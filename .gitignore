@@ -1,0 +1,11 @@
+#classes
+bin
+
+#IDE files
+.classpath
+.idea
+.project
+.settings
+
+#macos files
+*.DS_Store
