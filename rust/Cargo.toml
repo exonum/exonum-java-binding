@@ -1,0 +1,12 @@
+[package]
+name = "java_binding"
+version = "0.1.0"
+authors = ["Stanislav Tkach <stanislav.tkach@xdev.re"]
+
+[dependencies]
+jni = "0.4.0"
+
+[dependencies.exonum]
+git = "ssh://git@github.com/exonum/exonum-core.git"
+version = "0.1.0"
+rev = "e8e6469f35c3fcb2d37564faffa98139050b614a"
