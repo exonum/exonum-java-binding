@@ -1,6 +1,6 @@
 package com.exonum.storage.DB;
 
-public interface iDB {
+public interface DataBase {
 
 	public Object lookupSnapshot();
 	public Object lookupFork();

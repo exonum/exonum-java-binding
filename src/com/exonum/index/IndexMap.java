@@ -36,7 +36,7 @@ public class IndexMap<K extends StorageKey, V extends StorageValue> {
 		}
 	}
 	
-	public StorageValue get(K key) throws ClassNotFoundException, IOException, StorageOperationException{
+	public StorageValue get(K key) {
 		
 		dbConnect.lockRead();
 		RawValue rawWrapper = null;

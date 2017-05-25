@@ -3,7 +3,7 @@ package com.exonum.storage.DB;
 import com.exonum.storage.connector.Fork;
 import com.exonum.storage.connector.Snapshot;
 
-public class MemoryDB implements iDB {
+public class MemoryDB implements DataBase {
 
 	private final Object nativeMemoryDB;
 	
