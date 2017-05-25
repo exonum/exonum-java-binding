@@ -1,11 +1,11 @@
-package com.bitfury.test.main;
+package com.exonum.test.main;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-import com.bitfury.index.IndexMap;
+import com.exonum.index.IndexMap;
 import com.exonum.storage.exception.StorageOperationException;
 import com.exonum.storage.serialization.RawKey;
 import com.exonum.storage.serialization.RawValue;

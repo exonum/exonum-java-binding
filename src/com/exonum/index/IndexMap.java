@@ -1,4 +1,4 @@
-package com.bitfury.index;
+package com.exonum.index;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReadWriteLock;

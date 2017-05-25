@@ -1,4 +1,4 @@
-package com.bitfury.storage.DB;
+package com.exonum.storage.DB;
 
 import com.exonum.storage.connector.Fork;
 import com.exonum.storage.connector.Snapshot;

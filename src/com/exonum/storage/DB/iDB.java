@@ -1,4 +1,4 @@
-package com.bitfury.storage.DB;
+package com.exonum.storage.DB;
 
 public interface iDB {
 
