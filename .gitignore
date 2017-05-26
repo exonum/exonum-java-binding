@@ -9,3 +9,8 @@ bin
 
 #macos files
 *.DS_Store
+
+# Rust stuff
+rust/target
+rust/Cargo.lock
+*.rs.bk
