@@ -1,7 +1,10 @@
 [package]
-name = "java_binding"
+name = "java_bindings"
 version = "0.1.0"
 authors = ["Stanislav Tkach <stanislav.tkach@xdev.re"]
+
+[lib]
+crate-type = ["dylib"]
 
 [dependencies]
 jni = "0.4.0"
