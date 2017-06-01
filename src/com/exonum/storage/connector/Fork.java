@@ -7,14 +7,19 @@ public class Fork implements Connect {
 
 	private static ReadWriteLock locker = new ReentrantReadWriteLock();
 	
-	private final Object nativeFork;
+	private final long nativeFork;
 	
-	public Fork(Object forkObj) {
+	public Fork(long forkObj) {
 		this.nativeFork = forkObj;
 	}
 	
-	public Object getNativeFork(){
+	public long getNativeFork(){
 		return nativeFork;
+	}
+	
+	@Override
+	public void destroyNativeConnect(){
+		nativeFreeFork(nativeFork);
 	}
 	
 	@Override
@@ -37,4 +42,5 @@ public class Fork implements Connect {
 		locker.readLock().unlock();
 	}
 
+	private native void nativeFreeFork(long nativeFork);	
 }

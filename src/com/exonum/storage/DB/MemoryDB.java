@@ -5,26 +5,29 @@ import com.exonum.storage.connector.Snapshot;
 
 public class MemoryDB implements DataBase {
 
-	private final Object nativeMemoryDB;
+	private final long nativeMemoryDB;
 	
 	public MemoryDB() {
 		this.nativeMemoryDB = nativeCreateMemoryDB();
 	}
 	
 	@Override
-	public Object lookupSnapshot() {
-		
+	public void destroyNativeDB(){
+		nativeFreeMemoryDB(nativeMemoryDB);
+	}
+	
+	@Override
+	public Snapshot lookupSnapshot() {		
 		return new Snapshot(nativeLookupSnapshot(this.nativeMemoryDB));
 	}
 
 	@Override
-	public Object lookupFork() {
-		
+	public Fork lookupFork() {
 		return new Fork(nativeLookupSnapshot(this.nativeMemoryDB));
 	}
 
-	private native Object nativeLookupSnapshot(Object nativeDB);
-	private native Object nativeLookupFork(Object nativeDB);
-	private native Object nativeCreateMemoryDB();
-
+	private native long nativeLookupSnapshot(long nativeDB);
+	private native long nativeLookupFork(long nativeDB);
+	private native long nativeCreateMemoryDB();
+	private native void nativeFreeMemoryDB(long nativeDB);
 }

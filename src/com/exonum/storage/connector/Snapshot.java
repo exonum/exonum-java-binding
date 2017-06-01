@@ -4,14 +4,19 @@ import com.exonum.storage.exception.SnapshotUsageException;
 
 public class Snapshot implements Connect {
 
-	private final Object nativeSnapshot;
+	private final long nativeSnapshot;
 	
-	public Snapshot(Object snapshotObj) {
+	public Snapshot(long snapshotObj) {
 		this.nativeSnapshot = snapshotObj;
 	}
 	
-	public Object getNativeSnapshot(){
+	public long getNativeSnapshot(){
 		return nativeSnapshot;
+	}
+	
+	@Override
+	public void destroyNativeConnect() {
+		nativeFreeSnapshot(nativeSnapshot);
 	}
 	
 	@Override
@@ -34,4 +39,5 @@ public class Snapshot implements Connect {
 		//method do nothing for Snapshot
 	}
 
+	private native void nativeFreeSnapshot(long nativeSnapshot);	
 }

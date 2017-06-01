@@ -1,7 +1,12 @@
 package com.exonum.storage.DB;
 
+import com.exonum.storage.connector.Fork;
+import com.exonum.storage.connector.Snapshot;
+
 public interface DataBase {
 
-	public Object lookupSnapshot();
-	public Object lookupFork();
+	public Snapshot lookupSnapshot();
+	public Fork lookupFork();
+	
+	public void destroyNativeDB();
 }
