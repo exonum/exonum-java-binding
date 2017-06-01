@@ -1,6 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::JClass;
-use jni::sys::{jlong, jboolean, jbyteArray};
+use jni::sys::{jlong, jbyteArray};
 
 use std::panic;
 
@@ -10,68 +10,69 @@ use utils;
 // TODO: FIXME.
 type MapIndex = storage2::MapIndex<(), Vec<u8>, Vec<u8>>;
 
-/// Returns pointer to created `MapIndex` object or zero if panic occurs.
+/// Returns pointer to created `MapIndex` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_createNativeIndexMap(_: JNIEnv,
+pub extern "C" fn Java_com_exonum_index_IndexMap_createNativeIndexMap(env: JNIEnv,
                                                                       _: JClass,
                                                                       _db: jlong,
                                                                       _prefix: jbyteArray)
                                                                       -> jlong {
-    unimplemented!()
+    let res = panic::catch_unwind(|| unimplemented!());
+    utils::unwrap_or_exception(env, res)
 }
 
-/// Destroys underlying `MapIndex` object and frees memory. Return `false` if panic occurs.
+/// Destroys underlying `MapIndex` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_freeNativeIndexMap(_: JNIEnv,
+pub extern "C" fn Java_com_exonum_index_IndexMap_freeNativeIndexMap(env: JNIEnv,
                                                                     _: JClass,
-                                                                    db: jlong)
-                                                                    -> jboolean {
-    utils::drop_object::<MapIndex>(db)
+                                                                    index: jlong) {
+    utils::drop_object::<MapIndex>(env, index);
 }
 
 /// ???
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_putToIndexMap(_: JNIEnv,
+pub extern "C" fn Java_com_exonum_index_IndexMap_putToIndexMap(env: JNIEnv,
                                                                _: JClass,
                                                                _key: jbyteArray,
                                                                _value: jbyteArray,
-                                                               index: jlong)
-                                                               -> jboolean {
-    panic::catch_unwind(|| {
-                            let _index = utils::cast_object::<MapIndex>(index);
-                            unimplemented!()
-                        })
-            .is_ok() as jboolean
+                                                               index: jlong) {
+    let res = panic::catch_unwind(|| {
+                                      let _index = utils::cast_object::<MapIndex>(index);
+                                      unimplemented!()
+                                  });
+    utils::unwrap_or_exception(env, res)
 }
 
 /// ???
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_getFromIndexMap(_: JNIEnv,
+pub extern "C" fn Java_com_exonum_index_IndexMap_getFromIndexMap(_env: JNIEnv,
                                                                  _: JClass,
                                                                  _key: jbyteArray,
                                                                  _index: jlong)
                                                                  -> jbyteArray {
-    //    panic::catch_unwind(|| {
+    //    let res = panic::catch_unwind(|| {
     //        let _index = utils::cast_object::<MapIndex>(index);
-    //    }).is_ok() as jboolean
+    //        unimplemented!()
+    //    });
+    //    utils::unwrap_or_exception(env, res)
+
     unimplemented!()
 }
 
 /// ???
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_deleteFromIndexMap(_: JNIEnv,
+pub extern "C" fn Java_com_exonum_index_IndexMap_deleteFromIndexMap(env: JNIEnv,
                                                                     _: JClass,
                                                                     _key: jbyteArray,
-                                                                    index: jlong)
-                                                                    -> jboolean {
-    panic::catch_unwind(|| {
-                            let _index = utils::cast_object::<MapIndex>(index);
-                            unimplemented!()
-                        })
-            .is_ok() as jboolean
+                                                                    index: jlong) {
+    let res = panic::catch_unwind(|| {
+                                      let _index = utils::cast_object::<MapIndex>(index);
+                                      unimplemented!()
+                                  });
+    utils::unwrap_or_exception(env, res)
 }
