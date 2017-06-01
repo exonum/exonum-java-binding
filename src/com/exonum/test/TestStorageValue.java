@@ -49,5 +49,4 @@ public class TestStorageValue implements StorageValue {
 		}
 	    return res;
 	}
-
 }

@@ -6,4 +6,6 @@ public interface Connect {
 	public void lockRead();
 	public void unlockWrite();
 	public void unlockRead();
+	
+	public void destroyNativeConnect();
 }
