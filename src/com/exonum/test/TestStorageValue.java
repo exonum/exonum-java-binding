@@ -32,14 +32,12 @@ public class TestStorageValue implements StorageValue {
     }
 
 	@Override
-	public StorageValue deserializeFromRaw(byte[] raw) {		
+	public void deserializeFromRaw(byte[] raw) {
 	    try (ByteArrayInputStream bis = new ByteArrayInputStream(raw);
 	    	 ObjectInputStream in = new ObjectInputStream(bis)) {
-	    	StorageValue res = (StorageValue)in.readObject();
-	    	return res;
+	    	this.value = (String)in.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			// temporary test decision
-			return null;
 		}
 
 	}
