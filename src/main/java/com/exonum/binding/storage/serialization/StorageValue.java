@@ -1,4 +1,4 @@
-package com.exonum.storage.serialization;
+package com.exonum.binding.storage.serialization;
 
 public interface StorageValue {
 

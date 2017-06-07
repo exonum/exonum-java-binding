@@ -9,7 +9,7 @@ use utils;
 /// Performs the logger initialization.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_nativeInitLogger(env: JNIEnv, _: JClass) {
+pub extern "C" fn Java_com_exonum_binding_ClassNameTODO_nativeInitLogger(env: JNIEnv, _: JClass) {
     let res = panic::catch_unwind(|| {
                                       // Ignore logger initialization failure.
                                       let _ = helpers::init_logger();

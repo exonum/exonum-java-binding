@@ -1,4 +1,4 @@
-package com.exonum.test;
+package com.exonum.binding.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,8 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-import com.exonum.storage.serialization.RawValue;
-import com.exonum.storage.serialization.StorageValue;
+import com.exonum.binding.storage.serialization.RawValue;
+import com.exonum.binding.storage.serialization.StorageValue;
 
 public class TestStorageValue implements StorageValue {
 

@@ -14,6 +14,8 @@ jni = "0.4.0"
 [dependencies.exonum]
 git = "ssh://git@github.com/exonum/exonum-core.git"
 version = "0.1.0"
+# Please keep README.md in sync with the Exonum-Core version,
+# so that users are directed to the correct build instructions.
 rev = "67ac532ca2d5cf2d96ef148ae008b1599f7c9e96"
 
 [dependencies.blockchain_explorer]

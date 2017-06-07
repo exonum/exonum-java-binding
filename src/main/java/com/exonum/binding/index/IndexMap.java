@@ -1,9 +1,9 @@
-package com.exonum.index;
+package com.exonum.binding.index;
 
-import com.exonum.storage.connector.Connect;
-import com.exonum.storage.serialization.RawValue;
-import com.exonum.storage.serialization.StorageKey;
-import com.exonum.storage.serialization.StorageValue;
+import com.exonum.binding.storage.connector.Connect;
+import com.exonum.binding.storage.serialization.RawValue;
+import com.exonum.binding.storage.serialization.StorageKey;
+import com.exonum.binding.storage.serialization.StorageValue;
 
 public class IndexMap<K extends StorageKey, V extends StorageValue> {
 

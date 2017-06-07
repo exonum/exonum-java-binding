@@ -1,4 +1,4 @@
-package com.exonum.storage.connector;
+package com.exonum.binding.storage.connector;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -42,5 +42,6 @@ public class Fork implements Connect {
 		locker.readLock().unlock();
 	}
 
+	// fixme(dt): no such method!
 	private native void nativeFreeFork(long nativeFork);	
 }

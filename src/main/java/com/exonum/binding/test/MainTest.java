@@ -1,18 +1,17 @@
-package com.exonum.test;
+package com.exonum.binding.test;
 
-import com.exonum.index.IndexMap;
-import com.exonum.storage.DB.DataBase;
-import com.exonum.storage.DB.MemoryDB;
-import com.exonum.storage.connector.Connect;
-import com.exonum.storage.serialization.StorageValue;
+import com.exonum.binding.index.IndexMap;
+import com.exonum.binding.storage.DB.DataBase;
+import com.exonum.binding.storage.DB.MemoryDB;
+import com.exonum.binding.storage.connector.Connect;
 
 public class MainTest {
 
 	static {
-        // To have library `libjava_bindings` available by name,
+	    // To have library `libjava_bindings` available by name,
         // add a path to the folder containing it to java.library.path,
         // e.g.: java -Djava.library.path=rust/target/release …
-        System.loadLibrary("java_bindings");
+	    System.loadLibrary("java_bindings");
 	  }
 	
 	public static void main(String[] args) {

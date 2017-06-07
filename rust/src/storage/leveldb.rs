@@ -11,7 +11,7 @@ use super::db::View;
 /// Returns pointer to created `LevelDB` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeCreateLevelDB(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_LevelDB_nativeCreateLevelDB(env: JNIEnv,
                                                                          _: JClass,
                                                                          _path: JString)
                                                                          -> jlong {
@@ -28,7 +28,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeCreateLevelDB(env: JN
 /// Destroys underlying `LevelDB` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeLevelDB(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_LevelDB_nativeFreeLevelDB(env: JNIEnv,
                                                                        _: JClass,
                                                                        db: jlong) {
     utils::drop_object::<LevelDB>(&env, db);
@@ -37,7 +37,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeLevelDB(env: JNIE
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupSnapshot(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_LevelDB_nativeLookupSnapshot(env: JNIEnv,
                                                                           _: JClass,
                                                                           db: jlong)
                                                                           -> jlong {
@@ -52,7 +52,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupSnapshot(env: J
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupFork(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_LevelDB_nativeLookupFork(env: JNIEnv,
                                                                       _: JClass,
                                                                       db: jlong)
                                                                       -> jlong {
@@ -66,7 +66,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupFork(env: JNIEn
 /// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeView(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_LevelDB_nativeFreeView(env: JNIEnv,
                                                                     _: JClass,
                                                                     db: jlong) {
     utils::drop_object::<View>(&env, db);

@@ -1,6 +1,6 @@
-package com.exonum.storage.connector;
+package com.exonum.binding.storage.connector;
 
-import com.exonum.storage.exception.SnapshotUsageException;
+import com.exonum.binding.storage.exception.SnapshotUsageException;
 
 public class Snapshot implements Connect {
 
@@ -39,5 +39,6 @@ public class Snapshot implements Connect {
 		//method do nothing for Snapshot
 	}
 
+    // fixme(dt): no such method!
 	private native void nativeFreeSnapshot(long nativeSnapshot);	
 }
