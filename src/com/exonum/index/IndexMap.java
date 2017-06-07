@@ -28,7 +28,7 @@ public class IndexMap<K extends StorageKey, V extends StorageValue> {
 		}
 	}
 	
-	public StorageValue get(K key) {
+	public V get(K key) {
 		
 		dbConnect.lockRead();
 		RawValue rawWrapper = null;
@@ -46,7 +46,9 @@ public class IndexMap<K extends StorageKey, V extends StorageValue> {
 			e.printStackTrace();
 		}
 		
-		return tmp.deserializeFromRaw(rawWrapper.getRaw());
+		tmp.deserializeFromRaw(rawWrapper.getRaw());
+		
+		return tmp;
 	}
 	
 	public void delete(K key) {

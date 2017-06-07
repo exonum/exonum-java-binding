@@ -12,23 +12,20 @@ public class TestStorageKey implements StorageKey {
 
 	public int key = 1;
 	
-	@Override
-	public RawKey serializeToRaw() {
-		
-		ByteArrayOutputStream bos = null;
-		ObjectOutput out = null;
-		byte[] rawResult = null;
-		try{
-			bos = new ByteArrayOutputStream();
-	        out = new ObjectOutputStream(bos);
-	        out.writeObject(this);
-	        rawResult = bos.toByteArray();
-	        out.close();
-	        bos.close();
-		} catch (IOException e) {
-			// TODO: handle exception
-		}
-        
+    @Override
+    public RawKey serializeToRaw() {
+        byte[] rawResult = toBytes();
         return new RawKey(rawResult);
-	}
+    }
+
+    private byte[] toBytes() {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutput out = new ObjectOutputStream(bos)) {
+            out.writeInt(key);
+            return bos.toByteArray();
+        } catch (IOException e) {
+            // ignored, as byte output stream implementation does not throw.
+            return new byte[0];
+        }
+    }
 }

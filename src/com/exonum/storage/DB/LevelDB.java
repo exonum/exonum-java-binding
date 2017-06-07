@@ -23,7 +23,7 @@ public class LevelDB implements DataBase {
 
 	@Override
 	public Fork lookupFork() {
-		return new Fork(nativeLookupSnapshot(this.nativeLevelDB));
+		return new Fork(nativeLookupFork(this.nativeLevelDB));
 	}
 
 	private native long nativeLookupSnapshot(long nativeDB);

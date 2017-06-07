@@ -14,39 +14,31 @@ public class TestStorageValue implements StorageValue {
 
 	public String value = "Store me";
 	
-	@Override
-	public RawValue serializeToRaw() {
-		
-		ByteArrayOutputStream bos = null;
-		ObjectOutput out = null;
-		byte[] rawResult = null;
-		try{
-			bos = new ByteArrayOutputStream();
-	        out = new ObjectOutputStream(bos);
-	        out.writeObject(this);
-	        rawResult = bos.toByteArray();
-	        out.close();
-	        bos.close();
-		} catch (IOException e) {
-			// TODO: handle exception
-		}
-        
+    @Override
+    public RawValue serializeToRaw() {
+        byte[] rawResult = toBytes();
         return new RawValue(rawResult);
-	}
+    }
+
+    private byte[] toBytes() {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutput out = new ObjectOutputStream(bos)) {
+            out.writeChars(value);
+            return bos.toByteArray();
+        } catch (IOException e) {
+            // ignored, as byte output stream implementation does not throw.
+            return new byte[0];
+        }
+    }
 
 	@Override
-	public StorageValue deserializeFromRaw(byte[] raw) {
-		
-	    ByteArrayInputStream bis = new ByteArrayInputStream(raw);
-	    ObjectInputStream in = null;
-	    StorageValue res = null;
-		try {
-			in = new ObjectInputStream(bis);
-			res = (StorageValue)in.readObject();
+	public void deserializeFromRaw(byte[] raw) {
+	    try (ByteArrayInputStream bis = new ByteArrayInputStream(raw);
+	    	 ObjectInputStream in = new ObjectInputStream(bis)) {
+	    	this.value = (String)in.readObject();
 		} catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// temporary test decision
 		}
-	    return res;
+
 	}
 }
