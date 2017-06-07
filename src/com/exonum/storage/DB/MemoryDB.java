@@ -23,7 +23,7 @@ public class MemoryDB implements DataBase {
 
 	@Override
 	public Fork lookupFork() {
-		return new Fork(nativeLookupSnapshot(this.nativeMemoryDB));
+		return new Fork(nativeLookupFork(this.nativeMemoryDB));
 	}
 
 	private native long nativeLookupSnapshot(long nativeDB);
