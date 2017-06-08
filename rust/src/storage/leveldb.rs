@@ -4,8 +4,9 @@ use jni::sys::jlong;
 
 use std::panic;
 
-use exonum::storage2::{LevelDB, Database, Snapshot, Fork};
+use exonum::storage2::{LevelDB, Database};
 use utils;
+use super::db::View;
 
 /// Returns pointer to created `LevelDB` object.
 #[no_mangle]
@@ -21,7 +22,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeCreateLevelDB(env: JN
         // let path = env.get_string(path).expect("Couldn't get java string!").into();
         // Box::into_raw(Box::new(LevelDB::open(path))) as jlong
     });
-    utils::unwrap_or_exception(env, res)
+    utils::unwrap_or_exception(&env, res)
 }
 
 /// Destroys underlying `LevelDB` object and frees memory.
@@ -30,7 +31,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeCreateLevelDB(env: JN
 pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeLevelDB(env: JNIEnv,
                                                                        _: JClass,
                                                                        db: jlong) {
-    utils::drop_object::<LevelDB>(env, db);
+    utils::drop_object::<LevelDB>(&env, db);
 }
 
 /// Returns pointer to created `Snapshot` object.
@@ -41,21 +42,11 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupSnapshot(env: J
                                                                           db: jlong)
                                                                           -> jlong {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<LevelDB>(db);
-        // Additional boxing here is needed because "trait object" is represented by two pointers
-        // and cannot be cast into `jlong`.
-        Box::into_raw(Box::new(db.snapshot())) as jlong
-    });
-    utils::unwrap_or_exception(env, res)
-}
-
-/// Destroys underlying `Snapshot` object and frees memory.
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeSnapshot(env: JNIEnv,
-                                                                        _: JClass,
-                                                                        db: jlong) {
-    utils::drop_object::<Box<Snapshot>>(env, db);
+                                      let db = utils::cast_object::<LevelDB>(db);
+                                      Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as
+                                      jlong
+                                  });
+    utils::unwrap_or_exception(&env, res)
 }
 
 /// Returns pointer to created `Fork` object.
@@ -67,16 +58,16 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupFork(env: JNIEn
                                                                       -> jlong {
     let res = panic::catch_unwind(|| {
                                       let db = utils::cast_object::<LevelDB>(db);
-                                      Box::into_raw(Box::new(db.fork())) as jlong
+                                      Box::into_raw(Box::new(View::Fork(db.fork()))) as jlong
                                   });
-    utils::unwrap_or_exception(env, res)
+    utils::unwrap_or_exception(&env, res)
 }
 
-/// Destroys underlying `Fork` object and frees memory.
+/// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeFork(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeView(env: JNIEnv,
                                                                     _: JClass,
                                                                     db: jlong) {
-    utils::drop_object::<Fork>(env, db);
+    utils::drop_object::<View>(&env, db);
 }

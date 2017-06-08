@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Stanislav Tkach <stanislav.tkach@xdev.re"]
 
 [lib]
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 [dependencies]
 log = "0.3"
@@ -14,9 +14,9 @@ jni = "0.4.0"
 [dependencies.exonum]
 git = "ssh://git@github.com/exonum/exonum-core.git"
 version = "0.1.0"
-rev = "e8e6469f35c3fcb2d37564faffa98139050b614a"
+rev = "67ac532ca2d5cf2d96ef148ae008b1599f7c9e96"
 
 [dependencies.blockchain_explorer]
 git = "ssh://git@github.com/exonum/exonum-core.git"
 version = "0.1.0"
-rev = "e8e6469f35c3fcb2d37564faffa98139050b614a"
+rev = "67ac532ca2d5cf2d96ef148ae008b1599f7c9e96"

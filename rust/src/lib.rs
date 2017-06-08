@@ -14,14 +14,24 @@ extern crate blockchain_explorer;
 
 mod utils;
 mod init;
-mod leveldb;
-mod memorydb;
-mod map_index;
+mod storage;
 
-pub use init::*;
-pub use leveldb::*;
-pub use memorydb::*;
-pub use map_index::*;
+pub use init::Java_com_exonum_nativeInitLogger;
+pub use storage::{Java_com_exonum_storage_DB_MemoryDB_nativeCreateMemoryDB,
+                  Java_com_exonum_storage_DB_MemoryDB_nativeFreeMemoryDB,
+                  Java_com_exonum_storage_DB_MemoryDB_nativeLookupSnapshot,
+                  Java_com_exonum_storage_DB_MemoryDB_nativeLookupFork,
+                  Java_com_exonum_storage_DB_MemoryDB_nativeFreeView,
+                  Java_com_exonum_storage_DB_LevelDB_nativeCreateLevelDB,
+                  Java_com_exonum_storage_DB_LevelDB_nativeFreeLevelDB,
+                  Java_com_exonum_storage_DB_LevelDB_nativeLookupSnapshot,
+                  Java_com_exonum_storage_DB_LevelDB_nativeLookupFork,
+                  Java_com_exonum_storage_DB_LevelDB_nativeFreeView,
+                  Java_com_exonum_index_IndexMap_createNativeIndexMap,
+                  Java_com_exonum_index_IndexMap_freeNativeIndexMap,
+                  Java_com_exonum_index_IndexMap_putToIndexMap,
+                  Java_com_exonum_index_IndexMap_getFromIndexMap,
+                  Java_com_exonum_index_IndexMap_deleteFromIndexMap};
 
 // TODO: Use some objects (`DirectByteBuffer`?) instead of `jlong`?
 // TODO: better error handling.
