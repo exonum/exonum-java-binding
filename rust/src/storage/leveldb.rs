@@ -63,7 +63,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeLookupFork(env: JNIEn
     utils::unwrap_or_exception(&env, res)
 }
 
-/// Destroys underlying `Fork` object and frees memory.
+/// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_storage_DB_LevelDB_nativeFreeView(env: JNIEnv,
