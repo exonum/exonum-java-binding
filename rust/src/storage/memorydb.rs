@@ -11,7 +11,7 @@ use super::db::View;
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeCreateMemoryDB(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_MemoryDB_nativeCreateMemoryDB(env: JNIEnv,
                                                                            _: JClass)
                                                                            -> jlong {
     let res = panic::catch_unwind(|| Box::into_raw(Box::new(MemoryDB::new())) as jlong);
@@ -21,7 +21,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeCreateMemoryDB(env: 
 /// Destroys underlying `MemoryDB` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeFreeMemoryDB(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_MemoryDB_nativeFreeMemoryDB(env: JNIEnv,
                                                                          _: JClass,
                                                                          db: jlong) {
     utils::drop_object::<MemoryDB>(&env, db);
@@ -30,7 +30,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeFreeMemoryDB(env: JN
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeLookupSnapshot(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_MemoryDB_nativeLookupSnapshot(env: JNIEnv,
                                                                            _: JClass,
                                                                            db: jlong)
                                                                            -> jlong {
@@ -45,7 +45,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeLookupSnapshot(env: 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeLookupFork(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_MemoryDB_nativeLookupFork(env: JNIEnv,
                                                                        _: JClass,
                                                                        db: jlong)
                                                                        -> jlong {
@@ -59,7 +59,7 @@ pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeLookupFork(env: JNIE
 /// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_storage_DB_MemoryDB_nativeFreeView(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_storage_DB_MemoryDB_nativeFreeView(env: JNIEnv,
                                                                      _: JClass,
                                                                      db: jlong) {
     utils::drop_object::<View>(&env, db);

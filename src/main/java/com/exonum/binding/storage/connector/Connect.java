@@ -1,4 +1,4 @@
-package com.exonum.storage.connector;
+package com.exonum.binding.storage.connector;
 
 public interface Connect {
 	

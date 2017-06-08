@@ -1,7 +1,7 @@
-package com.exonum.storage.DB;
+package com.exonum.binding.storage.DB;
 
-import com.exonum.storage.connector.Fork;
-import com.exonum.storage.connector.Snapshot;
+import com.exonum.binding.storage.connector.Fork;
+import com.exonum.binding.storage.connector.Snapshot;
 
 public class MemoryDB implements DataBase {
 

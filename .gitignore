@@ -14,3 +14,6 @@ bin
 rust/target
 rust/Cargo.lock
 *.rs.bk
+
+# Maven target
+target/

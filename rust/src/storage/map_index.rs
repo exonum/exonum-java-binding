@@ -18,7 +18,7 @@ enum MapIndex {
 /// Returns pointer to created `MapIndex` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_createNativeIndexMap(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_createNativeIndexMap(env: JNIEnv,
                                                                       _: JClass,
                                                                       view: jlong,
                                                                       prefix: jbyteArray)
@@ -40,7 +40,7 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_createNativeIndexMap(env: JNIEn
 /// Destroys underlying `MapIndex` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_freeNativeIndexMap(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap(env: JNIEnv,
                                                                     _: JClass,
                                                                     index: jlong) {
     utils::drop_object::<MapIndex>(&env, index);
@@ -49,7 +49,7 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_freeNativeIndexMap(env: JNIEnv,
 /// ???
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_putToIndexMap(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(env: JNIEnv,
                                                                _: JClass,
                                                                _key: jbyteArray,
                                                                _value: jbyteArray,
@@ -64,7 +64,7 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_putToIndexMap(env: JNIEnv,
 /// ???
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_getFromIndexMap(_env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(_env: JNIEnv,
                                                                  _: JClass,
                                                                  _key: jbyteArray,
                                                                  _index: jlong)
@@ -81,7 +81,7 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_getFromIndexMap(_env: JNIEnv,
 /// ???
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_index_IndexMap_deleteFromIndexMap(env: JNIEnv,
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(env: JNIEnv,
                                                                     _: JClass,
                                                                     _key: jbyteArray,
                                                                     index: jlong) {

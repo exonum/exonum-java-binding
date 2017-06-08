@@ -1,4 +1,4 @@
-package com.exonum.storage.exception;
+package com.exonum.binding.storage.exception;
 
 public class SnapshotUsageException extends RuntimeException {
 
