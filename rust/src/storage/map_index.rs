@@ -4,22 +4,37 @@ use jni::sys::{jlong, jbyteArray};
 
 use std::panic;
 
-use exonum::storage2;
+use exonum::storage2::{self, Snapshot, Fork};
 use utils;
+use super::db::View;
 
-// TODO: FIXME.
-type MapIndex = storage2::MapIndex<(), Vec<u8>, Vec<u8>>;
+type Index<T> = storage2::MapIndex<T, Vec<u8>, Vec<u8>>;
+
+enum MapIndex {
+    SnapshotIndex(Index<&'static Box<Snapshot>>),
+    ForkIndex(Index<&'static mut Fork>),
+}
 
 /// Returns pointer to created `MapIndex` object.
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_index_IndexMap_createNativeIndexMap(env: JNIEnv,
                                                                       _: JClass,
-                                                                      _db: jlong,
-                                                                      _prefix: jbyteArray)
+                                                                      view: jlong,
+                                                                      prefix: jbyteArray)
                                                                       -> jlong {
-    let res = panic::catch_unwind(|| unimplemented!());
-    utils::unwrap_or_exception(env, res)
+    let res = panic::catch_unwind(|| {
+        let prefix = utils::bytes_array_to_vec(&env, prefix);
+        Box::into_raw(Box::new(match *utils::cast_object(view) {
+                                   View::Snapshot(ref snapshot) => {
+                                       MapIndex::SnapshotIndex(Index::new(prefix, snapshot))
+                                   }
+                                   View::Fork(ref mut fork) => {
+                                       MapIndex::ForkIndex(Index::new(prefix, fork))
+                                   }
+                               })) as jlong
+    });
+    utils::unwrap_or_exception(&env, res)
 }
 
 /// Destroys underlying `MapIndex` object and frees memory.
@@ -28,7 +43,7 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_createNativeIndexMap(env: JNIEn
 pub extern "C" fn Java_com_exonum_index_IndexMap_freeNativeIndexMap(env: JNIEnv,
                                                                     _: JClass,
                                                                     index: jlong) {
-    utils::drop_object::<MapIndex>(env, index);
+    utils::drop_object::<MapIndex>(&env, index);
 }
 
 /// ???
@@ -43,7 +58,7 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_putToIndexMap(env: JNIEnv,
                                       let _index = utils::cast_object::<MapIndex>(index);
                                       unimplemented!()
                                   });
-    utils::unwrap_or_exception(env, res)
+    utils::unwrap_or_exception(&env, res)
 }
 
 /// ???
@@ -74,5 +89,5 @@ pub extern "C" fn Java_com_exonum_index_IndexMap_deleteFromIndexMap(env: JNIEnv,
                                       let _index = utils::cast_object::<MapIndex>(index);
                                       unimplemented!()
                                   });
-    utils::unwrap_or_exception(env, res)
+    utils::unwrap_or_exception(&env, res)
 }
