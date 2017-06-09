@@ -19,6 +19,8 @@
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecks>MissingOverride,DeadException</java.compiler.errorprone.patchChecks>
+    <checkstyle.configLocation>checkstyle.xml</checkstyle.configLocation>
+    <checkstyle.severity>warning</checkstyle.severity>
   </properties>
 
   <build>
@@ -110,6 +112,38 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <!-- Checkstyle plugin is run during validate phase (before javac) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
+        <configuration>
+          <configLocation>${checkstyle.configLocation}</configLocation>
+          <propertyExpansion>checkstyle.severity=${checkstyle.severity}</propertyExpansion>
+        </configuration>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <linkXRef>false</linkXRef>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>7.8.1</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

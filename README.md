@@ -45,21 +45,24 @@ which produces a patch with suggested fixes `error-prone.patch`.
 ```$sh
 $ mvn compile -P fixerrors
 ```
-#### Enable a particular check
-Override `java.compiler.errorprone.flag` property:
-```$sh
-$ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR compile
-```
-In this example, Error Prone will fail the build if any method does not have `@Override` annotation.
-For a complete list of checks, go to http://errorprone.info/bugpatterns
+
 #### Produce a patch fixing particular warnings/errors
 ```$sh
 $ mvn -Djava.compiler.errorprone.patchChecks=MissingOverride,ClassNewInstance \
         compile -P fixerrors
 ```
+
 #### Enable a certain check and produce a patch
 ```$sh
 $ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR \
         -Djava.compiler.errorprone.patchChecks=MissingOverride \
         compile -P fixerrors
 ```
+## Code style checks
+### Java
+The style guide of the project: https://google.github.io/styleguide/javaguide.html 
+
+**TODO:** Create a separate repo with a customized version of the code style document.
+ 
+[Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project during `validate` phase 
+(i.e., _before_ compilation). You can run code style checks explicitly via `mvn checkstyle:check`.
