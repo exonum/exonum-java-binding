@@ -3,9 +3,10 @@ bin
 
 #IDE files
 .classpath
-.idea
 .project
 .settings
+.idea
+*.iml
 
 #macos files
 *.DS_Store
