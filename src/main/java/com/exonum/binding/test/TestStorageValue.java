@@ -36,7 +36,7 @@ public class TestStorageValue implements StorageValue {
         ObjectInputStream in = new ObjectInputStream(bis)) {
       this.value = (String) in.readObject();
     } catch (IOException | ClassNotFoundException e) {
-      // temporary test decision
+      throw new AssertionError();
     }
   }
 }
