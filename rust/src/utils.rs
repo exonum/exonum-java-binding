@@ -13,9 +13,20 @@ pub fn cast_object<T>(object: jlong) -> &'static mut T {
     unsafe { &mut *ptr }
 }
 
-pub fn bytes_array_to_vec(_env: &JNIEnv, _array: jbyteArray) -> Vec<u8> {
-    // TODO: FIXME.
-    unimplemented!();
+// TODO: Replace by `convert_byte_array` function from `jni-rs` when it becomes available.
+// See https://github.com/prevoty/jni-rs/pull/13 for the details.
+pub fn bytes_array_to_vec(env: &JNIEnv, array: jbyteArray) -> Vec<u8> {
+    let native_env = env.get_native_interface();
+    unsafe {
+        let length = (**native_env).GetArrayLength.unwrap()(native_env, array);
+        let mut vec = vec![0u8; length as usize];
+        (**native_env).GetByteArrayRegion.unwrap()(native_env,
+                                                   array,
+                                                   0,
+                                                   length,
+                                                   vec.as_mut_ptr() as *mut i8);
+        vec
+    }
 }
 
 // Constructs `Box` from raw pointer and immediately drops it.
@@ -24,20 +35,24 @@ pub fn drop_object<T>(env: &JNIEnv, object: jlong) {
                                       Box::from_raw(object as *mut T);
                                   });
     // TODO: Should we throw exception here or just log error?
-    unwrap_or_exception(env, res);
+    unwrap_exc_or_default(env, res);
 }
 
-// Returns value or "throws" exception. Default value is returned, because exception will be thrown
+// Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 // at the Java side. So this function should be used only for the `panic::catch_unwind` result.
-pub fn unwrap_or_exception<T: Default>(env: &JNIEnv, res: Result<T>) -> T {
+pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
     match res {
         Err(ref e) => {
             throw(env, &any_to_string(e));
+            error_val
         }
-        _ => {}
+        Ok(val) => val,
     }
+}
 
-    res.unwrap_or_default()
+// Same as `unwrap_exc_or` but returns default value.
+pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: Result<T>) -> T {
+    unwrap_exc_or(env, res, T::default())
 }
 
 // Calls a corresponding `JNIEnv` method, so exception will be thrown when execution returns to
