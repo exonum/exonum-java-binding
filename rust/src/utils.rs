@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::sys::{jlong, jbyteArray};
+use jni::sys::{jlong, jbyteArray, jobject};
 
 use std::panic;
 use std::any::Any;
@@ -16,6 +16,8 @@ pub fn cast_object<T>(object: jlong) -> &'static mut T {
 // TODO: Replace by `convert_byte_array` function from `jni-rs` when it becomes available.
 // See https://github.com/prevoty/jni-rs/pull/13 for the details.
 pub fn bytes_array_to_vec(env: &JNIEnv, array: jbyteArray) -> Vec<u8> {
+    assert_not_null(array);
+
     let native_env = env.get_native_interface();
     unsafe {
         let length = (**native_env).GetArrayLength.unwrap()(native_env, array);
@@ -32,8 +34,8 @@ pub fn bytes_array_to_vec(env: &JNIEnv, array: jbyteArray) -> Vec<u8> {
 // Constructs `Box` from raw pointer and immediately drops it.
 pub fn drop_object<T>(env: &JNIEnv, object: jlong) {
     let res = panic::catch_unwind(|| unsafe {
-                                      Box::from_raw(object as *mut T);
-                                  });
+        Box::from_raw(object as *mut T);
+    });
     // TODO: Should we throw exception here or just log error?
     unwrap_exc_or_default(env, res);
 }
@@ -63,7 +65,7 @@ pub fn throw(env: &JNIEnv, description: &str) {
         Ok(val) => val,
         Err(e) => {
             error!("Unable to find 'RuntimeException' class: {}",
-                   e.description());
+            e.description());
             return;
         }
     };
@@ -71,7 +73,7 @@ pub fn throw(env: &JNIEnv, description: &str) {
         Ok(_) => {}
         Err(e) => {
             error!("Unable to find 'RuntimeException' class: {}",
-                   e.description());
+            e.description());
         }
     }
 }
@@ -89,8 +91,18 @@ fn any_to_string(any: &Box<Any + Send>) -> String {
     }
 }
 
+// Panics if the value is null-pointer. Should be used only with `sys::JNIEnv`, because jni-rs
+// handles `NullPointerException` internally.
+fn assert_not_null(val: jobject) {
+    if val.is_null() {
+        // TODO: Throw `NullPointerException`?
+        panic!("Unexpected null pointer");
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::ptr;
     use super::*;
 
     #[test]
@@ -107,5 +119,11 @@ mod tests {
     #[should_panic(expected = "assertion failed: object != 0")]
     fn cast_zero_object() {
         let _ = cast_object::<i32>(0);
+    }
+
+    #[test]
+    #[should_panic(expected = "Unexpected null pointer")]
+    fn check_null_pointer() {
+        assert_not_null(ptr::null_mut());
     }
 }
