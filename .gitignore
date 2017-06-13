@@ -1,13 +1,14 @@
-#classes
+# classes
 bin
 
-#IDE files
+# IDE files
 .classpath
-.idea
 .project
 .settings
+.idea
+*.iml
 
-#macos files
+# macos files
 *.DS_Store
 
 # Rust stuff
