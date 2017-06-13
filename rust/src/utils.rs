@@ -34,8 +34,8 @@ pub fn bytes_array_to_vec(env: &JNIEnv, array: jbyteArray) -> Vec<u8> {
 // Constructs `Box` from raw pointer and immediately drops it.
 pub fn drop_object<T>(env: &JNIEnv, object: jlong) {
     let res = panic::catch_unwind(|| unsafe {
-        Box::from_raw(object as *mut T);
-    });
+                                      Box::from_raw(object as *mut T);
+                                  });
     // TODO: Should we throw exception here or just log error?
     unwrap_exc_or_default(env, res);
 }
@@ -65,7 +65,7 @@ pub fn throw(env: &JNIEnv, description: &str) {
         Ok(val) => val,
         Err(e) => {
             error!("Unable to find 'RuntimeException' class: {}",
-            e.description());
+                   e.description());
             return;
         }
     };
@@ -73,7 +73,7 @@ pub fn throw(env: &JNIEnv, description: &str) {
         Ok(_) => {}
         Err(e) => {
             error!("Unable to find 'RuntimeException' class: {}",
-            e.description());
+                   e.description());
         }
     }
 }
