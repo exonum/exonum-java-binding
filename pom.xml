@@ -12,7 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <rust.compiler.version>+nightly</rust.compiler.version>
+    <rust.compiler.version>nightly</rust.compiler.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <!-- Intentionally left empty, may be overrided from command line.
@@ -78,7 +78,7 @@
             <phase>compile</phase>
             <configuration>
               <arguments>
-                <argument>${rust.compiler.version}</argument>
+                <argument>+${rust.compiler.version}</argument>
                 <argument>build</argument>
               </arguments>
             </configuration>
@@ -91,7 +91,7 @@
             <phase>test</phase>
             <configuration>
               <arguments>
-                <argument>${rust.compiler.version}</argument>
+                <argument>+${rust.compiler.version}</argument>
                 <argument>test</argument>
               </arguments>
             </configuration>
