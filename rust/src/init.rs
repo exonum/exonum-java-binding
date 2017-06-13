@@ -14,7 +14,7 @@ pub extern "C" fn Java_com_exonum_binding_ClassNameTODO_nativeInitLogger(env: JN
                                       // Ignore logger initialization failure.
                                       let _ = helpers::init_logger();
                                   });
-    utils::unwrap_or_exception(&env, res);
+    utils::unwrap_exc_or_default(&env, res);
 }
 
 // TODO: exonum::crypto::init()?

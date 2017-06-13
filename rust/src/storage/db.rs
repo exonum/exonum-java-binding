@@ -6,3 +6,6 @@ pub enum View {
     Snapshot(Box<Snapshot>),
     Fork(Fork),
 }
+
+pub type Key = Vec<u8>;
+pub type Value = Vec<u8>;

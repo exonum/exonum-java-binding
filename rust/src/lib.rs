@@ -32,8 +32,3 @@ pub use storage::{Java_com_exonum_binding_storage_db_MemoryDb_nativeCreateMemory
                   Java_com_exonum_binding_index_IndexMap_putToIndexMap,
                   Java_com_exonum_binding_index_IndexMap_getFromIndexMap,
                   Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap};
-
-// TODO: Use some objects (`DirectByteBuffer`?) instead of `jlong`?
-// TODO: better error handling.
-// TODO: Move common (non-java specific) parts into separate repository (C-bindings).
-// TODO: Reduce boilerplate.
