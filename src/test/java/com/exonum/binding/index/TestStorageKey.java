@@ -1,4 +1,4 @@
-package com.exonum.binding.test;
+package com.exonum.binding.index;
 
 import com.exonum.binding.storage.serialization.RawKey;
 import com.exonum.binding.storage.serialization.StorageKey;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-public class TestStorageKey implements StorageKey {
+class TestStorageKey implements StorageKey {
 
   public int key = 1;
 
@@ -23,8 +23,8 @@ public class TestStorageKey implements StorageKey {
       out.writeInt(key);
       return bos.toByteArray();
     } catch (IOException e) {
-      // ignored, as byte output stream implementation does not throw.
-      return new byte[0];
+      // Must be unreachable, as byte output stream implementation does not throw.
+      throw new AssertionError(e);
     }
   }
 }

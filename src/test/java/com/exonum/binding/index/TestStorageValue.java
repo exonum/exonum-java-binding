@@ -1,4 +1,4 @@
-package com.exonum.binding.test;
+package com.exonum.binding.index;
 
 import com.exonum.binding.storage.serialization.RawValue;
 import com.exonum.binding.storage.serialization.StorageValue;
@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.util.Objects;
 
-public class TestStorageValue implements StorageValue {
+class TestStorageValue implements StorageValue {
 
   public String value = "Store me";
 
@@ -25,8 +26,8 @@ public class TestStorageValue implements StorageValue {
       out.writeChars(value);
       return bos.toByteArray();
     } catch (IOException e) {
-      // ignored, as byte output stream implementation does not throw.
-      return new byte[0];
+      // Must be unreachable, as byte output stream implementation does not throw.
+      throw new AssertionError(e);
     }
   }
 
@@ -36,7 +37,24 @@ public class TestStorageValue implements StorageValue {
         ObjectInputStream in = new ObjectInputStream(bis)) {
       this.value = (String) in.readObject();
     } catch (IOException | ClassNotFoundException e) {
-      throw new AssertionError();
+      throw new AssertionError(e);
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TestStorageValue that = (TestStorageValue) o;
+    return Objects.equals(value, that.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(value);
   }
 }
