@@ -47,7 +47,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap(env:
     utils::drop_object::<IndexType>(&env, index);
 }
 
-/// ???
+/// Sets `value` identified by the `key` into the index.
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(env: JNIEnv,
@@ -59,18 +59,16 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(env: JNIE
                                       &mut IndexType::SnapshotIndex(_) => {
                                           panic!("Unable to modify snapshot.");
                                       }
-                                      &mut IndexType::ForkIndex(ref _index) => {
-                                          let _key = utils::bytes_array_to_vec(&env, key);
-                                          let _value = utils::bytes_array_to_vec(&env, value);
-                                          unimplemented!();
-                                          // TODO: `StorageKey` should be implemented for `Vec<u8>`.
-                                          //index.put(key, value);
+                                      &mut IndexType::ForkIndex(ref mut index) => {
+                                          let key = Key(utils::bytes_array_to_vec(&env, key));
+                                          let value = utils::bytes_array_to_vec(&env, value);
+                                          index.put(&key, value);
                                       }
                                   });
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// ???
+/// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(env: JNIEnv,
@@ -79,33 +77,42 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(env: JN
                                                                          index: jlong)
                                                                          -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let _key = utils::bytes_array_to_vec(&env, key);
-        match utils::cast_object::<IndexType>(index) {
-            &mut IndexType::SnapshotIndex(ref _index) => {
-                // TODO: `StorageKey` should be implemented for `Vec<u8>`.
-                //index.get(key);
-                env.new_byte_array(&[0]).unwrap()
+        let key = Key(utils::bytes_array_to_vec(&env, key));
+        let val = match utils::cast_object::<IndexType>(index) {
+            &mut IndexType::SnapshotIndex(ref index) => {
+                index.get(&key)
             }
-            &mut IndexType::ForkIndex(ref _index) => {
-                // TODO: `StorageKey` should be implemented for `Vec<u8>`.
-                //index.get(key);
-                env.new_byte_array(&[0]).unwrap()
+            &mut IndexType::ForkIndex(ref index) => {
+                index.get(&key)
             }
+        };
+        match val {
+            Some(val) => {
+                // TODO: Remove casting.
+                let signed: Vec<_> = val.iter().map(|x| *x as i8).collect();
+                env.new_byte_array(signed.as_slice()).unwrap()
+            }
+            None => ptr::null_mut(),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// ???
+/// Removes value identified by the `key` from the index.
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(env: JNIEnv,
                                                                             _: JClass,
-                                                                            _key: jbyteArray,
+                                                                            key: jbyteArray,
                                                                             index: jlong) {
-    let res = panic::catch_unwind(|| {
-                                      let _index = utils::cast_object::<IndexType>(index);
-                                      unimplemented!()
-                                  });
+    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
+        &mut IndexType::SnapshotIndex(_) => {
+            panic!("Unable to modify snapshot.");
+        }
+        &mut IndexType::ForkIndex(ref mut index) => {
+            let key = Key(utils::bytes_array_to_vec(&env, key));
+            index.delete(&key);
+        }
+    });
     utils::unwrap_exc_or_default(&env, res)
 }
