@@ -60,7 +60,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(env: JNIE
                                           panic!("Unable to modify snapshot.");
                                       }
                                       &mut IndexType::ForkIndex(ref mut index) => {
-                                          let key = Key(utils::bytes_array_to_vec(&env, key));
+                                          let key = utils::bytes_array_to_vec(&env, key)[0];
                                           let value = utils::bytes_array_to_vec(&env, value);
                                           index.put(&key, value);
                                       }
@@ -77,7 +77,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(env: JN
                                                                          index: jlong)
                                                                          -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let key = Key(utils::bytes_array_to_vec(&env, key));
+        let key = utils::bytes_array_to_vec(&env, key)[0];
         let val = match utils::cast_object::<IndexType>(index) {
             &mut IndexType::SnapshotIndex(ref index) => {
                 index.get(&key)
@@ -110,7 +110,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(env:
             panic!("Unable to modify snapshot.");
         }
         &mut IndexType::ForkIndex(ref mut index) => {
-            let key = Key(utils::bytes_array_to_vec(&env, key));
+            let key = utils::bytes_array_to_vec(&env, key)[0];
             index.delete(&key);
         }
     });
