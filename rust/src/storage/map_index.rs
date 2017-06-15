@@ -5,11 +5,11 @@ use jni::sys::{jlong, jbyteArray};
 use std::panic;
 use std::ptr;
 
-use exonum::storage2::{self, Snapshot, Fork};
+use exonum::storage::{self, Snapshot, Fork};
 use utils;
 use super::db::{View, Key, Value};
 
-type Index<T> = storage2::MapIndex<T, Key, Value>;
+type Index<T> = storage::MapIndex<T, Key, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Box<Snapshot>>),
@@ -111,7 +111,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(env:
         }
         &mut IndexType::ForkIndex(ref mut index) => {
             let key = utils::bytes_array_to_vec(&env, key)[0];
-            index.delete(&key);
+            index.remove(&key);
         }
     });
     utils::unwrap_exc_or_default(&env, res)

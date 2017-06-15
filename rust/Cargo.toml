@@ -16,9 +16,4 @@ git = "ssh://git@github.com/exonum/exonum-core.git"
 version = "0.1.0"
 # Please keep README.md in sync with the Exonum-Core version,
 # so that users are directed to the correct build instructions.
-rev = "67ac532ca2d5cf2d96ef148ae008b1599f7c9e96"
-
-[dependencies.blockchain_explorer]
-git = "ssh://git@github.com/exonum/exonum-core.git"
-version = "0.1.0"
-rev = "67ac532ca2d5cf2d96ef148ae008b1599f7c9e96"
+rev = "56a91c4e2463d7e1803240641f6eaf040f4cc8fd"

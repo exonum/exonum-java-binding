@@ -3,7 +3,7 @@ use jni::objects::JClass;
 
 use std::panic;
 
-use blockchain_explorer::helpers;
+use exonum::helpers;
 use utils;
 
 /// Performs the logger initialization.

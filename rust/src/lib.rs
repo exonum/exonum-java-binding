@@ -10,7 +10,6 @@ extern crate log;
 extern crate env_logger;
 extern crate jni;
 extern crate exonum;
-extern crate blockchain_explorer;
 
 mod utils;
 mod init;
