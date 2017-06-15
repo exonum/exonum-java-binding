@@ -18,3 +18,5 @@ rust/Cargo.lock
 
 # Maven target
 target/
+
+*.log
