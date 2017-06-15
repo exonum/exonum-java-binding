@@ -13,7 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rust.compiler.version>nightly</rust.compiler.version>
+    <rust.compiler.version>stable</rust.compiler.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <!-- Intentionally left empty, may be overrided from command line.
