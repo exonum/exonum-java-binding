@@ -4,7 +4,7 @@ use jni::sys::jlong;
 
 use std::panic;
 
-use exonum::storage2::{MemoryDB, Database};
+use exonum::storage::{MemoryDB, Database};
 use utils;
 use super::db::View;
 

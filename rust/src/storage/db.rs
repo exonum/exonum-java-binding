@@ -1,4 +1,4 @@
-use exonum::storage2::{Snapshot, Fork};
+use exonum::storage::{Snapshot, Fork};
 
 // TODO: Temporary solution, should be replaced by the same typedef as `Value`.
 pub type Key = u8;
