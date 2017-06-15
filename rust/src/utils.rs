@@ -22,11 +22,13 @@ pub fn bytes_array_to_vec(env: &JNIEnv, array: jbyteArray) -> Vec<u8> {
     unsafe {
         let length = (**native_env).GetArrayLength.unwrap()(native_env, array);
         let mut vec = vec![0u8; length as usize];
-        (**native_env).GetByteArrayRegion.unwrap()(native_env,
-                                                   array,
-                                                   0,
-                                                   length,
-                                                   vec.as_mut_ptr() as *mut i8);
+        (**native_env).GetByteArrayRegion.unwrap()(
+            native_env,
+            array,
+            0,
+            length,
+            vec.as_mut_ptr() as *mut i8,
+        );
         vec
     }
 }
@@ -34,8 +36,8 @@ pub fn bytes_array_to_vec(env: &JNIEnv, array: jbyteArray) -> Vec<u8> {
 // Constructs `Box` from raw pointer and immediately drops it.
 pub fn drop_object<T>(env: &JNIEnv, object: jlong) {
     let res = panic::catch_unwind(|| unsafe {
-                                      Box::from_raw(object as *mut T);
-                                  });
+        Box::from_raw(object as *mut T);
+    });
     // TODO: Should we throw exception here or just log error?
     unwrap_exc_or_default(env, res);
 }
@@ -64,16 +66,20 @@ pub fn throw(env: &JNIEnv, description: &str) {
     let exception = match env.find_class("java/lang/RuntimeException") {
         Ok(val) => val,
         Err(e) => {
-            error!("Unable to find 'RuntimeException' class: {}",
-                   e.description());
+            error!(
+                "Unable to find 'RuntimeException' class: {}",
+                e.description()
+            );
             return;
         }
     };
     match env.throw_new(exception, description) {
         Ok(_) => {}
         Err(e) => {
-            error!("Unable to find 'RuntimeException' class: {}",
-                   e.description());
+            error!(
+                "Unable to find 'RuntimeException' class: {}",
+                e.description()
+            );
         }
     }
 }
