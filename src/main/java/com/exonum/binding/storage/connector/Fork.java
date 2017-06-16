@@ -13,12 +13,13 @@ public class Fork implements Connect {
     this.nativeFork = forkObj;
   }
 
-  public long getNativeFork() {
+  @Override
+  public long getNativeHandle() {
     return nativeFork;
   }
 
   @Override
-  public void destroyNativeConnect() {
+  public void close() {
     nativeFreeFork(nativeFork);
   }
 

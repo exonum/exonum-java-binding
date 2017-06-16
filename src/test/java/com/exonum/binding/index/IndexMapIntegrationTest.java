@@ -20,25 +20,25 @@ public class IndexMapIntegrationTest {
 
   @Test
   public void getShouldReturnSuccessfullyPutValue() throws Exception {
-    TestStorageKey key = new TestStorageKey();
-    TestStorageValue value = new TestStorageValue();
-    byte[] mapPrefix = new byte[] {'p'};
     Database database = null;
     Connect view = null;
     try {
       database = new MemoryDb();
       view = database.lookupFork();
 
-      IndexMap<TestStorageKey, TestStorageValue> map =
-              new IndexMap<>(TestStorageValue.class, view, mapPrefix);
+      byte[] mapPrefix = new byte[] {'p'};
+      IndexMap map = new IndexMap(view, mapPrefix);
+
+      byte[] key = new byte[] { 1 };
+      byte[] value = new byte[] {1, 2, 3, 4};
       map.put(key, value);
 
-      TestStorageValue storedValue = map.get(key);
+      byte[] storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(value));
     } finally {
       if (view != null) {
-        view.destroyNativeConnect();
+        view.close();
       }
       if (database != null) {
         database.destroyNativeDb();

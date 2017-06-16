@@ -10,12 +10,13 @@ public class Snapshot implements Connect {
     this.nativeSnapshot = snapshotObj;
   }
 
-  public long getNativeSnapshot() {
+  @Override
+  public long getNativeHandle() {
     return nativeSnapshot;
   }
 
   @Override
-  public void destroyNativeConnect() {
+  public void close() {
     nativeFreeSnapshot(nativeSnapshot);
   }
 
