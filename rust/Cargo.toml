@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 [dependencies]
 log = "0.3"
 env_logger = "0.3"
-jni = "0.4.1"
+jni = "0.4.2"
 
 [dependencies.exonum]
 git = "ssh://git@github.com/exonum/exonum-core.git"

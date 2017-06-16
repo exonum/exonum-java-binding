@@ -26,7 +26,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_createNativeIndexMap(
     prefix: jbyteArray,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        let prefix = utils::bytes_array_to_vec(&env, prefix);
+        let prefix = env.convert_byte_array(prefix).unwrap();
         Box::into_raw(Box::new(match *utils::cast_object(view) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(prefix, snapshot)),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
@@ -61,8 +61,8 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(
             panic!("Unable to modify snapshot.");
         }
         &mut IndexType::ForkIndex(ref mut index) => {
-            let key = utils::bytes_array_to_vec(&env, key)[0];
-            let value = utils::bytes_array_to_vec(&env, value);
+            let key = env.convert_byte_array(key).unwrap()[0];
+            let value = env.convert_byte_array(value).unwrap();
             index.put(&key, value);
         }
     });
@@ -79,7 +79,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(
     index: jlong,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let key = utils::bytes_array_to_vec(&env, key)[0];
+        let key = env.convert_byte_array(key).unwrap()[0];
         let val = match utils::cast_object::<IndexType>(index) {
             &mut IndexType::SnapshotIndex(ref index) => index.get(&key),
             &mut IndexType::ForkIndex(ref index) => index.get(&key),
@@ -110,7 +110,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(
             panic!("Unable to modify snapshot.");
         }
         &mut IndexType::ForkIndex(ref mut index) => {
-            let key = utils::bytes_array_to_vec(&env, key)[0];
+            let key = env.convert_byte_array(key).unwrap()[0];
             index.remove(&key);
         }
     });
