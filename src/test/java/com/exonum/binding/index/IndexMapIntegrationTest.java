@@ -18,10 +18,8 @@ public class IndexMapIntegrationTest {
     System.loadLibrary("java_bindings");
   }
 
-  // todo: remove expected exception when native code is fixed.
-  @Test(expected = AssertionError.class)
+  @Test
   public void getShouldReturnSuccessfullyPutValue() throws Exception {
-    fail();
     TestStorageKey key = new TestStorageKey();
     TestStorageValue value = new TestStorageValue();
     byte[] mapPrefix = new byte[] {'p'};
