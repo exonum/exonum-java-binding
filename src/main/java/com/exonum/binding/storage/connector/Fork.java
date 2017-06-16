@@ -20,7 +20,7 @@ public class Fork implements Connect {
 
   @Override
   public void close() {
-    nativeFreeFork(nativeFork);
+    Views.nativeFreeView(nativeFork);
   }
 
   @Override
@@ -42,7 +42,4 @@ public class Fork implements Connect {
   public void unlockRead() {
     locker.readLock().unlock();
   }
-
-  // fixme(dt): no such method!
-  private native void nativeFreeFork(long nativeFork);
 }
