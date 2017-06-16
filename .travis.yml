@@ -4,7 +4,8 @@ jdk: openjdk8
 sudo: required
 env:
   global:
-    - RUST_VERSION=nightly
+    - RUST_VERSION=stable
+    - RUSTFMT_VERSION=0.9.0
 cache:
   directories:
     - "$HOME/.cargo"
@@ -17,8 +18,14 @@ before_install:
   - export PATH="$PATH":"$HOME/.cargo/bin"
     # Install rustup if it's not already installed (i.e., not in CI cache)
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
-  - rustup install "$RUST_VERSION"
+    # Install a toolchain and set it as a default.
+  - rustup default "$RUST_VERSION"
+    # Install rustfmt if it's not already.
+  - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
+  - cd rust/
+  - cargo fmt -- --write-mode=diff
+  - cd -
   - mvn verify -B -Dcheckstyle.severity=error -Drust.compiler.version="$RUST_VERSION"
