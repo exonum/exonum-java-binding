@@ -2,7 +2,7 @@ package com.exonum.binding.index;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 import com.exonum.binding.storage.connector.Connect;
 import com.exonum.binding.storage.db.Database;
@@ -18,8 +18,37 @@ public class IndexMapIntegrationTest {
     System.loadLibrary("java_bindings");
   }
 
+  private static final byte[] mapPrefix = new byte[]{'p'};
+
   @Test
   public void getShouldReturnSuccessfullyPutValue() throws Exception {
+    Database database = null;
+    Connect view = null;
+    try {
+      database = new MemoryDb();
+      view = database.lookupFork();
+
+      IndexMap map = new IndexMap(view, mapPrefix);
+
+      byte[] key = new byte[] {1};
+      byte[] value = new byte[] {1, 2, 3, 4};
+      map.put(key, value);
+
+      byte[] storedValue = map.get(key);
+
+      assertThat(storedValue, equalTo(value));
+    } finally {
+      if (view != null) {
+        view.close();
+      }
+      if (database != null) {
+        database.destroyNativeDb();
+      }
+    }
+  }
+
+  @Test
+  public void getShouldReturnNullIfNoSuchValueInFork() throws Exception {
     Database database = null;
     Connect view = null;
     try {
@@ -29,13 +58,10 @@ public class IndexMapIntegrationTest {
       byte[] mapPrefix = new byte[] {'p'};
       IndexMap map = new IndexMap(view, mapPrefix);
 
-      byte[] key = new byte[] { 1 };
-      byte[] value = new byte[] {1, 2, 3, 4};
-      map.put(key, value);
+      byte[] key = new byte[] {1};
+      byte[] value = map.get(key);
 
-      byte[] storedValue = map.get(key);
-
-      assertThat(storedValue, equalTo(value));
+      assertNull(value);
     } finally {
       if (view != null) {
         view.close();
