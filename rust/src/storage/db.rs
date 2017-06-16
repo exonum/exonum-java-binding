@@ -1,4 +1,9 @@
+use jni::JNIEnv;
+use jni::objects::JClass;
+use jni::sys::jlong;
+
 use exonum::storage::{Snapshot, Fork};
+use utils;
 
 // TODO: Temporary solution, should be replaced by the same typedef as `Value`.
 pub type Key = u8;
@@ -9,4 +14,15 @@ pub type Value = Vec<u8>;
 pub enum View {
     Snapshot(Box<Snapshot>),
     Fork(Fork),
+}
+
+/// Destroys underlying `View` object and frees memory.
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_exonum_binding_storage_db_FIXME_nativeFreeView(
+    env: JNIEnv,
+    _: JClass,
+    db: jlong,
+) {
+    utils::drop_object::<View>(&env, db);
 }
