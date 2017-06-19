@@ -66,14 +66,3 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork(
     });
     utils::unwrap_exc_or_default(&env, res)
 }
-
-/// Destroys underlying `Snapshot` or `Fork` object and frees memory.
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFreeView(
-    env: JNIEnv,
-    _: JClass,
-    db: jlong,
-) {
-    utils::drop_object::<View>(&env, db);
-}

@@ -13,13 +13,14 @@ public class Fork implements Connect {
     this.nativeFork = forkObj;
   }
 
-  public long getNativeFork() {
+  @Override
+  public long getNativeHandle() {
     return nativeFork;
   }
 
   @Override
-  public void destroyNativeConnect() {
-    nativeFreeFork(nativeFork);
+  public void close() {
+    Views.nativeFreeView(nativeFork);
   }
 
   @Override
@@ -41,7 +42,4 @@ public class Fork implements Connect {
   public void unlockRead() {
     locker.readLock().unlock();
   }
-
-  // fixme(dt): no such method!
-  private native void nativeFreeFork(long nativeFork);
 }

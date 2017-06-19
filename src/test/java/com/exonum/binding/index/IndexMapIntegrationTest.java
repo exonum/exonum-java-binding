@@ -2,7 +2,7 @@ package com.exonum.binding.index;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 import com.exonum.binding.storage.connector.Connect;
 import com.exonum.binding.storage.db.Database;
@@ -18,29 +18,53 @@ public class IndexMapIntegrationTest {
     System.loadLibrary("java_bindings");
   }
 
-  // todo: remove expected exception when native code is fixed.
-  @Test(expected = AssertionError.class)
+  private static final byte[] mapPrefix = new byte[]{'p'};
+
+  @Test
   public void getShouldReturnSuccessfullyPutValue() throws Exception {
-    fail();
-    TestStorageKey key = new TestStorageKey();
-    TestStorageValue value = new TestStorageValue();
-    byte[] mapPrefix = new byte[] {'p'};
     Database database = null;
     Connect view = null;
     try {
       database = new MemoryDb();
       view = database.lookupFork();
 
-      IndexMap<TestStorageKey, TestStorageValue> map =
-              new IndexMap<>(TestStorageValue.class, view, mapPrefix);
+      IndexMap map = new IndexMap(view, mapPrefix);
+
+      byte[] key = new byte[] {1};
+      byte[] value = new byte[] {1, 2, 3, 4};
       map.put(key, value);
 
-      TestStorageValue storedValue = map.get(key);
+      byte[] storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(value));
     } finally {
       if (view != null) {
-        view.destroyNativeConnect();
+        view.close();
+      }
+      if (database != null) {
+        database.destroyNativeDb();
+      }
+    }
+  }
+
+  @Test
+  public void getShouldReturnNullIfNoSuchValueInFork() throws Exception {
+    Database database = null;
+    Connect view = null;
+    try {
+      database = new MemoryDb();
+      view = database.lookupFork();
+
+      byte[] mapPrefix = new byte[] {'p'};
+      IndexMap map = new IndexMap(view, mapPrefix);
+
+      byte[] key = new byte[] {1};
+      byte[] value = map.get(key);
+
+      assertNull(value);
+    } finally {
+      if (view != null) {
+        view.close();
       }
       if (database != null) {
         database.destroyNativeDb();

@@ -10,13 +10,14 @@ public class Snapshot implements Connect {
     this.nativeSnapshot = snapshotObj;
   }
 
-  public long getNativeSnapshot() {
+  @Override
+  public long getNativeHandle() {
     return nativeSnapshot;
   }
 
   @Override
-  public void destroyNativeConnect() {
-    nativeFreeSnapshot(nativeSnapshot);
+  public void close() {
+    Views.nativeFreeView(nativeSnapshot);
   }
 
   @Override
@@ -38,7 +39,4 @@ public class Snapshot implements Connect {
   public void unlockRead() {
     //method do nothing for Snapshot
   }
-
-  // fixme(dt): no such method!
-  private native void nativeFreeSnapshot(long nativeSnapshot);
 }

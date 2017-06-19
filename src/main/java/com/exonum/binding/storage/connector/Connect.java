@@ -1,6 +1,8 @@
 package com.exonum.binding.storage.connector;
 
-public interface Connect {
+import com.exonum.binding.NativeHandle;
+
+public interface Connect extends NativeHandle {
 
   public void lockWrite();
 
@@ -9,6 +11,4 @@ public interface Connect {
   public void unlockWrite();
 
   public void unlockRead();
-
-  public void destroyNativeConnect();
 }
