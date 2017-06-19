@@ -14,6 +14,8 @@ pub use self::leveldb::{Java_com_exonum_binding_storage_db_LevelDb_nativeCreateL
                         Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork};
 pub use self::map_index::{Java_com_exonum_binding_index_IndexMap_createNativeIndexMap,
                           Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap,
-                          Java_com_exonum_binding_index_IndexMap_putToIndexMap,
                           Java_com_exonum_binding_index_IndexMap_getFromIndexMap,
-                          Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap};
+                          Java_com_exonum_binding_index_IndexMap_containsInIndexMap,
+                          Java_com_exonum_binding_index_IndexMap_putToIndexMap,
+                          Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap,
+                          Java_com_exonum_binding_index_IndexMap_clearIndexMap};
