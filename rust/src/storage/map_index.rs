@@ -85,9 +85,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_containsInIndexMap(
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap()[0];
         (match utils::cast_object::<IndexType>(index) {
-            &mut IndexType::SnapshotIndex(ref index) => index.contains(&key),
-            &mut IndexType::ForkIndex(ref index) => index.contains(&key),
-        }) as jboolean
+             &mut IndexType::SnapshotIndex(ref index) => index.contains(&key),
+             &mut IndexType::ForkIndex(ref index) => index.contains(&key),
+         }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -154,5 +154,3 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_clearIndexMap(
     });
     utils::unwrap_exc_or_default(&env, res)
 }
-
-// TODO: iter, keys, values, iter_from, keys_from, values_from
