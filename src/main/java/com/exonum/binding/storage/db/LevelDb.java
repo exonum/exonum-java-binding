@@ -8,12 +8,12 @@ public class LevelDb implements Database {
   private final long nativeLevelDb;
 
   public LevelDb(String pathToDb) {
-    this.nativeLevelDb = nativeCreateLevelDb(pathToDb);
+    this.nativeLevelDb = nativeCreate(pathToDb);
   }
 
   @Override
   public void destroyNativeDb() {
-    nativeFreeLevelDb(nativeLevelDb);
+    nativeFree(nativeLevelDb);
   }
 
   @Override
@@ -30,7 +30,7 @@ public class LevelDb implements Database {
 
   private native long nativeLookupFork(long nativeDb);
 
-  private native long nativeCreateLevelDb(String path);
+  private native long nativeCreate(String path);
 
-  private native void nativeFreeLevelDb(long nativeDb);
+  private native void nativeFree(long nativeDb);
 }

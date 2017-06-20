@@ -19,7 +19,7 @@ enum IndexType {
 /// Returns pointer to created `MapIndex` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_createNativeIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view: jlong,
@@ -38,7 +38,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_createNativeIndexMap(
 /// Destroys underlying `MapIndex` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeFree(
     env: JNIEnv,
     _: JClass,
     index: jlong,
@@ -49,7 +49,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap(
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -76,7 +76,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_containsInIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -95,7 +95,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_containsInIndexMap(
 /// Sets `value` identified by the `key` into the index.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativePut(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -118,7 +118,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -139,7 +139,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(
 /// Clears the index, removing all values.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_clearIndexMap(
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeClear(
     env: JNIEnv,
     _: JClass,
     index: jlong,

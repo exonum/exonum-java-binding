@@ -8,13 +8,13 @@ public class IndexMap {
 
   public IndexMap(Connect connect, byte[] prefix) {
     this.dbConnect = connect;
-    this.nativeIndexMap = createNativeIndexMap(connect.getNativeHandle(), prefix);
+    this.nativeIndexMap = nativeCreate(connect.getNativeHandle(), prefix);
   }
 
   public void put(byte[] key, byte[] value) {
     dbConnect.lockWrite();
     try {
-      putToIndexMap(key, value, nativeIndexMap);
+      nativePut(key, value, nativeIndexMap);
     } finally {
       dbConnect.unlockWrite();
     }
@@ -23,7 +23,7 @@ public class IndexMap {
   public byte[] get(byte[] key) {
     dbConnect.lockRead();
     try {
-      return getFromIndexMap(key, nativeIndexMap);
+      return nativeGet(key, nativeIndexMap);
     } finally {
       dbConnect.unlockRead();
     }
@@ -32,17 +32,17 @@ public class IndexMap {
   public void delete(byte[] key) {
     dbConnect.lockWrite();
     try {
-      deleteFromIndexMap(key, nativeIndexMap);
+      nativeDelete(key, nativeIndexMap);
     } finally {
       dbConnect.unlockWrite();
     }
   }
 
-  private native long createNativeIndexMap(long viewNativeHandle, byte[] prefix);
+  private native long nativeCreate(long viewNativeHandle, byte[] prefix);
 
-  private native void putToIndexMap(byte[] key, byte[] value, long nativeIndex);
+  private native void nativePut(byte[] key, byte[] value, long nativeIndex);
 
-  private native byte[] getFromIndexMap(byte[] key, long nativeIndex);
+  private native byte[] nativeGet(byte[] key, long nativeIndex);
 
-  private native void deleteFromIndexMap(byte[] key, long nativeIndex);
+  private native void nativeDelete(byte[] key, long nativeIndex);
 }
