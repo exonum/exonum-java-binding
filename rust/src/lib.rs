@@ -31,4 +31,15 @@ pub use storage::{Java_com_exonum_binding_storage_db_MemoryDb_nativeCreateMemory
                   Java_com_exonum_binding_index_IndexMap_containsInIndexMap,
                   Java_com_exonum_binding_index_IndexMap_putToIndexMap,
                   Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap,
-                  Java_com_exonum_binding_index_IndexMap_clearIndexMap};
+                  Java_com_exonum_binding_index_IndexMap_clearIndexMap,
+                  Java_com_exonum_binding_index_IndexList_nativeCreate,
+                  Java_com_exonum_binding_index_IndexList_nativeFree,
+                  Java_com_exonum_binding_index_IndexList_nativeGet,
+                  Java_com_exonum_binding_index_IndexList_nativeLast,
+                  Java_com_exonum_binding_index_IndexList_nativeIsEmpty,
+                  Java_com_exonum_binding_index_IndexList_nativeLen,
+                  Java_com_exonum_binding_index_IndexList_nativePush,
+                  Java_com_exonum_binding_index_IndexList_nativePop,
+                  Java_com_exonum_binding_index_IndexList_nativeTruncate,
+                  Java_com_exonum_binding_index_IndexList_nativeSet,
+                  Java_com_exonum_binding_index_IndexList_nativeClear};
