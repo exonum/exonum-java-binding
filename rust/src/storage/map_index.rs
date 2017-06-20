@@ -1,15 +1,15 @@
 use jni::JNIEnv;
 use jni::objects::JClass;
-use jni::sys::{jlong, jbyteArray};
+use jni::sys::{jlong, jboolean, jbyteArray};
 
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{self, Snapshot, Fork};
+use exonum::storage::{Snapshot, Fork, MapIndex};
 use utils;
 use super::db::{View, Key, Value};
 
-type Index<T> = storage::MapIndex<T, Key, Value>;
+type Index<T> = MapIndex<T, Key, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Box<Snapshot>>),
@@ -46,29 +46,6 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap(
     utils::drop_object::<IndexType>(&env, index);
 }
 
-/// Sets `value` identified by the `key` into the index.
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(
-    env: JNIEnv,
-    _: JClass,
-    key: jbyteArray,
-    value: jbyteArray,
-    index: jlong,
-) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
-        &mut IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        &mut IndexType::ForkIndex(ref mut index) => {
-            let key = env.convert_byte_array(key).unwrap()[0];
-            let value = env.convert_byte_array(value).unwrap();
-            index.put(&key, value);
-        }
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
 #[allow(non_snake_case)]
@@ -96,6 +73,48 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
+/// Returns `true` if the map contains a value for the specified key.
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_containsInIndexMap(
+    env: JNIEnv,
+    _: JClass,
+    key: jbyteArray,
+    index: jlong,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let key = env.convert_byte_array(key).unwrap()[0];
+        (match utils::cast_object::<IndexType>(index) {
+             &mut IndexType::SnapshotIndex(ref index) => index.contains(&key),
+             &mut IndexType::ForkIndex(ref index) => index.contains(&key),
+         }) as jboolean
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Sets `value` identified by the `key` into the index.
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_putToIndexMap(
+    env: JNIEnv,
+    _: JClass,
+    key: jbyteArray,
+    value: jbyteArray,
+    index: jlong,
+) {
+    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
+        &mut IndexType::SnapshotIndex(_) => {
+            panic!("Unable to modify snapshot.");
+        }
+        &mut IndexType::ForkIndex(ref mut index) => {
+            let key = env.convert_byte_array(key).unwrap()[0];
+            let value = env.convert_byte_array(value).unwrap();
+            index.put(&key, value);
+        }
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
 #[allow(non_snake_case)]
@@ -112,6 +131,25 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(
         &mut IndexType::ForkIndex(ref mut index) => {
             let key = env.convert_byte_array(key).unwrap()[0];
             index.remove(&key);
+        }
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Clears the index, removing all values.
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_exonum_binding_index_IndexMap_clearIndexMap(
+    env: JNIEnv,
+    _: JClass,
+    index: jlong,
+) {
+    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
+        &mut IndexType::SnapshotIndex(_) => {
+            panic!("Unable to modify snapshot.");
+        }
+        &mut IndexType::ForkIndex(ref mut index) => {
+            index.clear();
         }
     });
     utils::unwrap_exc_or_default(&env, res)

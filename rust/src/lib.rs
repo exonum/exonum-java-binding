@@ -27,6 +27,8 @@ pub use storage::{Java_com_exonum_binding_storage_db_MemoryDb_nativeCreateMemory
                   Java_com_exonum_binding_storage_connector_Views_nativeFreeView,
                   Java_com_exonum_binding_index_IndexMap_createNativeIndexMap,
                   Java_com_exonum_binding_index_IndexMap_freeNativeIndexMap,
-                  Java_com_exonum_binding_index_IndexMap_putToIndexMap,
                   Java_com_exonum_binding_index_IndexMap_getFromIndexMap,
-                  Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap};
+                  Java_com_exonum_binding_index_IndexMap_containsInIndexMap,
+                  Java_com_exonum_binding_index_IndexMap_putToIndexMap,
+                  Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap,
+                  Java_com_exonum_binding_index_IndexMap_clearIndexMap};
