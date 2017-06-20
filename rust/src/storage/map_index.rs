@@ -136,7 +136,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_deleteFromIndexMap(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Clears the map, removing all values.
+/// Clears the index, removing all values.
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_clearIndexMap(
