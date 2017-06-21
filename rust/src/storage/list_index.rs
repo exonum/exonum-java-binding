@@ -165,9 +165,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
             &mut IndexType::SnapshotIndex(_) => {
                 panic!("Unable to modify snapshot.");
             }
-            &mut IndexType::ForkIndex(ref mut index) => {
-                index.pop()
-            }
+            &mut IndexType::ForkIndex(ref mut index) => index.pop(),
         };
         match val {
             Some(val) => {
