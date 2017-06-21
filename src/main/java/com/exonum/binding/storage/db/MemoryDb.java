@@ -8,12 +8,12 @@ public class MemoryDb implements Database {
   private final long nativeMemoryDb;
 
   public MemoryDb() {
-    this.nativeMemoryDb = nativeCreateMemoryDb();
+    this.nativeMemoryDb = nativeCreate();
   }
 
   @Override
   public void destroyNativeDb() {
-    nativeFreeMemoryDb(nativeMemoryDb);
+    nativeFree(nativeMemoryDb);
   }
 
   @Override
@@ -30,7 +30,7 @@ public class MemoryDb implements Database {
 
   private native long nativeLookupFork(long nativeDb);
 
-  private native long nativeCreateMemoryDb();
+  private native long nativeCreate();
 
-  private native void nativeFreeMemoryDb(long nativeDb);
+  private native void nativeFree(long nativeDb);
 }

@@ -20,7 +20,7 @@ public class Fork implements Connect {
 
   @Override
   public void close() {
-    Views.nativeFreeView(nativeFork);
+    Views.nativeFree(nativeFork);
   }
 
   @Override
