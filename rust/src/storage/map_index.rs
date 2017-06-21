@@ -62,11 +62,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_getFromIndexMap(
             &mut IndexType::ForkIndex(ref index) => index.get(&key),
         };
         match val {
-            Some(val) => {
-                // TODO: Remove casting.
-                let signed: Vec<_> = val.iter().map(|x| *x as i8).collect();
-                env.new_byte_array(signed.as_slice()).unwrap()
-            }
+            Some(val) => utils::convert_to_java_array(&env, &val),
             None => ptr::null_mut(),
         }
     });

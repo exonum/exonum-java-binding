@@ -61,11 +61,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
             &mut IndexType::ForkIndex(ref index) => index.get(i as u64),
         };
         match val {
-            Some(val) => {
-                // TODO: Remove casting.
-                let signed: Vec<_> = val.iter().map(|x| *x as i8).collect();
-                env.new_byte_array(signed.as_slice()).unwrap()
-            }
+            Some(val) => utils::convert_to_java_array(&env, &val),
             None => ptr::null_mut(),
         }
     });
@@ -86,11 +82,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLast(
             &mut IndexType::ForkIndex(ref index) => index.last(),
         };
         match val {
-            Some(val) => {
-                // TODO: Remove casting.
-                let signed: Vec<_> = val.iter().map(|x| *x as i8).collect();
-                env.new_byte_array(signed.as_slice()).unwrap()
-            }
+            Some(val) => utils::convert_to_java_array(&env, &val),
             None => ptr::null_mut(),
         }
     });
@@ -168,11 +160,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
             &mut IndexType::ForkIndex(ref mut index) => index.pop(),
         };
         match val {
-            Some(val) => {
-                // TODO: Remove casting.
-                let signed: Vec<_> = val.iter().map(|x| *x as i8).collect();
-                env.new_byte_array(signed.as_slice()).unwrap()
-            }
+            Some(val) => utils::convert_to_java_array(&env, &val),
             None => ptr::null_mut(),
         }
     });
