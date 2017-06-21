@@ -17,7 +17,7 @@ public class Snapshot implements Connect {
 
   @Override
   public void close() {
-    Views.nativeFreeView(nativeSnapshot);
+    Views.nativeFree(nativeSnapshot);
   }
 
   @Override

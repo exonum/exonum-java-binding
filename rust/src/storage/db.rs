@@ -16,10 +16,10 @@ pub enum View {
     Fork(Fork),
 }
 
-/// Destroys underlying `View` object and frees memory.
+/// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_storage_connector_Views_nativeFreeView(
+pub extern "C" fn Java_com_exonum_binding_storage_connector_Views_nativeFree(
     env: JNIEnv,
     _: JClass,
     db: jlong,
