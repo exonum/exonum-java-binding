@@ -18,6 +18,7 @@ pub enum View {
 /// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_storage_connector_Views_nativeFree(
     env: JNIEnv,
     _: JClass,

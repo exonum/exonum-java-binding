@@ -19,6 +19,7 @@ enum IndexType {
 /// Returns pointer to the created `ListIndex` object.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
     env: JNIEnv,
     _: JClass,
@@ -38,6 +39,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
 /// Destroys underlying `ListIndex` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeFree(
     env: JNIEnv,
     _: JClass,
@@ -49,6 +51,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeFree(
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
     env: JNIEnv,
     _: JClass,
@@ -56,9 +59,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match utils::cast_object::<IndexType>(list_handle) {
-            &mut IndexType::SnapshotIndex(ref list) => list.get(index as u64),
-            &mut IndexType::ForkIndex(ref list) => list.get(index as u64),
+        let val = match *utils::cast_object::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get(index as u64),
+            IndexType::ForkIndex(ref list) => list.get(index as u64),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -71,15 +74,16 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLast(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match utils::cast_object::<IndexType>(list_handle) {
-            &mut IndexType::SnapshotIndex(ref list) => list.last(),
-            &mut IndexType::ForkIndex(ref list) => list.last(),
+        let val = match *utils::cast_object::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.last(),
+            IndexType::ForkIndex(ref list) => list.last(),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -92,15 +96,16 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLast(
 /// Returns `true` if the list is empty.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        (match utils::cast_object::<IndexType>(list_handle) {
-             &mut IndexType::SnapshotIndex(ref list) => list.is_empty(),
-             &mut IndexType::ForkIndex(ref list) => list.is_empty(),
+        (match *utils::cast_object::<IndexType>(list_handle) {
+             IndexType::SnapshotIndex(ref list) => list.is_empty(),
+             IndexType::ForkIndex(ref list) => list.is_empty(),
          }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -109,6 +114,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
 /// Returns length of the list.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLen(
     env: JNIEnv,
     _: JClass,
@@ -126,17 +132,18 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLen(
 /// Adds value to the list.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePush(
     env: JNIEnv,
     _: JClass,
     value: jbyteArray,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             let value = env.convert_byte_array(value).unwrap();
             list.push(value);
         }
@@ -147,17 +154,18 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePush(
 /// Removes the last element from a list and returns it, or null pointer if it is empty.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match utils::cast_object::<IndexType>(list_handle) {
-            &mut IndexType::SnapshotIndex(_) => {
+        let val = match *utils::cast_object::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(_) => {
                 panic!("Unable to modify snapshot.");
             }
-            &mut IndexType::ForkIndex(ref mut list) => list.pop(),
+            IndexType::ForkIndex(ref mut list) => list.pop(),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -170,17 +178,18 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
 /// Shortens the list, keeping the first len elements and dropping the rest.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
     env: JNIEnv,
     _: JClass,
     len: jlong,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             list.truncate(len as u64);
         }
     });
@@ -190,6 +199,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeSet(
     env: JNIEnv,
     _: JClass,
@@ -197,11 +207,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeSet(
     value: jbyteArray,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             let value = env.convert_byte_array(value).unwrap();
             list.set(index as u64, value);
         }
@@ -212,16 +222,17 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeSet(
 /// Clears the list, removing all values.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeClear(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             list.clear();
         }
     });

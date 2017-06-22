@@ -10,6 +10,7 @@ use super::db::View;
 /// Returns pointer to created `LevelDB` object.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
@@ -28,6 +29,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
 /// Destroys underlying `LevelDB` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
     env: JNIEnv,
     _: JClass,
@@ -39,6 +41,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapshot(
     env: JNIEnv,
     _: JClass,
@@ -54,6 +57,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapsho
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
 #[allow(non_snake_case)]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork(
     env: JNIEnv,
     _: JClass,

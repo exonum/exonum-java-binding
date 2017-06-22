@@ -11,7 +11,7 @@ pub type Handle = jlong;
 
 // Panics if object is equal to zero.
 pub fn cast_object<T>(object: jlong) -> &'static mut T {
-    assert!(object != 0);
+    assert_ne!(object, 0);
     let ptr = object as *mut T;
     unsafe { &mut *ptr }
 }
@@ -101,7 +101,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "assertion failed: object != 0")]
+    #[should_panic(expected = "assertion failed: `(left != right)` (left: `0`, right: `0`)")]
     fn cast_zero_object() {
         let _ = cast_object::<i32>(0);
     }
