@@ -9,10 +9,11 @@ use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
 
+// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
 // Panics if object is equal to zero.
-pub fn cast_object<T>(object: jlong) -> &'static mut T {
+pub fn cast_object<T>(object: Handle) -> &'static mut T {
     assert_ne!(object, 0);
     let ptr = object as *mut T;
     unsafe { &mut *ptr }
