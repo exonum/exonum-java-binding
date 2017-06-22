@@ -1,11 +1,10 @@
 use jni::JNIEnv;
 use jni::objects::{JClass, JString};
-use jni::sys::jlong;
 
 use std::panic;
 
 use exonum::storage::{LevelDB, Database};
-use utils;
+use utils::{self, Handle};
 use super::db::View;
 
 /// Returns pointer to created `LevelDB` object.
@@ -15,7 +14,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
     _path: JString,
-) -> jlong {
+) -> Handle {
     let res = panic::catch_unwind(|| {
         unimplemented!()
         // TODO: `leveldb::options::Options` should be reexported.
@@ -32,9 +31,9 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
+    db_handle: Handle,
 ) {
-    utils::drop_object::<LevelDB>(&env, db);
+    utils::drop_object::<LevelDB>(&env, db_handle);
 }
 
 /// Returns pointer to created `Snapshot` object.
@@ -43,11 +42,11 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapshot(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
-) -> jlong {
+    db_handle: Handle,
+) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<LevelDB>(db);
-        Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as jlong
+        let db = utils::cast_object::<LevelDB>(db_handle);
+        Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -58,11 +57,11 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapsho
 pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
-) -> jlong {
+    db_handle: Handle,
+) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<LevelDB>(db);
-        Box::into_raw(Box::new(View::Fork(db.fork()))) as jlong
+        let db = utils::cast_object::<LevelDB>(db_handle);
+        Box::into_raw(Box::new(View::Fork(db.fork()))) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }

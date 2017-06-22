@@ -7,6 +7,8 @@ use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
 
+pub type Handle = jlong;
+
 // Panics if object is equal to zero.
 pub fn cast_object<T>(object: jlong) -> &'static mut T {
     assert!(object != 0);
@@ -21,9 +23,9 @@ pub fn convert_to_java_array(env: &JNIEnv, val: &[u8]) -> jbyteArray {
 }
 
 // Constructs `Box` from raw pointer and immediately drops it.
-pub fn drop_object<T>(env: &JNIEnv, object: jlong) {
+pub fn drop_object<T>(env: &JNIEnv, handle: Handle) {
     let res = panic::catch_unwind(|| unsafe {
-        Box::from_raw(object as *mut T);
+        Box::from_raw(handle as *mut T);
     });
     // TODO: Should we throw exception here or just log error?
     unwrap_exc_or_default(env, res);
