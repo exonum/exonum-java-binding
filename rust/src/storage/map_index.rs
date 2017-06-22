@@ -29,7 +29,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
         Box::into_raw(Box::new(match *utils::cast_object(view_handle) {
-            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(prefix, &**snapshot)),
+            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
+                Index::new(prefix, &**snapshot),
+            ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
         })) as Handle
     });
