@@ -6,6 +6,8 @@ env:
   global:
     - RUST_VERSION=stable
     - RUSTFMT_VERSION=0.9.0
+    - RUST_NIGHTLY_VERSION=nightly-2017-05-10
+    - RUST_CLIPPY_VERSION=0.0.131
 cache:
   directories:
     - "$HOME/.cargo"
@@ -18,6 +20,9 @@ before_install:
   - export PATH="$PATH":"$HOME/.cargo/bin"
     # Install rustup if it's not already installed (i.e., not in CI cache)
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
+    # Install nightly rust version and clippy.
+  - rustup toolchain install $RUST_NIGHTLY_VERSION
+  - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
     # Install a toolchain and set it as a default.
   - rustup default "$RUST_VERSION"
     # Install rustfmt if it's not already.
@@ -27,5 +32,6 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd rust/
   - cargo fmt -- --write-mode=diff
+  - cargo +$NIGHTLY_RUST clippy -- -D warnings
   - cd -
   - mvn verify -B -Dcheckstyle.severity=error -Drust.compiler.version="$RUST_VERSION"
