@@ -4,6 +4,8 @@
 //! some default stub value still should be returned from the Rust side.
 
 #![deny(missing_docs)]
+// `JNIEnv` is passed by value to the extern functions.
+#![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 
 #[macro_use]
 extern crate log;
