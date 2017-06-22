@@ -1,12 +1,12 @@
 use jni::JNIEnv;
 use jni::objects::JClass;
-use jni::sys::{jlong, jboolean, jbyteArray};
+use jni::sys::{jboolean, jbyteArray};
 
 use std::panic;
 use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, MapIndex};
-use utils;
+use utils::{self, Handle};
 use super::db::{View, Key, Value};
 
 type Index<T> = MapIndex<T, Key, Value>;
@@ -22,15 +22,15 @@ enum IndexType {
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view: jlong,
+    view_handle: Handle,
     prefix: jbyteArray,
-) -> jlong {
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
-        Box::into_raw(Box::new(match *utils::cast_object(view) {
+        Box::into_raw(Box::new(match *utils::cast_object(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(prefix, snapshot)),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })) as jlong
+        })) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -41,9 +41,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeFree(
     env: JNIEnv,
     _: JClass,
-    index: jlong,
+    map_handle: Handle,
 ) {
-    utils::drop_object::<IndexType>(&env, index);
+    utils::drop_object::<IndexType>(&env, map_handle);
 }
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
@@ -53,13 +53,13 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
-    index: jlong,
+    map_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap()[0];
-        let val = match utils::cast_object::<IndexType>(index) {
-            &mut IndexType::SnapshotIndex(ref index) => index.get(&key),
-            &mut IndexType::ForkIndex(ref index) => index.get(&key),
+        let val = match utils::cast_object::<IndexType>(map_handle) {
+            &mut IndexType::SnapshotIndex(ref map) => map.get(&key),
+            &mut IndexType::ForkIndex(ref map) => map.get(&key),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -76,13 +76,13 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
-    index: jlong,
+    map_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap()[0];
-        (match utils::cast_object::<IndexType>(index) {
-             &mut IndexType::SnapshotIndex(ref index) => index.contains(&key),
-             &mut IndexType::ForkIndex(ref index) => index.contains(&key),
+        (match utils::cast_object::<IndexType>(map_handle) {
+             &mut IndexType::SnapshotIndex(ref map) => map.contains(&key),
+             &mut IndexType::ForkIndex(ref map) => map.contains(&key),
          }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -96,16 +96,16 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativePut(
     _: JClass,
     key: jbyteArray,
     value: jbyteArray,
-    index: jlong,
+    map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
+    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(map_handle) {
         &mut IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut index) => {
+        &mut IndexType::ForkIndex(ref mut map) => {
             let key = env.convert_byte_array(key).unwrap()[0];
             let value = env.convert_byte_array(value).unwrap();
-            index.put(&key, value);
+            map.put(&key, value);
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -118,15 +118,15 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
-    index: jlong,
+    map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
+    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(map_handle) {
         &mut IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut index) => {
+        &mut IndexType::ForkIndex(ref mut map) => {
             let key = env.convert_byte_array(key).unwrap()[0];
-            index.remove(&key);
+            map.remove(&key);
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -138,14 +138,14 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
 pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeClear(
     env: JNIEnv,
     _: JClass,
-    index: jlong,
+    map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(index) {
+    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(map_handle) {
         &mut IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut index) => {
-            index.clear();
+        &mut IndexType::ForkIndex(ref mut map) => {
+            map.clear();
         }
     });
     utils::unwrap_exc_or_default(&env, res)

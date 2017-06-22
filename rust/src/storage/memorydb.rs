@@ -1,11 +1,10 @@
 use jni::JNIEnv;
 use jni::objects::JClass;
-use jni::sys::jlong;
 
 use std::panic;
 
 use exonum::storage::{MemoryDB, Database};
-use utils;
+use utils::{self, Handle};
 use super::db::View;
 
 /// Returns pointer to created `MemoryDB` object.
@@ -14,8 +13,8 @@ use super::db::View;
 pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
-) -> jlong {
-    let res = panic::catch_unwind(|| Box::into_raw(Box::new(MemoryDB::new())) as jlong);
+) -> Handle {
+    let res = panic::catch_unwind(|| Box::into_raw(Box::new(MemoryDB::new())) as Handle);
     utils::unwrap_exc_or_default(&env, res)
 }
 
@@ -25,9 +24,9 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate(
 pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeFree(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
+    db_handle: Handle,
 ) {
-    utils::drop_object::<MemoryDB>(&env, db);
+    utils::drop_object::<MemoryDB>(&env, db_handle);
 }
 
 /// Returns pointer to created `Snapshot` object.
@@ -36,11 +35,11 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeFree(
 pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupSnapshot(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
-) -> jlong {
+    db_handle: Handle,
+) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<MemoryDB>(db);
-        Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as jlong
+        let db = utils::cast_object::<MemoryDB>(db_handle);
+        Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -51,11 +50,11 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupSnapsh
 pub extern "C" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupFork(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
-) -> jlong {
+    db_handle: Handle,
+) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<MemoryDB>(db);
-        Box::into_raw(Box::new(View::Fork(db.fork()))) as jlong
+        let db = utils::cast_object::<MemoryDB>(db_handle);
+        Box::into_raw(Box::new(View::Fork(db.fork()))) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }

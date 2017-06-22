@@ -1,9 +1,8 @@
 use jni::JNIEnv;
 use jni::objects::JClass;
-use jni::sys::jlong;
 
 use exonum::storage::{Snapshot, Fork};
-use utils;
+use utils::{self, Handle};
 
 // TODO: Temporary solution, should be replaced by the same typedef as `Value`.
 pub type Key = u8;
@@ -22,7 +21,7 @@ pub enum View {
 pub extern "C" fn Java_com_exonum_binding_storage_connector_Views_nativeFree(
     env: JNIEnv,
     _: JClass,
-    db: jlong,
+    view_handle: Handle,
 ) {
-    utils::drop_object::<View>(&env, db);
+    utils::drop_object::<View>(&env, view_handle);
 }
