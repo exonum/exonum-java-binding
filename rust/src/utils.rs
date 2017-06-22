@@ -74,7 +74,7 @@ pub fn throw(env: &JNIEnv, description: &str) {
 }
 
 // Tries to get meaningful description from panic-error.
-fn any_to_string(any: &Box<Any + Send>) -> String {
+fn any_to_string(any: &Any) -> String {
     // TODO: jni::errors::Error?
     // TODO: Handle more types?
     if let Some(error) = any.downcast_ref::<Box<Error>>() {
