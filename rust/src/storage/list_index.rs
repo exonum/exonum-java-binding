@@ -121,9 +121,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLen(
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        (match utils::cast_object::<IndexType>(list_handle) {
-             &mut IndexType::SnapshotIndex(ref list) => list.len(),
-             &mut IndexType::ForkIndex(ref list) => list.len(),
+        (match *utils::cast_object::<IndexType>(list_handle) {
+             IndexType::SnapshotIndex(ref list) => list.len(),
+             IndexType::ForkIndex(ref list) => list.len(),
          }) as jlong
     });
     utils::unwrap_exc_or_default(&env, res)
