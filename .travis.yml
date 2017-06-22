@@ -32,6 +32,6 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd rust/
   - cargo fmt -- --write-mode=diff
-  - cargo +$NIGHTLY_RUST clippy -- -D warnings
+  - cargo +RUST_NIGHTLY_VERSION clippy -- -D warnings
   - cd -
   - mvn verify -B -Dcheckstyle.severity=error -Drust.compiler.version="$RUST_VERSION"
