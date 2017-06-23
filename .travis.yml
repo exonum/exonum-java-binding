@@ -29,3 +29,6 @@ script:
   - cargo fmt -- --write-mode=diff
   - cd -
   - mvn verify -B -Dcheckstyle.severity=error -Drust.compiler.version="$RUST_VERSION"
+notifications:
+  slack:
+    secure: CSs+h1w/Lj/pPtk3b7FA9JlcyBgfUXssUU2P/N/6RYpk37ImsNHw+M0tHi56Hk9r6mupoAgfftKbCsSXmlKT2fouT1w41nLLVVGtpji5vBOQpxQ8eLSkBtZE8fHyHRHxbj5A/CWN6tthvEkxSoAVKAjI4H/KFfupjFPyLTxih8mlhtL9aPzlGJV2N5xZey/OScW542Rlu6faWjrBvQ5u9D8htdRaKY9lMdCcaD4uOv3yAsDFvJuBZ5xputAOQaIC4ZzIX/1HBxPJkhi1Pie+bgTNeyuhlGjyTVFF0urf4vFmUbOBePeCcydmiMFfJ1b5fuzOK1BgmIazblaBacXn73rz3wN0D3xvyEE2qq6Bj/PffqVP6Gdb73H1w5AvB2GOdpBi5pjhAgvc2u0kJrVT0OQZfMkzXCGplTgOJYwaEVK6XPkrwMK0uTviag/t/FRqM032B0yi333njUfz59BOhNLM/xVgq/K6I8YJXvQigvXM18bfFxTX1GcIdiNKnnWhOQisrv6etXTFsk1zTIaFF7w+z+paSulsdMDgtsnZAsc8xWaT/g43sttn4b6jcvrMmVOwsFH5+S5muh04yGG7LVZdnhss3N8t9zv/g5ftPUh2aNuq2G3zGvqQDbag5rIGll6jMnlR3w/8F4zfXzjdLiqEI0Pigq8D54cXJR10RoI=
