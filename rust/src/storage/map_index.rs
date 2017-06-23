@@ -12,7 +12,7 @@ use super::db::{View, Key, Value};
 type Index<T> = MapIndex<T, Key, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Box<Snapshot>>),
+    SnapshotIndex(Index<&'static Snapshot>),
     ForkIndex(Index<&'static mut Fork>),
 }
 
@@ -28,7 +28,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
         Box::into_raw(Box::new(match *utils::cast_object(view_handle) {
-            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(prefix, snapshot)),
+            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
+                Index::new(prefix, &**snapshot),
+            ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
         })) as Handle
     });
@@ -57,9 +59,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap()[0];
-        let val = match utils::cast_object::<IndexType>(map_handle) {
-            &mut IndexType::SnapshotIndex(ref map) => map.get(&key),
-            &mut IndexType::ForkIndex(ref map) => map.get(&key),
+        let val = match *utils::cast_object::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.get(&key),
+            IndexType::ForkIndex(ref map) => map.get(&key),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -80,9 +82,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap()[0];
-        (match utils::cast_object::<IndexType>(map_handle) {
-             &mut IndexType::SnapshotIndex(ref map) => map.contains(&key),
-             &mut IndexType::ForkIndex(ref map) => map.contains(&key),
+        (match *utils::cast_object::<IndexType>(map_handle) {
+             IndexType::SnapshotIndex(ref map) => map.contains(&key),
+             IndexType::ForkIndex(ref map) => map.contains(&key),
          }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -98,11 +100,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativePut(
     value: jbyteArray,
     map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(map_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut map) => {
+        IndexType::ForkIndex(ref mut map) => {
             let key = env.convert_byte_array(key).unwrap()[0];
             let value = env.convert_byte_array(value).unwrap();
             map.put(&key, value);
@@ -120,11 +122,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
     key: jbyteArray,
     map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(map_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut map) => {
+        IndexType::ForkIndex(ref mut map) => {
             let key = env.convert_byte_array(key).unwrap()[0];
             map.remove(&key);
         }
@@ -140,11 +142,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexMap_nativeClear(
     _: JClass,
     map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(map_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut map) => {
+        IndexType::ForkIndex(ref mut map) => {
             map.clear();
         }
     });

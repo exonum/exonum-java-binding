@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", deny(needless_pass_by_value))]
+
 use jni::JNIEnv;
 use jni::sys::{jlong, jbyteArray};
 
@@ -7,11 +9,12 @@ use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
 
+// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
 // Panics if object is equal to zero.
-pub fn cast_object<T>(object: jlong) -> &'static mut T {
-    assert!(object != 0);
+pub fn cast_object<T>(object: Handle) -> &'static mut T {
+    assert_ne!(object, 0);
     let ptr = object as *mut T;
     unsafe { &mut *ptr }
 }
@@ -74,7 +77,7 @@ pub fn throw(env: &JNIEnv, description: &str) {
 }
 
 // Tries to get meaningful description from panic-error.
-fn any_to_string(any: &Box<Any + Send>) -> String {
+fn any_to_string(any: &Any) -> String {
     // TODO: jni::errors::Error?
     // TODO: Handle more types?
     if let Some(error) = any.downcast_ref::<Box<Error>>() {
@@ -101,7 +104,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "assertion failed: object != 0")]
+    #[should_panic(expected = "assertion failed: `(left != right)` (left: `0`, right: `0`)")]
     fn cast_zero_object() {
         let _ = cast_object::<i32>(0);
     }

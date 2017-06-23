@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Stanislav Tkach <stanislav.tkach@xdev.re"]
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["dylib"]
 
 [dependencies]
 log = "0.3"

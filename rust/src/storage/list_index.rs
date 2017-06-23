@@ -12,7 +12,7 @@ use super::db::{View, Value};
 type Index<T> = ListIndex<T, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Box<Snapshot>>),
+    SnapshotIndex(Index<&'static Snapshot>),
     ForkIndex(Index<&'static mut Fork>),
 }
 
@@ -28,7 +28,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
         Box::into_raw(Box::new(match *utils::cast_object(view) {
-            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(prefix, snapshot)),
+            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
+                Index::new(prefix, &**snapshot),
+            ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
         })) as Handle
     });
@@ -56,9 +58,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match utils::cast_object::<IndexType>(list_handle) {
-            &mut IndexType::SnapshotIndex(ref list) => list.get(index as u64),
-            &mut IndexType::ForkIndex(ref list) => list.get(index as u64),
+        let val = match *utils::cast_object::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get(index as u64),
+            IndexType::ForkIndex(ref list) => list.get(index as u64),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -77,9 +79,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLast(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match utils::cast_object::<IndexType>(list_handle) {
-            &mut IndexType::SnapshotIndex(ref list) => list.last(),
-            &mut IndexType::ForkIndex(ref list) => list.last(),
+        let val = match *utils::cast_object::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.last(),
+            IndexType::ForkIndex(ref list) => list.last(),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -98,9 +100,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
     list_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        (match utils::cast_object::<IndexType>(list_handle) {
-             &mut IndexType::SnapshotIndex(ref list) => list.is_empty(),
-             &mut IndexType::ForkIndex(ref list) => list.is_empty(),
+        (match *utils::cast_object::<IndexType>(list_handle) {
+             IndexType::SnapshotIndex(ref list) => list.is_empty(),
+             IndexType::ForkIndex(ref list) => list.is_empty(),
          }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -115,9 +117,9 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLen(
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        (match utils::cast_object::<IndexType>(list_handle) {
-             &mut IndexType::SnapshotIndex(ref list) => list.len(),
-             &mut IndexType::ForkIndex(ref list) => list.len(),
+        (match *utils::cast_object::<IndexType>(list_handle) {
+             IndexType::SnapshotIndex(ref list) => list.len(),
+             IndexType::ForkIndex(ref list) => list.len(),
          }) as jlong
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -132,11 +134,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePush(
     value: jbyteArray,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             let value = env.convert_byte_array(value).unwrap();
             list.push(value);
         }
@@ -153,11 +155,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match utils::cast_object::<IndexType>(list_handle) {
-            &mut IndexType::SnapshotIndex(_) => {
+        let val = match *utils::cast_object::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(_) => {
                 panic!("Unable to modify snapshot.");
             }
-            &mut IndexType::ForkIndex(ref mut list) => list.pop(),
+            IndexType::ForkIndex(ref mut list) => list.pop(),
         };
         match val {
             Some(val) => utils::convert_to_java_array(&env, &val),
@@ -176,11 +178,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
     len: jlong,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             list.truncate(len as u64);
         }
     });
@@ -197,11 +199,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeSet(
     value: jbyteArray,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             let value = env.convert_byte_array(value).unwrap();
             list.set(index as u64, value);
         }
@@ -217,11 +219,11 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeClear(
     _: JClass,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match utils::cast_object::<IndexType>(list_handle) {
-        &mut IndexType::SnapshotIndex(_) => {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        &mut IndexType::ForkIndex(ref mut list) => {
+        IndexType::ForkIndex(ref mut list) => {
             list.clear();
         }
     });
