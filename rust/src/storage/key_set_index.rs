@@ -59,9 +59,9 @@ pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
     let res = panic::catch_unwind(|| {
         let value = env.convert_byte_array(value).unwrap()[0];
         (match *utils::cast_object::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.contains(&value),
-            IndexType::ForkIndex(ref set) => set.contains(&value),
-        }) as jboolean
+             IndexType::SnapshotIndex(ref set) => set.contains(&value),
+             IndexType::ForkIndex(ref set) => set.contains(&value),
+         }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
 }
