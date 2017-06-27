@@ -19,7 +19,7 @@ enum IndexType {
 /// Returns pointer to the created `ListIndex` object.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view: jlong,
@@ -40,7 +40,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
 /// Destroys underlying `ListIndex` object and frees memory.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeFree(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -51,7 +51,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeFree(
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeGet(
     env: JNIEnv,
     _: JClass,
     index: jlong,
@@ -73,7 +73,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeGet(
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLast(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLast(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -94,7 +94,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLast(
 /// Returns `true` if the list is empty.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -111,7 +111,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
 /// Returns length of the list.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLen(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLen(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -128,7 +128,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeLen(
 /// Adds value to the list.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePush(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePush(
     env: JNIEnv,
     _: JClass,
     value: jbyteArray,
@@ -149,7 +149,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePush(
 /// Removes the last element from a list and returns it, or null pointer if it is empty.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePop(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -172,7 +172,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativePop(
 /// Shortens the list, keeping the first len elements and dropping the rest.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
     env: JNIEnv,
     _: JClass,
     len: jlong,
@@ -192,7 +192,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeSet(
     env: JNIEnv,
     _: JClass,
     index: jlong,
@@ -214,7 +214,7 @@ pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeSet(
 /// Clears the list, removing all values.
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_index_IndexList_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeClear(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
