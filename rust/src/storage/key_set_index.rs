@@ -17,7 +17,6 @@ enum IndexType {
 
 /// Returns pointer to created `KeySetIndex` object.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeCreate(
     env: JNIEnv,
     _: JClass,
@@ -38,7 +37,6 @@ pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeCreate(
 
 /// Destroys underlying `KeySetIndex` object and frees memory.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeFree(
     env: JNIEnv,
     _: JClass,
@@ -49,7 +47,6 @@ pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeFree(
 
 /// Returns `true` if the set contains the specified value.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
     env: JNIEnv,
     _: JClass,
@@ -68,7 +65,6 @@ pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
 
 /// Inserts value in the set.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeInsert(
     env: JNIEnv,
     _: JClass,
@@ -89,7 +85,6 @@ pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeInsert(
 
 /// Removes value from the set.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeRemove(
     env: JNIEnv,
     _: JClass,
@@ -110,7 +105,6 @@ pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeRemove(
 
 /// Clears the set, removing all values.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "C" fn Java_com_exonum_binding_index_KeySetIndex_nativeClear(
     env: JNIEnv,
     _: JClass,
