@@ -10,7 +10,7 @@ use utils;
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_ClassNameTODO_nativeInitLogger(
     env: JNIEnv,
-    _: JClass
+    _: JClass,
 ) {
     let res = panic::catch_unwind(|| {
         // Ignore logger initialization failure.
