@@ -8,7 +8,6 @@ use utils;
 
 /// Performs the logger initialization.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_ClassNameTODO_nativeInitLogger(
     env: JNIEnv,
     _: JClass

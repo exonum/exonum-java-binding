@@ -9,7 +9,6 @@ use super::db::View;
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
@@ -20,7 +19,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate(
 
 /// Destroys underlying `MemoryDB` object and frees memory.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeFree(
     env: JNIEnv,
     _: JClass,
@@ -31,7 +29,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupSnapshot(
     env: JNIEnv,
     _: JClass,
@@ -46,7 +43,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupS
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupFork(
     env: JNIEnv,
     _: JClass,

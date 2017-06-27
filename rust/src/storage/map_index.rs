@@ -18,7 +18,6 @@ enum IndexType {
 
 /// Returns pointer to created `MapIndex` object.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
     env: JNIEnv,
     _: JClass,
@@ -39,7 +38,6 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
 
 /// Destroys underlying `MapIndex` object and frees memory.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeFree(
     env: JNIEnv,
     _: JClass,
@@ -50,7 +48,6 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeFree(
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
     env: JNIEnv,
     _: JClass,
@@ -73,7 +70,6 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
     env: JNIEnv,
     _: JClass,
@@ -92,7 +88,6 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
 
 /// Sets `value` identified by the `key` into the index.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativePut(
     env: JNIEnv,
     _: JClass,
@@ -115,7 +110,6 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativePut(
 
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
     env: JNIEnv,
     _: JClass,
@@ -136,7 +130,6 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
 
 /// Clears the index, removing all values.
 #[no_mangle]
-#[allow(non_snake_case)]
 pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeClear(
     env: JNIEnv,
     _: JClass,
