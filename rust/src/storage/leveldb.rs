@@ -9,8 +9,7 @@ use super::db::View;
 
 /// Returns pointer to created `LevelDB` object.
 #[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
     _path: JString,
@@ -27,8 +26,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
 
 /// Destroys underlying `LevelDB` object and frees memory.
 #[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
     env: JNIEnv,
     _: JClass,
     db_handle: Handle,
@@ -38,8 +36,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapshot(
+pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapshot(
     env: JNIEnv,
     _: JClass,
     db_handle: Handle,
@@ -53,8 +50,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapsho
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-#[allow(non_snake_case)]
-pub extern "C" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork(
+pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork(
     env: JNIEnv,
     _: JClass,
     db_handle: Handle,

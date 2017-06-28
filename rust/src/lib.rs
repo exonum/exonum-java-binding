@@ -6,6 +6,8 @@
 #![deny(missing_docs)]
 // `JNIEnv` is passed by value to the extern functions.
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
+// Function names must follow Java naming for the native functions.
+#![allow(non_snake_case)]
 
 #[macro_use]
 extern crate log;

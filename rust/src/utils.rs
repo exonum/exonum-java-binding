@@ -1,4 +1,5 @@
 #![cfg_attr(feature = "cargo-clippy", deny(needless_pass_by_value))]
+#![deny(non_snake_case)]
 
 use jni::JNIEnv;
 use jni::sys::{jlong, jbyteArray};
