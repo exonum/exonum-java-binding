@@ -61,7 +61,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
             IndexType::ForkIndex(ref map) => map.get(&key),
         };
         match val {
-            Some(val) => utils::convert_to_java_array(&env, &val),
+            Some(val) => env.byte_array_from_slice(&val).unwrap(),
             None => ptr::null_mut(),
         }
     });

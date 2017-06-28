@@ -20,12 +20,6 @@ pub fn cast_object<T>(object: Handle) -> &'static mut T {
     unsafe { &mut *ptr }
 }
 
-// TODO: Remove.
-pub fn convert_to_java_array(env: &JNIEnv, val: &[u8]) -> jbyteArray {
-    let val = unsafe { mem::transmute(val) };
-    env.new_byte_array(val).unwrap()
-}
-
 // Constructs `Box` from raw pointer and immediately drops it.
 pub fn drop_object<T>(env: &JNIEnv, handle: Handle) {
     let res = panic::catch_unwind(|| unsafe {
