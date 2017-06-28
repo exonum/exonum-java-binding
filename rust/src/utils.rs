@@ -2,10 +2,9 @@
 #![deny(non_snake_case)]
 
 use jni::JNIEnv;
-use jni::sys::{jlong, jbyteArray};
+use jni::sys::jlong;
 
 use std::panic;
-use std::mem;
 use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
