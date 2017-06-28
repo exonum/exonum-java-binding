@@ -4,6 +4,7 @@ mod leveldb;
 mod map_index;
 mod list_index;
 mod key_set_index;
+mod value_set_index;
 
 pub use self::db::Java_com_exonum_binding_storage_connector_Views_nativeFree;
 pub use self::memorydb::{Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate,
@@ -38,3 +39,9 @@ pub use self::key_set_index::{Java_com_exonum_binding_index_KeySetIndex_nativeCr
                               Java_com_exonum_binding_index_KeySetIndex_nativeInsert,
                               Java_com_exonum_binding_index_KeySetIndex_nativeRemove,
                               Java_com_exonum_binding_index_KeySetIndex_nativeClear};
+pub use self::value_set_index::{Java_com_exonum_binding_index_ValueSetIndex_nativeCreate,
+                                Java_com_exonum_binding_index_ValueSetIndex_nativeFree,
+                                Java_com_exonum_binding_index_ValueSetIndex_nativeContains,
+                                Java_com_exonum_binding_index_ValueSetIndex_nativeInsert,
+                                Java_com_exonum_binding_index_ValueSetIndex_nativeRemove,
+                                Java_com_exonum_binding_index_ValueSetIndex_nativeClear};
