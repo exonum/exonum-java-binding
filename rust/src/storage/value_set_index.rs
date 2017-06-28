@@ -158,15 +158,3 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeClear(
     });
     utils::unwrap_exc_or_default(&env, res)
 }
-
-
-
-/*
-    pub fn contains_by_hash(&self, hash: &Hash) -> bool {
-        self.base.contains(hash)
-    }
-
-    pub fn remove_by_hash(&mut self, hash: &Hash) {
-        self.base.remove(hash)
-    }
-*/
