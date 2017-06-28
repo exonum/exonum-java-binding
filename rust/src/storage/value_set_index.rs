@@ -20,12 +20,12 @@ enum IndexType {
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view: jlong,
+    view_handle: jlong,
     prefix: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
-        Box::into_raw(Box::new(match *utils::cast_object(view) {
+        Box::into_raw(Box::new(match *utils::cast_object(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
@@ -40,9 +40,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeCreate(
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeFree(
     env: JNIEnv,
     _: JClass,
-    list_handle: Handle,
+    set_handle: Handle,
 ) {
-    utils::drop_object::<IndexType>(&env, list_handle);
+    utils::drop_object::<IndexType>(&env, set_handle);
 }
 
 /// Returns `true` if the set contains the specified value.
@@ -112,14 +112,14 @@ pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeRemove(
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeClear(
     env: JNIEnv,
     _: JClass,
-    list_handle: Handle,
+    set_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(set_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        IndexType::ForkIndex(ref mut list) => {
-            list.clear();
+        IndexType::ForkIndex(ref mut set) => {
+            set.clear();
         }
     });
     utils::unwrap_exc_or_default(&env, res)
