@@ -2,10 +2,9 @@
 #![deny(non_snake_case)]
 
 use jni::JNIEnv;
-use jni::sys::{jlong, jbyteArray};
+use jni::sys::jlong;
 
 use std::panic;
-use std::mem;
 use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
@@ -18,12 +17,6 @@ pub fn cast_object<T>(object: Handle) -> &'static mut T {
     assert_ne!(object, 0);
     let ptr = object as *mut T;
     unsafe { &mut *ptr }
-}
-
-// TODO: Remove.
-pub fn convert_to_java_array(env: &JNIEnv, val: &[u8]) -> jbyteArray {
-    let val = unsafe { mem::transmute(val) };
-    env.new_byte_array(val).unwrap()
 }
 
 // Constructs `Box` from raw pointer and immediately drops it.
