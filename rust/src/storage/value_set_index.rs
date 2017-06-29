@@ -74,9 +74,9 @@ pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeContainsByHa
     let res = panic::catch_unwind(|| {
         let hash = utils::convert_to_hash(&env, hash);
         (match *utils::cast_object::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
-            IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
-        }) as jboolean
+             IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
+             IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
+         }) as jboolean
     });
     utils::unwrap_exc_or_default(&env, res)
 }

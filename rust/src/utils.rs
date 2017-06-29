@@ -9,7 +9,7 @@ use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
 
-use exonum::crypto::{Hash};
+use exonum::crypto::Hash;
 
 // Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
