@@ -128,10 +128,12 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIter(
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(match *utils::cast_object::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.iter(),
-            IndexType::ForkIndex(ref list) => list.iter(),
-        })) as Handle
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter(),
+                IndexType::ForkIndex(ref list) => list.iter(),
+            },
+        )) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -145,10 +147,12 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterFrom(
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(match *utils::cast_object::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
-            IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
-        })) as Handle
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
+                IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
+            },
+        )) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }
