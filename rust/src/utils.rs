@@ -15,7 +15,7 @@ use exonum::crypto::{Hash};
 pub type Handle = jlong;
 
 pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> Hash {
-    // TODO: Optimize coping and allocations.
+    // TODO: Optimize copying and allocations.
     let bytes = env.convert_byte_array(array).unwrap();
     Hash::from_slice(&bytes).unwrap()
 }
