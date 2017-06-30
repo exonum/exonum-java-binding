@@ -9,7 +9,7 @@ import com.exonum.binding.storage.db.Database;
 import com.exonum.binding.storage.db.MemoryDb;
 import org.junit.Test;
 
-public class MapIntegrationTest {
+public class MapIndexIntegrationTest {
 
   static {
     // To have library `libjava_bindings` available by name,
