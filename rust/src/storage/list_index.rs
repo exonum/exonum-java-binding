@@ -6,6 +6,7 @@ use std::panic;
 use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, ListIndex};
+use exonum::storage::list_index::ListIndexIter;
 use utils::{self, Handle};
 use super::db::{View, Value};
 
@@ -119,6 +120,43 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLen(
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns pointer to the iterator over list.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIter(
+    env: JNIEnv,
+    _: JClass,
+    list_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter(),
+                IndexType::ForkIndex(ref list) => list.iter(),
+            },
+        )) as Handle
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns pointer to the iterator over list starting at given index.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterFrom(
+    env: JNIEnv,
+    _: JClass,
+    index_from: jlong,
+    list_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
+                IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
+            },
+        )) as Handle
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Adds value to the list.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePush(
@@ -217,4 +255,22 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeClear(
         }
     });
     utils::unwrap_exc_or_default(&env, res)
+}
+
+// TODO: Probably this functions should belong to some other class instead of IndexList.
+/// Return next value from the iterator. Returns null pointer when iteration is finished.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterNext(
+    env: JNIEnv,
+    _: JClass,
+    iter_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let mut iter = utils::cast_object::<ListIndexIter<Value>>(iter_handle);
+        match iter.next() {
+            Some(val) => env.byte_array_from_slice(&val).unwrap(),
+            None => ptr::null_mut(),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

@@ -63,7 +63,23 @@ pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeContains(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-// TODO: `contains_by_hash`.
+/// Returns `true` if the set contains value with the specified hash.
+#[no_mangle]
+pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeContainsByHash(
+    env: JNIEnv,
+    _: JClass,
+    hash: jbyteArray,
+    set_handle: Handle,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let hash = utils::convert_to_hash(&env, hash);
+        (match *utils::cast_object::<IndexType>(set_handle) {
+             IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
+             IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
+         }) as jboolean
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
 
 /// Inserts value to the set.
 #[no_mangle]
@@ -105,7 +121,25 @@ pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeRemove(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-// TODO: remove_by_hash
+/// Removes value with given hash from the set.
+#[no_mangle]
+pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeRemoveByHash(
+    env: JNIEnv,
+    _: JClass,
+    hash: jbyteArray,
+    set_handle: Handle,
+) {
+    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(set_handle) {
+        IndexType::SnapshotIndex(_) => {
+            panic!("Unable to modify snapshot.");
+        }
+        IndexType::ForkIndex(ref mut set) => {
+            let hash = utils::convert_to_hash(&env, hash);
+            set.remove_by_hash(&hash);
+        }
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
 
 /// Clears the set, removing all values.
 #[no_mangle]
