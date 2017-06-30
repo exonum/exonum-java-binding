@@ -2,15 +2,23 @@
 #![deny(non_snake_case)]
 
 use jni::JNIEnv;
-use jni::sys::jlong;
+use jni::sys::{jlong, jbyteArray};
 
 use std::panic;
 use std::any::Any;
 use std::thread::Result;
 use std::error::Error;
 
+use exonum::crypto::Hash;
+
 // Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
+
+pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> Hash {
+    // TODO: Optimize copying and allocations.
+    let bytes = env.convert_byte_array(array).unwrap();
+    Hash::from_slice(&bytes).unwrap()
+}
 
 // Panics if object is equal to zero.
 pub fn cast_object<T>(object: Handle) -> &'static mut T {

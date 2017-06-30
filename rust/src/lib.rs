@@ -59,6 +59,8 @@ pub use storage::{Java_com_exonum_binding_storage_connector_Views_nativeFree,
                   Java_com_exonum_binding_index_ValueSetIndex_nativeCreate,
                   Java_com_exonum_binding_index_ValueSetIndex_nativeFree,
                   Java_com_exonum_binding_index_ValueSetIndex_nativeContains,
+                  Java_com_exonum_binding_index_ValueSetIndex_nativeContainsByHash,
                   Java_com_exonum_binding_index_ValueSetIndex_nativeInsert,
                   Java_com_exonum_binding_index_ValueSetIndex_nativeRemove,
+                  Java_com_exonum_binding_index_ValueSetIndex_nativeRemoveByHash,
                   Java_com_exonum_binding_index_ValueSetIndex_nativeClear};
