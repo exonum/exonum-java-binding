@@ -9,7 +9,7 @@ import com.exonum.binding.storage.db.Database;
 import com.exonum.binding.storage.db.MemoryDb;
 import org.junit.Test;
 
-public class IndexMapIntegrationTest {
+public class MapIndexIntegrationTest {
 
   static {
     // To have library `libjava_bindings` available by name,
@@ -28,7 +28,7 @@ public class IndexMapIntegrationTest {
       database = new MemoryDb();
       view = database.lookupFork();
 
-      IndexMap map = new IndexMap(view, mapPrefix);
+      MapIndex map = new MapIndex(view, mapPrefix);
 
       byte[] key = new byte[] {1};
       byte[] value = new byte[] {1, 2, 3, 4};
@@ -56,7 +56,7 @@ public class IndexMapIntegrationTest {
       view = database.lookupFork();
 
       byte[] mapPrefix = new byte[] {'p'};
-      IndexMap map = new IndexMap(view, mapPrefix);
+      MapIndex map = new MapIndex(view, mapPrefix);
 
       byte[] key = new byte[] {1};
       byte[] value = map.get(key);

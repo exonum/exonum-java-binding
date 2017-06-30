@@ -2,11 +2,11 @@ package com.exonum.binding.index;
 
 import com.exonum.binding.storage.connector.Connect;
 
-public class IndexMap {
+public class MapIndex {
   private final Connect dbConnect;
   private long nativeIndexMap;
 
-  public IndexMap(Connect connect, byte[] prefix) {
+  public MapIndex(Connect connect, byte[] prefix) {
     this.dbConnect = connect;
     this.nativeIndexMap = nativeCreate(connect.getNativeHandle(), prefix);
   }

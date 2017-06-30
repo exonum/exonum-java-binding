@@ -18,7 +18,7 @@ enum IndexType {
 
 /// Returns pointer to created `MapIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view_handle: Handle,
@@ -38,7 +38,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeCreate(
 
 /// Destroys underlying `MapIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeFree(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
@@ -48,7 +48,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeFree(
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeGet(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -70,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeGet(
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeContains(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -88,7 +88,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeContains(
 
 /// Sets `value` identified by the `key` into the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativePut(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativePut(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -110,7 +110,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativePut(
 
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeDelete(
     env: JNIEnv,
     _: JClass,
     key: jbyteArray,
@@ -130,7 +130,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeDelete(
 
 /// Clears the index, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexMap_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeClear(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
