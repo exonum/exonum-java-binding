@@ -28,7 +28,7 @@ public class MapIntegrationTest {
       database = new MemoryDb();
       view = database.lookupFork();
 
-      Map map = new Map(view, mapPrefix);
+      MapIndex map = new MapIndex(view, mapPrefix);
 
       byte[] key = new byte[] {1};
       byte[] value = new byte[] {1, 2, 3, 4};
@@ -56,7 +56,7 @@ public class MapIntegrationTest {
       view = database.lookupFork();
 
       byte[] mapPrefix = new byte[] {'p'};
-      Map map = new Map(view, mapPrefix);
+      MapIndex map = new MapIndex(view, mapPrefix);
 
       byte[] key = new byte[] {1};
       byte[] value = map.get(key);
