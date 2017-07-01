@@ -63,6 +63,44 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns pointer to the iterator over set.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIter(
+    env: JNIEnv,
+    _: JClass,
+    set_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter(),
+                IndexType::ForkIndex(ref set) => set.iter(),
+            },
+        )) as Handle
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns pointer to the iterator over set starting at the given key.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFrom(
+    env: JNIEnv,
+    _: JClass,
+    from: jbyteArray,
+    set_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let from = env.convert_byte_array(from).unwrap()[0];
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter_from(from),
+                IndexType::ForkIndex(ref set) => set.iter_from(from),
+            },
+        )) as Handle
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Inserts value in the set.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeInsert(
@@ -119,4 +157,31 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeClear(
         }
     });
     utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Return next value from the iterator. Returns null pointer when iteration is finished.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterNext(
+    env: JNIEnv,
+    _: JClass,
+    iter_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let mut iter = utils::cast_object::<KeySetIndexIter<Value>>(iter_handle);
+        match iter.next() {
+            Some(val) => env.byte_array_from_slice(&val).unwrap(),
+            None => ptr::null_mut(),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Destroys underlying `KeySetIndex` iterator object and frees memory.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFree(
+    env: JNIEnv,
+    _: JClass,
+    iter_handle: Handle,
+) {
+    utils::drop_object::<KeySetIndexIter<Value>>(&env, iter_handle);
 }
