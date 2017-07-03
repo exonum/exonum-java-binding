@@ -20,6 +20,10 @@ pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> Hash {
     Hash::from_slice(&bytes).unwrap()
 }
 
+pub fn hash_to_array(env: &JNIEnv, hash: &Hash) -> jbyteArray {
+    env.byte_array_from_slice(hash.as_ref()).unwrap()
+}
+
 // Panics if object is equal to zero.
 pub fn cast_object<T>(object: Handle) -> &'static mut T {
     assert_ne!(object, 0);

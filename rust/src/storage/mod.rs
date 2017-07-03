@@ -1,6 +1,7 @@
 mod db;
 mod memorydb;
 mod leveldb;
+mod entry;
 mod map_index;
 mod list_index;
 mod key_set_index;
@@ -15,6 +16,13 @@ pub use self::leveldb::{Java_com_exonum_binding_storage_db_LevelDb_nativeCreate,
                         Java_com_exonum_binding_storage_db_LevelDb_nativeFree,
                         Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapshot,
                         Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork};
+pub use self::entry::{Java_com_exonum_binding_index_Entry_nativeCreate,
+                      Java_com_exonum_binding_index_Entry_nativeFree,
+                      Java_com_exonum_binding_index_Entry_nativeGet,
+                      Java_com_exonum_binding_index_Entry_nativeExists,
+                      Java_com_exonum_binding_index_Entry_nativeHash,
+                      Java_com_exonum_binding_index_Entry_nativeSet,
+                      Java_com_exonum_binding_index_Entry_nativeRemove};
 pub use self::map_index::{Java_com_exonum_binding_index_MapIndex_nativeCreate,
                           Java_com_exonum_binding_index_MapIndex_nativeFree,
                           Java_com_exonum_binding_index_MapIndex_nativeGet,
