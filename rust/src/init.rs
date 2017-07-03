@@ -18,5 +18,3 @@ pub extern "system" fn Java_com_exonum_binding_ClassNameTODO_nativeInitLogger(
     });
     utils::unwrap_exc_or_default(&env, res);
 }
-
-// TODO: exonum::crypto::init()?
