@@ -12,30 +12,15 @@ public class MapIndex {
   }
 
   public void put(byte[] key, byte[] value) {
-    dbConnect.lockWrite();
-    try {
-      nativePut(key, value, nativeIndexMap);
-    } finally {
-      dbConnect.unlockWrite();
-    }
+    nativePut(key, value, nativeIndexMap);
   }
 
   public byte[] get(byte[] key) {
-    dbConnect.lockRead();
-    try {
-      return nativeGet(key, nativeIndexMap);
-    } finally {
-      dbConnect.unlockRead();
-    }
+    return nativeGet(key, nativeIndexMap);
   }
 
   public void delete(byte[] key) {
-    dbConnect.lockWrite();
-    try {
-      nativeDelete(key, nativeIndexMap);
-    } finally {
-      dbConnect.unlockWrite();
-    }
+    nativeDelete(key, nativeIndexMap);
   }
 
   private native long nativeCreate(long viewNativeHandle, byte[] prefix);
