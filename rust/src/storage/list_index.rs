@@ -275,7 +275,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterNext(
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `IntexList` iterator object and frees memory.
+/// Destroys underlying `IndexList` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterFree(
     env: JNIEnv,
