@@ -43,13 +43,18 @@ pub use self::list_index::{Java_com_exonum_binding_index_IndexList_nativeCreate,
                            Java_com_exonum_binding_index_IndexList_nativeTruncate,
                            Java_com_exonum_binding_index_IndexList_nativeSet,
                            Java_com_exonum_binding_index_IndexList_nativeClear,
-                           Java_com_exonum_binding_index_IndexList_nativeIterNext};
+                           Java_com_exonum_binding_index_IndexList_nativeIterNext,
+                           Java_com_exonum_binding_index_IndexList_nativeIterFree};
 pub use self::key_set_index::{Java_com_exonum_binding_index_KeySetIndex_nativeCreate,
                               Java_com_exonum_binding_index_KeySetIndex_nativeFree,
                               Java_com_exonum_binding_index_KeySetIndex_nativeContains,
+                              Java_com_exonum_binding_index_KeySetIndex_nativeIter,
+                              Java_com_exonum_binding_index_KeySetIndex_nativeIterFrom,
                               Java_com_exonum_binding_index_KeySetIndex_nativeInsert,
                               Java_com_exonum_binding_index_KeySetIndex_nativeRemove,
-                              Java_com_exonum_binding_index_KeySetIndex_nativeClear};
+                              Java_com_exonum_binding_index_KeySetIndex_nativeClear,
+                              Java_com_exonum_binding_index_KeySetIndex_nativeIterNext,
+                              Java_com_exonum_binding_index_KeySetIndex_nativeIterFree};
 pub use self::value_set_index::{Java_com_exonum_binding_index_ValueSetIndex_nativeCreate,
                                 Java_com_exonum_binding_index_ValueSetIndex_nativeFree,
                                 Java_com_exonum_binding_index_ValueSetIndex_nativeContains,
