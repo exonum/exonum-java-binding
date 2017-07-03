@@ -56,7 +56,7 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
     set_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let value = env.convert_byte_array(value).unwrap()[0];
+        let value = env.convert_byte_array(value).unwrap();
         (match *utils::cast_object::<IndexType>(set_handle) {
              IndexType::SnapshotIndex(ref set) => set.contains(&value),
              IndexType::ForkIndex(ref set) => set.contains(&value),
@@ -92,7 +92,7 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFrom(
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let from = env.convert_byte_array(from).unwrap()[0];
+        let from = env.convert_byte_array(from).unwrap();
         Box::into_raw(Box::new(
             match *utils::cast_object::<IndexType>(set_handle) {
                 IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
@@ -116,7 +116,7 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeInsert(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value).unwrap()[0];
+            let value = env.convert_byte_array(value).unwrap();
             set.insert(value);
         }
     });
@@ -136,7 +136,7 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeRemove(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value).unwrap()[0];
+            let value = env.convert_byte_array(value).unwrap();
             set.remove(&value);
         }
     });
@@ -171,7 +171,7 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterNext(
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_object::<KeySetIndexIter<Key>>(iter_handle);
         match iter.next() {
-            Some(val) => env.byte_array_from_slice(&[val]).unwrap(),
+            Some(val) => env.byte_array_from_slice(&val).unwrap(),
             None => ptr::null_mut(),
         }
     });

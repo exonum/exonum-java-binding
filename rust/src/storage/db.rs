@@ -4,8 +4,7 @@ use jni::objects::JClass;
 use exonum::storage::{Snapshot, Fork};
 use utils::{self, Handle};
 
-// TODO: Temporary solution, should be replaced by the same typedef as `Value`.
-pub(crate) type Key = u8;
+pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
 
 // Raw pointer to the `View` is returned to the java side, so in rust functions that take back

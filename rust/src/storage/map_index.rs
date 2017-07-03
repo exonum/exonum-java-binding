@@ -55,7 +55,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeGet(
     map_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let key = env.convert_byte_array(key).unwrap()[0];
+        let key = env.convert_byte_array(key).unwrap();
         let val = match *utils::cast_object::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.get(&key),
             IndexType::ForkIndex(ref map) => map.get(&key),
@@ -77,7 +77,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeContains(
     map_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let key = env.convert_byte_array(key).unwrap()[0];
+        let key = env.convert_byte_array(key).unwrap();
         (match *utils::cast_object::<IndexType>(map_handle) {
              IndexType::SnapshotIndex(ref map) => map.contains(&key),
              IndexType::ForkIndex(ref map) => map.contains(&key),
@@ -100,7 +100,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativePut(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut map) => {
-            let key = env.convert_byte_array(key).unwrap()[0];
+            let key = env.convert_byte_array(key).unwrap();
             let value = env.convert_byte_array(value).unwrap();
             map.put(&key, value);
         }
@@ -121,7 +121,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeDelete(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut map) => {
-            let key = env.convert_byte_array(key).unwrap()[0];
+            let key = env.convert_byte_array(key).unwrap();
             map.remove(&key);
         }
     });
