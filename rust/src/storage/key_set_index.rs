@@ -3,8 +3,10 @@ use jni::objects::JClass;
 use jni::sys::{jboolean, jbyteArray};
 
 use std::panic;
+use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, KeySetIndex};
+use exonum::storage::key_set_index::KeySetIndexIter;
 use utils::{self, Handle};
 use super::db::{View, Key};
 
@@ -93,8 +95,8 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFrom(
         let from = env.convert_byte_array(from).unwrap()[0];
         Box::into_raw(Box::new(
             match *utils::cast_object::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter_from(from),
-                IndexType::ForkIndex(ref set) => set.iter_from(from),
+                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
+                IndexType::ForkIndex(ref set) => set.iter_from(&from),
             },
         )) as Handle
     });
@@ -167,9 +169,9 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterNext(
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_object::<KeySetIndexIter<Value>>(iter_handle);
+        let mut iter = utils::cast_object::<KeySetIndexIter<Key>>(iter_handle);
         match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
+            Some(val) => env.byte_array_from_slice(&[val]).unwrap(),
             None => ptr::null_mut(),
         }
     });
@@ -183,5 +185,5 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFree(
     _: JClass,
     iter_handle: Handle,
 ) {
-    utils::drop_object::<KeySetIndexIter<Value>>(&env, iter_handle);
+    utils::drop_object::<KeySetIndexIter<Key>>(&env, iter_handle);
 }
