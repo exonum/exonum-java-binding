@@ -19,7 +19,7 @@ enum IndexType {
 
 /// Returns pointer to the created `ListIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view: jlong,
@@ -39,7 +39,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeCreate(
 
 /// Destroys underlying `ListIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeFree(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -49,7 +49,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeFree(
 
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeGet(
     env: JNIEnv,
     _: JClass,
     index: jlong,
@@ -70,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeGet(
 
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLast(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLast(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -90,7 +90,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLast(
 
 /// Returns `true` if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIsEmpty(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -106,7 +106,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIsEmpty(
 
 /// Returns length of the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLen(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLen(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -122,7 +122,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeLen(
 
 /// Returns pointer to the iterator over list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIter(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIter(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -140,7 +140,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIter(
 
 /// Returns pointer to the iterator over list starting at given index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterFrom(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFrom(
     env: JNIEnv,
     _: JClass,
     index_from: jlong,
@@ -159,7 +159,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterFrom(
 
 /// Adds value to the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePush(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePush(
     env: JNIEnv,
     _: JClass,
     value: jbyteArray,
@@ -179,7 +179,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePush(
 
 /// Removes the last element from a list and returns it, or null pointer if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePop(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePop(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -201,7 +201,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativePop(
 
 /// Shortens the list, keeping the first len elements and dropping the rest.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeTruncate(
     env: JNIEnv,
     _: JClass,
     len: jlong,
@@ -220,7 +220,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeTruncate(
 
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeSet(
     env: JNIEnv,
     _: JClass,
     index: jlong,
@@ -241,7 +241,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeSet(
 
 /// Clears the list, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeClear(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -260,7 +260,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeClear(
 // TODO: Probably this functions should belong to some other class instead of IndexList.
 /// Return next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterNext(
     env: JNIEnv,
     _: JClass,
     iter_handle: Handle,
@@ -277,7 +277,7 @@ pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterNext(
 
 /// Destroys underlying `IndexList` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_IndexList_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFree(
     env: JNIEnv,
     _: JClass,
     iter_handle: Handle,
