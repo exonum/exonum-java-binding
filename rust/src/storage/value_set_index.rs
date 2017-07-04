@@ -216,7 +216,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashNex
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `IndexList` iterator object and frees memory.
+/// Destroys underlying `ValueSetIndex` hash-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashFree(
     env: JNIEnv,
