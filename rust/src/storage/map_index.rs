@@ -17,7 +17,7 @@ enum IndexType {
     ForkIndex(Index<&'static mut Fork>),
 }
 
-/// Returns pointer to created `MapIndex` object.
+/// Returns a pointer to created `MapIndex` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeCreate(
     env: JNIEnv,
@@ -87,7 +87,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeContains(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns pointer to the iterator over map keys.
+/// Returns a pointer to the iterator over map keys.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeKeys(
     env: JNIEnv,
@@ -105,7 +105,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeKeys(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns pointer to the iterator over map values.
+/// Returns a pointer to the iterator over map values.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeValues(
     env: JNIEnv,
@@ -123,7 +123,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeValues(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns pointer to the iterator over map keys starting at the given key.
+/// Returns a pointer to the iterator over map keys starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeKeysFrom(
     env: JNIEnv,
@@ -143,7 +143,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeKeysFrom(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns pointer to the iterator over map values starting at the given key.
+/// Returns a pointer to the iterator over map values starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeValuesFrom(
     env: JNIEnv,
@@ -223,7 +223,7 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeClear(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Return next value from the keys-iterator. Returns null pointer when iteration is finished.
+/// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeKeysNext(
     env: JNIEnv,
