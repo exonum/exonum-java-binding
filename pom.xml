@@ -20,6 +20,8 @@
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecks>MissingOverride,DeadException</java.compiler.errorprone.patchChecks>
+    <!-- Enables Java assertions, used in unit and integration tests -->
+    <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <build.nativeLibPath>rust/target/debug</build.nativeLibPath>
     <checkstyle.configLocation>checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
@@ -156,6 +158,7 @@
           <excludes>
             <exclude>**/*IntegrationTest.java</exclude>
           </excludes>
+          <argLine>${java.vm.assertionFlag}</argLine>
         </configuration>
       </plugin>
       <plugin>
@@ -166,7 +169,7 @@
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
-          <argLine>-Djava.library.path=${build.nativeLibPath} -Xcheck:jni</argLine>
+          <argLine>-Djava.library.path=${build.nativeLibPath} -Xcheck:jni ${java.vm.assertionFlag}</argLine>
         </configuration>
         <executions>
           <execution>

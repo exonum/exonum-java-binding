@@ -198,7 +198,8 @@
             <property name="allowMissingThrowsTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
             <property name="minLineCount" value="2"/>
-            <property name="allowedAnnotations" value="Override, Test, ImproveDocs"/>
+            <!-- todo: file a bug report so that it supports FQN -->
+            <property name="allowedAnnotations" value="Override, Test, ImproveDocs, After, Before"/>
             <property name="allowThrowsTagsForSubclasses" value="true"/>
         </module>
         <module name="MethodName">
