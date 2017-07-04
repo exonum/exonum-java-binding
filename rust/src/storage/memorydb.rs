@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::JClass;
+use jni::objects::{JClass, JObject};
 
 use std::panic;
 
@@ -9,7 +9,7 @@ use super::db::View;
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
 ) -> Handle {
@@ -19,9 +19,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeCreate(
 
 /// Destroys underlying `MemoryDB` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     db_handle: Handle,
 ) {
     utils::drop_object::<MemoryDB>(&env, db_handle);
@@ -29,9 +29,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupSnapshot(
+pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeLookupSnapshot(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -43,9 +43,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupS
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_MemoryDb_nativeLookupFork(
+pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeLookupFork(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {

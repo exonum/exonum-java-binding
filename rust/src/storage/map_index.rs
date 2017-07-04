@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::JClass;
+use jni::objects::{JClass, JObject};
 use jni::sys::{jboolean, jbyteArray};
 
 use std::panic;
@@ -18,7 +18,7 @@ enum IndexType {
 
 /// Returns pointer to created `MapIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view_handle: Handle,
@@ -38,9 +38,9 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeCreate(
 
 /// Destroys underlying `MapIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     map_handle: Handle,
 ) {
     utils::drop_object::<IndexType>(&env, map_handle);
@@ -48,9 +48,9 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeFree(
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     key: jbyteArray,
     map_handle: Handle,
 ) -> jbyteArray {
@@ -70,9 +70,9 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeGet(
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContains(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     key: jbyteArray,
     map_handle: Handle,
 ) -> jboolean {
@@ -88,9 +88,9 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeContains(
 
 /// Sets `value` identified by the `key` into the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativePut(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     key: jbyteArray,
     value: jbyteArray,
     map_handle: Handle,
@@ -110,9 +110,9 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativePut(
 
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeDelete(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeRemove(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     key: jbyteArray,
     map_handle: Handle,
 ) {
@@ -130,9 +130,9 @@ pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeDelete(
 
 /// Clears the index, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_MapIndex_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeClear(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     map_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
