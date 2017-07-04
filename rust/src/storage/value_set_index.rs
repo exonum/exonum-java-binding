@@ -3,8 +3,10 @@ use jni::objects::JClass;
 use jni::sys::{jlong, jbyteArray, jboolean};
 
 use std::panic;
+use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, ValueSetIndex};
+use exonum::storage::value_set_index::ValueSetIndexHashes;
 use utils::{self, Handle};
 use super::db::{View, Value};
 
@@ -77,6 +79,44 @@ pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeContainsByHa
              IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
              IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
          }) as jboolean
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns pointer to the iterator over set that returns hashes of values.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashes(
+    env: JNIEnv,
+    _: JClass,
+    set_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.hashes(),
+                IndexType::ForkIndex(ref set) => set.hashes(),
+            },
+        )) as Handle
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns pointer to the hash-iterator over set starting from the given hash.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashesFrom(
+    env: JNIEnv,
+    _: JClass,
+    from: jbyteArray,
+    set_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let from = utils::convert_to_hash(&env, from);
+        Box::into_raw(Box::new(
+            match *utils::cast_object::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.hashes_from(&from),
+                IndexType::ForkIndex(ref set) => set.hashes_from(&from),
+            },
+        )) as Handle
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -157,4 +197,31 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeClear(
         }
     });
     utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns next value from the iterator. Returns null pointer when iteration is finished.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashNext(
+    env: JNIEnv,
+    _: JClass,
+    iter_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let mut iter = utils::cast_object::<ValueSetIndexHashes>(iter_handle);
+        match iter.next() {
+            Some(val) => utils::hash_to_array(&env, &val),
+            None => ptr::null_mut(),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Destroys underlying `ValueSetIndex` hash-iterator object and frees memory.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashFree(
+    env: JNIEnv,
+    _: JClass,
+    iter_handle: Handle,
+) {
+    utils::drop_object::<ValueSetIndexHashes>(&env, iter_handle);
 }
