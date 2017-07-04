@@ -2,7 +2,21 @@ package com.exonum.binding.proxy;
 
 import com.exonum.binding.annotations.ImproveDocs;
 
-@ImproveDocs(assignee = "Timofeev")
+/**
+ * Represents a logical connection to (or a view of) a database.
+ *
+ * <p>There are two sub-types:
+ * <ul>
+ *   <li>A snapshot, which is a read-only view.</li>
+ *   <li>A fork, which is a read-write view.</li>
+ * </ul>
+ *
+ * <p>As any native proxy, a connection must be closed.
+ */
+@ImproveDocs(
+    assignee = "dt",
+    reason = "if all connections become non-managed, consider changing the last paragraph."
+)
 public abstract class Connect extends AbstractNativeProxy {
 
   /**

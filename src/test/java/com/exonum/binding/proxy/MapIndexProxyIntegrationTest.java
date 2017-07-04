@@ -20,7 +20,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnSuccessfullyPutValue() throws Exception {
     try (Database database = new MemoryDb();
-         Connect view = database.lookupFork();
+         Connect view = database.getFork();
          MapIndexProxy map = new MapIndexProxy(view, mapPrefix)) {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{1, 2, 3, 4};
@@ -37,7 +37,7 @@ public class MapIndexProxyIntegrationTest {
   public void getShouldReturnNullIfNoSuchValueInFork() throws Exception {
     byte[] mapPrefix = new byte[] {'p'};
     try (Database database = new MemoryDb();
-         Connect view = database.lookupFork();
+         Connect view = database.getFork();
          MapIndexProxy map = new MapIndexProxy(view, mapPrefix)) {
       byte[] key = new byte[]{1};
       byte[] value = map.get(key);

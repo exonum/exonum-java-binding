@@ -1,5 +1,11 @@
 package com.exonum.binding.proxy;
 
+import com.exonum.binding.annotations.ImproveDocs;
+
+@ImproveDocs(
+    assignee = "dt",
+    reason = "consider using exonum::storage docs + java.util.Map as a reference"
+)
 public class MapIndexProxy extends AbstractNativeProxy {
   @SuppressWarnings("unused")  // will use the reference to check if it is valid.
   private final Connect dbConnect;

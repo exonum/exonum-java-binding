@@ -1,11 +1,8 @@
 package com.exonum.binding.proxy;
 
-import com.exonum.binding.annotations.ImproveDocs;
-
-@ImproveDocs(
-    assignee = "Timofeev",
-    reason = "Lacks in both general description and method documentation."
-)
+/**
+ * Represents an underlying Exonum Storage database.
+ */
 public abstract class Database extends AbstractNativeProxy {
 
   /**
@@ -16,7 +13,24 @@ public abstract class Database extends AbstractNativeProxy {
     super(nativeHandle, owningHandle);
   }
 
-  public abstract Snapshot lookupSnapshot();
+  /**
+   * Creates a new snapshot of the database state.
+   *
+   * <p>A caller is responsible to close the snapshot (see {@link Connect#close()}).
+   *
+   *  @return a new snapshot of the database state.
+   */
+  public abstract Snapshot getSnapshot();
 
-  public abstract Fork lookupFork();
+  /**
+   * Creates a new database fork.
+   *
+   * <p>A fork allows to perform a transaction: a number of independent writes to a database,
+   * which then may be <em>atomically</em> applied to the database.
+   *
+   * <p>A caller is responsible to close the fork (see {@link Connect#close()}).
+   *
+   * @return a new database fork.
+   */
+  public abstract Fork getFork();
 }

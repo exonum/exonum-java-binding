@@ -7,12 +7,12 @@ public class LevelDb extends Database {
   }
 
   @Override
-  public Snapshot lookupSnapshot() {
+  public Snapshot getSnapshot() {
     return new Snapshot(nativeLookupSnapshot(this.nativeHandle));
   }
 
   @Override
-  public Fork lookupFork() {
+  public Fork getFork() {
     return new Fork(nativeLookupFork(this.nativeHandle));
   }
 

@@ -7,12 +7,12 @@ public class MemoryDb extends Database {
   }
 
   @Override
-  public Snapshot lookupSnapshot() {
+  public Snapshot getSnapshot() {
     return new Snapshot(nativeLookupSnapshot(nativeHandle));
   }
 
   @Override
-  public Fork lookupFork() {
+  public Fork getFork() {
     return new Fork(nativeLookupFork(nativeHandle));
   }
 
