@@ -1,5 +1,11 @@
 package com.exonum.binding.proxy;
 
+import com.exonum.binding.annotations.ImproveDocs;
+
+@ImproveDocs(
+    assignee = "Timofeev",
+    reason = "Lacks in both general description and method documentation."
+)
 public abstract class Database extends AbstractNativeProxy {
 
   /**

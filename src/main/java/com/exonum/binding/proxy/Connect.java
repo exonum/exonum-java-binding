@@ -1,5 +1,8 @@
 package com.exonum.binding.proxy;
 
+import com.exonum.binding.annotations.ImproveDocs;
+
+@ImproveDocs(assignee = "Timofeev")
 public abstract class Connect extends AbstractNativeProxy {
 
   /**
