@@ -41,10 +41,24 @@ public class MapIndexProxyIntegrationTest {
   // TODO(dt): test evil connect: fail gracefully on use-after-free.
 
   @Test
-  public void getShouldReturnSuccessfullyPutValue() throws Exception {
+  public void getShouldReturnSuccessfullyPutValueSingletonKey() throws Exception {
     testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{1, 2, 3, 4};
+
+      map.put(key, value);
+
+      byte[] storedValue = map.get(key);
+
+      assertThat(storedValue, equalTo(value));
+    });
+  }
+
+  @Test
+  public void getShouldReturnSuccessfullyPutValueThreeByteKey() throws Exception {
+    testWithConnect(database::createFork, (map) -> {
+      byte[] key = new byte[]{'k', 'e', 'y'};
+      byte[] value = new byte[]{'v'};
 
       map.put(key, value);
 
