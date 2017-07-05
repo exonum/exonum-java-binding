@@ -258,7 +258,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeClear(
 }
 
 // TODO: Probably this functions should belong to some other class instead of IndexList.
-/// Return next value from the iterator. Returns null pointer when iteration is finished.
+/// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterNext(
     env: JNIEnv,
