@@ -7,13 +7,13 @@ public class MemoryDb extends Database {
   }
 
   @Override
-  public Snapshot getSnapshot() {
-    return new Snapshot(nativeLookupSnapshot(nativeHandle));
+  public Snapshot createSnapshot() {
+    return new Snapshot(nativeCreateSnapshot(nativeHandle));
   }
 
   @Override
-  public Fork getFork() {
-    return new Fork(nativeLookupFork(nativeHandle));
+  public Fork createFork() {
+    return new Fork(nativeCreateFork(nativeHandle));
   }
 
   @Override
@@ -23,9 +23,9 @@ public class MemoryDb extends Database {
 
   private static native long nativeCreate();
 
-  private native long nativeLookupSnapshot(long nativeDb);
+  private native long nativeCreateSnapshot(long nativeDb);
 
-  private native long nativeLookupFork(long nativeDb);
+  private native long nativeCreateFork(long nativeDb);
 
   private native void nativeFree(long nativeDb);
 }

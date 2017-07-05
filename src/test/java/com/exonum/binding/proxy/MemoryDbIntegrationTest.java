@@ -23,7 +23,7 @@ public class MemoryDbIntegrationTest {
   @Test
   public void getSnapshotShallCreateNonNullSnapshot() throws Exception {
     try (MemoryDb database = new MemoryDb();
-         Snapshot snapshot = database.getSnapshot()) {
+         Snapshot snapshot = database.createSnapshot()) {
       assertNotNull(snapshot);
     }
   }
@@ -31,7 +31,7 @@ public class MemoryDbIntegrationTest {
   @Test
   public void getForkShallCreateNonNullFork() throws Exception {
     try (MemoryDb database = new MemoryDb();
-         Fork fork = database.getFork()) {
+         Fork fork = database.createFork()) {
       assertNotNull(fork);
     }
   }

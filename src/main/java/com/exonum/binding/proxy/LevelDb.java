@@ -7,13 +7,13 @@ public class LevelDb extends Database {
   }
 
   @Override
-  public Snapshot getSnapshot() {
-    return new Snapshot(nativeLookupSnapshot(this.nativeHandle));
+  public Snapshot createSnapshot() {
+    return new Snapshot(nativeCreateSnapshot(this.nativeHandle));
   }
 
   @Override
-  public Fork getFork() {
-    return new Fork(nativeLookupFork(this.nativeHandle));
+  public Fork createFork() {
+    return new Fork(nativeCreateFork(this.nativeHandle));
   }
 
   @Override
@@ -23,9 +23,9 @@ public class LevelDb extends Database {
 
   private static native long nativeCreate(String path);
 
-  private native long nativeLookupSnapshot(long nativeHandle);
+  private native long nativeCreateSnapshot(long nativeHandle);
 
-  private native long nativeLookupFork(long nativeHandle);
+  private native long nativeCreateFork(long nativeHandle);
 
   private native void nativeFree(long nativeHandle);
 }

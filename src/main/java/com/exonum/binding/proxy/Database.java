@@ -20,7 +20,7 @@ public abstract class Database extends AbstractNativeProxy {
    *
    *  @return a new snapshot of the database state.
    */
-  public abstract Snapshot getSnapshot();
+  public abstract Snapshot createSnapshot();
 
   /**
    * Creates a new database fork.
@@ -32,5 +32,5 @@ public abstract class Database extends AbstractNativeProxy {
    *
    * @return a new database fork.
    */
-  public abstract Fork getFork();
+  public abstract Fork createFork();
 }

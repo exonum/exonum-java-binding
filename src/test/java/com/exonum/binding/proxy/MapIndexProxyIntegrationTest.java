@@ -42,7 +42,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void getShouldReturnSuccessfullyPutValue() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{1, 2, 3, 4};
 
@@ -56,7 +56,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void putShouldOverwritePreviousValue() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] v1 = new byte[]{'v', '1'};
       byte[] v2 = new byte[]{'v', '2'};
@@ -72,7 +72,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void getShouldReturnSuccessfullyPutEmptyValue() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{};
 
@@ -86,7 +86,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void getShouldReturnSuccessfullyPutValueByEmptyKey() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{};
       byte[] value = new byte[]{2};
 
@@ -100,7 +100,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test(expected = RuntimeException.class)
   public void putShouldFailWithSnapshot() throws Exception {
-    testWithConnect(database::getSnapshot, (map) -> {
+    testWithConnect(database::createSnapshot, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{2};
 
@@ -110,7 +110,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void getShouldReturnNullIfNoSuchValueInFork() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = map.get(key);
 
@@ -120,7 +120,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void getShouldReturnNullIfNoSuchValueInEmptySnapshot() throws Exception {
-    testWithConnect(database::getSnapshot, (map) -> {
+    testWithConnect(database::createSnapshot, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = map.get(key);
 
@@ -130,7 +130,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void removeSuccessfullyPutValue() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{1, 2, 3, 4};
 
@@ -144,17 +144,17 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void clearEmptyFork() throws Exception {
-    testWithConnect(database::getFork, MapIndexProxy::clear);  // no-op
+    testWithConnect(database::createFork, MapIndexProxy::clear);  // no-op
   }
 
   @Test(expected = RuntimeException.class)
   public void clearSnapshotMustFail() throws Exception {
-    testWithConnect(database::getSnapshot, MapIndexProxy::clear);  // boom
+    testWithConnect(database::createSnapshot, MapIndexProxy::clear);  // boom
   }
 
   @Test
   public void clearSingleItemFork() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
       byte[] value = new byte[]{1, 2, 3, 4};
 
@@ -168,7 +168,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void clearSingleItemByEmptyKey() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte[] key = new byte[]{};
       byte[] value = new byte[]{1, 2, 3, 4};
 
@@ -182,7 +182,7 @@ public class MapIndexProxyIntegrationTest {
 
   @Test
   public void clearMultipleItemFork() throws Exception {
-    testWithConnect(database::getFork, (map) -> {
+    testWithConnect(database::createFork, (map) -> {
       byte numOfEntries = 5;
       List<Entry> entries = createMapEntries(numOfEntries);
 

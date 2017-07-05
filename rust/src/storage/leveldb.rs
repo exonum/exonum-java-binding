@@ -36,7 +36,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeLookupSnapshot(
+pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateSnapshot(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -50,7 +50,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeLookupSnapsho
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeLookupFork(
+pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateFork(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,

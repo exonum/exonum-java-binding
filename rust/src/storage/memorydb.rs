@@ -29,7 +29,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeLookupSnapshot(
+pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateSnapshot(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -43,7 +43,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeLookupSnapsh
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeLookupFork(
+pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateFork(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
