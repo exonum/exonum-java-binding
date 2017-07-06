@@ -30,7 +30,8 @@ import java.lang.annotation.Target;
     ElementType.ANNOTATION_TYPE,
     ElementType.TYPE,
     ElementType.FIELD,
-    ElementType.METHOD
+    ElementType.METHOD,
+    ElementType.CONSTRUCTOR,
 })
 public @interface ImproveDocs {
   /**

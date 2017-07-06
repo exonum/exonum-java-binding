@@ -38,7 +38,19 @@ public class MapIndexProxyIntegrationTest {
     }
   }
 
-  // TODO(dt): test evil connect: fail gracefully on use-after-free.
+  /**
+   * This test verifies that if a client destroys native objects through their proxies
+   * in the wrong order, he will get a runtime exception before a (possible) JVM crash.
+   */
+  @Test(expected = IllegalStateException.class)
+  public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
+    Snapshot view = database.createSnapshot();
+    MapIndexProxy map = new MapIndexProxy(view, mapPrefix);
+
+    // Destroy a view before the map.
+    view.close();
+    map.close();
+  }
 
   @Test
   public void getShouldReturnSuccessfullyPutValueSingletonKey() throws Exception {
