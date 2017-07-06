@@ -35,6 +35,6 @@ pub fn check_handle<T: 'static>(handle: Handle) {
                 handle
             );
         }
-        None => panic!("Invalid handle value: '{}'", handle),
+        None => panic!("Invalid handle value: '{:X}'", handle),
     }
 }
