@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JClass, JString};
+use jni::objects::{JClass, JObject, JString};
 
 use std::panic;
 
@@ -9,7 +9,7 @@ use super::db::View;
 
 /// Returns pointer to created `LevelDB` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
     _path: JString,
@@ -26,9 +26,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeCreate(
 
 /// Destroys underlying `LevelDB` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     db_handle: Handle,
 ) {
     utils::drop_object::<LevelDB>(&env, db_handle);
@@ -36,9 +36,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSnapshot(
+pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateSnapshot(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -50,9 +50,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupSn
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_db_LevelDb_nativeLookupFork(
+pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateFork(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
