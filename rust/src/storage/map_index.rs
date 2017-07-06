@@ -89,9 +89,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContain
 
 /// Returns a pointer to the iterator over map keys.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeys(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateKeysIter(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -107,9 +107,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeys(
 
 /// Returns a pointer to the iterator over map values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValues(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateValuesIter(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -225,9 +225,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeClear(
 
 /// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysIterNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -242,9 +242,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysNex
 
 /// Destroys underlying `MapIndex` keys-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
     utils::drop_object::<MapIndexKeys<Key>>(&env, iter_handle);
@@ -252,9 +252,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFre
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesIterNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -269,9 +269,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesN
 
 /// Destroys underlying `MapIndex` values-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
     utils::drop_object::<MapIndexValues<Value>>(&env, iter_handle);

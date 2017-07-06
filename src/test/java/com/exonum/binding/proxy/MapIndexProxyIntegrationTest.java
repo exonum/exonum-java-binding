@@ -2,8 +2,10 @@ package com.exonum.binding.proxy;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import com.exonum.binding.storage.RustIterAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -169,6 +171,68 @@ public class MapIndexProxyIntegrationTest {
   }
 
   @Test
+  public void keysShouldReturnEmptyIterIfNoEntries() throws Exception {
+    runTestWithView(database::createSnapshot, (map) -> {
+      try (RustIter<byte[]> iter = map.keys()) {
+        assertFalse(iter.next().isPresent());
+      }
+    });
+  }
+
+  @Test
+  public void keysShouldReturnIterWithAllKeys() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<Entry> entries = createSortedMapEntries((byte) 3);
+      for (Entry e : entries) {
+        map.put(e.key, e.value);
+      }
+
+      try (RustIter<byte[]> rustIter = map.keys();
+           RustIterAdapter<byte[]> iterator = new RustIterAdapter<>(rustIter)) {
+        int i = 0;
+        while (iterator.hasNext()) {
+          byte[] keyInIter = iterator.next();
+          byte[] keyInMap = entries.get(i).key;
+          assertThat(keyInIter, equalTo(keyInMap));
+          i++;
+        }
+        assertFalse(iterator.hasNext());
+      }
+    });
+  }
+
+  @Test
+  public void valuesShouldReturnEmptyIterIfNoEntries() throws Exception {
+    runTestWithView(database::createSnapshot, (map) -> {
+      try (RustIter<byte[]> iter = map.values()) {
+        assertFalse(iter.next().isPresent());
+      }
+    });
+  }
+
+  @Test
+  public void valuesShouldReturnIterWithAllValues() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<Entry> entries = createSortedMapEntries((byte) 3);
+      for (Entry e : entries) {
+        map.put(e.key, e.value);
+      }
+
+      try (RustIter<byte[]> rustIter = map.values();
+           RustIterAdapter<byte[]> iterator = new RustIterAdapter<>(rustIter)) {
+        int i = 0;
+        while (iterator.hasNext()) {
+          byte[] valueInIter = iterator.next();
+          byte[] valueInMap = entries.get(i).value;
+          assertThat(valueInIter, equalTo(valueInMap));
+          i++;
+        }
+        assertFalse(iterator.hasNext());
+      }
+    });
+  }
+
+  @Test
   public void clearEmptyFork() throws Exception {
     runTestWithView(database::createFork, MapIndexProxy::clear);  // no-op
   }
@@ -237,10 +301,19 @@ public class MapIndexProxyIntegrationTest {
     }
   }
 
+
   /**
    * Creates `numOfEntries` map entries: [(0, 1), (1, 2), … (i, i+1)].
    */
   private List<Entry> createMapEntries(byte numOfEntries) {
+    return createSortedMapEntries(numOfEntries);
+  }
+
+  /**
+   * Creates `numOfEntries` map entries, sorted by key:
+   * [(0, 1), (1, 2), … (i, i+1)].
+   */
+  private List<Entry> createSortedMapEntries(byte numOfEntries) {
     assert (numOfEntries < Byte.MAX_VALUE);
     List<Entry> l = new ArrayList<>(numOfEntries);
     for (byte k = 0; k < numOfEntries; k++) {
