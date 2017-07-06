@@ -21,5 +21,5 @@ pub extern "system" fn Java_com_exonum_binding_storage_connector_Views_nativeFre
     _: JClass,
     view_handle: Handle,
 ) {
-    utils::drop_object::<View>(&env, view_handle);
+    utils::drop_handle::<View>(&env, view_handle);
 }
