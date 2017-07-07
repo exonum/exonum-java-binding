@@ -17,6 +17,6 @@ public class Fork extends View {
 
   @Override
   void disposeInternal() {
-    Views.nativeFree(nativeHandle);
+    Views.nativeFree(getNativeHandle());
   }
 }

@@ -68,6 +68,34 @@ public class AbstractNativeProxyTest {
     assertFalse(proxy.isValid());
   }
 
+  @Test
+  public void getNativeHandle() throws Exception {
+    long expectedNativeHandle = 0x1FL;
+
+    proxy = new NativeProxyFake(expectedNativeHandle, true);
+
+    assertThat(proxy.getNativeHandle(), equalTo(expectedNativeHandle));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getNativeHandleShallFailIfProxyIsClosed() throws Exception {
+    long nativeHandle = 0x1FL;
+
+    proxy = new NativeProxyFake(nativeHandle, true);
+    proxy.close();
+
+    proxy.getNativeHandle();  // boom
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getNativeHandleShallFailIfInvalid() throws Exception {
+    long invalidHandle = 0x0L;
+
+    proxy = new NativeProxyFake(invalidHandle, true);
+
+    proxy.getNativeHandle();  // boom
+  }
+
   private static class NativeProxyFake extends AbstractNativeProxy {
 
     int timesDisposed;

@@ -1,5 +1,7 @@
 package com.exonum.binding.proxy;
 
+import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
+
 /**
  * A proxy of a native object.
  *
@@ -16,21 +18,11 @@ abstract class AbstractNativeProxy implements AutoCloseable {
   static final long INVALID_NATIVE_HANDLE = 0L;
 
   /**
-   * A native implementation-specific handle.
-   *
-   * <p>This value shall only be passed as an argument to native methods.
-   */
-  final long nativeHandle;
-
-  /**
    * Whether this proxy owns the corresponding native object and is responsible to clean it up.
    */
   private final boolean owningHandle;
 
-  /**
-   * Whether the proxy is valid and may be used to access the native object.
-   */
-  private boolean valid;
+  private long nativeHandle;
 
   /**
    * @param nativeHandle a native handle: an implementation-specific reference to a native object.
@@ -40,7 +32,30 @@ abstract class AbstractNativeProxy implements AutoCloseable {
   AbstractNativeProxy(long nativeHandle, boolean owningHandle) {
     this.nativeHandle = nativeHandle;
     this.owningHandle = owningHandle;
-    valid = (nativeHandle != INVALID_NATIVE_HANDLE);
+  }
+
+  /**
+   * Returns a native implementation-specific handle.
+   *
+   * <p>The returned value shall only be passed as an argument to native methods.
+   *
+   * <p>Warning: do not cache the return value, as you won't be able to catch use-after-free.
+   *
+   * @throws IllegalStateException if this native proxy is invalid (closed or nullptr).
+   */
+  final long getNativeHandle() {
+    checkValid(this);
+    return getNativeHandleUnsafe();
+  }
+
+  /**
+   * Returns a native handle.
+   *
+   * <p>If clients ever need to just get a value (e.g., in their {@link #toString()}
+   * implementation), make this package-local.
+   */
+  private long getNativeHandleUnsafe() {
+    return nativeHandle;
   }
 
   /**
@@ -53,26 +68,30 @@ abstract class AbstractNativeProxy implements AutoCloseable {
    */
   @Override
   public final void close() {
-    if (valid) {
+    if (isValid()) {
       try {
         if (owningHandle) {
           disposeInternal();
         }
       } finally {
-        valid = false;
+        invalidate();
       }
     }
+  }
+
+  /** Returns true if the proxy is valid and may be used to access the native object. */
+  final boolean isValid() {
+    return nativeHandle != INVALID_NATIVE_HANDLE;
   }
 
   /**
    * Destroys the corresponding native object.
    *
-   * <p>This method is only called from {@link #close()} and shall not be called directly.
+   * <p>This method is only called once from {@link #close()} and shall not be called directly.
    */
   abstract void disposeInternal();
 
-  /** Returns true if the proxy is valid and may be used to access the native object. */
-  final boolean isValid() {
-    return valid;
+  private void invalidate() {
+    nativeHandle = INVALID_NATIVE_HANDLE;
   }
 }
