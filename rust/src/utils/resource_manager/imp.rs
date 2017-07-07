@@ -31,7 +31,7 @@ pub fn check_handle<T: 'static>(handle: Handle) {
             assert_eq!(
                 type_id,
                 &TypeId::of::<T>(),
-                "Wrong type id for '{}' handle",
+                "Wrong type id for '{:X}' handle",
                 handle
             );
         }
