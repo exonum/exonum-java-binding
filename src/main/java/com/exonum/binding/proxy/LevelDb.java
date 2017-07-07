@@ -8,17 +8,17 @@ public class LevelDb extends Database {
 
   @Override
   public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(this.nativeHandle));
+    return new Snapshot(nativeCreateSnapshot(getNativeHandle()));
   }
 
   @Override
   public Fork createFork() {
-    return new Fork(nativeCreateFork(this.nativeHandle));
+    return new Fork(nativeCreateFork(getNativeHandle()));
   }
 
   @Override
   void disposeInternal() {
-    nativeFree(nativeHandle);
+    nativeFree(getNativeHandle());
   }
 
   private static native long nativeCreate(String path);

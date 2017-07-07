@@ -29,8 +29,4 @@ public abstract class View extends AbstractNativeProxy {
   View(long nativeHandle, boolean owningHandle) {
     super(nativeHandle, owningHandle);
   }
-
-  long getNativeHandle() {
-    return nativeHandle;
-  }
 }

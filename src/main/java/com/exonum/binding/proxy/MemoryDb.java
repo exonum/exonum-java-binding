@@ -8,17 +8,17 @@ public class MemoryDb extends Database {
 
   @Override
   public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(nativeHandle));
+    return new Snapshot(nativeCreateSnapshot(getNativeHandle()));
   }
 
   @Override
   public Fork createFork() {
-    return new Fork(nativeCreateFork(nativeHandle));
+    return new Fork(nativeCreateFork(getNativeHandle()));
   }
 
   @Override
   void disposeInternal() {
-    nativeFree(nativeHandle);
+    nativeFree(getNativeHandle());
   }
 
   private static native long nativeCreate();

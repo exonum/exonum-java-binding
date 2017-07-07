@@ -24,25 +24,25 @@ public class MapIndexProxy extends AbstractNativeProxy {
   }
 
   public void put(byte[] key, byte[] value) {
-    nativePut(checkStorageKey(key), checkStorageValue(value), nativeHandle);
+    nativePut(checkStorageKey(key), checkStorageValue(value), getNativeHandle());
   }
 
   public byte[] get(byte[] key) {
-    return nativeGet(checkStorageKey(key), nativeHandle);
+    return nativeGet(checkStorageKey(key), getNativeHandle());
   }
 
   public void remove(byte[] key) {
-    nativeRemove(checkStorageKey(key), nativeHandle);
+    nativeRemove(checkStorageKey(key), getNativeHandle());
   }
 
   public void clear() {
-    nativeClear(nativeHandle);
+    nativeClear(getNativeHandle());
   }
 
   @Override
   void disposeInternal() {
     checkValid(dbView);
-    nativeFree(nativeHandle);
+    nativeFree(getNativeHandle());
   }
 
   private static native long nativeCreate(long viewNativeHandle, byte[] prefix);
