@@ -47,7 +47,8 @@ mod tests {
     enum T {}
     const INVALID_HANDLE: Handle = i64::MAX;
 
-    // Unique ("valid") handles should be used in the each test.
+    // Unique ("valid") handles should be used in the each test because `HANDLES_MAP` is a shared
+    // state and tests are run concurrently.
     const MANAGE_HANDLES_FIRST_HANDLE: Handle = 1000;
     const MANAGE_HANDLES_SECOND_HANDLE: Handle = 2000;
     const DUPLICATED_HANDLE: Handle = 3000;
