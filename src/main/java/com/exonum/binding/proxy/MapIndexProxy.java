@@ -12,15 +12,15 @@ import com.exonum.binding.annotations.ImproveDocs;
     reason = "consider using exonum::storage docs + java.util.Map as a reference"
 )
 public class MapIndexProxy extends AbstractNativeProxy {
-  // TODO: consider moving 'dbConnect' to a super class as 'parents'
+  // TODO: consider moving 'dbView' to a super class as 'parents'
   //       (= objects that must not be deleted before this)
-  private final Connect dbConnect;
+  private final View dbView;
 
   @ImproveDocs(assignee = "dt")
-  public MapIndexProxy(Connect connect, byte[] prefix) {
-    super(nativeCreate(connect.getNativeHandle(), checkIndexPrefix(prefix)),
+  public MapIndexProxy(View view, byte[] prefix) {
+    super(nativeCreate(view.getNativeHandle(), checkIndexPrefix(prefix)),
         true);
-    this.dbConnect = connect;
+    this.dbView = view;
   }
 
   public void put(byte[] key, byte[] value) {
@@ -41,7 +41,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
 
   @Override
   void disposeInternal() {
-    checkValid(dbConnect);
+    checkValid(dbView);
     nativeFree(nativeHandle);
   }
 

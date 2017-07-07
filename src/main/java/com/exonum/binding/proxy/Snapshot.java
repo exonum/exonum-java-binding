@@ -21,7 +21,7 @@ import com.exonum.binding.annotations.ImproveDocs;
     assignee = "dt",
     reason = "Specify a particular instance of RuntimeException, thrown by collections."
 )
-public class Snapshot extends Connect {
+public class Snapshot extends View {
 
   public Snapshot(long nativeHandle) {
     super(nativeHandle, true);

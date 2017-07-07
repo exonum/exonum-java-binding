@@ -16,7 +16,7 @@ public abstract class Database extends AbstractNativeProxy {
   /**
    * Creates a new snapshot of the database state.
    *
-   * <p>A caller is responsible to close the snapshot (see {@link Connect#close()}).
+   * <p>A caller is responsible to close the snapshot (see {@link View#close()}).
    *
    *  @return a new snapshot of the database state.
    */
@@ -28,7 +28,7 @@ public abstract class Database extends AbstractNativeProxy {
    * <p>A fork allows to perform a transaction: a number of independent writes to a database,
    * which then may be <em>atomically</em> applied to the database.
    *
-   * <p>A caller is responsible to close the fork (see {@link Connect#close()}).
+   * <p>A caller is responsible to close the fork (see {@link View#close()}).
    *
    * @return a new database fork.
    */
