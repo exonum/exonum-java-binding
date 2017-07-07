@@ -9,7 +9,7 @@ import com.exonum.binding.annotations.ImproveDocs;
  * which then may be <em>atomically</em> applied to the database state.
  */
 @ImproveDocs(assignee = "dt", reason = "Document managed/non-managed forks when we have them")
-public class Fork extends Connect {
+public class Fork extends View {
 
   public Fork(long nativeHandle) {
     super(nativeHandle, true);
