@@ -1,5 +1,10 @@
 package com.exonum.binding.proxy;
 
+import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.proxy.StoragePreconditions.checkStorageKey;
+import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
+import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
+
 import com.exonum.binding.annotations.ImproveDocs;
 
 @ImproveDocs(
@@ -7,24 +12,27 @@ import com.exonum.binding.annotations.ImproveDocs;
     reason = "consider using exonum::storage docs + java.util.Map as a reference"
 )
 public class MapIndexProxy extends AbstractNativeProxy {
-  @SuppressWarnings("unused")  // will use the reference to check if it is valid.
+  // TODO: consider moving 'dbConnect' to a super class as 'parents'
+  //       (= objects that must not be deleted before this)
   private final Connect dbConnect;
 
+  @ImproveDocs(assignee = "dt")
   public MapIndexProxy(Connect connect, byte[] prefix) {
-    super(nativeCreate(connect.getNativeHandle(), prefix), true);
+    super(nativeCreate(connect.getNativeHandle(), checkIndexPrefix(prefix)),
+        true);
     this.dbConnect = connect;
   }
 
   public void put(byte[] key, byte[] value) {
-    nativePut(key, value, nativeHandle);
+    nativePut(checkStorageKey(key), checkStorageValue(value), nativeHandle);
   }
 
   public byte[] get(byte[] key) {
-    return nativeGet(key, nativeHandle);
+    return nativeGet(checkStorageKey(key), nativeHandle);
   }
 
   public void remove(byte[] key) {
-    nativeRemove(key, nativeHandle);
+    nativeRemove(checkStorageKey(key), nativeHandle);
   }
 
   public void clear() {
@@ -33,6 +41,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
 
   @Override
   void disposeInternal() {
+    checkValid(dbConnect);
     nativeFree(nativeHandle);
   }
 
