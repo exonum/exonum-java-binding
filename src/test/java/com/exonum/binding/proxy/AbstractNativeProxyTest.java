@@ -56,6 +56,13 @@ public class AbstractNativeProxyTest {
   }
 
   @Test
+  public void notOwningShallNotBeValidOnceClosed() throws Exception {
+    proxy = new NativeProxyFake(1L, false);
+    proxy.close();
+    assertFalse(proxy.isValid());
+  }
+
+  @Test
   public void shallNotBeValidIfInvalidHandle() throws Exception {
     proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
     assertFalse(proxy.isValid());

@@ -53,9 +53,11 @@ abstract class AbstractNativeProxy implements AutoCloseable {
    */
   @Override
   public final void close() {
-    if (owningHandle && valid) {
+    if (valid) {
       try {
-        disposeInternal();
+        if (owningHandle) {
+          disposeInternal();
+        }
       } finally {
         valid = false;
       }
