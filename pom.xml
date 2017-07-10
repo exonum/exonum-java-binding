@@ -85,6 +85,8 @@
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
                 <argument>build</argument>
+                <argument>--features</argument>
+                <argument>resource-manager</argument>
               </arguments>
             </configuration>
             <goals>
