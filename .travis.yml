@@ -8,7 +8,7 @@ env:
     - RUST_VERSION=stable
     - RUSTFMT_VERSION=0.9.0
     - RUST_NIGHTLY_VERSION=nightly-2017-06-21
-    - RUST_CLIPPY_VERSION=0.0.140
+    - RUST_CLIPPY_VERSION=0.0.143
 cache:
   directories:
     - "$HOME/.cargo"
