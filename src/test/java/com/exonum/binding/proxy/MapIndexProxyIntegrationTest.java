@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import com.exonum.binding.storage.RustIterAdapter;
+import com.exonum.binding.util.LibraryLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,11 +18,7 @@ import org.junit.Test;
 public class MapIndexProxyIntegrationTest {
 
   static {
-    // To have library `libjava_bindings` available by name,
-    // add a path to the folder containing it to java.library.path,
-    // e.g.: java -Djava.library.path=rust/target/release …
-    System.loadLibrary("java_bindings");
-    // TODO(dt): Replace with a library loader.
+    LibraryLoader.load();
   }
 
   private static final byte[] mapPrefix = new byte[]{'p'};
