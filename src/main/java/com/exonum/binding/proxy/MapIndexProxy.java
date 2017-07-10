@@ -6,6 +6,7 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
 import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
 
 import com.exonum.binding.annotations.ImproveDocs;
+import java.util.ConcurrentModificationException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -27,6 +28,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
   }
 
   public void put(byte[] key, byte[] value) {
+    notifyModified();
     nativePut(checkStorageKey(key), checkStorageValue(value), getNativeHandle());
   }
 
@@ -35,6 +37,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
   }
 
   public void remove(byte[] key) {
+    notifyModified();
     nativeRemove(checkStorageKey(key), getNativeHandle());
   }
 
@@ -46,7 +49,8 @@ public class MapIndexProxy extends AbstractNativeProxy {
   public RustIter<byte[]> keys() {
     return new ConfigurableIter<>(nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
-        this::nativeKeysIterFree);
+        this::nativeKeysIterFree,
+        ViewModificationCounter.getInstance());
   }
 
   /**
@@ -55,11 +59,17 @@ public class MapIndexProxy extends AbstractNativeProxy {
   public RustIter<byte[]> values() {
     return new ConfigurableIter<>(nativeCreateValuesIter(getNativeHandle()),
           this::nativeValuesIterNext,
-          this::nativeValuesIterFree);
+          this::nativeValuesIterFree,
+          ViewModificationCounter.getInstance());
   }
 
   public void clear() {
+    notifyModified();
     nativeClear(getNativeHandle());
+  }
+
+  private void notifyModified() {
+    ViewModificationCounter.getInstance().notifyModified(dbView);
   }
 
   @Override
@@ -92,23 +102,40 @@ public class MapIndexProxy extends AbstractNativeProxy {
 
   private native void nativeFree(long nativeHandle);
 
+  /**
+   * A fail-fast iterator.
+   *
+   * @param <E> type of elements returned by the iterator.
+   */
   private class ConfigurableIter<E> extends RustIter<E> {
 
     private final Function<Long, E> nextFunction;
     private final Consumer<Long> disposeOperation;
+    private final ViewModificationCounter modificationListener;
+    private final Integer mapModCount;
 
     ConfigurableIter(long nativeHandle,
                      Function<Long, E> nextFunction,
-                     Consumer<Long> disposeOperation) {
+                     Consumer<Long> disposeOperation,
+                     ViewModificationCounter modificationListener) {
       super(nativeHandle, true);
       this.nextFunction = nextFunction;
       this.disposeOperation = disposeOperation;
+      this.modificationListener = modificationListener;
+      this.mapModCount = modificationListener.getModificationCount(dbView);
     }
 
     @Override
     public Optional<E> next() {
-      // TODO(dt): check for concurrent modifications of the map.
+      checkNotModified();
       return Optional.ofNullable(nextFunction.apply(getNativeHandle()));
+    }
+
+    // todo(dt): Move to StoragePreconditions?
+    private void checkNotModified() {
+      if (modificationListener.isModifiedSince(dbView, mapModCount)) {
+        throw new ConcurrentModificationException("Fork was modified during iteration: " + dbView);
+      }
     }
 
     @Override

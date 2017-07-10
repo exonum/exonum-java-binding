@@ -7,8 +7,11 @@ import static org.junit.Assert.assertNull;
 
 import com.exonum.binding.storage.RustIterAdapter;
 import com.exonum.binding.util.LibraryLoader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.After;
@@ -21,7 +24,7 @@ public class MapIndexProxyIntegrationTest {
     LibraryLoader.load();
   }
 
-  private static final byte[] mapPrefix = new byte[]{'p'};
+  private static final byte[] mapPrefix = bytes("test map");
 
   private Database database;
 
@@ -68,8 +71,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnSuccessfullyPutValueThreeByteKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{'k', 'e', 'y'};
-      byte[] value = new byte[]{'v'};
+      byte[] key = bytes("key");
+      byte[] value = bytes("v");
 
       map.put(key, value);
 
@@ -83,8 +86,8 @@ public class MapIndexProxyIntegrationTest {
   public void putShouldOverwritePreviousValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte[] key = new byte[]{1};
-      byte[] v1 = new byte[]{'v', '1'};
-      byte[] v2 = new byte[]{'v', '2'};
+      byte[] v1 = bytes("v1");
+      byte[] v2 = bytes("v2");
 
       map.put(key, v1);
       map.put(key, v2);
@@ -123,7 +126,7 @@ public class MapIndexProxyIntegrationTest {
     });
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void putShouldFailWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
       byte[] key = new byte[]{1};
@@ -194,6 +197,55 @@ public class MapIndexProxyIntegrationTest {
           i++;
         }
         assertFalse(iterator.hasNext());
+      }
+    });
+  }
+
+  @Test(expected = ConcurrentModificationException.class)
+  public void keysIterNextShouldFailIfThisMapModifiedAfterNext() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<Entry> entries = createMapEntries((byte) 3);
+      for (Entry e : entries) {
+        map.put(e.key, e.value);
+      }
+
+      try (RustIter<byte[]> rustIter = map.keys()) {
+        rustIter.next();
+        map.put(bytes("new key"), bytes("new value"));
+        rustIter.next();
+      }
+    });
+  }
+
+  @Test(expected = ConcurrentModificationException.class)
+  public void keysIterNextShouldFailIfThisMapModifiedBeforeNext() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<Entry> entries = createMapEntries((byte) 3);
+      for (Entry e : entries) {
+        map.put(e.key, e.value);
+      }
+
+      try (RustIter<byte[]> rustIter = map.keys()) {
+        map.put(bytes("new key"), bytes("new value"));
+        rustIter.next();
+      }
+    });
+  }
+
+  @Test(expected = ConcurrentModificationException.class)
+  public void keysIterNextShouldFailIfOtherIndexModified() throws Exception {
+    runTestWithView(database::createFork, (view, map) -> {
+      List<Entry> entries = createMapEntries((byte) 3);
+      for (Entry e : entries) {
+        map.put(e.key, e.value);
+      }
+
+      try (RustIter<byte[]> rustIter = map.keys()) {
+        rustIter.next();
+        try (MapIndexProxy otherMap = new MapIndexProxy(view, bytes("other map"))) {
+          otherMap.put(bytes("new key"), bytes("new value"));
+        }
+        rustIter.next();
       }
     });
   }
@@ -291,13 +343,17 @@ public class MapIndexProxyIntegrationTest {
 
   private void runTestWithView(Supplier<View> viewSupplier,
                                Consumer<MapIndexProxy> mapTest) {
+    runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
+  }
+
+  private void runTestWithView(Supplier<View> viewSupplier,
+                               BiConsumer<View, MapIndexProxy> mapTest) {
     assert (database != null && database.isValid());
     try (View view = viewSupplier.get();
          MapIndexProxy mapUnderTest = new MapIndexProxy(view, mapPrefix)) {
-      mapTest.accept(mapUnderTest);
+      mapTest.accept(view, mapUnderTest);
     }
   }
-
 
   /**
    * Creates `numOfEntries` map entries: [(0, 1), (1, 2), … (i, i+1)].
@@ -321,8 +377,16 @@ public class MapIndexProxyIntegrationTest {
     return l;
   }
 
-  private byte[] bytes(byte... bytes) {
+  private static byte[] bytes(byte... bytes) {
     return bytes;
+  }
+
+  private static byte[] bytes(String s) {
+    try {
+      return s.getBytes("UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError(e);
+    }
   }
 
   private static class Entry {
