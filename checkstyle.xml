@@ -199,10 +199,9 @@
             <property name="allowMissingThrowsTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
             <property name="minLineCount" value="2"/>
-            <property name="allowedAnnotations" value="Override, Test"/>
+            <!-- todo: file a bug report so that it supports FQN -->
+            <property name="allowedAnnotations" value="Override, Test, ImproveDocs, After, Before"/>
             <property name="allowThrowsTagsForSubclasses" value="true"/>
-            <!-- todo(dt): remove as all Javadocs are added, so that CI will fail a build if they are missing -->
-            <property name="severity" value="warning"/>
         </module>
         <module name="MethodName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$"/>
