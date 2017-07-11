@@ -69,4 +69,33 @@ class StoragePreconditions {
   static void checkValid(AbstractNativeProxy nativeProxy) {
     checkValid(singleton(nativeProxy));
   }
+
+  /**
+   * Checks that a given view is an instance of {@link Fork} — a modifiable database view.
+   *
+   * @param databaseView a view to check.
+   * @return a modifiable view: a Fork.
+   * @throws UnsupportedOperationException if view is read-only or null.
+   */
+  static Fork checkCanModify(View databaseView) {
+    if (!(databaseView instanceof Fork)) {
+      throw new UnsupportedOperationException("Cannot modify the view: " + databaseView
+          + "\nUse a Fork to modify any collection.");
+    }
+    return (Fork) databaseView;
+  }
+
+  /**
+   * Checks that element index is valid, i.e., in range [0, size).
+   *
+   * @return a valid index
+   * @throws IndexOutOfBoundsException if index is not in range [0, size).
+   */
+  static long checkElementIndex(long index, long size) {
+    if (index < 0L || size <= index) {
+      throw new IndexOutOfBoundsException("Index must be in range [0, " + size + "),"
+          + " but: " + index);
+    }
+    return index;
+  }
 }
