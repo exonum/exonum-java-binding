@@ -1,5 +1,6 @@
 package com.exonum.binding.proxy;
 
+import static com.exonum.binding.test.TestStorageItems.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
@@ -7,7 +8,6 @@ import static org.junit.Assert.assertNull;
 
 import com.exonum.binding.storage.RustIterAdapter;
 import com.exonum.binding.util.LibraryLoader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -126,7 +126,7 @@ public class MapIndexProxyIntegrationTest {
     });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = UnsupportedOperationException.class)
   public void putShouldFailWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
       byte[] key = new byte[]{1};
@@ -286,7 +286,7 @@ public class MapIndexProxyIntegrationTest {
     runTestWithView(database::createFork, MapIndexProxy::clear);  // no-op
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = UnsupportedOperationException.class)
   public void clearSnapshotMustFail() throws Exception {
     runTestWithView(database::createSnapshot, MapIndexProxy::clear);  // boom
   }
@@ -375,18 +375,6 @@ public class MapIndexProxyIntegrationTest {
       l.add(new Entry(key, value));
     }
     return l;
-  }
-
-  private static byte[] bytes(byte... bytes) {
-    return bytes;
-  }
-
-  private static byte[] bytes(String s) {
-    try {
-      return s.getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new AssertionError(e);
-    }
   }
 
   private static class Entry {

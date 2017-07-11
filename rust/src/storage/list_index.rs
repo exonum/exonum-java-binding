@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::JClass;
+use jni::objects::{JClass, JObject};
 use jni::sys::{jlong, jbyteArray, jboolean};
 
 use std::panic;
@@ -19,7 +19,7 @@ enum IndexType {
 
 /// Returns pointer to the created `ListIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view: jlong,
@@ -39,9 +39,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeCreate(
 
 /// Destroys underlying `ListIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     list_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, list_handle);
@@ -49,11 +49,11 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeFree(
 
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGet(
     env: JNIEnv,
-    _: JClass,
-    index: jlong,
+    _: JObject,
     list_handle: Handle,
+    index: jlong,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let val = match *utils::cast_handle::<IndexType>(list_handle) {
@@ -70,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeGet(
 
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLast(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGetLast(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -90,9 +90,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLast(
 
 /// Returns `true` if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIsEmpty(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIsEmpty(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     list_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
@@ -106,9 +106,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIsEmpty(
 
 /// Returns length of the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLen(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSize(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
@@ -122,9 +122,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLen(
 
 /// Returns pointer to the iterator over list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIter(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreateIter(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -138,11 +138,11 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIter(
 
 /// Returns pointer to the iterator over list starting at given index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFrom(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFrom(
     env: JNIEnv,
-    _: JClass,
-    index_from: jlong,
+    _: JObject,
     list_handle: Handle,
+    index_from: jlong,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
@@ -155,11 +155,11 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFrom(
 
 /// Adds value to the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePush(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeAdd(
     env: JNIEnv,
-    _: JClass,
-    value: jbyteArray,
+    _: JObject,
     list_handle: Handle,
+    value: jbyteArray,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -175,9 +175,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePush(
 
 /// Removes the last element from a list and returns it, or null pointer if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePop(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeRemoveLast(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -197,11 +197,11 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePop(
 
 /// Shortens the list, keeping the first len elements and dropping the rest.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeTruncate(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeTruncate(
     env: JNIEnv,
-    _: JClass,
-    len: jlong,
+    _: JObject,
     list_handle: Handle,
+    len: jlong,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -216,12 +216,12 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeTruncate(
 
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSet(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
+    list_handle: Handle,
     index: jlong,
     value: jbyteArray,
-    list_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -237,9 +237,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeSet(
 
 /// Clears the list, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeClear(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     list_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
@@ -256,9 +256,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeClear(
 // TODO: Probably this functions should belong to some other class instead of IndexList.
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -273,9 +273,9 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterNext(
 
 /// Destroys underlying `IndexList` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
     utils::drop_handle::<ListIndexIter<Value>>(&env, iter_handle);

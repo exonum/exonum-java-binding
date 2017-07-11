@@ -41,23 +41,15 @@ class ViewModificationCounter {
   }
 
   /**
-   * Notifies that the view is modified.
+   * Notifies that the fork is modified.
    *
-   * <p>Each invocation increases the modification counter of the view. Initial value is zero.
-   * @param view a modified view.
-   * @throws IllegalArgumentException if a view is read-only ({@link Snapshot}).
+   * <p>Each invocation increases the modification counter of the fork. Initial value is zero.
+   * @param fork a modified (or about to be modified) fork.
+   * @throws NullPointerException if fork is null.
    */
-  void notifyModified(View view) {
-    Integer nextCount = getModificationCount(view) + 1;
-    Fork fork = checkedCast(view);
+  void notifyModified(Fork fork) {
+    Integer nextCount = getModificationCount(fork) + 1;
     modificationCounters.put(fork, nextCount);
-  }
-
-  private Fork checkedCast(View view) {
-    if (view instanceof Fork) {
-      return (Fork) view;
-    }
-    throw new IllegalArgumentException("Fork expected, but got a snapshot: " + view);
   }
 
   /**

@@ -20,12 +20,6 @@ public class ViewModificationCounterTest {
     listener = new ViewModificationCounter();
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void notifyShallFailForSnapshot() throws Exception {
-    Snapshot s = mock(Snapshot.class);
-    listener.notifyModified(s);
-  }
-
   @Test
   public void modCountShallChangeSinceNotification() throws Exception {
     Fork fork = mock(Fork.class);

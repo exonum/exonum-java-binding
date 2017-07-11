@@ -11,4 +11,11 @@ import java.util.Iterator;
  *
  * @param <E> type of the entry.
  */
-interface StorageIterator<E> extends Iterator<E>, AutoCloseable {}
+public interface StorageIterator<E> extends Iterator<E>, AutoCloseable {
+
+  /**
+   * Closes the iterator, freeing any underlying resources.
+   */
+  @Override
+  void close();
+}
