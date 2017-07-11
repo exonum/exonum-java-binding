@@ -27,12 +27,12 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeCreate(
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
-        Box::into_raw(Box::new(match *utils::cast_object(view) {
+        utils::to_handle(match *utils::cast_handle(view) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })) as Handle
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -44,7 +44,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeFree(
     _: JClass,
     list_handle: Handle,
 ) {
-    utils::drop_object::<IndexType>(&env, list_handle);
+    utils::drop_handle::<IndexType>(&env, list_handle);
 }
 
 /// Returns the value by index. Null pointer is returned if value is not found.
@@ -56,7 +56,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeGet(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *utils::cast_object::<IndexType>(list_handle) {
+        let val = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get(index as u64),
             IndexType::ForkIndex(ref list) => list.get(index as u64),
         };
@@ -76,7 +76,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLast(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *utils::cast_object::<IndexType>(list_handle) {
+        let val = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.last(),
             IndexType::ForkIndex(ref list) => list.last(),
         };
@@ -96,7 +96,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIsEmpty(
     list_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        (match *utils::cast_object::<IndexType>(list_handle) {
+        (match *utils::cast_handle::<IndexType>(list_handle) {
              IndexType::SnapshotIndex(ref list) => list.is_empty(),
              IndexType::ForkIndex(ref list) => list.is_empty(),
          }) as jboolean
@@ -112,7 +112,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeLen(
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        (match *utils::cast_object::<IndexType>(list_handle) {
+        (match *utils::cast_handle::<IndexType>(list_handle) {
              IndexType::SnapshotIndex(ref list) => list.len(),
              IndexType::ForkIndex(ref list) => list.len(),
          }) as jlong
@@ -128,12 +128,10 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIter(
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(list_handle) {
-                IndexType::SnapshotIndex(ref list) => list.iter(),
-                IndexType::ForkIndex(ref list) => list.iter(),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.iter(),
+            IndexType::ForkIndex(ref list) => list.iter(),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -147,12 +145,10 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFrom(
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(list_handle) {
-                IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
-                IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
+            IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -165,7 +161,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePush(
     value: jbyteArray,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -185,7 +181,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativePop(
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *utils::cast_object::<IndexType>(list_handle) {
+        let val = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(_) => {
                 panic!("Unable to modify snapshot.");
             }
@@ -207,7 +203,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeTruncate(
     len: jlong,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -227,7 +223,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeSet(
     value: jbyteArray,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -246,7 +242,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeClear(
     _: JClass,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -266,7 +262,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterNext(
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_object::<ListIndexIter<Value>>(iter_handle);
+        let mut iter = utils::cast_handle::<ListIndexIter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val).unwrap(),
             None => ptr::null_mut(),
@@ -282,5 +278,5 @@ pub extern "system" fn Java_com_exonum_binding_index_ListIndex_nativeIterFree(
     _: JClass,
     iter_handle: Handle,
 ) {
-    utils::drop_object::<ListIndexIter<Value>>(&env, iter_handle);
+    utils::drop_handle::<ListIndexIter<Value>>(&env, iter_handle);
 }

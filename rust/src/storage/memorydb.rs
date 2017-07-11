@@ -13,7 +13,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
 ) -> Handle {
-    let res = panic::catch_unwind(|| Box::into_raw(Box::new(MemoryDB::new())) as Handle);
+    let res = panic::catch_unwind(|| utils::to_handle(MemoryDB::new()));
     utils::unwrap_exc_or_default(&env, res)
 }
 
@@ -24,7 +24,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeFree(
     _: JObject,
     db_handle: Handle,
 ) {
-    utils::drop_object::<MemoryDB>(&env, db_handle);
+    utils::drop_handle::<MemoryDB>(&env, db_handle);
 }
 
 /// Returns pointer to created `Snapshot` object.
@@ -35,8 +35,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateSnapsh
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<MemoryDB>(db_handle);
-        Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as Handle
+        let db = utils::cast_handle::<MemoryDB>(db_handle);
+        utils::to_handle(View::Snapshot(db.snapshot()))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -49,8 +49,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateFork(
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<MemoryDB>(db_handle);
-        Box::into_raw(Box::new(View::Fork(db.fork()))) as Handle
+        let db = utils::cast_handle::<MemoryDB>(db_handle);
+        utils::to_handle(View::Fork(db.fork()))
     });
     utils::unwrap_exc_or_default(&env, res)
 }

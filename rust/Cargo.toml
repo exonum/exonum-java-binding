@@ -6,10 +6,15 @@ authors = ["Exonum Team <exonum@bitfury.com>"]
 [lib]
 crate-type = ["dylib"]
 
+[features]
+# Enables native handles checking. Useful for debugging.
+resource-manager = ["lazy_static"]
+
 [dependencies]
 log = "0.3"
 env_logger = "0.3"
 jni = "0.5.0"
+lazy_static = { version = "0.2", optional = true }
 
 [dependencies.exonum]
 git = "ssh://git@github.com/exonum/exonum-core.git"

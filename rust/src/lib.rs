@@ -15,6 +15,10 @@ extern crate env_logger;
 extern crate jni;
 extern crate exonum;
 
+#[cfg(feature = "resource-manager")]
+#[macro_use]
+extern crate lazy_static;
+
 mod utils;
 mod init;
 mod storage;
