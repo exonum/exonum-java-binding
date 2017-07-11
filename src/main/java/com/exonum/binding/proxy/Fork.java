@@ -11,12 +11,14 @@ import com.exonum.binding.annotations.ImproveDocs;
 @ImproveDocs(assignee = "dt", reason = "Document managed/non-managed forks when we have them")
 public class Fork extends View {
 
+  // TODO: When implementing non-owning Forks, review ViewModificationCounter & disposeInternal().
   public Fork(long nativeHandle) {
     super(nativeHandle, true);
   }
 
   @Override
   void disposeInternal() {
+    ViewModificationCounter.getInstance().remove(this);
     Views.nativeFree(getNativeHandle());
   }
 }
