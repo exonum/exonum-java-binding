@@ -47,14 +47,56 @@ fn throw(env: &JNIEnv, description: &str) {
 }
 
 // Tries to get meaningful description from panic-error.
-fn any_to_string(any: &Any) -> String {
-    // TODO: jni::errors::Error?
-    // TODO: Handle more types?
-    if let Some(error) = any.downcast_ref::<Box<Error>>() {
-        error.description().to_string()
-    } else if let Some(s) = any.downcast_ref::<&str>() {
+// TODO: Remove `allow(borrowed_box)` after https://github.com/Manishearth/rust-clippy/issues/1884
+// is fixed.
+#[cfg_attr(feature = "cargo-clippy", allow(borrowed_box))]
+fn any_to_string(any: &Box<Any + Send>) -> String {
+    if let Some(s) = any.downcast_ref::<&str>() {
         s.to_string()
+    } else if let Some(s) = any.downcast_ref::<String>() {
+        s.clone()
+    } else if let Some(error) = any.downcast_ref::<Box<Error + Send>>() {
+        error.description().to_string()
     } else {
-        "Unknown error occured".to_string()
+        "Unknown error occurred".to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::panic;
+    use std::error::Error;
+    use super::*;
+
+    #[test]
+    fn str_any() {
+        let string = "Static string (&str)";
+        let error = panic_error(string);
+        assert_eq!(string, any_to_string(&error));
+    }
+
+    #[test]
+    fn string_any() {
+        let string = "Owned string (String)".to_owned();
+        let error = panic_error(string.clone());
+        assert_eq!(string, any_to_string(&error));
+    }
+
+    #[test]
+    fn box_error_any() {
+        let error: Box<Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
+        let description = error.description().to_owned();
+        let error = panic_error(error);
+        assert_eq!(description, any_to_string(&error));
+    }
+
+    #[test]
+    fn unknown_any() {
+        let error = panic_error(1);
+        assert_eq!("Unknown error occurred", any_to_string(&error));
+    }
+
+    fn panic_error<T: Send + 'static>(val: T) -> Box<Any + Send> {
+        panic::catch_unwind(panic::AssertUnwindSafe(|| panic!(val))).unwrap_err()
     }
 }
