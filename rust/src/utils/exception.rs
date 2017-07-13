@@ -70,9 +70,9 @@ mod tests {
 
     #[test]
     fn str_any() {
-        let str = "Static string (&str)";
-        let error = panic_error(str);
-        assert_eq!(str, any_to_string(&error));
+        let string = "Static string (&str)";
+        let error = panic_error(string);
+        assert_eq!(string, any_to_string(&error));
     }
 
     #[test]
