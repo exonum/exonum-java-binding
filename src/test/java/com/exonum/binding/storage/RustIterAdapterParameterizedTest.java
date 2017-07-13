@@ -11,7 +11,7 @@ import static org.junit.runners.Parameterized.Parameters;
 
 import com.exonum.binding.proxy.RustIter;
 import com.exonum.binding.proxy.RustIterTestFake;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class RustIterAdapterParameterizedTest {
         rustIterMockFromIterable(underlyingList));
 
     // Use an adapter as Iterator to collect all items in a list
-    List<Integer> itemsFromIterAdapter = asList(Iterators.toArray(iterAdapter, Integer.class));
+    List<Integer> itemsFromIterAdapter = ImmutableList.copyOf(iterAdapter);
 
     // check that the lists are the same.
     assertThat(itemsFromIterAdapter, equalTo(underlyingList));
