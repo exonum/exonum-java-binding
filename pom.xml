@@ -14,6 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.compiler.version>stable</rust.compiler.version>
+    <rust.compiler.features>resource-manager</rust.compiler.features>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <!-- Intentionally left empty, may be overrided from command line.
@@ -86,7 +87,7 @@
                 <argument>+${rust.compiler.version}</argument>
                 <argument>build</argument>
                 <argument>--features</argument>
-                <argument>resource-manager</argument>
+                <argument>${rust.compiler.features}</argument>
               </arguments>
             </configuration>
             <goals>
@@ -100,6 +101,8 @@
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
                 <argument>test</argument>
+                <argument>--features</argument>
+                <argument>${rust.compiler.features}</argument>
               </arguments>
             </configuration>
             <goals>
