@@ -27,10 +27,11 @@ pub fn remove_handle<T: 'static>(handle: Handle) {
 
 pub fn check_handle<T: 'static>(handle: Handle) {
     match HANDLES_MAP.read().unwrap().get(&handle) {
-        Some(type_id) => {
+        Some(expected_type_id) => {
+            let actual_type_id = &TypeId::of::<T>();
             assert_eq!(
-                type_id,
-                &TypeId::of::<T>(),
+                expected_type_id,
+                actual_type_id,
                 "Wrong type id for '{:X}' handle",
                 handle
             );
