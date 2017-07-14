@@ -1,10 +1,14 @@
 package com.exonum.binding.proxy;
 
+import static com.exonum.binding.test.TestStorageItems.K1;
+import static com.exonum.binding.test.TestStorageItems.K2;
+import static com.exonum.binding.test.TestStorageItems.V1;
 import static com.exonum.binding.test.TestStorageItems.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.storage.RustIterAdapter;
 import com.exonum.binding.util.LibraryLoader;
@@ -52,6 +56,27 @@ public class MapIndexProxyIntegrationTest {
     // Destroy a view before the map.
     view.close();
     map.close();
+  }
+
+  @Test
+  public void containsKeyShouldReturnFalseIfNoSuchKey() throws Exception {
+    runTestWithView(database::createSnapshot,
+        (map) -> assertFalse(map.containsKey(K1)));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void containsKeyShouldThrowIfNullKey() throws Exception {
+    runTestWithView(database::createSnapshot,
+        (map) -> map.containsKey(null));
+  }
+
+  @Test
+  public void containsKeyShouldReturnTrueIfHasMappingForKey() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(K1, V1);
+      assertTrue(map.containsKey(K1));
+      assertFalse(map.containsKey(K2));
+    });
   }
 
   @Test

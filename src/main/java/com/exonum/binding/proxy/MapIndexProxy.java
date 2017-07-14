@@ -27,18 +27,28 @@ public class MapIndexProxy extends AbstractNativeProxy {
     modCounter = ViewModificationCounter.getInstance();
   }
 
+  /**
+   * Returns true if this map contains a mapping for the specified key.
+   *
+   * @throws NullPointerException if the key is null
+   * @throws IllegalStateException if this map is not valid
+   */
+  public boolean containsKey(byte[] key) {
+    return nativeContainsKey(getNativeHandle(), checkStorageKey(key));
+  }
+
   public void put(byte[] key, byte[] value) {
     notifyModified();
-    nativePut(checkStorageKey(key), checkStorageValue(value), getNativeHandle());
+    nativePut(getNativeHandle(), checkStorageKey(key), checkStorageValue(value));
   }
 
   public byte[] get(byte[] key) {
-    return nativeGet(checkStorageKey(key), getNativeHandle());
+    return nativeGet(getNativeHandle(), checkStorageKey(key));
   }
 
   public void remove(byte[] key) {
     notifyModified();
-    nativeRemove(checkStorageKey(key), getNativeHandle());
+    nativeRemove(getNativeHandle(), checkStorageKey(key));
   }
 
   /**
@@ -82,11 +92,13 @@ public class MapIndexProxy extends AbstractNativeProxy {
 
   private static native long nativeCreate(long viewNativeHandle, byte[] prefix);
 
-  private native void nativePut(byte[] key, byte[] value, long nativeHandle);
+  private native boolean nativeContainsKey(long nativeHandle, byte[] key);
 
-  private native byte[] nativeGet(byte[] key, long nativeHandle);
+  private native void nativePut(long nativeHandle, byte[] key, byte[] value);
 
-  private native void nativeRemove(byte[] key, long nativeHandle);
+  private native byte[] nativeGet(long nativeHandle, byte[] key);
+
+  private native void nativeRemove(long nativeHandle, byte[] key);
 
   private native long nativeCreateKeysIter(long nativeHandle);
 
