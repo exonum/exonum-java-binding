@@ -16,13 +16,18 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class MapIndexProxyIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private static final byte[] mapPrefix = bytes("test map");
 
@@ -44,13 +49,15 @@ public class MapIndexProxyIntegrationTest {
    * This test verifies that if a client destroys native objects through their proxies
    * in the wrong order, he will get a runtime exception before a (possible) JVM crash.
    */
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
     MapIndexProxy map = new MapIndexProxy(view, mapPrefix);
 
     // Destroy a view before the map.
     view.close();
+
+    expectedException.expect(IllegalStateException.class);
     map.close();
   }
 
@@ -201,7 +208,7 @@ public class MapIndexProxyIntegrationTest {
     });
   }
 
-  @Test(expected = ConcurrentModificationException.class)
+  @Test
   public void keysIterNextShouldFailIfThisMapModifiedAfterNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       List<Entry> entries = createMapEntries((byte) 3);
@@ -212,12 +219,14 @@ public class MapIndexProxyIntegrationTest {
       try (RustIter<byte[]> rustIter = map.keys()) {
         rustIter.next();
         map.put(bytes("new key"), bytes("new value"));
+
+        expectedException.expect(ConcurrentModificationException.class);
         rustIter.next();
       }
     });
   }
 
-  @Test(expected = ConcurrentModificationException.class)
+  @Test
   public void keysIterNextShouldFailIfThisMapModifiedBeforeNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       List<Entry> entries = createMapEntries((byte) 3);
@@ -227,12 +236,14 @@ public class MapIndexProxyIntegrationTest {
 
       try (RustIter<byte[]> rustIter = map.keys()) {
         map.put(bytes("new key"), bytes("new value"));
+
+        expectedException.expect(ConcurrentModificationException.class);
         rustIter.next();
       }
     });
   }
 
-  @Test(expected = ConcurrentModificationException.class)
+  @Test
   public void keysIterNextShouldFailIfOtherIndexModified() throws Exception {
     runTestWithView(database::createFork, (view, map) -> {
       List<Entry> entries = createMapEntries((byte) 3);
@@ -245,6 +256,8 @@ public class MapIndexProxyIntegrationTest {
         try (MapIndexProxy otherMap = new MapIndexProxy(view, bytes("other map"))) {
           otherMap.put(bytes("new key"), bytes("new value"));
         }
+
+        expectedException.expect(ConcurrentModificationException.class);
         rustIter.next();
       }
     });

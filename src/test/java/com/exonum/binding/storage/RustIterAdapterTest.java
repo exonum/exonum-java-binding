@@ -8,7 +8,9 @@ import static org.powermock.api.mockito.PowerMockito.spy;
 import com.exonum.binding.proxy.RustIter;
 import com.exonum.binding.proxy.RustIterTestFake;
 import java.util.NoSuchElementException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -17,22 +19,29 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RustIterAdapter.class)
 public class RustIterAdapterTest {
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
   RustIterAdapter<Integer> adapter;
 
-  @Test(expected = NoSuchElementException.class)
+  @Test
   public void nextThrowsIfNoNextItem0() throws Exception {
     adapter = new RustIterAdapter<>(
         new RustIterTestFake(emptyList()));
 
+    expectedException.expect(NoSuchElementException.class);
     adapter.next();
   }
 
-  @Test(expected = NoSuchElementException.class)
+  @Test
   public void nextThrowsIfNoNextItem1() throws Exception {
     adapter = new RustIterAdapter<>(
         new RustIterTestFake(singletonList(1)));
 
     adapter.next();
+
+    expectedException.expect(NoSuchElementException.class);
     adapter.next();
   }
 
