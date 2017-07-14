@@ -30,7 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class ConfigurableRustIterTest {
 
   @Rule
-  public ExpectedException exception = ExpectedException.none();
+  public ExpectedException expectedException = ExpectedException.none();
 
   private static final int INITIAL_MOD_COUNT = 11;
 
@@ -79,7 +79,7 @@ public class ConfigurableRustIterTest {
 
     notifyModified(fork);
 
-    exception.expect(ConcurrentModificationException.class);
+    expectedException.expect(ConcurrentModificationException.class);
     iter.next();
   }
 
@@ -92,7 +92,7 @@ public class ConfigurableRustIterTest {
 
     notifyModified(fork);
 
-    exception.expect(ConcurrentModificationException.class);
+    expectedException.expect(ConcurrentModificationException.class);
     iter.next();
   }
 
@@ -107,7 +107,7 @@ public class ConfigurableRustIterTest {
     } catch (ConcurrentModificationException e) {
       // Exception above is well expected.
       // Subsequent attempt to get the next item must result in the same exception:
-      exception.expect(ConcurrentModificationException.class);
+      expectedException.expect(ConcurrentModificationException.class);
       iter.next();
     }
   }
@@ -132,7 +132,7 @@ public class ConfigurableRustIterTest {
     createFromIterable(asList(1, 2), fork);
 
     when(fork.isValid()).thenReturn(false);
-    exception.expect(IllegalStateException.class);
+    expectedException.expect(IllegalStateException.class);
     iter.close();
   }
 
