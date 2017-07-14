@@ -52,8 +52,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeFree(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -71,11 +71,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContainsKey(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -124,8 +124,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateV
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFrom(
     env: JNIEnv,
     _: JClass,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -142,8 +142,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFro
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesFrom(
     env: JNIEnv,
     _: JClass,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -160,9 +160,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesF
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
     env: JNIEnv,
     _: JObject,
+    map_handle: Handle,
     key: jbyteArray,
     value: jbyteArray,
-    map_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -182,8 +182,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
