@@ -20,7 +20,7 @@
     <!-- Intentionally left empty, may be overrided from command line.
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
-    <java.compiler.errorprone.patchChecks>MissingOverride,DeadException</java.compiler.errorprone.patchChecks>
+    <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <build.nativeLibPath>rust/target/debug</build.nativeLibPath>
