@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::JClass;
+use jni::objects::{JClass, JObject};
 use jni::sys::{jlong, jbyteArray, jboolean};
 
 use std::panic;
@@ -18,7 +18,7 @@ enum IndexType {
 
 /// Returns pointer to the created `Entry` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view_handle: jlong,
@@ -38,9 +38,9 @@ pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeCreate(
 
 /// Destroys underlying `Entry` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     entry_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, entry_handle);
@@ -48,9 +48,9 @@ pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeFree(
 
 /// Returns the value or null pointer if it is absent.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeGet(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     entry_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -68,9 +68,9 @@ pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeGet(
 
 /// Returns `true` if the entry contains the value.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_index_Entry_nativeExists(
+pub extern "C" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeIsPresent(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     entry_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
@@ -84,9 +84,9 @@ pub extern "C" fn Java_com_exonum_binding_index_Entry_nativeExists(
 
 /// Returns the hash of the value or default hash if value is absent.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeHash(
+pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeGetHash(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     entry_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -103,11 +103,11 @@ pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeHash(
 
 /// Inserts value to the entry.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeSet(
     env: JNIEnv,
-    _: JClass,
-    value: jbyteArray,
+    _: JObject,
     entry_handle: Handle,
+    value: jbyteArray,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(entry_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -121,11 +121,11 @@ pub extern "system" fn Java_com_exonum_binding_index_Entry_nativeSet(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Removes value from the set.
+/// Removes a value from the entry.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_index_Entry_nativeRemove(
+pub extern "C" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeRemove(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     entry_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(entry_handle) {
