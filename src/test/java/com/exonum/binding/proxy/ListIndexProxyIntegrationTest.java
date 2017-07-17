@@ -307,7 +307,7 @@ public class ListIndexProxyIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    ListIndexProxy list = new ListIndexProxy(view, listPrefix);
+    ListIndexProxy list = new ListIndexProxy(listPrefix, view);
 
     view.close();  // a list must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -321,9 +321,8 @@ public class ListIndexProxyIntegrationTest {
 
   private void runTestWithView(Supplier<View> viewSupplier,
                                BiConsumer<View, ListIndexProxy> listTest) {
-    assert (database != null && database.isValid());
     try (View view = viewSupplier.get();
-         ListIndexProxy listUnderTest = new ListIndexProxy(view, listPrefix)) {
+         ListIndexProxy listUnderTest = new ListIndexProxy(listPrefix, view)) {
       listTest.accept(view, listUnderTest);
     }
   }

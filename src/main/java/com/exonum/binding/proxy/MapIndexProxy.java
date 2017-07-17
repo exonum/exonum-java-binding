@@ -20,8 +20,8 @@ public class MapIndexProxy extends AbstractNativeProxy {
   private final ViewModificationCounter modCounter;
 
   @ImproveDocs(assignee = "dt")
-  public MapIndexProxy(View view, byte[] prefix) {
-    super(nativeCreate(view.getNativeHandle(), checkIndexPrefix(prefix)),
+  public MapIndexProxy(byte[] prefix, View view) {
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()),
         true);
     this.dbView = view;
     modCounter = ViewModificationCounter.getInstance();
@@ -80,7 +80,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(long viewNativeHandle, byte[] prefix);
+  private static native long nativeCreate(byte[] prefix, long viewNativeHandle);
 
   private native void nativePut(byte[] key, byte[] value, long nativeHandle);
 

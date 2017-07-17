@@ -23,11 +23,11 @@ public class ListIndexProxy extends AbstractNativeProxy {
   /**
    * Creates a new ListIndexProxy.
    *
+   * @param prefix a list prefix — a unique identifier of this list in the underlying database
    * @param view a database view.
-   * @param prefix a list prefix, a unique identifier.
    */
-  ListIndexProxy(View view, byte[] prefix) {
-    super(nativeCreate(view.getNativeHandle(), checkIndexPrefix(prefix)), true);
+  ListIndexProxy(byte[] prefix, View view) {
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
     this.dbView = view;
     modCounter = ViewModificationCounter.getInstance();
   }
@@ -152,7 +152,7 @@ public class ListIndexProxy extends AbstractNativeProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(long viewNativeHandle, byte[] listPrefix);
+  private static native long nativeCreate(byte[] listPrefix, long viewNativeHandle);
 
   private native void nativeFree(long nativeHandle);
 

@@ -22,8 +22,8 @@ enum IndexType {
 pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view_handle: Handle,
     prefix: jbyteArray,
+    view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();

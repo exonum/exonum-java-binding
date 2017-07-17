@@ -33,7 +33,7 @@ public class EntryIndexProxy extends AbstractNativeProxy {
    * @throws IllegalStateException if the view proxy is invalid
    */
   EntryIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(view.getNativeHandle(), checkIndexPrefix(prefix)), true);
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
     this.dbView = view;
     this.modCounter = ViewModificationCounter.getInstance();
   }
@@ -100,7 +100,7 @@ public class EntryIndexProxy extends AbstractNativeProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(long viewNativeHandle, byte[] prefix);
+  private static native long nativeCreate(byte[] prefix, long viewNativeHandle);
 
   private native void nativeSet(long nativeHandle, byte[] value);
 
