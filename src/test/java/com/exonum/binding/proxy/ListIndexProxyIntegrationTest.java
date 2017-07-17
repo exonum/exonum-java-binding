@@ -321,9 +321,11 @@ public class ListIndexProxyIntegrationTest {
 
   private void runTestWithView(Supplier<View> viewSupplier,
                                BiConsumer<View, ListIndexProxy> listTest) {
-    try (View view = viewSupplier.get();
-         ListIndexProxy listUnderTest = new ListIndexProxy(listPrefix, view)) {
-      listTest.accept(view, listUnderTest);
-    }
+    IndicesTests.runTestWithView(
+        viewSupplier,
+        listPrefix,
+        ListIndexProxy::new,
+        listTest
+    );
   }
 }

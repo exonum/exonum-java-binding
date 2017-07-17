@@ -16,8 +16,11 @@ public class TestStorageItems {
   public static final byte[] K7 = bytes("k7");
   public static final byte[] K8 = bytes("k8");
   public static final byte[] K9 = bytes("k9");
-  public static final byte[] K10 = bytes("k10");
-  public static final List<byte[]> keys = asList(K1, K2, K3, K4, K5, K6, K7, K8, K9, K10);
+
+  /**
+   * Lexicographically ordered storage keys.
+   */
+  public static final List<byte[]> keys = asList(K1, K2, K3, K4, K5, K6, K7, K8, K9);
 
   public static final byte[] V1 = bytes("v1");
   public static final byte[] V2 = bytes("v2");
@@ -28,8 +31,11 @@ public class TestStorageItems {
   public static final byte[] V7 = bytes("v7");
   public static final byte[] V8 = bytes("v8");
   public static final byte[] V9 = bytes("v9");
-  public static final byte[] V10 = bytes("v10");
-  public static final List<byte[]> values = asList(V1, V2, V3, V4, V5, V6, V7, V8, V9, V10);
+
+  /**
+   * Storage values.
+   */
+  public static final List<byte[]> values = asList(V1, V2, V3, V4, V5, V6, V7, V8, V9);
 
   public static byte[] bytes(byte... bytes) {
     return bytes;

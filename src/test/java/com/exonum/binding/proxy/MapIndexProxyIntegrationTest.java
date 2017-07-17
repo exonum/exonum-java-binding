@@ -348,11 +348,12 @@ public class MapIndexProxyIntegrationTest {
 
   private void runTestWithView(Supplier<View> viewSupplier,
                                BiConsumer<View, MapIndexProxy> mapTest) {
-    assert (database != null && database.isValid());
-    try (View view = viewSupplier.get();
-         MapIndexProxy mapUnderTest = new MapIndexProxy(mapPrefix, view)) {
-      mapTest.accept(view, mapUnderTest);
-    }
+    IndicesTests.runTestWithView(
+        viewSupplier,
+        mapPrefix,
+        MapIndexProxy::new,
+        mapTest
+    );
   }
 
   /**

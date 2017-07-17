@@ -130,10 +130,11 @@ public class EntryIndexProxyIntegrationTest {
 
   private void runTestWithView(Supplier<View> viewSupplier,
                                BiConsumer<View, EntryIndexProxy> entryTest) {
-    assert (database != null && database.isValid());
-    try (View view = viewSupplier.get();
-         EntryIndexProxy entryUnderTest = new EntryIndexProxy(entryPrefix, view)) {
-      entryTest.accept(view, entryUnderTest);
-    }
+    IndicesTests.runTestWithView(
+        viewSupplier,
+        entryPrefix,
+        EntryIndexProxy::new,
+        entryTest
+    );
   }
 }
