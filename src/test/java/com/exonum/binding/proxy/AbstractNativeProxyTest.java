@@ -6,9 +6,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class AbstractNativeProxyTest {
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   NativeProxyFake proxy;
 
@@ -77,22 +82,24 @@ public class AbstractNativeProxyTest {
     assertThat(proxy.getNativeHandle(), equalTo(expectedNativeHandle));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void getNativeHandleShallFailIfProxyIsClosed() throws Exception {
     long nativeHandle = 0x1FL;
 
     proxy = new NativeProxyFake(nativeHandle, true);
     proxy.close();
 
+    expectedException.expect(IllegalStateException.class);
     proxy.getNativeHandle();  // boom
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void getNativeHandleShallFailIfInvalid() throws Exception {
     long invalidHandle = 0x0L;
 
     proxy = new NativeProxyFake(invalidHandle, true);
 
+    expectedException.expect(IllegalStateException.class);
     proxy.getNativeHandle();  // boom
   }
 
