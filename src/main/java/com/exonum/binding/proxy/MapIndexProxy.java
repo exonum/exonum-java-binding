@@ -31,7 +31,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
    *
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
-   * @param prefix a map prefix ­ a unique identifier of this map in the underlying storage
+   * @param prefix a unique identifier of this map in the underlying storage
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
@@ -99,6 +99,9 @@ public class MapIndexProxy extends AbstractNativeProxy {
   /**
    * Returns an iterator over the map keys. Must be explicitly closed.
    *
+   * <p>Any destructive operation on the same {@link Fork} this map uses
+   * (but not necessarily on <em>this map</em>) will invalidate the iterator.
+   *
    * @throws IllegalStateException if this map is not valid
    */
   // TODO(dt): consider creating a subclass (RustByteIter) so that you don't have to put a
@@ -113,6 +116,9 @@ public class MapIndexProxy extends AbstractNativeProxy {
 
   /**
    * Returns an iterator over the map values. Must be explicitly closed.
+   *
+   * <p>Any destructive operation on the same {@link Fork} this map uses
+   * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
    */
