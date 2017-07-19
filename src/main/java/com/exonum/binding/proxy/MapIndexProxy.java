@@ -1,6 +1,5 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkCanModify;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
@@ -19,13 +18,7 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
  * <p>As any native proxy, the map <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed map is prohibited and will result in {@link IllegalStateException}.
  */
-public class MapIndexProxy extends AbstractNativeProxy {
-  // TODO: consider moving 'dbView' to a super class as 'parents'
-  //       (= objects that must not be deleted before this)
-  private final View dbView;
-
-  private final ViewModificationCounter modCounter;
-
+public class MapIndexProxy extends AbstractIndexProxy {
   /**
    * Creates a new MapIndexProxy.
    *
@@ -37,10 +30,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
    * @throws NullPointerException if any argument is null
    */
   public MapIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()),
-        true);
-    this.dbView = view;
-    modCounter = ViewModificationCounter.getInstance();
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
   }
 
   /**
@@ -140,10 +130,6 @@ public class MapIndexProxy extends AbstractNativeProxy {
   public void clear() {
     notifyModified();
     nativeClear(getNativeHandle());
-  }
-
-  private void notifyModified() {
-    modCounter.notifyModified(checkCanModify(dbView));
   }
 
   @Override

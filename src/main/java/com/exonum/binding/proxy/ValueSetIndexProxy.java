@@ -25,14 +25,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @see KeySetIndexProxy
  */
-public class ValueSetIndexProxy extends AbstractNativeProxy {
-
-  private final View dbView;
-
-  /**
-   * Needed to detect modifications of this set during iteration over other indices.
-   */
-  private final ViewModificationCounter modCounter;
+public class ValueSetIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new value set proxy.
@@ -45,9 +38,7 @@ public class ValueSetIndexProxy extends AbstractNativeProxy {
    * @throws NullPointerException if any argument is null
    */
   ValueSetIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
-    dbView = view;
-    modCounter = ViewModificationCounter.getInstance();
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
   }
 
   /**
@@ -144,10 +135,6 @@ public class ValueSetIndexProxy extends AbstractNativeProxy {
   public void removeByHash(byte[] elementHash) {
     notifyModified();
     nativeRemoveByHash(getNativeHandle(), checkNotNull(elementHash));
-  }
-
-  private void notifyModified() {
-    modCounter.notifyModified(checkCanModify(dbView));
   }
 
   @Override

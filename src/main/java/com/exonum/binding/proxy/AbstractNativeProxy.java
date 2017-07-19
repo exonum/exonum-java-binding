@@ -5,10 +5,16 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
 /**
  * A proxy of a native object.
  *
+ * <p>A native proxy references the corresponding native object by its
+ * implementation-specific handle. If handle is zero, the proxy is considered invalid
+ * and will not permit referencing any native object. It is perfectly possible to get
+ * an invalid proxy (e.g., if a native method fails to allocate a native object).
+ *
  * <p>You must close a native proxy when it is no longer needed
  * to release any native resources (e.g., destroy a native object).
  * You may use a <a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>
  * statement to do that in orderly fashion.
+ * When a proxy is closed, it becomes invalid.
  */
 abstract class AbstractNativeProxy implements AutoCloseable {
 
@@ -25,9 +31,11 @@ abstract class AbstractNativeProxy implements AutoCloseable {
   private long nativeHandle;
 
   /**
-   * @param nativeHandle a native handle: an implementation-specific reference to a native object.
+   * Creates a native proxy.
+   *
+   * @param nativeHandle an implementation-specific reference to a native object
    * @param owningHandle true if this proxy is responsible to release any native resources;
-   *                     false — otherwise.
+   *                     false — otherwise
    */
   AbstractNativeProxy(long nativeHandle, boolean owningHandle) {
     this.nativeHandle = nativeHandle;
