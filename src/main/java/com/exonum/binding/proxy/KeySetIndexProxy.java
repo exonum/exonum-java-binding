@@ -24,14 +24,7 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
  *
  * @see ValueSetIndexProxy
  */
-public class KeySetIndexProxy extends AbstractNativeProxy {
-
-  private final View dbView;
-
-  /**
-   * Needed to detect modifications of this set during iteration over other indices.
-   */
-  private final ViewModificationCounter modCounter;
+public class KeySetIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new key set proxy.
@@ -44,9 +37,7 @@ public class KeySetIndexProxy extends AbstractNativeProxy {
    * @throws NullPointerException if any argument is null
    */
   KeySetIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
-    dbView = view;
-    modCounter = ViewModificationCounter.getInstance();
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
   }
 
   /**
@@ -113,10 +104,6 @@ public class KeySetIndexProxy extends AbstractNativeProxy {
   public void remove(byte[] e) {
     notifyModified();
     nativeRemove(getNativeHandle(), checkStorageKey(e));
-  }
-
-  private void notifyModified() {
-    modCounter.notifyModified(checkCanModify(dbView));
   }
 
   @Override

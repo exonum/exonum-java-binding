@@ -1,6 +1,5 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkCanModify;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
 import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
@@ -19,14 +18,7 @@ import java.util.NoSuchElementException;
  * Subsequent use of the closed entry is prohibited
  * and will result in {@link IllegalStateException}.
  */
-public class EntryIndexProxy extends AbstractNativeProxy {
-
-  private final View dbView;
-
-  /**
-   * Needed to detect modifications of this entry during iteration over other indices.
-   */
-  private final ViewModificationCounter modCounter;
+public class EntryIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new Entry.
@@ -40,9 +32,7 @@ public class EntryIndexProxy extends AbstractNativeProxy {
    * @throws IllegalStateException if the view proxy is invalid
    */
   EntryIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
-    this.dbView = view;
-    this.modCounter = ViewModificationCounter.getInstance();
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
   }
 
   /**
@@ -95,10 +85,6 @@ public class EntryIndexProxy extends AbstractNativeProxy {
   public void remove() {
     notifyModified();
     nativeRemove(getNativeHandle());
-  }
-
-  private void notifyModified() {
-    modCounter.notifyModified(checkCanModify(dbView));
   }
 
   @Override

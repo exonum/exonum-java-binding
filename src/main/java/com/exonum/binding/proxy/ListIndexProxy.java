@@ -1,6 +1,5 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkCanModify;
 import static com.exonum.binding.proxy.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
@@ -22,11 +21,7 @@ import java.util.NoSuchElementException;
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  */
-public class ListIndexProxy extends AbstractNativeProxy {
-
-  private final View dbView;
-
-  private final ViewModificationCounter modCounter;
+public class ListIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new ListIndexProxy.
@@ -39,9 +34,7 @@ public class ListIndexProxy extends AbstractNativeProxy {
    * @throws NullPointerException if any argument is null
    */
   ListIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
-    this.dbView = view;
-    modCounter = ViewModificationCounter.getInstance();
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
   }
 
   /**
@@ -143,10 +136,6 @@ public class ListIndexProxy extends AbstractNativeProxy {
   public void clear() {
     notifyModified();
     nativeClear(getNativeHandle());
-  }
-
-  private void notifyModified() {
-    modCounter.notifyModified(checkCanModify(dbView));
   }
 
   /**
