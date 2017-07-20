@@ -87,7 +87,7 @@ pub extern "C" fn Java_com_exonum_binding_index_ValueSetIndex_nativeContainsByHa
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIter(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -103,7 +103,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIter(
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterFrom(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
     from: jbyteArray,
 ) -> Handle {
@@ -121,7 +121,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterFro
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashes(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -137,7 +137,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashes(
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashesFrom(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
     from: jbyteArray,
 ) -> Handle {
@@ -233,7 +233,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeClear(
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jobject {
     let res = panic::catch_unwind(|| {
@@ -244,7 +244,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterNex
                 let value: JObject = env.byte_array_from_slice(&val.1).unwrap().into();
                 env.new_object(
                     "com/exonum/bindings/index/ValueSetIndex$Entry",
-                    "(II)V",
+                    "([B[B)V",
                     &[hash.into(), value.into()],
                 ).unwrap()
                     .into_inner()
@@ -259,7 +259,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterNex
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
     utils::drop_handle::<ValueSetIndexIter<Value>>(&env, iter_handle);
@@ -269,7 +269,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeIterFre
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
@@ -286,7 +286,7 @@ pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashNex
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_index_ValueSetIndex_nativeHashFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
     utils::drop_handle::<ValueSetIndexHashes>(&env, iter_handle);
