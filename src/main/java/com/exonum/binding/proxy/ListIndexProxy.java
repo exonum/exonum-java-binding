@@ -11,8 +11,16 @@ import java.util.NoSuchElementException;
 
 /**
  * A list index proxy is a contiguous list of elements.
+ * Elements may be added to or removed from the end of the list only.
  *
- * <p>Elements may be added to or removed from the end of the list only.
+ * <p>The "destructive" methods of the list, i.e., those that change its contents,
+ * are specified to throw {@link UnsupportedOperationException} if
+ * this list has been created with a read-only database view.
+ *
+ * <p>This list implementation does not permit null elements.
+ *
+ * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
+ * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  */
 public class ListIndexProxy extends AbstractNativeProxy {
 
@@ -23,8 +31,12 @@ public class ListIndexProxy extends AbstractNativeProxy {
   /**
    * Creates a new ListIndexProxy.
    *
-   * @param prefix a list prefix — a unique identifier of this list in the underlying database
-   * @param view a database view.
+   * @param prefix a unique identifier of this list in the underlying storage
+   * @param view a database view. Must be valid.
+   *             If a view is read-only, "destructive" operations are not permitted.
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the prefix has zero size
+   * @throws NullPointerException if any argument is null
    */
   ListIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
@@ -36,6 +48,9 @@ public class ListIndexProxy extends AbstractNativeProxy {
    * Adds a new element to the end of the list.
    *
    * @param e an element to append to the list.
+   * @throws NullPointerException if the element is null
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
    */
   public void add(byte[] e) {
     notifyModified();
@@ -47,7 +62,10 @@ public class ListIndexProxy extends AbstractNativeProxy {
    *
    * @param index an index of the element to replace.
    * @param e an element to add.
-   * @throws IndexOutOfBoundsException if index is invalid.
+   * @throws IndexOutOfBoundsException if the index is invalid.
+   * @throws NullPointerException if the element is null
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
    */
   public void set(long index, byte[] e) {
     checkElementIndex(index, size());
@@ -61,6 +79,7 @@ public class ListIndexProxy extends AbstractNativeProxy {
    * @param index an index of the element to return.
    * @return an element at the given index.
    * @throws IndexOutOfBoundsException if index is invalid.
+   * @throws IllegalStateException if this list is not valid
    */
   public byte[] get(long index) {
     return nativeGet(getNativeHandle(), checkElementIndex(index, size()));
@@ -71,6 +90,7 @@ public class ListIndexProxy extends AbstractNativeProxy {
    *
    * @return the last element of the list.
    * @throws NoSuchElementException if the list is empty.
+   * @throws IllegalStateException if this list is not valid
    */
   public byte[] getLast() {
     byte[] e = nativeGetLast(getNativeHandle());
@@ -85,6 +105,8 @@ public class ListIndexProxy extends AbstractNativeProxy {
    *
    * @return the last element of the list.
    * @throws NoSuchElementException if the list is empty
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
    */
   public byte[] removeLast() {
     notifyModified();
@@ -101,7 +123,10 @@ public class ListIndexProxy extends AbstractNativeProxy {
    * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
    * If {@code newSize >= size()}, has no effect.
    *
-   * @param newSize the maximum number of elements to keep.
+   * @param newSize the maximum number of elements to keep
+   * @throws IllegalArgumentException if the new size is negative
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
    */
   public void truncate(long newSize) {
     checkArgument(newSize >= 0, "New size must be non-negative: " + newSize);
@@ -111,6 +136,9 @@ public class ListIndexProxy extends AbstractNativeProxy {
 
   /**
    * Clears the list.
+   *
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
    */
   public void clear() {
     notifyModified();
@@ -123,6 +151,8 @@ public class ListIndexProxy extends AbstractNativeProxy {
 
   /**
    * Returns true if the list is empty, false — otherwise.
+   *
+   * @throws IllegalStateException if this list is not valid
    */
   public boolean isEmpty() {
     return nativeIsEmpty(getNativeHandle());
@@ -130,13 +160,20 @@ public class ListIndexProxy extends AbstractNativeProxy {
 
   /**
    * Returns the number of elements in the list.
+   *
+   * @throws IllegalStateException if this list is not valid
    */
   public long size() {
     return nativeSize(getNativeHandle());
   }
 
   /**
-   * Returns an iterator over elements in the list.
+   * Returns an iterator over the elements of the list.
+   *
+   * <p>Any destructive operation on the same {@link Fork} this list uses
+   * (but not necessarily on <em>this list</em>) will invalidate the iterator.
+   *
+   * @throws IllegalStateException if this list is not valid
    */
   public RustIter<byte[]> iterator() {
     return new ConfigurableRustIter<>(nativeCreateIter(getNativeHandle()),

@@ -26,7 +26,7 @@ public class EntryIndexProxyIntegrationTest {
   }
 
   @Rule
-  public ExpectedException exception = ExpectedException.none();
+  public ExpectedException expectedException = ExpectedException.none();
 
   private static final byte[] entryPrefix = bytes("test entry");
 
@@ -68,7 +68,7 @@ public class EntryIndexProxyIntegrationTest {
   @Test
   public void setFailsWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (e) -> {
-      exception.expect(UnsupportedOperationException.class);
+      expectedException.expect(UnsupportedOperationException.class);
       e.set(V1);
     });
   }
@@ -81,7 +81,7 @@ public class EntryIndexProxyIntegrationTest {
   @Test
   public void getFailsIfNotPresent() throws Exception {
     runTestWithView(database::createSnapshot, (e) -> {
-      exception.expect(NoSuchElementException.class);
+      expectedException.expect(NoSuchElementException.class);
       e.get();
     });
   }
@@ -107,7 +107,7 @@ public class EntryIndexProxyIntegrationTest {
   @Test
   public void removeFailsWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (e) -> {
-      exception.expect(UnsupportedOperationException.class);
+      expectedException.expect(UnsupportedOperationException.class);
       e.remove();
     });
   }
@@ -119,7 +119,7 @@ public class EntryIndexProxyIntegrationTest {
 
     view.close();
 
-    exception.expect(IllegalStateException.class);
+    expectedException.expect(IllegalStateException.class);
     entry.close();
   }
 

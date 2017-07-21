@@ -6,7 +6,7 @@ use std::panic;
 use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, MapIndex};
-use exonum::storage::map_index::{MapIndexKeys, MapIndexValues};
+use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use utils::{self, Handle};
 use super::db::{View, Key, Value};
 
@@ -52,8 +52,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeFree(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -71,11 +71,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContainsKey(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -83,6 +83,22 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContain
              IndexType::SnapshotIndex(ref map) => map.contains(&key),
              IndexType::ForkIndex(ref map) => map.contains(&key),
          }) as jboolean
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns a pointer to the iterator over a map keys and values.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateIter(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter(),
+            IndexType::ForkIndex(ref map) => map.iter(),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -119,13 +135,31 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateV
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns a pointer to the iterator over a map keys and values  starting at the given key.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateIterFrom(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    key: jbyteArray,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let key = env.convert_byte_array(key).unwrap();
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
+            IndexType::ForkIndex(ref map) => map.iter_from(&key),
+        })
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Returns a pointer to the iterator over map keys starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFrom(
     env: JNIEnv,
     _: JClass,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -142,8 +176,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFro
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesFrom(
     env: JNIEnv,
     _: JClass,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
@@ -160,9 +194,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesF
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
     env: JNIEnv,
     _: JObject,
+    map_handle: Handle,
     key: jbyteArray,
     value: jbyteArray,
-    map_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -182,8 +216,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) {
     let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
@@ -213,6 +247,42 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeClear(
         }
     });
     utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns the next value from the iterator. Returns null pointer when iteration is finished.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterNext(
+    env: JNIEnv,
+    _: JObject,
+    iter_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let mut iter = utils::cast_handle::<MapIndexIter<Key, Value>>(iter_handle);
+        match iter.next() {
+            Some(val) => {
+                let key: JObject = env.byte_array_from_slice(&val.0).unwrap().into();
+                let value: JObject = env.byte_array_from_slice(&val.1).unwrap().into();
+                env.new_object(
+                    "com/exonum/bindings/index/MapIndexProxy$Entry",
+                    "([B[B)V",
+                    &[key.into(), value.into()],
+                ).unwrap()
+                    .into_inner()
+            }
+            None => ptr::null_mut(),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Destroys underlying `MapIndex` iterator object and frees memory.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterFree(
+    env: JNIEnv,
+    _: JObject,
+    iter_handle: Handle,
+) {
+    utils::drop_handle::<MapIndexIter<Key, Value>>(&env, iter_handle);
 }
 
 /// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.

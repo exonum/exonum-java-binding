@@ -10,8 +10,14 @@ import java.util.NoSuchElementException;
 /**
  * An Entry is a database index that can contain no or a single value.
  *
- * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying operations
- * when created with a {@link Fork}.
+ * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying ("destructive")
+ * operations when created with a {@link Fork}.
+ * Such methods are specified to throw {@link UnsupportedOperationException} if
+ * the entry is created with a {@link Snapshot} — a read-only database view.
+ *
+ * <p>As any native proxy, the entry <em>must be closed</em> when no longer needed.
+ * Subsequent use of the closed entry is prohibited
+ * and will result in {@link IllegalStateException}.
  */
 public class EntryIndexProxy extends AbstractNativeProxy {
 
@@ -25,8 +31,9 @@ public class EntryIndexProxy extends AbstractNativeProxy {
   /**
    * Creates a new Entry.
    *
-   * @param prefix a prefix ­ a unique identifier of the Entry
-   * @param view a database view
+   * @param prefix a unique identifier of the Entry in the underlying storage
+   * @param view a database view. Must be valid.
+   *             If a view is read-only, "destructive" operations are not permitted.
    *
    * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if the prefix is empty

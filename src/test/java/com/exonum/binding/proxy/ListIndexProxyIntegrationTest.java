@@ -213,11 +213,13 @@ public class ListIndexProxyIntegrationTest {
     });
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void truncateToNegativeThrows() throws Exception {
+  @Test
+  public void truncateToNegativeSizeThrows() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      long invalidSize = -1;
       l.add(V1);
+
+      expectedException.expect(IllegalArgumentException.class);
+      long invalidSize = -1;
       l.truncate(invalidSize);
     });
   }

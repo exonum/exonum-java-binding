@@ -16,15 +16,15 @@ public class NativeResourceManagerIntegrationTest {
   }
 
   @Rule
-  public ExpectedException exception = ExpectedException.none();
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void nativeResourceManagerShallThrowIfUnknownHandle() throws Exception {
     long unknownNativeHandle = 0x110b;
     Fork f = new Fork(unknownNativeHandle);
 
-    exception.expect(RuntimeException.class);
-    exception.expectMessage("Invalid handle value: '110B'");
+    expectedException.expect(RuntimeException.class);
+    expectedException.expectMessage("Invalid handle value: '110B'");
     f.close();
   }
 
@@ -34,8 +34,8 @@ public class NativeResourceManagerIntegrationTest {
     try (Database database = new MemoryDb()) {
       Fork f = new Fork(database.getNativeHandle());
 
-      exception.expect(RuntimeException.class);
-      exception.expectMessage("Wrong type id for");
+      expectedException.expect(RuntimeException.class);
+      expectedException.expectMessage("Wrong type id for");
       f.close();
     }
   }
