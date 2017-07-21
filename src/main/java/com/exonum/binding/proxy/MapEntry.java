@@ -10,6 +10,7 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
  * It does not reflect the changes made to the map since this entry had been created.
  */
 public class MapEntry {
+  // TODO: If this class will automatically deserialize raw values, override Object#toString
   private final byte[] key;
   private final byte[] value;
 

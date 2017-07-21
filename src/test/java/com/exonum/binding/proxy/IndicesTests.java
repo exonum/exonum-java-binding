@@ -18,7 +18,7 @@ class IndicesTests {
    * @param indexTest a test to run. Receives the created view and the index as arguments.
    * @param <I> type of the index
    */
-  static <I extends AbstractNativeProxy>
+  static <I extends NativeProxy>
       void runTestWithView(Supplier<View> viewSupplier,
                            byte[] indexPrefix,
                            BiFunction<byte[], View, I> indexSupplier,
