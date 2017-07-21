@@ -146,8 +146,7 @@ public class ValueSetIndexProxyIntegrationTest {
 
       elements.forEach(set::add);
 
-      try (RustIter<byte[]> rustIter = set.hashes();
-           StorageIterator<byte[]> iter = new RustIterAdapter<>(rustIter)) {
+      try (StorageIterator<byte[]> iter = new RustIterAdapter<>(set.hashes())) {
         List<byte[]> iterHashes = ImmutableList.copyOf(iter);
 
         // Check that there are as many hashes as elements
@@ -159,15 +158,51 @@ public class ValueSetIndexProxyIntegrationTest {
         }
 
         // Check that hashes appear in lexicographical order
-        List<byte[]> orderedHashes = elements.stream()
-            .map(ValueSetIndexProxyIntegrationTest::getHashOf)
-            .sorted(UnsignedBytes.lexicographicalComparator())
-            .collect(Collectors.toList());
+        List<byte[]> orderedHashes = getOrderedHashes(elements);
         for (int i = 0; i < elements.size(); i++) {
           assertThat(iterHashes.get(i), equalTo(orderedHashes.get(i)));
         }
       }
     });
+  }
+
+  @Test
+  public void testIterator() throws Exception {
+    runTestWithView(database::createFork, (set) -> {
+      List<byte[]> elements = TestStorageItems.values;
+
+      elements.forEach(set::add);
+
+      try (StorageIterator<ValueSetIndexProxy.Entry> iterator =
+                   new RustIterAdapter<>(set.iterator())) {
+        List<ValueSetIndexProxy.Entry> entriesFromIter = ImmutableList.copyOf(iterator);
+
+        assertThat(entriesFromIter.size(), equalTo(elements.size()));
+
+        for (ValueSetIndexProxy.Entry e : entriesFromIter) {
+          assertTrue(set.containsByHash(e.getHash()));
+          assertTrue(set.contains(e.getValue()));
+        }
+
+        for (ValueSetIndexProxy.Entry e : entriesFromIter) {
+          assertThat(e.getHash(), equalTo(getHashOf(e.getValue())));
+        }
+
+        List<byte[]> orderedHashes = getOrderedHashes(elements);
+        for (int i = 0; i < elements.size(); i++) {
+          byte[] hashFromIter = entriesFromIter.get(i).getHash();
+          byte[] expectedHash = orderedHashes.get(i);
+          assertThat(hashFromIter, equalTo(expectedHash));
+        }
+      }
+    });
+  }
+
+  private static List<byte[]> getOrderedHashes(List<byte[]> elements) {
+    return elements.stream()
+            .map(ValueSetIndexProxyIntegrationTest::getHashOf)
+            .sorted(UnsignedBytes.lexicographicalComparator())
+            .collect(Collectors.toList());
   }
 
   @Test
