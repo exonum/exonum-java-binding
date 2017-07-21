@@ -214,8 +214,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysShouldReturnIterWithAllKeys() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createSortedMapEntries((byte) 3);
-      for (Entry e : entries) {
+      List<MapEntry> entries = createSortedMapEntries((byte) 3);
+      for (MapEntry e : entries) {
         map.put(e.key, e.value);
       }
 
@@ -236,8 +236,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfThisMapModifiedAfterNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createMapEntries((byte) 3);
-      for (Entry e : entries) {
+      List<MapEntry> entries = createMapEntries((byte) 3);
+      for (MapEntry e : entries) {
         map.put(e.key, e.value);
       }
 
@@ -254,8 +254,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfThisMapModifiedBeforeNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createMapEntries((byte) 3);
-      for (Entry e : entries) {
+      List<MapEntry> entries = createMapEntries((byte) 3);
+      for (MapEntry e : entries) {
         map.put(e.key, e.value);
       }
 
@@ -271,8 +271,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfOtherIndexModified() throws Exception {
     runTestWithView(database::createFork, (view, map) -> {
-      List<Entry> entries = createMapEntries((byte) 3);
-      for (Entry e : entries) {
+      List<MapEntry> entries = createMapEntries((byte) 3);
+      for (MapEntry e : entries) {
         map.put(e.key, e.value);
       }
 
@@ -300,8 +300,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void valuesShouldReturnIterWithAllValues() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createSortedMapEntries((byte) 3);
-      for (Entry e : entries) {
+      List<MapEntry> entries = createSortedMapEntries((byte) 3);
+      for (MapEntry e : entries) {
         map.put(e.key, e.value);
       }
 
@@ -361,10 +361,10 @@ public class MapIndexProxyIntegrationTest {
   public void clearMultipleItemFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte numOfEntries = 5;
-      List<Entry> entries = createMapEntries(numOfEntries);
+      List<MapEntry> entries = createMapEntries(numOfEntries);
 
       // Put all entries
-      for (Entry e : entries) {
+      for (MapEntry e : entries) {
         map.put(e.key, e.value);
       }
 
@@ -372,7 +372,7 @@ public class MapIndexProxyIntegrationTest {
       map.clear();
 
       // Check there are no entries left.
-      for (Entry e : entries) {
+      for (MapEntry e : entries) {
         byte[] storedValue = map.get(e.key);
         assertNull(storedValue);
       }
@@ -397,7 +397,7 @@ public class MapIndexProxyIntegrationTest {
   /**
    * Creates `numOfEntries` map entries: [(0, 1), (1, 2), … (i, i+1)].
    */
-  private List<Entry> createMapEntries(byte numOfEntries) {
+  private List<MapEntry> createMapEntries(byte numOfEntries) {
     return createSortedMapEntries(numOfEntries);
   }
 
@@ -405,24 +405,14 @@ public class MapIndexProxyIntegrationTest {
    * Creates `numOfEntries` map entries, sorted by key:
    * [(0, 1), (1, 2), … (i, i+1)].
    */
-  private List<Entry> createSortedMapEntries(byte numOfEntries) {
+  private List<MapEntry> createSortedMapEntries(byte numOfEntries) {
     assert (numOfEntries < Byte.MAX_VALUE);
-    List<Entry> l = new ArrayList<>(numOfEntries);
+    List<MapEntry> l = new ArrayList<>(numOfEntries);
     for (byte k = 0; k < numOfEntries; k++) {
       byte[] key = bytes(k);
       byte[] value = bytes((byte) (k + 1));
-      l.add(new Entry(key, value));
+      l.add(new MapEntry(key, value));
     }
     return l;
-  }
-
-  private static class Entry {
-    byte[] key;
-    byte[] value;
-
-    Entry(byte[] key, byte[] value) {
-      this.key = key;
-      this.value = value;
-    }
   }
 }

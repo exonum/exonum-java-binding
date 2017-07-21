@@ -9,6 +9,8 @@ import java.util.Set;
 
 class StoragePreconditions {
 
+  static final int PROOF_MAP_KEY_SIZE = 32;
+
   private static final int MIN_INDEX_PREFIX_LENGTH = 1;
 
   /**
@@ -33,6 +35,21 @@ class StoragePreconditions {
    */
   static byte[] checkStorageKey(byte[] key) {
     return checkNotNull(key, "Storage key is null");
+  }
+
+  /**
+   * Checks that a proof map key is valid: not null and 32-byte long.
+   *
+   * @param key a proof map key
+   * @return an unmodified key if it's valid
+   * @throws NullPointerException if key is null
+   * @throws IllegalArgumentException if the size of the key is not 32 bytes
+   */
+  static byte[] checkProofKey(byte[] key) {
+    checkNotNull(key, "Proof map key is null");
+    checkArgument(key.length == PROOF_MAP_KEY_SIZE,
+        "Proof map key has invalid size: " + key.length);
+    return key;
   }
 
   /**

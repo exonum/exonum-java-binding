@@ -1,5 +1,6 @@
 package com.exonum.binding.proxy;
 
+import static com.exonum.binding.test.TestStorageItems.bytes;
 import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
@@ -63,6 +64,45 @@ public class StoragePreconditionsTest {
   @Test(expected = NullPointerException.class)
   public void checkStorageKeyDoesNotAcceptNull() throws Exception {
     StoragePreconditions.checkStorageKey(null);
+  }
+
+  @Test
+  public void checkProofKeyAccepts32ByteZeroKey() throws Exception {
+    byte[] key = new byte[32];
+
+    assertThat(key, sameInstance(StoragePreconditions.checkProofKey(key)));
+  }
+
+  @Test
+  public void checkProofKeyAccepts32ByteNonZeroKey() throws Exception {
+    byte[] key = bytes("0123456789abcdef0123456789abcdef");
+
+    assertThat(key, sameInstance(StoragePreconditions.checkProofKey(key)));
+  }
+
+  @Test
+  public void checkProofKeyDoesNotAcceptNull() throws Exception {
+    expected.expect(NullPointerException.class);
+    expected.expectMessage("Proof map key is null");
+    StoragePreconditions.checkProofKey(null);
+  }
+
+  @Test
+  public void checkProofKeyDoesNotAcceptSmallerKeys() throws Exception {
+    byte[] key = new byte[1];
+
+    expected.expect(IllegalArgumentException.class);
+    expected.expectMessage("Proof map key has invalid size: 1");
+    StoragePreconditions.checkProofKey(key);
+  }
+
+  @Test
+  public void checkProofKeyDoesNotAcceptBiggerKeys() throws Exception {
+    byte[] key = new byte[64];
+
+    expected.expect(IllegalArgumentException.class);
+    expected.expectMessage("Proof map key has invalid size: 64");
+    StoragePreconditions.checkProofKey(key);
   }
 
   @Test

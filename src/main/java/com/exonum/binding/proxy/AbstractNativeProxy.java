@@ -16,7 +16,7 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
  * statement to do that in orderly fashion.
  * When a proxy is closed, it becomes invalid.
  */
-abstract class AbstractNativeProxy implements AutoCloseable {
+abstract class AbstractNativeProxy implements NativeProxy {
 
   /**
    * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
@@ -66,14 +66,6 @@ abstract class AbstractNativeProxy implements AutoCloseable {
     return nativeHandle;
   }
 
-  /**
-   * Close the native proxy.
-   *
-   * <p>Notifies the native code that the native object is no longer needed, and may be safely
-   * destroyed. Once closed, the proxy becomes invalid.
-   *
-   * <p>On consecutive invocations does nothing.
-   */
   @Override
   public final void close() {
     if (isValid()) {
