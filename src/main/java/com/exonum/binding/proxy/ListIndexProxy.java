@@ -31,15 +31,15 @@ public class ListIndexProxy extends AbstractNativeProxy {
   /**
    * Creates a new ListIndexProxy.
    *
+   * @param prefix a unique identifier of this list in the underlying storage
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
-   * @param prefix a unique identifier of this list in the underlying storage
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  ListIndexProxy(View view, byte[] prefix) {
-    super(nativeCreate(view.getNativeHandle(), checkIndexPrefix(prefix)), true);
+  ListIndexProxy(byte[] prefix, View view) {
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), true);
     this.dbView = view;
     modCounter = ViewModificationCounter.getInstance();
   }
@@ -189,7 +189,7 @@ public class ListIndexProxy extends AbstractNativeProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(long viewNativeHandle, byte[] listPrefix);
+  private static native long nativeCreate(byte[] listPrefix, long viewNativeHandle);
 
   private native void nativeFree(long nativeHandle);
 

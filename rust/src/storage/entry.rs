@@ -1,6 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
-use jni::sys::{jlong, jbyteArray, jboolean};
+use jni::sys::{jbyteArray, jboolean};
 
 use std::panic;
 use std::ptr;
@@ -21,8 +21,8 @@ enum IndexType {
 pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view_handle: jlong,
     prefix: jbyteArray,
+    view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();

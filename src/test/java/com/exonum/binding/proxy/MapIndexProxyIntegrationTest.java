@@ -56,7 +56,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
-    MapIndexProxy map = new MapIndexProxy(view, mapPrefix);
+    MapIndexProxy map = new MapIndexProxy(mapPrefix, view);
 
     // Destroy a view before the map.
     view.close();
@@ -278,7 +278,7 @@ public class MapIndexProxyIntegrationTest {
 
       try (RustIter<byte[]> rustIter = map.keys()) {
         rustIter.next();
-        try (MapIndexProxy otherMap = new MapIndexProxy(view, bytes("other map"))) {
+        try (MapIndexProxy otherMap = new MapIndexProxy(bytes("other map"), view)) {
           otherMap.put(bytes("new key"), bytes("new value"));
         }
 
@@ -386,11 +386,12 @@ public class MapIndexProxyIntegrationTest {
 
   private void runTestWithView(Supplier<View> viewSupplier,
                                BiConsumer<View, MapIndexProxy> mapTest) {
-    assert (database != null && database.isValid());
-    try (View view = viewSupplier.get();
-         MapIndexProxy mapUnderTest = new MapIndexProxy(view, mapPrefix)) {
-      mapTest.accept(view, mapUnderTest);
-    }
+    IndicesTests.runTestWithView(
+        viewSupplier,
+        mapPrefix,
+        MapIndexProxy::new,
+        mapTest
+    );
   }
 
   /**
