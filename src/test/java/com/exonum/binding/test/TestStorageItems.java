@@ -53,4 +53,6 @@ public class TestStorageItems {
       throw new AssertionError(e);
     }
   }
+
+  private TestStorageItems() {}
 }

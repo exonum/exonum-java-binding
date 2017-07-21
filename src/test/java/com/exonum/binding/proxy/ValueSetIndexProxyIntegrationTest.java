@@ -255,8 +255,8 @@ public class ValueSetIndexProxyIntegrationTest {
    * @param viewSupplier a function creating a database view
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<ValueSetIndexProxy> valueSetTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      Consumer<ValueSetIndexProxy> valueSetTest) {
     runTestWithView(viewSupplier,
         (view, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
     );
@@ -269,8 +269,8 @@ public class ValueSetIndexProxyIntegrationTest {
    * @param viewSupplier a function creating a database view
    * @param valueSetTest a test to run. Receives the created view and the set as arguments.
    */
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ValueSetIndexProxy> valueSetTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      BiConsumer<View, ValueSetIndexProxy> valueSetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         VALUE_SET_PREFIX,
