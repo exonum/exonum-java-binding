@@ -13,4 +13,6 @@ public class TestParameters {
   public static Object[] parameters(Object... testParameters) {
     return testParameters;
   }
+
+  private TestParameters() {}
 }

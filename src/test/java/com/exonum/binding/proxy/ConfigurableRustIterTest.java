@@ -136,7 +136,7 @@ public class ConfigurableRustIterTest {
     iter.close();
   }
 
-  private Fork createForkMock() {
+  private static Fork createForkMock() {
     Fork fork = mock(Fork.class);
     when(fork.isValid()).thenReturn(true);
     return fork;

@@ -21,4 +21,6 @@ public final class LibraryLoader {
   private static void loadOnce() {
     System.loadLibrary(BINDINGS_LIB_NAME);
   }
+
+  private LibraryLoader() {}
 }

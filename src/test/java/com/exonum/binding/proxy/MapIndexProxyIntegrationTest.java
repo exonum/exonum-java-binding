@@ -379,13 +379,13 @@ public class MapIndexProxyIntegrationTest {
     });
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<MapIndexProxy> mapTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      Consumer<MapIndexProxy> mapTest) {
     runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, MapIndexProxy> mapTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      BiConsumer<View, MapIndexProxy> mapTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         mapPrefix,
@@ -397,7 +397,7 @@ public class MapIndexProxyIntegrationTest {
   /**
    * Creates `numOfEntries` map entries: [(0, 1), (1, 2), … (i, i+1)].
    */
-  private List<Entry> createMapEntries(byte numOfEntries) {
+  private static List<Entry> createMapEntries(byte numOfEntries) {
     return createSortedMapEntries(numOfEntries);
   }
 
@@ -405,7 +405,7 @@ public class MapIndexProxyIntegrationTest {
    * Creates `numOfEntries` map entries, sorted by key:
    * [(0, 1), (1, 2), … (i, i+1)].
    */
-  private List<Entry> createSortedMapEntries(byte numOfEntries) {
+  private static List<Entry> createSortedMapEntries(byte numOfEntries) {
     assert (numOfEntries < Byte.MAX_VALUE);
     List<Entry> l = new ArrayList<>(numOfEntries);
     for (byte k = 0; k < numOfEntries; k++) {

@@ -123,13 +123,13 @@ public class EntryIndexProxyIntegrationTest {
     entry.close();
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<EntryIndexProxy> entryTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      Consumer<EntryIndexProxy> entryTest) {
     runTestWithView(viewSupplier, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, EntryIndexProxy> entryTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      BiConsumer<View, EntryIndexProxy> entryTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         entryPrefix,

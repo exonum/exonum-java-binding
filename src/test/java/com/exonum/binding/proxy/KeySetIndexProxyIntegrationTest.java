@@ -181,8 +181,8 @@ public class KeySetIndexProxyIntegrationTest {
    * @param viewSupplier a function creating a database view
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<KeySetIndexProxy> keySetTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      Consumer<KeySetIndexProxy> keySetTest) {
     runTestWithView(viewSupplier, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
 
@@ -193,8 +193,8 @@ public class KeySetIndexProxyIntegrationTest {
    * @param viewSupplier a function creating a database view
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, KeySetIndexProxy> keySetTest) {
+  private static void runTestWithView(Supplier<View> viewSupplier,
+                                      BiConsumer<View, KeySetIndexProxy> keySetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         KEY_SET_PREFIX,
