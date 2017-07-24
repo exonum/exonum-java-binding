@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.storage.RustIterAdapter;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -214,9 +215,9 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysShouldReturnIterWithAllKeys() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createSortedMapEntries((byte) 3);
-      for (Entry e : entries) {
-        map.put(e.key, e.value);
+      List<MapEntry> entries = createSortedMapEntries((byte) 3);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
       }
 
       try (RustIter<byte[]> rustIter = map.keys();
@@ -224,7 +225,7 @@ public class MapIndexProxyIntegrationTest {
         int i = 0;
         while (iterator.hasNext()) {
           byte[] keyInIter = iterator.next();
-          byte[] keyInMap = entries.get(i).key;
+          byte[] keyInMap = entries.get(i).getKey();
           assertThat(keyInIter, equalTo(keyInMap));
           i++;
         }
@@ -236,9 +237,9 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfThisMapModifiedAfterNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createMapEntries((byte) 3);
-      for (Entry e : entries) {
-        map.put(e.key, e.value);
+      List<MapEntry> entries = createMapEntries((byte) 3);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
       }
 
       try (RustIter<byte[]> rustIter = map.keys()) {
@@ -254,9 +255,9 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfThisMapModifiedBeforeNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createMapEntries((byte) 3);
-      for (Entry e : entries) {
-        map.put(e.key, e.value);
+      List<MapEntry> entries = createMapEntries((byte) 3);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
       }
 
       try (RustIter<byte[]> rustIter = map.keys()) {
@@ -271,9 +272,9 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfOtherIndexModified() throws Exception {
     runTestWithView(database::createFork, (view, map) -> {
-      List<Entry> entries = createMapEntries((byte) 3);
-      for (Entry e : entries) {
-        map.put(e.key, e.value);
+      List<MapEntry> entries = createMapEntries((byte) 3);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
       }
 
       try (RustIter<byte[]> rustIter = map.keys()) {
@@ -300,9 +301,9 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void valuesShouldReturnIterWithAllValues() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<Entry> entries = createSortedMapEntries((byte) 3);
-      for (Entry e : entries) {
-        map.put(e.key, e.value);
+      List<MapEntry> entries = createSortedMapEntries((byte) 3);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
       }
 
       try (RustIter<byte[]> rustIter = map.values();
@@ -310,11 +311,38 @@ public class MapIndexProxyIntegrationTest {
         int i = 0;
         while (iterator.hasNext()) {
           byte[] valueInIter = iterator.next();
-          byte[] valueInMap = entries.get(i).value;
+          byte[] valueInMap = entries.get(i).getValue();
           assertThat(valueInIter, equalTo(valueInMap));
           i++;
         }
         assertFalse(iterator.hasNext());
+      }
+    });
+  }
+
+  @Test
+  public void entriesShouldReturnIterWithAllValues() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry> entries = createSortedMapEntries((byte) 3);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      try (RustIterAdapter<MapEntry> iterator = new RustIterAdapter<>(map.entries())) {
+        List<MapEntry> iterEntries = ImmutableList.copyOf(iterator);
+
+        assertThat(iterEntries.size(), equalTo(entries.size()));
+
+        for (MapEntry e : iterEntries) {
+          assertThat(map.get(e.getKey()), equalTo(e.getValue()));
+        }
+
+        for (int i = 0; i < entries.size(); i++) {
+          MapEntry expected = entries.get(i);
+          MapEntry actual = iterEntries.get(i);
+          assertThat(actual.getKey(), equalTo(expected.getKey()));
+          assertThat(actual.getValue(), equalTo(expected.getValue()));
+        }
       }
     });
   }
@@ -361,19 +389,19 @@ public class MapIndexProxyIntegrationTest {
   public void clearMultipleItemFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte numOfEntries = 5;
-      List<Entry> entries = createMapEntries(numOfEntries);
+      List<MapEntry> entries = createMapEntries(numOfEntries);
 
       // Put all entries
-      for (Entry e : entries) {
-        map.put(e.key, e.value);
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
       }
 
       // Clear the map
       map.clear();
 
       // Check there are no entries left.
-      for (Entry e : entries) {
-        byte[] storedValue = map.get(e.key);
+      for (MapEntry e : entries) {
+        byte[] storedValue = map.get(e.getKey());
         assertNull(storedValue);
       }
     });
@@ -397,7 +425,7 @@ public class MapIndexProxyIntegrationTest {
   /**
    * Creates `numOfEntries` map entries: [(0, 1), (1, 2), … (i, i+1)].
    */
-  private static List<Entry> createMapEntries(byte numOfEntries) {
+  private static List<MapEntry> createMapEntries(byte numOfEntries) {
     return createSortedMapEntries(numOfEntries);
   }
 
@@ -405,24 +433,14 @@ public class MapIndexProxyIntegrationTest {
    * Creates `numOfEntries` map entries, sorted by key:
    * [(0, 1), (1, 2), … (i, i+1)].
    */
-  private static List<Entry> createSortedMapEntries(byte numOfEntries) {
+  private static List<MapEntry> createSortedMapEntries(byte numOfEntries) {
     assert (numOfEntries < Byte.MAX_VALUE);
-    List<Entry> l = new ArrayList<>(numOfEntries);
+    List<MapEntry> l = new ArrayList<>(numOfEntries);
     for (byte k = 0; k < numOfEntries; k++) {
       byte[] key = bytes(k);
       byte[] value = bytes((byte) (k + 1));
-      l.add(new Entry(key, value));
+      l.add(new MapEntry(key, value));
     }
     return l;
-  }
-
-  private static class Entry {
-    byte[] key;
-    byte[] value;
-
-    Entry(byte[] key, byte[] value) {
-      this.key = key;
-      this.value = value;
-    }
   }
 }
