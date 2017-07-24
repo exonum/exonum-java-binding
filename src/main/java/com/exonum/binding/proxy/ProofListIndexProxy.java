@@ -4,13 +4,15 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
 import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.NoSuchElementException;
 
 /**
- * A list index proxy is a contiguous list of elements.
- * Elements may be added to or removed from the end of the list only.
+ * A proof list index proxy is a contiguous list of elements, capable of providing
+ * cryptographic proofs that it contains a certain element at a particular position.
+ * Elements may be added to the end of the list only.
+ *
+ * <p>The proof list is implemented as a hash tree (Merkle tree).
  *
  * <p>The "destructive" methods of the list, i.e., those that change its contents,
  * are specified to throw {@link UnsupportedOperationException} if
@@ -21,10 +23,10 @@ import java.util.NoSuchElementException;
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  */
-public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
+public class ProofListIndexProxy extends AbstractIndexProxy implements ListIndex {
 
   /**
-   * Creates a new ListIndexProxy.
+   * Creates a new ProofListIndexProxy.
    *
    * @param prefix a unique identifier of this list in the underlying storage
    * @param view a database view. Must be valid.
@@ -33,7 +35,7 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  ListIndexProxy(byte[] prefix, View view) {
+  ProofListIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
   }
 
@@ -48,6 +50,7 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
     checkElementIndex(index, size());
     notifyModified();
     nativeSet(getNativeHandle(), index, checkStorageValue(e));
+
   }
 
   @Override
@@ -64,40 +67,6 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
       throw new NoSuchElementException("List is empty");
     }
     return e;
-  }
-
-  /**
-   * Removes the last element of the list and returns it.
-   *
-   * @return the last element of the list.
-   * @throws NoSuchElementException if the list is empty
-   * @throws IllegalStateException if this list is not valid
-   * @throws UnsupportedOperationException if this list is read-only
-   */
-  public byte[] removeLast() {
-    notifyModified();
-    byte[] e = nativeRemoveLast(getNativeHandle());
-    if (e == null) {
-      throw new NoSuchElementException("List is empty");
-    }
-    return e;
-  }
-
-  /**
-   * Truncates the list, reducing its size to {@code newSize}.
-   *
-   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
-   * If {@code newSize >= size()}, has no effect.
-   *
-   * @param newSize the maximum number of elements to keep
-   * @throws IllegalArgumentException if the new size is negative
-   * @throws IllegalStateException if this list is not valid
-   * @throws UnsupportedOperationException if this list is read-only
-   */
-  public void truncate(long newSize) {
-    checkArgument(newSize >= 0, "New size must be non-negative: " + newSize);
-    notifyModified();
-    nativeTruncate(getNativeHandle(), newSize);
   }
 
   @Override
@@ -143,10 +112,6 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
 
   private native byte[] nativeGetLast(long nativeHandle);
 
-  private native byte[] nativeRemoveLast(long nativeHandle);
-
-  private native void nativeTruncate(long nativeHandle, long newSize);
-
   private native void nativeClear(long nativeHandle);
 
   private native boolean nativeIsEmpty(long nativeHandle);
@@ -158,5 +123,4 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
   private native byte[] nativeIterNext(long iterNativeHandle);
 
   private native void nativeIterFree(long iterNativeHandle);
-
 }
