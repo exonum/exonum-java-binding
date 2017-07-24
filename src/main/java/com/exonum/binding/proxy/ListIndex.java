@@ -87,5 +87,5 @@ public interface ListIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this list is not valid
    */
-  RustIter<byte[]> iterator();
+  StorageIterator<byte[]> iterator();
 }

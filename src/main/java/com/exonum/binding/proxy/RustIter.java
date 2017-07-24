@@ -2,19 +2,19 @@ package com.exonum.binding.proxy;
 
 import java.util.Optional;
 
-public abstract class RustIter<E> extends AbstractNativeProxy {
-  /**
-   * @param nativeHandle a native handle: an implementation-specific reference to a native iterator.
-   * @param owningHandle true if this proxy is responsible to release any native resources;
-   */
-  RustIter(long nativeHandle, boolean owningHandle) {
-    super(nativeHandle, owningHandle);
-  }
+/**
+ * An interface corresponding to
+ * <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">std::iter::Iterator</a>
+ * from the Rust standard library.
+ *
+ * @param <E> type of elements returned by this iterator
+ */
+interface RustIter<E> extends NativeProxy {
 
   /**
    * Advance the iterator to the next item.
    *
    * @return the next item or {@link Optional#empty} if the end is reached.
    */
-  public abstract Optional<E> next();
+  Optional<E> next();
 }

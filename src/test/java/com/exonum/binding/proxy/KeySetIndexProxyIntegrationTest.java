@@ -8,8 +8,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.RustIterAdapter;
-import com.exonum.binding.storage.StorageIterator;
 import com.exonum.binding.test.TestStorageItems;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
@@ -113,9 +111,8 @@ public class KeySetIndexProxyIntegrationTest {
 
       elements.forEach(set::add);
 
-      try (RustIter<byte[]> rustIter = set.iterator();
-           StorageIterator<byte[]> iter = new RustIterAdapter<>(rustIter)) {
-        List<byte[]> iterElements = ImmutableList.copyOf(iter);
+      try (StorageIterator<byte[]> iterator = set.iterator()) {
+        List<byte[]> iterElements = ImmutableList.copyOf(iterator);
 
         // Check that there are as many elements as expected
         assertThat(elements.size(), equalTo(iterElements.size()));

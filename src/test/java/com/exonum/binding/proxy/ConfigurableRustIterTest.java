@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import com.exonum.binding.storage.RustIterAdapter;
 import com.google.common.collect.ImmutableList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;

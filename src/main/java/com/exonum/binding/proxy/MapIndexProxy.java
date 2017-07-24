@@ -57,8 +57,9 @@ public class MapIndexProxy extends AbstractIndexProxy implements MapIndex {
   }
 
   @Override
-  public RustIter<byte[]> keys() {
-    return new ConfigurableRustIter<>(nativeCreateKeysIter(getNativeHandle()),
+  public StorageIterator<byte[]> keys() {
+    return StorageIterators.createIterator(
+        nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
         dbView,
@@ -66,17 +67,19 @@ public class MapIndexProxy extends AbstractIndexProxy implements MapIndex {
   }
 
   @Override
-  public RustIter<byte[]> values() {
-    return new ConfigurableRustIter<>(nativeCreateValuesIter(getNativeHandle()),
-          this::nativeValuesIterNext,
-          this::nativeValuesIterFree,
-          dbView,
-          modCounter);
+  public StorageIterator<byte[]> values() {
+    return StorageIterators.createIterator(
+        nativeCreateValuesIter(getNativeHandle()),
+        this::nativeValuesIterNext,
+        this::nativeValuesIterFree,
+        dbView,
+        modCounter);
   }
 
   @Override
-  public RustIter<MapEntry> entries() {
-    return new ConfigurableRustIter<>(nativeCreateEntriesIter(getNativeHandle()),
+  public StorageIterator<MapEntry> entries() {
+    return StorageIterators.createIterator(
+        nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
         dbView,

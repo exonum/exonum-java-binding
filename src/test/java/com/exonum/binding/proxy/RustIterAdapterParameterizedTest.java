@@ -1,4 +1,4 @@
-package com.exonum.binding.storage;
+package com.exonum.binding.proxy;
 
 import static com.exonum.binding.test.TestParameters.parameters;
 import static java.util.Arrays.asList;
@@ -9,8 +9,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.runners.Parameterized.Parameter;
 import static org.junit.runners.Parameterized.Parameters;
 
-import com.exonum.binding.proxy.RustIter;
-import com.exonum.binding.proxy.RustIterTestFake;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;

@@ -1,8 +1,7 @@
-package com.exonum.binding.storage;
+package com.exonum.binding.proxy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.proxy.RustIter;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -11,14 +10,14 @@ import java.util.Optional;
  *
  * @param <E> type of the entry.
  */
-public class RustIterAdapter<E> implements StorageIterator<E> {
+class RustIterAdapter<E> implements StorageIterator<E> {
 
   private final RustIter<E> rustIter;
 
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<E> nextItem;
 
-  public RustIterAdapter(RustIter<E> rustIter) {
+  RustIterAdapter(RustIter<E> rustIter) {
     this.rustIter = checkNotNull(rustIter);
     this.nextItem = rustIter.next();
   }

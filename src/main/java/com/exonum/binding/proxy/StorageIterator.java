@@ -1,7 +1,5 @@
-package com.exonum.binding.storage;
+package com.exonum.binding.proxy;
 
-import com.exonum.binding.proxy.NativeProxy;
-import com.exonum.binding.proxy.RustIter;
 import java.util.Iterator;
 
 /**

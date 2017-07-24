@@ -80,14 +80,13 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native void nativeRemove(long nativeHandle, byte[] key);
 
   @Override
-  public RustIter<byte[]> keys() {
-    return new ConfigurableRustIter<>(
+  public StorageIterator<byte[]> keys() {
+    return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
         dbView,
-        modCounter
-    );
+        modCounter);
   }
 
   private native long nativeCreateKeysIter(long nativeHandle);
@@ -97,8 +96,8 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native void nativeKeysIterFree(long iterNativeHandle);
 
   @Override
-  public RustIter<byte[]> values() {
-    return new ConfigurableRustIter<>(
+  public StorageIterator<byte[]> values() {
+    return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
         this::nativeValuesIterFree,
@@ -113,8 +112,8 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native void nativeValuesIterFree(long iterNativeHandle);
 
   @Override
-  public RustIter<MapEntry> entries() {
-    return new ConfigurableRustIter<>(
+  public StorageIterator<MapEntry> entries() {
+    return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
