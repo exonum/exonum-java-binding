@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 
 [lib]
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 [features]
 # Enables native handles checking. Useful for debugging.
