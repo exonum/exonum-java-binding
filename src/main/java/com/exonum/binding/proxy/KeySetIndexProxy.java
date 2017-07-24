@@ -1,6 +1,5 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkCanModify;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
@@ -85,8 +84,9 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 
    */
-  public RustIter<byte[]> iterator() {
-    return new ConfigurableRustIter<>(nativeCreateIterator(getNativeHandle()),
+  public StorageIterator<byte[]> iterator() {
+    return StorageIterators.createIterator(
+        nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
         dbView,

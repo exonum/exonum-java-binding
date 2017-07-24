@@ -8,15 +8,12 @@ import static com.exonum.binding.test.TestStorageItems.bytes;
 import static com.exonum.binding.test.TestStorageItems.values;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.RustIterAdapter;
-import com.exonum.binding.storage.StorageIterator;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
@@ -25,9 +22,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -163,7 +157,7 @@ public class ProofMapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (StorageIterator<byte[]> keysIterator = new RustIterAdapter<>(map.keys())) {
+      try (StorageIterator<byte[]> keysIterator = map.keys()) {
         List<byte[]> keysFromIter = ImmutableList.copyOf(keysIterator);
 
         assertThat(keysFromIter.size(), equalTo(entries.size()));
@@ -188,7 +182,7 @@ public class ProofMapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (StorageIterator<byte[]> valuesIterator = new RustIterAdapter<>(map.values())) {
+      try (StorageIterator<byte[]> valuesIterator = map.values()) {
         List<byte[]> valuesFromIter = ImmutableList.copyOf(valuesIterator);
 
         assertThat(valuesFromIter.size(), equalTo(entries.size()));
@@ -210,7 +204,7 @@ public class ProofMapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (StorageIterator<MapEntry> entriesIterator = new RustIterAdapter<>(map.entries())) {
+      try (StorageIterator<MapEntry> entriesIterator = map.entries()) {
         List<MapEntry> entriesFromIter = ImmutableList.copyOf(entriesIterator);
 
         assertThat(entriesFromIter.size(), equalTo(entries.size()));

@@ -12,7 +12,7 @@ import java.util.function.Function;
  *
  * @param <E> type of elements returned by the iterator.
  */
-class ConfigurableRustIter<E> extends RustIter<E> {
+class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
   private final Function<Long, E> nextFunction;
   private final Consumer<Long> disposeOperation;

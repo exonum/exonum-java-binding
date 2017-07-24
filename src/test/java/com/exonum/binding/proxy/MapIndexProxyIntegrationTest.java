@@ -10,7 +10,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.RustIterAdapter;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -206,8 +205,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysShouldReturnEmptyIterIfNoEntries() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      try (RustIter<byte[]> iter = map.keys()) {
-        assertFalse(iter.next().isPresent());
+      try (StorageIterator<byte[]> iterator = map.keys()) {
+        assertFalse(iterator.hasNext());
       }
     });
   }
@@ -220,8 +219,7 @@ public class MapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (RustIter<byte[]> rustIter = map.keys();
-           RustIterAdapter<byte[]> iterator = new RustIterAdapter<>(rustIter)) {
+      try (StorageIterator<byte[]> iterator = map.keys()) {
         int i = 0;
         while (iterator.hasNext()) {
           byte[] keyInIter = iterator.next();
@@ -242,12 +240,12 @@ public class MapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (RustIter<byte[]> rustIter = map.keys()) {
-        rustIter.next();
+      try (StorageIterator<byte[]> iterator = map.keys()) {
+        iterator.next();
         map.put(bytes("new key"), bytes("new value"));
 
         expectedException.expect(ConcurrentModificationException.class);
-        rustIter.next();
+        iterator.next();
       }
     });
   }
@@ -260,11 +258,11 @@ public class MapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (RustIter<byte[]> rustIter = map.keys()) {
+      try (StorageIterator<byte[]> iterator = map.keys()) {
         map.put(bytes("new key"), bytes("new value"));
 
         expectedException.expect(ConcurrentModificationException.class);
-        rustIter.next();
+        iterator.next();
       }
     });
   }
@@ -277,14 +275,14 @@ public class MapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (RustIter<byte[]> rustIter = map.keys()) {
-        rustIter.next();
+      try (StorageIterator<byte[]> iterator = map.keys()) {
+        iterator.next();
         try (MapIndexProxy otherMap = new MapIndexProxy(bytes("other map"), view)) {
           otherMap.put(bytes("new key"), bytes("new value"));
         }
 
         expectedException.expect(ConcurrentModificationException.class);
-        rustIter.next();
+        iterator.next();
       }
     });
   }
@@ -292,8 +290,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void valuesShouldReturnEmptyIterIfNoEntries() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      try (RustIter<byte[]> iter = map.values()) {
-        assertFalse(iter.next().isPresent());
+      try (StorageIterator<byte[]> iterator = map.values()) {
+        assertFalse(iterator.hasNext());
       }
     });
   }
@@ -306,8 +304,7 @@ public class MapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (RustIter<byte[]> rustIter = map.values();
-           RustIterAdapter<byte[]> iterator = new RustIterAdapter<>(rustIter)) {
+      try (StorageIterator<byte[]> iterator = map.values()) {
         int i = 0;
         while (iterator.hasNext()) {
           byte[] valueInIter = iterator.next();
@@ -328,7 +325,7 @@ public class MapIndexProxyIntegrationTest {
         map.put(e.getKey(), e.getValue());
       }
 
-      try (RustIterAdapter<MapEntry> iterator = new RustIterAdapter<>(map.entries())) {
+      try (StorageIterator<MapEntry> iterator = map.entries()) {
         List<MapEntry> iterEntries = ImmutableList.copyOf(iterator);
 
         assertThat(iterEntries.size(), equalTo(entries.size()));

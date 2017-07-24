@@ -9,8 +9,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.RustIterAdapter;
-import com.exonum.binding.storage.StorageIterator;
 import com.exonum.binding.test.TestStorageItems;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
@@ -146,7 +144,7 @@ public class ValueSetIndexProxyIntegrationTest {
 
       elements.forEach(set::add);
 
-      try (StorageIterator<byte[]> iter = new RustIterAdapter<>(set.hashes())) {
+      try (StorageIterator<byte[]> iter = set.hashes()) {
         List<byte[]> iterHashes = ImmutableList.copyOf(iter);
 
         // Check that there are as many hashes as elements
@@ -173,8 +171,7 @@ public class ValueSetIndexProxyIntegrationTest {
 
       elements.forEach(set::add);
 
-      try (StorageIterator<ValueSetIndexProxy.Entry> iterator =
-                   new RustIterAdapter<>(set.iterator())) {
+      try (StorageIterator<ValueSetIndexProxy.Entry> iterator = set.iterator()) {
         List<ValueSetIndexProxy.Entry> entriesFromIter = ImmutableList.copyOf(iterator);
 
         assertThat(entriesFromIter.size(), equalTo(elements.size()));

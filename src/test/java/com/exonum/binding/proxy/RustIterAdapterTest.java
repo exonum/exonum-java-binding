@@ -1,12 +1,10 @@
-package com.exonum.binding.storage;
+package com.exonum.binding.proxy;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.spy;
 
-import com.exonum.binding.proxy.RustIter;
-import com.exonum.binding.proxy.RustIterTestFake;
 import java.util.NoSuchElementException;
 import org.junit.Rule;
 import org.junit.Test;

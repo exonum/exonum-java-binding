@@ -1,6 +1,5 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkCanModify;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
@@ -100,8 +99,8 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
    */
-  public RustIter<byte[]> hashes() {
-    return new ConfigurableRustIter<>(
+  public StorageIterator<byte[]> hashes() {
+    return StorageIterators.createIterator(
         nativeCreateHashIterator(getNativeHandle()),
         this::nativeHashIteratorNext,
         this::nativeHashIteratorFree,
@@ -119,14 +118,13 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
-  public RustIter<Entry> iterator() {
-    return new ConfigurableRustIter<>(
+  public StorageIterator<Entry> iterator() {
+    return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
         dbView,
-        modCounter
-    );
+        modCounter);
   }
 
   private native long nativeCreateIterator(long nativeHandle);

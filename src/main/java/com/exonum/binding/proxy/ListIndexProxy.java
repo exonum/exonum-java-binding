@@ -117,8 +117,9 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
   }
 
   @Override
-  public RustIter<byte[]> iterator() {
-    return new ConfigurableRustIter<>(nativeCreateIter(getNativeHandle()),
+  public StorageIterator<byte[]> iterator() {
+    return StorageIterators.createIterator(
+        nativeCreateIter(getNativeHandle()),
         this::nativeIterNext,
         this::nativeIterFree,
         dbView,

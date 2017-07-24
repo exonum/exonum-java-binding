@@ -8,11 +8,10 @@ import java.util.Optional;
  *
  * <p>An adapter of {@link Iterator} to {@link RustIter}.
  */
-public class RustIterTestFake extends RustIter<Integer> {
+public class RustIterTestFake implements RustIter<Integer> {
   private final Iterator<Integer> iterator;
 
-  public RustIterTestFake(Iterable<Integer> iterable) {
-    super(1L, true);
+  RustIterTestFake(Iterable<Integer> iterable) {
     this.iterator = iterable.iterator();
   }
 
@@ -23,7 +22,7 @@ public class RustIterTestFake extends RustIter<Integer> {
   }
 
   @Override
-  void disposeInternal() {
+  public void close() {
     // no-op
   }
 }

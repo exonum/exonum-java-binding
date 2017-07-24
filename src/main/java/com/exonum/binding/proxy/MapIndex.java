@@ -69,7 +69,7 @@ public interface MapIndex extends NativeProxy {
    */
   // TODO(dt): consider creating a subclass (RustByteIter) so that you don't have to put a
   // type parameter?
-  RustIter<byte[]> keys();
+  StorageIterator<byte[]> keys();
 
   /**
    * Returns an iterator over the map values in lexicographical order of <em>keys</em>.
@@ -81,7 +81,7 @@ public interface MapIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  RustIter<byte[]> values();
+  StorageIterator<byte[]> values();
 
   /**
    * Returns an iterator over the map entries.
@@ -94,7 +94,7 @@ public interface MapIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  RustIter<MapEntry> entries();
+  StorageIterator<MapEntry> entries();
 
   /**
    * Removes all of the key-value pairs from the map.

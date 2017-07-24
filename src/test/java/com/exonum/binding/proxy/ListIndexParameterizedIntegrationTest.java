@@ -10,8 +10,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.RustIterAdapter;
-import com.exonum.binding.storage.StorageIterator;
 import com.exonum.binding.test.TestStorageItems;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
@@ -217,7 +215,7 @@ public class ListIndexParameterizedIntegrationTest {
 
       elements.forEach(l::add);
 
-      try (StorageIterator<byte[]> iterator = new RustIterAdapter<>(l.iterator())) {
+      try (StorageIterator<byte[]> iterator = l.iterator()) {
         List<byte[]> iterElements = ImmutableList.copyOf(iterator);
 
         assertThat(elements.size(), equalTo(iterElements.size()));
