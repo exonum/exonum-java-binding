@@ -2,16 +2,13 @@ package com.exonum.binding.proxy;
 
 import static org.junit.Assert.assertNotNull;
 
+import com.exonum.binding.util.LibraryLoader;
 import org.junit.Test;
 
 public class MemoryDbIntegrationTest {
 
   static {
-    // To have library `libjava_bindings` available by name,
-    // add a path to the folder containing it to java.library.path,
-    // e.g.: java -Djava.library.path=rust/target/release …
-    System.loadLibrary("java_bindings");
-    // TODO(dt): Replace with a library loader.
+    LibraryLoader.load();
   }
 
   @Test

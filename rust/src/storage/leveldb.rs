@@ -19,7 +19,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreate(
         // TODO: `leveldb::options::Options` should be reexported.
         // TODO: Pass open options.
         // let path = env.get_string(path).expect("Couldn't get java string!").into();
-        // Box::into_raw(Box::new(LevelDB::open(path))) as jlong
+        // utils::to_handle(LevelDB::open(path)))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -31,7 +31,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeFree(
     _: JObject,
     db_handle: Handle,
 ) {
-    utils::drop_object::<LevelDB>(&env, db_handle);
+    utils::drop_handle::<LevelDB>(&env, db_handle);
 }
 
 /// Returns pointer to created `Snapshot` object.
@@ -42,8 +42,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateSnapsho
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<LevelDB>(db_handle);
-        Box::into_raw(Box::new(View::Snapshot(db.snapshot()))) as Handle
+        let db = utils::cast_handle::<LevelDB>(db_handle);
+        utils::to_handle(View::Snapshot(db.snapshot()))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -56,8 +56,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateFork(
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_object::<LevelDB>(db_handle);
-        Box::into_raw(Box::new(View::Fork(db.fork()))) as Handle
+        let db = utils::cast_handle::<LevelDB>(db_handle);
+        utils::to_handle(View::Fork(db.fork()))
     });
     utils::unwrap_exc_or_default(&env, res)
 }

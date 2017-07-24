@@ -1,19 +1,20 @@
 [package]
 name = "java_bindings"
 version = "0.1.0"
-authors = ["Stanislav Tkach <stanislav.tkach@xdev.re"]
+authors = ["Exonum Team <exonum@bitfury.com>"]
 
 [lib]
 crate-type = ["cdylib"]
 
+[features]
+# Enables native handles checking. Useful for debugging.
+resource-manager = ["lazy_static"]
+
 [dependencies]
+# ¡Please keep README.md in sync with the Exonum version,
+# so that users are directed to the correct build instructions!
+exonum = "0.1"
 log = "0.3"
 env_logger = "0.3"
 jni = "0.5.0"
-
-[dependencies.exonum]
-git = "ssh://git@github.com/exonum/exonum-core.git"
-version = "0.1.0"
-# ¡Please keep README.md in sync with the Exonum-Core version,
-# so that users are directed to the correct build instructions!
-rev = "f68c29e8ddac7e3fe327e3949efb2729803aec8a"
+lazy_static = { version = "0.2", optional = true }

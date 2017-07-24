@@ -6,7 +6,7 @@ use std::panic;
 use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, MapIndex};
-use exonum::storage::map_index::{MapIndexKeys, MapIndexValues};
+use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use utils::{self, Handle};
 use super::db::{View, Key, Value};
 
@@ -22,17 +22,17 @@ enum IndexType {
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view_handle: Handle,
     prefix: jbyteArray,
+    view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
-        Box::into_raw(Box::new(match *utils::cast_object(view_handle) {
+        utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })) as Handle
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -44,7 +44,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeFree(
     _: JObject,
     map_handle: Handle,
 ) {
-    utils::drop_object::<IndexType>(&env, map_handle);
+    utils::drop_handle::<IndexType>(&env, map_handle);
 }
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
@@ -52,12 +52,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeFree(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
-        let val = match *utils::cast_object::<IndexType>(map_handle) {
+        let val = match *utils::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.get(&key),
             IndexType::ForkIndex(ref map) => map.get(&key),
         };
@@ -71,15 +71,15 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeGet(
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContainsKey(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
-        (match *utils::cast_object::<IndexType>(map_handle) {
+        (match *utils::cast_handle::<IndexType>(map_handle) {
              IndexType::SnapshotIndex(ref map) => map.contains(&key),
              IndexType::ForkIndex(ref map) => map.contains(&key),
          }) as jboolean
@@ -87,38 +87,68 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContain
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over map keys.
+/// Returns a pointer to the iterator over a map keys and values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeys(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateIter(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.keys(),
-                IndexType::ForkIndex(ref map) => map.keys(),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter(),
+            IndexType::ForkIndex(ref map) => map.iter(),
+        })
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns a pointer to the iterator over map keys.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateKeysIter(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.keys(),
+            IndexType::ForkIndex(ref map) => map.keys(),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
 
 /// Returns a pointer to the iterator over map values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValues(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateValuesIter(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.values(),
-                IndexType::ForkIndex(ref map) => map.values(),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.values(),
+            IndexType::ForkIndex(ref map) => map.values(),
+        })
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns a pointer to the iterator over a map keys and values  starting at the given key.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateIterFrom(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    key: jbyteArray,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let key = env.convert_byte_array(key).unwrap();
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
+            IndexType::ForkIndex(ref map) => map.iter_from(&key),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -128,17 +158,15 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValues(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFrom(
     env: JNIEnv,
     _: JClass,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.keys_from(&key),
-                IndexType::ForkIndex(ref map) => map.keys_from(&key),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.keys_from(&key),
+            IndexType::ForkIndex(ref map) => map.keys_from(&key),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -148,17 +176,15 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFro
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesFrom(
     env: JNIEnv,
     _: JClass,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key).unwrap();
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.values_from(&key),
-                IndexType::ForkIndex(ref map) => map.values_from(&key),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.values_from(&key),
+            IndexType::ForkIndex(ref map) => map.values_from(&key),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -168,11 +194,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesF
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
     env: JNIEnv,
     _: JObject,
+    map_handle: Handle,
     key: jbyteArray,
     value: jbyteArray,
-    map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -190,10 +216,10 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativePut(
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
-    key: jbyteArray,
     map_handle: Handle,
+    key: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -212,7 +238,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeClear(
     _: JObject,
     map_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(map_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(map_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -223,15 +249,51 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeClear(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
+/// Returns the next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_object::<MapIndexKeys<Key>>(iter_handle);
+        let mut iter = utils::cast_handle::<MapIndexIter<Key, Value>>(iter_handle);
+        match iter.next() {
+            Some(val) => {
+                let key: JObject = env.byte_array_from_slice(&val.0).unwrap().into();
+                let value: JObject = env.byte_array_from_slice(&val.1).unwrap().into();
+                env.new_object(
+                    "com/exonum/bindings/index/MapIndexProxy$Entry",
+                    "([B[B)V",
+                    &[key.into(), value.into()],
+                ).unwrap()
+                    .into_inner()
+            }
+            None => ptr::null_mut(),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Destroys underlying `MapIndex` iterator object and frees memory.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterFree(
+    env: JNIEnv,
+    _: JObject,
+    iter_handle: Handle,
+) {
+    utils::drop_handle::<MapIndexIter<Key, Value>>(&env, iter_handle);
+}
+
+/// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysIterNext(
+    env: JNIEnv,
+    _: JObject,
+    iter_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let mut iter = utils::cast_handle::<MapIndexKeys<Key>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val).unwrap(),
             None => ptr::null_mut(),
@@ -242,23 +304,23 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysNex
 
 /// Destroys underlying `MapIndex` keys-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
-    utils::drop_object::<MapIndexKeys<Key>>(&env, iter_handle);
+    utils::drop_handle::<MapIndexKeys<Key>>(&env, iter_handle);
 }
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesIterNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_object::<MapIndexValues<Value>>(iter_handle);
+        let mut iter = utils::cast_handle::<MapIndexValues<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val).unwrap(),
             None => ptr::null_mut(),
@@ -269,10 +331,10 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesN
 
 /// Destroys underlying `MapIndex` values-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
-    utils::drop_object::<MapIndexValues<Value>>(&env, iter_handle);
+    utils::drop_handle::<MapIndexValues<Value>>(&env, iter_handle);
 }

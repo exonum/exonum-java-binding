@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::JClass;
+use jni::objects::{JClass, JObject};
 use jni::sys::{jboolean, jbyteArray};
 
 use std::panic;
@@ -19,45 +19,45 @@ enum IndexType {
 
 /// Returns pointer to created `KeySetIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view_handle: Handle,
     prefix: jbyteArray,
+    view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
-        Box::into_raw(Box::new(match *utils::cast_object(view_handle) {
+        utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })) as Handle
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
 
 /// Destroys underlying `KeySetIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
 ) {
-    utils::drop_object::<IndexType>(&env, set_handle);
+    utils::drop_handle::<IndexType>(&env, set_handle);
 }
 
 /// Returns `true` if the set contains the specified value.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeContains(
     env: JNIEnv,
-    _: JClass,
-    value: jbyteArray,
+    _: JObject,
     set_handle: Handle,
+    value: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let value = env.convert_byte_array(value).unwrap();
-        (match *utils::cast_object::<IndexType>(set_handle) {
+        (match *utils::cast_handle::<IndexType>(set_handle) {
              IndexType::SnapshotIndex(ref set) => set.contains(&value),
              IndexType::ForkIndex(ref set) => set.contains(&value),
          }) as jboolean
@@ -67,51 +67,47 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeContains(
 
 /// Returns pointer to the iterator over set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIter(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCreateIterator(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter(),
-                IndexType::ForkIndex(ref set) => set.iter(),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.iter(),
+            IndexType::ForkIndex(ref set) => set.iter(),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
 
 /// Returns pointer to the iterator over set starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFrom(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCreateIteratorFrom(
     env: JNIEnv,
-    _: JClass,
-    from: jbyteArray,
+    _: JObject,
     set_handle: Handle,
+    from: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let from = env.convert_byte_array(from).unwrap();
-        Box::into_raw(Box::new(
-            match *utils::cast_object::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-                IndexType::ForkIndex(ref set) => set.iter_from(&from),
-            },
-        )) as Handle
+        utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
+            IndexType::ForkIndex(ref set) => set.iter_from(&from),
+        })
     });
     utils::unwrap_exc_or_default(&env, res)
 }
 
 /// Inserts value in the set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeInsert(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeAdd(
     env: JNIEnv,
-    _: JClass,
-    value: jbyteArray,
+    _: JObject,
     set_handle: Handle,
+    value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(set_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(set_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -125,13 +121,13 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeInsert(
 
 /// Removes value from the set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeRemove(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeRemove(
     env: JNIEnv,
-    _: JClass,
-    value: jbyteArray,
+    _: JObject,
     set_handle: Handle,
+    value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(set_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(set_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -145,12 +141,12 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeRemove(
 
 /// Clears the set, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeClear(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     set_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_object::<IndexType>(set_handle) {
+    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(set_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -163,13 +159,13 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeClear(
 
 /// Return next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeIteratorNext(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_object::<KeySetIndexIter<Key>>(iter_handle);
+        let mut iter = utils::cast_handle::<KeySetIndexIter<Key>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val).unwrap(),
             None => ptr::null_mut(),
@@ -180,10 +176,10 @@ pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterNext(
 
 /// Destroys underlying `KeySetIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_index_KeySetIndex_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeIteratorFree(
     env: JNIEnv,
-    _: JClass,
+    _: JObject,
     iter_handle: Handle,
 ) {
-    utils::drop_object::<KeySetIndexIter<Key>>(&env, iter_handle);
+    utils::drop_handle::<KeySetIndexIter<Key>>(&env, iter_handle);
 }

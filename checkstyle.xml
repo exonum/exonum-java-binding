@@ -200,7 +200,7 @@
             <property name="allowMissingReturnTag" value="true"/>
             <property name="minLineCount" value="2"/>
             <!-- todo: file a bug report so that it supports FQN -->
-            <property name="allowedAnnotations" value="Override, Test, ImproveDocs, After, Before"/>
+            <property name="allowedAnnotations" value="Override, Test, ImproveDocs, After, Before, Parameters"/>
             <property name="allowThrowsTagsForSubclasses" value="true"/>
         </module>
         <module name="MethodName">

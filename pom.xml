@@ -14,12 +14,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.compiler.version>stable</rust.compiler.version>
+    <rust.compiler.features>resource-manager</rust.compiler.features>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <!-- Intentionally left empty, may be overrided from command line.
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
-    <java.compiler.errorprone.patchChecks>MissingOverride,DeadException</java.compiler.errorprone.patchChecks>
+    <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <build.nativeLibPath>rust/target/debug</build.nativeLibPath>
@@ -85,6 +86,8 @@
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
                 <argument>build</argument>
+                <argument>--features</argument>
+                <argument>${rust.compiler.features}</argument>
               </arguments>
             </configuration>
             <goals>
@@ -98,6 +101,8 @@
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
                 <argument>test</argument>
+                <argument>--features</argument>
+                <argument>${rust.compiler.features}</argument>
               </arguments>
             </configuration>
             <goals>
@@ -237,6 +242,11 @@
       <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>java-hamcrest</artifactId>
+      <version>2.0.0.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
