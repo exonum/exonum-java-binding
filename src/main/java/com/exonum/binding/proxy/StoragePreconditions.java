@@ -98,4 +98,6 @@ class StoragePreconditions {
     }
     return index;
   }
+
+  private StoragePreconditions() {}
 }

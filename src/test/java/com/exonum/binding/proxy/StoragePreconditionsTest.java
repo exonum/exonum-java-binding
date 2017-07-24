@@ -119,7 +119,7 @@ public class StoragePreconditionsTest {
     StoragePreconditions.checkValid(proxies);
   }
 
-  private Set<AbstractNativeProxy> createProxies(Boolean... isValid) {
+  private static Set<AbstractNativeProxy> createProxies(Boolean... isValid) {
     return Arrays.stream(isValid)
         .map(StoragePreconditionsTest::createProxy)
         .collect(Collectors.toSet());
@@ -142,10 +142,10 @@ public class StoragePreconditionsTest {
   public void checkCanModifyThrowsIfSnapshotPassed() throws Exception {
     Snapshot dbView = mock(Snapshot.class);
 
-    expected.expect(UnsupportedOperationException.class);
     Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
             + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
     expected.expectMessage(matchesPattern(pattern));
+    expected.expect(UnsupportedOperationException.class);
     StoragePreconditions.checkCanModify(dbView);
   }
 
@@ -153,9 +153,9 @@ public class StoragePreconditionsTest {
   public void checkCanModifyThrowsIfNullPassed() throws Exception {
     View dbView = null;
 
-    expected.expect(UnsupportedOperationException.class);
     expected.expectMessage("Cannot modify the view: null"
         + "\nUse a Fork to modify any collection.");
+    expected.expect(UnsupportedOperationException.class);
     StoragePreconditions.checkCanModify(dbView);
   }
 

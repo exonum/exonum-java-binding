@@ -97,7 +97,8 @@ public class MapIndexProxy extends AbstractNativeProxy {
   }
 
   /**
-   * Returns an iterator over the map keys. Must be explicitly closed.
+   * Returns an iterator over the map keys in lexicographical order.
+   * Must be explicitly closed.
    *
    * <p>Any destructive operation on the same {@link Fork} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
@@ -115,7 +116,9 @@ public class MapIndexProxy extends AbstractNativeProxy {
   }
 
   /**
-   * Returns an iterator over the map values. Must be explicitly closed.
+   * Returns an iterator over the map values.
+   * The values are ordered by <em>keys</em> in lexicographical order.
+   * Must be explicitly closed.
    *
    * <p>Any destructive operation on the same {@link Fork} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
@@ -129,6 +132,30 @@ public class MapIndexProxy extends AbstractNativeProxy {
           dbView,
           modCounter);
   }
+
+  /**
+   * Returns an iterator over the map entries.
+   * The entries are ordered by keys in lexicographical order.
+   * Must be explicitly closed.
+   *
+   * <p>Any destructive operation on the same {@link Fork} this map uses
+   * (but not necessarily on <em>this map</em>) will invalidate the iterator.
+   *
+   * @throws IllegalStateException if this map is not valid
+   */
+  public RustIter<MapEntry> entries() {
+    return new ConfigurableRustIter<>(nativeCreateEntriesIter(getNativeHandle()),
+        this::nativeEntriesIterNext,
+        this::nativeEntriesIterFree,
+        dbView,
+        modCounter);
+  }
+
+  private native long nativeCreateEntriesIter(long nativeHandle);
+
+  private native MapEntry nativeEntriesIterNext(long iterNativeHandle);
+
+  private native void nativeEntriesIterFree(long iterNativeHandle);
 
   /**
    * Removes all of the key-value pairs from the map.
