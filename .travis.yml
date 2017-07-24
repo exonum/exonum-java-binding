@@ -28,12 +28,17 @@ before_install:
   - rustup default "$RUST_VERSION"
     # Install rustfmt if it's not already.
   - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
+    # Install cargo-audit if it's not already.
+  - cargo-audit -V || cargo install cargo-audit --force
+    # List all installed cargo packages.
+  - cargo install --list
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd rust/
   - cargo fmt -- --write-mode=diff
   - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings
+  - cargo audit
   - cd -
   - mvn verify -B -Dcheckstyle.severity=error -Drust.compiler.version="$RUST_VERSION"
 notifications:
