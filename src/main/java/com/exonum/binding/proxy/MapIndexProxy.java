@@ -29,15 +29,15 @@ public class MapIndexProxy extends AbstractNativeProxy {
   /**
    * Creates a new MapIndexProxy.
    *
+   * @param prefix a unique identifier of this map in the underlying storage
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
-   * @param prefix a unique identifier of this map in the underlying storage
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  public MapIndexProxy(View view, byte[] prefix) {
-    super(nativeCreate(view.getNativeHandle(), checkIndexPrefix(prefix)),
+  public MapIndexProxy(byte[] prefix, View view) {
+    super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()),
         true);
     this.dbView = view;
     modCounter = ViewModificationCounter.getInstance();
@@ -152,7 +152,7 @@ public class MapIndexProxy extends AbstractNativeProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(long viewNativeHandle, byte[] prefix);
+  private static native long nativeCreate(byte[] prefix, long viewNativeHandle);
 
   private native boolean nativeContainsKey(long nativeHandle, byte[] key);
 

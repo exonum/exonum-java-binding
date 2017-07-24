@@ -22,12 +22,12 @@ enum IndexType {
 pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    view: jlong,
     prefix: jbyteArray,
+    view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let prefix = env.convert_byte_array(prefix).unwrap();
-        utils::to_handle(match *utils::cast_handle(view) {
+        utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
