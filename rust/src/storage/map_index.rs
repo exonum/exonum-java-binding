@@ -89,7 +89,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContain
 
 /// Returns a pointer to the iterator over a map keys and values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateIter(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateEntriesIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -251,7 +251,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeClear(
 
 /// Returns the next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeEntriesIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -263,7 +263,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterNex
                 let key: JObject = env.byte_array_from_slice(&val.0).unwrap().into();
                 let value: JObject = env.byte_array_from_slice(&val.1).unwrap().into();
                 env.new_object(
-                    "com/exonum/bindings/index/MapIndexProxy$Entry",
+                    "com/exonum/binding/proxy/MapEntry",
                     "([B[B)V",
                     &[key.into(), value.into()],
                 ).unwrap()
@@ -277,7 +277,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterNex
 
 /// Destroys underlying `MapIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeEntriesIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
