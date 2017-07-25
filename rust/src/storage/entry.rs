@@ -25,13 +25,13 @@ pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeCreat
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let prefix = env.convert_byte_array(prefix).unwrap();
-        utils::to_handle(match *utils::cast_handle(view_handle) {
+        let prefix = env.convert_byte_array(prefix)?;
+        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })
+        }))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -59,8 +59,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeGet(
             IndexType::ForkIndex(ref entry) => entry.get(),
         };
         match val {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
-            None => ptr::null_mut(),
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -74,10 +74,10 @@ pub extern "C" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeIsPresent(
     entry_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        (match *utils::cast_handle::<IndexType>(entry_handle) {
+        Ok(match *utils::cast_handle::<IndexType>(entry_handle) {
              IndexType::SnapshotIndex(ref entry) => entry.exists(),
              IndexType::ForkIndex(ref entry) => entry.exists(),
-         }) as jboolean
+         } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -114,8 +114,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeSet(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut entry) => {
-            let value = env.convert_byte_array(value).unwrap();
+            let value = env.convert_byte_array(value)?;
             entry.set(value);
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -134,6 +135,7 @@ pub extern "C" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeRemove(
         }
         IndexType::ForkIndex(ref mut entry) => {
             entry.remove();
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)

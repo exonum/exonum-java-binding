@@ -31,6 +31,7 @@ pub fn drop_handle<T: 'static>(env: &JNIEnv, handle: Handle) {
     let res = panic::catch_unwind(|| unsafe {
         resource_manager::remove_handle::<T>(handle);
         Box::from_raw(handle as *mut T);
+        Ok(())
     });
     exception::unwrap_exc_or_default(env, res);
 }

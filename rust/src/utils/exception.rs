@@ -1,18 +1,29 @@
 use jni::JNIEnv;
+use jni::errors::Error as JniError;
 
 use std::any::Any;
-use std::thread::Result;
+use std::thread;
+use std::result;
 use std::error::Error;
+
+type Result<T> = thread::Result<result::Result<T, JniError>>;
 
 // Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 // at the Java side. So this function should be used only for the `panic::catch_unwind` result.
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
     match res {
+        Ok(val) => {
+            match val {
+                Ok(val) => val,
+                // `JniError` represents a Java-exception, so we should ignore it because the
+                // exception will be rethrown automatically.
+                Err(_) => error_val,
+            }
+        }
         Err(ref e) => {
             throw(env, &any_to_string(e));
             error_val
         }
-        Ok(val) => val,
     }
 }
 
