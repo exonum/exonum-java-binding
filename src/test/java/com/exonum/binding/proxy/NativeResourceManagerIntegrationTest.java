@@ -1,5 +1,8 @@
 package com.exonum.binding.proxy;
 
+import com.exonum.binding.storage.database.Database;
+import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.Rule;
 import org.junit.Test;

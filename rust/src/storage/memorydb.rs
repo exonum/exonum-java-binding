@@ -9,7 +9,7 @@ use super::db::View;
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
 ) -> Handle {
@@ -19,7 +19,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreate(
 
 /// Destroys underlying `MemoryDB` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeFree(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -29,7 +29,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeFree(
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateSnapshot(
+pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeCreateSnapshot(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -43,7 +43,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateSnapsh
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_MemoryDb_nativeCreateFork(
+pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeCreateFork(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,

@@ -19,7 +19,7 @@ enum IndexType {
 
 /// Returns pointer to the created `ListIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     prefix: jbyteArray,
@@ -39,7 +39,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate
 
 /// Destroys the underlying `ListIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeFree(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -49,7 +49,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeFree(
 
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -70,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGet(
 
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGetLast(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeGetLast(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -90,7 +90,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGetLas
 
 /// Returns `true` if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIsEmpty(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeIsEmpty(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -106,7 +106,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIsEmpt
 
 /// Returns length of the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSize(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeSize(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -122,7 +122,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSize(
 
 /// Returns pointer to the iterator over list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreateIter(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeCreateIter(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -140,7 +140,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate
 
 /// Returns pointer to the iterator over list starting at given index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeIterFrom(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -159,7 +159,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFr
 
 /// Adds value to the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeAdd(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeAdd(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -180,7 +180,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeAdd(
 
 /// Removes the last element from a list and returns it, or null pointer if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeRemoveLast(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeRemoveLast(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -202,7 +202,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeRemove
 
 /// Shortens the list, keeping the first len elements and dropping the rest.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeTruncate(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeTruncate(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -222,7 +222,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeTrunca
 
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeSet(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -244,7 +244,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSet(
 
 /// Clears the list, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -264,7 +264,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeClear(
 // TODO: Probably this functions should belong to some other class instead of IndexList.
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -281,7 +281,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterNe
 
 /// Destroys the underlying `IndexList` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,

@@ -9,7 +9,7 @@ mod value_set_index;
 mod proof_list_index;
 mod proof_map_index;
 
-pub use self::db::Java_com_exonum_binding_proxy_Views_nativeFree;
+pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
 pub use self::memorydb::*;
 pub use self::leveldb::*;
 pub use self::entry::*;

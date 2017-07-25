@@ -23,7 +23,7 @@ enum IndexType {
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     prefix: jbyteArray,
@@ -43,7 +43,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
 
 /// Destroys the underlying `ProofMapIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeFree(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -53,7 +53,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeFr
 
 /// Returns the root hash of the proof map or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeRootHash(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeRootHash(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -70,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeRo
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -92,12 +92,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeGe
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeContainsKey(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeContainsKey(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
     key: jbyteArray,
-) -> jboolean {
+) -> jboolean{
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         Ok(match *utils::cast_handle::<IndexType>(map_handle) {
@@ -112,11 +112,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCo
 
 /// Returns the pointer to the iterator over a map keys and values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateEntriesIter(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateEntriesIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(map_handle) {
@@ -130,11 +130,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
 
 /// Returns the pointer to the iterator over map keys.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateKeysIter(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateKeysIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(map_handle) {
@@ -148,11 +148,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
 
 /// Returns the pointer to the iterator over map values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateValuesIter(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateValuesIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(map_handle) {
@@ -166,12 +166,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
 
 /// Returns the pointer to the iterator over a map keys and values starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateIterFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateIterFrom(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
     key: jbyteArray,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         Ok(utils::to_handle(
@@ -186,7 +186,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
 
 /// Returns the pointer to the iterator over map keys starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKeysFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeKeysFrom(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
@@ -206,12 +206,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKe
 
 /// Returns the pointer to the iterator over map values starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeValuesFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeValuesFrom(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
     key: jbyteArray,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         Ok(utils::to_handle(
@@ -226,7 +226,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeVa
 
 /// Sets `value` identified by the `key` into the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativePut(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativePut(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -249,7 +249,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativePu
 
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeRemove(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -270,7 +270,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeRe
 
 /// Removes all entries of the map.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -289,11 +289,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCl
 
 /// Returns the next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeEntriesIterNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeEntriesIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ProofMapIndexIter<Key, Value>>(iter_handle);
         match iter.next() {
@@ -302,7 +302,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeEn
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
                     env.new_object(
-                        "com/exonum/binding/proxy/MapEntry",
+                        "com/exonum/binding/storage/indices/MapEntry",
                         "([B[B)V",
                         &[key.into(), value.into()],
                     )?
@@ -317,21 +317,21 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeEn
 
 /// Destroys the underlying `ProofMapIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeEntriesIterFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeEntriesIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) {
+){
     utils::drop_handle::<ProofMapIndexIter<Key, Value>>(&env, iter_handle);
 }
 
 /// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKeysIterNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeKeysIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
         match iter.next() {
@@ -344,21 +344,21 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKe
 
 /// Destroys the underlying `ProofMapIndex` keys-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKeysIterFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) {
+){
     utils::drop_handle::<ProofMapIndexKeys<Key>>(&env, iter_handle);
 }
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeValuesIterNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeValuesIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ProofMapIndexValues<Value>>(iter_handle);
         match iter.next() {
@@ -371,11 +371,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeVa
 
 /// Destroys the underlying `ProofMapIndex` values-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeValuesIterFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) {
+){
     utils::drop_handle::<ProofMapIndexValues<Value>>(&env, iter_handle);
 }
 

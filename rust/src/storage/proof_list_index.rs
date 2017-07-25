@@ -19,7 +19,7 @@ enum IndexType {
 
 /// Returns pointer to the created `ProofListIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     prefix: jbyteArray,
@@ -39,7 +39,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeC
 
 /// Destroys the underlying `ProofListIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeFree(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -49,7 +49,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeF
 
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -70,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeG
 
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeGetLast(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetLast(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -90,7 +90,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeG
 
 /// Returns `true` if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeIsEmpty(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIsEmpty(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -106,7 +106,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeI
 
 /// Returns length of the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeSize(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeSize(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -122,7 +122,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeS
 
 /// Returns the height of the proof list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeHeight(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeHeight(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -138,11 +138,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeH
 
 /// Returns the root hash of the proof list or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeRootHash(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeRootHash(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.root_hash(),
@@ -158,11 +158,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeR
 
 /// Returns pointer to the iterator over list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeCreateIter(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeCreateIter(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(list_handle) {
@@ -176,12 +176,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeC
 
 /// Returns pointer to the iterator over list starting at given index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeIterFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIterFrom(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
     index_from: jlong,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(list_handle) {
@@ -195,7 +195,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeI
 
 /// Adds value to the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeAdd(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeAdd(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -216,7 +216,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeA
 
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeSet(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -238,7 +238,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeS
 
 /// Clears the list, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -257,11 +257,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeC
 
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
         match iter.next() {
@@ -274,10 +274,10 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeI
 
 /// Destroys the underlying `ProofListIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) {
+){
     utils::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
 }
