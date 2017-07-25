@@ -13,7 +13,7 @@ pub fn add_handle<T: 'static>(handle: Handle) {
     assert!(
         HANDLES_MAP
             .write()
-            .expect("Unable to make write-lock")
+            .expect("Unable to obtain write-lock")
             .insert(handle, TypeId::of::<T>())
             .is_none(),
         "Trying to add the same handle for the second time: {:X}, handle"
@@ -24,12 +24,12 @@ pub fn remove_handle<T: 'static>(handle: Handle) {
     check_handle::<T>(handle);
     HANDLES_MAP
         .write()
-        .expect("Unable to make write-lock")
+        .expect("Unable to obtain write-lock")
         .remove(&handle);
 }
 
 pub fn check_handle<T: 'static>(handle: Handle) {
-    match HANDLES_MAP.read().expect("Unable to make read-lock").get(
+    match HANDLES_MAP.read().expect("Unable to obtain read-lock").get(
         &handle,
     ) {
         Some(expected_type_id) => {
