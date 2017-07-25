@@ -22,11 +22,16 @@ pub fn add_handle<T: 'static>(handle: Handle) {
 
 pub fn remove_handle<T: 'static>(handle: Handle) {
     check_handle::<T>(handle);
-    HANDLES_MAP.write().expect("Unable to make write-lock").remove(&handle);
+    HANDLES_MAP
+        .write()
+        .expect("Unable to make write-lock")
+        .remove(&handle);
 }
 
 pub fn check_handle<T: 'static>(handle: Handle) {
-    match HANDLES_MAP.read().expect("Unable to make read-lock").get(&handle) {
+    match HANDLES_MAP.read().expect("Unable to make read-lock").get(
+        &handle,
+    ) {
         Some(expected_type_id) => {
             let actual_type_id = &TypeId::of::<T>();
             assert_eq!(

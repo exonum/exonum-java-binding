@@ -58,9 +58,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCont
     let res = panic::catch_unwind(|| {
         let value = env.convert_byte_array(value)?;
         Ok(match *utils::cast_handle::<IndexType>(set_handle) {
-             IndexType::SnapshotIndex(ref set) => set.contains(&value),
-             IndexType::ForkIndex(ref set) => set.contains(&value),
-         } as jboolean)
+            IndexType::SnapshotIndex(ref set) => set.contains(&value),
+            IndexType::ForkIndex(ref set) => set.contains(&value),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -73,10 +73,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCrea
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter(),
-            IndexType::ForkIndex(ref set) => set.iter(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter(),
+                IndexType::ForkIndex(ref set) => set.iter(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -91,10 +93,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCrea
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let from = env.convert_byte_array(from)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-            IndexType::ForkIndex(ref set) => set.iter_from(&from),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
+                IndexType::ForkIndex(ref set) => set.iter_from(&from),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }

@@ -97,9 +97,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIsEmpt
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         Ok(match *utils::cast_handle::<IndexType>(list_handle) {
-             IndexType::SnapshotIndex(ref list) => list.is_empty(),
-             IndexType::ForkIndex(ref list) => list.is_empty(),
-         } as jboolean)
+            IndexType::SnapshotIndex(ref list) => list.is_empty(),
+            IndexType::ForkIndex(ref list) => list.is_empty(),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -113,9 +113,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSize(
 ) -> jlong {
     let res = panic::catch_unwind(|| {
         Ok(match *utils::cast_handle::<IndexType>(list_handle) {
-             IndexType::SnapshotIndex(ref list) => list.len(),
-             IndexType::ForkIndex(ref list) => list.len(),
-         } as jlong)
+            IndexType::SnapshotIndex(ref list) => list.len(),
+            IndexType::ForkIndex(ref list) => list.len(),
+        } as jlong)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -128,10 +128,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.iter(),
-            IndexType::ForkIndex(ref list) => list.iter(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter(),
+                IndexType::ForkIndex(ref list) => list.iter(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -145,10 +147,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFr
     index_from: jlong,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
-            IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
+                IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }

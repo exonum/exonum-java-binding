@@ -58,9 +58,9 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContain
     let res = panic::catch_unwind(|| {
         let value = env.convert_byte_array(value)?;
         Ok(match *utils::cast_handle::<IndexType>(set_handle) {
-             IndexType::SnapshotIndex(ref set) => set.contains(&value),
-             IndexType::ForkIndex(ref set) => set.contains(&value),
-         } as jboolean)
+            IndexType::SnapshotIndex(ref set) => set.contains(&value),
+            IndexType::ForkIndex(ref set) => set.contains(&value),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -76,9 +76,9 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContain
     let res = panic::catch_unwind(|| {
         let hash = utils::convert_to_hash(&env, hash)?;
         Ok(match *utils::cast_handle::<IndexType>(set_handle) {
-             IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
-             IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
-         } as jboolean)
+            IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
+            IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -91,10 +91,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter(),
-            IndexType::ForkIndex(ref set) => set.iter(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter(),
+                IndexType::ForkIndex(ref set) => set.iter(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -109,10 +111,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let from = utils::convert_to_hash(&env, from)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-            IndexType::ForkIndex(ref set) => set.iter_from(&from),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
+                IndexType::ForkIndex(ref set) => set.iter_from(&from),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -125,10 +129,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.hashes(),
-            IndexType::ForkIndex(ref set) => set.hashes(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.hashes(),
+                IndexType::ForkIndex(ref set) => set.hashes(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -143,10 +149,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let from = utils::convert_to_hash(&env, from)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.hashes_from(&from),
-            IndexType::ForkIndex(ref set) => set.hashes_from(&from),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.hashes_from(&from),
+                IndexType::ForkIndex(ref set) => set.hashes_from(&from),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -246,11 +254,14 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIt
             Some(val) => {
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
-                Ok(env.new_object(
-                    "com/exonum/binding/proxy/ValueSetIndexProxy$Entry",
-                    "([B[B)V",
-                    &[hash.into(), value.into()],
-                )?.into_inner())
+                Ok(
+                    env.new_object(
+                        "com/exonum/binding/proxy/ValueSetIndexProxy$Entry",
+                        "([B[B)V",
+                        &[hash.into(), value.into()],
+                    )?
+                        .into_inner(),
+                )
             }
             None => Ok(ptr::null_mut()),
         }

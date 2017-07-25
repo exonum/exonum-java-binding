@@ -75,9 +75,9 @@ pub extern "C" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeIsPresent(
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         Ok(match *utils::cast_handle::<IndexType>(entry_handle) {
-             IndexType::SnapshotIndex(ref entry) => entry.exists(),
-             IndexType::ForkIndex(ref entry) => entry.exists(),
-         } as jboolean)
+            IndexType::SnapshotIndex(ref entry) => entry.exists(),
+            IndexType::ForkIndex(ref entry) => entry.exists(),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }

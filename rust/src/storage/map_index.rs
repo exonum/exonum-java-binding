@@ -80,9 +80,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContain
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
         Ok(match *utils::cast_handle::<IndexType>(map_handle) {
-             IndexType::SnapshotIndex(ref map) => map.contains(&key),
-             IndexType::ForkIndex(ref map) => map.contains(&key),
-         } as jboolean)
+            IndexType::SnapshotIndex(ref map) => map.contains(&key),
+            IndexType::ForkIndex(ref map) => map.contains(&key),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -95,10 +95,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateE
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.iter(),
-            IndexType::ForkIndex(ref map) => map.iter(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.iter(),
+                IndexType::ForkIndex(ref map) => map.iter(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -111,10 +113,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateK
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.keys(),
-            IndexType::ForkIndex(ref map) => map.keys(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.keys(),
+                IndexType::ForkIndex(ref map) => map.keys(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -127,10 +131,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateV
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.values(),
-            IndexType::ForkIndex(ref map) => map.values(),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.values(),
+                IndexType::ForkIndex(ref map) => map.values(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -145,10 +151,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateI
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
-            IndexType::ForkIndex(ref map) => map.iter_from(&key),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
+                IndexType::ForkIndex(ref map) => map.iter_from(&key),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -163,10 +171,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysFro
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.keys_from(&key),
-            IndexType::ForkIndex(ref map) => map.keys_from(&key),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.keys_from(&key),
+                IndexType::ForkIndex(ref map) => map.keys_from(&key),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -181,10 +191,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesF
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.values_from(&key),
-            IndexType::ForkIndex(ref map) => map.values_from(&key),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.values_from(&key),
+                IndexType::ForkIndex(ref map) => map.values_from(&key),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -265,11 +277,14 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeEntries
             Some(val) => {
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
-                Ok(env.new_object(
-                    "com/exonum/binding/proxy/MapEntry",
-                    "([B[B)V",
-                    &[key.into(), value.into()],
-                )?.into_inner())
+                Ok(
+                    env.new_object(
+                        "com/exonum/binding/proxy/MapEntry",
+                        "([B[B)V",
+                        &[key.into(), value.into()],
+                    )?
+                        .into_inner(),
+                )
             }
             None => Ok(ptr::null_mut()),
         }
