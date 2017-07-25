@@ -85,7 +85,7 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContain
 
 /// Returns the pointer to the iterator over a set that returns a pair of value and its hash.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreateIter(
+pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreateIterator(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -235,7 +235,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCl
 
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIteratorNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -247,7 +247,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIt
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(env.new_object(
-                    "com/exonum/bindings/index/ValueSetIndex$Entry",
+                    "com/exonum/binding/proxy/ValueSetIndexProxy$Entry",
                     "([B[B)V",
                     &[hash.into(), value.into()],
                 )?.into_inner())
@@ -260,7 +260,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIt
 
 /// Destroys underlying `ValueSetIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIteratorFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,

@@ -3,6 +3,7 @@ package com.exonum.binding.proxy;
 import static com.exonum.binding.proxy.StoragePreconditions.checkCanModify;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
 import static com.exonum.binding.proxy.StoragePreconditions.checkStorageKey;
+import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
 import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -117,7 +118,62 @@ public class ValueSetIndexProxy extends AbstractNativeProxy {
         modCounter);
   }
 
-  // TODO: add an iterator over (hash, element) pair
+  /**
+   * Returns an iterator over the entries of this set. An entry is a hash-value pair.
+   * The entries are ordered by keys lexicographically.
+   *
+   * <p>Any destructive operation on the same {@link Fork} this set uses
+   * (but not necessarily on <em>this set</em>) will invalidate the iterator.
+   *
+   * @return an iterator over the entries of this set
+   * @throws IllegalStateException if this set is not valid
+   */
+  public RustIter<Entry> iterator() {
+    return new ConfigurableRustIter<>(
+        nativeCreateIterator(getNativeHandle()),
+        this::nativeIteratorNext,
+        this::nativeIteratorFree,
+        dbView,
+        modCounter
+    );
+  }
+
+  private native long nativeCreateIterator(long nativeHandle);
+
+  private native Entry nativeIteratorNext(long iterNativeHandle);
+
+  private native void nativeIteratorFree(long iterNativeHandle);
+
+  /**
+   * An entry of a value set index: a hash-value pair.
+   *
+   * <p>An entry contains <em>a copy</em> of the data in the value set index.
+   * It does not reflect the changes made to the index since this entry had been created.
+   */
+  public static class Entry {
+    private final byte[] hash;
+    private final byte[] value;
+
+    @SuppressWarnings("unused")  // native API
+    private Entry(byte[] hash, byte[] value) {
+      this.hash = checkNotNull(hash);
+      this.value = checkStorageValue(value);
+    }
+
+    /**
+     * Returns a hash of the element of the set.
+     */
+    public byte[] getHash() {
+      return hash;
+    }
+
+    /**
+     * Returns an element of the set.
+     */
+    public byte[] getValue() {
+      return value;
+    }
+  }
 
   /**
    * Removes the element from this set. If it's not in the set, does nothing.
