@@ -13,11 +13,12 @@ type Result<T> = thread::Result<result::Result<T, JniError>>;
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
     match res {
         Ok(val) => {
-            match val {
-                Ok(val) => val,
+            if let Ok(val) = val {
+                val
+            } else {
                 // `JniError` represents a Java-exception, so we should ignore it because the
                 // exception will be rethrown automatically.
-                Err(_) => error_val,
+                error_val
             }
         }
         Err(ref e) => {
@@ -46,14 +47,8 @@ fn throw(env: &JNIEnv, description: &str) {
             return;
         }
     };
-    match env.throw_new(exception, description) {
-        Ok(_) => {}
-        Err(e) => {
-            error!(
-                "Unable to find 'RuntimeException' class: {}",
-                e.description()
-            );
-        }
+    if let Err(e) = env.throw_new(exception, description) {
+        error!("Unable to find 'RuntimeException' class: {}", e.description());
     }
 }
 
