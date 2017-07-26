@@ -26,13 +26,13 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCrea
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let prefix = env.convert_byte_array(prefix).unwrap();
-        utils::to_handle(match *utils::cast_handle(view_handle) {
+        let prefix = env.convert_byte_array(prefix)?;
+        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })
+        }))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -56,11 +56,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCont
     value: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let value = env.convert_byte_array(value).unwrap();
-        (match *utils::cast_handle::<IndexType>(set_handle) {
-             IndexType::SnapshotIndex(ref set) => set.contains(&value),
-             IndexType::ForkIndex(ref set) => set.contains(&value),
-         }) as jboolean
+        let value = env.convert_byte_array(value)?;
+        Ok(match *utils::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.contains(&value),
+            IndexType::ForkIndex(ref set) => set.contains(&value),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -73,10 +73,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCrea
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter(),
-            IndexType::ForkIndex(ref set) => set.iter(),
-        })
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter(),
+                IndexType::ForkIndex(ref set) => set.iter(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -90,11 +92,13 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeCrea
     from: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let from = env.convert_byte_array(from).unwrap();
-        utils::to_handle(match *utils::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-            IndexType::ForkIndex(ref set) => set.iter_from(&from),
-        })
+        let from = env.convert_byte_array(from)?;
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(set_handle) {
+                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
+                IndexType::ForkIndex(ref set) => set.iter_from(&from),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -112,8 +116,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeAdd(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value).unwrap();
+            let value = env.convert_byte_array(value)?;
             set.insert(value);
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -132,8 +137,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeRemo
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value).unwrap();
+            let value = env.convert_byte_array(value)?;
             set.remove(&value);
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -152,6 +158,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeClea
         }
         IndexType::ForkIndex(ref mut set) => {
             set.clear();
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -167,8 +174,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_KeySetIndexProxy_nativeIter
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<KeySetIndexIter<Key>>(iter_handle);
         match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
-            None => ptr::null_mut(),
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())

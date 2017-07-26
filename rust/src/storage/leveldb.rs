@@ -43,7 +43,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateSnapsho
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = utils::cast_handle::<LevelDB>(db_handle);
-        utils::to_handle(View::Snapshot(db.snapshot()))
+        Ok(utils::to_handle(View::Snapshot(db.snapshot())))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -57,7 +57,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_LevelDb_nativeCreateFork(
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = utils::cast_handle::<LevelDB>(db_handle);
-        utils::to_handle(View::Fork(db.fork()))
+        Ok(utils::to_handle(View::Fork(db.fork())))
     });
     utils::unwrap_exc_or_default(&env, res)
 }

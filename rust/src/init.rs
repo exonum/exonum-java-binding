@@ -15,6 +15,7 @@ pub extern "system" fn Java_com_exonum_binding_ClassNameTODO_nativeInitLogger(
     let res = panic::catch_unwind(|| {
         // Ignore logger initialization failure.
         let _ = helpers::init_logger();
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res);
 }

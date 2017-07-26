@@ -26,13 +26,13 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let prefix = env.convert_byte_array(prefix).unwrap();
-        utils::to_handle(match *utils::cast_handle(view_handle) {
+        let prefix = env.convert_byte_array(prefix)?;
+        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
                 Index::new(prefix, &**snapshot),
             ),
             View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
-        })
+        }))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -61,8 +61,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGet(
             IndexType::ForkIndex(ref list) => list.get(index as u64),
         };
         match val {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
-            None => ptr::null_mut(),
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -81,8 +81,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeGetLas
             IndexType::ForkIndex(ref list) => list.last(),
         };
         match val {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
-            None => ptr::null_mut(),
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -96,10 +96,10 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIsEmpt
     list_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        (match *utils::cast_handle::<IndexType>(list_handle) {
-             IndexType::SnapshotIndex(ref list) => list.is_empty(),
-             IndexType::ForkIndex(ref list) => list.is_empty(),
-         }) as jboolean
+        Ok(match *utils::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.is_empty(),
+            IndexType::ForkIndex(ref list) => list.is_empty(),
+        } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -112,10 +112,10 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSize(
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        (match *utils::cast_handle::<IndexType>(list_handle) {
-             IndexType::SnapshotIndex(ref list) => list.len(),
-             IndexType::ForkIndex(ref list) => list.len(),
-         }) as jlong
+        Ok(match *utils::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.len(),
+            IndexType::ForkIndex(ref list) => list.len(),
+        } as jlong)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -128,10 +128,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.iter(),
-            IndexType::ForkIndex(ref list) => list.iter(),
-        })
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter(),
+                IndexType::ForkIndex(ref list) => list.iter(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -145,10 +147,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFr
     index_from: jlong,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        utils::to_handle(match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
-            IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
-        })
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
+                IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -166,8 +170,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeAdd(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut list) => {
-            let value = env.convert_byte_array(value).unwrap();
+            let value = env.convert_byte_array(value)?;
             list.push(value);
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -188,8 +193,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeRemove
             IndexType::ForkIndex(ref mut list) => list.pop(),
         };
         match val {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
-            None => ptr::null_mut(),
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -209,6 +214,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeTrunca
         }
         IndexType::ForkIndex(ref mut list) => {
             list.truncate(len as u64);
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -228,8 +234,9 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeSet(
             panic!("Unable to modify snapshot.");
         }
         IndexType::ForkIndex(ref mut list) => {
-            let value = env.convert_byte_array(value).unwrap();
+            let value = env.convert_byte_array(value)?;
             list.set(index as u64, value);
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -248,6 +255,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeClear(
         }
         IndexType::ForkIndex(ref mut list) => {
             list.clear();
+            Ok(())
         }
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -264,8 +272,8 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterNe
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ListIndexIter<Value>>(iter_handle);
         match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val).unwrap(),
-            None => ptr::null_mut(),
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
