@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singleton;
 
+import java.util.Collection;
 import java.util.Set;
 
 class StoragePreconditions {
@@ -61,6 +62,18 @@ class StoragePreconditions {
    */
   static byte[] checkStorageValue(byte[] value) {
     return checkNotNull(value, "Storage value is null");
+  }
+
+  /**
+   * Checks that the specified collection contains valid storage values.
+   *
+   * @param values a storage value
+   * @return an unmodified collection if all elements are valid
+   * @throws NullPointerException if the collection is null or it contains null elements
+   */
+  static Collection<byte[]> checkStorageValues(Collection<byte[]> values) {
+    values.forEach(StoragePreconditions::checkStorageValue);
+    return values;
   }
 
   /**
