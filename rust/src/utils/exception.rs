@@ -48,7 +48,10 @@ fn throw(env: &JNIEnv, description: &str) {
         }
     };
     if let Err(e) = env.throw_new(exception, description) {
-        error!("Unable to find 'RuntimeException' class: {}", e.description());
+        error!(
+            "Unable to find 'RuntimeException' class: {}",
+            e.description()
+        );
     }
 }
 
