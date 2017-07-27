@@ -1,9 +1,6 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.proxy.StoragePreconditions.checkIndexPrefix;
-import static com.exonum.binding.proxy.StoragePreconditions.checkStorageValue;
-import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.NoSuchElementException;
@@ -21,7 +18,7 @@ import java.util.NoSuchElementException;
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  */
-public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
+public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex {
 
   /**
    * Creates a new ListIndexProxy.
@@ -35,35 +32,6 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
    */
   ListIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getNativeHandle()), view);
-  }
-
-  @Override
-  public void add(byte[] e) {
-    notifyModified();
-    nativeAdd(getNativeHandle(), checkStorageValue(e));
-  }
-
-  @Override
-  public void set(long index, byte[] e) {
-    checkElementIndex(index, size());
-    notifyModified();
-    nativeSet(getNativeHandle(), index, checkStorageValue(e));
-  }
-
-  @Override
-  public byte[] get(long index) {
-    return nativeGet(getNativeHandle(), checkElementIndex(index, size()));
-  }
-
-  @Override
-  public byte[] getLast() {
-    byte[] e = nativeGetLast(getNativeHandle());
-    // This method does not check if the list is empty first to use only a single native call
-    // in an optimistic scenario (= non-empty list).
-    if (e == null) {
-      throw new NoSuchElementException("List is empty");
-    }
-    return e;
   }
 
   /**
@@ -100,64 +68,42 @@ public class ListIndexProxy extends AbstractIndexProxy implements ListIndex {
     nativeTruncate(getNativeHandle(), newSize);
   }
 
-  @Override
-  public void clear() {
-    notifyModified();
-    nativeClear(getNativeHandle());
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return nativeIsEmpty(getNativeHandle());
-  }
-
-  @Override
-  public long size() {
-    return nativeSize(getNativeHandle());
-  }
-
-  @Override
-  public StorageIterator<byte[]> iterator() {
-    return StorageIterators.createIterator(
-        nativeCreateIter(getNativeHandle()),
-        this::nativeIterNext,
-        this::nativeIterFree,
-        dbView,
-        modCounter);
-  }
-
-  @Override
-  void disposeInternal() {
-    checkValid(dbView);
-    nativeFree(getNativeHandle());
-  }
-
   private static native long nativeCreate(byte[] listPrefix, long viewNativeHandle);
 
-  private native void nativeFree(long nativeHandle);
+  @Override
+  native void nativeFree(long nativeHandle);
 
-  private native void nativeAdd(long nativeHandle, byte[] e);
+  @Override
+  native void nativeAdd(long nativeHandle, byte[] e);
 
-  private native void nativeSet(long nativeHandle, long index, byte[] e);
+  @Override
+  native void nativeSet(long nativeHandle, long index, byte[] e);
 
-  private native byte[] nativeGet(long nativeHandle, long index);
+  @Override
+  native byte[] nativeGet(long nativeHandle, long index);
 
-  private native byte[] nativeGetLast(long nativeHandle);
+  @Override
+  native byte[] nativeGetLast(long nativeHandle);
 
-  private native byte[] nativeRemoveLast(long nativeHandle);
+  native byte[] nativeRemoveLast(long nativeHandle);
 
-  private native void nativeTruncate(long nativeHandle, long newSize);
+  native void nativeTruncate(long nativeHandle, long newSize);
 
-  private native void nativeClear(long nativeHandle);
+  @Override
+  native void nativeClear(long nativeHandle);
 
-  private native boolean nativeIsEmpty(long nativeHandle);
+  @Override
+  native boolean nativeIsEmpty(long nativeHandle);
 
-  private native long nativeSize(long nativeHandle);
+  @Override
+  native long nativeSize(long nativeHandle);
 
-  private native long nativeCreateIter(long nativeHandle);
+  @Override
+  native long nativeCreateIter(long nativeHandle);
 
-  private native byte[] nativeIterNext(long iterNativeHandle);
+  @Override
+  native byte[] nativeIterNext(long iterNativeHandle);
 
-  private native void nativeIterFree(long iterNativeHandle);
-
+  @Override
+  native void nativeIterFree(long iterNativeHandle);
 }
