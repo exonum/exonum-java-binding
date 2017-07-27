@@ -186,6 +186,18 @@
           </execution>
         </executions>
       </plugin>
+      <!-- you may explicitly run `mvn findbugs:check` from the command line,
+           but it's not bound to any phases in the default profile -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.4</version>
+        <configuration>
+          <effort>max</effort>
+          <threshold>medium</threshold>
+          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -206,6 +218,33 @@
                 <compilerArg>-XepPatchChecks:${java.compiler.errorprone.patchChecksFlag}</compilerArg>
               </compilerArgs>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- A build profile for a build performed on a CI server:
+            - Fails if the code has style issues
+            - Runs FindBugs during verify phase
+     -->
+    <profile>
+      <id>ci-build</id>
+      <properties>
+        <checkstyle.severity>error</checkstyle.severity>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>findbugs-during-verify</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
