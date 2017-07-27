@@ -37,7 +37,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeC
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys underlying `ProofListIndex` object and frees memory.
+/// Destroys the underlying `ProofListIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeFree(
     env: JNIEnv,
@@ -272,7 +272,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeI
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `ProofListIndex` iterator object and frees memory.
+/// Destroys the underlying `ProofListIndex` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofListIndexProxy_nativeIterFree(
     env: JNIEnv,

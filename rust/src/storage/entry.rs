@@ -36,7 +36,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeCreat
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys underlying `Entry` object and frees memory.
+/// Destroys the underlying `Entry` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_EntryIndexProxy_nativeFree(
     env: JNIEnv,

@@ -37,7 +37,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeCreate
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys underlying `ListIndex` object and frees memory.
+/// Destroys the underlying `ListIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeFree(
     env: JNIEnv,
@@ -279,7 +279,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterNe
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `IndexList` iterator object and frees memory.
+/// Destroys the underlying `IndexList` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ListIndexProxy_nativeIterFree(
     env: JNIEnv,

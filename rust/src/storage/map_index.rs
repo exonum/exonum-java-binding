@@ -292,7 +292,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeEntries
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `MapIndex` iterator object and frees memory.
+/// Destroys the underlying `MapIndex` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeEntriesIterFree(
     env: JNIEnv,
@@ -319,7 +319,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysIte
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `MapIndex` keys-iterator object and frees memory.
+/// Destroys the underlying `MapIndex` keys-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
@@ -346,7 +346,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesI
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `MapIndex` values-iterator object and frees memory.
+/// Destroys the underlying `MapIndex` values-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,

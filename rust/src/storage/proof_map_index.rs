@@ -315,7 +315,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeEn
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `ProofMapIndex` iterator object and frees memory.
+/// Destroys the underlying `ProofMapIndex` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeEntriesIterFree(
     env: JNIEnv,
@@ -342,7 +342,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKe
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `ProofMapIndex` keys-iterator object and frees memory.
+/// Destroys the underlying `ProofMapIndex` keys-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
@@ -369,7 +369,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeVa
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `ProofMapIndex` values-iterator object and frees memory.
+/// Destroys the underlying `ProofMapIndex` values-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,
