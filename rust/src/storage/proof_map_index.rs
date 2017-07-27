@@ -21,7 +21,7 @@ enum IndexType {
     ForkIndex(Index<&'static mut Fork>),
 }
 
-/// Returns a pointer to created `ProofMapIndex` object.
+/// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreate(
     env: JNIEnv,
@@ -41,7 +41,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys underlying `ProofMapIndex` object and frees memory.
+/// Destroys the underlying `ProofMapIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeFree(
     env: JNIEnv,
@@ -110,7 +110,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCo
 
 // TODO: `get_proof`.
 
-/// Returns a pointer to the iterator over a map keys and values.
+/// Returns the pointer to the iterator over a map keys and values.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateEntriesIter(
     env: JNIEnv,
@@ -128,7 +128,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over map keys.
+/// Returns the pointer to the iterator over map keys.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateKeysIter(
     env: JNIEnv,
@@ -146,7 +146,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over map values.
+/// Returns the pointer to the iterator over map values.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateValuesIter(
     env: JNIEnv,
@@ -164,7 +164,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over a map keys and values  starting at the given key.
+/// Returns the pointer to the iterator over a map keys and values starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCreateIterFrom(
     env: JNIEnv,
@@ -184,7 +184,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeCr
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over map keys starting at the given key.
+/// Returns the pointer to the iterator over map keys starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKeysFrom(
     env: JNIEnv,
@@ -204,7 +204,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeKe
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over map values starting at the given key.
+/// Returns the pointer to the iterator over map values starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeValuesFrom(
     env: JNIEnv,
@@ -268,7 +268,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeRe
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Clears the index, removing all values.
+/// Removes all entries of the map.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ProofMapIndexProxy_nativeClear(
     env: JNIEnv,
@@ -387,5 +387,4 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> Result<Key> {
     let mut key = Key::default();
     key.copy_from_slice(&bytes);
     Ok(key)
-
 }
