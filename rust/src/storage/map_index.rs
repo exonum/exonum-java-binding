@@ -17,7 +17,7 @@ enum IndexType {
     ForkIndex(Index<&'static mut Fork>),
 }
 
-/// Returns a pointer to created `MapIndex` object.
+/// Returns a pointer to the created `MapIndex` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreate(
     env: JNIEnv,
@@ -37,7 +37,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreate(
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys underlying `MapIndex` object and frees memory.
+/// Destroys the underlying `MapIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeFree(
     env: JNIEnv,
@@ -87,7 +87,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeContain
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over a map keys and values.
+/// Returns the pointer to the iterator over a map keys and values.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateEntriesIter(
     env: JNIEnv,
@@ -141,7 +141,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateV
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the iterator over a map keys and values  starting at the given key.
+/// Returns the pointer to the iterator over a map keys and values starting at the given key.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_MapIndexProxy_nativeCreateIterFrom(
     env: JNIEnv,
