@@ -37,7 +37,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys underlying `ValueSetIndex` object and frees memory.
+/// Destroys the underlying `ValueSetIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeFree(
     env: JNIEnv,
@@ -269,7 +269,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIt
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `ValueSetIndex` iterator object and frees memory.
+/// Destroys the underlying `ValueSetIndex` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIteratorFree(
     env: JNIEnv,
@@ -296,7 +296,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeHa
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys underlying `ValueSetIndex` hash-iterator object and frees memory.
+/// Destroys the underlying `ValueSetIndex` hash-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeHashIteratorFree(
     env: JNIEnv,
