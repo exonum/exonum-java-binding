@@ -3,8 +3,10 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValues;
 
 import com.exonum.binding.storage.database.View;
+import java.util.Collection;
 import java.util.NoSuchElementException;
 
 /**
@@ -22,6 +24,21 @@ abstract class AbstractListIndexProxy extends AbstractIndexProxy implements List
   public final void add(byte[] e) {
     notifyModified();
     nativeAdd(getNativeHandle(), checkStorageValue(e));
+  }
+
+  @Override
+  public void addAll(Collection<byte[]> elements) {
+    notifyModified();
+    addAllUnchecked(checkStorageValues(elements));
+  }
+
+  private void addAllUnchecked(Collection<byte[]> elements) {
+    // Cache the nativeHandle to avoid repeated 'isValid' checks.
+    // It's OK to do that during this call, as this class is not thread-safe.
+    long nativeHandle = getNativeHandle();
+    for (byte[] e : elements) {
+      nativeAdd(nativeHandle, e);
+    }
   }
 
   @Override

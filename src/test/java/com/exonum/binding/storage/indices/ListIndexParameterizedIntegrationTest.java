@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -16,6 +17,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -78,6 +80,96 @@ public class ListIndexParameterizedIntegrationTest {
   @Test(expected = UnsupportedOperationException.class)
   public void addFailsWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (l) -> l.add(V1));
+  }
+
+  @Test
+  public void addAllEmptyCollection() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      l.addAll(Collections.emptyList());
+
+      assertTrue(l.isEmpty());
+    });
+  }
+
+  @Test
+  public void addAllEmptyCollectionNonEmptyIndex() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      l.add(V1);
+      long initialSize = l.size();
+
+      l.addAll(Collections.emptyList());
+
+      assertThat(l.size(), equalTo(initialSize));
+    });
+  }
+
+  @Test
+  public void addAllNonEmptyCollection() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      List<byte[]> addedElements = asList(V1, V2);
+      l.addAll(addedElements);
+
+      assertThat(Math.toIntExact(l.size()), equalTo(addedElements.size()));
+
+      for (int i = 0; i < l.size(); i++) {
+        byte[] actual = l.get(i);
+        byte[] expected = addedElements.get(i);
+        assertThat(actual, equalTo(expected));
+      }
+    });
+  }
+
+  @Test
+  public void addAllNonEmptyCollectionNonEmptyIndex() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      l.add(V1);
+      int initialSize = Math.toIntExact(l.size());
+
+      List<byte[]> addedElements = asList(V1, V2);
+      l.addAll(addedElements);
+
+      assertThat(Math.toIntExact(l.size()), equalTo(initialSize + addedElements.size()));
+
+      for (int i = initialSize; i < l.size(); i++) {
+        byte[] actual = l.get(i);
+        byte[] expected = addedElements.get(i - initialSize);
+        assertThat(actual, equalTo(expected));
+      }
+    });
+  }
+
+  @Test
+  public void addAllCollectionWithFirstNull() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      List<byte[]> addedElements = asList(null, V2);
+      try {
+        l.addAll(addedElements);
+        fail("Expected NPE");
+      } catch (NullPointerException e) {
+        assertTrue(l.isEmpty());
+      }
+    });
+  }
+
+  @Test
+  public void addAllCollectionWithSecondNull() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      List<byte[]> addedElements = asList(V1, null);
+      try {
+        l.addAll(addedElements);
+        fail("Expected NPE");
+      } catch (NullPointerException e) {
+        assertTrue(l.isEmpty());
+      }
+    });
+  }
+
+  @Test
+  public void addAllNullCollection() throws Exception {
+    runTestWithView(database::createFork, (l) -> {
+      expectedException.expect(NullPointerException.class);
+      l.addAll(null);
+    });
   }
 
   @Test

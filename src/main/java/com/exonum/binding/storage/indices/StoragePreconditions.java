@@ -3,6 +3,9 @@ package com.exonum.binding.storage.indices;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
+import java.util.Set;
+
 final class StoragePreconditions {
 
   static final int PROOF_MAP_KEY_SIZE = 32;
@@ -57,6 +60,18 @@ final class StoragePreconditions {
    */
   static byte[] checkStorageValue(byte[] value) {
     return checkNotNull(value, "Storage value is null");
+  }
+
+  /**
+   * Checks that the specified collection contains valid storage values.
+   *
+   * @param values a storage value
+   * @return an unmodified collection if all elements are valid
+   * @throws NullPointerException if the collection is null or it contains null elements
+   */
+  static Collection<byte[]> checkStorageValues(Collection<byte[]> values) {
+    values.forEach(StoragePreconditions::checkStorageValue);
+    return values;
   }
 
   /**
