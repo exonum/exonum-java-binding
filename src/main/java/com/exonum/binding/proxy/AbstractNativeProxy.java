@@ -1,6 +1,6 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
+import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 
 /**
  * A proxy of a native object.
@@ -16,7 +16,7 @@ import static com.exonum.binding.proxy.StoragePreconditions.checkValid;
  * statement to do that in orderly fashion.
  * When a proxy is closed, it becomes invalid.
  */
-abstract class AbstractNativeProxy implements NativeProxy {
+public abstract class AbstractNativeProxy implements NativeProxy {
 
   /**
    * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
@@ -37,7 +37,7 @@ abstract class AbstractNativeProxy implements NativeProxy {
    * @param owningHandle true if this proxy is responsible to release any native resources;
    *                     false — otherwise
    */
-  AbstractNativeProxy(long nativeHandle, boolean owningHandle) {
+  protected AbstractNativeProxy(long nativeHandle, boolean owningHandle) {
     this.nativeHandle = nativeHandle;
     this.owningHandle = owningHandle;
   }
@@ -51,7 +51,7 @@ abstract class AbstractNativeProxy implements NativeProxy {
    *
    * @throws IllegalStateException if this native proxy is invalid (closed or nullptr).
    */
-  final long getNativeHandle() {
+  protected final long getNativeHandle() {
     checkValid(this);
     return getNativeHandleUnsafe();
   }
@@ -89,7 +89,7 @@ abstract class AbstractNativeProxy implements NativeProxy {
    *
    * <p>This method is only called once from {@link #close()} and shall not be called directly.
    */
-  abstract void disposeInternal();
+  protected abstract void disposeInternal();
 
   private void invalidate() {
     nativeHandle = INVALID_NATIVE_HANDLE;

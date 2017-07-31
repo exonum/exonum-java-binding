@@ -10,8 +10,8 @@
     <!-- It's OK to return byte arrays here -->
     <Bug pattern="EI_EXPOSE_REP"/>
     <Or>
-      <Class name="com.exonum.binding.proxy.MapEntry"/>
-      <Class name="com.exonum.binding.proxy.ValueSetIndexProxy$Entry"/>
+      <Class name="com.exonum.binding.storage.indices.MapEntry"/>
+      <Class name="com.exonum.binding.storage.indices.ValueSetIndexProxy$Entry"/>
     </Or>
   </Match>
 </FindBugsFilter>

@@ -19,7 +19,7 @@ enum IndexType {
 
 /// Returns pointer to the created `ValueSetIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     prefix: jbyteArray,
@@ -39,7 +39,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 
 /// Destroys the underlying `ValueSetIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeFree(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -49,7 +49,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeFr
 
 /// Returns `true` if the set contains the specified value.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContains(
+pub extern "C" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeContains(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -67,12 +67,12 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContain
 
 /// Returns `true` if the set contains value with the specified hash.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContainsByHash(
+pub extern "C" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeContainsByHash(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
     hash: jbyteArray,
-) -> jboolean {
+) -> jboolean{
     let res = panic::catch_unwind(|| {
         let hash = utils::convert_to_hash(&env, hash)?;
         Ok(match *utils::cast_handle::<IndexType>(set_handle) {
@@ -85,11 +85,11 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeContain
 
 /// Returns the pointer to the iterator over a set that returns a pair of value and its hash.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreateIterator(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreateIterator(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(set_handle) {
@@ -103,12 +103,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 
 /// Returns pointer to the iterator over set starting from the given hash.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreateIterFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreateIterFrom(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
     from: jbyteArray,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         let from = utils::convert_to_hash(&env, from)?;
         Ok(utils::to_handle(
@@ -123,11 +123,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 
 /// Returns pointer to the iterator over set that returns hashes of values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreateHashIterator(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreateHashIterator(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(set_handle) {
@@ -141,12 +141,12 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 
 /// Returns pointer to the hash-iterator over set starting from the given hash.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCreateHashIterFrom(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreateHashIterFrom(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
     from: jbyteArray,
-) -> Handle {
+) -> Handle{
     let res = panic::catch_unwind(|| {
         let from = utils::convert_to_hash(&env, from)?;
         Ok(utils::to_handle(
@@ -161,7 +161,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCr
 
 /// Inserts value to the set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeAdd(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeAdd(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -182,7 +182,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeAd
 
 /// Removes value from the set.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeRemove(
+pub extern "C" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -203,7 +203,7 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeRemove(
 
 /// Removes value with given hash from the set.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeRemoveByHash(
+pub extern "C" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeRemoveByHash(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -224,7 +224,7 @@ pub extern "C" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeRemoveB
 
 /// Clears the set, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -243,11 +243,11 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeCl
 
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIteratorNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeIteratorNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jobject {
+) -> jobject{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ValueSetIndexIter<Value>>(iter_handle);
         match iter.next() {
@@ -256,7 +256,7 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIt
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
                     env.new_object(
-                        "com/exonum/binding/proxy/ValueSetIndexProxy$Entry",
+                        "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry",
                         "([B[B)V",
                         &[hash.into(), value.into()],
                     )?
@@ -271,21 +271,21 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIt
 
 /// Destroys the underlying `ValueSetIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeIteratorFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeIteratorFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) {
+){
     utils::drop_handle::<ValueSetIndexIter<Value>>(&env, iter_handle);
 }
 
 /// Returns next value from the hash-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeHashIteratorNext(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeHashIteratorNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ValueSetIndexHashes>(iter_handle);
         match iter.next() {
@@ -298,10 +298,10 @@ pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeHa
 
 /// Destroys the underlying `ValueSetIndex` hash-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_proxy_ValueSetIndexProxy_nativeHashIteratorFree(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeHashIteratorFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) {
+){
     utils::drop_handle::<ValueSetIndexHashes>(&env, iter_handle);
 }

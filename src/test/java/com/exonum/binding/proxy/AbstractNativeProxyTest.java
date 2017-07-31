@@ -113,7 +113,7 @@ public class AbstractNativeProxyTest {
     }
 
     @Override
-    void disposeInternal() {
+    protected void disposeInternal() {
       timesDisposed++;
     }
   }
