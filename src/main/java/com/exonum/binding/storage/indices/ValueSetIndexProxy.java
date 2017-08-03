@@ -40,7 +40,7 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  ValueSetIndexProxy(byte[] prefix, View view) {
+  public ValueSetIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
   }
 

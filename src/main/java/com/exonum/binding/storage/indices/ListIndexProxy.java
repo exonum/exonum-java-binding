@@ -31,7 +31,7 @@ public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex 
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  ListIndexProxy(byte[] prefix, View view) {
+  public ListIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
   }
 
