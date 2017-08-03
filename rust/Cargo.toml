@@ -16,5 +16,5 @@ resource-manager = ["lazy_static"]
 exonum = "0.1"
 log = "0.3"
 env_logger = "0.3"
-jni = "0.5.0"
+jni = "0.5.1"
 lazy_static = { version = "0.2", optional = true }
