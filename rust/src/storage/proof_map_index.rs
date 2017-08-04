@@ -23,6 +23,8 @@ enum IndexType {
 
 type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
 
+const JAVA_PROOF_MAP_ENTRY: &str = "com/exonum/binding/storage/indices/MapEntry";
+
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreate(
@@ -124,7 +126,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             IndexType::SnapshotIndex(ref map) => map.iter(),
             IndexType::ForkIndex(ref map) => map.iter(),
         };
-        let iter = Iter::new(&env, iter, "com/exonum/binding/storage/indices/MapEntry")?;
+        let iter = Iter::new(&env, iter, JAVA_PROOF_MAP_ENTRY)?;
         Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -180,7 +182,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
             IndexType::ForkIndex(ref map) => map.iter_from(&key),
         };
-        let iter = Iter::new(&env, iter, "com/exonum/binding/storage/indices/MapEntry")?;
+        let iter = Iter::new(&env, iter, JAVA_PROOF_MAP_ENTRY)?;
         Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -303,7 +305,11 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
-                    env.new_object(iter.entry.as_obj(), "([B[B)V", &[key.into(), value.into()])?
+                    env.new_object(
+                        iter.element_class.as_obj(),
+                        "([B[B)V",
+                        &[key.into(), value.into()],
+                    )?
                         .into_inner(),
                 )
             }

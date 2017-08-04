@@ -19,6 +19,8 @@ enum IndexType {
 
 type Iter<'a> = PairIter<ValueSetIndexIter<'a, Value>>;
 
+const JAVA_VALUE_SET_ENTRY: &str = "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry";
+
 /// Returns pointer to the created `ValueSetIndex` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreate(
@@ -97,11 +99,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
             IndexType::SnapshotIndex(ref set) => set.iter(),
             IndexType::ForkIndex(ref set) => set.iter(),
         };
-        let iter = Iter::new(
-            &env,
-            iter,
-            "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry",
-        )?;
+        let iter = Iter::new(&env, iter, JAVA_VALUE_SET_ENTRY)?;
         Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -121,11 +119,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
             IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
             IndexType::ForkIndex(ref set) => set.iter_from(&from),
         };
-        let iter = Iter::new(
-            &env,
-            iter,
-            "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry",
-        )?;
+        let iter = Iter::new(&env, iter, JAVA_VALUE_SET_ENTRY)?;
         Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -265,7 +259,11 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
-                    env.new_object(iter.entry.as_obj(), "([B[B)V", &[hash.into(), value.into()])?
+                    env.new_object(
+                        iter.element_class.as_obj(),
+                        "([B[B)V",
+                        &[hash.into(), value.into()],
+                    )?
                         .into_inner(),
                 )
             }
