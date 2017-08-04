@@ -34,7 +34,7 @@ public class EntryIndexProxy extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the prefix is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
-  EntryIndexProxy(byte[] prefix, View view) {
+  public EntryIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
   }
 

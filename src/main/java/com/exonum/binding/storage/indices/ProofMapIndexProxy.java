@@ -35,7 +35,7 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  ProofMapIndexProxy(byte[] prefix, View view) {
+  public ProofMapIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
   }
 

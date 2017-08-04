@@ -38,7 +38,7 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  KeySetIndexProxy(byte[] prefix, View view) {
+  public KeySetIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
   }
 
