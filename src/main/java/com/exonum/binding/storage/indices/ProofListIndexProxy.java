@@ -32,7 +32,7 @@ public class ProofListIndexProxy extends AbstractListIndexProxy implements ListI
    * @throws IllegalArgumentException if the prefix has zero size
    * @throws NullPointerException if any argument is null
    */
-  ProofListIndexProxy(byte[] prefix, View view) {
+  public ProofListIndexProxy(byte[] prefix, View view) {
     super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
   }
 
