@@ -13,9 +13,9 @@ You do _not_ need to manually fetch and compile Exonum.
 ### Build the project
 To build the project, run
 ```$sh
-$ mvn package
+$ mvn install
 ```
-The native library will be in `rust/target/debug/`, a jar archive&mdash;in `target/`.
+The native library will be in `exonum-java-binding-core/rust/target/debug/`, a jar archive&mdash;in `exonum-java-binding-core/target/`.
  
 ## Developer guide
 ### Working with Error Prone
