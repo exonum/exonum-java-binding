@@ -1,4 +1,4 @@
-package com.exonum.binding.storage.proofs;
+package com.exonum.binding.storage.proofs.list;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.truth.Truth.assertThat;
@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.exonum.binding.hash.Hashes;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

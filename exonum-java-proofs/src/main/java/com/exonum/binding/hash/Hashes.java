@@ -1,10 +1,11 @@
-package com.exonum.binding.storage.proofs;
+package com.exonum.binding.hash;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-// todo(dt): consider moving to its own package.
-class Hashes {
+public class Hashes {
+
+  public static final int HASH_SIZE_BYTES = 32;
 
   private static final String EXONUM_DEFAULT_HASHING_ALGORITHM = "SHA-256";
 
@@ -18,7 +19,7 @@ class Hashes {
    * @param items zero or more byte arrays to hash
    * @return SHA-256 hash of the combined byte array
    */
-  static byte[] getHashOf(byte[]... items) {
+  public static byte[] getHashOf(byte[]... items) {
     try {
       MessageDigest sha256 = MessageDigest.getInstance(EXONUM_DEFAULT_HASHING_ALGORITHM);
       for (byte[] i : items) {
@@ -33,7 +34,7 @@ class Hashes {
   /**
    * Returns the hash as a hexadecimal String.
    */
-  static String toString(byte[] hash) {
+  public static String toString(byte[] hash) {
     if (hash == null) {
       return "null";
     }
