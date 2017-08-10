@@ -58,6 +58,11 @@ public class ListProofValidator implements ListProofVisitor {
 
   @Override
   public void visit(ListProofBranch branch) {
+    if (exceedsMaxBranchDepth()) {
+      // A proof tree where a branch node appears below the maximum allowed depth is not valid.
+      isBalanced = false;
+      return;
+    }
     long branchIndex = index;
     int branchDepth = depth;
     byte[] leftHash = visitLeft(branch, branchIndex, branchDepth);
@@ -83,19 +88,31 @@ public class ListProofValidator implements ListProofVisitor {
     }
   }
 
+  /**
+   * Returns true if the branch node exceeds the maximum depth at which branch nodes may appear
+   * (expectedLeafDepth - 1).
+   */
+  private boolean exceedsMaxBranchDepth() {
+    return depth >= expectedLeafDepth;
+  }
+
   private byte[] visitLeft(ListProofBranch branch, long branchIndex, int branchDepth) {
     index = branchIndex << 1;
-    depth = branchDepth + 1;
+    depth = getChildDepth(branchDepth);
     branch.getLeft().accept(this);
     return hash;
   }
 
   private byte[] visitRight(ListProofBranch branch, long branchIndex, int branchDepth) {
     index = (branchIndex << 1) + 1;
-    depth = branchDepth + 1;
+    depth = getChildDepth(branchDepth);
     hash = EMPTY_HASH;
     branch.getRight().ifPresent((right) -> right.accept(this));
     return hash;
+  }
+
+  private int getChildDepth(int branchDepth) {
+    return branchDepth + 1;
   }
 
   /**
