@@ -9,10 +9,11 @@ env:
     - RUSTFMT_VERSION=0.9.0
     - RUST_NIGHTLY_VERSION=nightly-2017-07-20
     - RUST_CLIPPY_VERSION=0.0.144
+    - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
 cache:
   directories:
     - "$HOME/.cargo"
-    - "$TRAVIS_BUILD_DIR/rust/target"
+    - "${EJB_RUST_BUILD_DIR}/target"
     - "$HOME/.m2"
 before_install:
   - sudo add-apt-repository -y ppa:chris-lea/libsodium
@@ -35,7 +36,7 @@ before_install:
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
-  - cd exonum-java-binding-core/rust/
+  - cd "${EJB_RUST_BUILD_DIR}"
   - cargo fmt -- --write-mode=diff
   - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings
   - cargo audit
