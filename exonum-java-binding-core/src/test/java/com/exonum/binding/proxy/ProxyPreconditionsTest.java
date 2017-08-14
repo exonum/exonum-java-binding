@@ -1,13 +1,17 @@
 package com.exonum.binding.proxy;
 
 import static java.util.Collections.singleton;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -18,6 +22,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
     AbstractNativeProxy.class,
 })
 public class ProxyPreconditionsTest {
+
+  @Rule public ExpectedException expectedException = ExpectedException.none();
+
+  private Pattern errorMessagePattern = Pattern.compile(
+      "Proxy is not valid: .*AbstractNativeProxy.*", Pattern.CASE_INSENSITIVE);
 
   @Test
   public void checkValidDoesNothingIfValid() throws Exception {
@@ -33,31 +42,40 @@ public class ProxyPreconditionsTest {
     ProxyPreconditions.checkValid(proxies);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void checkValidDoesNotAcceptSingleInvalidProxy() throws Exception {
     AbstractNativeProxy proxy = createProxy(false);
 
+    expectException();
     ProxyPreconditions.checkValid(proxy);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void checkValidDoesNotAcceptInvalidProxies1() throws Exception {
     Set<AbstractNativeProxy> proxies = createProxies(true, false);
 
+    expectException();
     ProxyPreconditions.checkValid(proxies);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void checkValidDoesNotAcceptInvalidProxies2() throws Exception {
     Set<AbstractNativeProxy> proxies = createProxies(false, true);
 
+    expectException();
     ProxyPreconditions.checkValid(proxies);
   }
 
-  @Test(expected = NullPointerException.class)
+  private void expectException() {
+    expectedException.expectMessage(matchesPattern(errorMessagePattern));
+    expectedException.expect(IllegalStateException.class);
+  }
+
+  @Test
   public void checkValidDoesNotAcceptNullProxy() throws Exception {
     Set<AbstractNativeProxy> proxies = singleton(null);
 
+    expectedException.expect(NullPointerException.class);
     ProxyPreconditions.checkValid(proxies);
   }
 

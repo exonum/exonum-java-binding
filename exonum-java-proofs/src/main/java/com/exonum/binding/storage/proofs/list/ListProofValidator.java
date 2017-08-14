@@ -133,7 +133,7 @@ public class ListProofValidator implements ListProofVisitor {
    * @throws IllegalStateException if proof is not valid
    */
   public Map<Long, byte[]> getElements() {
-    checkState(isValid(), "Proof is not valid: " + getReason());
+    checkState(isValid(), "Proof is not valid: %s", getReason());
     return elements;
   }
 
