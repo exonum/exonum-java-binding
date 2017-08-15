@@ -1,8 +1,11 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.proofs.list.ListProof;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -37,6 +40,47 @@ public class ProofListIndexProxy extends AbstractListIndexProxy implements ListI
   }
 
   private static native long nativeCreate(byte[] listPrefix, long viewNativeHandle);
+
+  /**
+   * Returns a proof that an element exists at the specified index in this list.
+   *
+   * @param index the element index
+   * @throws IndexOutOfBoundsException if the index is invalid
+   * @throws IllegalStateException if this list is not valid
+   */
+  public ListProof getProof(long index) {
+    checkElementIndex(index, size());
+    return nativeGetProof(getNativeHandle(), index);
+  }
+
+  private native ListProof nativeGetProof(long nativeHandle, long index);
+
+  /**
+   * Returns a proof that some elements exist in the specified range in this list.
+   *
+   * @param from the index of the first element
+   * @param to the index after the last element
+   * @throws IndexOutOfBoundsException if the range is not valid
+   * @throws IllegalStateException if this list is not valid
+   */
+  public ListProof getRangeProof(long from, long to) {
+    long size = size();
+    return nativeGetRangeProof(getNativeHandle(), checkElementIndex(from, size),
+        checkPositionIndex(to, size));
+  }
+
+  private native ListProof nativeGetRangeProof(long nativeHandle, long from, long to);
+
+  /**
+   * Returns the root hash of the proof list.
+   *
+   * @throws IllegalStateException if this list is not valid
+   */
+  public byte[] getRootHash() {
+    return nativeGetRootHash(getNativeHandle());
+  }
+
+  private native byte[] nativeGetRootHash(long nativeHandle);
 
   @Override
   native void nativeFree(long nativeHandle);

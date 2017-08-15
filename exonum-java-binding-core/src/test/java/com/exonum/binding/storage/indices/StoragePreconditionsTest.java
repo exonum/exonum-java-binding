@@ -165,4 +165,62 @@ public class StoragePreconditionsTest {
 
     assertThat(StoragePreconditions.checkElementIndex(index, size), equalTo(index));
   }
+
+  @Test
+  public void checkPositionIndexSize0_Valid() throws Exception {
+    long index = 0;
+    long size = 0;
+
+    assertThat(StoragePreconditions.checkPositionIndex(index, size), equalTo(index));
+  }
+
+  @Test
+  public void checkPositionIndexSize0_NotValid() throws Exception {
+    long index = 1;
+    long size = 0;
+
+    expected.expectMessage("index (1) is greater than size (0)");
+    expected.expect(IndexOutOfBoundsException.class);
+    StoragePreconditions.checkPositionIndex(index, size);
+  }
+
+  @Test
+  public void checkPositionIndexSize0_NotValidNegative() throws Exception {
+    long index = -1;
+    long size = 0;
+
+    expected.expectMessage("index (-1) is negative");
+    expected.expect(IndexOutOfBoundsException.class);
+    StoragePreconditions.checkPositionIndex(index, size);
+  }
+
+  @Test
+  public void checkPositionIndexSize3_AllValid() throws Exception {
+    long size = 3;
+    long[] validIndices = {0, 1, 2, 3};
+
+    for (long index : validIndices) {
+      assertThat(StoragePreconditions.checkPositionIndex(index, size), equalTo(index));
+    }
+  }
+
+  @Test
+  public void checkPositionIndexSize3_NotValid() throws Exception {
+    long index = 4;
+    long size = 3;
+
+    expected.expectMessage("index (4) is greater than size (3)");
+    expected.expect(IndexOutOfBoundsException.class);
+    StoragePreconditions.checkPositionIndex(index, size);
+  }
+
+  @Test
+  public void checkPositionIndex_NegativeSize() throws Exception {
+    long index = 0;
+    long size = -1;
+
+    expected.expectMessage("size (-1) is negative");
+    expected.expect(IllegalArgumentException.class);
+    StoragePreconditions.checkPositionIndex(index, size);
+  }
 }
