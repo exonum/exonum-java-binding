@@ -208,6 +208,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-proofs</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>23.0</version>

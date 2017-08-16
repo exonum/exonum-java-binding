@@ -1,19 +1,25 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
+import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.hash.Hashes;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
@@ -21,6 +27,10 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.common.primitives.UnsignedBytes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -28,6 +38,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -48,6 +59,8 @@ public class ProofMapIndexProxyIntegrationTest {
   private static final byte[] PK3 = createProofKey("PK3");
 
   private static final List<byte[]> proofKeys = asList(PK1, PK2, PK3);
+
+  private static final byte[] EMPTY_MAP_ROOT_HASH = new byte[Hashes.HASH_SIZE_BYTES];
 
   private Database database;
 
@@ -122,6 +135,115 @@ public class ProofMapIndexProxyIntegrationTest {
       map.put(PK1, V1);
 
       assertThat(map.get(PK1), equalTo(V1));
+    });
+  }
+
+  @Ignore
+  @Test
+  public void getRootHash_EmptyMap() throws Exception {
+    runTestWithView(database::createSnapshot, (map) -> {
+      assertThat(map.getRootHash(), equalTo(EMPTY_MAP_ROOT_HASH));
+    });
+  }
+
+  @Ignore
+  @Test
+  public void getRootHash_NonEmptyMap() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      byte[] rootHash = map.getRootHash();
+      assertThat(rootHash, notNullValue());
+      assertThat(rootHash.length, equalTo(Hashes.HASH_SIZE_BYTES));
+      assertThat(rootHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
+    });
+  }
+
+  @Ignore
+  @Test
+  public void getProof_EmptyMap() throws Exception {
+    runTestWithView(database::createSnapshot,
+        (map) -> assertThat(map, provesNoMappingFor(PK1))
+    );
+  }
+
+  @Ignore
+  @Test
+  public void getProof_SingletonMapContains() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      byte[] key = PK1;
+      byte[] value = V1;
+      map.put(key, value);
+
+      assertThat(map, provesThatContains(key, value));
+    });
+  }
+
+  @Ignore
+  @Test
+  public void getProof_SingletonMapDoesNotContain() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      assertThat(map, provesNoMappingFor(PK2));
+    });
+  }
+
+  @Ignore
+  @Test
+  public void getProof_MultiEntryMapContains() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry> entries = createSortedMapEntries();
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      for (MapEntry e : entries) {
+        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+      }
+    });
+  }
+
+  @Ignore
+  @Test
+  public void getProof_MultiEntryMapDoesNotContain() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry> entries = createSortedMapEntries();
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      byte[] allOnes = new byte[PROOF_MAP_KEY_SIZE];
+      Arrays.fill(allOnes, UnsignedBytes.checkedCast(0xFF));
+
+      List<byte[]> otherKeys = asList(
+          allOnes,  // [11…1]
+          createProofKey(""),  // [00…0]
+          createProofKey("PK1001"),
+          createProofKey("PK1002"),
+          createProofKey("PK100500")
+      );
+
+      for (byte[] key : otherKeys) {
+        assertThat(map, provesNoMappingFor(key));
+      }
+    });
+  }
+
+  @Ignore
+  @Test
+  // Might take quite a lot of time (validating 257 proofs), but it's an integration test, isn't it? :-)
+  // Consider adding a similar test for left-leaning MPT
+  public void getProof_MapContainsRightLeaningMaxHeightMpt() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry> entries = createEntriesForRightLeaningMpt();
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      for (MapEntry e : entries) {
+        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+      }
     });
   }
 
@@ -308,5 +430,35 @@ public class ProofMapIndexProxyIntegrationTest {
   private List<MapEntry> createSortedMapEntries() {
     return Streams.zip(proofKeys.stream(), values.stream(), MapEntry::new)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Keys:
+   *   00…0000
+   *   100…000
+   *   0100…00
+   *   00100…0
+   *   …
+   *   00…0100
+   *   00…0010
+   *   00…0001
+   */
+  private static List<MapEntry> createEntriesForRightLeaningMpt() {
+    int numKeyBits = Byte.SIZE * PROOF_MAP_KEY_SIZE;
+    BitSet keyBits = new BitSet(numKeyBits);
+    int numEntries = numKeyBits + 1;
+    List<MapEntry> entries = new ArrayList<>(numEntries);
+    entries.add(new MapEntry(new byte[PROOF_MAP_KEY_SIZE], V1));
+
+    for (int i = 0; i < numKeyBits; i++) {
+      keyBits.set(i);
+      byte[] key = createPrefixed(keyBits.toByteArray(), PROOF_MAP_KEY_SIZE);
+      byte[] value = values.get(i % values.size());
+      entries.add(new MapEntry(key, value));
+      keyBits.clear(i);
+      assert keyBits.length() == 0;
+    }
+
+    return entries;
   }
 }

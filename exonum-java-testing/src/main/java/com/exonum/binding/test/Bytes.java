@@ -1,5 +1,7 @@
 package com.exonum.binding.test;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.primitives.UnsignedBytes;
 import java.io.UnsupportedEncodingException;
 
@@ -44,6 +46,24 @@ public class Bytes {
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError(e);
     }
+  }
+
+  /**
+   * Creates a byte array of the given size with the specified prefix.
+   * Bytes after the prefix are set to zero.
+   *
+   * @param prefixBytes a prefix of the new array
+   * @param size a size of the new array
+   * @return a new array that has the prefixBytes as its first elements and zeroes after that
+   */
+  public static byte[] createPrefixed(byte[] prefixBytes, int size) {
+    checkArgument(0 <= size, "Size is negative: %s", size);
+    checkArgument(prefixBytes.length <= size,
+        "Prefix size (%s) is greater than the specified size (%s)", prefixBytes.length, size);
+
+    byte[] key = new byte[size];
+    System.arraycopy(prefixBytes, 0, key, 0, prefixBytes.length);
+    return key;
   }
 
   private Bytes() {}
