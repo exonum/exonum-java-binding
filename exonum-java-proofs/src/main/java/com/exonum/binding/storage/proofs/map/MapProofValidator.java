@@ -137,7 +137,6 @@ public class MapProofValidator implements MapProofVisitor {
     bstPath.goLeft();
     node.getLeft().accept(this);
 
-    // TODO: consider returning early if proof is not structurally valid?
     byte[] leftHash = rootHash;
     byte[] rightHash = node.getRightHash().getHash();
     byte[] leftDbKey = node.getLeftKey().getRawDbKey();
@@ -154,7 +153,6 @@ public class MapProofValidator implements MapProofVisitor {
     bstPath.goRight();
     node.getRight().accept(this);
 
-    // TODO: consider returning early if proof is not structurally valid?
     byte[] leftHash = node.getLeftHash().getHash();
     byte[] rightHash = rootHash;
     byte[] leftDbKey = node.getLeftKey().getRawDbKey();
