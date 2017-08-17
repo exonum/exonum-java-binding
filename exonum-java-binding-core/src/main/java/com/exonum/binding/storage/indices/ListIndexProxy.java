@@ -64,7 +64,7 @@ public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex 
    * @throws UnsupportedOperationException if this list is read-only
    */
   public void truncate(long newSize) {
-    checkArgument(newSize >= 0, "New size must be non-negative: " + newSize);
+    checkArgument(newSize >= 0, "New size must be non-negative: %s", newSize);
     notifyModified();
     nativeTruncate(getNativeHandle(), newSize);
   }
