@@ -1,4 +1,4 @@
-package com.exonum.binding.storage.proofs;
+package com.exonum.binding.storage.proofs.list;
 
 public interface ListProofVisitor {
 
