@@ -232,7 +232,9 @@ public class ProofMapIndexProxyIntegrationTest {
 
   @Ignore
   @Test
-  // Might take quite a lot of time (validating 257 proofs), but it's an integration test, isn't it? :-)
+  // Might take quite a lot of time (validating 257 proofs),
+  // but it's an integration test, isn't it? :-)
+  //
   // Consider adding a similar test for left-leaning MPT
   public void getProof_MapContainsRightLeaningMaxHeightMpt() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -441,7 +443,7 @@ public class ProofMapIndexProxyIntegrationTest {
    *   …
    *   00…0100
    *   00…0010
-   *   00…0001
+   *   00…0001.
    */
   private static List<MapEntry> createEntriesForRightLeaningMpt() {
     int numKeyBits = Byte.SIZE * PROOF_MAP_KEY_SIZE;
