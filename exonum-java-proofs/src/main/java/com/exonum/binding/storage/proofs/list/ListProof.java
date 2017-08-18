@@ -1,4 +1,4 @@
-package com.exonum.binding.storage.proofs;
+package com.exonum.binding.storage.proofs.list;
 
 /**
  * Represents a proof that some elements exist in a ProofList at certain positions.

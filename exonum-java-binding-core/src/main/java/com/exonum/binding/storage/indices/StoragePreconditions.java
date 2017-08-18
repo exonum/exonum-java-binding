@@ -46,19 +46,8 @@ final class StoragePreconditions {
   static byte[] checkProofKey(byte[] key) {
     checkNotNull(key, "Proof map key is null");
     checkArgument(key.length == PROOF_MAP_KEY_SIZE,
-        "Proof map key has invalid size: " + key.length);
+        "Proof map key has invalid size: %s", key.length);
     return key;
-  }
-
-  /**
-   * Checks that a value is valid.
-   *
-   * @param value a storage value.
-   * @return an unmodified value if it's valid.
-   * @throws NullPointerException if value is null.
-   */
-  static byte[] checkStorageValue(byte[] value) {
-    return checkNotNull(value, "Storage value is null");
   }
 
   /**
@@ -71,6 +60,17 @@ final class StoragePreconditions {
   static Collection<byte[]> checkStorageValues(Collection<byte[]> values) {
     values.forEach(StoragePreconditions::checkStorageValue);
     return values;
+  }
+
+  /**
+   * Checks that a value is valid.
+   *
+   * @param value a storage value.
+   * @return an unmodified value if it's valid.
+   * @throws NullPointerException if value is null.
+   */
+  static byte[] checkStorageValue(byte[] value) {
+    return checkNotNull(value, "Storage value is null");
   }
 
   /**

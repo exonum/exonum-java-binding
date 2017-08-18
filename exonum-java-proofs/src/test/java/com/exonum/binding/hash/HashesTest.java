@@ -1,4 +1,4 @@
-package com.exonum.binding.storage.proofs;
+package com.exonum.binding.hash;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -45,9 +45,9 @@ public class HashesTest {
 
   private static byte[] zeroSha256Hash() {
     String zeroHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-    int hashSizeBytes = 32;
-    byte[] zeroHashBytes = new byte[hashSizeBytes];
-    for (int i = 0; i < hashSizeBytes; i++) {
+    int hashSize = Hashes.HASH_SIZE_BYTES;
+    byte[] zeroHashBytes = new byte[hashSize];
+    for (int i = 0; i < hashSize; i++) {
       int startIndex = i * 2;
       zeroHashBytes[i] = UnsignedBytes.parseUnsignedByte(
           zeroHash.substring(startIndex, startIndex + 2), 16);

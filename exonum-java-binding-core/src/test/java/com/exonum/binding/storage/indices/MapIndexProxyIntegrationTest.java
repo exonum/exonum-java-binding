@@ -93,8 +93,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnSuccessfullyPutValueSingletonKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{1};
-      byte[] value = new byte[]{1, 2, 3, 4};
+      byte[] key = bytes(1);
+      byte[] value = bytes(1, 2, 3, 4);
 
       map.put(key, value);
 
@@ -121,7 +121,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void putShouldOverwritePreviousValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{1};
+      byte[] key = bytes(1);
       byte[] v1 = bytes("v1");
       byte[] v2 = bytes("v2");
 
@@ -137,7 +137,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnSuccessfullyPutEmptyValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{1};
+      byte[] key = bytes(1);
       byte[] value = new byte[]{};
 
       map.put(key, value);
@@ -152,7 +152,7 @@ public class MapIndexProxyIntegrationTest {
   public void getShouldReturnSuccessfullyPutValueByEmptyKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte[] key = new byte[]{};
-      byte[] value = new byte[]{2};
+      byte[] value = bytes(2);
 
       map.put(key, value);
 
@@ -165,8 +165,8 @@ public class MapIndexProxyIntegrationTest {
   @Test(expected = UnsupportedOperationException.class)
   public void putShouldFailWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      byte[] key = new byte[]{1};
-      byte[] value = new byte[]{2};
+      byte[] key = bytes(1);
+      byte[] value = bytes(2);
 
       map.put(key, value);
     });
@@ -175,7 +175,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnNullIfNoSuchValueInFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{1};
+      byte[] key = bytes(1);
       byte[] value = map.get(key);
 
       assertNull(value);
@@ -185,7 +185,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnNullIfNoSuchValueInEmptySnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      byte[] key = new byte[]{1};
+      byte[] key = bytes(1);
       byte[] value = map.get(key);
 
       assertNull(value);
@@ -195,8 +195,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void removeSuccessfullyPutValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{1};
-      byte[] value = new byte[]{1, 2, 3, 4};
+      byte[] key = bytes(1);
+      byte[] value = bytes(1, 2, 3, 4);
 
       map.put(key, value);
       map.remove(key);
@@ -361,8 +361,8 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void clearSingleItemFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{1};
-      byte[] value = new byte[]{1, 2, 3, 4};
+      byte[] key = bytes(1);
+      byte[] value = bytes(1, 2, 3, 4);
 
       map.put(key, value);
       map.clear();
@@ -376,7 +376,7 @@ public class MapIndexProxyIntegrationTest {
   public void clearSingleItemByEmptyKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte[] key = new byte[]{};
-      byte[] value = new byte[]{1, 2, 3, 4};
+      byte[] value = bytes(1, 2, 3, 4);
 
       map.put(key, value);
       map.clear();

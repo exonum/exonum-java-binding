@@ -19,7 +19,7 @@ public final class ProxyPreconditions {
    */
   public static void checkValid(Set<AbstractNativeProxy> nativeProxies) {
     for (AbstractNativeProxy proxy : nativeProxies) {
-      checkState(proxy.isValid(), "Proxy is not valid: " + proxy);
+      checkState(proxy.isValid(), "Proxy is not valid: %s", proxy);
     }
   }
 

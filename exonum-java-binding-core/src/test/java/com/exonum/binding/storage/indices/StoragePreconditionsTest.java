@@ -16,7 +16,7 @@ public class StoragePreconditionsTest {
 
   @Test
   public void checkStoragePrefixAcceptsNonEmpty() throws Exception {
-    byte[] prefix = new byte[]{'p'};
+    byte[] prefix = bytes('p');
 
     assertThat(prefix, sameInstance(StoragePreconditions.checkIndexPrefix(prefix)));
   }
@@ -42,7 +42,7 @@ public class StoragePreconditionsTest {
 
   @Test
   public void checkStorageKeyAcceptsNonEmpty() throws Exception {
-    byte[] key = new byte[]{'k'};
+    byte[] key = bytes('k');
 
     assertThat(key, sameInstance(StoragePreconditions.checkStorageKey(key)));
   }
@@ -100,7 +100,7 @@ public class StoragePreconditionsTest {
 
   @Test
   public void checkStorageValueAcceptsNonEmpty() throws Exception {
-    byte[] value = new byte[]{'v'};
+    byte[] value = bytes('v');
 
     assertThat(value, sameInstance(StoragePreconditions.checkStorageValue(value)));
   }

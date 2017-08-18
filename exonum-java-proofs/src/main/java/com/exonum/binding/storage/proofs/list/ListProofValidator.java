@@ -1,7 +1,8 @@
-package com.exonum.binding.storage.proofs;
+package com.exonum.binding.storage.proofs.list;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.hash.Hashes;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
@@ -41,7 +42,7 @@ public class ListProofValidator implements ListProofVisitor {
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
   public ListProofValidator(byte[] expectedRootHash, long numElements) {
-    this.expectedRootHash = Arrays.copyOf(expectedRootHash, expectedRootHash.length);
+    this.expectedRootHash = expectedRootHash.clone();
     expectedLeafDepth = getExpectedLeafDepth(numElements);
     elements = new TreeMap<>();
     index = 0;
@@ -132,7 +133,7 @@ public class ListProofValidator implements ListProofVisitor {
    * @throws IllegalStateException if proof is not valid
    */
   public Map<Long, byte[]> getElements() {
-    checkState(isValid(), "Proof is not valid: " + getReason());
+    checkState(isValid(), "Proof is not valid: %s", getReason());
     return elements;
   }
 
