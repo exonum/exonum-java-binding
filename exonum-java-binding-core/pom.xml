@@ -15,6 +15,7 @@
   <name>Exonum Java Binding: Core</name>
 
   <properties>
+    <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.compiler.version>stable</rust.compiler.version>
@@ -37,6 +38,8 @@
         <configuration>
           <compilerArgs>
             <arg>${java.compiler.errorprone.flag}</arg>
+            <arg>-h</arg>
+            <arg>${project.build.headersDirectory}</arg>
           </compilerArgs>
         </configuration>
       </plugin>
