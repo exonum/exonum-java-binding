@@ -1,6 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
-use jni::sys::{jboolean, jbyteArray};
+use jni::sys::{jboolean, jbyteArray, jobject};
 use jni::errors::Result;
 
 use std::panic;
@@ -293,7 +293,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray{
+) -> jobject{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<ProofMapIndexIter<Key, Value>>(iter_handle);
         match iter.next() {
