@@ -3,6 +3,7 @@ package com.exonum.binding.storage.proofs.map;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isNotValid;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isValid;
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
@@ -372,12 +373,6 @@ public class MapProofValidatorTest {
   private static HashCode createHash(String prefix) {
     byte[] prefixBytes = bytes(prefix);
     return new HashCode(createPrefixed(prefixBytes, Hashes.HASH_SIZE_BYTES));
-  }
-
-  private static byte[] createPrefixed(byte[] prefixBytes, int size) {
-    byte[] key = new byte[size];
-    System.arraycopy(prefixBytes, 0, key, 0, prefixBytes.length);
-    return key;
   }
 
   private static DbKey leafDbKey(byte[] key) {

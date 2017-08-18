@@ -6,6 +6,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkProof
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.proofs.map.MapProof;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -72,6 +73,32 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   }
 
   private native byte[] nativeGet(long nativeHandle, byte[] key);
+
+  /**
+   * Returns a proof that there is a value mapped to the specified key or
+   * that there is no such mapping.
+   *
+   * @param key a proof map key which might be mapped to some value, must be 32-byte long
+   * @throws NullPointerException if the key is null
+   * @throws IllegalStateException  if this map is not valid
+   * @throws IllegalArgumentException if the size of the key is not 32 bytes
+   */
+  public MapProof getProof(byte[] key) {
+    return nativeGetProof(getNativeHandle(), checkProofKey(key));
+  }
+
+  private native MapProof nativeGetProof(long nativeHandle, byte[] key);
+
+  /**
+   * Returns the root hash of the underlying Merkle-Patricia tree.
+   *
+   * @throws IllegalStateException  if this map is not valid
+   */
+  public byte[] getRootHash() {
+    return nativeGetRootHash(getNativeHandle());
+  }
+
+  private native byte[] nativeGetRootHash(long nativeHandle);
 
   @Override
   public void remove(byte[] key) {
