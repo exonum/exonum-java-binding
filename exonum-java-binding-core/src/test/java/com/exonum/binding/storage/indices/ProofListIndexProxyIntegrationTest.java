@@ -1,12 +1,18 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.ProofListContainsMatcher.provesThatContains;
+import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.test.Bytes.bytes;
-import static org.junit.Assert.fail;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -21,7 +27,12 @@ import org.junit.rules.ExpectedException;
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
+@Ignore("Proofs not implemented yet.")
 public class ProofListIndexProxyIntegrationTest {
+
+  private static final int HASH_SIZE = 32;
+
+  private static final byte[] EMPTY_LIST_ROOT_HASH = new byte[HASH_SIZE];
 
   static {
     LibraryLoader.load();
@@ -45,20 +56,102 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  @Ignore("proofs not implemented yet")
-  public void getProofTest() throws Exception {
-    runTestWithView(database::createFork, (l) -> {
-      fail("not implemented");
+  public void getRootHashEmptyList() throws Exception {
+    runTestWithView(database::createSnapshot, (list) -> {
+      assertThat(list.getRootHash(), equalTo(EMPTY_LIST_ROOT_HASH));
+    });
+  }
+
+  @Test
+  public void getRootHashSingletonList() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      list.add(V1);
+
+      byte[] rootHash = list.getRootHash();
+      assertThat(rootHash.length, equalTo(HASH_SIZE));
+      assertThat(rootHash, not(equalTo(EMPTY_LIST_ROOT_HASH)));
+    });
+  }
+
+  @Test
+  public void getProofFailsIfEmptyList() throws Exception {
+    runTestWithView(database::createSnapshot, (list) -> {
+      expectedException.expect(IndexOutOfBoundsException.class);
+      list.getProof(0);
+    });
+  }
+
+  @Test
+  public void getProofSingletonList() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      list.add(V1);
+
+      assertThat(list, provesThatContains(0, V1));
+    });
+  }
+
+  @Test
+  public void getRangeProofSingletonList() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      list.add(V1);
+
+      assertThat(list, provesThatContains(0, singletonList(V1)));
+    });
+  }
+
+  @Test
+  public void getProofMultipleItemList() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      List<byte[]> values = TestStorageItems.values;
+      values.forEach(list::add);
+
+      for (int i = 0; i < values.size(); i++) {
+        assertThat(list, provesThatContains(i, values.get(i)));
+      }
+    });
+  }
+
+  @Test
+  public void getRangeProofMultipleItemList_FullRange() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      List<byte[]> values = TestStorageItems.values;
+      values.forEach(list::add);
+
+      assertThat(list, provesThatContains(0, values));
+    });
+  }
+
+  @Test
+  public void getRangeProofMultipleItemList_1stHalf() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      List<byte[]> values = TestStorageItems.values;
+      values.forEach(list::add);
+
+      int from = 0;
+      int to = values.size() / 2;
+      assertThat(list, provesThatContains(from, values.subList(from, to)));
+    });
+  }
+
+  @Test
+  public void getRangeProofMultipleItemList_2ndHalf() throws Exception {
+    runTestWithView(database::createFork, (list) -> {
+      List<byte[]> values = TestStorageItems.values;
+      values.forEach(list::add);
+
+      int from = values.size() / 2;
+      int to = values.size();
+      assertThat(list, provesThatContains(from, values.subList(from, to)));
     });
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<ListIndex> listTest) {
+                               Consumer<ProofListIndexProxy> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ListIndex> listTest) {
+                               BiConsumer<View, ProofListIndexProxy> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_PREFIX,
