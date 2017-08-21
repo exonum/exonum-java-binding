@@ -27,7 +27,6 @@ import org.junit.rules.ExpectedException;
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
-@Ignore("Proofs not implemented yet.")
 public class ProofListIndexProxyIntegrationTest {
 
   private static final int HASH_SIZE = 32;
