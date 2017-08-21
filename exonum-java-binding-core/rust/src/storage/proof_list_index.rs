@@ -1,12 +1,14 @@
 use jni::JNIEnv;
+use jni::errors::Result;
 use jni::objects::{JClass, JObject};
-use jni::sys::{jlong, jint, jbyteArray, jboolean};
+use jni::sys::{jlong, jint, jbyteArray, jboolean, jobject};
 
 use std::panic;
 use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, ProofListIndex};
-use exonum::storage::proof_list_index::ProofListIndexIter;
+use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
+use exonum::crypto::Hash;
 use utils::{self, Handle};
 use super::db::{View, Value};
 
@@ -138,7 +140,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns the root hash of the proof list or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeRootHash(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetRootHash(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -153,8 +155,42 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-// TODO: `get_proof`.
-// TODO: `get_range_proof`.
+/// Returns Java representation of the proof that an element exists at the specified index.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetProof(
+    env: JNIEnv,
+    _: JObject,
+    list_handle: Handle,
+    index: jlong,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        let proof = match *utils::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
+            IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
+        };
+        make_java_proof(&env, &proof)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Returns Java representation of the proof that some elements exists in the specified range.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
+    env: JNIEnv,
+    _: JObject,
+    list_handle: Handle,
+    from: jlong,
+    to: jlong,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        let proof = match *utils::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64, to as u64),
+            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64, to as u64),
+        };
+        make_java_proof(&env, &proof)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
 
 /// Returns pointer to the iterator over list.
 #[no_mangle]
@@ -280,4 +316,54 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     iter_handle: Handle,
 ){
     utils::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
+}
+
+fn make_java_proof(env: &JNIEnv, proof: &ListProof<Value>) -> Result<jobject> {
+    match *proof {
+        ListProof::Full(ref left, ref right) => {
+            let left = make_java_proof(env, left.as_ref())?;
+            let right = make_java_proof(env, right.as_ref())?;
+            make_java_proof_branch(env, left, right)
+        }
+        ListProof::Left(ref left, ref hash) => {
+            let left = make_java_proof(env, left.as_ref())?;
+            let right = hash.map_or(Ok(ptr::null_mut()), |hash| make_java_hash_node(env, &hash))?;
+            make_java_proof_branch(env, left, right)
+        }
+        ListProof::Right(ref hash, ref right) => {
+            let left = make_java_hash_node(env, hash)?;
+            let right = make_java_proof(env, right.as_ref())?;
+            make_java_proof_branch(env, left, right)
+        }
+        ListProof::Leaf(ref value) => make_java_proof_element(env, value),
+    }
+}
+
+fn make_java_proof_element(env: &JNIEnv, value: &Value) -> Result<jobject> {
+    let value: JObject = env.byte_array_from_slice(&value)?.into();
+    Ok(env.new_object(
+        "com/exonum/binding/storage/proofs/list/ProofListElement",
+        "([B)V",
+        &[value.into()],
+    )?.into_inner())
+}
+
+fn make_java_proof_branch(env: &JNIEnv, left: jobject, right: jobject) -> Result<jobject> {
+    let left: JObject = left.into();
+    let right: JObject = right.into();
+    Ok(env.new_object(
+        "com/exonum/binding/storage/proofs/list/ListProofBranch",
+        "(Lcom/exonum/binding/storage/proofs/list/ListProof;\
+          Lcom/exonum/binding/storage/proofs/list/ListProof;)V",
+        &[left.into(), right.into()],
+    )?.into_inner())
+}
+
+fn make_java_hash_node(env: &JNIEnv, hash: &Hash) -> Result<jobject> {
+    let hash: JObject = utils::convert_hash(env, hash)?.into();
+    Ok(env.new_object(
+        "com/exonum/binding/storage/proofs/list/HashNode",
+        "([B)V",
+        &[hash.into()],
+    )?.into_inner())
 }
