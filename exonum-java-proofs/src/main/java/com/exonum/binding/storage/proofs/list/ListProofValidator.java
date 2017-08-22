@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.proofs.list;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.Hashes;
@@ -42,6 +43,7 @@ public class ListProofValidator implements ListProofVisitor {
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
   public ListProofValidator(byte[] expectedRootHash, long numElements) {
+    checkArgument(0 < numElements, "numElements (%s) must be positive", numElements);
     this.expectedRootHash = expectedRootHash.clone();
     expectedLeafDepth = getExpectedLeafDepth(numElements);
     elements = new TreeMap<>();
@@ -52,9 +54,7 @@ public class ListProofValidator implements ListProofVisitor {
   }
 
   private int getExpectedLeafDepth(long numElements) {
-    return (numElements > 1)
-        ? (int) Math.round(Math.ceil(Math.log(numElements) / Math.log(2.0)))
-        : 1;
+    return (int) Math.round(Math.ceil(Math.log(numElements) / Math.log(2.0)));
   }
 
   @Override

@@ -46,6 +46,32 @@ public class ListProofValidatorTest {
   }
 
   @Test
+  public void constructorRejectsZeroSize() throws Exception {
+    expectedException.expect(IllegalArgumentException.class);
+    validator = new ListProofValidator(ROOT_HASH, 0);
+  }
+
+  @Test
+  public void constructorRejectsNegativeSize() throws Exception {
+    expectedException.expect(IllegalArgumentException.class);
+    validator = new ListProofValidator(ROOT_HASH, -1);
+  }
+
+  @Test
+  public void visitSingletonListProof() throws Exception {
+    ListProof root = new ProofListElement(V1);
+    when(Hashes.getHashOf(V1)).thenReturn(ROOT_HASH);
+
+    int listSize = 1;
+    validator = new ListProofValidator(ROOT_HASH, listSize);
+    root.accept(validator);
+
+    assertTrue(validator.isValid());
+    assertThat(validator.getElements())
+        .containsExactly(0L, V1);
+  }
+
+  @Test
   public void visitFullProof_2elements() throws Exception {
     ProofListElement left = new ProofListElement(V1);
     when(Hashes.getHashOf(V1)).thenReturn(H1);
@@ -119,21 +145,20 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visitFullProofNoRight() throws Exception {
+  public void visitIllegalProofOfSingletonTree() throws Exception {
     int listSize = 1;
 
     ProofListElement left = new ProofListElement(V1);
     when(Hashes.getHashOf(V1)).thenReturn(H1);
 
+    // A proof for a list of size 1 must not contain branch nodes.
     ListProofBranch root = new ListProofBranch(left, null);
     when(Hashes.getHashOf(eq(H1), eq(EMPTY_HASH))).thenReturn(ROOT_HASH);
 
     validator = new ListProofValidator(ROOT_HASH, listSize);
     validator.visit(root);
 
-    assertTrue(validator.isValid());
-    assertThat(validator.getElements())
-        .containsExactly(0L, V1);
+    assertFalse(validator.isValid());
   }
 
   @Test
@@ -196,7 +221,7 @@ public class ListProofValidatorTest {
 
   @Test
   public void visitLeftHash() throws Exception {
-    int listSize = 1;
+    int listSize = 2;
 
     ListProof left = new HashNode(H1);
     ListProofBranch root = new ListProofBranch(left, null);
