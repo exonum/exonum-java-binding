@@ -87,5 +87,31 @@ final class StoragePreconditions {
     return index;
   }
 
+  /**
+   * Checks that the specified index is a valid position: in range [0, size].
+   *
+   * @param index a position index
+   * @param size size of the sequence
+   * @return a valid position index
+   * @throws IndexOutOfBoundsException if the index is not in range [0, size]
+   * @throws IllegalArgumentException if size is negative
+   */
+  static long checkPositionIndex(long index, long size) {
+    if (index < 0 || index > size) {
+      throw new IndexOutOfBoundsException(badPositionIndex(index, size));
+    }
+    return index;
+  }
+
+  private static String badPositionIndex(long index, long size) {
+    if (index < 0) {
+      return "index (" + index + ") is negative";
+    } else if (size >= 0) {
+      return "index (" + index + ") is greater than size (" + size + ")";
+    } else {
+      throw new IllegalArgumentException("size (" + size + ") is negative");
+    }
+  }
+
   private StoragePreconditions() {}
 }
