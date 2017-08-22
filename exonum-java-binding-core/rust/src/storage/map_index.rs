@@ -1,6 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
-use jni::sys::{jboolean, jbyteArray};
+use jni::sys::{jboolean, jbyteArray, jobject};
 
 use std::panic;
 use std::ptr;
@@ -270,7 +270,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray{
+) -> jobject{
     let res = panic::catch_unwind(|| {
         let mut iter = utils::cast_handle::<MapIndexIter<Key, Value>>(iter_handle);
         match iter.next() {
