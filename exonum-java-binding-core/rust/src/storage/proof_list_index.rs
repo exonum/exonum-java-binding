@@ -162,13 +162,13 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     _: JObject,
     list_handle: Handle,
     index: jlong,
-) -> jobject {
+) -> jobject{
     let res = panic::catch_unwind(|| {
         let proof = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
             IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
         };
-        make_java_proof(&env, &proof)
+        make_java_proof(&env, &proof).map(|x| x.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -181,13 +181,13 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
     from: jlong,
     to: jlong,
-) -> jobject {
+) -> jobject{
     let res = panic::catch_unwind(|| {
         let proof = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64, to as u64),
             IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64, to as u64),
         };
-        make_java_proof(&env, &proof)
+        make_java_proof(&env, &proof).map(|x| x.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -318,7 +318,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     utils::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
 }
 
-fn make_java_proof(env: &JNIEnv, proof: &ListProof<Value>) -> Result<jobject> {
+fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JObject<'a>> {
     match *proof {
         ListProof::Full(ref left, ref right) => {
             let left = make_java_proof(env, left.as_ref())?;
@@ -327,7 +327,9 @@ fn make_java_proof(env: &JNIEnv, proof: &ListProof<Value>) -> Result<jobject> {
         }
         ListProof::Left(ref left, ref hash) => {
             let left = make_java_proof(env, left.as_ref())?;
-            let right = hash.map_or(Ok(ptr::null_mut()), |hash| make_java_hash_node(env, &hash))?;
+            let right = hash.map_or(Ok(ptr::null_mut().into()), |hash| {
+                make_java_hash_node(env, &hash)
+            })?;
             make_java_proof_branch(env, left, right)
         }
         ListProof::Right(ref hash, ref right) => {
@@ -339,31 +341,36 @@ fn make_java_proof(env: &JNIEnv, proof: &ListProof<Value>) -> Result<jobject> {
     }
 }
 
-fn make_java_proof_element(env: &JNIEnv, value: &Value) -> Result<jobject> {
+fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
     let value: JObject = env.byte_array_from_slice(&value)?.into();
-    Ok(env.new_object(
+    env.new_object(
         "com/exonum/binding/storage/proofs/list/ProofListElement",
         "([B)V",
         &[value.into()],
-    )?.into_inner())
+    )
+    // TODO: Free local reference (#141).
 }
 
-fn make_java_proof_branch(env: &JNIEnv, left: jobject, right: jobject) -> Result<jobject> {
-    let left: JObject = left.into();
-    let right: JObject = right.into();
-    Ok(env.new_object(
+fn make_java_proof_branch<'a>(
+    env: &JNIEnv<'a>,
+    left: JObject,
+    right: JObject,
+) -> Result<JObject<'a>> {
+    env.new_object(
         "com/exonum/binding/storage/proofs/list/ListProofBranch",
         "(Lcom/exonum/binding/storage/proofs/list/ListProof;\
           Lcom/exonum/binding/storage/proofs/list/ListProof;)V",
         &[left.into(), right.into()],
-    )?.into_inner())
+    )
+    // TODO: Free local references (#141).
 }
 
-fn make_java_hash_node(env: &JNIEnv, hash: &Hash) -> Result<jobject> {
+fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>> {
     let hash: JObject = utils::convert_hash(env, hash)?.into();
-    Ok(env.new_object(
+    env.new_object(
         "com/exonum/binding/storage/proofs/list/HashNode",
         "([B)V",
         &[hash.into()],
-    )?.into_inner())
+    )
+    // TODO: Free local reference (#141).
 }
