@@ -9,7 +9,7 @@ use std::ptr;
 use exonum::storage::{Snapshot, Fork, ProofMapIndex};
 use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues};
 use exonum::crypto::HASH_SIZE as PROOF_KEY_SIZE;
-use utils::{self, Handle};
+use utils::{self, Handle, PairIter};
 use super::db::{View, Value};
 
 // TODO: Use `PROOF_KEY_SIZE` after https://github.com/exonum/exonum/pull/270 is merged.
@@ -20,6 +20,10 @@ enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
     ForkIndex(Index<&'static mut Fork>),
 }
+
+type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
+
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntry";
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
@@ -118,12 +122,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     map_handle: Handle,
 ) -> Handle{
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.iter(),
-                IndexType::ForkIndex(ref map) => map.iter(),
-            },
-        ))
+        let iter = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter(),
+            IndexType::ForkIndex(ref map) => map.iter(),
+        };
+        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
+        Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -174,12 +178,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 ) -> Handle{
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
-                IndexType::ForkIndex(ref map) => map.iter_from(&key),
-            },
-        ))
+        let iter = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
+            IndexType::ForkIndex(ref map) => map.iter_from(&key),
+        };
+        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
+        Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -295,15 +299,15 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     iter_handle: Handle,
 ) -> jobject{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ProofMapIndexIter<Key, Value>>(iter_handle);
-        match iter.next() {
+        let mut iter = utils::cast_handle::<Iter>(iter_handle);
+        match iter.iter.next() {
             Some(val) => {
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
-                    env.new_object(
-                        "com/exonum/binding/storage/indices/MapEntry",
-                        "([B[B)V",
+                    env.new_object_by_id(
+                        &iter.element_class,
+                        iter.constructor_id,
                         &[key.into(), value.into()],
                     )?
                         .into_inner(),
@@ -322,7 +326,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     _: JObject,
     iter_handle: Handle,
 ){
-    utils::drop_handle::<ProofMapIndexIter<Key, Value>>(&env, iter_handle);
+    utils::drop_handle::<Iter>(&env, iter_handle);
 }
 
 /// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
