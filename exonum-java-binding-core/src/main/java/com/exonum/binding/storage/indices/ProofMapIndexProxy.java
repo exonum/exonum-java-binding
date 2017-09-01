@@ -50,7 +50,7 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native boolean nativeContainsKey(long nativeHandle, byte[] key);
 
   /**
-   * {@inheritDoc}.
+   * {@inheritDoc}
    *
    * @param key a proof map key, must be 32-byte long
    * @param value a storage value to associate with the key

@@ -20,7 +20,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.compiler.version>stable</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
-    <!-- Intentionally left empty, may be overrided from command line.
+    <!-- Intentionally left empty, may be overridden from the command line.
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
@@ -70,6 +70,19 @@
                 <argument>build</argument>
                 <argument>--features</argument>
                 <argument>${rust.compiler.features}</argument>
+              </arguments>
+            </configuration>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>test-rust-lib-no-resource-manager</id>
+            <phase>test</phase>
+            <configuration>
+              <arguments>
+                <argument>+${rust.compiler.version}</argument>
+                <argument>test</argument>
               </arguments>
             </configuration>
             <goals>
