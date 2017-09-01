@@ -9,7 +9,7 @@ use std::ptr;
 use exonum::storage::{Snapshot, Fork, ProofListIndex};
 use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
 use exonum::crypto::Hash;
-use utils::{self, Handle};
+use utils::{self, Handle, AutoLocalRef};
 use super::db::{View, Value};
 
 type Index<T> = ProofListIndex<T, Value>;
@@ -344,13 +344,12 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
 // TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
 #[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
 fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
-    let value: JObject = env.byte_array_from_slice(value)?.into();
+    let value = AutoLocalRef::new(env, env.byte_array_from_slice(value)?);
     env.new_object(
         "com/exonum/binding/storage/proofs/list/ProofListElement",
         "([B)V",
-        &[value.into()],
+        &[value.as_obj().into()],
     )
-    // TODO: Free local reference (#141).
 }
 
 fn make_java_proof_branch<'a>(
@@ -358,21 +357,21 @@ fn make_java_proof_branch<'a>(
     left: JObject,
     right: JObject,
 ) -> Result<JObject<'a>> {
+    let left = AutoLocalRef::new(env, left.into_inner());
+    let right = AutoLocalRef::new(env, right.into_inner());
     env.new_object(
         "com/exonum/binding/storage/proofs/list/ListProofBranch",
         "(Lcom/exonum/binding/storage/proofs/list/ListProof;\
           Lcom/exonum/binding/storage/proofs/list/ListProof;)V",
-        &[left.into(), right.into()],
+        &[left.as_obj().into(), right.as_obj().into()],
     )
-    // TODO: Free local references (#141).
 }
 
 fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>> {
-    let hash: JObject = utils::convert_hash(env, hash)?.into();
+    let hash = AutoLocalRef::new(env, utils::convert_hash(env, hash)?);
     env.new_object(
         "com/exonum/binding/storage/proofs/list/HashNode",
         "([B)V",
-        &[hash.into()],
+        &[hash.as_obj().into()],
     )
-    // TODO: Free local reference (#141).
 }
