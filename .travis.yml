@@ -7,8 +7,8 @@ env:
   global:
     - RUST_VERSION=stable
     - RUSTFMT_VERSION=0.9.0
-    - RUST_NIGHTLY_VERSION=nightly-2017-07-20
-    - RUST_CLIPPY_VERSION=0.0.144
+    - RUST_NIGHTLY_VERSION=nightly-2017-08-31
+    - RUST_CLIPPY_VERSION=0.0.155
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
 cache:
   directories:

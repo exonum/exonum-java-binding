@@ -249,7 +249,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     iter_handle: Handle,
 ) -> jobject{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ValueSetIndexIter<Value>>(iter_handle);
+        let iter = utils::cast_handle::<ValueSetIndexIter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => {
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
@@ -287,7 +287,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     iter_handle: Handle,
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ValueSetIndexHashes>(iter_handle);
+        let iter = utils::cast_handle::<ValueSetIndexHashes>(iter_handle);
         match iter.next() {
             Some(val) => utils::convert_hash(&env, &val),
             None => Ok(ptr::null_mut()),

@@ -270,7 +270,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ListIndexIter<Value>>(iter_handle);
+        let iter = utils::cast_handle::<ListIndexIter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
