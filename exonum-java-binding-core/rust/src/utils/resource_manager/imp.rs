@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "assertion failed: `(left != right)` (left: `0`, right: `0`)")]
+    #[should_panic(expected = "assertion failed: `(left != right)`\n  left: `0`,\n right: `0`")]
     fn add_zero_handle() {
         add_handle::<T>(0);
     }
