@@ -253,15 +253,15 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     iter_handle: Handle,
 ) -> jobject{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<Iter>(iter_handle);
-        match iter.iter.next() {
+        let mut iterWrapper = utils::cast_handle::<Iter>(iter_handle);
+        match iterWrapper.iter.next() {
             Some(val) => {
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
                     env.new_object_by_id(
-                        &iter.element_class,
-                        iter.constructor_id,
+                        &iterWrapper.element_class,
+                        iterWrapper.constructor_id,
                         &[hash.into(), value.into()],
                     )?
                         .into_inner(),
