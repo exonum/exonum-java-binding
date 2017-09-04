@@ -7,7 +7,7 @@ use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, MapIndex};
 use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
-use utils::{self, Handle};
+use utils::{self, Handle, PairIter};
 use super::db::{View, Key, Value};
 
 type Index<T> = MapIndex<T, Key, Value>;
@@ -16,6 +16,10 @@ enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
     ForkIndex(Index<&'static mut Fork>),
 }
+
+type Iter<'a> = PairIter<MapIndexIter<'a, Key, Value>>;
+
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntry";
 
 /// Returns a pointer to the created `MapIndex` object.
 #[no_mangle]
@@ -95,12 +99,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
     map_handle: Handle,
 ) -> Handle{
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.iter(),
-                IndexType::ForkIndex(ref map) => map.iter(),
-            },
-        ))
+        let iter = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter(),
+            IndexType::ForkIndex(ref map) => map.iter(),
+        };
+        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
+        Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -151,12 +155,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
 ) -> Handle{
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
-                IndexType::ForkIndex(ref map) => map.iter_from(&key),
-            },
-        ))
+        let iter = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
+            IndexType::ForkIndex(ref map) => map.iter_from(&key),
+        };
+        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
+        Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -272,15 +276,15 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
     iter_handle: Handle,
 ) -> jobject{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<MapIndexIter<Key, Value>>(iter_handle);
-        match iter.next() {
+        let mut iterWrapper = utils::cast_handle::<Iter>(iter_handle);
+        match iterWrapper.iter.next() {
             Some(val) => {
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
-                    env.new_object(
-                        "com/exonum/binding/storage/indices/MapEntry",
-                        "([B[B)V",
+                    env.new_object_by_id(
+                        &iterWrapper.element_class,
+                        iterWrapper.constructor_id,
                         &[key.into(), value.into()],
                     )?
                         .into_inner(),
@@ -299,7 +303,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
     _: JObject,
     iter_handle: Handle,
 ){
-    utils::drop_handle::<MapIndexIter<Key, Value>>(&env, iter_handle);
+    utils::drop_handle::<Iter>(&env, iter_handle);
 }
 
 /// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
