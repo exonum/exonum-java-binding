@@ -7,7 +7,7 @@ use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, ValueSetIndex};
 use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
-use utils::{self, Handle};
+use utils::{self, Handle, PairIter};
 use super::db::{View, Value};
 
 type Index<T> = ValueSetIndex<T, Value>;
@@ -16,6 +16,10 @@ enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
     ForkIndex(Index<&'static mut Fork>),
 }
+
+type Iter<'a> = PairIter<ValueSetIndexIter<'a, Value>>;
+
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry";
 
 /// Returns pointer to the created `ValueSetIndex` object.
 #[no_mangle]
@@ -91,12 +95,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     set_handle: Handle,
 ) -> Handle{
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter(),
-                IndexType::ForkIndex(ref set) => set.iter(),
-            },
-        ))
+        let iter = match *utils::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.iter(),
+            IndexType::ForkIndex(ref set) => set.iter(),
+        };
+        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
+        Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -111,12 +115,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
 ) -> Handle{
     let res = panic::catch_unwind(|| {
         let from = utils::convert_to_hash(&env, from)?;
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-                IndexType::ForkIndex(ref set) => set.iter_from(&from),
-            },
-        ))
+        let iter = match *utils::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
+            IndexType::ForkIndex(ref set) => set.iter_from(&from),
+        };
+        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
+        Ok(utils::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -249,15 +253,15 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     iter_handle: Handle,
 ) -> jobject{
     let res = panic::catch_unwind(|| {
-        let iter = utils::cast_handle::<ValueSetIndexIter<Value>>(iter_handle);
-        match iter.next() {
+        let iterWrapper = utils::cast_handle::<Iter>(iter_handle);
+        match iterWrapper.iter.next() {
             Some(val) => {
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(
-                    env.new_object(
-                        "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry",
-                        "([B[B)V",
+                    env.new_object_by_id(
+                        &iterWrapper.element_class,
+                        iterWrapper.constructor_id,
                         &[hash.into(), value.into()],
                     )?
                         .into_inner(),
@@ -276,7 +280,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     _: JObject,
     iter_handle: Handle,
 ){
-    utils::drop_handle::<ValueSetIndexIter<Value>>(&env, iter_handle);
+    utils::drop_handle::<Iter>(&env, iter_handle);
 }
 
 /// Returns next value from the hash-iterator. Returns null pointer when iteration is finished.
