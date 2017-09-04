@@ -172,7 +172,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
     iter_handle: Handle,
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<KeySetIndexIter<Key>>(iter_handle);
+        let iter = utils::cast_handle::<KeySetIndexIter<Key>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),

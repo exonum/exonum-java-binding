@@ -299,7 +299,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     iter_handle: Handle,
 ) -> jobject{
     let res = panic::catch_unwind(|| {
-        let mut iterWrapper = utils::cast_handle::<Iter>(iter_handle);
+        let iterWrapper = utils::cast_handle::<Iter>(iter_handle);
         match iterWrapper.iter.next() {
             Some(val) => {
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
@@ -337,7 +337,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     iter_handle: Handle,
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
+        let iter = utils::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -364,7 +364,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     iter_handle: Handle,
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ProofMapIndexValues<Value>>(iter_handle);
+        let iter = utils::cast_handle::<ProofMapIndexValues<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),

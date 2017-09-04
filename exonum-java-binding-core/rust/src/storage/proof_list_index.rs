@@ -130,10 +130,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
 ) -> jint {
     let res = panic::catch_unwind(|| {
-        Ok(match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.height(),
-            IndexType::ForkIndex(ref list) => list.height(),
-        } as jint)
+        Ok(i32::from(
+            match *utils::cast_handle::<IndexType>(list_handle) {
+                IndexType::SnapshotIndex(ref list) => list.height(),
+                IndexType::ForkIndex(ref list) => list.height(),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -299,7 +301,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     iter_handle: Handle,
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
-        let mut iter = utils::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
+        let iter = utils::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
