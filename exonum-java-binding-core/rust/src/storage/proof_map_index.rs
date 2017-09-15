@@ -7,13 +7,12 @@ use std::panic;
 use std::ptr;
 
 use exonum::storage::{Snapshot, Fork, ProofMapIndex};
-use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues};
-use exonum::crypto::HASH_SIZE as PROOF_KEY_SIZE;
+use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
+                                       PROOF_MAP_KEY_SIZE};
 use utils::{self, Handle, PairIter};
 use super::db::{View, Value};
 
-// TODO: Use `PROOF_KEY_SIZE` after https://github.com/exonum/exonum/pull/270 is merged.
-type Key = [u8; PROOF_KEY_SIZE];
+type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
 enum IndexType {
@@ -386,7 +385,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> Result<Key> {
     // TODO: Optimize copying and allocations.
     let bytes = env.convert_byte_array(array)?;
-    assert_eq!(PROOF_KEY_SIZE, bytes.len());
+    assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
 
     let mut key = Key::default();
     key.copy_from_slice(&bytes);
