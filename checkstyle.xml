@@ -8,9 +8,15 @@
     <property name="fileExtensions" value="java, properties, xml"/>
     <property name="severity" value="${checkstyle.severity}" default="warning"/>
 
+    <module name="SuppressionFilter">
+        <property name="file" value="${checkstyle.suppressions.file}" default="foo.xml"/>
+        <property name="optional" value="true"/>
+    </module>
+
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
+
     <module name="NewlineAtEndOfFile"/>
 
     <module name="TreeWalker">
