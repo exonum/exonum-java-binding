@@ -83,6 +83,8 @@ public interface Message {
 
   class Builder extends Message_Builder2 {
 
+    // todo: add defaults?
+
     @Override
     public Builder setBody(ByteBuffer body) {
       int bodySize = body.remaining();
