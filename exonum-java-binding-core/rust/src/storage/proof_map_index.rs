@@ -468,11 +468,12 @@ fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLoca
 
 fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocal<'a>> {
     let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
-    let java_hash = env.new_object(
-        "com/exonum/binding/storage/proofs/map/HashCode",
-        "([B)V",
-        &[hash.as_obj().into()],
+    let java_hash = env.call_static_method("com/google/common/hash/HashCode",
+                                            "fromBytes",
+                                            "([B)Lcom/google/common/hash/HashCode;",
+                                            &[hash.as_obj().into()]
     )?;
+    let java_hash = java_hash.l().unwrap();
     Ok(env.auto_local(java_hash))
 }
 
@@ -487,7 +488,7 @@ fn make_java_non_equal_value_at_root(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/NonEqualValueAtRoot",
             "(Lcom/exonum/binding/storage/proofs/map/DbKey;\
-              Lcom/exonum/binding/storage/proofs/map/HashCode;)V",
+              Lcom/google/common/hash/HashCode;)V",
             &[key.as_obj().into(), hash.as_obj().into()],
         )?
             .into_inner(),
@@ -531,8 +532,8 @@ fn make_java_mapping_not_found_branch(
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/MappingNotFoundProofBranch",
-            "(Lcom/exonum/binding/storage/proofs/map/HashCode;\
-              Lcom/exonum/binding/storage/proofs/map/HashCode;\
+            "(Lcom/google/common/hash/HashCode;\
+              Lcom/google/common/hash/HashCode;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
             &[
@@ -561,7 +562,7 @@ fn make_java_left_proof_branch(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/LeftMapProofBranch",
             "(Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
-              Lcom/exonum/binding/storage/proofs/map/HashCode;\
+              Lcom/google/common/hash/HashCode;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
             &[
@@ -589,7 +590,7 @@ fn make_java_right_proof_branch(
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/RightMapProofBranch",
-            "(Lcom/exonum/binding/storage/proofs/map/HashCode;\
+            "(Lcom/google/common/hash/HashCode;\
               Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;)V",

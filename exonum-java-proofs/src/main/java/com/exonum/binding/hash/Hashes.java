@@ -1,5 +1,7 @@
 package com.exonum.binding.hash;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -49,6 +51,10 @@ public class Hashes {
     } catch (NoSuchAlgorithmException e) {
       throw new Error(e);  // unreachable on standard-compliant VMs
     }
+  }
+
+  public static HashFunction getDefaultHashFunction() {
+    return Hashing.sha256();
   }
 
   /**
