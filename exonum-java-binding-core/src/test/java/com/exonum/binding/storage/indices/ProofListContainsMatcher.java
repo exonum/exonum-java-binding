@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.proofs.list.ListProofValidator;
 import com.exonum.binding.test.ByteMapsIsEqualMatcher;
+import com.google.common.hash.HashCode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
     }
 
     ListProof proof = proofFunction.apply(list);
-    ListProofValidator validator = new ListProofValidator(list.getRootHash(), list.size());
+    ListProofValidator validator = new ListProofValidator(HashCode.fromBytes(list.getRootHash()), list.size());  // fixme:
     proof.accept(validator);
 
     return validator.isValid() && elementsMatcher.matches(validator.getElements());
@@ -47,7 +48,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
   @Override
   protected void describeMismatchSafely(ProofListIndexProxy list, Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
-    ListProofValidator validator = new ListProofValidator(list.getRootHash(), list.size());
+    ListProofValidator validator = new ListProofValidator(HashCode.fromBytes(list.getRootHash()), list.size());  // fixme:
     proof.accept(validator);
 
     if (!validator.isValid()) {

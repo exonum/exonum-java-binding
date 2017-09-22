@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofValidator;
+import com.google.common.hash.HashCode;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -39,8 +40,8 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy> {
 
   private MapProofValidator checkProof(ProofMapIndexProxy map) {
     MapProof proof = map.getProof(key);
-    byte[] rootHash = map.getRootHash();
-    assert proof != null && rootHash != null;
+    HashCode rootHash = HashCode.fromBytes(map.getRootHash());
+    assert proof != null;
     MapProofValidator validator = new MapProofValidator(rootHash, key);
 
     proof.accept(validator);

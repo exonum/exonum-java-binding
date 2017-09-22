@@ -1,11 +1,18 @@
 package com.exonum.binding.storage.proofs.list;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.hash.HashCodeFunnel.hashCodeFunnel;
 
 import com.exonum.binding.hash.Hashes;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.PrimitiveSink;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 /**
@@ -13,9 +20,9 @@ import java.util.TreeMap;
  */
 public class ListProofValidator implements ListProofVisitor {
 
-  private static final byte[] EMPTY_HASH = new byte[0];
+  private final HashCode expectedRootHash;
 
-  private final byte[] expectedRootHash;
+  private final HashFunction hashFunction;
 
   private final int expectedLeafDepth;
 
@@ -33,7 +40,18 @@ public class ListProofValidator implements ListProofVisitor {
    */
   private boolean isBalanced;
 
-  private byte[] hash;
+  private HashCode hash;
+
+  /**
+    * Creates a new ListProofValidator.
+   *
+   * @param expectedRootHash an expected value of a root hash
+   * @param numElements the number of elements in the proof list.
+   *                    The same as the number of leaf nodes in the Merkle tree.
+   */
+  public ListProofValidator(byte[] expectedRootHash, long numElements) {
+    this(HashCode.fromBytes(expectedRootHash), numElements, Hashes.getDefaultHashFunction());
+  }
 
   /**
    * Creates a new ListProofValidator.
@@ -42,15 +60,29 @@ public class ListProofValidator implements ListProofVisitor {
    * @param numElements the number of elements in the proof list.
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
-  public ListProofValidator(byte[] expectedRootHash, long numElements) {
+  public ListProofValidator(HashCode expectedRootHash, long numElements) {
+    this(expectedRootHash, numElements, Hashes.getDefaultHashFunction());
+  }
+
+  /**
+   * Creates a new ListProofValidator.
+   *
+   * @param expectedRootHash an expected value of a root hash
+   * @param numElements the number of elements in the proof list.
+   *                    The same as the number of leaf nodes in the Merkle tree.
+   * @param hashFunction a hashFunction to use
+   */
+  @VisibleForTesting
+  ListProofValidator(HashCode expectedRootHash, long numElements, HashFunction hashFunction) {
     checkArgument(0 < numElements, "numElements (%s) must be positive", numElements);
-    this.expectedRootHash = expectedRootHash.clone();
+    this.expectedRootHash = checkNotNull(expectedRootHash);
+    this.hashFunction = checkNotNull(hashFunction);
     expectedLeafDepth = getExpectedLeafDepth(numElements);
     elements = new TreeMap<>();
     index = 0;
     depth = 0;
     isBalanced = true;
-    hash = EMPTY_HASH;
+    hash = null;
   }
 
   private int getExpectedLeafDepth(long numElements) {
@@ -66,9 +98,14 @@ public class ListProofValidator implements ListProofVisitor {
     }
     long branchIndex = index;
     int branchDepth = depth;
-    byte[] leftHash = visitLeft(branch, branchIndex, branchDepth);
-    byte[] rightHash = visitRight(branch, branchIndex, branchDepth);
-    hash = Hashes.getHashOf(leftHash, rightHash);
+    HashCode leftHash = visitLeft(branch, branchIndex, branchDepth);
+    Optional<HashCode> rightHash = visitRight(branch, branchIndex, branchDepth);
+
+    hash = hashFunction.newHasher()
+        .putObject(leftHash, hashCodeFunnel())
+        .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
+            from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
+        .hash();
   }
 
   @Override
@@ -85,7 +122,7 @@ public class ListProofValidator implements ListProofVisitor {
     isBalanced &= (depth == expectedLeafDepth);
     if (isBalanced) {
       elements.put(index, value.getElement());
-      hash = Hashes.getHashOf(value.getElement());
+      hash = hashFunction.hashObject(value, ProofListElement.funnel());
     }
   }
 
@@ -97,19 +134,19 @@ public class ListProofValidator implements ListProofVisitor {
     return depth >= expectedLeafDepth;
   }
 
-  private byte[] visitLeft(ListProofBranch branch, long branchIndex, int branchDepth) {
-    index = branchIndex << 1;
+  private HashCode visitLeft(ListProofBranch branch, long branchIndex, int branchDepth) {
+    index = 2 * branchIndex;
     depth = getChildDepth(branchDepth);
     branch.getLeft().accept(this);
     return hash;
   }
 
-  private byte[] visitRight(ListProofBranch branch, long branchIndex, int branchDepth) {
-    index = (branchIndex << 1) + 1;
+  private Optional<HashCode> visitRight(ListProofBranch branch, long branchIndex, int branchDepth) {
+    index = 2 * branchIndex + 1;
     depth = getChildDepth(branchDepth);
-    hash = EMPTY_HASH;
+    hash = null;
     branch.getRight().ifPresent((right) -> right.accept(this));
-    return hash;
+    return Optional.ofNullable(hash);
   }
 
   private int getChildDepth(int branchDepth) {
@@ -124,7 +161,7 @@ public class ListProofValidator implements ListProofVisitor {
   }
 
   private boolean doesHashMatchExpected() {
-    return Arrays.equals(hash, expectedRootHash);
+    return expectedRootHash.equals(hash);
   }
 
   /**
@@ -143,8 +180,8 @@ public class ListProofValidator implements ListProofVisitor {
     } else if (elements.isEmpty()) {
       return "the tree does not contain any value nodes";
     } else if (!doesHashMatchExpected()) {
-      return "hash mismatch: expected=" + Hashes.toString(expectedRootHash)
-          + ", actual=" + Hashes.toString(hash);
+      return "hash mismatch: expected=" + expectedRootHash
+          + ", actual=" + hash;
     } else {
       return "";
     }
@@ -153,8 +190,8 @@ public class ListProofValidator implements ListProofVisitor {
   @Override
   public String toString() {
     return "ListProofValidator{"
-        + "hash=" + Hashes.toString(hash)
-        + ", expectedRootHash=" + Hashes.toString(expectedRootHash)
+        + "hash=" + hash
+        + ", expectedRootHash=" + expectedRootHash
         + ", isBalanced=" + isBalanced
         + ", elements=" + elements
         + ", expectedLeafDepth=" + expectedLeafDepth
