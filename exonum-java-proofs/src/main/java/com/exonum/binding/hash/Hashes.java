@@ -1,5 +1,6 @@
 package com.exonum.binding.hash;
 
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -20,14 +21,33 @@ public class Hashes {
    * @return SHA-256 hash of the combined byte array
    */
   public static byte[] getHashOf(byte[]... items) {
+    MessageDigest hasher = getSha256Hasher();
+    for (byte[] i : items) {
+      hasher.update(i);
+    }
+    return hasher.digest();
+  }
+
+  /**
+   * Computes the SHA-256 hash of the buffer contents.  {@code input.remaining()} bytes are
+   * used to compute the hash. When this method completes, the position in the input byte buffer
+   * is equal to its limit.
+   *
+   * @param input a byte buffer
+   * @return a SHA-256 hash of the byte buffer
+   * @throws NullPointerException if the buffer is null
+   */
+  public static byte[] getHashOf(ByteBuffer input) {
+    MessageDigest hasher = getSha256Hasher();
+    hasher.update(input);
+    return hasher.digest();
+  }
+
+  private static MessageDigest getSha256Hasher() {
     try {
-      MessageDigest sha256 = MessageDigest.getInstance(EXONUM_DEFAULT_HASHING_ALGORITHM);
-      for (byte[] i : items) {
-        sha256.update(i);
-      }
-      return sha256.digest();
+      return MessageDigest.getInstance(EXONUM_DEFAULT_HASHING_ALGORITHM);
     } catch (NoSuchAlgorithmException e) {
-      throw new Error(e);
+      throw new Error(e);  // unreachable on standard-compliant VMs
     }
   }
 

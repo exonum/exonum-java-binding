@@ -4,7 +4,6 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -15,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -106,7 +106,7 @@ public class ListProofValidatorTest {
         )
     );
 
-    when(Hashes.getHashOf(any())).thenReturn(ROOT_HASH);
+    when(Hashes.getHashOf(anyBytes())).thenReturn(ROOT_HASH);
 
     int listSize = 4;
     validator = new ListProofValidator(ROOT_HASH, listSize);
@@ -283,7 +283,7 @@ public class ListProofValidatorTest {
     // A list of size 4 has a height equal to 2, however, the proof tree exceeds that height.
     long listSize = 4;
     validator = new ListProofValidator(ROOT_HASH, listSize);
-    when(Hashes.getHashOf(any())).thenReturn(ROOT_HASH);
+    when(Hashes.getHashOf(anyBytes())).thenReturn(ROOT_HASH);
 
     root.accept(validator);
 
@@ -292,6 +292,10 @@ public class ListProofValidatorTest {
     expectedException.expectMessage("a value node appears at the wrong level");
     expectedException.expect(IllegalStateException.class);
     validator.getElements();
+  }
+
+  private static byte[][] anyBytes() {
+    return ArgumentMatchers.any();
   }
 
   private ListProof generateLeftLeaningProofTree(int depth) {
