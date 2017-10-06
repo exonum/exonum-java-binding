@@ -138,7 +138,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getRootHash_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
@@ -146,7 +145,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getRootHash_NonEmptyMap() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -159,7 +157,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot,
@@ -167,7 +164,6 @@ public class ProofMapIndexProxyIntegrationTest {
     );
   }
 
-  @Ignore
   @Test
   public void getProof_SingletonMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -179,7 +175,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_SingletonMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -189,7 +184,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_MultiEntryMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -204,7 +198,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_MultiEntryMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -230,7 +223,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   // Might take quite a lot of time (validating 257 proofs),
   // but it's an integration test, isn't it? :-)

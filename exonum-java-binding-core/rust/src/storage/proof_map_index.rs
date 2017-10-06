@@ -6,10 +6,12 @@ use jni::errors::Result;
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, ProofMapIndex};
+use exonum::crypto::Hash;
+use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof};
 use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
+                                       ProofMapDBKey, BranchProofNode, ProofNode,
                                        PROOF_MAP_KEY_SIZE};
-use utils::{self, Handle, PairIter};
+use utils::{self, Handle, PairIter, AutoLocalRef};
 use super::db::{View, Value};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
@@ -111,7 +113,34 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     utils::unwrap_exc_or_default(&env, res)
 }
 
-// TODO: `get_proof`.
+/// Returns Java-proof object.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetProof(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    key: jbyteArray,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        let key = convert_to_key(&env, key)?;
+        let proof = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.get_proof(&key),
+            IndexType::ForkIndex(ref map) => map.get_proof(&key),
+        };
+
+        match proof {
+            MapProof::LeafRootInclusive(key, val) => {
+                make_java_equal_value_at_root(&env, &key, &val)
+            }
+            MapProof::LeafRootExclusive(key, hash) => {
+                make_java_non_equal_value_at_root(&env, &key, &hash)
+            }
+            MapProof::Empty => make_java_empty_proof(&env),
+            MapProof::Branch(branch) => make_java_brach_proof(&env, &branch),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
 
 /// Returns the pointer to the iterator over a map keys and values.
 #[no_mangle]
@@ -390,4 +419,205 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> Result<Key> {
     let mut key = Key::default();
     key.copy_from_slice(&bytes);
     Ok(key)
+}
+
+fn make_java_empty_proof(env: &JNIEnv) -> Result<jobject> {
+    Ok(
+        env.new_object(
+            "com/exonum/binding/storage/proofs/map/EmptyMapProof",
+            "()V",
+            &[],
+        )?
+            .into_inner(),
+    )
+}
+
+fn make_java_equal_value_at_root(
+    env: &JNIEnv,
+    key: &ProofMapDBKey,
+    value: &Value,
+) -> Result<jobject> {
+    let key = make_java_db_key(env, key)?;
+    let value = AutoLocalRef::new(env, env.byte_array_from_slice(&value)?);
+    Ok(
+        env.new_object(
+            "com/exonum/binding/storage/proofs/map/EqualValueAtRoot",
+            "(Lcom/exonum/binding/storage/proofs/map/DbKey;[B)V",
+            &[key.as_obj().into(), value.as_obj().into()],
+        )?
+            .into_inner(),
+    )
+}
+
+fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLocalRef<'a>> {
+    let key = AutoLocalRef::new(env, env.byte_array_from_slice(key.as_ref())?);
+    let java_db_key = env.new_object(
+        "com/exonum/binding/storage/proofs/map/DbKey",
+        "([B)V",
+        &[key.as_obj().into()],
+    )?;
+    Ok(AutoLocalRef::new(env, java_db_key.into_inner()))
+}
+
+fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocalRef<'a>> {
+    let hash = AutoLocalRef::new(env, utils::convert_hash(env, hash)?);
+    let java_hash = env.new_object(
+        "com/exonum/binding/storage/proofs/map/HashCode",
+        "([B)V",
+        &[hash.as_obj().into()],
+    )?;
+    Ok(AutoLocalRef::new(env, java_hash.into_inner()))
+}
+
+fn make_java_non_equal_value_at_root(
+    env: &JNIEnv,
+    key: &ProofMapDBKey,
+    hash: &Hash,
+) -> Result<jobject> {
+    let key = make_java_db_key(env, key)?;
+    let hash = make_java_hash(env, hash)?;
+    Ok(
+        env.new_object(
+            "com/exonum/binding/storage/proofs/map/NonEqualValueAtRoot",
+            "(Lcom/exonum/binding/storage/proofs/map/DbKey;\
+              Lcom/exonum/binding/storage/proofs/map/HashCode;)V",
+            &[key.as_obj().into(), hash.as_obj().into()],
+        )?
+            .into_inner(),
+    )
+}
+
+fn make_java_brach_proof(env: &JNIEnv, branch: &BranchProofNode<Value>) -> Result<jobject> {
+    match *branch {
+        BranchProofNode::BranchKeyNotFound {
+            ref left_hash,
+            ref right_hash,
+            ref left_key,
+            ref right_key,
+        } => {
+            make_java_mapping_not_found_branch(env, &left_hash, &right_hash, &left_key, &right_key)
+        }
+        BranchProofNode::LeftBranch {
+            ref left_node,
+            ref right_hash,
+            ref left_key,
+            ref right_key,
+        } => make_java_left_proof_branch(env, left_node, right_hash, left_key, right_key),
+        BranchProofNode::RightBranch {
+            ref left_hash,
+            ref right_node,
+            ref left_key,
+            ref right_key,
+        } => make_java_right_proof_branch(env, left_hash, right_node, left_key, right_key),
+    }
+}
+
+fn make_java_mapping_not_found_branch(
+    env: &JNIEnv,
+    left_hash: &Hash,
+    right_hash: &Hash,
+    left_key: &ProofMapDBKey,
+    right_key: &ProofMapDBKey,
+) -> Result<jobject> {
+    let left_hash = make_java_hash(env, left_hash)?;
+    let right_hash = make_java_hash(env, right_hash)?;
+    let left_key = make_java_db_key(env, left_key)?;
+    let right_key = make_java_db_key(env, right_key)?;
+    Ok(
+        env.new_object(
+            "com/exonum/binding/storage/proofs/map/MappingNotFoundProofBranch",
+            "(Lcom/exonum/binding/storage/proofs/map/HashCode;\
+              Lcom/exonum/binding/storage/proofs/map/HashCode;\
+              Lcom/exonum/binding/storage/proofs/map/DbKey;\
+              Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
+            &[
+                left_hash.as_obj().into(),
+                right_hash.as_obj().into(),
+                left_key.as_obj().into(),
+                right_key.as_obj().into(),
+            ],
+        )?
+            .into_inner(),
+    )
+}
+
+fn make_java_left_proof_branch(
+    env: &JNIEnv,
+    left_node: &ProofNode<Value>,
+    right_hash: &Hash,
+    left_key: &ProofMapDBKey,
+    right_key: &ProofMapDBKey,
+) -> Result<jobject> {
+    let left_node = make_java_proof_node(env, left_node)?;
+    let right_hash = make_java_hash(env, right_hash)?;
+    let left_key = make_java_db_key(env, left_key)?;
+    let right_key = make_java_db_key(env, right_key)?;
+    Ok(
+        env.new_object(
+            "com/exonum/binding/storage/proofs/map/LeftMapProofBranch",
+            "(Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
+              Lcom/exonum/binding/storage/proofs/map/HashCode;\
+              Lcom/exonum/binding/storage/proofs/map/DbKey;\
+              Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
+            &[
+                left_node.as_obj().into(),
+                right_hash.as_obj().into(),
+                left_key.as_obj().into(),
+                right_key.as_obj().into(),
+            ],
+        )?
+            .into_inner(),
+    )
+}
+
+fn make_java_right_proof_branch(
+    env: &JNIEnv,
+    left_hash: &Hash,
+    right_node: &ProofNode<Value>,
+    left_key: &ProofMapDBKey,
+    right_key: &ProofMapDBKey,
+) -> Result<jobject> {
+    let left_hash = make_java_hash(env, left_hash)?;
+    let right_node = make_java_proof_node(env, right_node)?;
+    let left_key = make_java_db_key(env, left_key)?;
+    let right_key = make_java_db_key(env, right_key)?;
+    Ok(
+        env.new_object(
+            "com/exonum/binding/storage/proofs/map/RightMapProofBranch",
+            "(Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
+              Lcom/exonum/binding/storage/proofs/map/HashCode;\
+              Lcom/exonum/binding/storage/proofs/map/DbKey;\
+              Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
+            &[
+                left_hash.as_obj().into(),
+                right_node.as_obj().into(),
+                left_key.as_obj().into(),
+                right_key.as_obj().into(),
+            ],
+        )?
+            .into_inner(),
+    )
+}
+
+fn make_java_proof_node<'a>(
+    env: &'a JNIEnv,
+    proof_node: &ProofNode<Value>,
+) -> Result<AutoLocalRef<'a>> {
+    match *proof_node {
+        ProofNode::Branch(ref branch_proof_node) => {
+            let branch = make_java_brach_proof(env, &branch_proof_node)?;
+            Ok(AutoLocalRef::new(env, branch))
+        }
+        ProofNode::Leaf(ref value) => make_java_leaf_proof_node(env, &value),
+    }
+}
+
+fn make_java_leaf_proof_node<'a>(env: &'a JNIEnv, value: &Value) -> Result<AutoLocalRef<'a>> {
+    let value = AutoLocalRef::new(env, env.byte_array_from_slice(&value)?);
+    let leaf_proof_node = env.new_object(
+        "com/exonum/binding/storage/proofs/map/LeafMapProofNode",
+        "([B)V",
+        &[value.as_obj().into()],
+    )?;
+    Ok(AutoLocalRef::new(env, leaf_proof_node.into_inner()))
 }
