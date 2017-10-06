@@ -45,7 +45,7 @@ public class MapProofValidatorTest {
   public void setUp() throws Exception {
     mockStatic(Hashes.class);
     // Return root hash by default
-    when(Hashes.getHashOf(any())).thenReturn(ROOT_HASH);
+    when(Hashes.getHashOf(anyBytes())).thenReturn(ROOT_HASH);
   }
 
   @Test
@@ -352,12 +352,16 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0), 1),
         leafDbKey(key));
 
-    when(Hashes.getHashOf(any())).thenReturn(EMPTY_HASH);
+    when(Hashes.getHashOf(anyBytes())).thenReturn(EMPTY_HASH);
     validator = new MapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
     testGetValueFails(Status.VALID);
+  }
+
+  private static byte[][] anyBytes() {
+    return any();
   }
 
   private static byte[] createKey(int... prefix) {

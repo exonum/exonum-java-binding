@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.UnsignedBytes;
+import java.nio.ByteBuffer;
 import org.junit.Test;
 
 public class HashesTest {
@@ -41,6 +42,20 @@ public class HashesTest {
   @Test
   public void getHashOfNoArgs() throws Exception {
     assertThat(Hashes.getHashOf(), equalTo(ZERO_HASH));
+  }
+
+  @Test
+  public void getHashOfEmptyByteBuffer() throws Exception {
+    assertThat(Hashes.getHashOf(ByteBuffer.allocate(0)), equalTo(ZERO_HASH));
+  }
+
+  @Test
+  public void getHashOfNonEmptyByteBuffer() throws Exception {
+    byte[] inputBytes = bytes("some input bytes");
+    ByteBuffer inputBuffer = ByteBuffer.wrap(inputBytes);
+    byte[] expectedHash = Hashes.getHashOf(inputBytes);
+
+    assertThat(Hashes.getHashOf(inputBuffer), equalTo(expectedHash));
   }
 
   private static byte[] zeroSha256Hash() {
