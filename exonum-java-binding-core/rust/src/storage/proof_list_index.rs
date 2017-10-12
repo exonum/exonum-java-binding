@@ -9,7 +9,7 @@ use std::ptr;
 use exonum::storage::{Snapshot, Fork, ProofListIndex};
 use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
 use exonum::crypto::Hash;
-use utils::{self, Handle, AutoLocalRef};
+use utils::{self, Handle};
 use super::db::{View, Value};
 
 type Index<T> = ProofListIndex<T, Value>;
@@ -346,7 +346,7 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
 // TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
 #[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
 fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
-    let value = AutoLocalRef::new(env, env.byte_array_from_slice(value)?);
+    let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     env.new_object(
         "com/exonum/binding/storage/proofs/list/ProofListElement",
         "([B)V",
@@ -359,8 +359,8 @@ fn make_java_proof_branch<'a>(
     left: JObject,
     right: JObject,
 ) -> Result<JObject<'a>> {
-    let left = AutoLocalRef::new(env, left.into_inner());
-    let right = AutoLocalRef::new(env, right.into_inner());
+    let left = env.auto_local(left);
+    let right = env.auto_local(right);
     env.new_object(
         "com/exonum/binding/storage/proofs/list/ListProofBranch",
         "(Lcom/exonum/binding/storage/proofs/list/ListProof;\
@@ -370,7 +370,7 @@ fn make_java_proof_branch<'a>(
 }
 
 fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>> {
-    let hash = AutoLocalRef::new(env, utils::convert_hash(env, hash)?);
+    let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
     env.new_object(
         "com/exonum/binding/storage/proofs/list/HashNode",
         "([B)V",
