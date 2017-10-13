@@ -49,7 +49,7 @@ public interface Message {
   short getServiceId();
 
   /**
-   * Returns the type of this message.
+   * Returns the type of this message within a service.
    */
   short getMessageType();
 
