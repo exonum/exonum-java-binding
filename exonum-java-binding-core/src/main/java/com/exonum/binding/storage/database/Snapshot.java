@@ -1,14 +1,12 @@
 package com.exonum.binding.storage.database;
 
-import com.exonum.binding.annotations.ImproveDocs;
-
 /**
  * A snapshot is a read-only, immutable database view.
  *
  * <p>A snapshot represents database state at the time it was created. Immutability implies that:
  * <ul>
  *   <li>Write operations are prohibited; an attempt to perform a modifying operation
- *       will result in a RuntimeException</li>
+ *       will result in an {@link UnsupportedOperationException}</li>
  *   <li>Database state will not change whilst a snapshot is alive.
  *       As a snapshot requires a growing amount of memory resources as services write
  *       to the database, do <strong>not</strong> keep Snapshots alive for extended periods of time.
@@ -17,12 +15,11 @@ import com.exonum.binding.annotations.ImproveDocs;
  *
  * @see Fork
  */
-@ImproveDocs(
-    assignee = "dt",
-    reason = "Specify a particular instance of RuntimeException, thrown by collections."
-)
 public class Snapshot extends View {
 
+  // todo: consider making package-private so that clients aren't able to reference an invalid
+  // memory region (or use the knowledge of a registry of native allocations
+  // to safely discard such attempts).
   public Snapshot(long nativeHandle) {
     super(nativeHandle, true);
   }
