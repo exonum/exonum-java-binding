@@ -7,7 +7,7 @@ use std::panic;
 use std::ptr;
 
 use exonum::crypto::Hash;
-use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof};
+use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof, StorageKey};
 use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
                                        ProofMapDBKey, BranchProofNode, ProofNode,
                                        PROOF_MAP_KEY_SIZE};
@@ -450,7 +450,14 @@ fn make_java_equal_value_at_root(
 }
 
 fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLocal<'a>> {
-    let key = env.auto_local(env.byte_array_from_slice(key.as_ref())?.into());
+    // TODO: Export `DB_KEY_SIZE`?
+    const PROOF_KEY_SIZE: usize = PROOF_MAP_KEY_SIZE + 2;
+    debug_assert_eq!(PROOF_KEY_SIZE, key.size());
+
+    let mut buffer = [0; PROOF_KEY_SIZE];
+    key.write(&mut buffer);
+
+    let key = env.auto_local(env.byte_array_from_slice(&buffer)?.into());
     let java_db_key = env.new_object(
         "com/exonum/binding/storage/proofs/map/DbKey",
         "([B)V",
