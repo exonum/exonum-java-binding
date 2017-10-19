@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JClass, JObject};
+use jni::objects::{JClass, JObject, AutoLocal};
 use jni::sys::{jboolean, jbyteArray, jobject};
 use jni::errors::Result;
 
@@ -11,7 +11,7 @@ use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof};
 use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
                                        ProofMapDBKey, BranchProofNode, ProofNode,
                                        PROOF_MAP_KEY_SIZE};
-use utils::{self, Handle, PairIter, AutoLocalRef};
+use utils::{self, Handle, PairIter};
 use super::db::{View, Value};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
@@ -438,7 +438,7 @@ fn make_java_equal_value_at_root(
     value: &Value,
 ) -> Result<jobject> {
     let key = make_java_db_key(env, key)?;
-    let value = AutoLocalRef::new(env, env.byte_array_from_slice(&value)?);
+    let value = env.auto_local(env.byte_array_from_slice(&value)?.into());
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/EqualValueAtRoot",
@@ -449,24 +449,24 @@ fn make_java_equal_value_at_root(
     )
 }
 
-fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLocalRef<'a>> {
-    let key = AutoLocalRef::new(env, env.byte_array_from_slice(key.as_ref())?);
+fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLocal<'a>> {
+    let key = env.auto_local(env.byte_array_from_slice(key.as_ref())?.into());
     let java_db_key = env.new_object(
         "com/exonum/binding/storage/proofs/map/DbKey",
         "([B)V",
         &[key.as_obj().into()],
     )?;
-    Ok(AutoLocalRef::new(env, java_db_key.into_inner()))
+    Ok(env.auto_local(java_db_key))
 }
 
-fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocalRef<'a>> {
-    let hash = AutoLocalRef::new(env, utils::convert_hash(env, hash)?);
+fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocal<'a>> {
+    let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
     let java_hash = env.new_object(
         "com/exonum/binding/storage/proofs/map/HashCode",
         "([B)V",
         &[hash.as_obj().into()],
     )?;
-    Ok(AutoLocalRef::new(env, java_hash.into_inner()))
+    Ok(env.auto_local(java_hash))
 }
 
 fn make_java_non_equal_value_at_root(
@@ -602,22 +602,22 @@ fn make_java_right_proof_branch(
 fn make_java_proof_node<'a>(
     env: &'a JNIEnv,
     proof_node: &ProofNode<Value>,
-) -> Result<AutoLocalRef<'a>> {
+) -> Result<AutoLocal<'a>> {
     match *proof_node {
         ProofNode::Branch(ref branch_proof_node) => {
             let branch = make_java_brach_proof(env, &branch_proof_node)?;
-            Ok(AutoLocalRef::new(env, branch))
+            Ok(env.auto_local(branch.into()))
         }
         ProofNode::Leaf(ref value) => make_java_leaf_proof_node(env, &value),
     }
 }
 
-fn make_java_leaf_proof_node<'a>(env: &'a JNIEnv, value: &Value) -> Result<AutoLocalRef<'a>> {
-    let value = AutoLocalRef::new(env, env.byte_array_from_slice(&value)?);
+fn make_java_leaf_proof_node<'a>(env: &'a JNIEnv, value: &Value) -> Result<AutoLocal<'a>> {
+    let value = env.auto_local(env.byte_array_from_slice(&value)?.into());
     let leaf_proof_node = env.new_object(
         "com/exonum/binding/storage/proofs/map/LeafMapProofNode",
         "([B)V",
         &[value.as_obj().into()],
     )?;
-    Ok(AutoLocalRef::new(env, leaf_proof_node.into_inner()))
+    Ok(env.auto_local(leaf_proof_node))
 }
