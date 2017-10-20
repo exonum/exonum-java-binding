@@ -432,13 +432,15 @@ fn make_java_empty_proof(env: &JNIEnv) -> Result<jobject> {
     )
 }
 
+// TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
+#[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
 fn make_java_equal_value_at_root(
     env: &JNIEnv,
     key: &ProofMapDBKey,
     value: &Value,
 ) -> Result<jobject> {
     let key = make_java_db_key(env, key)?;
-    let value = env.auto_local(env.byte_array_from_slice(&value)?.into());
+    let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/EqualValueAtRoot",
@@ -502,7 +504,7 @@ fn make_java_brach_proof(env: &JNIEnv, branch: &BranchProofNode<Value>) -> Resul
             ref left_key,
             ref right_key,
         } => {
-            make_java_mapping_not_found_branch(env, &left_hash, &right_hash, &left_key, &right_key)
+            make_java_mapping_not_found_branch(env, left_hash, right_hash, left_key, right_key)
         }
         BranchProofNode::LeftBranch {
             ref left_node,
@@ -612,15 +614,17 @@ fn make_java_proof_node<'a>(
 ) -> Result<AutoLocal<'a>> {
     match *proof_node {
         ProofNode::Branch(ref branch_proof_node) => {
-            let branch = make_java_brach_proof(env, &branch_proof_node)?;
+            let branch = make_java_brach_proof(env, branch_proof_node)?;
             Ok(env.auto_local(branch.into()))
         }
-        ProofNode::Leaf(ref value) => make_java_leaf_proof_node(env, &value),
+        ProofNode::Leaf(ref value) => make_java_leaf_proof_node(env, value),
     }
 }
 
+// TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
+#[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
 fn make_java_leaf_proof_node<'a>(env: &'a JNIEnv, value: &Value) -> Result<AutoLocal<'a>> {
-    let value = env.auto_local(env.byte_array_from_slice(&value)?.into());
+    let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     let leaf_proof_node = env.new_object(
         "com/exonum/binding/storage/proofs/map/LeafMapProofNode",
         "([B)V",
