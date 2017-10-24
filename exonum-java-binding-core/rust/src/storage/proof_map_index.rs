@@ -503,9 +503,7 @@ fn make_java_brach_proof(env: &JNIEnv, branch: &BranchProofNode<Value>) -> Resul
             ref right_hash,
             ref left_key,
             ref right_key,
-        } => {
-            make_java_mapping_not_found_branch(env, left_hash, right_hash, left_key, right_key)
-        }
+        } => make_java_mapping_not_found_branch(env, left_hash, right_hash, left_key, right_key),
         BranchProofNode::LeftBranch {
             ref left_node,
             ref right_hash,
