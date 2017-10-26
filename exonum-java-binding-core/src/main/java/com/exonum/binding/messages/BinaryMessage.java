@@ -9,6 +9,20 @@ import java.nio.ByteBuffer;
 public interface BinaryMessage extends Message {
 
   /**
+   * Creates a binary message from a byte array.
+   *
+   * @param messageBytes an array with message bytes
+   * @return a binary message
+   * @throws IllegalArgumentException if message has invalid size
+   */
+  static BinaryMessage fromBytes(byte[] messageBytes) {
+    ByteBuffer buf = ByteBuffer.wrap(messageBytes);
+    return MessageReader.wrap(buf);
+  }
+
+  // todo: fromBuffer/wrap(ByteBuffer)?
+
+  /**
    * Returns the whole binary message.
    */
   // todo: consider renaming, for this class *is* a message.
