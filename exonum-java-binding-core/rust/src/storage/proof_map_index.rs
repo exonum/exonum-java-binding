@@ -58,7 +58,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the root hash of the proof map or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeRootHash(
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
