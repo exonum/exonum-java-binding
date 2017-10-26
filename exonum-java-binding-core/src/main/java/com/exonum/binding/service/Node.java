@@ -1,4 +1,4 @@
-package com.exonum.binding;
+package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
