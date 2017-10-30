@@ -591,8 +591,8 @@ fn make_java_right_proof_branch(
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/RightMapProofBranch",
-            "(Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
-              Lcom/exonum/binding/storage/proofs/map/HashCode;\
+            "(Lcom/exonum/binding/storage/proofs/map/HashCode;\
+              Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;\
               Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
             &[
