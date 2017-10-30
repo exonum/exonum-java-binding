@@ -52,7 +52,7 @@ public class Hashes {
   }
 
   /**
-   * Returns the hash as a hexadecimal String.
+   * Returns the hash as a hexadecimal String, or «null» if it's null.
    */
   public static String toString(byte[] hash) {
     if (hash == null) {
