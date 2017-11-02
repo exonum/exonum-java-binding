@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +16,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class TreePathIsPrefixParameterizedTest {
+public class KeyBitSetIsPrefixParameterizedTest {
 
   @Parameter(0)
   public byte[] pathBytes;
@@ -37,14 +36,14 @@ public class TreePathIsPrefixParameterizedTest {
   @Parameter(5)
   public String description;
 
-  private TreePath path;
+  private KeyBitSet path;
 
-  private TreePath other;
+  private KeyBitSet other;
 
   @Before
   public void setUp() throws Exception {
-    path = new TreePath(BitSet.valueOf(pathBytes), pathLength);
-    other = new TreePath(BitSet.valueOf(otherPathBytes), otherPathLength);
+    path = new KeyBitSet(pathBytes, pathLength);
+    other = new KeyBitSet(otherPathBytes, otherPathLength);
   }
 
   @Test
@@ -55,6 +54,12 @@ public class TreePathIsPrefixParameterizedTest {
   @Test
   public void isPrefixOfSelf() throws Exception {
     assertTrue(path.isPrefixOf(path));
+  }
+
+  @Test
+  public void isPrefixOfClone() throws Exception {
+    KeyBitSet clone = new KeyBitSet(pathBytes, pathLength);
+    assertTrue(path.isPrefixOf(clone));
   }
 
   @Parameters(name = "{index} = {5}")

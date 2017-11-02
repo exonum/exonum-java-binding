@@ -117,20 +117,6 @@ class TreePath {
     return length;
   }
 
-  @SuppressWarnings("ReferenceEquality")
-  boolean isPrefixOf(TreePath other) {
-    if (other == this) {
-      return true;
-    }
-    if (other.length < this.length) {
-      return false;
-    }
-    BitSet thisPath = (BitSet) this.path.clone();
-    thisPath.xor(other.path);
-    int firstSetBitIndex = thisPath.nextSetBit(0);
-    return (firstSetBitIndex >= this.length) || (firstSetBitIndex == -1);
-  }
-
   byte[] toByteArray() {
     return path.toByteArray();
   }

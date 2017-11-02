@@ -6,7 +6,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.hash.Hashes;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -38,6 +37,13 @@ public class MapProofValidator implements MapProofVisitor {
     }
   }
 
+  /**
+   * A temporary feature-switch. When enabled:
+   *   - DbKey checks that no bits are set after `numSignificant` bits.
+   *   - MapProofValidator checks that left and right keys of a node are correct.
+   */
+  static final boolean PERFORM_TREE_CORRECTNESS_CHECKS = false;
+
   private static final int MAX_TREE_HEIGHT = DbKey.KEY_SIZE_BITS;
 
   private final byte[] expectedRootHash;
@@ -45,13 +51,12 @@ public class MapProofValidator implements MapProofVisitor {
   private final byte[] key;
 
   /**
-   * A current path in a proof tree for the Merkle-Patricia BST.
+   * A key as a bit set.
    *
-   * <p>Whether the path corresponds to the requested key is checked in terminal nodes only:
-   * {@link EqualValueAtRoot}, {@link NonEqualValueAtRoot}, {@link EmptyMapProof},
-   *  {@link MappingNotFoundProofBranch}, {@link LeafMapProofNode}.
+   * <p>A visitor of each branch node checks that a child key is a prefix of
+   * a requested database key.
    */
-  private final TreePath bstPath;
+  private final KeyBitSet keyBits;
 
   private Status status;
 
@@ -59,6 +64,11 @@ public class MapProofValidator implements MapProofVisitor {
 
   @Nullable
   private byte[] value;
+
+  /**
+   * A height of the proof tree, calculated as the validator goes down the tree.
+   */
+  private int bstHeight;
 
   /**
    * Creates a new validator of a map proof.
@@ -69,8 +79,15 @@ public class MapProofValidator implements MapProofVisitor {
   public MapProofValidator(byte[] rootHash, byte[] key) {
     this.expectedRootHash = checkNotNull(rootHash);
     this.key = checkNotNull(key);
-    bstPath = new TreePath();
+    keyBits = getKeyAsBitSet(key);
     status = Status.VALID;
+    rootHash = new byte[0];
+    value = null;
+    bstHeight = 0;
+  }
+
+  private static KeyBitSet getKeyAsBitSet(byte[] key) {
+    return new KeyBitSet(key, DbKey.KEY_SIZE_BITS);
   }
 
   /**
@@ -134,7 +151,15 @@ public class MapProofValidator implements MapProofVisitor {
       status = Status.INVALID_BRANCH_NODE_DEPTH;
       return;
     }
-    bstPath.goLeft();
+    if (PERFORM_TREE_CORRECTNESS_CHECKS) {
+      KeyBitSet leftKey = node.getLeftKey().keyBits();
+      if (!leftKey.isPrefixOf(keyBits)) {
+        status = Status.INVALID_PATH_TO_NODE;
+        return;
+      }
+    }
+
+    bstHeight++;
     node.getLeft().accept(this);
 
     byte[] leftHash = rootHash;
@@ -150,7 +175,15 @@ public class MapProofValidator implements MapProofVisitor {
       status = Status.INVALID_BRANCH_NODE_DEPTH;
       return;
     }
-    bstPath.goRight();
+    if (PERFORM_TREE_CORRECTNESS_CHECKS) {
+      KeyBitSet rightKey = node.getRightKey().keyBits();
+      if (!rightKey.isPrefixOf(keyBits)) {
+        status = Status.INVALID_PATH_TO_NODE;
+        return;
+      }
+    }
+
+    bstHeight++;
     node.getRight().accept(this);
 
     byte[] leftHash = node.getLeftHash().getHash();
@@ -166,17 +199,15 @@ public class MapProofValidator implements MapProofVisitor {
       status = Status.INVALID_BRANCH_NODE_DEPTH;
       return;
     }
-    TreePath keyAsPath = getKeyAsBstPath();
-    if (!bstPath.isPrefixOf(keyAsPath)) {
-      status = Status.INVALID_PATH_TO_NODE;
-      return;
-    }
-    boolean mayContainKeyInSubTrees = Stream.of(node.getLeftKey(), node.getRightKey())
-        .map(DbKey::toPath)
-        .anyMatch((subTreePath) -> subTreePath.isPrefixOf(keyAsPath));
-    if (mayContainKeyInSubTrees) {
-      status = Status.MAY_CONTAIN_REQUESTED_VALUE_IN_SUBTREES;
-      return;
+    // This one is absolutely required in a proper validator.
+    if (PERFORM_TREE_CORRECTNESS_CHECKS) {
+      boolean mayContainKeyInSubTrees = Stream.of(node.getLeftKey(), node.getRightKey())
+          .map(DbKey::keyBits)
+          .anyMatch((subTreeKey) -> subTreeKey.isPrefixOf(keyBits));
+      if (mayContainKeyInSubTrees) {
+        status = Status.MAY_CONTAIN_REQUESTED_VALUE_IN_SUBTREES;
+        return;
+      }
     }
 
     // The node is correct, compute the hash.
@@ -189,18 +220,18 @@ public class MapProofValidator implements MapProofVisitor {
 
   @Override
   public void visit(LeafMapProofNode leafMapProofNode) {
-    TreePath keyAsPath = getKeyAsBstPath();
-    if (!bstPath.isPrefixOf(keyAsPath)) {
+    if (bstHeight == 0) {
       status = Status.INVALID_PATH_TO_NODE;
       return;
     }
+
     value = leafMapProofNode.getValue();
     rootHash = Hashes.getHashOf(value);
   }
 
   private void checkPathToRootNode(MapProof node) {
-    checkState(bstPath.getLength() == 0,
-        "Invalid state: node=%s cannot appear by such path in any tree: %s", node, bstPath);
+    checkState(bstHeight == 0,
+        "Invalid state: node=%s cannot appear at such depth in any tree: %s", node, bstHeight);
   }
 
   private boolean hasValidDbKey(EqualValueAtRoot node) {
@@ -227,15 +258,11 @@ public class MapProofValidator implements MapProofVisitor {
   }
 
   private boolean isValidBranchDepth() {
-    return bstPath.getLength() < MAX_TREE_HEIGHT;
+    return bstHeight < MAX_TREE_HEIGHT;
   }
 
   private boolean isValidNotFoundBranchDepth() {
-    return bstPath.getLength() < MAX_TREE_HEIGHT - 1;
-  }
-
-  private TreePath getKeyAsBstPath() {
-    return new TreePath(BitSet.valueOf(key), DbKey.KEY_SIZE_BITS, DbKey.KEY_SIZE_BITS);
+    return bstHeight < MAX_TREE_HEIGHT - 1;
   }
 
   @Override
@@ -245,8 +272,9 @@ public class MapProofValidator implements MapProofVisitor {
         + ", rootHash=" + Hashes.toString(rootHash)
         + ", status=" + status
         + ", key=" + Arrays.toString(key)
+        + ", keyBits=" + keyBits
         + ", value=" + Arrays.toString(value)
-        + ", bstPath=" + bstPath
+        + ", bstHeight=" + bstHeight
         + '}';
   }
 }
