@@ -7,4 +7,6 @@
 <suppressions>
     <!-- Exclude (mostly) auto-generated code -->
     <suppress files="Message_Builder2\.java" checks=".*"/>
+    <!-- fixme: remove when https://github.com/checkstyle/checkstyle/issues/5088 is resolved -->
+    <suppress files="Node\.java" checks="JavadocMethod"/>
 </suppressions>
