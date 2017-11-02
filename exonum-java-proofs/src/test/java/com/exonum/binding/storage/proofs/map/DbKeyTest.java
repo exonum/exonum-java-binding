@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.google.common.primitives.UnsignedBytes;
-import java.util.BitSet;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -39,56 +38,68 @@ public class DbKeyTest {
 
   @Test
   public void throwsIfBranchKeySliceHasBitsAfterSignificantPart0Bits() throws Exception {
-    int numSignificantBits = 0;
-    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x01), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      int numSignificantBits = 0;
+      byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x01), numSignificantBits);
 
-    expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+      expectedException.expect(IllegalArgumentException.class);
+      DbKey dbKey = new DbKey(rawDbKey);
+    }
   }
 
   @Test
   public void throwsIfBranchKeySliceHasBitsAfterSignificantPart1Bit() throws Exception {
-    int numSignificantBits = 1;
-    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x03), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      int numSignificantBits = 1;
+      byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x03), numSignificantBits);
 
-    expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+      expectedException.expect(IllegalArgumentException.class);
+      DbKey dbKey = new DbKey(rawDbKey);
+    }
   }
 
   @Test
   public void throwsIfBranchKeySliceHasBitsAfterSignificantPart7Bit() throws Exception {
-    int numSignificantBits = 7;
-    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x80), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      int numSignificantBits = 7;
+      byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x80), numSignificantBits);
 
-    expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+      expectedException.expect(IllegalArgumentException.class);
+      DbKey dbKey = new DbKey(rawDbKey);
+    }
   }
 
   @Test
   public void throwsIfBranchKeySliceHasBitsAfterSignificantPart8Bit() throws Exception {
-    int numSignificantBits = 8;
-    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      int numSignificantBits = 8;
+      byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
 
-    expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+      expectedException.expect(IllegalArgumentException.class);
+      DbKey dbKey = new DbKey(rawDbKey);
+    }
   }
 
   @Test
   public void throwsIfBranchKeySliceHasBitsAfterSignificantPart12Bit() throws Exception {
-    int numSignificantBits = 12;
-    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x1F), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      int numSignificantBits = 12;
+      byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x1F), numSignificantBits);
 
-    expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+      expectedException.expect(IllegalArgumentException.class);
+      DbKey dbKey = new DbKey(rawDbKey);
+    }
   }
 
   @Test
   public void throwsIfBranchKeySliceHasBitsAfterSignificantPart16Bit() throws Exception {
-    int numSignificantBits = 16;
-    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0xFF, 0x01), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      int numSignificantBits = 16;
+      byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0xFF, 0x01), numSignificantBits);
 
-    expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+      expectedException.expect(IllegalArgumentException.class);
+      DbKey dbKey = new DbKey(rawDbKey);
+    }
   }
 
   @Test
@@ -232,43 +243,40 @@ public class DbKeyTest {
   }
 
   @Test
-  public void testToPath_Leaf() throws Exception {
+  public void testKeyBits_Leaf() throws Exception {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.LEAF.code, keyPrefix, 0);
     DbKey dbKey = new DbKey(rawDbKey);
 
-    TreePath expectedPath = new TreePath(BitSet.valueOf(keyPrefix), DbKey.KEY_SIZE_BITS,
-        DbKey.KEY_SIZE_BITS);
-    TreePath path = dbKey.toPath();
+    KeyBitSet expectedKeyBits = new KeyBitSet(keyPrefix, DbKey.KEY_SIZE_BITS);
+    KeyBitSet keyBits = dbKey.keyBits();
 
-    assertThat(path, equalTo(expectedPath));
+    assertThat(keyBits, equalTo(expectedKeyBits));
   }
 
   @Test
-  public void testToPath_RootBranch() throws Exception {
+  public void testKeyBits_RootBranch() throws Exception {
     byte[] keyPrefix = bytes();
     int numSignificantBits = 0;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, numSignificantBits);
     DbKey dbKey = new DbKey(rawDbKey);
 
-    TreePath expectedPath = new TreePath(BitSet.valueOf(keyPrefix), numSignificantBits,
-        DbKey.KEY_SIZE_BITS);
-    TreePath path = dbKey.toPath();
+    KeyBitSet expectedKeyBits = new KeyBitSet(keyPrefix, numSignificantBits);
+    KeyBitSet keyBits = dbKey.keyBits();
 
-    assertThat(path, equalTo(expectedPath));
+    assertThat(keyBits, equalTo(expectedKeyBits));
   }
 
   @Test
-  public void testToPath_IntermediateBranch() throws Exception {
+  public void testKeyBits_IntermediateBranch() throws Exception {
     byte[] keyPrefix = bytes("abc");
     int numSignificantBits = keyPrefix.length * Byte.SIZE;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, numSignificantBits);
     DbKey dbKey = new DbKey(rawDbKey);
 
-    TreePath expectedPath = new TreePath(BitSet.valueOf(keyPrefix), numSignificantBits,
-        DbKey.KEY_SIZE_BITS);
-    TreePath path = dbKey.toPath();
+    KeyBitSet expectedKeyBits = new KeyBitSet(keyPrefix, numSignificantBits);
+    KeyBitSet keyBits = dbKey.keyBits();
 
-    assertThat(path, equalTo(expectedPath));
+    assertThat(keyBits, equalTo(expectedKeyBits));
   }
 }

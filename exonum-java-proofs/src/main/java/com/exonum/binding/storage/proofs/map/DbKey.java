@@ -46,12 +46,12 @@ public class DbKey {
   }
 
   /**
-   * Size of the key in bytes.
+   * Size of the user key in bytes.
    */
   public static final int KEY_SIZE = 32;
 
   /**
-   * Size of the key in bits.
+   * Size of the user key in bits.
    */
   public static final int KEY_SIZE_BITS = KEY_SIZE * Byte.SIZE;
 
@@ -125,10 +125,12 @@ public class DbKey {
   }
 
   private void checkBranchKeySlice(byte[] keySlice, int numSignificantBits) {
-    BitSet keyBits = BitSet.valueOf(keySlice);
-    checkArgument(keyBits.length() <= numSignificantBits,
-        "Branch key slice contains set bits after its numSignificantBits: "
-            + "length=%s, numSignificantBits=%s", keyBits.length(), numSignificantBits);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      BitSet keyBits = BitSet.valueOf(keySlice);
+      checkArgument(keyBits.length() <= numSignificantBits,
+          "Branch key slice contains set bits after its numSignificantBits (%s): "
+              + "length=%s, keyBits=%s", numSignificantBits, keyBits.length(), keyBits);
+    }
   }
 
   /**
@@ -158,9 +160,9 @@ public class DbKey {
   }
 
   /**
-   * Converts a database key into a tree path.
+   * Returns a key as a bit set.
    */
-  public TreePath toPath() {
-    return new TreePath(BitSet.valueOf(keySlice), numSignificantBits, KEY_SIZE_BITS);
+  public KeyBitSet keyBits() {
+    return new KeyBitSet(keySlice, numSignificantBits);
   }
 }
