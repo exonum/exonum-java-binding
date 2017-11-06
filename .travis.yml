@@ -50,7 +50,7 @@ script:
   - cargo fmt -- --write-mode=diff
   - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings
   - cargo audit
-  - cd -
+  - cd "${TRAVIS_BUILD_DIR}"
   - $MVN verify -T 1C -B -P ci-build -Drust.compiler.version="$RUST_VERSION"
 notifications:
   slack:
