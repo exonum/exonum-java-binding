@@ -1,6 +1,5 @@
 mod db;
 mod memorydb;
-mod leveldb;
 mod entry;
 mod map_index;
 mod list_index;
@@ -11,7 +10,6 @@ mod proof_map_index;
 
 pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
 pub use self::memorydb::*;
-pub use self::leveldb::*;
 pub use self::entry::*;
 pub use self::map_index::*;
 pub use self::list_index::*;
