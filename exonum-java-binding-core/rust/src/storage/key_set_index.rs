@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JClass, JObject};
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray};
 
 use std::panic;
@@ -22,16 +22,16 @@ enum IndexType {
 pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    prefix: jbyteArray,
+    name: JString,
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let prefix = env.convert_byte_array(prefix)?;
+        let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
             View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(
-                Index::new(prefix, &**snapshot),
+                Index::new(name, &**snapshot),
             ),
-            View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(prefix, fork)),
+            View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)
