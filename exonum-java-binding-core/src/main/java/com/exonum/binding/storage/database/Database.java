@@ -10,8 +10,8 @@ public abstract class Database extends AbstractNativeProxy {
   /**
    * Create a new database proxy.
    *
-   * @param nativeHandle a native handle: an implementation-specific reference to a native object.
-   * @param owningHandle true if this proxy is responsible to release any native resources;
+   * @param nativeHandle a native handle: an implementation-specific reference to a native object
+   * @param owningHandle true if this proxy is responsible to release any native resources
    */
   Database(long nativeHandle, boolean owningHandle) {
     super(nativeHandle, owningHandle);
@@ -22,7 +22,7 @@ public abstract class Database extends AbstractNativeProxy {
    *
    * <p>A caller is responsible to close the snapshot (see {@link View#close()}).
    *
-   *  @return a new snapshot of the database state.
+   *  @return a new snapshot of the database state
    */
   public abstract Snapshot createSnapshot();
 
@@ -34,7 +34,7 @@ public abstract class Database extends AbstractNativeProxy {
    *
    * <p>A caller is responsible to close the fork (see {@link View#close()}).
    *
-   * @return a new database fork.
+   * @return a new database fork
    */
   public abstract Fork createFork();
 }
