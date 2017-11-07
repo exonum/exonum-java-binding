@@ -9,8 +9,10 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2017-08-31
     - RUST_CLIPPY_VERSION=0.0.155
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
+    - MVN="$HOME/bin/apache-maven/bin/mvn"
 cache:
   directories:
+    - "$HOME/bin/apache-maven"
     - "$HOME/.cargo"
     - "${EJB_RUST_BUILD_DIR}/target"
     - "$HOME/.m2"
@@ -32,6 +34,15 @@ before_install:
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
   - cargo install --list
+    # Install a recent version of Maven instead of the ancient default
+  - $MVN -version | grep "3.5.2"
+     || mkdir -p ~/bin
+        && cd ~/bin/
+        && rm -rf apache-maven
+        && wget http://apache.volia.net/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.tar.gz
+        && tar xf apache-maven-3.5.2-bin.tar.gz
+        && mv apache-maven-3.5.2/ apache-maven/
+        && rm apache-maven-3.5.2-bin.tar.gz
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
@@ -39,8 +50,8 @@ script:
   - cargo fmt -- --write-mode=diff
   - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings
   - cargo audit
-  - cd -
-  - mvn verify -T 1C -B -P ci-build -Drust.compiler.version="$RUST_VERSION"
+  - cd "${TRAVIS_BUILD_DIR}"
+  - $MVN verify -T 1C -B -P ci-build -Drust.compiler.version="$RUST_VERSION"
 notifications:
   slack:
     secure: m9GypuiO7oTg5/PoPfYvJRsx2x44q+TwBzLaDQegJZOhP6vNUrLHV06wCMund2SqVG3EwQkaVP4L0DmDLPFd/i+SXRPK0BUC+1G4HTp/VllmtkrebePqtlaXTrkJDHpxKLafaOOZd948LqsGs+PKehbKU5FJGeUcNgtsqkE/LZ4F9GgrWgQzh5qNrPK/dCS+svwiNSICJOtMp5rG84LAbCLHLMS9lII1Mo/ELsIsZ1OreHZjfcweQ/Br5vIqlH14s98y4CaZhvHy3F1KsP00HCltA4sQSokiMLh2wWlxtjY5bCP6tAUY3CP6sYDHE4WoRc2zu2RCo+D7J0N2i8y/KbuduCqXVnFv9vIc311DrkfazFV1WvJkND9h8RyNA73ZdhTCRAXGECTgxqr1HYPzk0Ox9D0jcPW/6uJOdYGfG+UwYTqbHL9bEsc6RW5hw+siyA5bcgZ+Ah8njzrc6Z+09CQnNqqfF6KbQoqUl9VipYWSomBMVA6SCaWVFXN7b/OnEkNWPj+GlPDkSEqH8cFHVJYD0AZ0V9TdwXNheyIc7Aq7E9eiR7g+OOnKPBC2sJaa04Ae+Q5nWPk3/UtZplg3lJTIqe3NgkNI5bIo0XzKA+xFpNIWbJnWko4oFwjFdfmgTuyyI76sVQNwxwfaUQfr6BtUyELrtwt4eM17BmB9Crk=
