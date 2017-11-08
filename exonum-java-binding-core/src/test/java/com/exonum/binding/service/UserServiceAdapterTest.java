@@ -69,9 +69,9 @@ public class UserServiceAdapterTest {
         .getMessage()
         .array();
 
-    Transaction transaction = serviceAdapter.convertTransaction(message);
+    UserTransactionAdapter transactionAdapter = serviceAdapter.convertTransaction(message);
 
-    assertThat(transaction, equalTo(expectedTransaction));
+    assertThat(transactionAdapter.transaction, equalTo(expectedTransaction));
   }
 
   @Test
