@@ -12,7 +12,10 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,7 +36,7 @@ public class ServerIntegrationTest {
 
   @Test
   public void createRouter_stoppedServer() throws Exception {
-    server.stop();
+    blockingStop();
 
     expectedException.expect(IllegalStateException.class);
     server.createRouter();
@@ -43,7 +46,7 @@ public class ServerIntegrationTest {
   public void mountSubRouter_stoppedServer() throws Exception {
     server.start(PORT);
     Router router = server.createRouter();
-    server.stop();
+    blockingStop();
 
     expectedException.expect(IllegalStateException.class);
     server.mountSubRouter("/service1", router);
@@ -57,7 +60,7 @@ public class ServerIntegrationTest {
       expectedException.expect(IllegalStateException.class);
       server.start(PORT);
     } finally {
-      server.stop();
+      blockingStop();
     }
   }
 
@@ -82,7 +85,7 @@ public class ServerIntegrationTest {
   @Test
   public void start_wontStartStopped() throws Exception {
     server.start(PORT);
-    server.stop();
+    blockingStop();
 
     expectedException.expect(IllegalStateException.class);
     server.start(PORT);
@@ -121,10 +124,19 @@ public class ServerIntegrationTest {
         fail(ar.cause().getMessage());
       }
     } finally {
-      server.stop();
+      blockingStop();
       if (wcVertx != null) {
         wcVertx.close();
       }
     }
+  }
+
+  /**
+   * A blocking server stop, so that asynchronous exceptions are not hidden.
+   */
+  private void blockingStop() throws InterruptedException, ExecutionException, TimeoutException {
+    Future<Void> f = server.stop();
+    int stopTimeout = 2;
+    f.get(stopTimeout, TimeUnit.SECONDS);
   }
 }
