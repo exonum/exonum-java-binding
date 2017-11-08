@@ -6,11 +6,13 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
+import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.storage.indices.TestStorageItems.V3;
+import static com.exonum.binding.storage.indices.TestStorageItems.V4;
 import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
@@ -24,6 +26,8 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.proofs.map.MapProof;
+import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
@@ -58,7 +62,7 @@ public class ProofMapIndexProxyIntegrationTest {
   private static final byte[] PK2 = createProofKey("PK2");
   private static final byte[] PK3 = createProofKey("PK3");
 
-  private static final List<byte[]> proofKeys = asList(PK1, PK2, PK3);
+  private static final List<byte[]> proofKeys = ImmutableList.of(PK1, PK2, PK3);
 
   private static final byte[] EMPTY_MAP_ROOT_HASH = new byte[Hashes.HASH_SIZE_BYTES];
 
@@ -185,6 +189,97 @@ public class ProofMapIndexProxyIntegrationTest {
   }
 
   @Test
+  public void getProof_FourEntryMap_LastByte_Contains1() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry> entries = ImmutableList.of(
+          new MapEntry(createProofKey((byte) 0b0000_0000), V1),
+          new MapEntry(createProofKey((byte) 0b0000_0001), V2),
+          new MapEntry(createProofKey((byte) 0b1000_0000), V3),
+          new MapEntry(createProofKey((byte) 0b1000_0001), V4));
+
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      for (MapEntry e : entries) {
+        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+      }
+    });
+  }
+
+  @Test
+  public void getProof_FourEntryMap_LastByte_Contains2() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry> entries = ImmutableList.of(
+          new MapEntry(createProofKey((byte) 0b00), V1),
+          new MapEntry(createProofKey((byte) 0b01), V2),
+          new MapEntry(createProofKey((byte) 0b10), V3),
+          new MapEntry(createProofKey((byte) 0b11), V4));
+
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      for (MapEntry e : entries) {
+        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+      }
+    });
+  }
+
+  @Test
+  public void getProof_FourEntryMap_FirstByte_Contains() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      byte[] key1 = createProofKey();
+      byte[] key2 = createProofKey();
+      key2[0] = (byte) 0b0000_0001;
+      byte[] key3 = createProofKey();
+      key3[0] = (byte) 0b1000_0000;
+      byte[] key4 = createProofKey();
+      key4[0] = (byte) 0b1000_0001;
+
+      List<MapEntry> entries = ImmutableList.of(
+          new MapEntry(key1, V1),
+          new MapEntry(key2, V2),
+          new MapEntry(key3, V3),
+          new MapEntry(key4, V4));
+
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      for (MapEntry e : entries) {
+        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+      }
+    });
+  }
+
+  @Test
+  public void getProof_FourEntryMap_FirstAndLastByte_Contains() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      byte[] key1 = createProofKey();  // 000…0
+      byte[] key2 = createProofKey();  // 100…0
+      key2[0] = (byte) 0x01;
+      byte[] key3 = createProofKey((byte) 0x80);// 000…01
+      byte[] key4 = createProofKey((byte) 0x80);// 100…01
+      key4[0] = (byte) 0x01;
+
+      List<MapEntry> entries = ImmutableList.of(
+          new MapEntry(key1, V1),
+          new MapEntry(key2, V2),
+          new MapEntry(key3, V3),
+          new MapEntry(key4, V4));
+
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      for (MapEntry e : entries) {
+        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+      }
+    });
+  }
+
+  @Test
   public void getProof_MultiEntryMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry> entries = createSortedMapEntries();
@@ -198,6 +293,14 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
+  @SuppressWarnings("unused")
+  private void printProof(ProofMapIndexProxy map, byte[] key) {
+    MapProof proof = map.getProof(key);
+    System.out.println("\nProof for key: " + Hashes.toString(key));
+    MapProofTreePrinter printer = new MapProofTreePrinter();
+    proof.accept(printer);
+  }
+
   @Test
   public void getProof_MultiEntryMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -209,7 +312,7 @@ public class ProofMapIndexProxyIntegrationTest {
       byte[] allOnes = new byte[PROOF_MAP_KEY_SIZE];
       Arrays.fill(allOnes, UnsignedBytes.checkedCast(0xFF));
 
-      List<byte[]> otherKeys = asList(
+      List<byte[]> otherKeys = ImmutableList.of(
           allOnes,  // [11…1]
           createProofKey(""),  // [00…0]
           createProofKey("PK1001"),
@@ -224,7 +327,7 @@ public class ProofMapIndexProxyIntegrationTest {
   }
 
   @Test
-  // Might take quite a lot of time (validating 257 proofs),
+  // Takes quite a lot of time (validating 257 proofs),
   // but it's an integration test, isn't it? :-)
   //
   // Consider adding a similar test for left-leaning MPT
@@ -395,6 +498,10 @@ public class ProofMapIndexProxyIntegrationTest {
    */
   private static byte[] createProofKey(String suffix) {
     byte[] suffixBytes = bytes(suffix);
+    return createProofKey(suffixBytes);
+  }
+
+  private static byte[] createProofKey(byte... suffixBytes) {
     checkArgument(suffixBytes.length <= PROOF_MAP_KEY_SIZE);
     byte[] proofKey = new byte[PROOF_MAP_KEY_SIZE];
     System.arraycopy(suffixBytes, 0, proofKey, PROOF_MAP_KEY_SIZE - suffixBytes.length,
