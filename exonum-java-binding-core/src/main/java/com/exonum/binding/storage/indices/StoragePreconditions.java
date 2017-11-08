@@ -9,19 +9,17 @@ final class StoragePreconditions {
 
   static final int PROOF_MAP_KEY_SIZE = 32;
 
-  private static final int MIN_INDEX_PREFIX_LENGTH = 1;
-
   /**
-   * Checks that an index prefix is valid.
+   * Checks that an index name is valid.
    *
-   * @param prefix an index prefix.
-   * @return an unmodified prefix if it's valid.
-   * @throws NullPointerException if the prefix is null.
-   * @throws IllegalArgumentException if the prefix has zero length.
+   * @param name an index name
+   * @return an unmodified name if it's valid
+   * @throws NullPointerException if the name is null
+   * @throws IllegalArgumentException if the name has zero length
    */
-  static byte[] checkIndexPrefix(byte[] prefix) {
-    checkArgument(MIN_INDEX_PREFIX_LENGTH <= prefix.length, "prefix has zero size");
-    return prefix;
+  static String checkIndexName(String name) {
+    checkArgument(!name.isEmpty(), "name is empty");
+    return name;
   }
 
   /**

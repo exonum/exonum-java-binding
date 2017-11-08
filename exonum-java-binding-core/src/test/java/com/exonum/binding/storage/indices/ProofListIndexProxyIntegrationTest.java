@@ -2,7 +2,6 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
-import static com.exonum.binding.test.Bytes.bytes;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -18,7 +17,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,7 +40,7 @@ public class ProofListIndexProxyIntegrationTest {
 
   private Database database;
 
-  private static final byte[] LIST_PREFIX = bytes("test proof list");
+  private static final String LIST_NAME = "test_proof_list";
 
   @Before
   public void setUp() throws Exception {
@@ -153,7 +151,7 @@ public class ProofListIndexProxyIntegrationTest {
                                BiConsumer<View, ProofListIndexProxy> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        LIST_PREFIX,
+        LIST_NAME,
         ProofListIndexProxy::new,
         listTest
     );

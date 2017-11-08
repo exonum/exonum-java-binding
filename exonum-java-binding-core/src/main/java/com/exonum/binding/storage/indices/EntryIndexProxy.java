@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
 import com.exonum.binding.storage.database.Fork;
@@ -26,16 +26,17 @@ public class EntryIndexProxy extends AbstractIndexProxy {
   /**
    * Creates a new Entry.
    *
-   * @param prefix a unique identifier of the Entry in the underlying storage
+   * @param name a unique alphanumeric identifier of the Entry in the underlying storage:
+   *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    *
    * @throws NullPointerException if any argument is null
-   * @throws IllegalArgumentException if the prefix is empty
+   * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
-  public EntryIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
+  public EntryIndexProxy(String name, View view) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
   }
 
   /**
@@ -96,7 +97,7 @@ public class EntryIndexProxy extends AbstractIndexProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(byte[] prefix, long viewNativeHandle);
+  private static native long nativeCreate(String name, long viewNativeHandle);
 
   private native void nativeSet(long nativeHandle, byte[] value);
 

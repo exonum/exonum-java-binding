@@ -3,7 +3,6 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V3;
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -31,7 +30,7 @@ public class EntryIndexProxyIntegrationTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private static final byte[] entryPrefix = bytes("test entry");
+  private static final String ENTRY_NAME = "test_entry";
 
   private Database database;
 
@@ -118,7 +117,7 @@ public class EntryIndexProxyIntegrationTest {
   @Test
   public void closeMustDetectUseAfterViewFreed() throws Exception {
     View view = database.createSnapshot();
-    EntryIndexProxy entry = new EntryIndexProxy(entryPrefix, view);
+    EntryIndexProxy entry = new EntryIndexProxy(ENTRY_NAME, view);
 
     view.close();
 
@@ -135,7 +134,7 @@ public class EntryIndexProxyIntegrationTest {
                                       BiConsumer<View, EntryIndexProxy> entryTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        entryPrefix,
+        ENTRY_NAME,
         EntryIndexProxy::new,
         entryTest
     );
