@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.storage.database.View;
@@ -24,15 +24,16 @@ public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex 
   /**
    * Creates a new ListIndexProxy.
    *
-   * @param prefix a unique identifier of this list in the underlying storage
+   * @param name a unique alphanumeric identifier of this list in the underlying storage:
+   *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @throws IllegalStateException if the view is not valid
-   * @throws IllegalArgumentException if the prefix has zero size
+   * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ListIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
+  public ListIndexProxy(String name, View view) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
   }
 
   /**
@@ -69,7 +70,7 @@ public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex 
     nativeTruncate(getNativeHandle(), newSize);
   }
 
-  private static native long nativeCreate(byte[] listPrefix, long viewNativeHandle);
+  private static native long nativeCreate(String listName, long viewNativeHandle);
 
   @Override
   native void nativeFree(long nativeHandle);

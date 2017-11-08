@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.storage.database.View;
@@ -28,18 +28,19 @@ public class ProofListIndexProxy extends AbstractListIndexProxy implements ListI
   /**
    * Creates a new ProofListIndexProxy.
    *
-   * @param prefix a unique identifier of this list in the underlying storage
+   * @param name a unique alphanumeric identifier of this list in the underlying storage:
+   *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @throws IllegalStateException if the view is not valid
-   * @throws IllegalArgumentException if the prefix has zero size
+   * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofListIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
+  public ProofListIndexProxy(String name, View view) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
   }
 
-  private static native long nativeCreate(byte[] listPrefix, long viewNativeHandle);
+  private static native long nativeCreate(String listName, long viewNativeHandle);
 
   /**
    * Returns a proof that an element exists at the specified index in this list.

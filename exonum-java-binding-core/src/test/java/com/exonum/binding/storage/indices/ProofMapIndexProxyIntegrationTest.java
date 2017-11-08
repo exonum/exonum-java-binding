@@ -52,7 +52,7 @@ public class ProofMapIndexProxyIntegrationTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private static final byte[] mapPrefix = bytes("test proof map");
+  private static final String mapName = "test_proof_map";
 
   private static final byte[] PK1 = createProofKey("PK1");
   private static final byte[] PK2 = createProofKey("PK2");
@@ -386,7 +386,7 @@ public class ProofMapIndexProxyIntegrationTest {
   @Test
   public void closeShallFailIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
-    ProofMapIndexProxy map = new ProofMapIndexProxy(mapPrefix, view);
+    ProofMapIndexProxy map = new ProofMapIndexProxy(mapName, view);
 
     // Destroy a view before the map.
     view.close();
@@ -419,7 +419,7 @@ public class ProofMapIndexProxyIntegrationTest {
                                BiConsumer<View, ProofMapIndexProxy> mapTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        mapPrefix,
+        mapName,
         ProofMapIndexProxy::new,
         mapTest
     );
