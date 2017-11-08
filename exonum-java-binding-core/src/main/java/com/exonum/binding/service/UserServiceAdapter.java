@@ -1,12 +1,16 @@
 package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transport.Server;
+import io.vertx.ext.web.Router;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * An adapter of a user-facing interface {@link Service} to an interface with a native code:
@@ -18,8 +22,14 @@ class UserServiceAdapter {
 
   private final Service service;
 
-  UserServiceAdapter(Service service) {
+  private final Server server;
+
+  @Nullable
+  private Node node;
+
+  UserServiceAdapter(Service service, Server server) {
     this.service = checkNotNull(service, "service");
+    this.server = checkNotNull(server, "server");
   }
 
   short getId() {
@@ -99,13 +109,22 @@ class UserServiceAdapter {
     }
   }
 
-  void mountPublicApiHandler() {
-    //todo:
-    service.createPublicApiHandlers();
+  void mountPublicApiHandler(long nodeNativeHandle) {
+    checkState(node == null, "There is a node already: are you calling this method twice?");
+    node = new Node(nodeNativeHandle);
+    Router router = server.createRouter();
+    service.createPublicApiHandlers(node, router);
+    server.mountSubRouter(getName(), router);
   }
 
-  void mountPrivateApiHandler() {
-    //todo:
-    service.createPrivateApiHandlers();
+  /**
+   * Close this service adapter.
+   *
+   * <p>Releases any resources.
+   */
+  void close() {
+    if (node != null) {
+      node.close();
+    }
   }
 }

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import io.vertx.ext.web.Router;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -51,9 +52,6 @@ public class AbstractServiceTest {
     }
 
     @Override
-    public void createPublicApiHandlers() {}
-
-    @Override
-    public void createPrivateApiHandlers() {}
+    public void createPublicApiHandlers(Node node, Router router) {}
   }
 }
