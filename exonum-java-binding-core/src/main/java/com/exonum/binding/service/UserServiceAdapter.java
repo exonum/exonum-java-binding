@@ -53,7 +53,7 @@ class UserServiceAdapter {
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  Transaction convertTransaction(byte[] transactionMessage) {
+  UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
     BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
     assert message.getServiceId() == getId() :
         "Message id is distinct from the service id";
@@ -63,7 +63,7 @@ class UserServiceAdapter {
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
         message.getMessageType());  // todo: consider moving this check to the native code?
-    return transaction;
+    return new UserTransactionAdapter(transaction);
   }
 
   /**
