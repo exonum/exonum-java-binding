@@ -7,38 +7,48 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mock;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transport.Server;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.impl.RouterImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({
+    Server.class
+})
 public class UserServiceAdapterTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  @Mock
   private Service service;
+
+  private Server server;
 
   private UserServiceAdapter serviceAdapter;
 
   @Before
   public void setUp() throws Exception {
-    serviceAdapter = new UserServiceAdapter(service);
+    service = mock(Service.class);
+    server = mock(Server.class);
+    serviceAdapter = new UserServiceAdapter(service, server);
   }
 
   @Test
@@ -77,7 +87,7 @@ public class UserServiceAdapterTest {
         .array();
 
     expectedException.expectMessage("Invalid service implementation: "
-            + "Service#convertToTransaction must never return null.");
+        + "Service#convertToTransaction must never return null.");
     expectedException.expect(NullPointerException.class);
     serviceAdapter.convertTransaction(message);
   }
@@ -150,12 +160,23 @@ public class UserServiceAdapterTest {
 
   @Test
   public void mountPublicApiHandler() throws Exception {
-    // todo:
+    Router router = mock(RouterImpl.class);
+    when(server.createRouter())
+        .thenReturn(router);
+
+    String serviceName = "service1";
+    when(service.getName())
+        .thenReturn(serviceName);
+
+    serviceAdapter.mountPublicApiHandler(0x0A);
+    verify(server).mountSubRouter(eq(serviceName), eq(router));
   }
 
   @Test
-  public void mountPrivateApiHandler() throws Exception {
-    // todo:
-  }
+  public void mountPublicApiHandler_FailsOnSubsequentCalls() throws Exception {
+    serviceAdapter.mountPublicApiHandler(0x0A);
 
+    expectedException.expect(IllegalStateException.class);
+    serviceAdapter.mountPublicApiHandler(0x0B);
+  }
 }

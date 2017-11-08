@@ -6,6 +6,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import io.vertx.ext.web.Router;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -81,12 +82,24 @@ public interface Service {
   }
 
   /**
-   * todo: After transport.
+   * Creates handlers that makes up the public API of this service.
+   * The handlers are added to the given router, which is then mounted at a path,
+   * equal to the service name.
+   *
+   * <p>Please note that the path prefix is stripped from the request path when it is forwarded to
+   * the given router. For example, if your service name is «cryptocurrency»,
+   * and you have two endpoints «/send-money» and «/balance», use these names when
+   * defining handlers, and they will be available by paths «/cryptocurrency/send-money»
+   * and «/cryptocurrency/balance»:
+   * <pre><code>
+   * router.get("/balance").handler((rc) -> {
+   *   rc.response().end("$1’000’000");
+   * });
+   * </code></pre>
+   *
+   * @param node a set-up Exonum node, providing an interface to access
+   *             the current blockchain state and submit transactions
+   * @param router a router responsible for handling requests to this service
    */
-  void createPublicApiHandlers();
-
-  /**
-   * todo: After transport.
-   */
-  void createPrivateApiHandlers();
+  void createPublicApiHandlers(Node node, Router router);
 }
