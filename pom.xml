@@ -133,5 +133,7 @@
     <module>exonum-java-binding-core</module>
     <module>exonum-java-proofs</module>
     <module>exonum-java-testing</module>
+      <module>spi-test</module>
+    <module>spi-impl</module>
   </modules>
 </project>
