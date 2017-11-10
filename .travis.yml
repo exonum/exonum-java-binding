@@ -1,5 +1,4 @@
 language: java
-group: deprecated-2017Q2
 dist: trusty
 jdk: openjdk8
 sudo: required

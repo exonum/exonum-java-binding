@@ -211,8 +211,10 @@ public class MapProofValidatorTest {
     validator = new MapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
-    assertThat(validator, isNotValid());
-    testGetValueFails(Status.INVALID_PATH_TO_NODE);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      assertThat(validator, isNotValid());
+      testGetValueFails(Status.INVALID_PATH_TO_NODE);
+    }
   }
 
   @Test
@@ -232,8 +234,10 @@ public class MapProofValidatorTest {
     validator = new MapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
-    assertThat(validator, isNotValid());
-    testGetValueFails(Status.MAY_CONTAIN_REQUESTED_VALUE_IN_SUBTREES);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      assertThat(validator, isNotValid());
+      testGetValueFails(Status.MAY_CONTAIN_REQUESTED_VALUE_IN_SUBTREES);
+    }
   }
 
   @Test
@@ -253,20 +257,37 @@ public class MapProofValidatorTest {
     validator = new MapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
-    assertThat(validator, isNotValid());
-    testGetValueFails(Status.MAY_CONTAIN_REQUESTED_VALUE_IN_SUBTREES);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      assertThat(validator, isNotValid());
+      testGetValueFails(Status.MAY_CONTAIN_REQUESTED_VALUE_IN_SUBTREES);
+    }
   }
 
   // Successful test
   @Test
-  public void testVisitMappingNotFound_Valid() throws Exception {
-    byte[] key = createKey(0b100);  // [00100…00]
+  public void testVisitMappingNotFound_ValidAtRoot() throws Exception {
+    byte[] key = createKey(0b0100);  // [00100…00]
+    MapProof mapProof = new MappingNotFoundProofBranch(
+        createHash("h1"),
+        createHash("h2"),
+        branchDbKey(createKey(0b0000), 4),
+        branchDbKey(createKey(0b1001), 4));
+
+    validator = new MapProofValidator(ROOT_HASH, key);
+    mapProof.accept(validator);
+
+    assertThat(validator, isValid(key, null));
+  }
+
+  @Test
+  public void testVisitMappingNotFound_ValidAsLeftChild() throws Exception {
+    byte[] key = createKey(0b0100);  // [00100…00]
     MapProof mapProof = new LeftMapProofBranch(
         new MappingNotFoundProofBranch(
             createHash("h1"),
             createHash("h2"),
-            branchDbKey(createKey(0b1000), 4),
-            branchDbKey(createKey(0b1100), 4)),
+            branchDbKey(createKey(0b00_00), 4),
+            branchDbKey(createKey(0b11_00), 4)),
         createHash("h3"),
         branchDbKey(createKey(0b00), 2),
         branchDbKey(createKey(0b01), 2));
@@ -290,8 +311,10 @@ public class MapProofValidatorTest {
     validator = new MapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
-    assertThat(validator, isNotValid());
-    testGetValueFails(Status.INVALID_PATH_TO_NODE);
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      assertThat(validator, isNotValid());
+      testGetValueFails(Status.INVALID_PATH_TO_NODE);
+    }
   }
 
   @Test
@@ -303,6 +326,20 @@ public class MapProofValidatorTest {
         new LeafMapProofNode(V1), // ![1] <- [00100…00]
         branchDbKey(createKey(0b0), 1),
         leafDbKey(otherKey));
+
+    validator = new MapProofValidator(ROOT_HASH, key);
+    mapProof.accept(validator);
+
+    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
+      assertThat(validator, isNotValid());
+      testGetValueFails(Status.INVALID_PATH_TO_NODE);
+    }
+  }
+
+  @Test
+  public void testVisitLeaf_NotValid_LeafAtRoot() throws Exception {
+    byte[] key = createKey(0b100);      // [00100…00]
+    MapProof mapProof = new LeafMapProofNode(V1);
 
     validator = new MapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
@@ -319,6 +356,39 @@ public class MapProofValidatorTest {
         new LeafMapProofNode(value), // [0] <- [00100…00]
         createHash("h1"),
         leafDbKey(key),
+        branchDbKey(createKey(0b1), 1));
+
+    validator = new MapProofValidator(ROOT_HASH, key);
+    mapProof.accept(validator);
+
+    assertThat(validator, isValid(key, value));
+  }
+
+  /**
+   * Tests a case when a key length increases for more than a single bit.
+   *
+   * <pre>
+   *                        o
+   * +0                 /        \
+   *                 o[0110]    o[1…]
+   * +0           /         \
+   *      L[0110’0111’0…0]  o[0110’1…]
+   * </pre>
+   */
+  @Test
+  public void testVisitLeaf_Valid_L2_LeftSubTree_PrefixExtension() throws Exception {
+    byte[] key = createKey(0b1110_1110);      // [011101110…00]
+    byte[] value = V1;
+    MapProof mapProof = new LeftMapProofBranch(
+        new LeftMapProofBranch(
+          new LeafMapProofNode(value),
+          createHash("h2"),
+          leafDbKey(key),
+          branchDbKey(createKey(0b1_1110), 5)
+        ),
+        createHash("h1"),
+        // Prefix extension: left branch adds 1+3 bits to the prefix.
+        branchDbKey(createKey(0b1110), 4),
         branchDbKey(createKey(0b1), 1));
 
     validator = new MapProofValidator(ROOT_HASH, key);
@@ -344,8 +414,30 @@ public class MapProofValidatorTest {
   }
 
   @Test
+  public void testVisitLeaf_Valid_L2_RightSubTree_PrefixExtension() throws Exception {
+    byte[] key = createKey(0b1_1001);      // [1000100…0]
+    byte[] value = V1;
+    MapProof mapProof = new RightMapProofBranch(
+        createHash("h1"),
+        new RightMapProofBranch(
+            createHash("h2"),
+            new LeafMapProofNode(value),
+            branchDbKey(createKey(0b0_1001), 5),
+            leafDbKey(key)
+        ),
+        branchDbKey(createKey(0b0), 1),
+        // Prefix extension: right branch adds 1+3 bits to the prefix.
+        branchDbKey(createKey(0b1001), 4));
+
+    validator = new MapProofValidator(ROOT_HASH, key);
+    mapProof.accept(validator);
+
+    assertThat(validator, isValid(key, value));
+  }
+
+  @Test
   public void testVisitLeaf_ValidTree_L1_HashMismatch() throws Exception {
-    byte[] key = createKey(0b101);      // [00100…00]
+    byte[] key = createKey(0b101);      // [10100…00]
     MapProof mapProof = new RightMapProofBranch(
         createHash("h1"),
         new LeafMapProofNode(V1), // [1] <- [10100…00]
