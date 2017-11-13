@@ -29,6 +29,15 @@ public class MemoryDb extends Database {
     return new Fork(nativeCreateFork(getNativeHandle()));
   }
 
+  /**
+   * Applies the changes from the given fork to the database state.
+   *
+   * @param fork a fork to get changes from
+   */
+  public void merge(Fork fork) {
+    nativeMerge(fork.getViewNativeHandle());
+  }
+
   @Override
   protected void disposeInternal() {
     nativeFree(getNativeHandle());
@@ -39,6 +48,8 @@ public class MemoryDb extends Database {
   private native long nativeCreateSnapshot(long nativeDb);
 
   private native long nativeCreateFork(long nativeDb);
+
+  private native void nativeMerge(long forkNativeHandle);
 
   private native void nativeFree(long nativeDb);
 }
