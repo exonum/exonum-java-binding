@@ -1,6 +1,5 @@
 package com.exonum.binding.service;
 
-import static com.exonum.binding.messages.ByteBufferAllocator.allocateBuffer;
 import static com.exonum.binding.test.Bytes.bytes;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -14,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.messages.TemplateMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
@@ -97,12 +97,8 @@ public class UserServiceAdapterTest {
    */
   private BinaryMessage getServiceMessage(short serviceId) {
     return new Message.Builder()
-        .setNetworkId((byte) 0x01)
-        .setVersion((byte) 0x02)
+        .mergeFrom(TemplateMessage.TEMPLATE_MESSAGE)
         .setServiceId(serviceId)
-        .setMessageType((short) 0xB204)
-        .setBody(allocateBuffer(2))
-        .setSignature(allocateBuffer(64))
         .buildRaw();
   }
 
