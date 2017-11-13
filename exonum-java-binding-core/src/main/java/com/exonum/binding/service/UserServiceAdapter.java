@@ -26,7 +26,7 @@ class UserServiceAdapter {
   private final Server server;
 
   @Nullable
-  private Node node;
+  private NodeProxy node;
 
   @Inject
   UserServiceAdapter(Service service, Server server) {
@@ -113,7 +113,7 @@ class UserServiceAdapter {
 
   void mountPublicApiHandler(long nodeNativeHandle) {
     checkState(node == null, "There is a node already: are you calling this method twice?");
-    node = new Node(nodeNativeHandle);
+    node = new NodeProxy(nodeNativeHandle);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
     server.mountSubRouter(getName(), router);
