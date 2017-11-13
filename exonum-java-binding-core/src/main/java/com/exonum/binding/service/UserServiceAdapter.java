@@ -8,6 +8,7 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -27,6 +28,7 @@ class UserServiceAdapter {
   @Nullable
   private Node node;
 
+  @Inject
   UserServiceAdapter(Service service, Server server) {
     this.service = checkNotNull(service, "service");
     this.server = checkNotNull(server, "server");
