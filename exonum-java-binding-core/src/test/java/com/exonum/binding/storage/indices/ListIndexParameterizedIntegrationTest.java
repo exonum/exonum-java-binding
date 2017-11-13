@@ -52,7 +52,7 @@ public class ListIndexParameterizedIntegrationTest {
   @Parameterized.Parameter(1)
   public String testName;
 
-  private static final byte[] LIST_PREFIX = bytes("test list");
+  private static final String LIST_NAME = "test_list";
 
   private Database database;
 
@@ -324,7 +324,7 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    ListIndex list = listSupplier.function.apply(LIST_PREFIX, view);
+    ListIndex list = listSupplier.function.apply(LIST_NAME, view);
 
     view.close();  // a list must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -340,7 +340,7 @@ public class ListIndexParameterizedIntegrationTest {
                                BiConsumer<View, ListIndex> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        LIST_PREFIX,
+        LIST_NAME,
         listSupplier.function,
         listTest
     );
@@ -356,9 +356,9 @@ public class ListIndexParameterizedIntegrationTest {
 
   // Needed for you can't assign a lambda to an Object
   private static class FunctionHolder {
-    final BiFunction<byte[], View, ListIndex> function;
+    final BiFunction<String, View, ListIndex> function;
 
-    private FunctionHolder(BiFunction<byte[], View, ListIndex> function) {
+    private FunctionHolder(BiFunction<String, View, ListIndex> function) {
       this.function = function;
     }
   }

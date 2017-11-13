@@ -2,7 +2,6 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.K9;
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -32,7 +31,7 @@ public class KeySetIndexProxyIntegrationTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private static final byte[] KEY_SET_PREFIX = bytes("test key set");
+  private static final String KEY_SET_NAME = "test_key_set";
 
   private Database database;
 
@@ -166,7 +165,7 @@ public class KeySetIndexProxyIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    KeySetIndexProxy set = new KeySetIndexProxy(KEY_SET_PREFIX, view);
+    KeySetIndexProxy set = new KeySetIndexProxy(KEY_SET_NAME, view);
 
     view.close();  // a set must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -196,7 +195,7 @@ public class KeySetIndexProxyIntegrationTest {
                                       BiConsumer<View, KeySetIndexProxy> keySetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        KEY_SET_PREFIX,
+        KEY_SET_NAME,
         KeySetIndexProxy::new,
         keySetTest
     );

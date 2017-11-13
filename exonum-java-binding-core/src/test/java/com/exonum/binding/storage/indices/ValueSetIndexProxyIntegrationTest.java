@@ -3,7 +3,6 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V9;
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -39,7 +38,7 @@ public class ValueSetIndexProxyIntegrationTest {
 
   private static final String EXONUM_DEFAULT_HASHING_ALGORITHM = "SHA-256";
 
-  private static final byte[] VALUE_SET_PREFIX = bytes("test value set");
+  private static final String VALUE_SET_NAME = "test_value_set";
 
   private Database database;
 
@@ -274,7 +273,7 @@ public class ValueSetIndexProxyIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    ValueSetIndexProxy set = new ValueSetIndexProxy(VALUE_SET_PREFIX, view);
+    ValueSetIndexProxy set = new ValueSetIndexProxy(VALUE_SET_NAME, view);
 
     view.close();  // a set must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -307,7 +306,7 @@ public class ValueSetIndexProxyIntegrationTest {
                                       BiConsumer<View, ValueSetIndexProxy> valueSetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        VALUE_SET_PREFIX,
+        VALUE_SET_NAME,
         ValueSetIndexProxy::new,
         valueSetTest
     );

@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
@@ -29,18 +29,19 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   /**
    * Creates a ProofMapIndexProxy.
    *
-   * @param prefix a unique identifier of this map in the underlying storage
+   * @param name a unique alphanumeric identifier of this map in the underlying storage:
+   *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @throws IllegalStateException if the view is not valid
-   * @throws IllegalArgumentException if the prefix has zero size
+   * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofMapIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
+  public ProofMapIndexProxy(String name, View view) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
   }
 
-  private static native long nativeCreate(byte[] prefix, long viewNativeHandle);
+  private static native long nativeCreate(String name, long viewNativeHandle);
 
   @Override
   public boolean containsKey(byte[] key) {

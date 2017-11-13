@@ -2,7 +2,6 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -34,7 +33,7 @@ public class ListIndexProxyIntegrationTest {
 
   private Database database;
 
-  private final byte[] listPrefix = bytes("test list");
+  private static final String LIST_NAME = "test_list";
 
   @Before
   public void setUp() throws Exception {
@@ -157,7 +156,7 @@ public class ListIndexProxyIntegrationTest {
                                BiConsumer<View, ListIndexProxy> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        listPrefix,
+        LIST_NAME,
         ListIndexProxy::new,
         listTest
     );
