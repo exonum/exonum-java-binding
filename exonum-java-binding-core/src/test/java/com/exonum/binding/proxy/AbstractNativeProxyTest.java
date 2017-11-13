@@ -107,8 +107,8 @@ public class AbstractNativeProxyTest {
 
     int timesDisposed;
 
-    NativeProxyFake(long nativeHandle, boolean owningHandle) {
-      super(nativeHandle, owningHandle);
+    NativeProxyFake(long nativeHandle, boolean dispose) {
+      super(nativeHandle, dispose);
       timesDisposed = 0;
     }
 

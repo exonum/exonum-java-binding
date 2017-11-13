@@ -26,11 +26,11 @@ public abstract class View extends AbstractNativeProxy {
   /**
    * Create a new view proxy.
    *
-   * @param nativeHandle a native handle: an implementation-specific reference to a native object.
-   * @param owningHandle true if this proxy is responsible to release any native resources;
+   * @param nativeHandle a native handle: an implementation-specific reference to a native object
+   * @param dispose true if this proxy is responsible to release any resources
    */
-  View(long nativeHandle, boolean owningHandle) {
-    super(nativeHandle, owningHandle);
+  View(long nativeHandle, boolean dispose) {
+    super(nativeHandle, dispose);
   }
 
   /**
