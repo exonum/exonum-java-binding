@@ -2,6 +2,15 @@ language: java
 dist: trusty
 jdk: openjdk8
 sudo: required
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:giskou/librocksdb'
+    packages:
+    - librocksdb
+    - libsnappy-dev
+
 env:
   global:
     - RUST_VERSION=stable
@@ -9,6 +18,9 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2017-08-31
     - RUST_CLIPPY_VERSION=0.0.155
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
+    - ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
+    - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
+
 cache:
   directories:
     - "$HOME/.cargo"
