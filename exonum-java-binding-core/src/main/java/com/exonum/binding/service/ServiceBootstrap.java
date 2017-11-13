@@ -3,15 +3,15 @@ package com.exonum.binding.service;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.transport.Server;
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.Singleton;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 
 /**
- * This class is intended to be used by native code to bootstrap a Java service.
+ * A Java service bootstrap loader.
  */
 class ServiceBootstrap {
 
@@ -23,7 +23,8 @@ class ServiceBootstrap {
    * @return a new service
    */
   static UserServiceAdapter startService(String serviceModuleName, int serverPort) {
-    Injector injector = Guice.createInjector(new MyModule(), createUserModule(serviceModuleName));
+    Injector injector = Guice.createInjector(new FrameworkModule(),
+        createUserModule(serviceModuleName));
 
     Server server = injector.getInstance(Server.class);
     Runtime.getRuntime().addShutdownHook(
@@ -47,7 +48,8 @@ class ServiceBootstrap {
   private static Module createUserModule(String moduleName) {
     try {
       Class<?> moduleClass = Class.forName(moduleName);
-      Object moduleObject = moduleClass.newInstance();
+      Constructor constructor = moduleClass.getDeclaredConstructor();
+      Object moduleObject = constructor.newInstance();
       checkArgument(moduleObject instanceof Module, "Class is not a sub-class of %s",
           Module.class.getCanonicalName());
       return (Module) moduleObject;
@@ -55,22 +57,10 @@ class ServiceBootstrap {
       throw new IllegalArgumentException("Module class cannot be found", e);
     } catch (IllegalAccessException e) {
       throw new IllegalArgumentException("Cannot access the no-arg module constructor", e);
-    } catch (InstantiationException e) {
+    } catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("No no-arg constructor", e);
+    } catch (InstantiationException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
-  }
-}
-
-/**
- * A framework module which configures the system-wide bindings.
- */
-class MyModule extends AbstractModule {
-
-  @Override
-  protected void configure() {
-    bind(Server.class).in(Singleton.class);
-    //  fixme: if that's a proxy of a NodeProxy :-)
-//    bind(Node.class);
-    bind(UserServiceAdapter.class);
   }
 }
