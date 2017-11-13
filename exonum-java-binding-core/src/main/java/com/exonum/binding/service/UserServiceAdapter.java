@@ -8,6 +8,7 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -27,6 +28,7 @@ class UserServiceAdapter {
   @Nullable
   private Node node;
 
+  @Inject
   UserServiceAdapter(Service service, Server server) {
     this.service = checkNotNull(service, "service");
     this.server = checkNotNull(server, "server");
@@ -53,7 +55,7 @@ class UserServiceAdapter {
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  Transaction convertTransaction(byte[] transactionMessage) {
+  UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
     BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
     assert message.getServiceId() == getId() :
         "Message id is distinct from the service id";
@@ -63,7 +65,7 @@ class UserServiceAdapter {
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
         message.getMessageType());  // todo: consider moving this check to the native code?
-    return transaction;
+    return new UserTransactionAdapter(transaction);
   }
 
   /**
