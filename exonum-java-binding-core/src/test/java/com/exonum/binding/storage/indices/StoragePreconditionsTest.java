@@ -15,22 +15,22 @@ public class StoragePreconditionsTest {
   public ExpectedException expected = ExpectedException.none();
 
   @Test
-  public void checkStoragePrefixAcceptsNonEmpty() throws Exception {
-    byte[] prefix = bytes('p');
+  public void checkIndexNameAcceptsNonEmpty() throws Exception {
+    String name = "table1";
 
-    assertThat(prefix, sameInstance(StoragePreconditions.checkIndexPrefix(prefix)));
+    assertThat(name, sameInstance(StoragePreconditions.checkIndexName(name)));
   }
 
   @Test(expected = NullPointerException.class)
-  public void checkStoragePrefixDoesNotAcceptNull() throws Exception {
-    StoragePreconditions.checkIndexPrefix(null);
+  public void checkIndexNameDoesNotAcceptNull() throws Exception {
+    StoragePreconditions.checkIndexName(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void checkStoragePrefixDoesNotAcceptEmpty() throws Exception {
-    byte[] prefix = new byte[]{};
+  public void checkIndexNameDoesNotAcceptEmpty() throws Exception {
+    String name = "";
 
-    StoragePreconditions.checkIndexPrefix(prefix);
+    StoragePreconditions.checkIndexName(name);
   }
 
   @Test
