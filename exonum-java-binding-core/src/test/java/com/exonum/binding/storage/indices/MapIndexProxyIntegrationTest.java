@@ -37,7 +37,7 @@ public class MapIndexProxyIntegrationTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private static final byte[] mapPrefix = bytes("test map");
+  private static final String MAP_NAME = "test_map";
 
   private Database database;
 
@@ -60,7 +60,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
-    MapIndexProxy map = new MapIndexProxy(mapPrefix, view);
+    MapIndexProxy map = new MapIndexProxy(MAP_NAME, view);
 
     // Destroy a view before the map.
     view.close();
@@ -281,7 +281,7 @@ public class MapIndexProxyIntegrationTest {
 
       try (StorageIterator<byte[]> iterator = map.keys()) {
         iterator.next();
-        try (MapIndexProxy otherMap = new MapIndexProxy(bytes("other map"), view)) {
+        try (MapIndexProxy otherMap = new MapIndexProxy("other_map", view)) {
           otherMap.put(bytes("new key"), bytes("new value"));
         }
 
@@ -417,7 +417,7 @@ public class MapIndexProxyIntegrationTest {
                                       BiConsumer<View, MapIndexProxy> mapTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
-        mapPrefix,
+        MAP_NAME,
         MapIndexProxy::new,
         mapTest
     );
