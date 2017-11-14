@@ -3,7 +3,6 @@ package com.exonum.binding.storage.database;
 import static com.exonum.binding.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -50,7 +49,7 @@ public class MemoryDbIntegrationTest {
   @Test
   public void merge_singleList() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
-      byte[] listName = bytes("list");
+      String listName = "list";
 
       try (Fork fork = db.createFork();
            ListIndex list = new ListIndexProxy(listName, fork)) {
@@ -71,8 +70,8 @@ public class MemoryDbIntegrationTest {
   @Test
   public void merge_twoIndices() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
-      byte[] listName = bytes("list");
-      byte[] mapName = bytes("map");
+      String listName = "list";
+      String mapName = "map";
 
       try (Fork fork = db.createFork();
            ListIndex list = new ListIndexProxy(listName, fork);
@@ -98,7 +97,7 @@ public class MemoryDbIntegrationTest {
   @Test
   public void merge_multipleForks() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
-      byte[] listName = bytes("list");
+      String listName = "list";
 
       List<byte[]> values = TestStorageItems.values.subList(0, 3);
 
