@@ -5,7 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.util.List;
 
-final class TestStorageItems {
+public final class TestStorageItems {
   // Auto-generated.
   public static final byte[] K1 = bytes("k1");
   public static final byte[] K2 = bytes("k2");

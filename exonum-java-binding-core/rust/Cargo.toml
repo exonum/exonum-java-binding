@@ -13,12 +13,7 @@ resource-manager = ["lazy_static"]
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,
 # so that users are directed to the correct build instructions!
-# TODO: Use exonum 0.3
-# exonum = "0.2"
-log = "0.3"
+exonum = "0.3"
+log = "0.3.8"
 jni = "0.6.1"
-lazy_static = { version = "0.2", optional = true }
-
-[dependencies.exonum]
-git = "https://github.com/exonum/exonum"
-rev = "9b27bb7e13b66c1689ee7130480f352b97de65d5"
+lazy_static = { version = "0.2.9", optional = true }

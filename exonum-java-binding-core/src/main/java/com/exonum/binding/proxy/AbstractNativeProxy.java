@@ -11,7 +11,7 @@ import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
  * an invalid proxy (e.g., if a native method fails to allocate a native object).
  *
  * <p>You must close a native proxy when it is no longer needed
- * to release any native resources (e.g., destroy a native object).
+ * to release any resources it holds (e.g., destroy a native object).
  * You may use a <a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>
  * statement to do that in orderly fashion.
  * When a proxy is closed, it becomes invalid.
@@ -24,9 +24,10 @@ public abstract class AbstractNativeProxy implements NativeProxy {
   static final long INVALID_NATIVE_HANDLE = 0L;
 
   /**
-   * Whether this proxy owns the corresponding native object and is responsible to clean it up.
+   * Whether this proxy shall dispose any resources when closed
+   * (e.g., if it owns the corresponding native object and is responsible to clean it up).
    */
-  private final boolean owningHandle;
+  private final boolean dispose;
 
   private long nativeHandle;
 
@@ -34,12 +35,12 @@ public abstract class AbstractNativeProxy implements NativeProxy {
    * Creates a native proxy.
    *
    * @param nativeHandle an implementation-specific reference to a native object
-   * @param owningHandle true if this proxy is responsible to release any native resources;
-   *                     false — otherwise
+   * @param dispose true if this proxy is responsible to release any resources
+   *                by calling {@link #disposeInternal}; false — otherwise
    */
-  protected AbstractNativeProxy(long nativeHandle, boolean owningHandle) {
+  protected AbstractNativeProxy(long nativeHandle, boolean dispose) {
     this.nativeHandle = nativeHandle;
-    this.owningHandle = owningHandle;
+    this.dispose = dispose;
   }
 
   /**
@@ -70,7 +71,7 @@ public abstract class AbstractNativeProxy implements NativeProxy {
   public final void close() {
     if (isValid()) {
       try {
-        if (owningHandle) {
+        if (dispose) {
           disposeInternal();
         }
       } finally {
@@ -85,9 +86,10 @@ public abstract class AbstractNativeProxy implements NativeProxy {
   }
 
   /**
-   * Destroys the corresponding native object.
+   * Releases any resources owned by this proxy (e.g., the corresponding native object).
    *
-   * <p>This method is only called once from {@link #close()} and shall not be called directly.
+   * <p>This method is only called once from {@link #close()} for a <strong>valid</strong>
+   * proxy and shall not be called directly.
    */
   protected abstract void disposeInternal();
 

@@ -17,11 +17,27 @@ package com.exonum.binding.storage.database;
  */
 public class Snapshot extends View {
 
+  /**
+   * Creates a new owning Snapshot proxy.
+   *
+   * @param nativeHandle a handle of the native Snapshot object
+   */
   // todo: consider making package-private so that clients aren't able to reference an invalid
   // memory region (or use the knowledge of a registry of native allocations
   // to safely discard such attempts).
   public Snapshot(long nativeHandle) {
-    super(nativeHandle, true);
+    this(nativeHandle, true);
+  }
+
+  /**
+   * Creates a new Snapshot proxy.
+   *
+   * @param nativeHandle a handle of the native Snapshot object
+   * @param owningHandle whether a proxy owns the corresponding native object and is responsible
+   *                     to clean it up
+   */
+  public Snapshot(long nativeHandle, boolean owningHandle) {
+    super(nativeHandle, owningHandle);
   }
 
   @Override

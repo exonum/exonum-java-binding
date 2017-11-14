@@ -1,4 +1,4 @@
-package com.exonum.binding;
+package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -14,8 +14,7 @@ import java.nio.ByteBuffer;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-// todo: a better name?
-public class Node extends AbstractNativeProxy {
+public class NodeProxy extends AbstractNativeProxy implements Node {
 
   /**
    * Creates a proxy of a node. Native code owns the node,
@@ -23,24 +22,17 @@ public class Node extends AbstractNativeProxy {
    *
    * @param nativeHandle an implementation-specific reference to a native node
    */
-  protected Node(long nativeHandle) {
+  protected NodeProxy(long nativeHandle) {
     // fixme: remove this comment when https://jira.bf.local/browse/EEN-27 is resolved
     super(nativeHandle, false);
   }
 
   /**
-   * Submits a transaction into Exonum network. This node does <em>not</em> execute
-   * the transaction immediately, but verifies it and, if it is valid,
-   * broadcasts it to all the nodes in the network. Then each node adds the transaction to a
-   * <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
-   * The transaction is executed later asynchronously.
+   * {@inheritDoc}
    *
-   * @param transaction a transaction to send
-   * @throws InvalidTransactionException if the transaction is not valid
-   * @throws InternalServerError if this node failed to process the transaction
-   * @throws NullPointerException if the transaction is null
    * @throws IllegalStateException if the node proxy is closed
    */
+  @Override
   public void submitTransaction(Transaction transaction)
       throws InvalidTransactionException, InternalServerError {
     BinaryMessage message = transaction.getMessage();
@@ -71,15 +63,11 @@ public class Node extends AbstractNativeProxy {
       throws InvalidTransactionException, InternalServerError;
 
   /**
-   * Creates a new snapshot of the current database state.
+   * {@inheritDoc}
    *
-   * <p>The caller is responsible to <strong>close</strong> the snapshot
-   * to destroy the corresponding native objects.
-   *
-   * @return a snapshot of the database state
    * @throws IllegalStateException if the node proxy is closed
-   * @see Snapshot
    */
+  @Override
   public Snapshot createSnapshot() {
     return new Snapshot(nativeCreateSnapshot(getNativeHandle()));
   }
@@ -87,10 +75,11 @@ public class Node extends AbstractNativeProxy {
   private native long nativeCreateSnapshot(long nativeHandle);
 
   /**
-   * Returns the public key of this node.
+   * {@inheritDoc}
    *
    * @throws IllegalStateException if the node proxy is closed
    */
+  @Override
   public byte[] getPublicKey() {
     return nativeGetPublicKey(getNativeHandle());
   }

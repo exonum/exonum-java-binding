@@ -141,6 +141,7 @@ public final class Server {
   /**
    * A runnable usage sample/playground.
    */
+  @SuppressWarnings("FutureReturnValueIgnored")
   public static void main(String[] args) {
     Server server = new Server();
     // Create a router of a service

@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexPrefix;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 
 import com.exonum.binding.storage.database.Fork;
@@ -31,15 +31,16 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
   /**
    * Creates a new key set proxy.
    *
-   * @param prefix a set prefix — a unique identifier of this set in the underlying storage
+   * @param name a unique alphanumeric identifier of this set in the underlying storage:
+   *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
    * @throws IllegalStateException if the view is not valid
-   * @throws IllegalArgumentException if the prefix has zero size
+   * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public KeySetIndexProxy(byte[] prefix, View view) {
-    super(nativeCreate(checkIndexPrefix(prefix), view.getViewNativeHandle()), view);
+  public KeySetIndexProxy(String name, View view) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
   }
 
   /**
@@ -115,7 +116,7 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
     nativeFree(getNativeHandle());
   }
 
-  private static native long nativeCreate(byte[] setPrefix, long viewNativeHandle);
+  private static native long nativeCreate(String setName, long viewNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

@@ -1,6 +1,7 @@
 use jni::JNIEnv;
 use jni::sys::jbyteArray;
 use jni::errors::Result;
+use jni::objects::JString;
 
 use exonum::crypto::Hash;
 
@@ -16,4 +17,8 @@ pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> Result<Hash> {
 // Converts `Hash` to Java byte array.
 pub fn convert_hash(env: &JNIEnv, hash: &Hash) -> Result<jbyteArray> {
     env.byte_array_from_slice(hash.as_ref())
+}
+
+pub fn convert_to_string(env: &JNIEnv, val: JString) -> Result<String> {
+    Ok(env.get_string(val)?.into())
 }
