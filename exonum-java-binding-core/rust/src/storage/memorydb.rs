@@ -54,3 +54,25 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
     });
     utils::unwrap_exc_or_default(&env, res)
 }
+
+/// Merges given fork into the database.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeMerge(
+    env: JNIEnv,
+    _: JObject,
+    db_handle: Handle,
+    fork_handle: Handle,
+) {
+    let res = panic::catch_unwind(|| {
+        let db = utils::cast_handle::<MemoryDB>(db_handle);
+        let fork = match *utils::cast_handle(fork_handle) {
+            View::Snapshot(_) => {
+                panic!("Attempt to merge snapshot instead of fork.");
+            }
+            View::Fork(fork) => fork,
+        };
+        db.merge(fork.into_patch());
+        Ok(())
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}

@@ -45,7 +45,6 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
   public void merge_singleList() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
@@ -66,7 +65,6 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
   public void merge_twoIndices() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
@@ -93,7 +91,6 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
   public void merge_multipleForks() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
