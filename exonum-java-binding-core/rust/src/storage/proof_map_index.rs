@@ -60,7 +60,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> jbyteArray {
+) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.root_hash(),
