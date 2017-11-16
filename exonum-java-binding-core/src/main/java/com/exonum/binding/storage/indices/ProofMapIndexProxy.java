@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
@@ -115,7 +114,7 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -131,7 +130,7 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
         this::nativeValuesIterFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -147,7 +146,7 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -167,7 +166,6 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
 
   @Override
   protected void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 

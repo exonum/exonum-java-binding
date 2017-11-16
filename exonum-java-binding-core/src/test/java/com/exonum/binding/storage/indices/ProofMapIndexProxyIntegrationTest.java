@@ -58,9 +58,9 @@ public class ProofMapIndexProxyIntegrationTest {
 
   private static final String mapName = "test_proof_map";
 
-  private static final byte[] PK1 = createProofKey("PK1");
-  private static final byte[] PK2 = createProofKey("PK2");
-  private static final byte[] PK3 = createProofKey("PK3");
+  static final byte[] PK1 = createProofKey("PK1");
+  static final byte[] PK2 = createProofKey("PK2");
+  static final byte[] PK3 = createProofKey("PK3");
 
   private static final List<byte[]> proofKeys = ImmutableList.of(PK1, PK2, PK3);
 
