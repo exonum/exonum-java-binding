@@ -21,12 +21,12 @@ public class MemoryDb extends Database {
 
   @Override
   public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(getNativeHandle()));
+    return new Snapshot(nativeCreateSnapshot(getNativeHandle()), this);
   }
 
   @Override
   public Fork createFork() {
-    return new Fork(nativeCreateFork(getNativeHandle()));
+    return new Fork(nativeCreateFork(getNativeHandle()), this);
   }
 
   /**
