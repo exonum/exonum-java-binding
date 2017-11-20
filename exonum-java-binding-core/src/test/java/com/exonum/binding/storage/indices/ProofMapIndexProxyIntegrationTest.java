@@ -327,6 +327,7 @@ public class ProofMapIndexProxyIntegrationTest {
   }
 
   @Test
+  @Ignore
   // Takes quite a lot of time (validating 257 proofs),
   // but it's an integration test, isn't it? :-)
   //
