@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 
@@ -98,7 +97,7 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -117,7 +116,6 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
 
   @Override
   protected void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 

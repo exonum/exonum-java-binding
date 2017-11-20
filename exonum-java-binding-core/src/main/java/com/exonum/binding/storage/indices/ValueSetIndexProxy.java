@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
@@ -113,7 +112,7 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
         nativeCreateHashIterator(getNativeHandle()),
         this::nativeHashIteratorNext,
         this::nativeHashIteratorFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -132,7 +131,7 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -202,7 +201,6 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
 
   @Override
   protected void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 

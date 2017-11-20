@@ -1,6 +1,14 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.singleton;
+
+import com.google.common.annotations.VisibleForTesting;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A proxy of a native object.
@@ -29,6 +37,12 @@ public abstract class AbstractNativeProxy implements NativeProxy {
    */
   private final boolean dispose;
 
+  /**
+   * Proxies that this one references, including transitive references.
+   * Each of these must be valid at each native call.
+   */
+  private final Set<AbstractNativeProxy> referenced;
+
   private long nativeHandle;
 
   /**
@@ -39,21 +53,62 @@ public abstract class AbstractNativeProxy implements NativeProxy {
    *                by calling {@link #disposeInternal}; false — otherwise
    */
   protected AbstractNativeProxy(long nativeHandle, boolean dispose) {
-    this.nativeHandle = nativeHandle;
-    this.dispose = dispose;
+    this(nativeHandle, dispose, Collections.emptySet());
+  }
+
+
+  /**
+   * Creates a native proxy.
+   *
+   * @param nativeHandle an implementation-specific reference to a native object
+   * @param dispose true if this proxy is responsible to release any resources
+   *                by calling {@link #disposeInternal}; false — otherwise
+   * @param referenced a referenced native object, that must be alive
+   *                   during the operation of this native proxy
+   */
+  protected AbstractNativeProxy(long nativeHandle, boolean dispose,
+                                AbstractNativeProxy referenced) {
+    this(nativeHandle, dispose, singleton(checkNotNull(referenced)));
   }
 
   /**
-   * Returns a native implementation-specific handle.
+   * Creates a native proxy.
+   *
+   * @param nativeHandle an implementation-specific reference to a native object
+   * @param dispose true if this proxy is responsible to release any resources
+   *                by calling {@link #disposeInternal}; false — otherwise
+   * @param referenced a collection of referenced native objects, that must be alive
+   *                   during the operation of this native proxy
+   */
+  protected AbstractNativeProxy(long nativeHandle, boolean dispose,
+                                Collection<AbstractNativeProxy> referenced) {
+    this.nativeHandle = nativeHandle;
+    this.dispose = dispose;
+    this.referenced = getTransitivelyReferenced(referenced);
+  }
+
+  private Set<AbstractNativeProxy> getTransitivelyReferenced(
+      Collection<AbstractNativeProxy> referenced) {
+    // You don't have to perform a recursive flat map because each of the proxies
+    // this proxy references has all its transitive dependencies.
+    return referenced.stream()
+        .flatMap((proxy) -> Stream.concat(Stream.of(proxy), proxy.referenced.stream()))
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns a native implementation-specific handle if it may be safely used
+   * to access the native object.
    *
    * <p>The returned value shall only be passed as an argument to native methods.
    *
    * <p>Warning: do not cache the return value, as you won't be able to catch use-after-free.
    *
-   * @throws IllegalStateException if this native proxy is invalid (closed or nullptr).
+   * @throws IllegalStateException if this native proxy or any directly or transitively referenced
+   *     proxies are invalid (closed or nullptr).
    */
   protected final long getNativeHandle() {
-    checkValid(this);
+    checkAllRefsValid();
     return getNativeHandleUnsafe();
   }
 
@@ -69,8 +124,9 @@ public abstract class AbstractNativeProxy implements NativeProxy {
 
   @Override
   public final void close() {
-    if (isValid()) {
+    if (isValidHandle()) {
       try {
+        checkAllRefsValid();
         if (dispose) {
           disposeInternal();
         }
@@ -80,9 +136,39 @@ public abstract class AbstractNativeProxy implements NativeProxy {
     }
   }
 
-  /** Returns true if the proxy is valid and may be used to access the native object. */
-  final boolean isValid() {
+  /**
+   * Returns true if the proxy has a valid native handle.
+   * */
+  @VisibleForTesting
+  final boolean isValidHandle() {
     return nativeHandle != INVALID_NATIVE_HANDLE;
+  }
+
+  private void checkAllRefsValid() {
+    if (!allRefsValid()) {
+      throw new IllegalStateException(getInvalidProxyErrMessage());
+    }
+  }
+
+  private boolean allRefsValid() {
+    return isValidHandle() && referenced.stream()
+        .allMatch(AbstractNativeProxy::isValidHandle);
+  }
+
+  private String getInvalidProxyErrMessage() {
+    if (!isValidHandle()) {
+      return String.format("This proxy (%s) is not valid", this);
+    }
+    Set<AbstractNativeProxy> invalidReferenced = getInvalidReferences();
+    return String.format("This proxy (%s) references some invalid proxies: %s",
+        this, invalidReferenced);
+  }
+
+  @VisibleForTesting
+  Set<AbstractNativeProxy> getInvalidReferences() {
+    return referenced.stream()
+        .filter(p -> !p.isValidHandle())
+        .collect(Collectors.toSet());
   }
 
   /**

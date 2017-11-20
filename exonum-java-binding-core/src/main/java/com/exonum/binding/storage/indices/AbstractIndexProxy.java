@@ -15,8 +15,6 @@ import com.exonum.binding.storage.database.ViewModificationCounter;
  */
 abstract class AbstractIndexProxy extends AbstractNativeProxy {
 
-  // TODO: consider moving 'dbView' to a super class as 'parents'
-  //       (= objects that must not be deleted before this)
   final View dbView;
 
   /**
@@ -34,7 +32,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy {
    * @throws NullPointerException if view is null
    */
   AbstractIndexProxy(long nativeHandle, View view) {
-    super(nativeHandle, true);
+    super(nativeHandle, true, view);
     this.dbView = checkNotNull(view);
     this.modCounter = ViewModificationCounter.getInstance();
   }
