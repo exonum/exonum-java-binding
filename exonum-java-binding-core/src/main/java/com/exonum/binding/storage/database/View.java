@@ -1,7 +1,11 @@
 package com.exonum.binding.storage.database;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+
 import com.exonum.binding.annotations.ImproveDocs;
 import com.exonum.binding.proxy.AbstractNativeProxy;
+import javax.annotation.Nullable;
 
 /**
  * Represents a view of a database.
@@ -31,6 +35,10 @@ public abstract class View extends AbstractNativeProxy {
    */
   View(long nativeHandle, boolean dispose) {
     super(nativeHandle, dispose);
+  }
+
+  View(long nativeHandle, boolean dispose, @Nullable MemoryDb db) {
+    super(nativeHandle, dispose, (db == null) ? emptySet() : singleton(db));
   }
 
   /**
