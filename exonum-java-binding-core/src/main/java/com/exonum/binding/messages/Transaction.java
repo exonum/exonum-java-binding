@@ -1,6 +1,7 @@
 package com.exonum.binding.messages;
 
 import com.exonum.binding.storage.database.Fork;
+import com.google.common.hash.HashCode;
 
 /**
  * An Exonum transaction.
@@ -44,7 +45,7 @@ public interface Transaction {
   /**
    * Returns a hash of this transaction — a SHA-256 hash of the transaction message.
    */
-  default byte[] hash() {
+  default HashCode hash() {
     return getMessage().hash();
   }
 

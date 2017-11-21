@@ -6,6 +6,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkStora
 
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
+import com.google.common.hash.HashCode;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -100,8 +101,8 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
    *
    * @throws IllegalStateException  if this map is not valid
    */
-  public byte[] getRootHash() {
-    return nativeGetRootHash(getNativeHandle());
+  public HashCode getRootHash() {
+    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
   }
 
   private native byte[] nativeGetRootHash(long nativeHandle);

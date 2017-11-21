@@ -18,8 +18,12 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
+import com.google.common.hash.HashCode;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -116,12 +120,31 @@ public class UserServiceAdapterTest {
   public void getStateHashes_SingletonList() throws Exception {
     byte[] h1 = bytes("hash1");
     when(service.getStateHashes(any(Snapshot.class)))
-        .thenReturn(singletonList(h1));
+        .thenReturn(singletonList(HashCode.fromBytes(h1)));
 
     byte[][] hashes = serviceAdapter.getStateHashes(0x0A);
 
     assertThat(hashes.length, equalTo(1));
     assertThat(hashes[0], equalTo(h1));
+  }
+
+  @Test
+  public void getStateHashes_MultipleHashesList() throws Exception {
+    byte[][] hashes = {
+        bytes("hash1"),
+        bytes("hash2"),
+        bytes("hash3")
+    };
+    List<HashCode> hashesFromService = Arrays.stream(hashes)
+        .map(HashCode::fromBytes)
+        .collect(Collectors.toList());
+
+    when(service.getStateHashes(any(Snapshot.class)))
+        .thenReturn(hashesFromService);
+
+    byte[][] actualHashes = serviceAdapter.getStateHashes(0x0A);
+
+    assertThat(actualHashes, equalTo(hashes));
   }
 
   @Test

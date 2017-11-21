@@ -7,6 +7,7 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.google.common.hash.HashCode;
 import java.util.List;
 
 /**
@@ -49,7 +50,7 @@ public abstract class AbstractService implements Service {
   }
 
   @Override
-  public List<byte[]> getStateHashes(Snapshot snapshot) {
+  public List<HashCode> getStateHashes(Snapshot snapshot) {
     return createDataSchema(snapshot).getStateHashes();
   }
 

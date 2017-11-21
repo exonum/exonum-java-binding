@@ -8,14 +8,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.hash.Hashes;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
+import com.google.common.hash.HashCode;
 import com.google.common.primitives.UnsignedBytes;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -113,7 +113,7 @@ public class ValueSetIndexProxyIntegrationTest {
   @Test
   public void doesNotContainElementsByHashWhenEmpty() throws Exception {
     runTestWithView(database::createSnapshot, (set) -> {
-      byte[] valueHash = getHashOf(V2);
+      HashCode valueHash = getHashOf(V2);
       assertFalse(set.containsByHash(valueHash));
     });
   }
@@ -123,7 +123,7 @@ public class ValueSetIndexProxyIntegrationTest {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
-      byte[] valueHash = getHashOf(V1);
+      HashCode valueHash = getHashOf(V1);
       assertTrue(set.containsByHash(valueHash));
     });
   }
@@ -133,7 +133,7 @@ public class ValueSetIndexProxyIntegrationTest {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
-      byte[] otherValueHash = getHashOf(V2);
+      HashCode otherValueHash = getHashOf(V2);
       assertFalse(set.containsByHash(otherValueHash));
     });
   }
@@ -145,19 +145,19 @@ public class ValueSetIndexProxyIntegrationTest {
 
       elements.forEach(set::add);
 
-      try (StorageIterator<byte[]> iter = set.hashes()) {
-        List<byte[]> iterHashes = ImmutableList.copyOf(iter);
+      try (StorageIterator<HashCode> iter = set.hashes()) {
+        List<HashCode> iterHashes = ImmutableList.copyOf(iter);
 
         // Check that there are as many hashes as elements
         assertThat(elements.size(), equalTo(iterHashes.size()));
 
         // Check that all hashes correspond to elements in the set.
-        for (byte[] hash: iterHashes) {
+        for (HashCode hash: iterHashes) {
           assertTrue(set.containsByHash(hash));
         }
 
         // Check that hashes appear in lexicographical order
-        List<byte[]> orderedHashes = getOrderedHashes(elements);
+        List<HashCode> orderedHashes = getOrderedHashes(elements);
         for (int i = 0; i < elements.size(); i++) {
           assertThat(iterHashes.get(i), equalTo(orderedHashes.get(i)));
         }
@@ -186,20 +186,21 @@ public class ValueSetIndexProxyIntegrationTest {
           assertThat(e.getHash(), equalTo(getHashOf(e.getValue())));
         }
 
-        List<byte[]> orderedHashes = getOrderedHashes(elements);
-        for (int i = 0; i < elements.size(); i++) {
-          byte[] hashFromIter = entriesFromIter.get(i).getHash();
-          byte[] expectedHash = orderedHashes.get(i);
-          assertThat(hashFromIter, equalTo(expectedHash));
-        }
+        List<HashCode> actualHashes = entriesFromIter.stream()
+            .map((e) -> e.getHash())
+            .collect(Collectors.toList());
+
+        List<HashCode> orderedHashes = getOrderedHashes(elements);
+        assertThat(actualHashes, equalTo(orderedHashes));
       }
     });
   }
 
-  private static List<byte[]> getOrderedHashes(List<byte[]> elements) {
+  private static List<HashCode> getOrderedHashes(List<byte[]> elements) {
     return elements.stream()
             .map(ValueSetIndexProxyIntegrationTest::getHashOf)
-            .sorted(UnsignedBytes.lexicographicalComparator())
+            .sorted((h1, h2) -> UnsignedBytes.lexicographicalComparator()
+                .compare(h1.asBytes(), h2.asBytes()))
             .collect(Collectors.toList());
   }
 
@@ -239,7 +240,7 @@ public class ValueSetIndexProxyIntegrationTest {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
-      byte[] valueHash = getHashOf(V1);
+      HashCode valueHash = getHashOf(V1);
 
       set.removeByHash(valueHash);
 
@@ -253,8 +254,8 @@ public class ValueSetIndexProxyIntegrationTest {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
-      byte[] valueHash = getHashOf(V9);
-      set.remove(valueHash);
+      HashCode valueHash = getHashOf(V9);
+      set.removeByHash(valueHash);
 
       assertFalse(set.contains(V9));
       assertFalse(set.containsByHash(valueHash));
@@ -312,12 +313,8 @@ public class ValueSetIndexProxyIntegrationTest {
     );
   }
 
-  private static byte[] getHashOf(byte[] value) {
-    try {
-      MessageDigest sha256 = MessageDigest.getInstance(EXONUM_DEFAULT_HASHING_ALGORITHM);
-      return sha256.digest(value);
-    } catch (NoSuchAlgorithmException e) {
-      throw new AssertionError(e);
-    }
+  private static HashCode getHashOf(byte[] value) {
+    return Hashes.getDefaultHashFunction()
+        .hashBytes(value);
   }
 }

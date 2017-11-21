@@ -6,6 +6,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.google.common.hash.HashCode;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
 import java.util.List;
@@ -76,8 +77,7 @@ public interface Service {
    * @see ProofListIndexProxy#getRootHash()
    * @see ProofMapIndexProxy#getRootHash()
    */
-  // fixme: byte[] -> HashCode
-  default List<byte[]> getStateHashes(Snapshot snapshot) {
+  default List<HashCode> getStateHashes(Snapshot snapshot) {
     return Collections.emptyList();
   }
 
