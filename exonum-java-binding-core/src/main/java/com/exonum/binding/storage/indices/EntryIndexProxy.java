@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
@@ -17,16 +16,22 @@ import java.util.NoSuchElementException;
  * Such methods are specified to throw {@link UnsupportedOperationException} if
  * the entry is created with a {@link Snapshot} — a read-only database view.
  *
+ * <p>All method arguments are non-null by default.
+ *
+ * <p>This class is not thread-safe and and its instances shall not be shared between threads.
+ *
  * <p>As any native proxy, the entry <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed entry is prohibited
  * and will result in {@link IllegalStateException}.
+ *
+ * @see View
  */
 public class EntryIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new Entry.
    *
-   * @param name a unique alphanumeric identifier of the Entry in the underlying storage:
+   * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
@@ -93,7 +98,6 @@ public class EntryIndexProxy extends AbstractIndexProxy {
 
   @Override
   protected void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 

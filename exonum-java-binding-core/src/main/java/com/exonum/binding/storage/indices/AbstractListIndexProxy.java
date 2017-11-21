@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValues;
@@ -85,13 +84,12 @@ abstract class AbstractListIndexProxy extends AbstractIndexProxy implements List
         nativeCreateIter(getNativeHandle()),
         this::nativeIterNext,
         this::nativeIterFree,
-        dbView,
+        this,
         modCounter);
   }
 
   @Override
   protected final void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 

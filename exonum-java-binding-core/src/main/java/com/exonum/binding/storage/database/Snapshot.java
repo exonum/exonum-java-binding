@@ -1,5 +1,7 @@
 package com.exonum.binding.storage.database;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A snapshot is a read-only, immutable database view.
  *
@@ -38,6 +40,17 @@ public class Snapshot extends View {
    */
   public Snapshot(long nativeHandle, boolean owningHandle) {
     super(nativeHandle, owningHandle);
+  }
+
+  /**
+   * Creates a new owning Snapshot proxy.
+   *
+   * @param nativeHandle a handle of the native Snapshot object
+   * @param memoryDb a database that created this proxy
+   * @throws NullPointerException if database is null
+   */
+  Snapshot(long nativeHandle, MemoryDb memoryDb) {
+    super(nativeHandle, true, checkNotNull(memoryDb));
   }
 
   @Override

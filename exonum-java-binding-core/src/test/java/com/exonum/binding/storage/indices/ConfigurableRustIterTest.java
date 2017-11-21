@@ -7,13 +7,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.doThrow;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import com.exonum.binding.proxy.ProxyPreconditions;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -26,14 +22,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    ProxyPreconditions.class,
-})
 public class ConfigurableRustIterTest {
 
   @Rule
@@ -52,13 +41,11 @@ public class ConfigurableRustIterTest {
     modCounter = mock(ViewModificationCounter.class);
     when(modCounter.getModificationCount(any(View.class)))
         .thenReturn(INITIAL_MOD_COUNT);
-
-    mockStatic(ProxyPreconditions.class);
   }
 
   @Test
   public void nextGoesThroughAllElements() throws Exception {
-    Fork fork = createForkMock();
+    Fork fork = createFork();
     List<Integer> underlyingList = asList(1, 2, 3);
     createFromIterable(underlyingList, fork);
 
@@ -69,11 +56,11 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextIsNotAffectedByUnrelatedModifications() throws Exception {
-    Snapshot view = mock(Snapshot.class);
+    Snapshot view = createSnapshot();
     List<Integer> underlyingList = asList(1, 2);
     createFromIterable(underlyingList, view);
 
-    Fork unrelatedFork = createForkMock();
+    Fork unrelatedFork = createFork();
     notifyModified(unrelatedFork);
 
     List<Integer> iterElements = ImmutableList.copyOf(new RustIterAdapter<>(iter));
@@ -83,7 +70,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextFailsIfModifiedBeforeFirstNext() throws Exception {
-    Fork fork = createForkMock();
+    Fork fork = createFork();
     createFromIterable(emptyList(), fork);
 
     notifyModified(fork);
@@ -94,7 +81,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextFailsIfModifiedAfterFirstNext() throws Exception {
-    Fork fork = createForkMock();
+    Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
     iter.next();  // 1st must succeed
@@ -106,8 +93,30 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
+  public void nextFailsIfCollectionClosed() throws Exception {
+    Snapshot view = createSnapshot();
+    AbstractIndexProxy index = createIndex(view);
+
+    createFromIterable(asList(1, 2), index);
+
+    index.close();
+    expectedException.expect(IllegalStateException.class);
+    iter.next();
+  }
+
+  @Test
+  public void nextFailsIfViewClosed() throws Exception {
+    Snapshot view = createSnapshot();
+    createFromIterable(asList(1, 2), view);
+
+    view.close();
+    expectedException.expect(IllegalStateException.class);
+    iter.next();
+  }
+
+  @Test
   public void viewModificationResultsInTerminalState() throws Exception {
-    Fork fork = createForkMock();
+    Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
     try {
       notifyModified(fork);
@@ -123,7 +132,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void closeDoesNotFailIfModifiedAfterTheLastNext() throws Exception {
-    Fork fork = createForkMock();
+    Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
     while (iter.next().isPresent()) {
@@ -137,32 +146,44 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void closeFailsIfViewClosedBefore() throws Exception {
-    Fork fork = createForkMock();
+    Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
-    doThrow(new IllegalStateException()).when(ProxyPreconditions.class);
-    ProxyPreconditions.checkValid(eq(fork));
-
+    fork.close();
     expectedException.expect(IllegalStateException.class);
     iter.close();
   }
 
-  private static Fork createForkMock() {
-    Fork fork = mock(Fork.class);
+  private static Fork createFork() {
+    return new Fork(1L, false);
+  }
 
-    doNothing().when(ProxyPreconditions.class);
-    ProxyPreconditions.checkValid(eq(fork));
-
-    return fork;
+  private static Snapshot createSnapshot() {
+    return new Snapshot(2L, false);
   }
 
   private void createFromIterable(Iterable<Integer> it, View parentView) {
+    AbstractIndexProxy collection = createIndex(parentView);
+    createFromIterable(it, collection);
+  }
+
+  private void createFromIterable(Iterable<Integer> it, AbstractIndexProxy index) {
     Iterator<Integer> iterator = it.iterator();
     iter = new ConfigurableRustIter<>(DEFAULT_NATIVE_HANDLE,
         (h) -> iterator.hasNext() ? iterator.next() : null,
         (h) -> { /* no-op dispose */ },
-        parentView,
+        index,
         modCounter);
+  }
+
+  private static AbstractIndexProxy createIndex(View view) {
+    return new AbstractIndexProxy(0x01, view) {
+
+      @Override
+      protected void disposeInternal() {
+        // no-op
+      }
+    };
   }
 
   private void notifyModified(Fork fork) {
