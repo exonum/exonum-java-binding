@@ -13,12 +13,17 @@ type Result<T> = thread::Result<result::Result<T, JniError>>;
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
     match res {
         Ok(val) => {
-            if let Ok(val) = val {
-                val
-            } else {
-                // `JniError` represents a Java-exception, so we should ignore it because the
-                // exception will be rethrown automatically.
-                error_val
+            match val {
+                Ok(val) => val,
+                Err(jni_error) => {
+                    // Do nothing if there is a pending Java-exception that will be thrown
+                    // automatically by the JVM when the native method returns.
+                    if !env.exception_check().unwrap() {
+                        // Throw a Java exception manually in case of an internal error.
+                        throw(env, &jni_error.to_string())
+                    }
+                    error_val
+                }
             }
         }
         Err(ref e) => {
