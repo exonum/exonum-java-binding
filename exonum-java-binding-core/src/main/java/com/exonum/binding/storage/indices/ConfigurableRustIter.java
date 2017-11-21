@@ -1,7 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
-
 import com.exonum.binding.proxy.AbstractNativeProxy;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
@@ -19,30 +17,30 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
 
   private final Function<Long, E> nextFunction;
   private final Consumer<Long> disposeOperation;
-  private final View parentView;
+  private final View collectionView;
   private final ViewModificationCounter modificationCounter;
   private final Integer initialModCount;
 
   /**
    * Creates a new iterator over a collection (index).
    *
-   * @param nativeHandle nativeHandle of this iterator.
-   * @param nextFunction a function to call to get the next item.
-   * @param disposeOperation an operation to call to destroy the corresponding native iterator.
-   * @param parentView a view from which the collection has been created.
-   * @param modificationCounter a view modification counter.
+   * @param nativeHandle nativeHandle of this iterator
+   * @param nextFunction a function to call to get the next item
+   * @param disposeOperation an operation to call to destroy the corresponding native iterator
+   * @param collection a collection over which to iterate
+   * @param modificationCounter a view modification counter
    */
   ConfigurableRustIter(long nativeHandle,
                        Function<Long, E> nextFunction,
                        Consumer<Long> disposeOperation,
-                       View parentView,
+                       AbstractIndexProxy collection,
                        ViewModificationCounter modificationCounter) {
-    super(nativeHandle, true);
+    super(nativeHandle, true, collection);
     this.nextFunction = nextFunction;
     this.disposeOperation = disposeOperation;
-    this.parentView = parentView;
+    this.collectionView = collection.dbView;
     this.modificationCounter = modificationCounter;
-    this.initialModCount = modificationCounter.getModificationCount(parentView);
+    this.initialModCount = modificationCounter.getModificationCount(collectionView);
   }
 
   @Override
@@ -52,15 +50,14 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
   }
 
   private void checkNotModified() {
-    if (modificationCounter.isModifiedSince(parentView, initialModCount)) {
+    if (modificationCounter.isModifiedSince(collectionView, initialModCount)) {
       throw new ConcurrentModificationException("Fork was modified during iteration: "
-          + parentView);
+          + collectionView);
     }
   }
 
   @Override
   protected void disposeInternal() {
-    checkValid(parentView);
     disposeOperation.accept(getNativeHandle());
   }
 }

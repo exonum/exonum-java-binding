@@ -3,7 +3,6 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.test.TestParameters.parameters;
 import static java.util.Arrays.asList;
 import static org.junit.runners.Parameterized.Parameter;
-import static org.junit.runners.Parameterized.Parameters;
 
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -19,6 +18,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class PrefixNameParameterizedIntegrationTest {

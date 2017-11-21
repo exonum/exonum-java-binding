@@ -58,9 +58,9 @@ public class ProofMapIndexProxyIntegrationTest {
 
   private static final String mapName = "test_proof_map";
 
-  private static final byte[] PK1 = createProofKey("PK1");
-  private static final byte[] PK2 = createProofKey("PK2");
-  private static final byte[] PK3 = createProofKey("PK3");
+  static final byte[] PK1 = createProofKey("PK1");
+  static final byte[] PK2 = createProofKey("PK2");
+  static final byte[] PK3 = createProofKey("PK3");
 
   private static final List<byte[]> proofKeys = ImmutableList.of(PK1, PK2, PK3);
 
@@ -142,7 +142,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getRootHash_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
@@ -150,7 +149,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getRootHash_NonEmptyMap() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -163,7 +161,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot,
@@ -171,7 +168,6 @@ public class ProofMapIndexProxyIntegrationTest {
     );
   }
 
-  @Ignore
   @Test
   public void getProof_SingletonMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -183,7 +179,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_SingletonMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -193,7 +188,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_LastByte_Contains1() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -213,7 +207,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_LastByte_Contains2() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -233,7 +226,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_FirstByte_Contains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -261,7 +253,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_FirstAndLastByte_Contains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -288,7 +279,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_MultiEntryMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -311,7 +301,6 @@ public class ProofMapIndexProxyIntegrationTest {
     proof.accept(printer);
   }
 
-  @Ignore
   @Test
   public void getProof_MultiEntryMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -337,8 +326,8 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
+  @Ignore
   // Takes quite a lot of time (validating 257 proofs),
   // but it's an integration test, isn't it? :-)
   //
