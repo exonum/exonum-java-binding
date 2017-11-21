@@ -6,6 +6,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkPosit
 
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
+import com.google.common.hash.HashCode;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -81,8 +82,8 @@ public class ProofListIndexProxy extends AbstractListIndexProxy implements ListI
    *
    * @throws IllegalStateException if this list is not valid
    */
-  public byte[] getRootHash() {
-    return nativeGetRootHash(getNativeHandle());
+  public HashCode getRootHash() {
+    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
   }
 
   private native byte[] nativeGetRootHash(long nativeHandle);

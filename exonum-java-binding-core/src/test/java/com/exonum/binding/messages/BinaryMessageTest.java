@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.hash.Hashes;
+import com.google.common.hash.HashCode;
 import org.junit.Test;
 
 public class BinaryMessageTest {
@@ -20,8 +21,8 @@ public class BinaryMessageTest {
         .setSignature(allocateBuffer(64))
         .buildRaw();
 
-    byte[] hash = message.hash();
+    HashCode hash = message.hash();
 
-    assertThat(hash.length, equalTo(Hashes.HASH_SIZE_BYTES));
+    assertThat(hash.bits(), equalTo(Hashes.HASH_SIZE_BITS));
   }
 }

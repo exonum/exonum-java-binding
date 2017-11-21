@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.hash.Hashes.HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
@@ -31,6 +32,7 @@ import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.common.hash.HashCode;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +66,7 @@ public class ProofMapIndexProxyIntegrationTest {
 
   private static final List<byte[]> proofKeys = ImmutableList.of(PK1, PK2, PK3);
 
-  private static final byte[] EMPTY_MAP_ROOT_HASH = new byte[Hashes.HASH_SIZE_BYTES];
+  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromBytes(new byte[HASH_SIZE_BYTES]);
 
   private Database database;
 
@@ -154,9 +156,9 @@ public class ProofMapIndexProxyIntegrationTest {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      byte[] rootHash = map.getRootHash();
+      HashCode rootHash = map.getRootHash();
       assertThat(rootHash, notNullValue());
-      assertThat(rootHash.length, equalTo(Hashes.HASH_SIZE_BYTES));
+      assertThat(rootHash.bits(), equalTo(Hashes.HASH_SIZE_BITS));
       assertThat(rootHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
     });
   }

@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 public class Hashes {
 
   public static final int HASH_SIZE_BYTES = 32;
+  public static final int HASH_SIZE_BITS = HASH_SIZE_BYTES * Byte.SIZE;
 
   private static final String EXONUM_DEFAULT_HASHING_ALGORITHM = "SHA-256";
 

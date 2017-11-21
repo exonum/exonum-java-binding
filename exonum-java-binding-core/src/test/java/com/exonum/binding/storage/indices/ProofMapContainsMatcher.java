@@ -40,8 +40,8 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy> {
 
   private MapProofValidator checkProof(ProofMapIndexProxy map) {
     MapProof proof = map.getProof(key);
-    HashCode rootHash = HashCode.fromBytes(map.getRootHash());
-    assert proof != null;
+    assert proof != null : "The proof must not be null";
+    HashCode rootHash = map.getRootHash();
     MapProofValidator validator = new MapProofValidator(rootHash, key);
 
     proof.accept(validator);

@@ -8,6 +8,7 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
+import com.google.common.hash.HashCode;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -89,8 +90,10 @@ class UserServiceAdapter {
     // (e.g., ANP#getNativeHandle)?
     assert snapshotHandle != 0;
     try (Snapshot snapshot = new Snapshot(snapshotHandle, false)) {
-      List<byte[]> stateHashes = service.getStateHashes(snapshot);
-      return stateHashes.toArray(new byte[0][]);
+      List<HashCode> stateHashes = service.getStateHashes(snapshot);
+      return stateHashes.stream()
+          .map(HashCode::asBytes)
+          .toArray(byte[][]::new);
     }
   }
 
