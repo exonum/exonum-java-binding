@@ -437,13 +437,13 @@ fn make_java_equal_value_at_root(
     key: &ProofMapDBKey,
     value: &Value,
 ) -> Result<jobject> {
-    let key = make_java_db_key(env, key)?;
+    let db_key = make_java_db_key(env, key)?;
     let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/EqualValueAtRoot",
-            "(Lcom/exonum/binding/storage/proofs/map/DbKey;[B)V",
-            &[key.as_obj().into(), value.as_obj().into()],
+            "([B[B)V",
+            &[db_key.as_obj().into(), value.as_obj().into()],
         )?
             .into_inner(),
     )
@@ -457,24 +457,13 @@ fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLoca
     let mut buffer = [0; PROOF_KEY_SIZE];
     key.write(&mut buffer);
 
-    let key = env.auto_local(env.byte_array_from_slice(&buffer)?.into());
-    let java_db_key = env.new_object(
-        "com/exonum/binding/storage/proofs/map/DbKey",
-        "([B)V",
-        &[key.as_obj().into()],
-    )?;
-    Ok(env.auto_local(java_db_key))
+    let db_key_bytes = env.auto_local(env.byte_array_from_slice(&buffer)?.into());
+    Ok(db_key_bytes)
 }
 
 fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocal<'a>> {
     let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
-    let java_hash = env.call_static_method("com/google/common/hash/HashCode",
-                                            "fromBytes",
-                                            "([B)Lcom/google/common/hash/HashCode;",
-                                            &[hash.as_obj().into()]
-    )?;
-    let java_hash = java_hash.l().unwrap();
-    Ok(env.auto_local(java_hash))
+    Ok(hash)
 }
 
 fn make_java_non_equal_value_at_root(
@@ -487,8 +476,7 @@ fn make_java_non_equal_value_at_root(
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/NonEqualValueAtRoot",
-            "(Lcom/exonum/binding/storage/proofs/map/DbKey;\
-              Lcom/google/common/hash/HashCode;)V",
+            "([B[B)V",
             &[key.as_obj().into(), hash.as_obj().into()],
         )?
             .into_inner(),
@@ -532,10 +520,7 @@ fn make_java_mapping_not_found_branch(
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/MappingNotFoundProofBranch",
-            "(Lcom/google/common/hash/HashCode;\
-              Lcom/google/common/hash/HashCode;\
-              Lcom/exonum/binding/storage/proofs/map/DbKey;\
-              Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
+            "([B[B[B[B)V",
             &[
                 left_hash.as_obj().into(),
                 right_hash.as_obj().into(),
@@ -562,9 +547,9 @@ fn make_java_left_proof_branch(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/LeftMapProofBranch",
             "(Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
-              Lcom/google/common/hash/HashCode;\
-              Lcom/exonum/binding/storage/proofs/map/DbKey;\
-              Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
+            [B\
+            [B\
+            [B)V",
             &[
                 left_node.as_obj().into(),
                 right_hash.as_obj().into(),
@@ -590,10 +575,10 @@ fn make_java_right_proof_branch(
     Ok(
         env.new_object(
             "com/exonum/binding/storage/proofs/map/RightMapProofBranch",
-            "(Lcom/google/common/hash/HashCode;\
-              Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
-              Lcom/exonum/binding/storage/proofs/map/DbKey;\
-              Lcom/exonum/binding/storage/proofs/map/DbKey;)V",
+            "([B\
+            Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
+            [B\
+            [B)V",
             &[
                 left_hash.as_obj().into(),
                 right_node.as_obj().into(),

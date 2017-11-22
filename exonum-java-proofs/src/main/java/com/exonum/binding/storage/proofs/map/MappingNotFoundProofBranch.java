@@ -14,6 +14,12 @@ public class MappingNotFoundProofBranch extends BranchMapProofNode {
 
   private final HashCode rightHash;
 
+  @SuppressWarnings("unused")  // native API
+  MappingNotFoundProofBranch(byte[] leftHash, byte[] rightHash, byte[] leftKey, byte[] rightKey) {
+    this(HashCode.fromBytes(leftHash), HashCode.fromBytes(rightHash),
+        DbKey.fromBytes(leftKey), DbKey.fromBytes(rightKey));
+  }
+
   /**
    * Create a new branch node.
    *

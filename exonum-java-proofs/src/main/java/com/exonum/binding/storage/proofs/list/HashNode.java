@@ -14,7 +14,8 @@ public class HashNode implements ListProof {
   /**
    * Creates a new hash node.
    */
-  public HashNode(byte[] hash) {
+  @SuppressWarnings("unused")  // native API
+  HashNode(byte[] hash) {
     this(HashCode.fromBytes(hash));
   }
 

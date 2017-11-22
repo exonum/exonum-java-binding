@@ -2,6 +2,7 @@ package com.exonum.binding.storage.proofs.map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.BitSet;
 
@@ -75,7 +76,11 @@ public class DbKey {
    * @throws NullPointerException if the key is null
    * @throws IllegalArgumentException if the specified database key is not valid
    */
-  public DbKey(byte[] rawDbKey) {
+  public static DbKey fromBytes(byte[] rawDbKey) {
+    return new DbKey(rawDbKey);
+  }
+
+  private DbKey(byte[] rawDbKey) {
     checkArgument(rawDbKey.length == DB_KEY_SIZE,
         "Database key has illegal size: %s", rawDbKey.length);
     this.rawDbKey = rawDbKey.clone();  // TODO: when you copy, and when not?
@@ -100,6 +105,7 @@ public class DbKey {
     }
   }
 
+  @VisibleForTesting  // This constructor exists for tests only.
   DbKey(DbKey.Type nodeType, byte[] keySlice, int numSignificantBits) {
     // TODO: consider extracting the checks below
     checkArgument(keySlice.length == KEY_SIZE);
