@@ -11,6 +11,11 @@ public class EqualValueAtRoot implements MapProof {
 
   private final byte[] value;
 
+  @SuppressWarnings("unused") // native API
+  EqualValueAtRoot(byte[] databaseKey, byte[] value) {
+    this(DbKey.fromBytes(databaseKey), value);
+  }
+
   /**
    * Creates a new proof node.
    *

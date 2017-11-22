@@ -13,6 +13,11 @@ public class NonEqualValueAtRoot implements MapProof {
 
   private final HashCode valueHash;
 
+  @SuppressWarnings("unused") // native API
+  NonEqualValueAtRoot(byte[] databaseKey, byte[] valueHash) {
+    this(DbKey.fromBytes(databaseKey), HashCode.fromBytes(valueHash));
+  }
+
   /**
    * Create a new proof node.
    *

@@ -14,6 +14,11 @@ public class LeftMapProofBranch extends BranchMapProofNode {
 
   private final HashCode rightHash;
 
+  @SuppressWarnings("unused") // native API
+  LeftMapProofBranch(MapProofNode left, byte[] rightHash, byte[] leftKey, byte[] rightKey) {
+    this(left, HashCode.fromBytes(rightHash), DbKey.fromBytes(leftKey), DbKey.fromBytes(rightKey));
+  }
+
   /**
    * Create a new branch node with the mapping in the left sub-tree.
    *
