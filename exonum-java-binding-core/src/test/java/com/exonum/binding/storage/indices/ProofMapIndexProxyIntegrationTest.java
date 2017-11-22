@@ -298,7 +298,7 @@ public class ProofMapIndexProxyIntegrationTest {
   @SuppressWarnings("unused")
   private void printProof(ProofMapIndexProxy map, byte[] key) {
     MapProof proof = map.getProof(key);
-    System.out.println("\nProof for key: " + Hashes.toString(key));
+    System.out.println("\nProof for key: " + Hashes.toHexString(key));
     MapProofTreePrinter printer = new MapProofTreePrinter();
     proof.accept(printer);
   }

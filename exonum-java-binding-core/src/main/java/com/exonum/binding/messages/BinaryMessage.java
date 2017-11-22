@@ -37,7 +37,7 @@ public interface BinaryMessage extends Message {
    * Returns the SHA-256 hash of this message.
    */
   default HashCode hash() {
-    HashFunction hashFunction = Hashes.getDefaultHashFunction();
+    HashFunction hashFunction = Hashes.defaultHashFunction();
     return hashFunction.hashBytes(getMessage());
   }
 }

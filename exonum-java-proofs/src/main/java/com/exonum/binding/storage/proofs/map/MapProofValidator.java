@@ -87,7 +87,7 @@ public class MapProofValidator implements MapProofVisitor {
    * @param key a requested key
    */
   public MapProofValidator(byte[] rootHash, byte[] key) {
-    this(HashCode.fromBytes(rootHash), key, Hashes.getDefaultHashFunction());
+    this(HashCode.fromBytes(rootHash), key, Hashes.defaultHashFunction());
   }
 
   /**
@@ -97,7 +97,7 @@ public class MapProofValidator implements MapProofVisitor {
    * @param key a requested key
    */
   public MapProofValidator(HashCode rootHash, byte[] key) {
-    this(rootHash, key, Hashes.getDefaultHashFunction());
+    this(rootHash, key, Hashes.defaultHashFunction());
   }
 
   @VisibleForTesting  // to easily inject a mock of a hash function.

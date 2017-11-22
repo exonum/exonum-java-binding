@@ -54,7 +54,7 @@ class MapProofValidatorMatchers {
       @Override
       public void describeTo(Description description) {
         description.appendText("valid proof, key=")
-            // As users mock Hashes, its #toString method might not work :-(
+            // As users mock Hashes, its #toHexString method might not work :-(
             .appendText(HashCode.fromBytes(key).toString())
             .appendText(", value=").appendText(Arrays.toString(expectedValue));
       }
