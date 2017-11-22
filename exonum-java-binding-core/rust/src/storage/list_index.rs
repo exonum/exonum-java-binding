@@ -185,9 +185,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let val = match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(_) => {
-                panic!("Unable to modify snapshot.");
-            }
+            IndexType::SnapshotIndex(_) => panic!("Unable to modify snapshot."),
             IndexType::ForkIndex(ref mut list) => list.pop(),
         };
         match val {
