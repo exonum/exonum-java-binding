@@ -50,7 +50,7 @@ public class ListProofValidator implements ListProofVisitor {
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
   public ListProofValidator(byte[] expectedRootHash, long numElements) {
-    this(HashCode.fromBytes(expectedRootHash), numElements, Hashes.getDefaultHashFunction());
+    this(HashCode.fromBytes(expectedRootHash), numElements, Hashes.defaultHashFunction());
   }
 
   /**
@@ -61,7 +61,7 @@ public class ListProofValidator implements ListProofVisitor {
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
   public ListProofValidator(HashCode expectedRootHash, long numElements) {
-    this(expectedRootHash, numElements, Hashes.getDefaultHashFunction());
+    this(expectedRootHash, numElements, Hashes.defaultHashFunction());
   }
 
   /**

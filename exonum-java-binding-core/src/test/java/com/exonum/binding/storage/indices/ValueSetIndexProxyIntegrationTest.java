@@ -314,7 +314,7 @@ public class ValueSetIndexProxyIntegrationTest {
   }
 
   private static HashCode getHashOf(byte[] value) {
-    return Hashes.getDefaultHashFunction()
+    return Hashes.defaultHashFunction()
         .hashBytes(value);
   }
 }

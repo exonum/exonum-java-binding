@@ -45,7 +45,7 @@ class MapProofValidatorMatcher extends TypeSafeMatcher<MapProofValidator> {
    * Converts a hash to string.
    *
    * <p>As users mock {@link com.exonum.binding.hash.Hashes},
-   * its #toString method might not work. That is a mock-safe alternative.
+   * its #toHexString method might not work. That is a mock-safe alternative.
    */
   static String hashToString(byte[] hash) {
     return HashCode.fromBytes(hash).toString();
