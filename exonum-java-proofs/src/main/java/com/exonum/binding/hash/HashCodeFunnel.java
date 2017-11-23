@@ -1,9 +1,9 @@
-package com.google.common.hash;
+package com.exonum.binding.hash;
 
 /**
  * HashCode funnel. Puts the hash code bytes into the sink without copying.
  */
-public enum HashCodeFunnel implements Funnel<HashCode> {
+public enum HashCodeFunnel implements com.exonum.binding.hash.Funnel<HashCode> {
   INSTANCE;
 
   @Override
@@ -11,7 +11,7 @@ public enum HashCodeFunnel implements Funnel<HashCode> {
     into.putBytes(from.getBytesInternal());
   }
 
-  public static Funnel<HashCode> hashCodeFunnel() {
+  public static com.exonum.binding.hash.Funnel<HashCode> hashCodeFunnel() {
     return HashCodeFunnel.INSTANCE;
   }
 
