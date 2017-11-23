@@ -11,6 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
@@ -18,7 +21,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.UnsignedInts;
@@ -33,7 +35,6 @@ import javax.annotation.Nullable;
  * @author Kurt Alfred Kluever
  * @since 11.0
  */
-@Beta
 public abstract class HashCode {
   HashCode() {}
 

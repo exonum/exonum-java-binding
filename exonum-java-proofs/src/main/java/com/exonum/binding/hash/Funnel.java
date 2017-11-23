@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
-import com.google.common.annotations.Beta;
 import com.google.common.hash.BloomFilter;
 import java.io.Serializable;
 
@@ -39,7 +41,6 @@ import java.io.Serializable;
  * @author Dimitris Andreou
  * @since 11.0
  */
-@Beta
 public interface Funnel<T> extends Serializable {
 
   /**

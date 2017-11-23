@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -27,20 +29,19 @@ import javax.annotation.Nullable;
  * @author Dimitris Andreou
  * @since 11.0
  */
-@Beta
 public final class Funnels {
-  private Funnels() {}
 
   /**
    * Returns a funnel that extracts the bytes from a {@code byte} array.
    */
-  public static com.exonum.binding.hash.Funnel<byte[]> byteArrayFunnel() {
+  public static Funnel<byte[]> byteArrayFunnel() {
     return ByteArrayFunnel.INSTANCE;
   }
 
-  private enum ByteArrayFunnel implements com.exonum.binding.hash.Funnel<byte[]> {
+  private enum ByteArrayFunnel implements Funnel<byte[]> {
     INSTANCE;
 
+    @Override
     public void funnel(byte[] from, PrimitiveSink into) {
       into.putBytes(from);
     }
@@ -58,13 +59,14 @@ public final class Funnels {
    *
    * @since 15.0 (since 11.0 as {@code Funnels.stringFunnel()}.
    */
-  public static com.exonum.binding.hash.Funnel<CharSequence> unencodedCharsFunnel() {
+  public static Funnel<CharSequence> unencodedCharsFunnel() {
     return UnencodedCharsFunnel.INSTANCE;
   }
 
-  private enum UnencodedCharsFunnel implements com.exonum.binding.hash.Funnel<CharSequence> {
+  private enum UnencodedCharsFunnel implements Funnel<CharSequence> {
     INSTANCE;
 
+    @Override
     public void funnel(CharSequence from, PrimitiveSink into) {
       into.putUnencodedChars(from);
     }
@@ -81,17 +83,18 @@ public final class Funnels {
    *
    * @since 15.0
    */
-  public static com.exonum.binding.hash.Funnel<CharSequence> stringFunnel(Charset charset) {
+  public static Funnel<CharSequence> stringFunnel(Charset charset) {
     return new StringCharsetFunnel(charset);
   }
 
-  private static class StringCharsetFunnel implements com.exonum.binding.hash.Funnel<CharSequence>, Serializable {
+  private static class StringCharsetFunnel implements Funnel<CharSequence>, Serializable {
     private final Charset charset;
 
     StringCharsetFunnel(Charset charset) {
       this.charset = Preconditions.checkNotNull(charset);
     }
 
+    @Override
     public void funnel(CharSequence from, PrimitiveSink into) {
       into.putString(from, charset);
     }
@@ -139,13 +142,14 @@ public final class Funnels {
    *
    * @since 13.0
    */
-  public static com.exonum.binding.hash.Funnel<Integer> integerFunnel() {
+  public static Funnel<Integer> integerFunnel() {
     return IntegerFunnel.INSTANCE;
   }
 
-  private enum IntegerFunnel implements com.exonum.binding.hash.Funnel<Integer> {
+  private enum IntegerFunnel implements Funnel<Integer> {
     INSTANCE;
 
+    @Override
     public void funnel(Integer from, PrimitiveSink into) {
       into.putInt(from);
     }
@@ -162,17 +166,18 @@ public final class Funnels {
    *
    * @since 15.0
    */
-  public static <E> com.exonum.binding.hash.Funnel<Iterable<? extends E>> sequentialFunnel(com.exonum.binding.hash.Funnel<E> elementFunnel) {
-    return new SequentialFunnel<E>(elementFunnel);
+  public static <E> Funnel<Iterable<? extends E>> sequentialFunnel(Funnel<E> elementFunnel) {
+    return new SequentialFunnel<>(elementFunnel);
   }
 
-  private static class SequentialFunnel<E> implements com.exonum.binding.hash.Funnel<Iterable<? extends E>>, Serializable {
-    private final com.exonum.binding.hash.Funnel<E> elementFunnel;
+  private static class SequentialFunnel<E> implements Funnel<Iterable<? extends E>>, Serializable {
+    private final Funnel<E> elementFunnel;
 
-    SequentialFunnel(com.exonum.binding.hash.Funnel<E> elementFunnel) {
+    SequentialFunnel(Funnel<E> elementFunnel) {
       this.elementFunnel = Preconditions.checkNotNull(elementFunnel);
     }
 
+    @Override
     public void funnel(Iterable<? extends E> from, PrimitiveSink into) {
       for (E e : from) {
         elementFunnel.funnel(e, into);
@@ -204,13 +209,14 @@ public final class Funnels {
    *
    * @since 13.0
    */
-  public static com.exonum.binding.hash.Funnel<Long> longFunnel() {
+  public static Funnel<Long> longFunnel() {
     return LongFunnel.INSTANCE;
   }
 
-  private enum LongFunnel implements com.exonum.binding.hash.Funnel<Long> {
+  private enum LongFunnel implements Funnel<Long> {
     INSTANCE;
 
+    @Override
     public void funnel(Long from, PrimitiveSink into) {
       into.putLong(from);
     }
@@ -222,7 +228,7 @@ public final class Funnels {
   }
 
   /**
-   * Wraps a {@code PrimitiveSink} as an {@link OutputStream}, so it is easy to {@link com.exonum.binding.hash.Funnel#funnel
+   * Wraps a {@code PrimitiveSink} as an {@link OutputStream}, so it is easy to {@link Funnel#funnel
    * funnel} an object to a {@code PrimitiveSink} if there is already a way to write the contents of
    * the object to an {@code OutputStream}.
    *
@@ -262,4 +268,30 @@ public final class Funnels {
       return "Funnels.asOutputStream(" + sink + ")";
     }
   }
+
+  /**
+   * Returns a funnel for hashcode.
+   */
+  public static Funnel<HashCode> hashCodeFunnel() {
+    return HashCodeFunnel.INSTANCE;
+  }
+
+  /**
+   * HashCode funnel. Puts the hash code bytes into the sink without copying.
+   */
+  public enum HashCodeFunnel implements Funnel<HashCode> {
+    INSTANCE;
+
+    @Override
+    public void funnel(HashCode from, PrimitiveSink into) {
+      into.putBytes(from.getBytesInternal());
+    }
+
+    @Override
+    public String toString() {
+      return "Funnels.HashCodeFunnel";
+    }
+  }
+
+  private Funnels() {}
 }

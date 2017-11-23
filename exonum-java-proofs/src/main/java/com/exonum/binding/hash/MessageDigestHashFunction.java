@@ -11,6 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
@@ -30,7 +33,7 @@ import java.util.Arrays;
  * @author Kevin Bourrillion
  * @author Dimitris Andreou
  */
-final class MessageDigestHashFunction extends com.exonum.binding.hash.AbstractHashFunction implements Serializable {
+final class MessageDigestHashFunction extends AbstractHashFunction implements Serializable {
   private final MessageDigest prototype;
   private final int bytes;
   private final boolean supportsClone;
@@ -81,7 +84,7 @@ final class MessageDigestHashFunction extends com.exonum.binding.hash.AbstractHa
   }
 
   @Override
-  public com.exonum.binding.hash.Hasher newHasher() {
+  public Hasher newHasher() {
     if (supportsClone) {
       try {
         return new MessageDigestHasher((MessageDigest) prototype.clone(), bytes);
@@ -117,7 +120,7 @@ final class MessageDigestHashFunction extends com.exonum.binding.hash.AbstractHa
   /**
    * Hasher that updates a message digest.
    */
-  private static final class MessageDigestHasher extends com.exonum.binding.hash.AbstractByteHasher {
+  private static final class MessageDigestHasher extends AbstractByteHasher {
     private final MessageDigest digest;
     private final int bytes;
     private boolean done;
@@ -150,12 +153,12 @@ final class MessageDigestHashFunction extends com.exonum.binding.hash.AbstractHa
     }
 
     @Override
-    public com.exonum.binding.hash.HashCode hash() {
+    public HashCode hash() {
       checkNotDone();
       done = true;
       return (bytes == digest.getDigestLength())
-          ? com.exonum.binding.hash.HashCode.fromBytesNoCopy(digest.digest())
-          : com.exonum.binding.hash.HashCode.fromBytesNoCopy(Arrays.copyOf(digest.digest(), bytes));
+          ? HashCode.fromBytesNoCopy(digest.digest())
+          : HashCode.fromBytesNoCopy(Arrays.copyOf(digest.digest(), bytes));
     }
   }
 }

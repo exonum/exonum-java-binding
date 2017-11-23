@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
-import com.google.common.annotations.Beta;
 import com.google.common.primitives.Ints;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -30,14 +32,14 @@ import java.nio.charset.Charset;
  * <ul>
  * <li><b>block of data:</b> the input for a hash function is always, in concept, an ordered byte
  *     array. This hashing API accepts an arbitrary sequence of byte and multibyte values (via
- *     {@link com.exonum.binding.hash.Hasher}), but this is merely a convenience; these are always translated into raw byte
+ *     {@link Hasher}), but this is merely a convenience; these are always translated into raw byte
  *     sequences under the covers.
  *
  * <li><b>hash code:</b> each hash function always yields hash codes of the same fixed bit length
  *     (given by {@link #bits}). For example, {@link Hashing#sha1} produces a 160-bit number, while
  *     {@link Hashing#murmur3_32()} yields only 32 bits. Because a {@code long} value is clearly
  *     insufficient to hold all hash code values, this API represents a hash code as an instance of
- *     {@link com.exonum.binding.hash.HashCode}.
+ *     {@link HashCode}.
  *
  * <li><b>pure function:</b> the value produced must depend only on the input bytes, in the order
  *     they appear. Input data is never modified. {@link HashFunction} instances should always be
@@ -86,9 +88,9 @@ import java.nio.charset.Charset;
  * <h3>Providing input to a hash function</h3>
  *
  * <p>The primary way to provide the data that your hash function should act on is via a
- * {@link com.exonum.binding.hash.Hasher}. Obtain a new hasher from the hash function using {@link #newHasher}, "push" the
- * relevant data into it using methods like {@link com.exonum.binding.hash.Hasher#putBytes(byte[])}, and finally ask for the
- * {@code HashCode} when finished using {@link com.exonum.binding.hash.Hasher#hash}. (See an {@linkplain #newHasher example}
+ * {@link Hasher}. Obtain a new hasher from the hash function using {@link #newHasher}, "push" the
+ * relevant data into it using methods like {@link Hasher#putBytes(byte[])}, and finally ask for the
+ * {@code HashCode} when finished using {@link Hasher#hash}. (See an {@linkplain #newHasher example}
  * of this.)
  *
  * <p>If all you want to hash is a single byte array, string or {@code long} value, there are
@@ -96,7 +98,7 @@ import java.nio.charset.Charset;
  *
  * <p>Hasher accepts primitive data types, but can also accept any Object of type {@code
  * T} provided that you implement a {@link com.exonum.binding.hash.Funnel}{@code <T>} to specify how to "feed" data from
- * that object into the function. (See {@linkplain com.exonum.binding.hash.Hasher#putObject an example} of this.)
+ * that object into the function. (See {@linkplain Hasher#putObject an example} of this.)
  *
  * <p><b>Compatibility note:</b> Throughout this API, multibyte values are always interpreted in
  * <i>little-endian</i> order. That is, hashing the byte array {@code {0x01, 0x02, 0x03, 0x04}} is
@@ -121,7 +123,6 @@ import java.nio.charset.Charset;
  * @author Kevin Bourrillion
  * @since 11.0
  */
-@Beta
 public interface HashFunction {
   /**
    * Begins a new hash code computation by returning an initialized, stateful {@code
@@ -133,14 +134,14 @@ public interface HashFunction {
    *       .putBoolean(isActive)
    *       .hash();}</pre>
    */
-  com.exonum.binding.hash.Hasher newHasher();
+  Hasher newHasher();
 
   /**
    * Begins a new hash code computation as {@link #newHasher()}, but provides a hint of the expected
    * size of the input (in bytes). This is only important for non-streaming hash functions (hash
    * functions that need to buffer their whole input before processing any of it).
    */
-  com.exonum.binding.hash.Hasher newHasher(int expectedInputSize);
+  Hasher newHasher(int expectedInputSize);
 
   /**
    * Shortcut for {@code newHasher().putInt(input).hash()}; returns the hash code for the given
@@ -149,20 +150,20 @@ public interface HashFunction {
    *
    * @since 12.0
    */
-  com.exonum.binding.hash.HashCode hashInt(int input);
+  HashCode hashInt(int input);
 
   /**
    * Shortcut for {@code newHasher().putLong(input).hash()}; returns the hash code for the given
    * {@code long} value, interpreted in little-endian byte order. The implementation <i>might</i>
    * perform better than its longhand equivalent, but should not perform worse.
    */
-  com.exonum.binding.hash.HashCode hashLong(long input);
+  HashCode hashLong(long input);
 
   /**
    * Shortcut for {@code newHasher().putBytes(input).hash()}. The implementation <i>might</i>
    * perform better than its longhand equivalent, but should not perform worse.
    */
-  com.exonum.binding.hash.HashCode hashBytes(byte[] input);
+  HashCode hashBytes(byte[] input);
 
   /**
    * Shortcut for {@code newHasher().putBytes(input, off, len).hash()}. The implementation
@@ -171,7 +172,7 @@ public interface HashFunction {
    * @throws IndexOutOfBoundsException if {@code off < 0} or {@code off + len > bytes.length} or
    *     {@code len < 0}
    */
-  com.exonum.binding.hash.HashCode hashBytes(byte[] input, int off, int len);
+  HashCode hashBytes(byte[] input, int off, int len);
 
   /**
    * Shortcut for {@code newHasher().putBytes(input).hash()}. The implementation <i>might</i>
@@ -179,7 +180,7 @@ public interface HashFunction {
    *
    * @since 23.0
    */
-  com.exonum.binding.hash.HashCode hashBytes(ByteBuffer input);
+  HashCode hashBytes(ByteBuffer input);
 
   /**
    * Shortcut for {@code newHasher().putUnencodedChars(input).hash()}. The implementation
@@ -194,7 +195,7 @@ public interface HashFunction {
    *
    * @since 15.0 (since 11.0 as hashString(CharSequence)).
    */
-  com.exonum.binding.hash.HashCode hashUnencodedChars(CharSequence input);
+  HashCode hashUnencodedChars(CharSequence input);
 
   /**
    * Shortcut for {@code newHasher().putString(input, charset).hash()}. Characters are encoded using
@@ -206,7 +207,7 @@ public interface HashFunction {
    * faster, produces the same output across Java releases, and hashes every {@code char} in the
    * input, even if some are invalid.
    */
-  com.exonum.binding.hash.HashCode hashString(CharSequence input, Charset charset);
+  HashCode hashString(CharSequence input, Charset charset);
 
   /**
    * Shortcut for {@code newHasher().putObject(instance, funnel).hash()}. The implementation
@@ -214,7 +215,7 @@ public interface HashFunction {
    *
    * @since 14.0
    */
-  <T> com.exonum.binding.hash.HashCode hashObject(T instance, com.exonum.binding.hash.Funnel<? super T> funnel);
+  <T> HashCode hashObject(T instance, Funnel<? super T> funnel);
 
   /**
    * Returns the number of bits (a multiple of 32) that each hash code produced by this hash

@@ -11,6 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
@@ -33,7 +36,7 @@ import java.nio.charset.Charset;
  * change between Java releases.
  *
  * <p><b>Warning:</b> Chunks of data that are put into the {@link Hasher} are not delimited. The
- * resulting {@link com.exonum.binding.hash.HashCode} is dependent only on the bytes inserted, and the order in which they
+ * resulting {@link HashCode} is dependent only on the bytes inserted, and the order in which they
  * were inserted, not how those bytes were chunked into discrete put() operations. For example, the
  * following three expressions all generate colliding hash codes: <pre>   {@code
  *
@@ -131,7 +134,7 @@ public interface Hasher extends PrimitiveSink {
    * Computes a hash code based on the data that have been provided to this hasher. The result is
    * unspecified if this method is called more than once on the same instance.
    */
-  com.exonum.binding.hash.HashCode hash();
+  HashCode hash();
 
   /**
    * {@inheritDoc}

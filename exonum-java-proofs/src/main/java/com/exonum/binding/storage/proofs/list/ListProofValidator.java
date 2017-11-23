@@ -1,15 +1,15 @@
 package com.exonum.binding.storage.proofs.list;
 
+import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.hash.HashCodeFunnel.hashCodeFunnel;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.hash.PrimitiveSink;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.PrimitiveSink;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class ListProofValidator implements ListProofVisitor {
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
   public ListProofValidator(byte[] expectedRootHash, long numElements) {
-    this(HashCode.fromBytes(expectedRootHash), numElements, Hashes.defaultHashFunction());
+    this(HashCode.fromBytes(expectedRootHash), numElements);
   }
 
   /**
@@ -61,7 +61,7 @@ public class ListProofValidator implements ListProofVisitor {
    *                    The same as the number of leaf nodes in the Merkle tree.
    */
   public ListProofValidator(HashCode expectedRootHash, long numElements) {
-    this(expectedRootHash, numElements, Hashes.defaultHashFunction());
+    this(expectedRootHash, numElements, Hashing.defaultHashFunction());
   }
 
   /**

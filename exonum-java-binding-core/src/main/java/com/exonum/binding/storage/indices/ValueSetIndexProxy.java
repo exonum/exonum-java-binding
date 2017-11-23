@@ -4,9 +4,9 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
-import com.google.common.hash.HashCode;
 import javax.annotation.Nullable;
 
 /**

@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.hash.Hashes.HASH_SIZE_BITS;
-import static com.exonum.binding.hash.Hashes.HASH_SIZE_BYTES;
+import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
+import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static java.util.Collections.singletonList;
@@ -9,11 +9,11 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.common.hash.HashCode;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -34,7 +34,7 @@ public class ProofListIndexProxyIntegrationTest {
    * An empty list root hash: an all-zero hash code.
    */
   private static final HashCode EMPTY_LIST_ROOT_HASH =
-      HashCode.fromBytes(new byte[HASH_SIZE_BYTES]);
+      HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
 
   static {
     LibraryLoader.load();
@@ -70,7 +70,7 @@ public class ProofListIndexProxyIntegrationTest {
       list.add(V1);
 
       HashCode rootHash = list.getRootHash();
-      assertThat(rootHash.bits(), equalTo(HASH_SIZE_BITS));
+      assertThat(rootHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
       assertThat(rootHash, not(equalTo(EMPTY_LIST_ROOT_HASH)));
     });
   }

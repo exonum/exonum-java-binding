@@ -4,9 +4,9 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
-import com.google.common.hash.HashCode;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;

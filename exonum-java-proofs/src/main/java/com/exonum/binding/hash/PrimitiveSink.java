@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
-import com.google.common.annotations.Beta;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -25,7 +27,6 @@ import java.nio.charset.Charset;
  * @author Kevin Bourrillion
  * @since 12.0 (in 11.0 as {@code Sink})
  */
-@Beta
 @CanIgnoreReturnValue
 public interface PrimitiveSink {
   /**

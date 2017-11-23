@@ -34,6 +34,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
+          <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
         </configuration>
       </plugin>
 
