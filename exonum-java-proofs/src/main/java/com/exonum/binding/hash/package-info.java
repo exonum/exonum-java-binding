@@ -11,6 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modification copyright (C) 2017 Bitfury Soft
+ */
 
 // TODO(user): when things stabilize, flesh this out
 /**
@@ -18,6 +21,13 @@
  *
  * <p>See the Guava User Guide article on
  * <a href="https://github.com/google/guava/wiki/HashingExplained">hashing</a>.
+ *
+ * <p>This package is a repackaged copy of com.google.common.hash from Guava, as of 23.4-jre,
+ * since the hashing APIs we re-export are in {@link com.google.common.annotations.Beta}
+ * and may change at any time.
+ *
+ * <p>It includes only the classes, needed for SHA-256 hash function.
+ * The other supported hash functions and bloom-filters are removed.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

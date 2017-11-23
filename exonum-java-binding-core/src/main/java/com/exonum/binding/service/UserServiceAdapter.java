@@ -3,12 +3,12 @@ package com.exonum.binding.service;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
-import com.google.common.hash.HashCode;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;

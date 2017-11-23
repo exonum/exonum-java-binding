@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.hash.Hashes.HASH_SIZE_BYTES;
+import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
@@ -22,7 +22,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
@@ -32,7 +33,6 @@ import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.google.common.hash.HashCode;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +66,8 @@ public class ProofMapIndexProxyIntegrationTest {
 
   private static final List<byte[]> proofKeys = ImmutableList.of(PK1, PK2, PK3);
 
-  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromBytes(new byte[HASH_SIZE_BYTES]);
+  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromBytes(
+      new byte[DEFAULT_HASH_SIZE_BYTES]);
 
   private Database database;
 
@@ -158,7 +159,7 @@ public class ProofMapIndexProxyIntegrationTest {
 
       HashCode rootHash = map.getRootHash();
       assertThat(rootHash, notNullValue());
-      assertThat(rootHash.bits(), equalTo(Hashes.HASH_SIZE_BITS));
+      assertThat(rootHash.bits(), equalTo(Hashing.DEFAULT_HASH_SIZE_BITS));
       assertThat(rootHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
     });
   }
@@ -298,7 +299,7 @@ public class ProofMapIndexProxyIntegrationTest {
   @SuppressWarnings("unused")
   private void printProof(ProofMapIndexProxy map, byte[] key) {
     MapProof proof = map.getProof(key);
-    System.out.println("\nProof for key: " + Hashes.toHexString(key));
+    System.out.println("\nProof for key: " + Hashing.toHexString(key));
     MapProofTreePrinter printer = new MapProofTreePrinter();
     proof.accept(printer);
   }

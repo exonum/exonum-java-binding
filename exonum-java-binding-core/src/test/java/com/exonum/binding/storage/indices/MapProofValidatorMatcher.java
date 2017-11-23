@@ -1,9 +1,9 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.hash.Hashing.toHexString;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.storage.proofs.map.MapProofValidator;
-import com.google.common.hash.HashCode;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
@@ -37,18 +37,8 @@ class MapProofValidatorMatcher extends TypeSafeMatcher<MapProofValidator> {
 
   @Override
   public void describeTo(Description description) {
-    description.appendText("valid proof, key=").appendText(hashToString(key))
+    description.appendText("valid proof, key=").appendText(toHexString(key))
         .appendText(", value=").appendText(Arrays.toString(expectedValue));
-  }
-
-  /**
-   * Converts a hash to string.
-   *
-   * <p>As users mock {@link com.exonum.binding.hash.Hashes},
-   * its #toHexString method might not work. That is a mock-safe alternative.
-   */
-  static String hashToString(byte[] hash) {
-    return HashCode.fromBytes(hash).toString();
   }
 
   /**

@@ -4,8 +4,8 @@ import static com.exonum.binding.messages.ByteBufferAllocator.allocateBuffer;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import com.exonum.binding.hash.Hashes;
-import com.google.common.hash.HashCode;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.Hashing;
 import org.junit.Test;
 
 public class BinaryMessageTest {
@@ -23,6 +23,6 @@ public class BinaryMessageTest {
 
     HashCode hash = message.hash();
 
-    assertThat(hash.bits(), equalTo(Hashes.HASH_SIZE_BITS));
+    assertThat(hash.bits(), equalTo(Hashing.DEFAULT_HASH_SIZE_BITS));
   }
 }

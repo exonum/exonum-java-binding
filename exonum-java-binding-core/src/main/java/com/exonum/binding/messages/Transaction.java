@@ -1,7 +1,7 @@
 package com.exonum.binding.messages;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
-import com.google.common.hash.HashCode;
 
 /**
  * An Exonum transaction.

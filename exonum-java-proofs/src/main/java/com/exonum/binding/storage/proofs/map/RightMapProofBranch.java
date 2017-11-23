@@ -2,7 +2,7 @@ package com.exonum.binding.storage.proofs.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.hash.HashCode;
+import com.exonum.binding.hash.HashCode;
 
 /**
  * A proof node for a map that might contain mapping for the requested key in the right sub tree.

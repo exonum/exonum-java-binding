@@ -4,13 +4,11 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
-public class HashesTest {
+public class HashingTest {
 
   private static final String ZERO_HASH_HEX =
       "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
@@ -19,13 +17,13 @@ public class HashesTest {
 
   @Test
   public void getHashOfEmptyArray() throws Exception {
-    HashFunction f = Hashes.defaultHashFunction();
+    HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(bytes()), equalTo(ZERO_HASH_CODE));
   }
 
   @Test
   public void getHashOfEmptyByteBuffer() throws Exception {
-    HashFunction f = Hashes.defaultHashFunction();
+    HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(ByteBuffer.allocate(0)), equalTo(ZERO_HASH_CODE));
   }
 
@@ -33,7 +31,7 @@ public class HashesTest {
   public void toStringAllHexNumbersLower() throws Exception {
     for (byte b = 0; b <= 0xF; b++) {
       String expected = "0" + UnsignedBytes.toString(b, 16);
-      assertThat(Hashes.toHexString(bytes(b)), equalTo(expected));
+      assertThat(Hashing.toHexString(bytes(b)), equalTo(expected));
     }
   }
 
@@ -42,7 +40,7 @@ public class HashesTest {
     for (int i = 1; i <= 0xF; i++) {
       byte b = (byte) (i << 4);
       String expected = UnsignedBytes.toString(b, 16);
-      assertThat(Hashes.toHexString(bytes(b)), equalTo(expected));
+      assertThat(Hashing.toHexString(bytes(b)), equalTo(expected));
     }
   }
 }

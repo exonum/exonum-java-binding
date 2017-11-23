@@ -8,8 +8,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.hash.Funnel;
-import com.google.common.hash.PrimitiveSink;
+import com.exonum.binding.hash.Funnel;
+import com.exonum.binding.hash.PrimitiveSink;
 import org.junit.Test;
 
 public class ProofListElementTest {

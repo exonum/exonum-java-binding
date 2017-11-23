@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.proofs.list;
 
-import com.google.common.hash.Funnel;
-import com.google.common.hash.PrimitiveSink;
+import com.exonum.binding.hash.Funnel;
+import com.exonum.binding.hash.PrimitiveSink;
 
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.

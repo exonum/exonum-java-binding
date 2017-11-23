@@ -4,9 +4,9 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkEleme
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
-import com.google.common.hash.HashCode;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing

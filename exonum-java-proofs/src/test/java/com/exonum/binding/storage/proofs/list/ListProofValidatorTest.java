@@ -11,10 +11,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.hash.Funnel;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hasher;
+import com.exonum.binding.hash.Funnel;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hasher;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;

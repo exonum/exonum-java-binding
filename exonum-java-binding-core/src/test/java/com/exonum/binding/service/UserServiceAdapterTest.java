@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.TemplateMessage;
@@ -18,7 +19,6 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
-import com.google.common.hash.HashCode;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
 import java.util.Arrays;

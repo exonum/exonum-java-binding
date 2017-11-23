@@ -11,6 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+/*
+ * Modifications copyright (C) 2017 Bitfury Soft
+ */
 
 package com.exonum.binding.hash;
 
