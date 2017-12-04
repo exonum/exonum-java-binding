@@ -15,5 +15,5 @@ resource-manager = ["lazy_static"]
 # so that users are directed to the correct build instructions!
 exonum = "0.3"
 log = "0.3.8"
-jni = "0.7.2"
+jni = "0.8.0"
 lazy_static = { version = "0.2.11", optional = true }
