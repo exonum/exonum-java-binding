@@ -44,7 +44,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -330,7 +329,6 @@ public class ProofMapIndexProxyIntegrationTest {
   }
 
   @Test
-  // @Ignore
   // Takes quite a lot of time (validating 257 proofs),
   // but it's an integration test, isn't it? :-)
   //

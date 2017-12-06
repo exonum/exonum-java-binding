@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JClass, JObject, JString, AutoLocal};
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
 use jni::errors::Result;
 
@@ -52,6 +52,38 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     map_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, map_handle);
+}
+
+/// Returns Java-proof object.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetProof(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    key: jbyteArray,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        env.with_local_frame(32, || {
+            let key = convert_to_key(&env, key)?;
+            let proof = match *utils::cast_handle::<IndexType>(map_handle) {
+                IndexType::SnapshotIndex(ref map) => map.get_proof(&key),
+                IndexType::ForkIndex(ref map) => map.get_proof(&key),
+            };
+            match proof {
+                MapProof::LeafRootInclusive(key, val) => {
+                    make_java_equal_value_at_root(&env, &key, &val)
+                }
+                MapProof::LeafRootExclusive(key, hash) => {
+                    make_java_non_equal_value_at_root(&env, &key, &hash)
+                }
+                MapProof::Empty => make_java_empty_proof(&env),
+                MapProof::Branch(branch) => make_java_brach_proof(&env, &branch),
+            }
+                .map(JObject::from)
+        })
+            .map(JObject::into_inner)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Returns the root hash of the proof map or default hash value if it is empty.
@@ -109,36 +141,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
         } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns Java-proof object.
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetProof(
-    env: JNIEnv,
-    _: JObject,
-    map_handle: Handle,
-    key: jbyteArray,
-) -> jobject {
-    let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
-        env.with_local_frame(512, || {
-            let proof = match *utils::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.get_proof(&key),
-                IndexType::ForkIndex(ref map) => map.get_proof(&key),
-            };
-            match proof {
-                MapProof::LeafRootInclusive(key, val) => {
-                    make_java_equal_value_at_root(&env, &key, &val)
-                }
-                MapProof::LeafRootExclusive(key, hash) => {
-                    make_java_non_equal_value_at_root(&env, &key, &hash)
-                }
-                MapProof::Empty => make_java_empty_proof(&env),
-                MapProof::Branch(branch) => make_java_brach_proof(&env, &branch),
-            }.map(From::from)
-        }).map(JObject::into_inner)
-    });
-    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Returns the pointer to the iterator over a map keys and values.
@@ -421,14 +423,14 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> Result<Key> {
 }
 
 fn make_java_empty_proof(env: &JNIEnv) -> Result<jobject> {
-    Ok(
+    env.with_local_frame(32, || {
         env.new_object(
             "com/exonum/binding/storage/proofs/map/EmptyMapProof",
             "()V",
             &[],
-        )?
-            .into_inner(),
-    )
+        )
+    })
+        .map(JObject::into_inner)
 }
 
 // TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
@@ -438,19 +440,19 @@ fn make_java_equal_value_at_root(
     key: &ProofMapDBKey,
     value: &Value,
 ) -> Result<jobject> {
-    let db_key = make_java_db_key(env, key)?;
-    let value = env.auto_local(env.byte_array_from_slice(value)?.into());
-    Ok(
+    env.with_local_frame(32, || {
+        let db_key = make_java_db_key(env, key)?;
+        let value = JObject::from(env.byte_array_from_slice(value)?);
         env.new_object(
             "com/exonum/binding/storage/proofs/map/EqualValueAtRoot",
             "([B[B)V",
-            &[db_key.as_obj().into(), value.as_obj().into()],
-        )?
-            .into_inner(),
-    )
+            &[db_key.into(), value.into()],
+        )
+    })
+        .map(JObject::into_inner)
 }
 
-fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLocal<'a>> {
+fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<JObject<'a>> {
     // TODO: Export `DB_KEY_SIZE`?
     const PROOF_KEY_SIZE: usize = PROOF_MAP_KEY_SIZE + 2;
     debug_assert_eq!(PROOF_KEY_SIZE, key.size());
@@ -458,13 +460,13 @@ fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLoca
     let mut buffer = [0; PROOF_KEY_SIZE];
     key.write(&mut buffer);
 
-    let db_key_bytes = env.auto_local(env.byte_array_from_slice(&buffer)?.into());
-    Ok(db_key_bytes)
+    env.byte_array_from_slice(&buffer)
+        .map(JObject::from)
 }
 
-fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocal<'a>> {
-    let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
-    Ok(hash)
+fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<JObject<'a>> {
+    utils::convert_hash(env, hash)
+        .map(JObject::from)
 }
 
 fn make_java_non_equal_value_at_root(
@@ -472,16 +474,16 @@ fn make_java_non_equal_value_at_root(
     key: &ProofMapDBKey,
     hash: &Hash,
 ) -> Result<jobject> {
-    let key = make_java_db_key(env, key)?;
-    let hash = make_java_hash(env, hash)?;
-    Ok(
+    env.with_local_frame(32, || {
+        let key = make_java_db_key(env, key)?;
+        let hash = make_java_hash(env, hash)?;
         env.new_object(
             "com/exonum/binding/storage/proofs/map/NonEqualValueAtRoot",
             "([B[B)V",
-            &[key.as_obj().into(), hash.as_obj().into()],
-        )?
-            .into_inner(),
-    )
+            &[key.into(), hash.into()],
+        )
+    })
+        .map(JObject::into_inner)
 }
 
 fn make_java_brach_proof(env: &JNIEnv, branch: &BranchProofNode<Value>) -> Result<jobject> {
@@ -514,23 +516,23 @@ fn make_java_mapping_not_found_branch(
     left_key: &ProofMapDBKey,
     right_key: &ProofMapDBKey,
 ) -> Result<jobject> {
-    let left_hash = make_java_hash(env, left_hash)?;
-    let right_hash = make_java_hash(env, right_hash)?;
-    let left_key = make_java_db_key(env, left_key)?;
-    let right_key = make_java_db_key(env, right_key)?;
-    Ok(
+    env.with_local_frame(32, || {
+        let left_hash = make_java_hash(env, left_hash)?;
+        let right_hash = make_java_hash(env, right_hash)?;
+        let left_key = make_java_db_key(env, left_key)?;
+        let right_key = make_java_db_key(env, right_key)?;
         env.new_object(
             "com/exonum/binding/storage/proofs/map/MappingNotFoundProofBranch",
             "([B[B[B[B)V",
             &[
-                left_hash.as_obj().into(),
-                right_hash.as_obj().into(),
-                left_key.as_obj().into(),
-                right_key.as_obj().into(),
+                left_hash.into(),
+                right_hash.into(),
+                left_key.into(),
+                right_key.into(),
             ],
-        )?
-            .into_inner(),
-    )
+        )
+    })
+        .map(JObject::into_inner)
 }
 
 fn make_java_left_proof_branch(
@@ -540,11 +542,11 @@ fn make_java_left_proof_branch(
     left_key: &ProofMapDBKey,
     right_key: &ProofMapDBKey,
 ) -> Result<jobject> {
-    let left_node = make_java_proof_node(env, left_node)?;
-    let right_hash = make_java_hash(env, right_hash)?;
-    let left_key = make_java_db_key(env, left_key)?;
-    let right_key = make_java_db_key(env, right_key)?;
-    Ok(
+    env.with_local_frame(32, || {
+        let left_node = make_java_proof_node(env, left_node)?;
+        let right_hash = make_java_hash(env, right_hash)?;
+        let left_key = make_java_db_key(env, left_key)?;
+        let right_key = make_java_db_key(env, right_key)?;
         env.new_object(
             "com/exonum/binding/storage/proofs/map/LeftMapProofBranch",
             "(Lcom/exonum/binding/storage/proofs/map/MapProofNode;\
@@ -552,14 +554,14 @@ fn make_java_left_proof_branch(
             [B\
             [B)V",
             &[
-                left_node.as_obj().into(),
-                right_hash.as_obj().into(),
-                left_key.as_obj().into(),
-                right_key.as_obj().into(),
+                left_node.into(),
+                right_hash.into(),
+                left_key.into(),
+                right_key.into(),
             ],
-        )?
-            .into_inner(),
-    )
+        )
+    })
+        .map(JObject::into_inner)
 }
 
 fn make_java_right_proof_branch(
@@ -569,11 +571,11 @@ fn make_java_right_proof_branch(
     left_key: &ProofMapDBKey,
     right_key: &ProofMapDBKey,
 ) -> Result<jobject> {
-    let left_hash = make_java_hash(env, left_hash)?;
-    let right_node = make_java_proof_node(env, right_node)?;
-    let left_key = make_java_db_key(env, left_key)?;
-    let right_key = make_java_db_key(env, right_key)?;
-    Ok(
+    env.with_local_frame(32, || {
+        let left_hash = make_java_hash(env, left_hash)?;
+        let right_node = make_java_proof_node(env, right_node)?;
+        let left_key = make_java_db_key(env, left_key)?;
+        let right_key = make_java_db_key(env, right_key)?;
         env.new_object(
             "com/exonum/binding/storage/proofs/map/RightMapProofBranch",
             "([B\
@@ -581,37 +583,39 @@ fn make_java_right_proof_branch(
             [B\
             [B)V",
             &[
-                left_hash.as_obj().into(),
-                right_node.as_obj().into(),
-                left_key.as_obj().into(),
-                right_key.as_obj().into(),
+                left_hash.into(),
+                right_node.into(),
+                left_key.into(),
+                right_key.into(),
             ],
-        )?
-            .into_inner(),
-    )
+        )
+    })
+        .map(JObject::into_inner)
 }
 
 fn make_java_proof_node<'a>(
     env: &'a JNIEnv,
     proof_node: &ProofNode<Value>,
-) -> Result<AutoLocal<'a>> {
-    match *proof_node {
-        ProofNode::Branch(ref branch_proof_node) => {
-            let branch = make_java_brach_proof(env, branch_proof_node)?;
-            Ok(env.auto_local(branch.into()))
+) -> Result<JObject<'a>> {
+    env.with_local_frame(32, || {
+        match *proof_node {
+            ProofNode::Branch(ref branch_proof_node) => {
+                make_java_brach_proof(env, branch_proof_node)
+                    .map(JObject::from)
+            }
+            ProofNode::Leaf(ref value) => make_java_leaf_proof_node(env, value),
         }
-        ProofNode::Leaf(ref value) => make_java_leaf_proof_node(env, value),
-    }
+    })
 }
 
 // TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
 #[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
-fn make_java_leaf_proof_node<'a>(env: &'a JNIEnv, value: &Value) -> Result<AutoLocal<'a>> {
-    let value = env.auto_local(env.byte_array_from_slice(value)?.into());
+fn make_java_leaf_proof_node<'a>(env: &'a JNIEnv, value: &Value) -> Result<JObject<'a>> {
+    let value = JObject::from(env.byte_array_from_slice(value)?);
     let leaf_proof_node = env.new_object(
         "com/exonum/binding/storage/proofs/map/LeafMapProofNode",
         "([B)V",
-        &[value.as_obj().into()],
+        &[value.into()],
     )?;
-    Ok(env.auto_local(leaf_proof_node))
+    Ok(leaf_proof_node)
 }
