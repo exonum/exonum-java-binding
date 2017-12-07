@@ -121,22 +121,21 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 ) -> jobject {
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
-        env.with_local_frame(512, || {
-            let proof = match *utils::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.get_proof(&key),
-                IndexType::ForkIndex(ref map) => map.get_proof(&key),
-            };
-            match proof {
-                MapProof::LeafRootInclusive(key, val) => {
-                    make_java_equal_value_at_root(&env, &key, &val)
-                }
-                MapProof::LeafRootExclusive(key, hash) => {
-                    make_java_non_equal_value_at_root(&env, &key, &hash)
-                }
-                MapProof::Empty => make_java_empty_proof(&env),
-                MapProof::Branch(branch) => make_java_brach_proof(&env, &branch),
-            }.map(From::from)
-        }).map(JObject::into_inner)
+        env.ensure_local_capacity(512)?;
+        let proof = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.get_proof(&key),
+            IndexType::ForkIndex(ref map) => map.get_proof(&key),
+        };
+        match proof {
+            MapProof::LeafRootInclusive(key, val) => {
+                make_java_equal_value_at_root(&env, &key, &val)
+            }
+            MapProof::LeafRootExclusive(key, hash) => {
+                make_java_non_equal_value_at_root(&env, &key, &hash)
+            }
+            MapProof::Empty => make_java_empty_proof(&env),
+            MapProof::Branch(branch) => make_java_brach_proof(&env, &branch),
+        }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
