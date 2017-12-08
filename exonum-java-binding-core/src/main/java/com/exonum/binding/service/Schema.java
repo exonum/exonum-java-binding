@@ -1,6 +1,6 @@
 package com.exonum.binding.service;
 
-import com.google.common.hash.HashCode;
+import com.exonum.binding.hash.HashCode;
 import java.util.Collections;
 import java.util.List;
 

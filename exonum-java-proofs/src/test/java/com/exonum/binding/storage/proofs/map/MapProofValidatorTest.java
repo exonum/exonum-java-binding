@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.proofs.map;
 
+import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isNotValid;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isValid;
 import static com.exonum.binding.test.Bytes.bytes;
@@ -12,12 +13,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hasher;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.exonum.binding.storage.proofs.map.MapProofValidator.Status;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hasher;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.junit.Before;
@@ -31,9 +31,10 @@ public class MapProofValidatorTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final byte[] V1 = bytes("V1");
-  private static final HashCode ROOT_HASH = HashCode.fromBytes(createPrefixed(bytes("root hash"),
-      Hashes.HASH_SIZE_BYTES));
-  private static final HashCode EMPTY_HASH = HashCode.fromBytes(new byte[Hashes.HASH_SIZE_BYTES]);
+  private static final HashCode ROOT_HASH = HashCode.fromBytes(
+      createPrefixed(bytes("root hash"), DEFAULT_HASH_SIZE_BYTES));
+  private static final HashCode EMPTY_HASH = HashCode.fromBytes(
+      new byte[DEFAULT_HASH_SIZE_BYTES]);
 
 
   private HashFunction hashFunction;
@@ -477,7 +478,7 @@ public class MapProofValidatorTest {
 
   private static HashCode createHash(String prefix) {
     byte[] prefixBytes = bytes(prefix);
-    return HashCode.fromBytes(createPrefixed(prefixBytes, Hashes.HASH_SIZE_BYTES));
+    return HashCode.fromBytes(createPrefixed(prefixBytes, DEFAULT_HASH_SIZE_BYTES));
   }
 
   private static DbKey leafDbKey(byte[] key) {

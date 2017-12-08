@@ -1,8 +1,8 @@
 package com.exonum.binding.messages;
 
-import com.exonum.binding.hash.Hashes;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hashing;
 import java.nio.ByteBuffer;
 
 /**
@@ -37,7 +37,7 @@ public interface BinaryMessage extends Message {
    * Returns the SHA-256 hash of this message.
    */
   default HashCode hash() {
-    HashFunction hashFunction = Hashes.defaultHashFunction();
+    HashFunction hashFunction = Hashing.defaultHashFunction();
     return hashFunction.hashBytes(getMessage());
   }
 }

@@ -2,7 +2,7 @@ package com.exonum.binding.storage.proofs.list;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.hash.HashCode;
+import com.exonum.binding.hash.HashCode;
 
 /**
  * Represents a hash of a Merkle sub-tree: a leaf node in proof trees.

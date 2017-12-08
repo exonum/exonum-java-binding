@@ -1,16 +1,16 @@
 package com.exonum.binding.storage.proofs.map;
 
+import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.hash.HashCodeFunnel.hashCodeFunnel;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,7 +50,7 @@ public class MapProofValidator implements MapProofVisitor {
    */
   static final boolean PERFORM_TREE_CORRECTNESS_CHECKS = false;
 
-  private static final int HASH_SIZE_BITS = Hashes.HASH_SIZE_BYTES * Byte.SIZE;
+  private static final int HASH_SIZE_BITS = Hashing.DEFAULT_HASH_SIZE_BYTES * Byte.SIZE;
 
   private static final int MAX_TREE_HEIGHT = DbKey.KEY_SIZE_BITS;
 
@@ -87,7 +87,7 @@ public class MapProofValidator implements MapProofVisitor {
    * @param key a requested key
    */
   public MapProofValidator(byte[] rootHash, byte[] key) {
-    this(HashCode.fromBytes(rootHash), key, Hashes.defaultHashFunction());
+    this(HashCode.fromBytes(rootHash), key, Hashing.defaultHashFunction());
   }
 
   /**
@@ -97,7 +97,7 @@ public class MapProofValidator implements MapProofVisitor {
    * @param key a requested key
    */
   public MapProofValidator(HashCode rootHash, byte[] key) {
-    this(rootHash, key, Hashes.defaultHashFunction());
+    this(rootHash, key, Hashing.defaultHashFunction());
   }
 
   @VisibleForTesting  // to easily inject a mock of a hash function.
@@ -279,7 +279,7 @@ public class MapProofValidator implements MapProofVisitor {
   }
 
   private static HashCode getEmptyTreeHash() {
-    return HashCode.fromBytes(new byte[Hashes.HASH_SIZE_BYTES]);
+    return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
   }
 
   private HashCode computeBranchHash(HashCode leftHash, HashCode rightHash,

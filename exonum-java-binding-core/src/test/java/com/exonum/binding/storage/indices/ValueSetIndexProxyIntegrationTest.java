@@ -8,13 +8,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
-import com.google.common.hash.HashCode;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -314,7 +314,7 @@ public class ValueSetIndexProxyIntegrationTest {
   }
 
   private static HashCode getHashOf(byte[] value) {
-    return Hashes.defaultHashFunction()
+    return Hashing.defaultHashFunction()
         .hashBytes(value);
   }
 }
