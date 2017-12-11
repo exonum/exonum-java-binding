@@ -3,6 +3,7 @@ package com.exonum.binding.service;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
@@ -89,8 +90,10 @@ class UserServiceAdapter {
     // (e.g., ANP#getNativeHandle)?
     assert snapshotHandle != 0;
     try (Snapshot snapshot = new Snapshot(snapshotHandle, false)) {
-      List<byte[]> stateHashes = service.getStateHashes(snapshot);
-      return stateHashes.toArray(new byte[0][]);
+      List<HashCode> stateHashes = service.getStateHashes(snapshot);
+      return stateHashes.stream()
+          .map(HashCode::asBytes)
+          .toArray(byte[][]::new);
     }
   }
 

@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.proofs.map;
 
+import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isNotValid;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isValid;
 import static com.exonum.binding.test.Bytes.bytes;
@@ -9,10 +10,12 @@ import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hasher;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.exonum.binding.storage.proofs.map.MapProofValidator.Status;
 import java.util.Arrays;
@@ -21,31 +24,33 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    Hashes.class,
-})
 public class MapProofValidatorTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final byte[] V1 = bytes("V1");
-  private static final byte[] ROOT_HASH = createPrefixed(bytes("root hash"),
-      Hashes.HASH_SIZE_BYTES);
-  private static final byte[] EMPTY_HASH = new byte[Hashes.HASH_SIZE_BYTES];
+  private static final HashCode ROOT_HASH = HashCode.fromBytes(
+      createPrefixed(bytes("root hash"), DEFAULT_HASH_SIZE_BYTES));
+  private static final HashCode EMPTY_HASH = HashCode.fromBytes(
+      new byte[DEFAULT_HASH_SIZE_BYTES]);
 
+
+  private HashFunction hashFunction;
+  private Hasher hasher;
   private MapProofValidator validator;
 
   @Before
   public void setUp() throws Exception {
-    mockStatic(Hashes.class);
-    // Return root hash by default
-    when(Hashes.getHashOf(anyBytes())).thenReturn(ROOT_HASH);
+    hasher = mock(Hasher.class);
+    when(hasher.putObject(any(), any())).thenReturn(hasher);
+    when(hasher.putBytes(any(byte[].class))).thenReturn(hasher);
+    when(hasher.hash()).thenReturn(ROOT_HASH);
+
+    hashFunction = mock(HashFunction.class);
+    when(hashFunction.hashBytes(any(byte[].class))).thenReturn(ROOT_HASH);
+    when(hashFunction.newHasher()).thenReturn(hasher);
   }
 
   @Test
@@ -54,7 +59,7 @@ public class MapProofValidatorTest {
     byte[] otherKey = createKey(0b101);
     MapProof mapProof = new EqualValueAtRoot(leafDbKey(otherKey), V1);
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
@@ -67,7 +72,7 @@ public class MapProofValidatorTest {
     DbKey databaseKey = branchDbKey(key, 4);
     MapProof mapProof = new EqualValueAtRoot(databaseKey, V1);
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
@@ -88,7 +93,7 @@ public class MapProofValidatorTest {
     byte[] value = V1;
     MapProof mapProof = new EqualValueAtRoot(leafDbKey(key), value);
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, value));
@@ -99,7 +104,7 @@ public class MapProofValidatorTest {
     byte[] key = createKey(0b1011);  // [110100…00]
     MapProof mapProof = new NonEqualValueAtRoot(leafDbKey(key), createHash("h1"));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
@@ -113,7 +118,7 @@ public class MapProofValidatorTest {
     MapProof mapProof = new NonEqualValueAtRoot(databaseKey, createHash("h1"));
 
     byte[] otherKey = createKey(0b1011);  // [110100…00]
-    validator = new MapProofValidator(ROOT_HASH, otherKey);
+    validator = createMapProofValidator(ROOT_HASH, otherKey);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
@@ -136,7 +141,7 @@ public class MapProofValidatorTest {
         createHash("h1"));
 
     byte[] otherKey = createKey(0b1011);  // [110100…00]
-    validator = new MapProofValidator(ROOT_HASH, otherKey);
+    validator = createMapProofValidator(ROOT_HASH, otherKey);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(otherKey, null));
@@ -147,7 +152,7 @@ public class MapProofValidatorTest {
     MapProof mapProof = new EmptyMapProof();
 
     byte[] key = createKey(0b101);
-    validator = new MapProofValidator(EMPTY_HASH, key);
+    validator = createMapProofValidator(EMPTY_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, null));
@@ -158,7 +163,7 @@ public class MapProofValidatorTest {
     MapProof mapProof = new EmptyMapProof();
 
     byte[] key = createKey(0b101);
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
@@ -188,7 +193,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b00), 2),
         branchDbKey(createKey(0b01), 2));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertTrue(validator.isValid());
@@ -208,7 +213,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0), 1),
         branchDbKey(createKey(1), 1));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
@@ -231,7 +236,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0), 1),
         branchDbKey(createKey(0b1), 1));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
@@ -254,7 +259,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0), 1),
         branchDbKey(createKey(0b1), 1));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
@@ -273,7 +278,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0000), 4),
         branchDbKey(createKey(0b1001), 4));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, null));
@@ -292,7 +297,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b00), 2),
         branchDbKey(createKey(0b01), 2));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, null));
@@ -308,7 +313,7 @@ public class MapProofValidatorTest {
         leafDbKey(otherKey),
         branchDbKey(createKey(0b11), 2));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
@@ -327,7 +332,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0), 1),
         leafDbKey(otherKey));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
@@ -358,7 +363,7 @@ public class MapProofValidatorTest {
         leafDbKey(key),
         branchDbKey(createKey(0b1), 1));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, value));
@@ -391,7 +396,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b1110), 4),
         branchDbKey(createKey(0b1), 1));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, value));
@@ -407,7 +412,7 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0), 1),
         leafDbKey(key));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, value));
@@ -429,7 +434,7 @@ public class MapProofValidatorTest {
         // Prefix extension: right branch adds 1+3 bits to the prefix.
         branchDbKey(createKey(0b1001), 4));
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isValid(key, value));
@@ -444,16 +449,21 @@ public class MapProofValidatorTest {
         branchDbKey(createKey(0b0), 1),
         leafDbKey(key));
 
-    when(Hashes.getHashOf(anyBytes())).thenReturn(EMPTY_HASH);
-    validator = new MapProofValidator(ROOT_HASH, key);
+    when(hasher.hash()).thenReturn(EMPTY_HASH);
+
+    validator = createMapProofValidator(ROOT_HASH, key);
     mapProof.accept(validator);
 
     assertThat(validator, isNotValid());
     testGetValueFails(Status.VALID);
   }
 
-  private static byte[][] anyBytes() {
-    return any();
+  /**
+   * Creates a {@link MapProofValidator} with the given rootHash and key and
+   * the mock of a hash function.
+   */
+  private MapProofValidator createMapProofValidator(HashCode rootHash, byte[] key) {
+    return new MapProofValidator(rootHash, key, hashFunction);
   }
 
   private static byte[] createKey(int... prefix) {
@@ -468,7 +478,7 @@ public class MapProofValidatorTest {
 
   private static HashCode createHash(String prefix) {
     byte[] prefixBytes = bytes(prefix);
-    return new HashCode(createPrefixed(prefixBytes, Hashes.HASH_SIZE_BYTES));
+    return HashCode.fromBytes(createPrefixed(prefixBytes, DEFAULT_HASH_SIZE_BYTES));
   }
 
   private static DbKey leafDbKey(byte[] key) {
@@ -486,7 +496,7 @@ public class MapProofValidatorTest {
     byte[] value = V1;
     MapProof mapProof = createProofTree(height, value);
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
 
     mapProof.accept(validator);
 
@@ -500,7 +510,7 @@ public class MapProofValidatorTest {
     byte[] value = V1;
     MapProof mapProof = createProofTree(height, value);
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
 
     mapProof.accept(validator);
 
@@ -513,7 +523,7 @@ public class MapProofValidatorTest {
     byte[] key = new byte[DbKey.KEY_SIZE];
     MapProof mapProof = createProofTree(height, V1);
 
-    validator = new MapProofValidator(ROOT_HASH, key);
+    validator = createMapProofValidator(ROOT_HASH, key);
 
     mapProof.accept(validator);
 

@@ -10,21 +10,27 @@ import java.util.NoSuchElementException;
  * A list index proxy is a contiguous list of elements.
  * Elements may be added to or removed from the end of the list only.
  *
+ * <p>This list implementation does not permit null elements.
+ *
  * <p>The "destructive" methods of the list, i.e., those that change its contents,
  * are specified to throw {@link UnsupportedOperationException} if
  * this list has been created with a read-only database view.
  *
- * <p>This list implementation does not permit null elements.
+ * <p>All method arguments are non-null by default.
+ *
+ * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ *
+ * @see View
  */
 public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex {
 
   /**
    * Creates a new ListIndexProxy.
    *
-   * @param name a unique alphanumeric identifier of this list in the underlying storage:
+   * @param name a unique alphanumeric non-empty identifier of this list in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.

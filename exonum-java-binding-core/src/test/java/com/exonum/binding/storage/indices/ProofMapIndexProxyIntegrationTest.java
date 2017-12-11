@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
@@ -21,7 +22,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
@@ -58,13 +60,14 @@ public class ProofMapIndexProxyIntegrationTest {
 
   private static final String mapName = "test_proof_map";
 
-  private static final byte[] PK1 = createProofKey("PK1");
-  private static final byte[] PK2 = createProofKey("PK2");
-  private static final byte[] PK3 = createProofKey("PK3");
+  static final byte[] PK1 = createProofKey("PK1");
+  static final byte[] PK2 = createProofKey("PK2");
+  static final byte[] PK3 = createProofKey("PK3");
 
   private static final List<byte[]> proofKeys = ImmutableList.of(PK1, PK2, PK3);
 
-  private static final byte[] EMPTY_MAP_ROOT_HASH = new byte[Hashes.HASH_SIZE_BYTES];
+  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromBytes(
+      new byte[DEFAULT_HASH_SIZE_BYTES]);
 
   private Database database;
 
@@ -142,7 +145,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getRootHash_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
@@ -150,20 +152,18 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getRootHash_NonEmptyMap() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      byte[] rootHash = map.getRootHash();
+      HashCode rootHash = map.getRootHash();
       assertThat(rootHash, notNullValue());
-      assertThat(rootHash.length, equalTo(Hashes.HASH_SIZE_BYTES));
+      assertThat(rootHash.bits(), equalTo(Hashing.DEFAULT_HASH_SIZE_BITS));
       assertThat(rootHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
     });
   }
 
-  @Ignore
   @Test
   public void getProof_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot,
@@ -171,7 +171,6 @@ public class ProofMapIndexProxyIntegrationTest {
     );
   }
 
-  @Ignore
   @Test
   public void getProof_SingletonMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -183,7 +182,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_SingletonMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -193,7 +191,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_LastByte_Contains1() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -213,7 +210,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_LastByte_Contains2() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -233,7 +229,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_FirstByte_Contains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -261,7 +256,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_FourEntryMap_FirstAndLastByte_Contains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -288,7 +282,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   public void getProof_MultiEntryMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -306,12 +299,11 @@ public class ProofMapIndexProxyIntegrationTest {
   @SuppressWarnings("unused")
   private void printProof(ProofMapIndexProxy map, byte[] key) {
     MapProof proof = map.getProof(key);
-    System.out.println("\nProof for key: " + Hashes.toString(key));
+    System.out.println("\nProof for key: " + Hashing.toHexString(key));
     MapProofTreePrinter printer = new MapProofTreePrinter();
     proof.accept(printer);
   }
 
-  @Ignore
   @Test
   public void getProof_MultiEntryMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
@@ -337,7 +329,6 @@ public class ProofMapIndexProxyIntegrationTest {
     });
   }
 
-  @Ignore
   @Test
   // Takes quite a lot of time (validating 257 proofs),
   // but it's an integration test, isn't it? :-)

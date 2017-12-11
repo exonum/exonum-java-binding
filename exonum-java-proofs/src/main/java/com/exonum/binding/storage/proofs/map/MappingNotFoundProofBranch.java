@@ -2,6 +2,8 @@ package com.exonum.binding.storage.proofs.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.hash.HashCode;
+
 
 /**
  * A map proof node for a map that does not contain mapping for the requested key.
@@ -11,6 +13,12 @@ public class MappingNotFoundProofBranch extends BranchMapProofNode {
   private final HashCode leftHash;
 
   private final HashCode rightHash;
+
+  @SuppressWarnings("unused")  // native API
+  MappingNotFoundProofBranch(byte[] leftHash, byte[] rightHash, byte[] leftKey, byte[] rightKey) {
+    this(HashCode.fromBytes(leftHash), HashCode.fromBytes(rightHash),
+        DbKey.fromBytes(leftKey), DbKey.fromBytes(rightKey));
+  }
 
   /**
    * Create a new branch node.

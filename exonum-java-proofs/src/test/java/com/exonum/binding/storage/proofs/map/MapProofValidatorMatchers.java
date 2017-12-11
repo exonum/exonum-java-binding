@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.proofs.map;
 
-import com.google.common.hash.HashCode;
+import com.exonum.binding.hash.Hashing;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
@@ -54,8 +54,7 @@ class MapProofValidatorMatchers {
       @Override
       public void describeTo(Description description) {
         description.appendText("valid proof, key=")
-            // As users mock Hashes, its #toString method might not work :-(
-            .appendText(HashCode.fromBytes(key).toString())
+            .appendText(Hashing.toHexString(key))
             .appendText(", value=").appendText(Arrays.toString(expectedValue));
       }
     };

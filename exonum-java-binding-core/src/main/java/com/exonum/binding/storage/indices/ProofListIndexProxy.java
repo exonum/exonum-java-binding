@@ -4,13 +4,14 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkEleme
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
  * cryptographic proofs that it contains a certain element at a particular position.
- * Elements may be added to the end of the list only.
+ * Non-null elements may be added to the end of the list only.
  *
  * <p>The proof list is implemented as a hash tree (Merkle tree).
  *
@@ -18,17 +19,21 @@ import com.exonum.binding.storage.proofs.list.ListProof;
  * are specified to throw {@link UnsupportedOperationException} if
  * this list has been created with a read-only database view.
  *
- * <p>This list implementation does not permit null elements.
+ * <p>All method arguments are non-null by default.
+ *
+ * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ *
+ * @see View
  */
 public class ProofListIndexProxy extends AbstractListIndexProxy implements ListIndex {
 
   /**
    * Creates a new ProofListIndexProxy.
    *
-   * @param name a unique alphanumeric identifier of this list in the underlying storage:
+   * @param name a unique alphanumeric non-empty identifier of this list in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
@@ -77,8 +82,8 @@ public class ProofListIndexProxy extends AbstractListIndexProxy implements ListI
    *
    * @throws IllegalStateException if this list is not valid
    */
-  public byte[] getRootHash() {
-    return nativeGetRootHash(getNativeHandle());
+  public HashCode getRootHash() {
+    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
   }
 
   private native byte[] nativeGetRootHash(long nativeHandle);

@@ -1,5 +1,6 @@
 package com.exonum.binding.service;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
@@ -76,8 +77,7 @@ public interface Service {
    * @see ProofListIndexProxy#getRootHash()
    * @see ProofMapIndexProxy#getRootHash()
    */
-  // fixme: byte[] -> HashCode
-  default List<byte[]> getStateHashes(Snapshot snapshot) {
+  default List<HashCode> getStateHashes(Snapshot snapshot) {
     return Collections.emptyList();
   }
 

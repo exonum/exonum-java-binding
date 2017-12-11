@@ -1,13 +1,13 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
-import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
+import javax.annotation.Nullable;
 
 /**
  * A value set is an index that contains no duplicate elements (values).
@@ -23,17 +23,22 @@ import com.exonum.binding.storage.database.View;
  * are specified to throw {@link UnsupportedOperationException} if the set has been created with
  * a read-only database view.
  *
+ * <p>All method arguments are non-null by default.
+ *
+ * <p>This class is not thread-safe and and its instances shall not be shared between threads.
+ *
  * <p>As any native proxy, the set <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed set is prohibited and will result in {@link IllegalStateException}.
  *
  * @see KeySetIndexProxy
+ * @see View
  */
 public class ValueSetIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new value set proxy.
    *
-   * @param name a unique alphanumeric identifier of this set in the underlying storage:
+   * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
@@ -76,7 +81,7 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    *
    * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
-   * @see #containsByHash(byte[])
+   * @see #containsByHash(HashCode)
    */
   public boolean contains(byte[] e) {
     return nativeContains(getNativeHandle(), checkStorageKey(e));
@@ -89,8 +94,8 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @throws NullPointerException if the hash is null
    * @throws IllegalStateException if this set is not valid
    */
-  public boolean containsByHash(byte[] elementHash) {
-    return nativeContainsByHash(getNativeHandle(), checkNotNull(elementHash));
+  public boolean containsByHash(HashCode elementHash) {
+    return nativeContainsByHash(getNativeHandle(), elementHash.asBytes());
   }
 
   /**
@@ -103,12 +108,15 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
    */
-  public StorageIterator<byte[]> hashes() {
+  public StorageIterator<HashCode> hashes() {
     return StorageIterators.createIterator(
         nativeCreateHashIterator(getNativeHandle()),
-        this::nativeHashIteratorNext,
+        (handle) -> {
+          byte[] next = nativeHashIteratorNext(handle);
+          return next == null ? null : HashCode.fromBytes(next);
+        },
         this::nativeHashIteratorFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -127,7 +135,7 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -144,19 +152,19 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * It does not reflect the changes made to the index since this entry had been created.
    */
   public static class Entry {
-    private final byte[] hash;
+    private final HashCode hash;
     private final byte[] value;
 
     @SuppressWarnings("unused")  // native API
     private Entry(byte[] hash, byte[] value) {
-      this.hash = checkNotNull(hash);
+      this.hash = HashCode.fromBytes(hash);
       this.value = checkStorageValue(value);
     }
 
     /**
      * Returns a hash of the element of the set.
      */
-    public byte[] getHash() {
+    public HashCode getHash() {
       return hash;
     }
 
@@ -190,14 +198,13 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
-  public void removeByHash(byte[] elementHash) {
+  public void removeByHash(HashCode elementHash) {
     notifyModified();
-    nativeRemoveByHash(getNativeHandle(), checkNotNull(elementHash));
+    nativeRemoveByHash(getNativeHandle(), elementHash.asBytes());
   }
 
   @Override
   protected void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 
@@ -213,6 +220,7 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
 
   private native long nativeCreateHashIterator(long nativeHandle);
 
+  @Nullable
   private native byte[] nativeHashIteratorNext(long iterNativeHandle);
 
   private native void nativeHashIteratorFree(long iterNativeHandle);

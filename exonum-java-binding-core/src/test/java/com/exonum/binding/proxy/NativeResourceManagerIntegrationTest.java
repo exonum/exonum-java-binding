@@ -3,6 +3,7 @@ package com.exonum.binding.proxy;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,8 +23,8 @@ public class NativeResourceManagerIntegrationTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void nativeResourceManagerShallThrowIfUnknownHandle() throws Exception {
-    long unknownNativeHandle = 0x110b;
+  public void nativeResourceManagerShallThrowIfUnknownForkHandle() throws Exception {
+    long unknownNativeHandle = 0x110B;
     Fork f = new Fork(unknownNativeHandle);
 
     expectedException.expect(RuntimeException.class);
@@ -31,6 +32,15 @@ public class NativeResourceManagerIntegrationTest {
     f.close();
   }
 
+  @Test
+  public void nativeResourceManagerShallThrowIfUnknownSnapshotHandle() throws Exception {
+    long unknownNativeHandle = 0xABCD;
+    Snapshot s = new Snapshot(unknownNativeHandle);
+
+    expectedException.expect(RuntimeException.class);
+    expectedException.expectMessage("Invalid handle value: 'ABCD'");
+    s.close();
+  }
 
   @Test
   public void nativeResourceManagerShallThrowIfHandleUsedWithOtherType() throws Exception {

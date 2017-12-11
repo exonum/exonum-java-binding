@@ -2,6 +2,8 @@ package com.exonum.binding.storage.proofs.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.hash.HashCode;
+
 
 /**
  * A proof node for a map that might contain mapping for the requested key in the left sub tree.
@@ -11,6 +13,11 @@ public class LeftMapProofBranch extends BranchMapProofNode {
   private final MapProofNode left;
 
   private final HashCode rightHash;
+
+  @SuppressWarnings("unused") // native API
+  LeftMapProofBranch(MapProofNode left, byte[] rightHash, byte[] leftKey, byte[] rightKey) {
+    this(left, HashCode.fromBytes(rightHash), DbKey.fromBytes(leftKey), DbKey.fromBytes(rightKey));
+  }
 
   /**
    * Create a new branch node with the mapping in the left sub-tree.

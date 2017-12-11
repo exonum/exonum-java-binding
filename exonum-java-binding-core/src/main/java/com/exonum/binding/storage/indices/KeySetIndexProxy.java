@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.proxy.ProxyPreconditions.checkValid;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 
@@ -21,17 +20,22 @@ import com.exonum.binding.storage.database.View;
  * are specified to throw {@link UnsupportedOperationException} if the set has been created with
  * a read-only database view.
  *
+ * <p>All method arguments are non-null by default.
+ *
+ * <p>This class is not thread-safe and and its instances shall not be shared between threads.
+ *
  * <p>As any native proxy, the set <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed set is prohibited and will result in {@link IllegalStateException}.
  *
  * @see ValueSetIndexProxy
+ * @see View
  */
 public class KeySetIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new key set proxy.
    *
-   * @param name a unique alphanumeric identifier of this set in the underlying storage:
+   * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
@@ -93,7 +97,7 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        dbView,
+        this,
         modCounter);
   }
 
@@ -112,7 +116,6 @@ public class KeySetIndexProxy extends AbstractIndexProxy {
 
   @Override
   protected void disposeInternal() {
-    checkValid(dbView);
     nativeFree(getNativeHandle());
   }
 

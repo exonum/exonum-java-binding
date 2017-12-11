@@ -20,11 +20,17 @@ public class DbKeyTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
+  public void throwsIfNull() throws Exception {
+    expectedException.expect(NullPointerException.class);
+    DbKey.fromBytes(null);
+  }
+
+  @Test
   public void throwsIfInvalidNodeTypeCode() throws Exception {
     byte[] rawDbKey = createDbKey(2, bytes("a"), 8);
 
     expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
   }
 
   @Test
@@ -33,7 +39,7 @@ public class DbKeyTest {
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes("a"), invalidNumBits);
 
     expectedException.expect(IllegalArgumentException.class);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
   }
 
   @Test
@@ -43,7 +49,7 @@ public class DbKeyTest {
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x01), numSignificantBits);
 
       expectedException.expect(IllegalArgumentException.class);
-      DbKey dbKey = new DbKey(rawDbKey);
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
     }
   }
 
@@ -54,7 +60,7 @@ public class DbKeyTest {
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x03), numSignificantBits);
 
       expectedException.expect(IllegalArgumentException.class);
-      DbKey dbKey = new DbKey(rawDbKey);
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
     }
   }
 
@@ -65,7 +71,7 @@ public class DbKeyTest {
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x80), numSignificantBits);
 
       expectedException.expect(IllegalArgumentException.class);
-      DbKey dbKey = new DbKey(rawDbKey);
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
     }
   }
 
@@ -76,7 +82,7 @@ public class DbKeyTest {
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
 
       expectedException.expect(IllegalArgumentException.class);
-      DbKey dbKey = new DbKey(rawDbKey);
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
     }
   }
 
@@ -87,7 +93,7 @@ public class DbKeyTest {
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x1F), numSignificantBits);
 
       expectedException.expect(IllegalArgumentException.class);
-      DbKey dbKey = new DbKey(rawDbKey);
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
     }
   }
 
@@ -98,14 +104,14 @@ public class DbKeyTest {
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0xFF, 0x01), numSignificantBits);
 
       expectedException.expect(IllegalArgumentException.class);
-      DbKey dbKey = new DbKey(rawDbKey);
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
     }
   }
 
   @Test
   public void getNodeType_BranchNode() throws Exception {
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes("a"), 8);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNodeType(), equalTo(Type.BRANCH));
   }
@@ -113,7 +119,7 @@ public class DbKeyTest {
   @Test
   public void getNodeType_LeafNode() throws Exception {
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes("a"), 0);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNodeType(), equalTo(Type.LEAF));
   }
@@ -122,7 +128,7 @@ public class DbKeyTest {
   public void getKeySlice_RootBranch() throws Exception {
     byte[] keyPrefix = bytes();
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, keyPrefix.length * Byte.SIZE);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getKeySlice(), keySliceStartsWith(keyPrefix));
   }
@@ -131,7 +137,7 @@ public class DbKeyTest {
   public void getKeySlice_IntermediateBranch() throws Exception {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, keyPrefix.length * Byte.SIZE);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getKeySlice(), keySliceStartsWith(keyPrefix));
   }
@@ -140,7 +146,7 @@ public class DbKeyTest {
   public void getKeySlice_Leaf() throws Exception {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.LEAF.code, keyPrefix, 0);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getKeySlice(), keySliceStartsWith(keyPrefix));
   }
@@ -149,7 +155,7 @@ public class DbKeyTest {
   public void getNumSignificantBits_RootBranch() throws Exception {
     int numSignificantBits = 0;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(), numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(numSignificantBits));
   }
@@ -158,7 +164,7 @@ public class DbKeyTest {
   public void getNumSignificantBits_IntermediateBranch() throws Exception {
     int numSignificantBits = 16;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes("ab"), numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(numSignificantBits));
   }
@@ -167,7 +173,7 @@ public class DbKeyTest {
   public void getNumSignificantBits_IntermediateBranch9Bits() throws Exception {
     int numSignificantBits = 9;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(numSignificantBits));
   }
@@ -176,7 +182,7 @@ public class DbKeyTest {
   public void getNumSignificantBits_IntermediateBranch12Bits() throws Exception {
     int numSignificantBits = 12;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x0F), numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(numSignificantBits));
   }
@@ -185,7 +191,7 @@ public class DbKeyTest {
   public void getNumSignificantBits_IntermediateBranch15Bits() throws Exception {
     int numSignificantBits = 15;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x7F), numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(numSignificantBits));
   }
@@ -193,7 +199,7 @@ public class DbKeyTest {
   @Test
   public void getNumSignificantBits_Leaf() throws Exception {
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes(0xFF), 0);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(DbKey.KEY_SIZE_BITS));
   }
@@ -246,7 +252,7 @@ public class DbKeyTest {
   public void testKeyBits_Leaf() throws Exception {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.LEAF.code, keyPrefix, 0);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     KeyBitSet expectedKeyBits = new KeyBitSet(keyPrefix, DbKey.KEY_SIZE_BITS);
     KeyBitSet keyBits = dbKey.keyBits();
@@ -259,7 +265,7 @@ public class DbKeyTest {
     byte[] keyPrefix = bytes();
     int numSignificantBits = 0;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     KeyBitSet expectedKeyBits = new KeyBitSet(keyPrefix, numSignificantBits);
     KeyBitSet keyBits = dbKey.keyBits();
@@ -272,7 +278,7 @@ public class DbKeyTest {
     byte[] keyPrefix = bytes("abc");
     int numSignificantBits = keyPrefix.length * Byte.SIZE;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, numSignificantBits);
-    DbKey dbKey = new DbKey(rawDbKey);
+    DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     KeyBitSet expectedKeyBits = new KeyBitSet(keyPrefix, numSignificantBits);
     KeyBitSet keyBits = dbKey.keyBits();

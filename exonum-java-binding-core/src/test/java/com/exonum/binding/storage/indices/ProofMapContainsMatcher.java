@@ -2,6 +2,7 @@ package com.exonum.binding.storage.indices;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofValidator;
 import javax.annotation.Nullable;
@@ -39,8 +40,8 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy> {
 
   private MapProofValidator checkProof(ProofMapIndexProxy map) {
     MapProof proof = map.getProof(key);
-    byte[] rootHash = map.getRootHash();
-    assert proof != null && rootHash != null;
+    assert proof != null : "The proof must not be null";
+    HashCode rootHash = map.getRootHash();
     MapProofValidator validator = new MapProofValidator(rootHash, key);
 
     proof.accept(validator);

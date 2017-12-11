@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.proofs.list;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.exonum.binding.hash.Funnel;
+import com.exonum.binding.hash.PrimitiveSink;
 
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
@@ -16,7 +17,7 @@ public class ProofListElement implements ListProof {
    * @throws NullPointerException if the element is null
    */
   public ProofListElement(byte[] element) {
-    this.element = checkNotNull(element);
+    this.element = element.clone();
   }
 
   @Override
@@ -28,6 +29,19 @@ public class ProofListElement implements ListProof {
    * Returns the value of the element.
    */
   public byte[] getElement() {
-    return element;
+    return element.clone();
+  }
+
+  public static Funnel<ProofListElement> funnel() {
+    return ElementFunnel.INSTANCE;
+  }
+
+  enum ElementFunnel implements Funnel<ProofListElement> {
+    INSTANCE {
+      @Override
+      public void funnel(ProofListElement from, PrimitiveSink into) {
+        into.putBytes(from.element);
+      }
+    }
   }
 }

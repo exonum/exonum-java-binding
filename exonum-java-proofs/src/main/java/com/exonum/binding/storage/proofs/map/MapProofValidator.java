@@ -1,10 +1,16 @@
 package com.exonum.binding.storage.proofs.map;
 
+import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.hash.Hashes;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -44,11 +50,15 @@ public class MapProofValidator implements MapProofVisitor {
    */
   static final boolean PERFORM_TREE_CORRECTNESS_CHECKS = false;
 
+  private static final int HASH_SIZE_BITS = Hashing.DEFAULT_HASH_SIZE_BYTES * Byte.SIZE;
+
   private static final int MAX_TREE_HEIGHT = DbKey.KEY_SIZE_BITS;
 
-  private final byte[] expectedRootHash;
+  private final HashCode expectedRootHash;
 
   private final byte[] key;
+
+  private final HashFunction hashFunction;
 
   /**
    * A key as a bit set.
@@ -60,7 +70,7 @@ public class MapProofValidator implements MapProofVisitor {
 
   private Status status;
 
-  private byte[] rootHash;
+  private HashCode rootHash;
 
   @Nullable
   private byte[] value;
@@ -77,11 +87,29 @@ public class MapProofValidator implements MapProofVisitor {
    * @param key a requested key
    */
   public MapProofValidator(byte[] rootHash, byte[] key) {
-    this.expectedRootHash = checkNotNull(rootHash);
+    this(HashCode.fromBytes(rootHash), key, Hashing.defaultHashFunction());
+  }
+
+  /**
+   * Creates a new validator of a map proof.
+   *
+   * @param rootHash a root hash of the proof map to validate against
+   * @param key a requested key
+   */
+  public MapProofValidator(HashCode rootHash, byte[] key) {
+    this(rootHash, key, Hashing.defaultHashFunction());
+  }
+
+  @VisibleForTesting  // to easily inject a mock of a hash function.
+  MapProofValidator(HashCode rootHash, byte[] key, HashFunction hashFunction) {
+    checkArgument(rootHash.bits() == HASH_SIZE_BITS,
+        "Root hash must be 256 bit long (actual length %s)", rootHash.bits());
+    this.expectedRootHash = rootHash;
     this.key = checkNotNull(key);
     keyBits = getKeyAsBitSet(key);
+    this.hashFunction = checkNotNull(hashFunction);
     status = Status.VALID;
-    rootHash = new byte[0];
+    rootHash = null;
     value = null;
     bstHeight = 0;
   }
@@ -94,7 +122,7 @@ public class MapProofValidator implements MapProofVisitor {
    * Returns true if this proof is valid: structurally correct and producing the expected root hash.
    */
   public boolean isValid() {
-    return status == Status.VALID && Arrays.equals(rootHash, expectedRootHash);
+    return status == Status.VALID && expectedRootHash.equals(rootHash);
   }
 
   public byte[] getKey() {
@@ -119,11 +147,9 @@ public class MapProofValidator implements MapProofVisitor {
       status = Status.INVALID_DB_KEY_OF_ROOT_NODE;
       return;
     }
-    DbKey databaseKey = node.getDatabaseKey();
-    byte[] rawDbKey = databaseKey.getRawDbKey();
     value = node.getValue();
-    byte[] valueHash = Hashes.getHashOf(value);
-    rootHash = getSingletonTreeHash(rawDbKey, valueHash);
+    HashCode valueHash = hashFunction.hashBytes(node.getValue());
+    rootHash = getSingletonTreeHash(node.getDatabaseKey(), valueHash);
   }
 
   @Override
@@ -133,10 +159,7 @@ public class MapProofValidator implements MapProofVisitor {
       status = Status.INVALID_DB_KEY_OF_ROOT_NODE;
       return;
     }
-    DbKey databaseKey = node.getDatabaseKey();
-    byte[] rawDbKey = databaseKey.getRawDbKey();
-    byte[] valueHash = node.getValueHash().getHash();
-    rootHash = getSingletonTreeHash(rawDbKey, valueHash);
+    rootHash = getSingletonTreeHash(node.getDatabaseKey(), node.getValueHash());
   }
 
   @Override
@@ -162,11 +185,11 @@ public class MapProofValidator implements MapProofVisitor {
     bstHeight++;
     node.getLeft().accept(this);
 
-    byte[] leftHash = rootHash;
-    byte[] rightHash = node.getRightHash().getHash();
-    byte[] leftDbKey = node.getLeftKey().getRawDbKey();
-    byte[] rightDbKey = node.getRightKey().getRawDbKey();
-    rootHash = Hashes.getHashOf(leftHash, rightHash, leftDbKey, rightDbKey);
+    HashCode leftHash = rootHash;
+    rootHash = computeBranchHash(leftHash,
+        node.getRightHash(),
+        node.getLeftKey(),
+        node.getRightKey());
   }
 
   @Override
@@ -186,11 +209,11 @@ public class MapProofValidator implements MapProofVisitor {
     bstHeight++;
     node.getRight().accept(this);
 
-    byte[] leftHash = node.getLeftHash().getHash();
-    byte[] rightHash = rootHash;
-    byte[] leftDbKey = node.getLeftKey().getRawDbKey();
-    byte[] rightDbKey = node.getRightKey().getRawDbKey();
-    rootHash = Hashes.getHashOf(leftHash, rightHash, leftDbKey, rightDbKey);
+    HashCode rightHash = rootHash;
+    rootHash = computeBranchHash(node.getLeftHash(),
+        rightHash,
+        node.getLeftKey(),
+        node.getRightKey());
   }
 
   @Override
@@ -211,11 +234,10 @@ public class MapProofValidator implements MapProofVisitor {
     }
 
     // The node is correct, compute the hash.
-    byte[] leftHash = node.getLeftHash().getHash();
-    byte[] rightHash = node.getRightHash().getHash();
-    byte[] leftDbKey = node.getLeftKey().getRawDbKey();
-    byte[] rightDbKey = node.getRightKey().getRawDbKey();
-    rootHash = Hashes.getHashOf(leftHash, rightHash, leftDbKey, rightDbKey);
+    rootHash = computeBranchHash(node.getLeftHash(),
+        node.getRightHash(),
+        node.getLeftKey(),
+        node.getRightKey());
   }
 
   @Override
@@ -226,7 +248,7 @@ public class MapProofValidator implements MapProofVisitor {
     }
 
     value = leafMapProofNode.getValue();
-    rootHash = Hashes.getHashOf(value);
+    rootHash = hashFunction.hashBytes(value);
   }
 
   private void checkPathToRootNode(MapProof node) {
@@ -249,12 +271,25 @@ public class MapProofValidator implements MapProofVisitor {
         && Arrays.equals(databaseKey.getKeySlice(), key);
   }
 
-  private static byte[] getSingletonTreeHash(byte[] dbKey, byte[] valueHash) {
-    return Hashes.getHashOf(dbKey, valueHash);
+  private HashCode getSingletonTreeHash(DbKey dbKey, HashCode valueHash) {
+    return hashFunction.newHasher()
+        .putObject(dbKey, dbKeyFunnel())
+        .putObject(valueHash, hashCodeFunnel())
+        .hash();
   }
 
-  private static byte[] getEmptyTreeHash() {
-    return new byte[Hashes.HASH_SIZE_BYTES];
+  private static HashCode getEmptyTreeHash() {
+    return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
+  }
+
+  private HashCode computeBranchHash(HashCode leftHash, HashCode rightHash,
+                                     DbKey leftDbKey, DbKey rightDbKey) {
+    return hashFunction.newHasher()
+        .putObject(leftHash, hashCodeFunnel())
+        .putObject(rightHash, hashCodeFunnel())
+        .putObject(leftDbKey, dbKeyFunnel())
+        .putObject(rightDbKey, dbKeyFunnel())
+        .hash();
   }
 
   private boolean isValidBranchDepth() {
@@ -268,8 +303,8 @@ public class MapProofValidator implements MapProofVisitor {
   @Override
   public String toString() {
     return "MapProofValidator{"
-        + "expectedRootHash=" + Hashes.toString(expectedRootHash)
-        + ", rootHash=" + Hashes.toString(rootHash)
+        + "expectedRootHash=" + expectedRootHash
+        + ", rootHash=" + rootHash
         + ", status=" + status
         + ", key=" + Arrays.toString(key)
         + ", keyBits=" + keyBits

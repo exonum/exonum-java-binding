@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -45,7 +44,7 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void testConstructor() throws Exception {
-    View view = mock(Fork.class);
+    View view = createFork();
     proxy = new IndexProxyImpl(view);
 
     assertThat(proxy.dbView, equalTo(view));
@@ -61,7 +60,7 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void checkCanModifyThrowsIfSnapshotPassed() throws Exception {
-    Snapshot dbView = mock(Snapshot.class);
+    Snapshot dbView = createSnapshot();
     proxy = new IndexProxyImpl(dbView);
 
     Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
@@ -73,11 +72,19 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void checkCanModifyAcceptsFork() throws Exception {
-    Fork dbView = mock(Fork.class);
+    Fork dbView = createFork();
     proxy = new IndexProxyImpl(dbView);
 
     proxy.notifyModified();
     verify(modCounter).notifyModified(eq(dbView));
+  }
+
+  private Fork createFork() {
+    return new Fork(1L, false);
+  }
+
+  private Snapshot createSnapshot() {
+    return new Snapshot(2L, false);
   }
 
   private static class IndexProxyImpl extends AbstractIndexProxy {
