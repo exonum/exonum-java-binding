@@ -7,7 +7,7 @@ You need JDK 1.8+, [Maven 3](https://maven.apache.org/download.cgi) and [Rust](h
 
 ### Install system dependencies
 Please install Rust and the system dependencies of 
-Exonum. The instructions are available [here](https://github.com/exonum/exonum/blob/v0.3/INSTALL.md).
+Exonum. The instructions are available [here](https://github.com/exonum/exonum/blob/v0.4/INSTALL.md).
 You do _not_ need to manually fetch and compile Exonum.
 
 ### Build the project
