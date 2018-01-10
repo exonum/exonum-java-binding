@@ -3,7 +3,7 @@ package com.exonum.binding.test;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.primitives.UnsignedBytes;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 public class Bytes {
 
@@ -41,11 +41,7 @@ public class Bytes {
    * @return a string as bytes in UTF-8.
    */
   public static byte[] bytes(String s) {
-    try {
-      return s.getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new AssertionError(e);
-    }
+    return s.getBytes(StandardCharsets.UTF_8);
   }
 
   /**
