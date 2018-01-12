@@ -14,6 +14,7 @@ extern crate log;
 extern crate jni;
 extern crate exonum;
 
+#[cfg(any(test, feature = "resource-manager"))]
 #[macro_use]
 extern crate lazy_static;
 
