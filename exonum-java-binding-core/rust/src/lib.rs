@@ -9,10 +9,10 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
+extern crate exonum;
+extern crate jni;
 #[macro_use]
 extern crate log;
-extern crate jni;
-extern crate exonum;
 
 #[cfg(any(test, feature = "resource-manager"))]
 #[macro_use]
@@ -27,13 +27,11 @@ pub use init::*;
 pub use proxy::*;
 pub use storage::*;
 
-
 /// Utilities for testing
 #[cfg(test)]
 pub mod test_util {
     use std::sync::Arc;
     use jni::{InitArgsBuilder, JNIVersion, JavaVM};
-
 
     lazy_static! {
         pub static ref VM: Arc<JavaVM> = {

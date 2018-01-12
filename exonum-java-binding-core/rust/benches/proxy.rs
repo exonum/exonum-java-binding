@@ -1,7 +1,7 @@
 #![feature(test)]
 
-extern crate jni;
 extern crate java_bindings;
+extern crate jni;
 extern crate test;
 
 #[macro_use]
@@ -9,11 +9,10 @@ extern crate lazy_static;
 
 use jni::{InitArgsBuilder, JNIVersion, JavaVM};
 use std::sync::Arc;
-use test::{Bencher, black_box};
+use test::{black_box, Bencher};
 
 use java_bindings::AtomicIntegerProxy;
 use java_bindings::DumbExecutor;
-
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = {
@@ -28,7 +27,6 @@ lazy_static! {
         Arc::new(jvm)
     };
 }
-
 
 #[bench]
 pub fn create_drop_dumb(b: &mut Bencher) {
