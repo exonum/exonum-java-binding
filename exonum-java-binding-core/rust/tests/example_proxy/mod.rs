@@ -9,16 +9,16 @@ use jni::sys::jint;
 /// A temporary example of a native-to-JNI proxy
 #[derive(Clone)]
 pub struct AtomicIntegerProxy<E>
-    where
-        E: Executor,
+where
+    E: Executor,
 {
     exec: E,
     obj: GlobalRef,
 }
 
 impl<E> AtomicIntegerProxy<E>
-    where
-        E: Executor,
+where
+    E: Executor,
 {
     /// Creates a new instance of `AtomicIntegerProxy`
     pub fn new(exec: E, init_value: jint) -> Result<Self> {

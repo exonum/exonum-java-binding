@@ -9,8 +9,8 @@ pub trait Executor: Clone {
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM
     fn with_attached<F, R>(&self, f: F) -> Result<R>
-        where
-            F: FnOnce(&JNIEnv) -> Result<R>;
+    where
+        F: FnOnce(&JNIEnv) -> Result<R>;
 }
 
 /// A "dumb" implementation of `Executor`.

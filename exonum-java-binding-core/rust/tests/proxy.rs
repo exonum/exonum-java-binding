@@ -1,5 +1,5 @@
-extern crate jni;
 extern crate java_bindings;
+extern crate jni;
 #[macro_use]
 extern crate lazy_static;
 
@@ -13,7 +13,7 @@ use std::thread::spawn;
 mod example_proxy;
 use example_proxy::*;
 
-#[path="../src/test_util.rs"]
+#[path = "../src/test_util.rs"]
 mod test_util;
 use test_util::create_vm;
 

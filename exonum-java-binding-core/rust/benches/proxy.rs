@@ -12,11 +12,11 @@ use std::sync::Arc;
 
 use test::{black_box, Bencher};
 
-#[path="../tests/example_proxy/mod.rs"]
+#[path = "../tests/example_proxy/mod.rs"]
 mod proxy;
 use proxy::AtomicIntegerProxy;
 
-#[path="../src/test_util.rs"]
+#[path = "../src/test_util.rs"]
 mod test_util;
 use test_util::create_vm;
 
