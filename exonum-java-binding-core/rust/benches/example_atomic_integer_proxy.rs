@@ -13,8 +13,8 @@ use std::sync::Arc;
 use test::{black_box, Bencher};
 
 #[path = "../tests/example_proxy/mod.rs"]
-mod proxy;
-use proxy::AtomicIntegerProxy;
+mod model;
+use model::AtomicIntegerProxy;
 
 #[path = "../src/test_util.rs"]
 mod test_util;
@@ -26,27 +26,29 @@ lazy_static! {
 
 #[bench]
 pub fn create_drop(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: VM.clone() };
-    b.iter(move || black_box(AtomicIntegerProxy::new(executor.clone(), 0).unwrap()));
+    let executor = DumbExecutor { vm: Arc::clone(&VM) };
+    b.iter(move || {
+        black_box(AtomicIntegerProxy::new(executor.clone(), 0).unwrap())
+    });
 }
 
 #[bench]
 pub fn increment(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: VM.clone() };
+    let executor = DumbExecutor { vm: Arc::clone(&VM) };
     let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
     b.iter(move || black_box(aip.increment_and_get().unwrap()));
 }
 
 #[bench]
 pub fn add(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: VM.clone() };
+    let executor = DumbExecutor { vm: Arc::clone(&VM) };
     let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
     b.iter(move || black_box(aip.add_and_get(2).unwrap()));
 }
 
 #[bench]
 pub fn get(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: VM.clone() };
+    let executor = DumbExecutor { vm: Arc::clone(&VM) };
     let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
     b.iter(move || black_box(aip.get().unwrap()));
 }
