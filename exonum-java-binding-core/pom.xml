@@ -149,7 +149,11 @@
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
-          <argLine>-Djava.library.path=${build.nativeLibPath} -Xcheck:jni ${java.vm.assertionFlag}</argLine>
+          <argLine>-Djava.library.path=${build.nativeLibPath}
+                   -Xcheck:jni
+                   ${java.vm.assertionFlag}
+                   -Xss1500k
+          </argLine>
         </configuration>
         <executions>
           <execution>
