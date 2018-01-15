@@ -56,7 +56,7 @@ pub fn it_works_in_concurrent_threads() {
     let mut threads = Vec::new();
 
     for _ in 0..THREAD_NUM {
-        let barrier = barrier.clone();
+        let barrier = Arc::clone(&barrier);
         let mut atomic = atomic.clone();
         let jh = spawn(move || {
             barrier.wait();

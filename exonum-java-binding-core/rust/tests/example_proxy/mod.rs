@@ -38,8 +38,9 @@ where
 
     /// Gets a current value from java object
     pub fn get(&mut self) -> Result<jint> {
-        self.exec
-            .with_attached(|env| env.call_method(self.obj.as_obj(), "get", "()I", &[])?.i())
+        self.exec.with_attached(|env| {
+            env.call_method(self.obj.as_obj(), "get", "()I", &[])?.i()
+        })
     }
 
     /// Increments a value of java object and then gets it
