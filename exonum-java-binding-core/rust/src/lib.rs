@@ -27,25 +27,5 @@ pub use init::*;
 pub use proxy::*;
 pub use storage::*;
 
-/// Utilities for testing
 #[cfg(test)]
-pub mod test_util {
-    use std::sync::Arc;
-    use jni::{InitArgsBuilder, JNIVersion, JavaVM};
-
-    lazy_static! {
-        pub static ref VM: Arc<JavaVM> = {
-            let jvm_args = InitArgsBuilder::new()
-                .version(JNIVersion::V8)
-                .option("-Xcheck:jni")
-                .option("-Xdebug")
-                .build()
-                .unwrap_or_else(|e| panic!(format!("{:#?}", e)));
-
-            let jvm = JavaVM::new(jvm_args)
-                .unwrap_or_else(|e| panic!(format!("{:#?}", e)));
-
-            Arc::new(jvm)
-        };
-    }
-}
+mod test_util;

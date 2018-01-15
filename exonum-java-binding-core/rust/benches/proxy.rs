@@ -2,34 +2,30 @@
 
 extern crate java_bindings;
 extern crate jni;
-extern crate test;
-
 #[macro_use]
 extern crate lazy_static;
+extern crate test;
 
-use jni::{InitArgsBuilder, JNIVersion, JavaVM};
+use java_bindings::DumbExecutor;
+use jni::JavaVM;
 use std::sync::Arc;
+
 use test::{black_box, Bencher};
 
-use java_bindings::AtomicIntegerProxy;
-use java_bindings::DumbExecutor;
+#[path="../tests/example_proxy/mod.rs"]
+mod proxy;
+use proxy::AtomicIntegerProxy;
+
+#[path="../src/test_util.rs"]
+mod test_util;
+use test_util::create_vm;
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = {
-        let jvm_args = InitArgsBuilder::new()
-            .version(JNIVersion::V8)
-            .build()
-            .unwrap_or_else(|e| panic!(format!("{:#?}", e)));
-
-        let jvm = JavaVM::new(jvm_args)
-            .unwrap_or_else(|e| panic!(format!("{:#?}", e)));
-
-        Arc::new(jvm)
-    };
+    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(false));
 }
 
 #[bench]
-pub fn create_drop_dumb(b: &mut Bencher) {
+pub fn create_drop(b: &mut Bencher) {
     let executor = DumbExecutor { vm: VM.clone() };
     b.iter(move || black_box(AtomicIntegerProxy::new(executor.clone(), 0).unwrap()));
 }
@@ -46,4 +42,11 @@ pub fn add(b: &mut Bencher) {
     let executor = DumbExecutor { vm: VM.clone() };
     let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
     b.iter(move || black_box(aip.add_and_get(2).unwrap()));
+}
+
+#[bench]
+pub fn get(b: &mut Bencher) {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
+    b.iter(move || black_box(aip.get().unwrap()));
 }
