@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
@@ -44,7 +45,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -335,6 +335,10 @@ public class ProofMapIndexProxyIntegrationTest {
   //
   // Consider adding a similar test for left-leaning MPT
   public void getProof_MapContainsRightLeaningMaxHeightMpt() throws Exception {
+    // todo: migrate to JUnit 5 and just exclude on all non-CI builds for it take 8+ seconds.
+    // Abort the test on Mac for it fails with stack overflow
+    assumeNotMac();
+
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry> entries = createEntriesForRightLeaningMpt();
       for (MapEntry e : entries) {
@@ -345,6 +349,13 @@ public class ProofMapIndexProxyIntegrationTest {
         assertThat(map, provesThatContains(e.getKey(), e.getValue()));
       }
     });
+  }
+
+  private void assumeNotMac() {
+    assumeFalse(System.getProperty("os.name", "generic")
+        .toLowerCase()
+        .contains("mac")
+    );
   }
 
   @Test
