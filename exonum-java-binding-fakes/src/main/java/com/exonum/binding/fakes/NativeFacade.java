@@ -12,6 +12,7 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.transport.Server;
+import com.exonum.binding.util.LibraryLoader;
 import io.vertx.ext.web.Router;
 
 /**
@@ -21,6 +22,10 @@ import io.vertx.ext.web.Router;
  */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Used in native code
 public final class NativeFacade {
+
+  static {
+    LibraryLoader.load();
+  }
 
   /**
    * Creates a UserTransactionAdapter of a transaction that puts a given value into the storage.
