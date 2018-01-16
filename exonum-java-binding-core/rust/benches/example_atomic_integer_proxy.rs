@@ -6,18 +6,18 @@ extern crate jni;
 extern crate lazy_static;
 extern crate test;
 
-use java_bindings::DumbExecutor;
-use jni::JavaVM;
-use std::sync::Arc;
-
-use test::{black_box, Bencher};
-
 #[path = "../tests/example_proxy/mod.rs"]
-mod model;
-use model::AtomicIntegerProxy;
-
+mod example_proxy;
 #[path = "../src/test_util.rs"]
 mod test_util;
+
+use java_bindings::DumbExecutor;
+use jni::JavaVM;
+
+use std::sync::Arc;
+use test::{black_box, Bencher};
+
+use example_proxy::AtomicIntegerProxy;
 use test_util::create_vm;
 
 lazy_static! {

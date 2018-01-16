@@ -3,6 +3,10 @@ extern crate jni;
 #[macro_use]
 extern crate lazy_static;
 
+mod example_proxy;
+#[path = "../src/test_util.rs"]
+mod test_util;
+
 use java_bindings::DumbExecutor;
 use jni::JavaVM;
 use jni::sys::jint;
@@ -10,11 +14,7 @@ use jni::sys::jint;
 use std::sync::{Arc, Barrier};
 use std::thread::spawn;
 
-mod example_proxy;
 use example_proxy::AtomicIntegerProxy;
-
-#[path = "../src/test_util.rs"]
-mod test_util;
 use test_util::create_vm;
 
 lazy_static! {
