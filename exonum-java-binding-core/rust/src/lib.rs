@@ -9,18 +9,23 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
+extern crate exonum;
+extern crate jni;
 #[macro_use]
 extern crate log;
-extern crate jni;
-extern crate exonum;
 
-#[cfg(feature = "resource-manager")]
+#[cfg(any(test, feature = "resource-manager"))]
 #[macro_use]
 extern crate lazy_static;
 
 mod utils;
 mod init;
+mod proxy;
 mod storage;
 
 pub use init::*;
+pub use proxy::*;
 pub use storage::*;
+
+#[cfg(test)]
+mod test_util;

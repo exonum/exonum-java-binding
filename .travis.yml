@@ -20,6 +20,7 @@ env:
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     - ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
     - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
+    - LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)":"$LD_LIBRARY_PATH"
 
 cache:
   directories:
