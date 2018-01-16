@@ -1,4 +1,4 @@
-package com.exonum.binding.service;
+package com.exonum.binding.service.adapters;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static java.util.Collections.emptyList;
@@ -16,6 +16,7 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.TemplateMessage;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;

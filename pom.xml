@@ -130,8 +130,9 @@
   </dependencies>
 
   <modules>
-    <module>exonum-java-binding-core</module>
-    <module>exonum-java-proofs</module>
     <module>exonum-java-testing</module>
+    <module>exonum-java-proofs</module>
+    <module>exonum-java-binding-core</module>
+    <module>exonum-java-binding-fakes</module>
   </modules>
 </project>

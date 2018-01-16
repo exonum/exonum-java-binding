@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-public class NodeProxy extends AbstractNativeProxy implements Node {
+public final class NodeProxy extends AbstractNativeProxy implements Node {
 
   /**
    * Creates a proxy of a node. Native code owns the node,
@@ -22,7 +22,7 @@ public class NodeProxy extends AbstractNativeProxy implements Node {
    *
    * @param nativeHandle an implementation-specific reference to a native node
    */
-  protected NodeProxy(long nativeHandle) {
+  public NodeProxy(long nativeHandle) {
     // fixme: remove this comment when https://jira.bf.local/browse/EEN-27 is resolved
     super(nativeHandle, false);
   }
