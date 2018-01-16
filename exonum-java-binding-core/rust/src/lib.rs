@@ -10,19 +10,21 @@
 #![allow(non_snake_case)]
 
 #[macro_use]
-extern crate exonum;
-extern crate jni;
+pub extern crate exonum;
+pub extern crate jni;
 #[macro_use]
 extern crate log;
+pub extern crate serde_json;
 
 #[cfg(feature = "resource-manager")]
 #[macro_use]
 extern crate lazy_static;
 
-mod utils;
 mod init;
 mod proxy;
 mod storage;
+#[doc(hidden)]
+pub mod utils;
 
 pub use init::*;
 pub use proxy::*;
