@@ -12,6 +12,8 @@ use jni::sys::jboolean;
 use std::fmt;
 
 use Executor;
+use storage::View;
+use utils;
 
 /// A proxy for `Transaction`s
 #[derive(Clone)]
@@ -62,7 +64,7 @@ where
             let _res = self.exec.with_attached(|env: &JNIEnv| {
                 env.call_method(
                     self.obj.as_obj(),
-                    "verify",
+                    "isValid",
                     "()Z",
                     &[],
                 )?
@@ -78,14 +80,20 @@ where
     fn execute(&self, fork: &mut Fork) {
         println!("TransactionProxy::execute()");
         let res = (|| -> Result<()> {
-            let obj = self.exec.with_attached(|env: &JNIEnv| {
+            self.exec.with_attached(|env: &JNIEnv| {
                 env.call_method(
                     self.obj.as_obj(),
                     "execute",
                     "()V",
-                    &[],
-                )
-            })?;
+                    // FIXME how this is intended to work?
+                    &[JValue::from(utils::to_handle(View::Fork(fork)))],
+/*
+89 |                     &[JValue::from(utils::to_handle(View::Fork(fork)))],
+   |                                                                ^^^^ expected struct `exonum::storage::Fork`, found mutable reference
+*/
+                )?;
+                Ok(())
+            })
         })();
         // FIXME here should be nice panic
         res.unwrap()
