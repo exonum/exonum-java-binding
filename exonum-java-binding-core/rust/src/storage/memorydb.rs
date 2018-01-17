@@ -36,7 +36,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = utils::cast_handle::<MemoryDB>(db_handle);
-        Ok(utils::to_handle(View::Snapshot(db.snapshot())))
+        Ok(utils::to_handle(View::from_owned_snapshot(db.snapshot())))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -50,7 +50,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = utils::cast_handle::<MemoryDB>(db_handle);
-        Ok(utils::to_handle(View::Fork(db.fork())))
+        Ok(utils::to_handle(View::from_owned_fork(db.fork())))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
