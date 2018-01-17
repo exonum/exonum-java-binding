@@ -33,6 +33,15 @@ public final class UserServiceAdapterMockBuilder {
         .thenReturn(checkNotNull(transaction));
   }
 
+  /**
+   * Sets up the mock to reject any transaction message,
+   * as if it is does not belong to this service.
+   */
+  public void rejectingRawTransactions() {
+    when(service.convertTransaction(any(byte[].class)))
+        .thenThrow(IllegalArgumentException.class);
+  }
+
   public void stateHashes(byte[][] stateHashes) {
     when(service.getStateHashes(anyLong()))
         .thenReturn(checkNotNull(stateHashes));
