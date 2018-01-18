@@ -31,6 +31,7 @@ impl View {
         View::Fork(fork)
     }
 
+    #[cfg_attr(feature="cargo-clippy", allow(needless_borrow))]
     fn drop_owned(env: &JNIEnv, view: &View) {
         match *view {
             View::Snapshot(ref pair) => {
