@@ -2,31 +2,68 @@ use jni::JNIEnv;
 use jni::sys::jlong;
 
 use std::panic;
+use std::marker::PhantomData;
 
 use super::exception;
 use super::resource_manager;
 
-// Raw pointer passed to and from Java-side.
+/// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
-// Returns handle (raw pointer) to the given object allocated in the heap.
+/// Wrapper for the non-owned handle. Call `resource_manager::unregister_handle` in the `Drop`
+/// implementation.
+pub struct NonOwnedHandle<T: 'static> {
+    handle: Handle,
+    handle_type: PhantomData<T>,
+}
+
+impl<T> NonOwnedHandle<T> {
+    fn new(handle: Handle) -> Self {
+        resource_manager::register_handle::<T>(handle);
+        Self {
+            handle,
+            handle_type: PhantomData,
+        }
+    }
+
+    /// Returns `Handle` value.
+    pub fn get(&self) -> Handle {
+        self.handle
+    }
+}
+
+impl<T> Drop for NonOwnedHandle<T> {
+    fn drop(&mut self) {
+        resource_manager::unregister_handle::<T>(self.handle);
+    }
+}
+
+/// Returns handle (raw pointer) to the given owned object allocated in the heap. This handle must
+/// be freed by the `drop_handle` function call.
 pub fn to_handle<T: 'static>(val: T) -> Handle {
     let handle = Box::into_raw(Box::new(val)) as Handle;
     resource_manager::add_handle::<T>(handle);
     handle
 }
 
+/// Returns handle (raw pointer) to the given owned object. This functions assumes that the object
+/// is owned by someone, therefore such handle should not be freed manually.
+pub fn as_handle<T>(val: &mut T) -> NonOwnedHandle<T> {
+    let ptr = val as *mut T;
+    NonOwnedHandle::new(ptr as Handle)
+}
+
 // Panics if object is equal to zero.
 pub fn cast_handle<T>(handle: Handle) -> &'static mut T {
     assert_ne!(handle, 0, "Invalid handle value");
 
-    resource_manager::check_handle::<T>(handle);
+    resource_manager::check_handle::<T>(handle, true);
 
     let ptr = handle as *mut T;
     unsafe { &mut *ptr }
 }
 
-// Constructs `Box` from raw pointer and immediately drops it.
+/// Constructs `Box` from raw pointer and immediately drops it. Handle must be owned.
 pub fn drop_handle<T: 'static>(env: &JNIEnv, handle: Handle) {
     let res = panic::catch_unwind(|| unsafe {
         resource_manager::remove_handle::<T>(handle);
