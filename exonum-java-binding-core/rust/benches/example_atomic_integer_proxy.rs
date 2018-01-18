@@ -8,8 +8,8 @@ extern crate test;
 
 #[path = "../tests/example_proxy/mod.rs"]
 mod example_proxy;
-#[path = "../src/test_util.rs"]
-mod test_util;
+#[path = "../tests/util/mod.rs"]
+mod util;
 
 use java_bindings::DumbExecutor;
 use jni::JavaVM;
@@ -18,7 +18,7 @@ use std::sync::Arc;
 use test::{black_box, Bencher};
 
 use example_proxy::AtomicIntegerProxy;
-use test_util::create_vm;
+use util::create_vm;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(false));

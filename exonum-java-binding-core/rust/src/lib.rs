@@ -26,6 +26,3 @@ mod storage;
 pub use init::*;
 pub use proxy::*;
 pub use storage::*;
-
-#[cfg(test)]
-mod test_util;
