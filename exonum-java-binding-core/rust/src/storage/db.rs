@@ -22,7 +22,7 @@ lazy_static! {
     static ref VIEW_MAP: RwLock<HashMap<usize, Handle>> = RwLock::new(HashMap::new());
 }
 
-struct Pair(usize, usize);
+struct Pair (usize, usize);
 
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
