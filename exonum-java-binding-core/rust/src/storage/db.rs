@@ -22,7 +22,7 @@ lazy_static! {
     static ref VIEW_MAP: RwLock<HashMap<usize, Handle>> = RwLock::new(HashMap::new());
 }
 
-struct Pair (usize, usize);
+struct Pair(usize, usize);
 
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
@@ -42,7 +42,7 @@ impl View {
         view
     }
 
-    #[cfg_attr(feature="cargo-clippy", allow(needless_borrow))]
+    #[cfg_attr(feature = "cargo-clippy", allow(needless_borrow))]
     fn drop_owned(env: &JNIEnv, view: &View) {
         if let Some(handle) = view.remove_handle() {
             match *view {
@@ -52,9 +52,12 @@ impl View {
         }
     }
 
+    #[cfg_attr(feature = "cargo-clippy", allow(needless_borrow))]
     fn id(&self) -> usize {
         match *self {
-            View::Snapshot(ref snapshot) => unsafe { ::std::mem::transmute_copy::<_, Pair>(snapshot) }.0,
+            View::Snapshot(ref snapshot) => {
+                unsafe { ::std::mem::transmute_copy::<_, Pair>(snapshot) }.0
+            }
             View::Fork(ref fork) => unsafe { ::std::mem::transmute_copy(fork) },
         }
     }
