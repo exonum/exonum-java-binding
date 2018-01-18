@@ -21,7 +21,7 @@ lazy_static! {
 }
 
 #[test]
-pub fn it_works() {
+pub fn it_works_verify() {
     let executor = DumbExecutor { vm: VM.clone() };
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
@@ -31,7 +31,7 @@ pub fn it_works() {
 }
 
 #[test]
-pub fn it_works_in_another_thread() {
+pub fn it_works_in_another_thread_verify() {
     let executor = DumbExecutor { vm: VM.clone() };
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
@@ -45,7 +45,7 @@ pub fn it_works_in_another_thread() {
 }
 
 #[test]
-pub fn it_works_in_concurrent_threads() {
+pub fn it_works_in_concurrent_threads_verify() {
     const ITERS_PER_THREAD: usize = 10_000;
     const THREAD_NUM: usize = 8;
 

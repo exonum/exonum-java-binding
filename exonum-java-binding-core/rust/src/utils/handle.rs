@@ -42,7 +42,7 @@ mod tests {
 
     #[cfg(not(feature = "resource-manager"))]
     #[test]
-    fn cast_simple_object() {
+    fn cast_simple_object_test() {
         static VALUE: i32 = 0;
 
         let mut object = Box::new(VALUE);
@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Invalid handle value")]
-    fn cast_zero_object() {
+    fn cast_zero_object_test() {
         let _ = cast_handle::<i32>(0);
     }
 }
