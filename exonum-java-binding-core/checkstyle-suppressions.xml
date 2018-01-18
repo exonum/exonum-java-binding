@@ -13,4 +13,7 @@
 
     <!-- Allow multiple classes per file in tests -->
     <suppress files="test.+Test.java" checks="OneTopLevelClass"/>
+
+    <!-- Do not require Javadoc for native adapters -->
+    <suppress files="service/adapters.+.java" checks="JavadocMethod"/>
 </suppressions>

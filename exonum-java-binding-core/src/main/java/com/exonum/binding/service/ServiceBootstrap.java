@@ -2,6 +2,7 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

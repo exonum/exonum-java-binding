@@ -1,5 +1,6 @@
 package com.exonum.binding.service;
 
+import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
