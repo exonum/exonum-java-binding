@@ -10,7 +10,7 @@ use super::resource_manager;
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
-/// Wrapper for the non-owned handle. Call `resource_manager::unregister_handle` in the `Drop`
+/// Wrapper for the non-owned handle. Calls `resource_manager::unregister_handle` in the `Drop`
 /// implementation.
 pub struct NonOwnedHandle<T: 'static> {
     handle: Handle,
@@ -38,26 +38,34 @@ impl<T> Drop for NonOwnedHandle<T> {
     }
 }
 
-/// Returns handle (raw pointer) to the given owned object allocated in the heap. This handle must
-/// be freed by the `drop_handle` function call.
+/// Returns a handle (a raw pointer) to the given Java-owned object allocated in the heap. This
+/// handle must be freed by the `drop_handle` function call.
 pub fn to_handle<T: 'static>(val: T) -> Handle {
     let handle = Box::into_raw(Box::new(val)) as Handle;
     resource_manager::add_handle::<T>(handle);
     handle
 }
 
-/// Returns handle (raw pointer) to the given owned object. This functions assumes that the object
-/// is owned by someone, therefore such handle should not be freed manually.
+/// Returns a handle (a raw pointer) to the given native-owned object. This handle should not be
+/// freed manually.
 pub fn as_handle<T>(val: &mut T) -> NonOwnedHandle<T> {
     let ptr = val as *mut T;
     NonOwnedHandle::new(ptr as Handle)
 }
 
-// Panics if object is equal to zero.
+/// "Converts" handle to the reference to object.
+///
+/// # Panics
+///
+/// Panics if handle is equal to zero.
+///
+/// # Notes
+///
+/// Additional validity checks are performed if "resource-manager" feature is enabled.
 pub fn cast_handle<T>(handle: Handle) -> &'static mut T {
     assert_ne!(handle, 0, "Invalid handle value");
 
-    resource_manager::check_handle::<T>(handle, true);
+    resource_manager::check_handle::<T>(handle);
 
     let ptr = handle as *mut T;
     unsafe { &mut *ptr }

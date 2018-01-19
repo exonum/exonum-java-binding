@@ -8,60 +8,65 @@ lazy_static! {
     static ref HANDLES_MAP: RwLock<HashMap<Handle, HandleInfo>> = RwLock::new(HashMap::new());
 }
 
+/// Represents `Handle` ownership model.
+#[derive(Debug, PartialEq, Eq)]
+enum HandleOwnershipType {
+    /// Handle created on the Java side, therefore it should be freed manually.
+    JavaOwned,
+    /// Handle created on the native side, should not be freed by Java.
+    NativeOwned,
+}
+
+/// Information associated with handle.
+#[derive(Debug)]
 struct HandleInfo {
     type_id: TypeId,
-    is_owned: bool,
+    ownership: HandleOwnershipType,
 }
 
 impl HandleInfo {
-    fn new(type_id: TypeId, is_owned: bool) -> Self {
-        Self { type_id, is_owned }
+    fn new(type_id: TypeId, ownership: HandleOwnershipType) -> Self {
+        Self { type_id, ownership }
     }
 }
 
-/// Adds handle to the resource manager.
-fn add_handle_impl<T: 'static>(handle: Handle, is_owned: bool) {
+/// Adds given handle to the resource manager.
+///
+/// # Panics
+///
+/// Panics if handle is equal to zero or it is already present in the resource manager.
+fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
     assert_ne!(handle, 0);
     assert!(
         HANDLES_MAP
             .write()
             .expect("Unable to obtain write-lock")
-            .insert(handle, HandleInfo::new(TypeId::of::<T>(), is_owned))
+            .insert(handle, HandleInfo::new(TypeId::of::<T>(), ownership))
             .is_none(),
         "Trying to add the same handle for the second time: {:X}, handle"
     )
 }
 
-/// Removes handle from the resource manager.
-pub fn remove_handle_impl<T: 'static>(handle: Handle, is_owned: bool) {
-    check_handle::<T>(handle, is_owned);
+/// Removes given handle from the resource manager.
+///
+/// # Panics
+///
+/// See `check_handle_impl` for details.
+fn remove_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
+    check_handle_impl::<T>(handle, Some(ownership));
+    // Return value is ignored because `check_handle_impl` already checks that handle is present.
     HANDLES_MAP
         .write()
         .expect("Unable to obtain write-lock")
         .remove(&handle);
 }
 
-/// Adds owned handle to the resource manager.
-pub fn add_handle<T: 'static>(handle: Handle) {
-    add_handle_impl::<T>(handle, true);
-}
-
-/// Removes owned handle from the resource manager.
-pub fn remove_handle<T: 'static>(handle: Handle) {
-    remove_handle_impl::<T>(handle, true);
-}
-
-/// Adds non-owned handle to the resource manager.
-pub fn register_handle<T: 'static>(handle: Handle) {
-    add_handle_impl::<T>(handle, false);
-}
-
-/// Removes non-owned handle from the resource manager.
-pub fn unregister_handle<T: 'static>(handle: Handle) {
-    remove_handle_impl::<T>(handle, false);
-}
-
-pub fn check_handle<T: 'static>(handle: Handle, is_owned: bool) {
+/// Checks given handle for validity.
+///
+/// # Panics
+///
+/// Panics if handle is unknown or its type or ownership model is wrong.
+fn check_handle_impl<T: 'static>(handle: Handle, ownership: Option<HandleOwnershipType>) {
     match HANDLES_MAP
         .read()
         .expect("Unable to obtain read-lock")
@@ -74,16 +79,68 @@ pub fn check_handle<T: 'static>(handle: Handle, is_owned: bool) {
                 "Wrong type id for '{:X}' handle",
                 handle
             );
-            assert_eq!(
-                is_owned,
-                info.is_owned,
-                "Error: '{:X}' handle should be {}owned",
-                handle,
-                if info.is_owned { "" } else { "non-" }
-            );
+
+            match ownership {
+                Some(val) => {
+                    assert_eq!(
+                        val,
+                        info.ownership,
+                        "Error: '{:X}' handle should be {:?}",
+                        handle,
+                        info.ownership
+                    );
+                }
+                None => (),
+            }
         }
         None => panic!("Invalid handle value: '{:X}'", handle),
     }
+}
+
+/// Adds Java-owned handle to the resource manager.
+///
+/// # Panics
+///
+/// See `add_handle_impl` for the details.
+pub fn add_handle<T: 'static>(handle: Handle) {
+    add_handle_impl::<T>(handle, HandleOwnershipType::JavaOwned);
+}
+
+/// Removes Java-owned handle from the resource manager.
+///
+/// # Panics
+///
+/// See `remove_handle_impl` for the details.
+pub fn remove_handle<T: 'static>(handle: Handle) {
+    remove_handle_impl::<T>(handle, HandleOwnershipType::JavaOwned);
+}
+
+/// Adds native-owned handle to the resource manager.
+///
+/// # Panics
+///
+/// See `add_handle_impl` for the details.
+pub fn register_handle<T: 'static>(handle: Handle) {
+    assert_ne!(handle, 0);
+    add_handle_impl::<T>(handle, HandleOwnershipType::NativeOwned);
+}
+
+/// Removes native-owned handle from the resource manager.
+///
+/// # Panics
+///
+/// See `remove_handle_impl` for the details.
+pub fn unregister_handle<T: 'static>(handle: Handle) {
+    remove_handle_impl::<T>(handle, HandleOwnershipType::NativeOwned);
+}
+
+/// Checks given handle for validity.
+///
+/// # Panics
+///
+/// See `check_handle_impl` for the details.
+pub fn check_handle<T: 'static>(handle: Handle) {
+    check_handle_impl::<T>(handle, None);
 }
 
 /// Returns the number of known handles.
@@ -113,26 +170,44 @@ mod tests {
 
     #[test]
     fn manage_handles() {
-        assert_eq!(0, known_handles());
-
+        // Add Java-owned handle.
         enum T1 {}
         add_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
-        check_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE, true);
+        check_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
+        check_handle_impl::<T1>(
+            MANAGE_HANDLES_FIRST_HANDLE,
+            Some(HandleOwnershipType::JavaOwned),
+        );
 
+        // Add second Java-owned handle.
         enum T2 {}
         add_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE);
-        check_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE, true);
+        check_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE);
+        check_handle_impl::<T2>(
+            MANAGE_HANDLES_SECOND_HANDLE,
+            Some(HandleOwnershipType::JavaOwned),
+        );
 
         remove_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE);
 
         // Reuse handle value.
         add_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE);
-        check_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE, true);
+        check_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE);
+        check_handle_impl::<T1>(
+            MANAGE_HANDLES_SECOND_HANDLE,
+            Some(HandleOwnershipType::JavaOwned),
+        );
 
+        // Add native-owned handle.
         enum T3 {}
         register_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE);
-        check_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE, false);
+        check_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE);
+        check_handle_impl::<T3>(
+            MANAGE_HANDLES_NON_OWNED_HANDLE,
+            Some(HandleOwnershipType::NativeOwned),
+        );
 
+        // Remove all handles.
         remove_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
         remove_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE);
         unregister_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE);
@@ -166,13 +241,13 @@ mod tests {
     #[test]
     #[should_panic(expected = "Invalid handle value")]
     fn check_zero_handle() {
-        check_handle::<T>(0, true);
+        check_handle::<T>(0);
     }
 
     #[test]
     #[should_panic(expected = "Invalid handle value")]
     fn check_invalid_handle() {
-        check_handle::<T>(INVALID_HANDLE, true);
+        check_handle::<T>(INVALID_HANDLE);
     }
 
     #[test]
@@ -180,13 +255,13 @@ mod tests {
     fn check_wrong_type_handle() {
         add_handle::<T>(WRONG_TYPE_HANDLE);
         enum OtherT {}
-        check_handle::<OtherT>(WRONG_TYPE_HANDLE, true);
+        check_handle::<OtherT>(WRONG_TYPE_HANDLE);
     }
 
     #[test]
     #[should_panic(expected = "handle should be")]
     fn check_wrong_ownrship_handle() {
         add_handle::<T>(WRONG_OWNERSHIP_HANDLE);
-        register_handle::<T>(WRONG_OWNERSHIP_HANDLE);
+        remove_handle::<T>(WRONG_OWNERSHIP_HANDLE);
     }
 }
