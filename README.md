@@ -65,6 +65,39 @@ $ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR \
         compile -P fixerrors
 ```
 
+### How to test the native library
+
+#### Without feature "invocation"
+
+```$sh
+$ cargo test --all
+```
+
+#### With feature "invocation"
+
+With this feature enabled an executable binary needs `libjvm.so`/`libjvm.dylib` in order to start.
+On *nix systems a path to `libjvm` should be added to environment variable LD_LIBRARY_PATH.
+
+```$sh
+export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}"
+export JAVA_LIB_PATH="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
+export LD_LIBRARY_PATH=$JAVA_LIB_PATH:$LD_LIBRARY_PATH
+```  
+
+On OS X since El Capitan, LD_LIBRARY_PATH can't be propagated to subshells (for example, when you run a shell-script),
+so LD_LIBRARY_PATH should be set in the same shell where `cargo` is run.
+
+All integrity tests and benchmarks with `libjvm` should be placed in subcrate `dy_tests`.
+Additionally, since `dy_tests` in the workspace, to exclude these tests from `--all`, feature `invocation` is used. 
+Accordingly test modules have to be marked with `#![cfg(feature = "invocation")]`. 
+
+Althou java_bindings crate organized as workspace, a bug in `cargo` prevents the use of option `--package`.
+So, until it is fixed, `--manifest-path` can be used instead.
+```$sh
+$ cargo test --manifest-path dy_tests/Cargo.toml --features invocation
+```
+
+
 ### Code style checks
 #### Java
 The style guide of the project: https://google.github.io/styleguide/javaguide.html 
