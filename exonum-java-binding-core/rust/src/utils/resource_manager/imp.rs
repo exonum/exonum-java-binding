@@ -262,6 +262,6 @@ mod tests {
     #[should_panic(expected = "handle should be")]
     fn check_wrong_ownrship_handle() {
         add_handle::<T>(WRONG_OWNERSHIP_HANDLE);
-        remove_handle::<T>(WRONG_OWNERSHIP_HANDLE);
+        unregister_handle::<T>(WRONG_OWNERSHIP_HANDLE);
     }
 }
