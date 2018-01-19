@@ -1,3 +1,5 @@
+#![cfg(feature = "invocation")]
+
 extern crate java_bindings;
 extern crate jni;
 #[macro_use]
