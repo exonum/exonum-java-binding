@@ -83,21 +83,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn str_any_test() {
+    fn str_any() {
         let string = "Static string (&str)";
         let error = panic_error(string);
         assert_eq!(string, any_to_string(&error));
     }
 
     #[test]
-    fn string_any_test() {
+    fn string_any() {
         let string = "Owned string (String)".to_owned();
         let error = panic_error(string.clone());
         assert_eq!(string, any_to_string(&error));
     }
 
     #[test]
-    fn box_error_any_test() {
+    fn box_error_any() {
         let error: Box<Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
         let description = error.description().to_owned();
         let error = panic_error(error);
@@ -105,7 +105,7 @@ mod tests {
     }
 
     #[test]
-    fn unknown_any_test() {
+    fn unknown_any() {
         let error = panic_error(1);
         assert_eq!("Unknown error occurred", any_to_string(&error));
     }
