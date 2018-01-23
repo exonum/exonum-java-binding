@@ -13,7 +13,7 @@ use super::resource_manager;
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
-/// Wrapper for the non-owned handle. Calls `resource_manager::unregister_handle` in the `Drop`
+/// Wrapper for a non-owned handle. Calls `resource_manager::unregister_handle` in the `Drop`
 /// implementation.
 pub struct NonOwnedHandle<T: 'static> {
     handle: Handle,
@@ -56,11 +56,11 @@ pub fn as_handle<T>(val: &mut T) -> NonOwnedHandle<T> {
     NonOwnedHandle::new(ptr as Handle)
 }
 
-/// "Converts" handle to the reference to object.
+/// "Converts" a handle to the object reference.
 ///
 /// # Panics
 ///
-/// Panics if handle is equal to zero.
+/// Panics if the handle is equal to zero.
 ///
 /// # Notes
 ///
@@ -74,7 +74,11 @@ pub fn cast_handle<T>(handle: Handle) -> &'static mut T {
     unsafe { &mut *ptr }
 }
 
-/// Constructs `Box` from raw pointer and immediately drops it. Handle must be owned.
+/// Destroys the Java-owned native object identified by the given handle.
+///
+/// # Panics
+///
+/// Panics if the handle is not valid, or if it identifies a native-owned object.
 pub fn drop_handle<T: 'static>(env: &JNIEnv, handle: Handle) {
     let res = panic::catch_unwind(|| unsafe {
         resource_manager::remove_handle::<T>(handle);

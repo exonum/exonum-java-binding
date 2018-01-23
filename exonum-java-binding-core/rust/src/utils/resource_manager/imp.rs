@@ -11,22 +11,23 @@ lazy_static! {
 /// Represents `Handle` ownership model.
 #[derive(Debug, PartialEq, Eq)]
 enum HandleOwnershipType {
-    /// Handle created on the Java side, therefore it should be freed manually.
+    /// A handle to a native object, owned by the Java side.
     JavaOwned,
-    /// Handle created on the native side, should not be freed by Java.
+    /// A handle to a native object, owned by the native side, and temporarily made available to
+    /// the Java side.
     NativeOwned,
 }
 
 /// Information associated with handle.
 #[derive(Debug)]
 struct HandleInfo {
-    type_id: TypeId,
+    object_type: TypeId,
     ownership: HandleOwnershipType,
 }
 
 impl HandleInfo {
-    fn new(type_id: TypeId, ownership: HandleOwnershipType) -> Self {
-        Self { type_id, ownership }
+    fn new(object_type: TypeId, ownership: HandleOwnershipType) -> Self {
+        Self { object_type, ownership }
     }
 }
 
@@ -47,7 +48,7 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
     )
 }
 
-/// Removes given handle from the resource manager.
+/// Removes the given handle from the resource manager.
 ///
 /// # Panics
 ///
@@ -72,10 +73,10 @@ fn check_handle_impl<T: 'static>(handle: Handle, ownership: Option<HandleOwnersh
         .expect("Unable to obtain read-lock")
         .get(&handle) {
         Some(info) => {
-            let actual_type_id = TypeId::of::<T>();
+            let actual_object_type = TypeId::of::<T>();
             assert_eq!(
-                info.type_id,
-                actual_type_id,
+                info.object_type,
+                actual_object_type,
                 "Wrong type id for '{:X}' handle",
                 handle
             );
