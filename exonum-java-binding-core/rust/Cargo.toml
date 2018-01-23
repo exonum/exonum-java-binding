@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 
 [workspace]
-members = ["dy_tests"]
+members = ["integration_tests"]
 
 [lib]
 crate-type = ["rlib", "cdylib"]
@@ -12,7 +12,6 @@ crate-type = ["rlib", "cdylib"]
 [features]
 # Enables native handles checking. Useful for debugging.
 resource-manager = ["lazy_static"]
-invocation = ["jni/invocation"]
 
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,

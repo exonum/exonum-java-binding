@@ -1,4 +1,3 @@
-#![cfg(feature = "invocation")]
 #![feature(test)]
 
 extern crate java_bindings;
