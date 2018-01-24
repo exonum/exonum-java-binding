@@ -30,6 +30,24 @@
                     <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
+
+            <!-- Generates a classpath file to be used by ejb-core-native integration tests.
+                 Bound to the default phase (generate-sources). -->
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <outputFile>${project.build.directory}/ejb-fakes-classpath.txt</outputFile>
+                    <includeScope>runtime</includeScope>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-classpath-file</id>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
