@@ -65,6 +65,63 @@ $ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR \
         compile -P fixerrors
 ```
 
+### How to test the native library
+
+To separate unit-tests and integration tests, to exclude tests which depends on configured and loaded `libjvm`, 
+all integration tests and benchmarks with `libjvm` should be placed in subcrate `integration_tests`. 
+
+#### Testing without jni integration tests
+
+Since the `integration_tests` subcrate is in the workspace, to exclude these tests from `--all` tests, the `--exclude` 
+option is used.
+
+```$sh
+$ cargo test --all --exclude integration_tests
+```
+
+#### Testing with jni integration tests
+
+Although java_bindings crate organized as workspace, a bug in `cargo` prevents the use of option `--package` (`-p`).
+So, until it is fixed, `--manifest-path` can be used instead.
+
+```$sh
+$ cargo test --manifest-path integration_tests/Cargo.toml
+```
+
+#### Configuring the environment
+
+The Exonum Java Bindings binary and tests executable binaries needs `libjvm.so`/`libjvm.dylib` in order to start.
+In the simplest case, the system already has the `JAVA_HOME` variable set.
+In many systems, this variable is missing by default and there are different ways to determine the location of JDK:
+
+```$sh
+export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}"
+```
+
+```$sh
+export JAVA_HOME=`java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | sed 's/^.*= //'`
+```
+
+On Debian/Ubuntu there is the `java-switcher` project, which can select current JDK and set `JAVA_HOME`.
+Other distributives may have own tools.
+ 
+Next, we need to determine the path of the dynamic library itself.
+
+```$sh
+export JAVA_LIB_PATH="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
+```  
+
+Finally we need to set the `LD_LIBRARY_PATH` variable, to make `libjvm` available to load on start of tests. 
+On OS X since El Capitan, `LD_LIBRARY_PATH` can't be propagated to subshells (for example, when you run a shell-script),
+so `LD_LIBRARY_PATH` should be set in the same shell where `cargo test` is run, so there is used an intermediate
+variable for cross-platform compatibility.
+
+```$sh
+export LD_LIBRARY_PATH=$JAVA_LIB_PATH:$LD_LIBRARY_PATH
+```  
+
+
+
 ### Code style checks
 #### Java
 The style guide of the project: https://google.github.io/styleguide/javaguide.html 

@@ -14,7 +14,7 @@ extern crate jni;
 #[macro_use]
 extern crate log;
 
-#[cfg(any(test, feature = "resource-manager"))]
+#[cfg(feature = "resource-manager")]
 #[macro_use]
 extern crate lazy_static;
 
@@ -26,6 +26,3 @@ mod storage;
 pub use init::*;
 pub use proxy::*;
 pub use storage::*;
-
-#[cfg(test)]
-mod test_util;

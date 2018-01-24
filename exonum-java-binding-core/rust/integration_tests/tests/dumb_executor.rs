@@ -4,8 +4,7 @@ extern crate jni;
 extern crate lazy_static;
 
 mod example_proxy;
-#[path = "../src/test_util.rs"]
-mod test_util;
+mod util;
 
 use java_bindings::DumbExecutor;
 use jni::JavaVM;
@@ -15,7 +14,7 @@ use std::sync::{Arc, Barrier};
 use std::thread::spawn;
 
 use example_proxy::AtomicIntegerProxy;
-use test_util::create_vm;
+use util::create_vm;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(true));
