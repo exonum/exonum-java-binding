@@ -27,7 +27,10 @@ struct HandleInfo {
 
 impl HandleInfo {
     fn new(object_type: TypeId, ownership: HandleOwnershipType) -> Self {
-        Self { object_type, ownership }
+        Self {
+            object_type,
+            ownership,
+        }
     }
 }
 
