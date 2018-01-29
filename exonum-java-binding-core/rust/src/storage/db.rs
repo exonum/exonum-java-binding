@@ -42,7 +42,10 @@ impl View {
         let handle = utils::to_handle::<Fork>(fork);
         let fork_ref = unsafe { &mut *(handle as *mut Fork) };
         let internal = ViewRef::Fork(fork_ref);
-        View { handle: Some(handle), internal }
+        View {
+            handle: Some(handle),
+            internal,
+        }
     }
 
     #[cfg_attr(feature = "cargo-clippy", allow(needless_borrow))]

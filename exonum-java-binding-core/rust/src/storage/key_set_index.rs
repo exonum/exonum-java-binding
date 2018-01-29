@@ -27,10 +27,14 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(match *utils::cast_handle::<View>(view_handle).view_ref() {
-            ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(Index::new(name, &*snapshot)),
-            ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<View>(view_handle).view_ref() {
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
