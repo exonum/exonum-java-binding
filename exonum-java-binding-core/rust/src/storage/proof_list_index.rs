@@ -10,7 +10,7 @@ use exonum::storage::{Snapshot, Fork, ProofListIndex};
 use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
 use exonum::crypto::Hash;
 use utils::{self, Handle};
-use super::db::{View, Value};
+use super::db::{View, ViewRef, Value};
 
 type Index<T> = ProofListIndex<T, Value>;
 
@@ -29,9 +29,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
-            View::Snapshot(snapshot) => IndexType::SnapshotIndex(Index::new(name, &*snapshot)),
-            View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+        Ok(utils::to_handle(match *utils::cast_handle::<View>(view_handle).view_ref() {
+            ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(Index::new(name, &*snapshot)),
+            ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)

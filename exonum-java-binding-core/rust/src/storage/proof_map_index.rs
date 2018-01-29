@@ -11,7 +11,7 @@ use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof, StorageKey};
 use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
                                        ProofPath, BranchProofNode, ProofNode, PROOF_MAP_KEY_SIZE};
 use utils::{self, Handle, PairIter};
-use super::db::{View, Value};
+use super::db::{View, ViewRef, Value};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
@@ -35,9 +35,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
-            View::Snapshot(snapshot) => IndexType::SnapshotIndex(Index::new(name, &*snapshot)),
-            View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+        Ok(utils::to_handle(match *utils::cast_handle::<View>(view_handle).view_ref() {
+            ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(Index::new(name, &*snapshot)),
+            ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)
