@@ -3,6 +3,9 @@ name = "java_bindings"
 version = "0.1.0"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 
+[workspace]
+members = ["integration_tests"]
+
 [lib]
 crate-type = ["rlib", "cdylib"]
 
@@ -24,4 +27,3 @@ optional = false
 
 [dev-dependencies.jni]
 version = "0.9.0"
-features = ["invocation"]

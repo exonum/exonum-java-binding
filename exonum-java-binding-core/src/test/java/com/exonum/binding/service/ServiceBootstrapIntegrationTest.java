@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.service.adapters.UserServiceAdapter;
+import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.google.inject.AbstractModule;
