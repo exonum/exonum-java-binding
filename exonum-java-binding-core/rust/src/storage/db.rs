@@ -48,6 +48,22 @@ impl View {
         }
     }
 
+    pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
+        let snapshot_ref = unsafe { &*(&*snapshot as *const Snapshot) };
+        View {
+            handle: None,
+            internal: ViewRef::Snapshot(snapshot_ref),
+        }
+    }
+
+    pub fn from_ref_fork(fork: &mut Fork) -> Self {
+        let fork_ref = unsafe { &mut *(fork as *mut Fork) };
+        View {
+            handle: None,
+            internal: ViewRef::Fork(fork_ref),
+        }
+    }
+
     #[cfg_attr(feature = "cargo-clippy", allow(needless_borrow))]
     fn drop_if_owned(env: &JNIEnv, view_handle: Handle) {
         let res = panic::catch_unwind(|| {
