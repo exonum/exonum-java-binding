@@ -4,7 +4,7 @@ use exonum::storage::{Snapshot, Fork};
 
 use std::panic;
 
-use utils::{self, Handle, unwrap_exc_or_default};
+use utils::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
@@ -42,10 +42,8 @@ impl View {
         let handle = utils::to_handle::<Fork>(fork);
         let fork_ref = unsafe { &mut *(handle as *mut Fork) };
         let internal = ViewRef::Fork(fork_ref);
-        View {
-            handle: Some(handle),
-            internal,
-        }
+        let handle = Some(handle);
+        View { handle, internal }
     }
 
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
@@ -76,27 +74,11 @@ impl View {
             }
             Ok(())
         });
-        unwrap_exc_or_default(env, res);
+        utils::unwrap_exc_or_default(env, res);
     }
 
     pub fn view_ref(&mut self) -> &mut ViewRef {
         &mut self.internal
-    }
-}
-
-impl ViewRef {
-    pub fn is_fork(&self) -> bool {
-        match *self {
-            ViewRef::Fork(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_snapshot(&self) -> bool {
-        match *self {
-            ViewRef::Snapshot(_) => true,
-            _ => false,
-        }
     }
 }
 
@@ -118,31 +100,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn create_view() {
+    fn create_view_owned_fork() {
         let db = MemoryDB::new();
-        {
-            let fork = db.fork();
-            let view = View::from_owned_fork(fork);
-            assert!(view.handle.is_some());
-            assert!(view.internal.is_fork());
-        }
-        {
-            let snapshot = db.snapshot();
-            let view = View::from_owned_snapshot(snapshot);
-            assert!(view.handle.is_some());
-            assert!(view.internal.is_snapshot());
-        }
-        {
-            let mut fork = db.fork();
-            let view = View::from_ref_fork(&mut fork);
-            assert!(view.handle.is_none());
-            assert!(view.internal.is_fork());
-        }
-        {
-            let snapshot = db.snapshot();
-            let view = View::from_ref_snapshot(&*snapshot);
-            assert!(view.handle.is_none());
-            assert!(view.internal.is_snapshot());
-        }
+        let fork = db.fork();
+        let view = View::from_owned_fork(fork);
+        assert!(view.handle.is_some());
+    }
+
+    #[test]
+    fn create_view_owned_snapshot() {
+        let db = MemoryDB::new();
+        let snapshot = db.snapshot();
+        let view = View::from_owned_snapshot(snapshot);
+        assert!(view.handle.is_some());
+    }
+
+    #[test]
+    fn create_view_ref_fork() {
+        let db = MemoryDB::new();
+        let mut fork = db.fork();
+        let view = View::from_ref_fork(&mut fork);
+        assert!(view.handle.is_none());
+    }
+
+    #[test]
+    fn create_view_ref_snapshot() {
+        let db = MemoryDB::new();
+        let snapshot = db.snapshot();
+        let view = View::from_ref_snapshot(&*snapshot);
+        assert!(view.handle.is_none());
     }
 }
