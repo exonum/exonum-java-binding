@@ -55,6 +55,8 @@ impl View {
         View { owned, reference }
     }
 
+    // Will be removed in #ECR-242
+    #[allow(dead_code)]
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
         // Make a reference `'static`
         let snapshot_ref = unsafe { &*(&*snapshot as *const Snapshot) };
@@ -64,6 +66,8 @@ impl View {
         }
     }
 
+    // Will be removed in #ECR-242
+    #[allow(dead_code)]
     pub fn from_ref_fork(fork: &mut Fork) -> Self {
         // Make a reference `'static`
         let fork_ref = unsafe { &mut *(fork as *mut Fork) };
