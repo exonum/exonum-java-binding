@@ -2,18 +2,33 @@ use jni::JNIEnv;
 use jni::objects::JClass;
 use exonum::storage::{Snapshot, Fork};
 
-use std::panic;
-
 use utils::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
 
-// Raw pointer to the `View` is returned to the java side, so in rust functions that take back
-// `Snapshot` or`Fork` it will be possible to distinguish them.
+/// Raw pointer to the `View` is returned to the java side, so in rust functions that take back
+/// `Snapshot` or `Fork` it will be possible to distinguish them.
+///
+/// Why there is a separate reference?
+/// Full `Box<Snapshot>`/`Box<Fork>` type may be saved as owned value to be able drop it in the end.
+/// Short `&Snapshot`/`&Fork` type is provided by the core and we have to make `ViewRef` compatible.
+///
+/// Why `Fork` is boxed?
+/// This is needed to make sure that it will not be moved after creating a reference.
+/// `View` itself will be moved from the stack to the heap in order to be converted in `Handle`.
+
 pub(crate) struct View {
-    handle: Option<Handle>,
-    internal: ViewRef,
+    // The `owned` field is only needed for the drop stage,
+    // so `Box<Fork/Snapshot>` will be dropped when an instance of `View` will leave the scope.
+    #[allow(dead_code)]
+    owned: Option<ViewOwned>,
+    reference: ViewRef,
+}
+
+enum ViewOwned {
+    Snapshot(Box<Snapshot>),
+    Fork(Box<Fork>),
 }
 
 pub(crate) enum ViewRef {
@@ -23,62 +38,43 @@ pub(crate) enum ViewRef {
 
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
-        // Clone a reference
-        // Why here is a separate reference?
-        // Full `&Box<Snapshot>` type is saved into a handle to be able free it later.
-        // Short `&Snapshot` type is provided by the core.
+        // Make a reference to an owned data
         let snapshot_ref = unsafe { &*(&*snapshot as *const Snapshot) };
-        let internal = ViewRef::Snapshot(snapshot_ref);
-        let handle = Some(utils::to_handle::<Box<Snapshot>>(snapshot));
-        View { handle, internal }
+        let reference = ViewRef::Snapshot(snapshot_ref);
+        let owned = Some(ViewOwned::Snapshot(snapshot));
+        View { owned, reference }
     }
 
     pub fn from_owned_fork(fork: Fork) -> Self {
-        // Clone a reference
-        // How it works?
-        // A handle is reused back as a mutable reference.
-        // But it is still impossible to use more than 1 instance of an exclusive `&mut` reference
-        // at once, since the handle can be used only after an instance of `View` is dropped.
-        let handle = utils::to_handle::<Fork>(fork);
-        let fork_ref = unsafe { &mut *(handle as *mut Fork) };
-        let internal = ViewRef::Fork(fork_ref);
-        let handle = Some(handle);
-        View { handle, internal }
+        // Box `Fork` to make sure it will not be moved later
+        let mut fork = Box::new(fork);
+        // Make a reference to an owned data
+        let fork_ref = unsafe { &mut *(&mut *fork as *mut Fork) };
+        let reference = ViewRef::Fork(fork_ref);
+        let owned = Some(ViewOwned::Fork(fork));
+        View { owned, reference }
     }
 
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
+        // Make a reference `'static`
         let snapshot_ref = unsafe { &*(&*snapshot as *const Snapshot) };
         View {
-            handle: None,
-            internal: ViewRef::Snapshot(snapshot_ref),
+            owned: None,
+            reference: ViewRef::Snapshot(snapshot_ref),
         }
     }
 
     pub fn from_ref_fork(fork: &mut Fork) -> Self {
+        // Make a reference `'static`
         let fork_ref = unsafe { &mut *(fork as *mut Fork) };
         View {
-            handle: None,
-            internal: ViewRef::Fork(fork_ref),
+            owned: None,
+            reference: ViewRef::Fork(fork_ref),
         }
     }
 
-    #[cfg_attr(feature = "cargo-clippy", allow(needless_borrow))]
-    fn drop_if_owned(env: &JNIEnv, view_handle: Handle) {
-        let res = panic::catch_unwind(|| {
-            let view = utils::cast_handle::<View>(view_handle);
-            if let Some(handle) = view.handle {
-                match view.internal {
-                    ViewRef::Snapshot(_) => utils::drop_handle::<Box<Snapshot>>(env, handle),
-                    ViewRef::Fork(_) => utils::drop_handle::<Fork>(env, handle),
-                };
-            }
-            Ok(())
-        });
-        utils::unwrap_exc_or_default(env, res);
-    }
-
     pub fn view_ref(&mut self) -> &mut ViewRef {
-        &mut self.internal
+        &mut self.reference
     }
 }
 
@@ -89,7 +85,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
     _: JClass,
     view_handle: Handle,
 ) {
-    View::drop_if_owned(&env, view_handle);
     utils::drop_handle::<View>(&env, view_handle);
 }
 
@@ -104,7 +99,7 @@ mod tests {
         let db = MemoryDB::new();
         let fork = db.fork();
         let view = View::from_owned_fork(fork);
-        assert!(view.handle.is_some());
+        assert!(view.owned.is_some());
     }
 
     #[test]
@@ -112,7 +107,7 @@ mod tests {
         let db = MemoryDB::new();
         let snapshot = db.snapshot();
         let view = View::from_owned_snapshot(snapshot);
-        assert!(view.handle.is_some());
+        assert!(view.owned.is_some());
     }
 
     #[test]
@@ -120,7 +115,7 @@ mod tests {
         let db = MemoryDB::new();
         let mut fork = db.fork();
         let view = View::from_ref_fork(&mut fork);
-        assert!(view.handle.is_none());
+        assert!(view.owned.is_none());
     }
 
     #[test]
@@ -128,6 +123,6 @@ mod tests {
         let db = MemoryDB::new();
         let snapshot = db.snapshot();
         let view = View::from_ref_snapshot(&*snapshot);
-        assert!(view.handle.is_none());
+        assert!(view.owned.is_none());
     }
 }
