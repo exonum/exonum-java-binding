@@ -20,6 +20,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.compiler.version>stable</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
+    <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <!-- Intentionally left empty, may be overridden from the command line.
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
@@ -63,7 +64,8 @@
                 | compile | build |
                 | test    | test  |  -->
           <execution>
-            <!-- currently we build a rust lib during 'compile' phase as integration tests depend on the library -->
+            <!-- We build a rust lib during 'compile' phase as Java integration tests
+                 depend on the library -->
             <id>build-rust-lib</id>
             <phase>compile</phase>
             <configuration>
@@ -78,6 +80,8 @@
               <goal>exec</goal>
             </goals>
           </execution>
+
+          <!-- todo: make this one ci-only -->
           <execution>
             <id>test-rust-lib-no-resource-manager</id>
             <phase>test</phase>
@@ -85,12 +89,16 @@
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
                 <argument>test</argument>
+                <argument>--all</argument>
+                <argument>--exclude</argument>
+                <argument>${rust.itSubCrate}</argument>
               </arguments>
             </configuration>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+
           <execution>
             <id>test-rust-lib</id>
             <phase>test</phase>
@@ -100,12 +108,16 @@
                 <argument>test</argument>
                 <argument>--features</argument>
                 <argument>${rust.compiler.features}</argument>
+                <argument>--all</argument>
+                <argument>--exclude</argument>
+                <argument>${rust.itSubCrate}</argument>
               </arguments>
             </configuration>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+
           <execution>
             <id>clean-rust-target</id>
             <phase>clean</phase>
