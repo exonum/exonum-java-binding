@@ -84,6 +84,22 @@ impl View {
     }
 }
 
+impl ViewRef {
+    pub fn is_fork(&self) -> bool {
+        match *self {
+            ViewRef::Fork(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_snapshot(&self) -> bool {
+        match *self {
+            ViewRef::Snapshot(_) => true,
+            _ => false,
+        }
+    }
+}
+
 /// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree(
@@ -93,4 +109,40 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
 ) {
     View::drop_if_owned(&env, view_handle);
     utils::drop_handle::<View>(&env, view_handle);
+}
+
+
+#[cfg(test)]
+mod tests {
+    use exonum::storage::{MemoryDB, Database};
+    use super::*;
+
+    #[test]
+    fn create_view() {
+        let db = MemoryDB::new();
+        {
+            let fork = db.fork();
+            let view = View::from_owned_fork(fork);
+            assert!(view.handle.is_some());
+            assert!(view.internal.is_fork());
+        }
+        {
+            let snapshot = db.snapshot();
+            let view = View::from_owned_snapshot(snapshot);
+            assert!(view.handle.is_some());
+            assert!(view.internal.is_snapshot());
+        }
+        {
+            let mut fork = db.fork();
+            let view = View::from_ref_fork(&mut fork);
+            assert!(view.handle.is_none());
+            assert!(view.internal.is_fork());
+        }
+        {
+            let snapshot = db.snapshot();
+            let view = View::from_ref_snapshot(&*snapshot);
+            assert!(view.handle.is_none());
+            assert!(view.internal.is_snapshot());
+        }
+    }
 }
