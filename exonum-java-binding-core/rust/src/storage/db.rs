@@ -77,7 +77,7 @@ impl View {
         }
     }
 
-    pub fn view_ref(&mut self) -> &mut ViewRef {
+    pub fn get(&mut self) -> &mut ViewRef {
         &mut self.reference
     }
 }
