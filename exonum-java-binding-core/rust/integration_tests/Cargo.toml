@@ -8,6 +8,7 @@ workspace = ".."
 [features]
 
 [dependencies]
+exonum = { version = "0.4" }
 java_bindings = { path = ".." }
 jni = { version = "0.9.0", features = ["invocation"] }
 lazy_static = "1.0.0"

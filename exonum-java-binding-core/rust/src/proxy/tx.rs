@@ -1,13 +1,10 @@
-use exonum::crypto::PublicKey;
 use exonum::blockchain::Transaction;
 use exonum::storage::Fork;
 use exonum::messages::{Message, RawMessage};
 use jni::*;
 use jni::errors::Result;
-use jni::objects::AutoLocal;
 use jni::objects::GlobalRef;
 use jni::objects::JValue;
-use jni::sys::jboolean;
 
 use std::fmt;
 
@@ -22,8 +19,15 @@ where
     E: Executor + 'static,
 {
     exec: E,
-    obj: GlobalRef,
+    adapter: GlobalRef,
 }
+
+// FIXME docs
+// `TransactionProxy` is immutable, so it can be safely used in different threads.
+unsafe impl <E> Sync for TransactionProxy<E>
+where
+    E: Executor + 'static,
+{}
 
 impl<E> fmt::Debug for TransactionProxy<E>
 where
@@ -38,19 +42,10 @@ impl<E> TransactionProxy<E>
 where
     E: Executor + 'static,
 {
-    /// FIXME add documentation
-    pub fn new(exec: E, fqn: &str) {
-//        let obj = exec.with_attached(|env: &JNIEnv| {
-//            let local_ref = AutoLocal::new(
-//                env,
-//                env.new_object(
-//                    fqn,
-//                    "(I)V",
-//                    &[JValue::from(init_value)],
-//                )?,
-//            );
-//            env.new_global_ref(local_ref.as_obj())
-//        })?;
+    /// Creates an instance of `TransactionProxy` with already prepared global ref
+    /// to `UserTransactionAdapter`.
+    pub unsafe fn from_global_ref(exec: E, adapter: GlobalRef) -> Self {
+        TransactionProxy { exec, adapter }
     }
 }
 
@@ -59,43 +54,35 @@ where
     E: Executor + 'static,
 {
     fn verify(&self) -> bool {
-        println!("TransactionProxy::verify()");
-        let res = (|| -> Result<bool> {
-            let _res = self.exec.with_attached(|env: &JNIEnv| {
-                env.call_method(
-                    self.obj.as_obj(),
-                    "isValid",
-                    "()Z",
-                    &[],
-                )?
-                    .b()
-            })?;
-            // FIXME real result
-            Ok(true)
-        })();
-        // FIXME maybe here should be panic?
+        println!("UserTransactionAdapter::verify()");
+        let res = self.exec.with_attached(|env: &JNIEnv| {
+            env.call_method(
+                self.adapter.as_obj(),
+                "isValid",
+                "()Z",
+                &[],
+            )?
+                .z()
+        });
+        // FIXME maybe here should be a panic?
         res.unwrap_or(false)
     }
 
     fn execute(&self, fork: &mut Fork) {
-        println!("TransactionProxy::execute()");
+        println!("UserTransactionAdapter::execute()");
         let res = (|| -> Result<()> {
             self.exec.with_attached(|env: &JNIEnv| {
+                let view_handle = utils::to_handle(View::from_ref_fork(fork));
                 env.call_method(
-                    self.obj.as_obj(),
+                    self.adapter.as_obj(),
                     "execute",
-                    "()V",
-                    // FIXME how this is intended to work?
-                    &[JValue::from(utils::to_handle(View::Fork(fork)))],
-/*
-89 |                     &[JValue::from(utils::to_handle(View::Fork(fork)))],
-   |                                                                ^^^^ expected struct `exonum::storage::Fork`, found mutable reference
-*/
+                    "(J)V",
+                    &[JValue::from(view_handle)],
                 )?;
                 Ok(())
             })
         })();
-        // FIXME here should be nice panic
+        // FIXME here should be a nice panic
         res.unwrap()
     }
 }
