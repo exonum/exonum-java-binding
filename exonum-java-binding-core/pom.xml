@@ -76,6 +76,8 @@
                 <argument>build</argument>
                 <argument>--features</argument>
                 <argument>${rust.compiler.features}</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
               </arguments>
             </configuration>
             <goals>
@@ -94,6 +96,8 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
               </arguments>
             </configuration>
             <goals>
@@ -113,6 +117,8 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
               </arguments>
             </configuration>
             <goals>
