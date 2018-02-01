@@ -85,7 +85,11 @@
             </goals>
           </execution>
 
-          <!-- todo: make this one ci-only -->
+          <!-- Runs rust native tests withour resource manager.
+
+               todo: run on a CI server only
+               Note: cannot be currently extracted in 'ci-build' profile for will produce a library
+               without rm and break ITs in Java. -->
           <execution>
             <id>test-rust-lib-no-resource-manager</id>
             <phase>test</phase>
