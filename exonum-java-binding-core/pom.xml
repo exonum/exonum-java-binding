@@ -53,16 +53,18 @@
         <!-- A configuration shared across multiple executions -->
         <configuration>
           <executable>cargo</executable>
-          <workingDirectory>rust/</workingDirectory>
+          <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>
           <!-- Each execution has its own configuration for
-               we need to execute cargo during various phases (e.g., clean, compile).
+               we need to execute cargo during various phases (e.g., compile).
                Correspondences between Maven and Cargo phases:
                 | Maven   | Cargo |
-                | clean   | clean |
                 | compile | build |
-                | test    | test  |  -->
+                | test    | test  |
+
+               Clean does not work reliably in a multi-module project and, therefore,
+               not supported. -->
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
                  depend on the library -->
@@ -111,19 +113,6 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-
-          <execution>
-            <id>clean-rust-target</id>
-            <phase>clean</phase>
-            <configuration>
-              <arguments>
-                <argument>clean</argument>
               </arguments>
             </configuration>
             <goals>
