@@ -102,6 +102,11 @@
            <artifactId>maven-dependency-plugin</artifactId>
            <version>3.0.2</version>
          </plugin>
+
+         <plugin>
+           <artifactId>maven-clean-plugin</artifactId>
+           <version>3.0.0</version>
+         </plugin>
        </plugins>
      </pluginManagement>
   </build>
