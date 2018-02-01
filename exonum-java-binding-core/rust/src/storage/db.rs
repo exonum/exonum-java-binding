@@ -101,38 +101,80 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
 
 #[cfg(test)]
 mod tests {
-    use exonum::storage::{MemoryDB, Database};
+    use exonum::storage::{Database, Entry, MemoryDB};
     use super::*;
 
-    #[test]
-    fn create_view_owned_fork() {
-        let db = MemoryDB::new();
-        let fork = db.fork();
-        let view = View::from_owned_fork(fork);
-        assert!(view.owned.is_some());
-    }
+    const TEST_VALUE: i32 = 42;
 
-    #[test]
-    fn create_view_owned_snapshot() {
-        let db = MemoryDB::new();
-        let snapshot = db.snapshot();
-        let view = View::from_owned_snapshot(snapshot);
-        assert!(view.owned.is_some());
-    }
-
-    #[test]
-    fn create_view_ref_fork() {
-        let db = MemoryDB::new();
+    // Creates database with a prepared state.
+    fn setup_database() -> MemoryDB {
+        let mut db = MemoryDB::new();
         let mut fork = db.fork();
-        let view = View::from_ref_fork(&mut fork);
+        entry(&mut fork).set(TEST_VALUE);
+        let patch = fork.into_patch();
+        db.merge(patch).unwrap();
+        db
+    }
+
+    fn entry<T>(t: T) -> Entry<T, i32> {
+        Entry::new("test", t)
+    }
+
+    #[test]
+    fn create_view_with_owned_fork() {
+        let db = setup_database();
+        let fork = db.fork();
+        let mut view = View::from_owned_fork(fork);
+        match *view.get() {
+            ViewRef::Fork(ref mut fork) => assert_eq!(Some(TEST_VALUE), entry(fork).get()),
+            _ => unreachable!(),
+        }
+        match view.owned {
+            Some(ViewOwned::Fork(mut fork)) => {
+                assert_eq!(Some(TEST_VALUE), entry(&mut *fork).get())
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn create_view_with_owned_snapshot() {
+        let db = setup_database();
+        let snapshot = db.snapshot();
+        let mut view = View::from_owned_snapshot(snapshot);
+        match *view.get() {
+            ViewRef::Snapshot(snapshot) => assert_eq!(Some(TEST_VALUE), entry(snapshot).get()),
+            _ => unreachable!(),
+        }
+        match view.owned {
+            Some(ViewOwned::Snapshot(snapshot)) => {
+                assert_eq!(Some(TEST_VALUE), entry(snapshot).get())
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn create_view_with_ref_fork() {
+        let db = setup_database();
+        let mut fork = db.fork();
+        let mut view = View::from_ref_fork(&mut fork);
+        match *view.get() {
+            ViewRef::Fork(ref mut fork) => assert_eq!(Some(TEST_VALUE), entry(fork).get()),
+            _ => unreachable!(),
+        }
         assert!(view.owned.is_none());
     }
 
     #[test]
-    fn create_view_ref_snapshot() {
-        let db = MemoryDB::new();
+    fn create_view_with_ref_snapshot() {
+        let db = setup_database();
         let snapshot = db.snapshot();
-        let view = View::from_ref_snapshot(&*snapshot);
+        let mut view = View::from_ref_snapshot(&*snapshot);
+        match *view.get() {
+            ViewRef::Snapshot(snapshot) => assert_eq!(Some(TEST_VALUE), entry(snapshot).get()),
+            _ => unreachable!(),
+        }
         assert!(view.owned.is_none());
     }
 }
