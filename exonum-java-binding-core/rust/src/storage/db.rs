@@ -106,6 +106,46 @@ mod tests {
 
     const TEST_VALUE: i32 = 42;
 
+    #[test]
+    fn create_view_with_owned_fork() {
+        let db = setup_database();
+        let fork = db.fork();
+        let mut view = View::from_owned_fork(fork);
+        check_ref_fork_is_correct(&mut view);
+        check_owned_fork_is_correct(view);
+    }
+
+    #[test]
+    fn create_view_with_owned_snapshot() {
+        let db = setup_database();
+        let snapshot = db.snapshot();
+        let mut view = View::from_owned_snapshot(snapshot);
+        check_ref_snapshot_is_correct(&mut view);
+        check_owned_snapshot_is_correct(view);
+    }
+
+    #[test]
+    fn create_view_with_ref_fork() {
+        let db = setup_database();
+        let mut fork = db.fork();
+        let mut view = View::from_ref_fork(&mut fork);
+        check_ref_fork_is_correct(&mut view);
+        assert!(view.owned.is_none());
+    }
+
+    #[test]
+    fn create_view_with_ref_snapshot() {
+        let db = setup_database();
+        let snapshot = db.snapshot();
+        let mut view = View::from_ref_snapshot(&*snapshot);
+        check_ref_snapshot_is_correct(&mut view);
+        assert!(view.owned.is_none());
+    }
+
+    /* ****************
+     * Util functions *
+     **************** */
+
     // Creates database with a prepared state.
     fn setup_database() -> MemoryDB {
         let mut db = MemoryDB::new();
@@ -120,61 +160,45 @@ mod tests {
         Entry::new("test", view)
     }
 
-    fn assert_value<T: AsRef<Snapshot + 'static>>(view: T) {
+    fn check_ref_fork_is_correct(view: &mut View) {
+        match *view.get() {
+            ViewRef::Fork(ref fork) => check_value_is_correct(fork),
+            _ => panic!("View::reference expected to be Fork"),
+        }
+    }
+
+    fn check_ref_snapshot_is_correct(view: &mut View) {
+        match *view.get() {
+            ViewRef::Snapshot(snapshot) => check_value_is_correct(snapshot),
+            _ => panic!("View::reference expected to be Snapshot"),
+        }
+    }
+
+    fn check_value_is_correct<T: AsRef<Snapshot + 'static>>(view: T) {
         assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 
-    #[test]
-    fn create_view_with_owned_fork() {
-        let db = setup_database();
-        let fork = db.fork();
-        let mut view = View::from_owned_fork(fork);
-        match *view.get() {
-            ViewRef::Fork(ref fork) => assert_value(fork),
-            _ => unreachable!(),
-        }
-        match view.owned {
-            Some(ViewOwned::Fork(fork)) => assert_value(&*fork),
-            _ => unreachable!(),
-        }
+    fn check_owned_fork_is_correct(mut view: View) {
+        let rf = match *view.get() {
+            ViewRef::Fork(ref fork) => &**fork as *const Fork,
+            _ => panic!("View::reference expected to be Fork"),
+        };
+        let owned = match view.owned {
+            Some(ViewOwned::Fork(fork)) => &*fork as *const Fork,
+            _ => panic!("View::owned expected to be Some(Fork)"),
+        };
+        assert_eq!(owned, rf);
     }
 
-    #[test]
-    fn create_view_with_owned_snapshot() {
-        let db = setup_database();
-        let snapshot = db.snapshot();
-        let mut view = View::from_owned_snapshot(snapshot);
-        match *view.get() {
-            ViewRef::Snapshot(snapshot) => assert_value(snapshot),
-            _ => unreachable!(),
-        }
-        match view.owned {
-            Some(ViewOwned::Snapshot(snapshot)) => assert_value(snapshot),
-            _ => unreachable!(),
-        }
-    }
-
-    #[test]
-    fn create_view_with_ref_fork() {
-        let db = setup_database();
-        let mut fork = db.fork();
-        let mut view = View::from_ref_fork(&mut fork);
-        match *view.get() {
-            ViewRef::Fork(ref fork) => assert_value(fork),
-            _ => unreachable!(),
-        }
-        assert!(view.owned.is_none());
-    }
-
-    #[test]
-    fn create_view_with_ref_snapshot() {
-        let db = setup_database();
-        let snapshot = db.snapshot();
-        let mut view = View::from_ref_snapshot(&*snapshot);
-        match *view.get() {
-            ViewRef::Snapshot(snapshot) => assert_value(snapshot),
-            _ => unreachable!(),
-        }
-        assert!(view.owned.is_none());
+    fn check_owned_snapshot_is_correct(mut view: View) {
+        let rf = match *view.get() {
+            ViewRef::Snapshot(ref fork) => &**fork as *const Snapshot,
+            _ => panic!("View::reference expected to be Snapshot"),
+        };
+        let owned = match view.owned {
+            Some(ViewOwned::Snapshot(snapshot)) => &*snapshot as *const Snapshot,
+            _ => panic!("View::owned expected to be Some(Snapshot)"),
+        };
+        assert_eq!(owned, rf);
     }
 }
