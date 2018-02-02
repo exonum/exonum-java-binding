@@ -9,15 +9,12 @@ pub(crate) type Value = Vec<u8>;
 
 
 /// A `View` is a wrapper for `Snapshot` or `Fork`, which makes it possible to distinguish them
-/// on the rust side, and transfer them as a raw pointer via the java side.
+/// on the rust side, and transfer them as a raw pointer to the java side.
 ///
-/// Additionally, the `View` type is used in two scenarios now:
+/// The `View` type is used in two scenarios:
 /// - it holds owned value of `Fork` or `Snapshot` and destroys it in the end,
 ///    in the case when the java side creates and owns it;
 /// - it just holds a reference, when one is provided from the rust side.
-///
-/// For both scenarios there is only a reference needed for underlying storage indexes, so
-/// an optional `owned` part is private.
 ///
 /// For storage API we need a reference, so we create it to the owned part. But since there is no
 /// way in Rust to make a `View` value not movable. Furthermore, it have to be moved from the stack
@@ -102,6 +99,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
 #[cfg(test)]
 mod tests {
     use exonum::storage::{Database, Entry, MemoryDB};
+
+    use std::convert::AsRef;
+
     use super::*;
 
     const TEST_VALUE: i32 = 42;
@@ -116,8 +116,12 @@ mod tests {
         db
     }
 
-    fn entry<T>(t: T) -> Entry<T, i32> {
-        Entry::new("test", t)
+    fn entry<T>(view: T) -> Entry<T, i32> {
+        Entry::new("test", view)
+    }
+
+    fn assert_value<T: AsRef<Snapshot + 'static>>(view: T) {
+        assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 
     #[test]
@@ -126,13 +130,11 @@ mod tests {
         let fork = db.fork();
         let mut view = View::from_owned_fork(fork);
         match *view.get() {
-            ViewRef::Fork(ref mut fork) => assert_eq!(Some(TEST_VALUE), entry(fork).get()),
+            ViewRef::Fork(ref fork) => assert_value(fork),
             _ => unreachable!(),
         }
         match view.owned {
-            Some(ViewOwned::Fork(mut fork)) => {
-                assert_eq!(Some(TEST_VALUE), entry(&mut *fork).get())
-            }
+            Some(ViewOwned::Fork(fork)) => assert_value(&*fork),
             _ => unreachable!(),
         }
     }
@@ -143,13 +145,11 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_owned_snapshot(snapshot);
         match *view.get() {
-            ViewRef::Snapshot(snapshot) => assert_eq!(Some(TEST_VALUE), entry(snapshot).get()),
+            ViewRef::Snapshot(snapshot) => assert_value(snapshot),
             _ => unreachable!(),
         }
         match view.owned {
-            Some(ViewOwned::Snapshot(snapshot)) => {
-                assert_eq!(Some(TEST_VALUE), entry(snapshot).get())
-            }
+            Some(ViewOwned::Snapshot(snapshot)) => assert_value(snapshot),
             _ => unreachable!(),
         }
     }
@@ -160,7 +160,7 @@ mod tests {
         let mut fork = db.fork();
         let mut view = View::from_ref_fork(&mut fork);
         match *view.get() {
-            ViewRef::Fork(ref mut fork) => assert_eq!(Some(TEST_VALUE), entry(fork).get()),
+            ViewRef::Fork(ref fork) => assert_value(fork),
             _ => unreachable!(),
         }
         assert!(view.owned.is_none());
@@ -172,7 +172,7 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_ref_snapshot(&*snapshot);
         match *view.get() {
-            ViewRef::Snapshot(snapshot) => assert_eq!(Some(TEST_VALUE), entry(snapshot).get()),
+            ViewRef::Snapshot(snapshot) => assert_value(snapshot),
             _ => unreachable!(),
         }
         assert!(view.owned.is_none());
