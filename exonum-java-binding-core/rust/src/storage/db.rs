@@ -42,8 +42,7 @@ pub(crate) enum ViewRef {
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
         // Make a "self-reference" to a value in the `owned` field
-        let snapshot_ref = unsafe { &*(&*snapshot as *const Snapshot) };
-        let reference = ViewRef::Snapshot(snapshot_ref);
+        let reference = unsafe { ViewRef::from_snapshot(&*snapshot) };
         let owned = Some(ViewOwned::Snapshot(snapshot));
         View { owned, reference }
     }
@@ -52,36 +51,41 @@ impl View {
         // Box a `Fork` value to make sure it will not be moved later and will not break a reference
         let mut fork = Box::new(fork);
         // Make a "self-reference" to a value in the `owned` field
-        let fork_ref = unsafe { &mut *(&mut *fork as *mut Fork) };
-        let reference = ViewRef::Fork(fork_ref);
+        let reference = unsafe { ViewRef::from_fork(&mut *fork) };
         let owned = Some(ViewOwned::Fork(fork));
         View { owned, reference }
     }
 
-    // Will be removed in #ECR-242
+    // Will be used in #ECR-242
     #[allow(dead_code)]
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
-        // Make a provided reference `'static`
-        let snapshot_ref = unsafe { &*(&*snapshot as *const Snapshot) };
-        View {
-            owned: None,
-            reference: ViewRef::Snapshot(snapshot_ref),
-        }
+        let owned = None;
+        let reference = unsafe { ViewRef::from_snapshot(snapshot) };
+        View { owned, reference }
     }
 
-    // Will be removed in #ECR-242
+    // Will be used in #ECR-242
     #[allow(dead_code)]
     pub fn from_ref_fork(fork: &mut Fork) -> Self {
-        // Make a provided reference `'static`
-        let fork_ref = unsafe { &mut *(fork as *mut Fork) };
-        View {
-            owned: None,
-            reference: ViewRef::Fork(fork_ref),
-        }
+        let owned = None;
+        let reference = unsafe { ViewRef::from_fork(fork) };
+        View { owned, reference }
     }
 
     pub fn get(&mut self) -> &mut ViewRef {
         &mut self.reference
+    }
+}
+
+impl ViewRef {
+    unsafe fn from_fork(fork: &mut Fork) -> Self {
+        // Make a provided reference `'static`
+        ViewRef::Fork(&mut *(fork as *mut Fork))
+    }
+
+    unsafe fn from_snapshot(snapshot: &Snapshot) -> Self {
+        // Make a provided reference `'static`
+        ViewRef::Snapshot(&*(snapshot as *const Snapshot))
     }
 }
 
@@ -112,7 +116,7 @@ mod tests {
         let fork = db.fork();
         let mut view = View::from_owned_fork(fork);
         check_ref_fork(&mut view);
-        check_owned_fork(view);
+        check_owned_ref(view);
     }
 
     #[test]
@@ -121,7 +125,7 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_owned_snapshot(snapshot);
         check_ref_snapshot(&mut view);
-        check_owned_snapshot(view);
+        check_owned_ref(view);
     }
 
     #[test]
@@ -147,8 +151,7 @@ mod tests {
         let mut db = MemoryDB::new();
         let mut fork = db.fork();
         entry(&mut fork).set(TEST_VALUE);
-        let patch = fork.into_patch();
-        db.merge(patch).unwrap();
+        db.merge(fork.into_patch()).unwrap();
         db
     }
 
@@ -174,27 +177,19 @@ mod tests {
         assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 
-    fn check_owned_fork(mut view: View) {
-        let rf = match *view.get() {
-            ViewRef::Fork(ref fork) => &**fork as *const Fork,
-            _ => panic!("View::reference expected to be Fork"),
+    fn check_owned_ref(mut view: View) {
+        let reference = match *view.get() {
+            ViewRef::Fork(ref fork) => &**fork as *const Fork as usize,
+            ViewRef::Snapshot(ref snapshot) => snapshot_as_usize(&**snapshot),
         };
-        let owned = match view.owned {
-            Some(ViewOwned::Fork(fork)) => &*fork as *const Fork,
-            _ => panic!("View::owned expected to be Some(Fork)"),
+        let owned = match view.owned.expect("The owned field expected to be Some()") {
+            ViewOwned::Fork(fork) => &*fork as *const Fork as usize,
+            ViewOwned::Snapshot(snapshot) => snapshot_as_usize(&*snapshot),
         };
-        assert_eq!(owned, rf);
+        assert_eq!(owned, reference);
     }
 
-    fn check_owned_snapshot(mut view: View) {
-        let rf = match *view.get() {
-            ViewRef::Snapshot(ref snapshot) => &**snapshot as *const Snapshot,
-            _ => panic!("View::reference expected to be Snapshot"),
-        };
-        let owned = match view.owned {
-            Some(ViewOwned::Snapshot(snapshot)) => &*snapshot as *const Snapshot,
-            _ => panic!("View::owned expected to be Some(Snapshot)"),
-        };
-        assert_eq!(owned, rf);
+    fn snapshot_as_usize<T: ?Sized>(t: &T) -> usize {
+        unsafe { ::std::mem::transmute_copy::<_, (usize, usize)>(&t) }.0
     }
 }
