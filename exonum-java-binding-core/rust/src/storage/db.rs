@@ -116,7 +116,7 @@ mod tests {
         let fork = db.fork();
         let mut view = View::from_owned_fork(fork);
         check_ref_fork(&mut view);
-        check_owned_ref(view);
+        check_owned_ref(&mut view);
     }
 
     #[test]
@@ -125,7 +125,7 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_owned_snapshot(snapshot);
         check_ref_snapshot(&mut view);
-        check_owned_ref(view);
+        check_owned_ref(&mut view);
     }
 
     #[test]
@@ -177,14 +177,16 @@ mod tests {
         assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 
-    fn check_owned_ref(mut view: View) {
+    fn check_owned_ref(view: &mut View) {
         let reference = match *view.get() {
             ViewRef::Fork(ref fork) => &**fork as *const Fork as usize,
             ViewRef::Snapshot(ref snapshot) => snapshot_as_usize(&**snapshot),
         };
-        let owned = match view.owned.expect("The owned field expected to be Some()") {
-            ViewOwned::Fork(fork) => &*fork as *const Fork as usize,
-            ViewOwned::Snapshot(snapshot) => snapshot_as_usize(&*snapshot),
+        let owned = match *view.owned.as_ref().expect(
+            "The owned field expected to be Some()",
+        ) {
+            ViewOwned::Fork(ref fork) => &**fork as *const Fork as usize,
+            ViewOwned::Snapshot(ref snapshot) => snapshot_as_usize(&**snapshot),
         };
         assert_eq!(owned, reference);
     }
