@@ -66,10 +66,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeM
     let res = panic::catch_unwind(|| {
         let db = utils::cast_handle::<MemoryDB>(db_handle);
         let fork = match *utils::cast_handle(view_handle) {
-            View::Snapshot(_) => {
-                panic!("Attempt to merge snapshot instead of fork.")
-            }
-            View::Fork(fork) => fork,
+            View::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
+            View::Fork(ref fork) => fork,
         };
         db.merge(fork.patch().clone());
         Ok(())
