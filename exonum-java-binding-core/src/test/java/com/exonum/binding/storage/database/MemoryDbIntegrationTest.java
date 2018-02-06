@@ -108,7 +108,7 @@ public class MemoryDbIntegrationTest {
 
       try (Snapshot snapshot = db.createSnapshot();
            ListIndex list = new ListIndexProxy(listName, snapshot)) {
-        assertThat(list.size(), equalTo(values.size()));
+        assertThat(list.size(), equalTo((long)values.size()));
         for (int i = 0; i < values.size(); i++) {
           assertThat(values.get(i), equalTo(list.get(i)));
         }
