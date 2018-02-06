@@ -11,6 +11,7 @@ import java.util.Iterator;
  * when you're done with them:
  * <pre>
  * {@code
+ *
  * try (ListIndexProxy list = new ListIndexProxy(name, view);
  *      StorageIterator<E> iterator = list.iterator()) {
  *   while (iterator.hasNext()) {
