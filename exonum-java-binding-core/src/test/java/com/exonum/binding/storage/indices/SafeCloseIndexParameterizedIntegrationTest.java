@@ -139,7 +139,8 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
         parameters(ValueSetIndexProxy::new, (set) -> set.contains(V1)),
 
-        parameters(EntryIndexProxy::new, (entry) -> entry.isPresent())
+        parameters((name, view) -> new EntryIndexProxy<>(name, view, TestSerializers.string()),
+            (entry) -> entry.isPresent())
     );
   }
 

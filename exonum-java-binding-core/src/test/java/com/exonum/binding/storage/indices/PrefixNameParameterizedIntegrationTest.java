@@ -67,9 +67,10 @@ public class PrefixNameParameterizedIntegrationTest {
             parameters(new FunctionHolder(ProofMapIndexProxy::new)),
             parameters(new FunctionHolder(ValueSetIndexProxy::new)),
             parameters(new FunctionHolder(KeySetIndexProxy::new)),
-            parameters(new FunctionHolder(EntryIndexProxy::new))
+            parameters(new FunctionHolder((name, view) ->
+                new EntryIndexProxy<>(name, view, TestSerializers.string()))
+            )
         ));
-
   }
 
   private static <T> Collection<T[]> merge(Collection<T[]> a, Collection<T[]> b) {
