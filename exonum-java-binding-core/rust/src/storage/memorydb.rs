@@ -69,7 +69,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeM
             View::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
             View::Fork(ref fork) => fork,
         };
-        db.merge(fork.patch().clone());
+        db.merge(fork.patch().clone()).expect(
+            "Unable to merge fork",
+        );
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
