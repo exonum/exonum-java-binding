@@ -53,16 +53,18 @@
         <!-- A configuration shared across multiple executions -->
         <configuration>
           <executable>cargo</executable>
-          <workingDirectory>rust/</workingDirectory>
+          <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>
           <!-- Each execution has its own configuration for
-               we need to execute cargo during various phases (e.g., clean, compile).
+               we need to execute cargo during various phases (e.g., compile).
                Correspondences between Maven and Cargo phases:
                 | Maven   | Cargo |
-                | clean   | clean |
                 | compile | build |
-                | test    | test  |  -->
+                | test    | test  |
+
+               Clean does not work reliably in a multi-module project and, therefore,
+               not supported. -->
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
                  depend on the library -->
@@ -74,6 +76,8 @@
                 <argument>build</argument>
                 <argument>--features</argument>
                 <argument>${rust.compiler.features}</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
               </arguments>
             </configuration>
             <goals>
@@ -81,7 +85,11 @@
             </goals>
           </execution>
 
-          <!-- todo: make this one ci-only -->
+          <!-- Runs rust native tests withour resource manager.
+
+               todo: run on a CI server only
+               Note: cannot be currently extracted in 'ci-build' profile for will produce a library
+               without rm and break ITs in Java. -->
           <execution>
             <id>test-rust-lib-no-resource-manager</id>
             <phase>test</phase>
@@ -92,6 +100,8 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
               </arguments>
             </configuration>
             <goals>
@@ -111,19 +121,8 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-
-          <execution>
-            <id>clean-rust-target</id>
-            <phase>clean</phase>
-            <configuration>
-              <arguments>
-                <argument>clean</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
               </arguments>
             </configuration>
             <goals>
