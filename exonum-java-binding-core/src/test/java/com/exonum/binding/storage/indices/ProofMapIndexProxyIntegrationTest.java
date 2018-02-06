@@ -28,6 +28,7 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.util.LibraryLoader;
@@ -493,6 +494,28 @@ public class ProofMapIndexProxyIntegrationTest {
     map.close();
   }
 
+  @Ignore // a failing test: messes with proof map internals
+  @Test
+  public void messWithProofMap() {
+    runTestWithView(database::createFork, (view, proofMap) -> {
+      // Put some stuff into the proof map
+      proofMap.put(PK1, V1);
+      proofMap.put(PK2, V2);
+
+      // Create a *regular* map with the *same* name as the proof map above.
+      //
+      // A reliable framework must kick you in the balls right away.
+      MapIndexProxy regularMap = new MapIndexProxy(mapName, view);
+
+      // Put V3, using a clever key, replacing a previous value in the proof map,
+      // identified by PK1.
+      regularMap.put(leafDbKey(PK1), V3);
+
+      // Oops, we have affected the state of the proof map, haven't we?
+      assertThat(proofMap.get(PK1), equalTo(V1)); // boom
+    });
+  }
+
   /**
    * Create a proof key of length 32 with the specified suffix.
    *
@@ -564,5 +587,16 @@ public class ProofMapIndexProxyIntegrationTest {
     }
 
     return entries;
+  }
+
+  /** Creates a leaf database key, given a user key (32-byte-long). */
+  private static byte[] leafDbKey(byte[] userProofMapKey) {
+    checkArgument(userProofMapKey.length == PROOF_MAP_KEY_SIZE);
+    byte[] rawLeafKey = new byte[userProofMapKey.length + 2];
+    System.arraycopy(userProofMapKey, 0, rawLeafKey, 1, userProofMapKey.length);
+    // Set the first byte to a leaf
+    rawLeafKey[0] = Type.LEAF.code;
+    // last byte is zero for a leaf.
+    return rawLeafKey;
   }
 }
