@@ -49,7 +49,7 @@ public class MemoryDb extends Database {
 
   private native long nativeCreateFork(long nativeDb);
 
-  private native void nativeMerge(long forkNativeHandle);
+  private native void nativeMerge(long nativeDb, long forkNativeHandle);
 
   private native void nativeFree(long nativeDb);
 }
