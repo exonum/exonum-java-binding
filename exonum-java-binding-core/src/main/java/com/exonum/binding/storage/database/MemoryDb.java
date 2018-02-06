@@ -35,7 +35,7 @@ public class MemoryDb extends Database {
    * @param fork a fork to get changes from
    */
   public void merge(Fork fork) {
-    nativeMerge(fork.getViewNativeHandle());
+    nativeMerge(getNativeHandle(), fork.getViewNativeHandle());
   }
 
   @Override
