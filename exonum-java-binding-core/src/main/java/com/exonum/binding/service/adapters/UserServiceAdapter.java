@@ -1,4 +1,4 @@
-package com.exonum.binding.service;
+package com.exonum.binding.service.adapters;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -6,6 +6,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.service.NodeProxy;
+import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
@@ -15,12 +17,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /**
- * An adapter of a user-facing interface {@link Service} to an interface with a native code:
- *   - Separates user-facing interface and the framework implementation,
- *     to enable us to change them independently.
- *   - Provides the native code with a convenient interface (simpler, faster, more reliable).
+ * An adapter of a user-facing interface {@link Service} to an interface with a native code.
  */
-class UserServiceAdapter {
+@SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
+public class UserServiceAdapter {
 
   private final Service service;
 
@@ -35,11 +35,11 @@ class UserServiceAdapter {
     this.server = checkNotNull(server, "server");
   }
 
-  short getId() {
+  public short getId() {
     return service.getId();
   }
 
-  String getName() {
+  public String getName() {
     return service.getName();
   }
 
@@ -56,7 +56,7 @@ class UserServiceAdapter {
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
+  public UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
     BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
     assert message.getServiceId() == getId() :
         "Message id is distinct from the service id";
@@ -79,7 +79,7 @@ class UserServiceAdapter {
    * @see Service#getStateHashes(Snapshot)
    */
   // todo: if the native code is better of with a flattened array, change the signature
-  byte[][] getStateHashes(long snapshotHandle) {
+  public byte[][] getStateHashes(long snapshotHandle) {
     // fixme: Although this code and #initialize below close the snapshot proxy,
     // making it impossible to create new indices, a user may still have live references
     // to the indices created during the method execution (e.g., a ProofMapIndex).
@@ -106,7 +106,7 @@ class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  String initalize(long forkHandle) {
+  public String initalize(long forkHandle) {
     assert forkHandle != 0;
     try (Fork fork = new Fork(forkHandle, false)) {
       return service.initialize(fork)
@@ -114,7 +114,7 @@ class UserServiceAdapter {
     }
   }
 
-  void mountPublicApiHandler(long nodeNativeHandle) {
+  public void mountPublicApiHandler(long nodeNativeHandle) {
     checkState(node == null, "There is a node already: are you calling this method twice?");
     node = new NodeProxy(nodeNativeHandle);
     Router router = server.createRouter();
@@ -127,7 +127,7 @@ class UserServiceAdapter {
    *
    * <p>Releases any resources.
    */
-  void close() {
+  public void close() {
     if (node != null) {
       node.close();
     }

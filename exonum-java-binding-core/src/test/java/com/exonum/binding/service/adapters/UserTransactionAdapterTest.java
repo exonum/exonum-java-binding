@@ -1,4 +1,4 @@
-package com.exonum.binding.service;
+package com.exonum.binding.service.adapters;
 
 import static org.mockito.Mockito.doNothing;
 

@@ -3,11 +3,12 @@
 [![Build Status](https://www.travis-ci.com/exonum/exonum-java-binding.svg?token=2dVYazsUZFvBqHW82g4U&branch=master)](https://www.travis-ci.com/exonum/exonum-java-binding)
 
 ## How to build
-You need JDK 1.8+, [Maven 3](https://maven.apache.org/download.cgi) and [Rust](https://www.rust-lang.org/).
+You need JDK 1.8+, [Maven 3](https://maven.apache.org/download.cgi) 
+and [Rust](https://www.rust-lang.org/).
 
 ### Install system dependencies
-Please install Rust and the system dependencies of 
-Exonum. The instructions are available [here](https://github.com/exonum/exonum/blob/v0.4/INSTALL.md).
+Please install Rust and the system dependencies of Exonum. 
+The instructions are available [here](https://github.com/exonum/exonum/blob/v0.5.1/INSTALL.md).
 You do _not_ need to manually fetch and compile Exonum.
 
 ### Build the project
@@ -15,11 +16,20 @@ To build the project, run
 ```$sh
 $ mvn install
 ```
-The native library will be in `exonum-java-binding-core/rust/target/debug/`, a jar archive&mdash;in `exonum-java-binding-core/target/`.
+The native library will be in `exonum-java-binding-core/rust/target/debug/`, 
+a jar archive&mdash;in `exonum-java-binding-core/target/`.
  
 ## Developer guide
+### How to run all tests
+To run _all_ tests, including CI-only and slow Java tests, native integration tests 
+depending on the JVM, invoke this script:
+```$sh
+$ ./run_all_tests.sh
+```
+
 ### Working with Error Prone
-We use [Error Prone](https://github.com/google/error-prone/) to catch common programming errors at compile time.
+We use [Error Prone](https://github.com/google/error-prone/) to catch common programming errors 
+at compile time.
 
 #### How to pass a flag to Error Prone
 Override `java.compiler.errorprone.flag` property:
@@ -71,5 +81,6 @@ The style guide of the project: https://google.github.io/styleguide/javaguide.ht
 
 **TODO:** Create a separate repo with a customized version of the code style document.
  
-[Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project during `validate` phase 
-(i.e., _before_ compilation). You can run code style checks explicitly via `mvn checkstyle:check`.
+[Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project 
+during `validate` phase (i.e., _before_ compilation). You can run code style checks explicitly 
+via `mvn checkstyle:check`.

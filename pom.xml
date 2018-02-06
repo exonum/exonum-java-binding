@@ -97,6 +97,16 @@
            <artifactId>maven-surefire-plugin</artifactId>
            <version>2.20</version>
          </plugin>
+
+         <plugin>
+           <artifactId>maven-dependency-plugin</artifactId>
+           <version>3.0.2</version>
+         </plugin>
+
+         <plugin>
+           <artifactId>maven-clean-plugin</artifactId>
+           <version>3.0.0</version>
+         </plugin>
        </plugins>
      </pluginManagement>
   </build>
@@ -130,8 +140,9 @@
   </dependencies>
 
   <modules>
-    <module>exonum-java-binding-core</module>
-    <module>exonum-java-proofs</module>
     <module>exonum-java-testing</module>
+    <module>exonum-java-proofs</module>
+    <module>exonum-java-binding-core</module>
+    <module>exonum-java-binding-fakes</module>
   </modules>
 </project>
