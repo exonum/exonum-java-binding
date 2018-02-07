@@ -4,6 +4,7 @@ import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
@@ -16,12 +17,18 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -189,6 +196,43 @@ public class MapIndexProxyIntegrationTest {
       byte[] value = map.get(key);
 
       assertNull(value);
+    });
+  }
+
+  @Test
+  public void putPrefixKeys() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      byte[] fullKey = bytes("A long key we will take prefixes of");
+
+      // Generate a stream of key-value pairs, where each key is a prefix of the longest key:
+      // 'A' -> V1
+      // 'A ' -> V2
+      // 'A l' -> V3
+      // …
+      Stream<Integer> keySizes = IntStream.range(1, fullKey.length).boxed();
+      Stream<byte[]> values = TestStorageItems.values.stream();
+      List<MapEntry> entries = Streams.zip(keySizes, values,
+          (size, value) -> new MapEntry(prefix(fullKey, size), value)
+      )
+          .collect(Collectors.toList());
+
+      // Shuffle so that we don't add in a certain order.
+      Collections.shuffle(entries);
+
+      // Add them to the map
+      for (MapEntry e : entries) {
+        map.put(e.getKey(), e.getValue());
+      }
+
+      // Check that each key maps to the correct value.
+      for (MapEntry e : entries) {
+        byte[] key = e.getKey();
+        assertTrue(map.containsKey(key));
+
+        byte[] value = map.get(key);
+        byte[] expectedValue = e.getValue();
+        assertThat(value, equalTo(expectedValue));
+      }
     });
   }
 
@@ -421,6 +465,11 @@ public class MapIndexProxyIntegrationTest {
         MapIndexProxy::new,
         mapTest
     );
+  }
+
+  private static byte[] prefix(byte[] source, int prefixSize) {
+    checkArgument(prefixSize <= source.length);
+    return Arrays.copyOf(source, prefixSize);
   }
 
   /**
