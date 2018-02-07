@@ -45,11 +45,11 @@ public class MemoryDb extends Database {
 
   private static native long nativeCreate();
 
-  private native long nativeCreateSnapshot(long nativeDb);
+  private native long nativeCreateSnapshot(long dbNativeHandle);
 
-  private native long nativeCreateFork(long nativeDb);
+  private native long nativeCreateFork(long dbNativeHandle);
 
-  private native void nativeMerge(long nativeDb, long forkNativeHandle);
+  private native void nativeMerge(long dbNativeHandle, long forkNativeHandle);
 
-  private native void nativeFree(long nativeDb);
+  private native void nativeFree(long dbNativeHandle);
 }
