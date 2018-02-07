@@ -55,7 +55,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Merges given fork into the database.
+/// Merges the given fork into the database.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeMerge(
     env: JNIEnv,
