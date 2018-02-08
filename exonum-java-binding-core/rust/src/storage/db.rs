@@ -40,16 +40,17 @@ pub(crate) enum ViewRef {
 
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
-        // Make a "self-reference" to a value in the `owned` field
+        // Make a "self-reference" to a value in the `owned` field.
         let reference = unsafe { ViewRef::from_snapshot(&*snapshot) };
         let _owned = Some(ViewOwned::Snapshot(snapshot));
         View { _owned, reference }
     }
 
     pub fn from_owned_fork(fork: Fork) -> Self {
-        // Box a `Fork` value to make sure it will not be moved later and will not break a reference
+        // Box a `Fork` value to make sure it will not be moved later
+        // and will not break a reference.
         let mut fork = Box::new(fork);
-        // Make a "self-reference" to a value in the `owned` field
+        // Make a "self-reference" to a value in the `owned` field.
         let reference = unsafe { ViewRef::from_fork(&mut *fork) };
         let _owned = Some(ViewOwned::Fork(fork));
         View { _owned, reference }
@@ -78,12 +79,12 @@ impl View {
 
 impl ViewRef {
     unsafe fn from_fork(fork: &mut Fork) -> Self {
-        // Make a provided reference `'static`
+        // Make a provided reference `'static`.
         ViewRef::Fork(&mut *(fork as *mut Fork))
     }
 
     unsafe fn from_snapshot(snapshot: &Snapshot) -> Self {
-        // Make a provided reference `'static`
+        // Make a provided reference `'static`.
         ViewRef::Snapshot(&*(snapshot as *const Snapshot))
     }
 }
