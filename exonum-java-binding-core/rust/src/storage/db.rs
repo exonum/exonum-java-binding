@@ -40,36 +40,40 @@ pub(crate) enum ViewRef {
 
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
-        // Make a "self-reference" to a value in the `owned` field.
-        let reference = unsafe { ViewRef::from_snapshot(&*snapshot) };
-        let _owned = Some(ViewOwned::Snapshot(snapshot));
-        View { _owned, reference }
+        View {
+            // Make a "self-reference" to a value stored in the `owned` field.
+            reference: unsafe { ViewRef::from_snapshot(&*snapshot) },
+            _owned: Some(ViewOwned::Snapshot(snapshot)),
+        }
     }
 
     pub fn from_owned_fork(fork: Fork) -> Self {
         // Box a `Fork` value to make sure it will not be moved later
-        // and will not break a reference.
+        // and will not break the `reference` field.
         let mut fork = Box::new(fork);
-        // Make a "self-reference" to a value in the `owned` field.
-        let reference = unsafe { ViewRef::from_fork(&mut *fork) };
-        let _owned = Some(ViewOwned::Fork(fork));
-        View { _owned, reference }
+        View {
+            // Make a "self-reference" to a value stored in the `owned` field.
+            reference: unsafe { ViewRef::from_fork(&mut *fork) },
+            _owned: Some(ViewOwned::Fork(fork)),
+        }
     }
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
-        let _owned = None;
-        let reference = unsafe { ViewRef::from_snapshot(snapshot) };
-        View { _owned, reference }
+        View {
+            reference: unsafe { ViewRef::from_snapshot(snapshot) },
+            _owned: None,
+        }
     }
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
     pub fn from_ref_fork(fork: &mut Fork) -> Self {
-        let _owned = None;
-        let reference = unsafe { ViewRef::from_fork(fork) };
-        View { _owned, reference }
+        View {
+            reference: unsafe { ViewRef::from_fork(fork) },
+            _owned: None,
+        }
     }
 
     pub fn get(&mut self) -> &mut ViewRef {
