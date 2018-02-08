@@ -1,6 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::JClass;
-use exonum::storage::{Snapshot, Fork};
+use exonum::storage::{Fork, Snapshot};
 
 use utils::{self, Handle};
 
@@ -152,7 +152,7 @@ mod tests {
 
     // Creates database with a prepared state.
     fn setup_database() -> MemoryDB {
-        let mut db = MemoryDB::new();
+        let db = MemoryDB::new();
         let mut fork = db.fork();
         entry(&mut fork).set(TEST_VALUE);
         db.merge(fork.into_patch()).unwrap();

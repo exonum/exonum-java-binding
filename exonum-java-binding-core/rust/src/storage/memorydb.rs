@@ -3,9 +3,9 @@ use jni::objects::{JClass, JObject};
 
 use std::panic;
 
-use exonum::storage::{MemoryDB, Database};
+use exonum::storage::{Database, MemoryDB};
 use utils::{self, Handle};
-use super::db::View;
+use super::db::{View, ViewRef};
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
@@ -65,9 +65,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeM
 ) {
     let res = panic::catch_unwind(|| {
         let db = utils::cast_handle::<MemoryDB>(db_handle);
-        let fork = match *utils::cast_handle(view_handle) {
-            View::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
-            View::Fork(ref fork) => fork,
+        let fork = match *utils::cast_handle::<View>(view_handle).get() {
+            ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
+            ViewRef::Fork(ref fork) => fork,
         };
         db.merge(fork.patch().clone()).expect(
             "Unable to merge fork",
