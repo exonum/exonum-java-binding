@@ -22,10 +22,9 @@ pub(crate) type Value = Vec<u8>;
 /// should be placed in the heap to prevent its movement after creating a reference to it.
 
 pub(crate) struct View {
-    // The `owned` field is used, it is not a fake, but its value only needed for the drop stage,
+    // The `owned` field is used, but its value only needed for the drop stage,
     // so `Box<Fork>`/`Box<Snapshot>` will be dropped when an instance of `View` leaves the scope.
-    #[allow(dead_code)]
-    owned: Option<ViewOwned>,
+    _owned: Option<ViewOwned>,
     reference: ViewRef,
 }
 
@@ -43,8 +42,8 @@ impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
         // Make a "self-reference" to a value in the `owned` field
         let reference = unsafe { ViewRef::from_snapshot(&*snapshot) };
-        let owned = Some(ViewOwned::Snapshot(snapshot));
-        View { owned, reference }
+        let _owned = Some(ViewOwned::Snapshot(snapshot));
+        View { _owned, reference }
     }
 
     pub fn from_owned_fork(fork: Fork) -> Self {
@@ -52,24 +51,24 @@ impl View {
         let mut fork = Box::new(fork);
         // Make a "self-reference" to a value in the `owned` field
         let reference = unsafe { ViewRef::from_fork(&mut *fork) };
-        let owned = Some(ViewOwned::Fork(fork));
-        View { owned, reference }
+        let _owned = Some(ViewOwned::Fork(fork));
+        View { _owned, reference }
     }
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
-        let owned = None;
+        let _owned = None;
         let reference = unsafe { ViewRef::from_snapshot(snapshot) };
-        View { owned, reference }
+        View { _owned, reference }
     }
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
     pub fn from_ref_fork(fork: &mut Fork) -> Self {
-        let owned = None;
+        let _owned = None;
         let reference = unsafe { ViewRef::from_fork(fork) };
-        View { owned, reference }
+        View { _owned, reference }
     }
 
     pub fn get(&mut self) -> &mut ViewRef {
@@ -134,7 +133,7 @@ mod tests {
         let mut fork = db.fork();
         let mut view = View::from_ref_fork(&mut fork);
         check_ref_fork(&mut view);
-        assert!(view.owned.is_none());
+        assert!(view._owned.is_none());
     }
 
     #[test]
@@ -143,7 +142,7 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_ref_snapshot(&*snapshot);
         check_ref_snapshot(&mut view);
-        assert!(view.owned.is_none());
+        assert!(view._owned.is_none());
     }
 
     // Creates database with a prepared state.
@@ -178,20 +177,22 @@ mod tests {
     }
 
     fn check_owned_ref(view: &mut View) {
-        let reference = match *view.get() {
-            ViewRef::Fork(ref fork) => &**fork as *const Fork as usize,
-            ViewRef::Snapshot(ref snapshot) => snapshot_as_usize(&**snapshot),
-        };
-        let owned = match *view.owned.as_ref().expect(
-            "The owned field expected to be Some()",
-        ) {
-            ViewOwned::Fork(ref fork) => &**fork as *const Fork as usize,
-            ViewOwned::Snapshot(ref snapshot) => snapshot_as_usize(&**snapshot),
-        };
-        assert_eq!(owned, reference);
-    }
+        #[derive(Eq, PartialEq, Debug)]
+        enum Ptr {
+            Fork(*const Fork),
+            Snapshot(*const Snapshot),
+        }
 
-    fn snapshot_as_usize<T: ?Sized>(t: &T) -> usize {
-        unsafe { ::std::mem::transmute_copy::<_, (usize, usize)>(&t) }.0
+        let ref_ = match *view.get() {
+            ViewRef::Fork(ref f) => Ptr::Fork(&**f),
+            ViewRef::Snapshot(ref s) => Ptr::Snapshot(&**s),
+        };
+
+        let owned = match *view._owned.as_ref().unwrap() {
+            ViewOwned::Fork(ref f) => Ptr::Fork(&**f),
+            ViewOwned::Snapshot(ref s) => Ptr::Snapshot(&**s),
+        };
+
+        assert_eq!(owned, ref_);
     }
 }
