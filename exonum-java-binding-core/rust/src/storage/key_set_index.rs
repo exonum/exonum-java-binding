@@ -8,7 +8,7 @@ use std::ptr;
 use exonum::storage::{Snapshot, Fork, KeySetIndex};
 use exonum::storage::key_set_index::KeySetIndexIter;
 use utils::{self, Handle};
-use super::db::{View, Key};
+use super::db::{View, ViewRef, Key};
 
 type Index<T> = KeySetIndex<T, Key>;
 
@@ -27,10 +27,14 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
-            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(name, &**snapshot)),
-            View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<View>(view_handle).get() {
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
