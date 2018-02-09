@@ -188,7 +188,7 @@ mod tests {
             Snapshot(*const Snapshot),
         }
 
-        let ref_ = match *view.get() {
+        let reference = match *view.get() {
             ViewRef::Fork(ref f) => Ptr::Fork(&**f),
             ViewRef::Snapshot(ref s) => Ptr::Snapshot(&**s),
         };
@@ -198,6 +198,6 @@ mod tests {
             ViewOwned::Snapshot(ref s) => Ptr::Snapshot(&**s),
         };
 
-        assert_eq!(owned, ref_);
+        assert_eq!(owned, reference);
     }
 }
