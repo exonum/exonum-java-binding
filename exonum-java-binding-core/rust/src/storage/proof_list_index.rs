@@ -331,9 +331,10 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
         }
         ListProof::Left(ref left, ref hash) => {
             let left = make_java_proof(env, left.as_ref())?;
-            let right = hash.map_or(Ok(ptr::null_mut().into()), |hash| {
-                make_java_hash_node(env, &hash)
-            })?;
+            let right = hash.map_or(
+                Ok((ptr::null_mut() as jobject).into()),
+                |hash| make_java_hash_node(env, &hash),
+            )?;
             make_java_proof_branch(env, left, right)
         }
         ListProof::Right(ref hash, ref right) => {
