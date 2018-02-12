@@ -1,10 +1,14 @@
 use exonum::blockchain::Transaction;
+use exonum::encoding::Offset;
+use exonum::encoding::serialize::json::ExonumJson;
+use exonum::encoding::serialize::WriteBufferWrapper;
 use exonum::storage::Fork;
 use exonum::messages::{Message, RawMessage};
 use jni::*;
 use jni::errors::Result;
 use jni::objects::GlobalRef;
 use jni::objects::JValue;
+use serde_json::value::Value;
 
 use std::fmt;
 
@@ -46,6 +50,20 @@ where
     /// to `UserTransactionAdapter`.
     pub unsafe fn from_global_ref(exec: E, adapter: GlobalRef) -> Self {
         TransactionProxy { exec, adapter }
+    }
+}
+
+impl<E> ExonumJson for TransactionProxy<E>
+where
+    E: Executor + 'static,
+{
+    fn deserialize_field<B: WriteBufferWrapper>(value: &Value, buffer: &mut B, from: Offset, to: Offset) -> ::std::result::Result<(), Box<::std::error::Error>> where
+        Self: Sized {
+        unimplemented!()
+    }
+
+    fn serialize_field(&self) -> ::std::result::Result<Value, Box<::std::error::Error + Send + Sync>> {
+        unimplemented!()
     }
 }
 
@@ -91,6 +109,11 @@ impl<E> Message for TransactionProxy<E>
 where
     E: Executor,
 {
+    fn from_raw(raw: RawMessage) -> ::std::result::Result<Self, ::exonum::encoding::Error> where
+        Self: Sized {
+        unimplemented!()
+    }
+
     fn raw(&self) -> &RawMessage {
         unimplemented!()
     }

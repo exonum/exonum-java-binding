@@ -17,6 +17,7 @@ resource-manager = []
 # ¡Please keep README.md in sync with the Exonum version,
 # so that users are directed to the correct build instructions!
 exonum = "0.5.1"
-log = "0.4.1"
 jni = "0.9.3"
-lazy_static = "1.0.0"
+lazy_static = "1"
+log = "0.4.1"
+serde_json = "1.0.2"
