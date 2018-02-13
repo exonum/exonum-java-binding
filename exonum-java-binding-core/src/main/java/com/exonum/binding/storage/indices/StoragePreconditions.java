@@ -40,24 +40,13 @@ final class StoragePreconditions {
    * @return an unmodified key if it's valid
    * @throws NullPointerException if key is null
    * @throws IllegalArgumentException if the size of the key is not 32 bytes
+   * @apiNote prefer {@link ProofMapKeyCheckingSerializerDecorator}
    */
   static byte[] checkProofKey(byte[] key) {
     checkNotNull(key, "Proof map key is null");
     checkArgument(key.length == PROOF_MAP_KEY_SIZE,
         "Proof map key has invalid size: %s", key.length);
     return key;
-  }
-
-  /**
-   * Checks that the specified collection contains valid storage values.
-   *
-   * @param values a storage value
-   * @return an unmodified collection if all elements are valid
-   * @throws NullPointerException if the collection is null or it contains null elements
-   */
-  static Collection<byte[]> checkStorageValues(Collection<byte[]> values) {
-    values.forEach(StoragePreconditions::checkStorageValue);
-    return values;
   }
 
   /**
@@ -69,6 +58,18 @@ final class StoragePreconditions {
    */
   static byte[] checkStorageValue(byte[] value) {
     return checkNotNull(value, "Storage value is null");
+  }
+
+  /**
+   * Checks that the given collection does not contain null entries.
+   *
+   * @throws NullPointerException if the collection is null or contains nulls
+   */
+  static <E> void checkNoNulls(Collection<E> collection) {
+    checkNotNull(collection, "Collection is null");
+    if (collection.contains(null)) {
+      throw new NullPointerException("Collection contains nulls");
+    }
   }
 
   /**

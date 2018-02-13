@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.serialization;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,7 +25,12 @@ public class CheckingSerializerDecoratorTest {
   @Before
   public void setUp() throws Exception {
     delegateMock = mock(Serializer.class);
-    decorator = new CheckingSerializerDecorator(delegateMock);
+    decorator = CheckingSerializerDecorator.from(delegateMock);
+  }
+
+  @Test
+  public void fromSelf() {
+    assertThat(CheckingSerializerDecorator.from(decorator), sameInstance(decorator));
   }
 
   @Test
@@ -46,7 +52,7 @@ public class CheckingSerializerDecoratorTest {
   public void toBytes_NullFromDelegate() {
     when(delegateMock.toBytes(any())).thenReturn(null);
 
-    expectNpe("Broken serializer");
+    expectBrokenSerializerException();
     decorator.toBytes(new Object());
   }
 
@@ -69,13 +75,13 @@ public class CheckingSerializerDecoratorTest {
   public void fromBytes_NullFromDelegate() {
     when(delegateMock.fromBytes(any())).thenReturn(null);
 
-    expectNpe("Broken serializer");
+    expectBrokenSerializerException();
     decorator.fromBytes(new byte[0]);
   }
 
-  private void expectNpe(String messageSubstring) {
-    expectedException.expectMessage(messageSubstring);
-    expectedException.expect(NullPointerException.class);
+  private void expectBrokenSerializerException() {
+    expectedException.expectMessage("Broken serializer");
+    expectedException.expect(IllegalStateException.class);
   }
 
   private void expectNpe() {

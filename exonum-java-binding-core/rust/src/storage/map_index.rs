@@ -19,7 +19,7 @@ enum IndexType {
 
 type Iter<'a> = PairIter<MapIndexIter<'a, Key, Value>>;
 
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntry";
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 
 /// Returns a pointer to the created `MapIndex` object.
 #[no_mangle]

@@ -12,8 +12,11 @@ import com.exonum.binding.storage.database.Fork;
  * the map has been created with a read-only database view.
  *
  * <p>This interface prohibits null keys and values.
+ *
+ * @param <K> the type of keys in this map
+ * @param <V> the type of values in this map
  */
-public interface MapIndex extends NativeProxy {
+public interface MapIndex<K, V> extends NativeProxy {
 
   /**
    * Returns true if this map contains a mapping for the specified key.
@@ -21,7 +24,7 @@ public interface MapIndex extends NativeProxy {
    * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    */
-  boolean containsKey(byte[] key);
+  boolean containsKey(K key);
 
   /**
    * Puts a new key-value pair into the map. If this map already contains
@@ -35,7 +38,7 @@ public interface MapIndex extends NativeProxy {
    *                                  from being stored in this map
    * @throws UnsupportedOperationException if this map is read-only
    */
-  void put(byte[] key, byte[] value);
+  void put(K key, V value);
 
   /**
    * Returns the value associated with the specified key,
@@ -47,7 +50,7 @@ public interface MapIndex extends NativeProxy {
    * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    */
-  byte[] get(byte[] key);
+  V get(K key);
 
   /**
    * Removes the value mapped to the specified key from the map.
@@ -58,7 +61,7 @@ public interface MapIndex extends NativeProxy {
    * @throws IllegalStateException if this map is not valid
    * @throws UnsupportedOperationException if this map is read-only
    */
-  void remove(byte[] key);
+  void remove(K key);
   
   /**
    * Returns an iterator over the map keys in lexicographical order.
@@ -70,9 +73,7 @@ public interface MapIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  // TODO(dt): consider creating a subclass (RustByteIter) so that you don't have to put a
-  // type parameter?
-  StorageIterator<byte[]> keys();
+  StorageIterator<K> keys();
 
   /**
    * Returns an iterator over the map values in lexicographical order of <em>keys</em>.
@@ -84,7 +85,7 @@ public interface MapIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  StorageIterator<byte[]> values();
+  StorageIterator<V> values();
 
   /**
    * Returns an iterator over the map entries.
@@ -97,7 +98,7 @@ public interface MapIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  StorageIterator<MapEntry> entries();
+  StorageIterator<MapEntry<K, V>> entries();
 
   /**
    * Removes all of the key-value pairs from the map.

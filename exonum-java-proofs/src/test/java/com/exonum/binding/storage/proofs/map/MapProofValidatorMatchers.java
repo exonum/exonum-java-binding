@@ -1,7 +1,6 @@
 package com.exonum.binding.storage.proofs.map;
 
 import com.exonum.binding.hash.Hashing;
-import java.util.Arrays;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -37,13 +36,13 @@ class MapProofValidatorMatchers {
    * @param expectedValue a value that is expected to be mapped to the requested key,
    *                      or null if there must not be such mapping in the proof map
    */
-  static Matcher<MapProofValidator> isValid(byte[] key, @Nullable byte[] expectedValue) {
-    return new TypeSafeMatcher<MapProofValidator>() {
+  static Matcher<MapProofValidator<String>> isValid(byte[] key, @Nullable String expectedValue) {
+    return new TypeSafeMatcher<MapProofValidator<String>>() {
       private final Matcher<byte[]> keyMatcher = IsEqual.equalTo(key);
-      private final Matcher<byte[]> valueMatcher = IsEqual.equalTo(expectedValue);
+      private final Matcher<String> valueMatcher = IsEqual.equalTo(expectedValue);
 
       @Override
-      protected boolean matchesSafely(MapProofValidator item) {
+      protected boolean matchesSafely(MapProofValidator<String> item) {
         return item.isValid()
             && keyMatcher.matches(item.getKey())
             && item.getValue()
@@ -55,7 +54,7 @@ class MapProofValidatorMatchers {
       public void describeTo(Description description) {
         description.appendText("valid proof, key=")
             .appendText(Hashing.toHexString(key))
-            .appendText(", value=").appendText(Arrays.toString(expectedValue));
+            .appendText(", value=").appendText(expectedValue);
       }
     };
   }

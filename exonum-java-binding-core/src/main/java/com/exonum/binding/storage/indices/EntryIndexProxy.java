@@ -25,6 +25,8 @@ import java.util.NoSuchElementException;
  * Subsequent use of the closed entry is prohibited
  * and will result in {@link IllegalStateException}.
  *
+ * @param <T> the type of an element in this entry
+ *
  * @see View
  */
 public class EntryIndexProxy<T> extends AbstractIndexProxy {
@@ -46,7 +48,7 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    */
   public EntryIndexProxy(String name, View view, Serializer<T> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
-    this.serializer = new CheckingSerializerDecorator<>(serializer);
+    this.serializer = CheckingSerializerDecorator.from(serializer);
   }
 
   /**

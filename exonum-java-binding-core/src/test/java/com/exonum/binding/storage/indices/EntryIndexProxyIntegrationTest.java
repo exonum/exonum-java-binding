@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -121,7 +122,7 @@ public class EntryIndexProxyIntegrationTest {
   public void closeMustDetectUseAfterViewFreed() throws Exception {
     View view = database.createSnapshot();
     EntryIndexProxy<String> entry = new EntryIndexProxy<>(ENTRY_NAME, view,
-        TestSerializers.string());
+        StandardSerializers.string());
 
     view.close();
 
@@ -136,11 +137,11 @@ public class EntryIndexProxyIntegrationTest {
 
   private static void runTestWithView(Supplier<View> viewSupplier,
                                       BiConsumer<View, EntryIndexProxy<String>> entryTest) {
-    // todo: it would be nice to migrate run test to a new signature, again, NON-WIP PR
-    try (View view = viewSupplier.get();
-         EntryIndexProxy<String> entry =
-             new EntryIndexProxy<>(ENTRY_NAME, view, TestSerializers.string())) {
-      entryTest.accept(view, entry);
-    }
+    IndicesTests.runTestWithView(
+        viewSupplier,
+        ENTRY_NAME,
+        EntryIndexProxy::new,
+        entryTest
+    );
   }
 }

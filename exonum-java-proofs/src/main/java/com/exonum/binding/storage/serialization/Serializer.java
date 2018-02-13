@@ -1,7 +1,5 @@
 package com.exonum.binding.storage.serialization;
 
-import com.exonum.binding.storage.indices.EntryIndexProxy;
-
 /**
  * Converts Java objects into a binary representation in some format, and vice versa.
  *
@@ -9,8 +7,7 @@ import com.exonum.binding.storage.indices.EntryIndexProxy;
  * {@link #toBytes(Object)} produces such an array, that being passed to {@link #fromBytes(byte[])},
  * is converted to another object o2, that is equal to the original object o.
  *
- * <p>This interface is designed to be primarily used by storage proxies
- * (e.g., {@linkplain EntryIndexProxy}).
+ * <p>This interface is designed to be primarily used by storage proxies and proof validators.
  *
  * @param <T> a type of serializable object
  */
@@ -30,8 +27,9 @@ public interface Serializer<T> {
    *
    * @param serializedValue an array containing a serialized value of type T, must not be null
    * @return a value
-   * @throws NullPointerException if array is null
-   * @throws IllegalArgumentException if array cannot be de-serialized into a value of type T
+   * @throws NullPointerException if the array is null
+   * @throws IllegalArgumentException if the array cannot be decoded into a value of type T
+   *     (e.g., contains 2 bytes when 4 are expected)
    */
   T fromBytes(byte[] serializedValue);
 }

@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class KeySetIndexProxyIntegrationTest {
   @Test
   public void addMultipleElements() throws Exception {
     runTestWithView(database::createFork, (set) -> {
-      List<byte[]> keys = TestStorageItems.keys.subList(0, 3);
+      List<String> keys = TestStorageItems.keys.subList(0, 3);
       keys.forEach(set::add);
       keys.forEach(
           (k) -> assertTrue(set.contains(k))
@@ -80,7 +81,7 @@ public class KeySetIndexProxyIntegrationTest {
   @Test
   public void clearNonEmptyRemovesAllElements() throws Exception {
     runTestWithView(database::createFork, (set) -> {
-      List<byte[]> keys = TestStorageItems.keys.subList(0, 3);
+      List<String> keys = TestStorageItems.keys.subList(0, 3);
 
       keys.forEach(set::add);
 
@@ -108,25 +109,16 @@ public class KeySetIndexProxyIntegrationTest {
   @Test
   public void testIterator() throws Exception {
     runTestWithView(database::createFork, (set) -> {
-      List<byte[]> elements = TestStorageItems.keys;
+      List<String> elements = TestStorageItems.keys;
 
       elements.forEach(set::add);
 
-      try (StorageIterator<byte[]> iterator = set.iterator()) {
-        List<byte[]> iterElements = ImmutableList.copyOf(iterator);
+      try (StorageIterator<String> iterator = set.iterator()) {
+        List<String> iterElements = ImmutableList.copyOf(iterator);
 
-        // Check that there are as many elements as expected
-        assertThat(elements.size(), equalTo(iterElements.size()));
-
-        // Check that all elements are in the set.
-        for (byte[] e: iterElements) {
-          assertTrue(set.contains(e));
-        }
-
-        // Check that elements appear in lexicographical order
-        for (int i = 0; i < elements.size(); i++) {
-          assertThat(iterElements.get(i), equalTo(elements.get(i)));
-        }
+        // Check that iterator includes all the elements added
+        // and that they appear in lexicographical order (the order of TestStorageItems.keys).
+        assertThat(iterElements, equalTo(elements));
       }
     });
   }
@@ -165,7 +157,8 @@ public class KeySetIndexProxyIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    KeySetIndexProxy set = new KeySetIndexProxy(KEY_SET_NAME, view);
+    KeySetIndexProxy<String> set = new KeySetIndexProxy<>(KEY_SET_NAME, view,
+        StandardSerializers.string());
 
     view.close();  // a set must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -180,7 +173,7 @@ public class KeySetIndexProxyIntegrationTest {
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      Consumer<KeySetIndexProxy> keySetTest) {
+                                      Consumer<KeySetIndexProxy<String>> keySetTest) {
     runTestWithView(viewSupplier, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
 
@@ -192,7 +185,7 @@ public class KeySetIndexProxyIntegrationTest {
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, KeySetIndexProxy> keySetTest) {
+                                      BiConsumer<View, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         KEY_SET_NAME,

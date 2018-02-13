@@ -48,23 +48,23 @@ public class ListIndexProxyIntegrationTest {
   @Test(expected = NoSuchElementException.class)
   public void removeLastEmptyList() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      byte[] ignored = l.removeLast();
+      String ignored = l.removeLast();
     });
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void removeLastWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (l) -> {
-      byte[] ignored = l.removeLast();
+      String ignored = l.removeLast();
     });
   }
 
   @Test
   public void removeLastSingleElementList() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      byte[] addedElement = V1;
+      String addedElement = V1;
       l.add(addedElement);
-      byte[] last = l.removeLast();
+      String last = l.removeLast();
 
       assertThat(last, equalTo(addedElement));
       assertTrue(l.isEmpty());
@@ -76,7 +76,7 @@ public class ListIndexProxyIntegrationTest {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
-      byte[] last = l.removeLast();
+      String last = l.removeLast();
 
       assertThat(last, equalTo(V2));
       assertThat(l.size(), equalTo(1L));
@@ -148,12 +148,12 @@ public class ListIndexProxyIntegrationTest {
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<ListIndexProxy> listTest) {
+                               Consumer<ListIndexProxy<String>> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ListIndexProxy> listTest) {
+                               BiConsumer<View, ListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_NAME,

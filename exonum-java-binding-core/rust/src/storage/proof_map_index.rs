@@ -24,7 +24,7 @@ enum IndexType {
 
 type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
 
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntry";
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]

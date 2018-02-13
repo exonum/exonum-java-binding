@@ -16,8 +16,10 @@ import java.util.NoSuchElementException;
  *
  * <p>As any native proxy, the list index <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ *
+ * @param <T> the type of elements in this list
  */
-public interface ListIndex extends NativeProxy {
+public interface ListIndex<T> extends NativeProxy {
 
   /**
    * Adds a new element to the end of the list.
@@ -27,7 +29,7 @@ public interface ListIndex extends NativeProxy {
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  void add(byte[] e);
+  void add(T e);
 
   /**
    * Adds all elements from the specified collection to this list.
@@ -40,7 +42,7 @@ public interface ListIndex extends NativeProxy {
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  void addAll(Collection<byte[]> elements);
+  void addAll(Collection<? extends T> elements);
 
   /**
    * Replaces the element at the given index of the list with the specified element.
@@ -52,7 +54,7 @@ public interface ListIndex extends NativeProxy {
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  void set(long index, byte[] e);
+  void set(long index, T e);
 
   /**
    * Returns the element at the given index.
@@ -62,7 +64,7 @@ public interface ListIndex extends NativeProxy {
    * @throws IndexOutOfBoundsException if index is invalid
    * @throws IllegalStateException if this list is not valid
    */
-  byte[] get(long index);
+  T get(long index);
 
   /**
    * Returns the last element of the list.
@@ -71,7 +73,7 @@ public interface ListIndex extends NativeProxy {
    * @throws NoSuchElementException if the list is empty
    * @throws IllegalStateException if this list is not valid
    */
-  byte[] getLast();
+  T getLast();
 
   /**
    * Clears the list.
@@ -103,5 +105,5 @@ public interface ListIndex extends NativeProxy {
    *
    * @throws IllegalStateException if this list is not valid
    */
-  StorageIterator<byte[]> iterator();
+  StorageIterator<T> iterator();
 }

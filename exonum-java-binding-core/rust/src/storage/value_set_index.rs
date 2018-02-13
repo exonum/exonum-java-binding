@@ -19,7 +19,7 @@ enum IndexType {
 
 type Iter<'a> = PairIter<ValueSetIndexIter<'a, Value>>;
 
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/ValueSetIndexProxy$Entry";
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/ValueSetIndexProxy$EntryInternal";
 
 /// Returns pointer to the created `ValueSetIndex` object.
 #[no_mangle]

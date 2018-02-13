@@ -2,7 +2,6 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
-import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.TestParameters.parameters;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -14,6 +13,7 @@ import static org.junit.Assert.fail;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.After;
@@ -47,7 +46,7 @@ public class ListIndexParameterizedIntegrationTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Parameterized.Parameter(0)
-  public FunctionHolder listSupplier;
+  public PartiallyAppliedIndexConstructor<ListIndex<String>> listSupplier;
 
   @Parameterized.Parameter(1)
   public String testName;
@@ -69,9 +68,9 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void addSingleElementToEmptyList() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      byte[] addedElement = V1;
+      String addedElement = V1;
       l.add(addedElement);
-      byte[] element = l.get(0);
+      String element = l.get(0);
 
       assertThat(element, equalTo(addedElement));
     });
@@ -106,14 +105,14 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void addAllNonEmptyCollection() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      List<byte[]> addedElements = asList(V1, V2);
+      List<String> addedElements = asList(V1, V2);
       l.addAll(addedElements);
 
       assertThat(Math.toIntExact(l.size()), equalTo(addedElements.size()));
 
       for (int i = 0; i < l.size(); i++) {
-        byte[] actual = l.get(i);
-        byte[] expected = addedElements.get(i);
+        String actual = l.get(i);
+        String expected = addedElements.get(i);
         assertThat(actual, equalTo(expected));
       }
     });
@@ -125,14 +124,14 @@ public class ListIndexParameterizedIntegrationTest {
       l.add(V1);
       int initialSize = Math.toIntExact(l.size());
 
-      List<byte[]> addedElements = asList(V1, V2);
+      List<String> addedElements = asList(V1, V2);
       l.addAll(addedElements);
 
       assertThat(Math.toIntExact(l.size()), equalTo(initialSize + addedElements.size()));
 
       for (int i = initialSize; i < l.size(); i++) {
-        byte[] actual = l.get(i);
-        byte[] expected = addedElements.get(i - initialSize);
+        String actual = l.get(i);
+        String expected = addedElements.get(i - initialSize);
         assertThat(actual, equalTo(expected));
       }
     });
@@ -141,7 +140,7 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void addAllCollectionWithFirstNull() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      List<byte[]> addedElements = asList(null, V2);
+      List<String> addedElements = asList(null, V2);
       try {
         l.addAll(addedElements);
         fail("Expected NPE");
@@ -154,7 +153,7 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void addAllCollectionWithSecondNull() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      List<byte[]> addedElements = asList(V1, null);
+      List<String> addedElements = asList(V1, null);
       try {
         l.addAll(addedElements);
         fail("Expected NPE");
@@ -176,10 +175,10 @@ public class ListIndexParameterizedIntegrationTest {
   public void setReplaceFirstSingleElement() throws Exception {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
-      byte[] replacingElement = bytes("r1");
+      String replacingElement = "r1";
       l.set(0, replacingElement);
 
-      byte[] element = l.get(0);
+      String element = l.get(0);
       assertThat(element, equalTo(replacingElement));
     });
   }
@@ -189,11 +188,11 @@ public class ListIndexParameterizedIntegrationTest {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
-      byte[] replacingElement = bytes("r2");
+      String replacingElement = "r2";
       long last = l.size() - 1;
       l.set(last, replacingElement);
 
-      byte[] element = l.get(last);
+      String element = l.get(last);
       assertThat(element, equalTo(replacingElement));
     });
   }
@@ -202,7 +201,7 @@ public class ListIndexParameterizedIntegrationTest {
   public void setReplaceAbsentElement() throws Exception {
     runTestWithView(database::createFork, (l) -> {
       long invalidIndex = 0;
-      byte[] replacingElement = bytes("r2");
+      String replacingElement = "r2";
 
       expectedException.expect(IndexOutOfBoundsException.class);
       l.set(invalidIndex, replacingElement);
@@ -219,16 +218,16 @@ public class ListIndexParameterizedIntegrationTest {
   @Test(expected = NoSuchElementException.class)
   public void getLastEmptyList() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      byte[] ignored = l.getLast();
+      String ignored = l.getLast();
     });
   }
 
   @Test
   public void getLastSingleElementList() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      byte[] addedElement = V1;
+      String addedElement = V1;
       l.add(addedElement);
-      byte[] last = l.getLast();
+      String last = l.getLast();
 
       assertThat(last, equalTo(addedElement));
     });
@@ -239,7 +238,7 @@ public class ListIndexParameterizedIntegrationTest {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
-      byte[] last = l.getLast();
+      String last = l.getLast();
 
       assertThat(last, equalTo(V2));
     });
@@ -305,18 +304,14 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void testIterator() throws Exception {
     runTestWithView(database::createFork, (l) -> {
-      List<byte[]> elements = TestStorageItems.values;
+      List<String> elements = TestStorageItems.values;
 
-      elements.forEach(l::add);
+      l.addAll(elements);
 
-      try (StorageIterator<byte[]> iterator = l.iterator()) {
-        List<byte[]> iterElements = ImmutableList.copyOf(iterator);
+      try (StorageIterator<String> iterator = l.iterator()) {
+        List<String> iterElements = ImmutableList.copyOf(iterator);
 
-        assertThat(elements.size(), equalTo(iterElements.size()));
-
-        for (int i = 0; i < elements.size(); i++) {
-          assertThat(iterElements.get(i), equalTo(elements.get(i)));
-        }
+        assertThat(iterElements, equalTo(elements));
       }
     });
   }
@@ -324,7 +319,7 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    ListIndex list = listSupplier.function.apply(LIST_NAME, view);
+    ListIndex list = listSupplier.create(LIST_NAME, view);
 
     view.close();  // a list must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -332,34 +327,23 @@ public class ListIndexParameterizedIntegrationTest {
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<ListIndex> listTest) {
+                               Consumer<ListIndex<String>> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ListIndex> listTest) {
-    IndicesTests.runTestWithView(
-        viewSupplier,
-        LIST_NAME,
-        listSupplier.function,
-        listTest
-    );
+                               BiConsumer<View, ListIndex<String>> listTest) {
+    try (View view = viewSupplier.get();
+         ListIndex<String> list = listSupplier.create(LIST_NAME, view)) {
+      listTest.accept(view, list);
+    }
   }
 
   @Parameters(name = "{index}: {1}")
   public static Collection<Object[]> testData() {
     return asList(
-        parameters(new FunctionHolder(ListIndexProxy::new), "ListIndex"),
-        parameters(new FunctionHolder(ProofListIndexProxy::new), "ProofListIndex")
+        parameters(IndexConstructors.from(ListIndexProxy::new), "ListIndex"),
+        parameters(IndexConstructors.from(ProofListIndexProxy::new), "ProofListIndex")
     );
-  }
-
-  // Needed for you can't assign a lambda to an Object
-  private static class FunctionHolder {
-    final BiFunction<String, View, ListIndex> function;
-
-    private FunctionHolder(BiFunction<String, View, ListIndex> function) {
-      this.function = function;
-    }
   }
 }

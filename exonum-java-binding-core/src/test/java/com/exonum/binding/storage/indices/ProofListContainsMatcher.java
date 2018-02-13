@@ -2,37 +2,39 @@ package com.exonum.binding.storage.indices;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.proofs.list.ListProofValidator;
-import com.exonum.binding.test.ByteMapsIsEqualMatcher;
+import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
+class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<String>> {
 
-  private final Function<ProofListIndexProxy, ListProof> proofFunction;
-  private final ByteMapsIsEqualMatcher<Long> elementsMatcher;
+  private final Function<ProofListIndexProxy<String>, ListProof> proofFunction;
+  private final Matcher<Map<Long, String>> elementsMatcher;
 
-  ProofListContainsMatcher(Function<ProofListIndexProxy, ListProof> proofFunction,
-                           Map<Long, byte[]> expectedProofElements) {
+  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>, ListProof> proofFunction,
+                                   Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
-    this.elementsMatcher = ByteMapsIsEqualMatcher.equalTo(expectedProofElements);
+    this.elementsMatcher = equalTo(expectedProofElements);
   }
 
   @Override
-  protected boolean matchesSafely(ProofListIndexProxy list) {
+  protected boolean matchesSafely(ProofListIndexProxy<String> list) {
     if (list == null) {
       return false;
     }
 
     ListProof proof = proofFunction.apply(list);
-    ListProofValidator validator = new ListProofValidator(list.getRootHash(), list.size());
+    ListProofValidator<String> validator = newProofValidator(list);
     proof.accept(validator);
 
     return validator.isValid() && elementsMatcher.matches(validator.getElements());
@@ -45,9 +47,10 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
   }
 
   @Override
-  protected void describeMismatchSafely(ProofListIndexProxy list, Description mismatchDescription) {
+  protected void describeMismatchSafely(ProofListIndexProxy<String> list,
+                                        Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
-    ListProofValidator validator = new ListProofValidator(list.getRootHash(), list.size());
+    ListProofValidator<String> validator = newProofValidator(list);
     proof.accept(validator);
 
     if (!validator.isValid()) {
@@ -62,6 +65,11 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
     }
   }
 
+  private ListProofValidator<String> newProofValidator(ProofListIndexProxy<String> list) {
+    return new ListProofValidator<>(list.getRootHash(), list.size(),
+        StandardSerializers.string());
+  }
+
   /**
    * Creates a matcher for a proof list that will match iff the list contains the specified value
    * at the specified position and provides a <em>valid</em> cryptographic proof of that.
@@ -71,11 +79,12 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
    * @param index an index of the element
    * @param expectedValue an expected value of the element at the given index
    */
-  public static ProofListContainsMatcher provesThatContains(long index, byte[] expectedValue) {
+  public static ProofListContainsMatcher provesThatContains(long index, String expectedValue) {
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy, ListProof> proofFunction = (list) -> list.getProof(index);
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
+        (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction,
         Collections.singletonMap(index, expectedValue));
@@ -94,14 +103,15 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy> {
    * @throws IllegalArgumentException if from is negative or the list is empty
    */
   public static ProofListContainsMatcher provesThatContains(long from,
-                                                            List<byte[]> expectedValues) {
+                                                            List<String> expectedValues) {
     checkArgument(0 <= from, "Range start index (%s) is negative", from);
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
     long to = from + expectedValues.size();
-    Function<ProofListIndexProxy, ListProof> proofFunction = (list) -> list.getRangeProof(from, to);
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
+        (list) -> list.getRangeProof(from, to);
 
-    Map<Long, byte[]> expectedProofElements = new TreeMap<>();
+    Map<Long, String> expectedProofElements = new TreeMap<>();
     for (long i = from; i < to; i++) {
       expectedProofElements.put(i, expectedValues.get(Math.toIntExact(i - from)));
     }

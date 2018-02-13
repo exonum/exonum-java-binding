@@ -1,8 +1,9 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.ViewModificationCounter;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.LongConsumer;
+import java.util.function.LongFunction;
 
 final class StorageIterators {
 
@@ -17,13 +18,18 @@ final class StorageIterators {
    * @param disposeOperation an operation to call to destroy the corresponding native iterator
    * @param parent a collection over which to iterate
    * @param modificationCounter a view modification counter
+   * @param transformingFunction a function to apply to elements returned by native iterator
+   *                             (usually, to an array of bytes)
    */
-  static <E> StorageIterator<E> createIterator(long nativeHandle,
-                                               Function<Long, E> nextFunction,
-                                               Consumer<Long> disposeOperation,
-                                               AbstractIndexProxy parent,
-                                               ViewModificationCounter modificationCounter) {
-    return new RustIterAdapter<>(
+  static <ElementT, NativeT> StorageIterator<ElementT> createIterator(
+      long nativeHandle,
+      LongFunction<NativeT> nextFunction,
+      LongConsumer disposeOperation,
+      AbstractIndexProxy parent,
+      ViewModificationCounter modificationCounter,
+      Function<? super NativeT, ? extends ElementT> transformingFunction) {
+    // todo: Use the Guava-provided iterator when ECR-595 is resolved (Iterators#transform)
+    RustIterAdapter<NativeT> iterator = new RustIterAdapter<>(
         new ConfigurableRustIter<>(
             nativeHandle,
             nextFunction,
@@ -32,6 +38,13 @@ final class StorageIterators {
             modificationCounter
         )
     );
+    return transform(iterator, transformingFunction);
+  }
+
+  private static <InT, OutT> StorageIterator<OutT> transform(
+      StorageIterator<? extends InT> backingIterator,
+      Function<? super InT, ? extends OutT> transformingFunction) {
+    return new TransformedIterator<>(backingIterator, transformingFunction);
   }
 
   private StorageIterators() {}

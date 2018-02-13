@@ -5,13 +5,16 @@ import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static java.util.Arrays.asList;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorOne;
+import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorTwo;
+import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.Collection;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.junit.After;
@@ -41,7 +44,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private static final String indexName = "index";
+  private static final String INDEX_NAME = "index";
 
   private MemoryDb database;
 
@@ -50,7 +53,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   private Consumer<I> indexConsumer;
 
   public SafeCloseIndexParameterizedIntegrationTest(TestParameters<I> parameters) {
-    this.indexProvider = (v) -> parameters.indexCtor.apply(indexName, v);
+    this.indexProvider = (v) -> parameters.indexFactory.create(INDEX_NAME, v);
     this.indexConsumer = parameters.indexConsumer;
   }
 
@@ -131,7 +134,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
         parameters(ProofListIndexProxy::new, AbstractListIndexProxy::size),
 
-        parameters(MapIndexProxy::new, (map) -> map.containsKey(K1)),
+        parameters(MapIndexProxy::new, (map) -> map.containsKey(PK1)),
 
         parameters(ProofMapIndexProxy::new, (map) -> map.containsKey(PK1)),
 
@@ -139,27 +142,39 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
         parameters(ValueSetIndexProxy::new, (set) -> set.contains(V1)),
 
-        parameters((name, view) -> new EntryIndexProxy<>(name, view, TestSerializers.string()),
-            (entry) -> entry.isPresent())
+        parameters(EntryIndexProxy::new, (entry) -> entry.isPresent())
     );
   }
 
-  private static <I extends AbstractIndexProxy> TestParameters[] parameters(
-      BiFunction<String, View, I> indexCtor,
-      Consumer<I> indexConsumer) {
+  private static <IndexT extends AbstractIndexProxy> TestParameters[] parameters(
+      IndexConstructorOne<IndexT, String> indexCtor,
+      Consumer<IndexT> indexConsumer) {
     return new TestParameters[] {
-        new TestParameters<>(indexCtor, indexConsumer)
+        new TestParameters<>(
+            IndexConstructors.from(indexCtor),
+            indexConsumer
+        )
     };
   }
 
-  static class TestParameters<J extends AbstractIndexProxy> {
-    BiFunction<String, View, J> indexCtor;
+  private static <IndexT extends AbstractIndexProxy> TestParameters[] parameters(
+      IndexConstructorTwo<IndexT, HashCode, String> indexCtor,
+      Consumer<IndexT> indexConsumer) {
+    return new TestParameters[] {
+        new TestParameters<>(
+            IndexConstructors.from(indexCtor),
+            indexConsumer
+        )
+    };
+  }
 
-    Consumer<J> indexConsumer;
+  static class TestParameters<IndexT extends AbstractIndexProxy> {
+    PartiallyAppliedIndexConstructor<IndexT> indexFactory;
+    Consumer<IndexT> indexConsumer;
 
-    TestParameters(BiFunction<String, View, J> indexCtor,
-                   Consumer<J> indexConsumer) {
-      this.indexCtor = indexCtor;
+    TestParameters(PartiallyAppliedIndexConstructor<IndexT> indexFactory,
+                   Consumer<IndexT> indexConsumer) {
+      this.indexFactory = indexFactory;
       this.indexConsumer = indexConsumer;
     }
   }
