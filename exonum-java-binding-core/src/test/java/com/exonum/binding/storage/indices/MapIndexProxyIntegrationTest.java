@@ -5,6 +5,7 @@ import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
@@ -18,12 +19,17 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -186,6 +192,41 @@ public class MapIndexProxyIntegrationTest {
       String value = map.get(K1);
 
       assertNull(value);
+    });
+  }
+
+  @Test
+  public void putPrefixKeys() throws Exception {
+    runTestWithView(database::createFork, (map) -> {
+      String fullKey = "A long key to take prefixes of";
+
+      // Generate a stream of key-value pairs, where each key is a prefix of the longest key:
+      // 'A' -> V1
+      // 'A ' -> V2
+      // 'A l' -> V3
+      // …
+      Stream<String> keys = IntStream.range(1, fullKey.length())
+          .boxed()
+          .map(size -> prefix(fullKey, size));
+      Stream<String> values = TestStorageItems.values.stream();
+      List<MapEntry<String, String>> entries = Streams.zip(keys, values, MapEntry::from)
+          .collect(Collectors.toList());
+
+      // Shuffle so that we don't add in a certain order.
+      Collections.shuffle(entries);
+
+      // Add them to the map
+      putAll(map, entries);
+
+      // Check that each key maps to the correct value.
+      for (MapEntry<String, String> e : entries) {
+        String key = e.getKey();
+        assertTrue(map.containsKey(key));
+
+        String value = map.get(key);
+        String expectedValue = e.getValue();
+        assertThat(value, equalTo(expectedValue));
+      }
     });
   }
 
@@ -383,6 +424,11 @@ public class MapIndexProxyIntegrationTest {
   private static MapIndexProxy<String, String> createMap(String name, View view) {
     return new MapIndexProxy<>(name, view, StandardSerializers.string(),
         StandardSerializers.string());
+  }
+
+  private static String prefix(String source, int prefixSize) {
+    checkArgument(prefixSize <= source.length());
+    return source.substring(0, prefixSize);
   }
 
   /**

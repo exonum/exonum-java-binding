@@ -46,7 +46,6 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
   public void merge_singleList() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
@@ -67,7 +66,6 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
   public void merge_twoIndices() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
@@ -94,7 +92,6 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
   public void merge_multipleForks() throws Exception {
     try (MemoryDb db = new MemoryDb()) {
@@ -112,7 +109,7 @@ public class MemoryDbIntegrationTest {
 
       try (Snapshot snapshot = db.createSnapshot();
            ListIndex<String> list = newList(listName, snapshot)) {
-        assertThat(list.size(), equalTo(values.size()));
+        assertThat(list.size(), equalTo((long) values.size()));
         for (int i = 0; i < values.size(); i++) {
           assertThat(values.get(i), equalTo(list.get(i)));
         }

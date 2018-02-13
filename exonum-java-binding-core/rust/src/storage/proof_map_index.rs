@@ -9,10 +9,9 @@ use std::ptr;
 use exonum::crypto::Hash;
 use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof, StorageKey};
 use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
-                                       ProofMapDBKey, BranchProofNode, ProofNode,
-                                       PROOF_MAP_KEY_SIZE};
+                                       ProofPath, BranchProofNode, ProofNode, PROOF_MAP_KEY_SIZE};
 use utils::{self, Handle, PairIter};
-use super::db::{View, Value};
+use super::db::{View, ViewRef, Value};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
@@ -36,10 +35,14 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(match *utils::cast_handle(view_handle) {
-            View::Snapshot(ref snapshot) => IndexType::SnapshotIndex(Index::new(name, &**snapshot)),
-            View::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
-        }))
+        Ok(utils::to_handle(
+            match *utils::cast_handle::<View>(view_handle).get() {
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -432,11 +435,7 @@ fn make_java_empty_proof(env: &JNIEnv) -> Result<jobject> {
 
 // TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
 #[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
-fn make_java_equal_value_at_root(
-    env: &JNIEnv,
-    key: &ProofMapDBKey,
-    value: &Value,
-) -> Result<jobject> {
+fn make_java_equal_value_at_root(env: &JNIEnv, key: &ProofPath, value: &Value) -> Result<jobject> {
     let db_key = make_java_db_key(env, key)?;
     let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     Ok(
@@ -449,7 +448,7 @@ fn make_java_equal_value_at_root(
     )
 }
 
-fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofMapDBKey) -> Result<AutoLocal<'a>> {
+fn make_java_db_key<'a>(env: &'a JNIEnv, key: &ProofPath) -> Result<AutoLocal<'a>> {
     // TODO: Export `DB_KEY_SIZE`?
     const PROOF_KEY_SIZE: usize = PROOF_MAP_KEY_SIZE + 2;
     debug_assert_eq!(PROOF_KEY_SIZE, key.size());
@@ -468,7 +467,7 @@ fn make_java_hash<'a>(env: &'a JNIEnv, hash: &Hash) -> Result<AutoLocal<'a>> {
 
 fn make_java_non_equal_value_at_root(
     env: &JNIEnv,
-    key: &ProofMapDBKey,
+    key: &ProofPath,
     hash: &Hash,
 ) -> Result<jobject> {
     let key = make_java_db_key(env, key)?;
@@ -510,8 +509,8 @@ fn make_java_mapping_not_found_branch(
     env: &JNIEnv,
     left_hash: &Hash,
     right_hash: &Hash,
-    left_key: &ProofMapDBKey,
-    right_key: &ProofMapDBKey,
+    left_key: &ProofPath,
+    right_key: &ProofPath,
 ) -> Result<jobject> {
     let left_hash = make_java_hash(env, left_hash)?;
     let right_hash = make_java_hash(env, right_hash)?;
@@ -536,8 +535,8 @@ fn make_java_left_proof_branch(
     env: &JNIEnv,
     left_node: &ProofNode<Value>,
     right_hash: &Hash,
-    left_key: &ProofMapDBKey,
-    right_key: &ProofMapDBKey,
+    left_key: &ProofPath,
+    right_key: &ProofPath,
 ) -> Result<jobject> {
     let left_node = make_java_proof_node(env, left_node)?;
     let right_hash = make_java_hash(env, right_hash)?;
@@ -565,8 +564,8 @@ fn make_java_right_proof_branch(
     env: &JNIEnv,
     left_hash: &Hash,
     right_node: &ProofNode<Value>,
-    left_key: &ProofMapDBKey,
-    right_key: &ProofMapDBKey,
+    left_key: &ProofPath,
+    right_key: &ProofPath,
 ) -> Result<jobject> {
     let left_hash = make_java_hash(env, left_hash)?;
     let right_node = make_java_proof_node(env, right_node)?;
