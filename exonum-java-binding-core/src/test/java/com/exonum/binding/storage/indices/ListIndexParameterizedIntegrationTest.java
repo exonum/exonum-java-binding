@@ -10,8 +10,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.exonum.binding.storage.database.Database;
+import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.exonum.binding.util.LibraryLoader;
@@ -46,14 +47,14 @@ public class ListIndexParameterizedIntegrationTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Parameterized.Parameter(0)
-  public PartiallyAppliedIndexConstructor<ListIndex<String>> listSupplier;
+  public PartiallyAppliedIndexConstructor<ListIndex<String>> listFactory;
 
   @Parameterized.Parameter(1)
   public String testName;
 
   private static final String LIST_NAME = "test_list";
 
-  private Database database;
+  private MemoryDb database;
 
   @Before
   public void setUp() throws Exception {
@@ -208,11 +209,20 @@ public class ListIndexParameterizedIntegrationTest {
     });
   }
 
-  @Test(expected = Exception.class)  // Currently it fails due to IndexOutOfBoundsException.
-  // As we do not have an API to first add an item to a Fork, get a patch and apply it to the db,
-  // and then test `set` with a Snapshot, we cannot test UnsupportedOperationException here.
+  @Test(expected = UnsupportedOperationException.class)
   public void setWithSnapshot() throws Exception {
-    runTestWithView(database::createSnapshot, (l) -> l.set(0, V1));
+    // Initialize the list.
+    try (Fork fork = database.createFork();
+         ListIndex<String> list = createList(fork)) {
+      list.add(V1);
+      database.merge(fork);
+    }
+
+    // Expect the read-only list to throw an exception.
+    try (Snapshot snapshot = database.createSnapshot();
+         ListIndex<String> list = createList(snapshot)) {
+      list.set(0, V2);
+    }
   }
 
   @Test(expected = NoSuchElementException.class)
@@ -319,7 +329,7 @@ public class ListIndexParameterizedIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    ListIndex list = listSupplier.create(LIST_NAME, view);
+    ListIndex list = createList(view);
 
     view.close();  // a list must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -334,9 +344,13 @@ public class ListIndexParameterizedIntegrationTest {
   private void runTestWithView(Supplier<View> viewSupplier,
                                BiConsumer<View, ListIndex<String>> listTest) {
     try (View view = viewSupplier.get();
-         ListIndex<String> list = listSupplier.create(LIST_NAME, view)) {
+         ListIndex<String> list = createList(view)) {
       listTest.accept(view, list);
     }
+  }
+
+  private ListIndex<String> createList(View view) {
+    return listFactory.create(LIST_NAME, view);
   }
 
   @Parameters(name = "{index}: {1}")
