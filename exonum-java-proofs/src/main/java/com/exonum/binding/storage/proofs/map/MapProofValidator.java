@@ -48,7 +48,7 @@ public class MapProofValidator<V> implements MapProofVisitor {
    *   - DbKey checks that no bits are set after `numSignificant` bits.
    *   - MapProofValidator checks that left and right keys of a node are correct.
    */
-  static final boolean PERFORM_TREE_CORRECTNESS_CHECKS = false;
+  static final boolean PERFORM_TREE_CORRECTNESS_CHECKS = true;
 
   private static final int HASH_SIZE_BITS = Hashing.DEFAULT_HASH_SIZE_BYTES * Byte.SIZE;
 
