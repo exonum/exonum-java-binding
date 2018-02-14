@@ -15,6 +15,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
+    <!-- Enables Java assertions, used in unit and integration tests -->
+    <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
 
@@ -23,6 +25,7 @@
     <powermock.version>1.7.1</powermock.version>
     <mockito-core.version>2.8.47</mockito-core.version>
     <guava.version>23.0</guava.version>
+    <vertx.version>3.5.1</vertx.version>
   </properties>
 
   <build>

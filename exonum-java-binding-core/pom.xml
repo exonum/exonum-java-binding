@@ -25,10 +25,7 @@
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
-    <!-- Enables Java assertions, used in unit and integration tests -->
-    <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <build.nativeLibPath>rust/target/debug</build.nativeLibPath>
-    <vertx.version>3.5.0</vertx.version>
     <guice.version>4.1.0</guice.version>
     <auto-value.version>1.5.3</auto-value.version>
   </properties>

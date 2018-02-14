@@ -12,7 +12,7 @@ class FrameworkModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(Server.class).in(Singleton.class);
+    bind(Server.class).toProvider(Server::create).in(Singleton.class);
     //  fixme: if that's a proxy of a NodeProxy :-)
     // bind(Node.class);
     bind(UserServiceAdapter.class);

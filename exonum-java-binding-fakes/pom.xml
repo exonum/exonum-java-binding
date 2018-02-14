@@ -16,6 +16,10 @@
 
     <name>Exonum Java Binding: Fakes</name>
 
+    <properties>
+        <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -28,6 +32,20 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
+                </configuration>
+            </plugin>
+
+            <!-- Since there is no much sense in separating unit & integration tests in this module,
+                 run both categories during 'test' phase. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>
+                        -Djava.library.path=${ejb-core.nativeLibPath}
+                        -Xcheck:jni
+                        ${java.vm.assertionFlag}
+                    </argLine>
                 </configuration>
             </plugin>
 
@@ -68,6 +86,14 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+
+        <!-- todo: Remove when https://jira.bf.local/browse/ECR-521 is resolved -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-codegen</artifactId>
+            <version>${vertx.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

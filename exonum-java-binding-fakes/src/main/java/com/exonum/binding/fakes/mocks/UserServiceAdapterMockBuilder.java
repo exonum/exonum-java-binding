@@ -1,8 +1,9 @@
-package com.exonum.binding.fakes.services;
+package com.exonum.binding.fakes.mocks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +29,7 @@ public final class UserServiceAdapterMockBuilder {
     when(service.getName()).thenReturn(name);
   }
 
-  public void convertingTo(UserTransactionAdapter transaction) {
+  public void convertTransaction(UserTransactionAdapter transaction) {
     when(service.convertTransaction(any(byte[].class)))
         .thenReturn(checkNotNull(transaction));
   }
@@ -37,9 +38,9 @@ public final class UserServiceAdapterMockBuilder {
    * Sets up the mock to reject any transaction message,
    * as if it is does not belong to this service.
    */
-  public void rejectingRawTransactions() {
+  public void convertTransactionThrowing(Throwable t) {
     when(service.convertTransaction(any(byte[].class)))
-        .thenThrow(IllegalArgumentException.class);
+        .thenThrow(t);
   }
 
   public void stateHashes(byte[][] stateHashes) {
@@ -47,9 +48,24 @@ public final class UserServiceAdapterMockBuilder {
         .thenReturn(checkNotNull(stateHashes));
   }
 
+  public void stateHashesThrowing(Throwable t) {
+    when(service.getStateHashes(anyLong()))
+        .thenThrow(t);
+  }
+
   public void initialGlobalConfig(String initialGlobalConfig) {
     when(service.initalize(anyLong()))
         .thenReturn(checkNotNull(initialGlobalConfig));
+  }
+
+  public void initialGlobalConfigThrowing(Throwable t) {
+    when(service.initalize(anyLong()))
+        .thenThrow(t);
+  }
+
+  public void mountPublicApiHandlerThrowing(Throwable t) {
+    doThrow(t)
+        .when(service).mountPublicApiHandler(anyLong());
   }
 
   /** Returns a set-up mock. */
