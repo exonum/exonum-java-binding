@@ -23,6 +23,15 @@ public final class SetEntryTransaction implements Transaction {
   private final String value;
   private final String info;
 
+  /**
+   * Creates a transaction with a pre-configured behaviour.
+   *
+   * @param valid whether a transaction has to be valid (i.e., return true
+   *              in its {@link Transaction#isValid()} method)
+   * @param value a value to put into an entry {@link #ENTRY_NAME}
+   * @param info a value to be returned as this transaction text representation
+   *     {@link Transaction#info()}
+   */
   public SetEntryTransaction(boolean valid, String value, String info) {
     this.valid = valid;
     this.value = checkNotNull(value);
