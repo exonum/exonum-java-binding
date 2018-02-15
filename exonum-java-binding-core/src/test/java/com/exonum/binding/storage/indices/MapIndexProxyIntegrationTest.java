@@ -1,9 +1,10 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
-import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -15,11 +16,11 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -67,7 +68,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
-    MapIndexProxy map = new MapIndexProxy(MAP_NAME, view);
+    MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
 
     // Destroy a view before the map.
     view.close();
@@ -79,13 +80,15 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void containsKeyShouldReturnFalseIfNoSuchKey() throws Exception {
     runTestWithView(database::createSnapshot,
-        (map) -> assertFalse(map.containsKey(K1)));
+        (map) -> assertFalse(map.containsKey(K1))
+    );
   }
 
   @Test(expected = NullPointerException.class)
   public void containsKeyShouldThrowIfNullKey() throws Exception {
     runTestWithView(database::createSnapshot,
-        (map) -> map.containsKey(null));
+        (map) -> map.containsKey(null)
+    );
   }
 
   @Test
@@ -98,14 +101,14 @@ public class MapIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getShouldReturnSuccessfullyPutValueSingletonKey() throws Exception {
+  public void getShouldReturnSuccessfullyPutValueSingleByteKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = bytes(1, 2, 3, 4);
+      String key = "k";
+      String value = V1;
 
       map.put(key, value);
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(value));
     });
@@ -114,12 +117,12 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnSuccessfullyPutValueThreeByteKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes("key");
-      byte[] value = bytes("v");
+      String key = "key";
+      String value = V1;
 
       map.put(key, value);
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(value));
     });
@@ -128,28 +131,26 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void putShouldOverwritePreviousValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes(1);
-      byte[] v1 = bytes("v1");
-      byte[] v2 = bytes("v2");
+      String key = "key";
 
-      map.put(key, v1);
-      map.put(key, v2);
+      map.put(key, V1);
+      map.put(key, V2);
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
 
-      assertThat(storedValue, equalTo(v2));
+      assertThat(storedValue, equalTo(V2));
     });
   }
 
   @Test
   public void getShouldReturnSuccessfullyPutEmptyValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = new byte[]{};
+      String key = K1;
+      String value = "";
 
       map.put(key, value);
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(value));
     });
@@ -158,12 +159,12 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnSuccessfullyPutValueByEmptyKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{};
-      byte[] value = bytes(2);
+      String key = "";
+      String value = V1;
 
       map.put(key, value);
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(value));
     });
@@ -172,18 +173,14 @@ public class MapIndexProxyIntegrationTest {
   @Test(expected = UnsupportedOperationException.class)
   public void putShouldFailWithSnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = bytes(2);
-
-      map.put(key, value);
+      map.put(K1, V1);
     });
   }
 
   @Test
   public void getShouldReturnNullIfNoSuchValueInFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = map.get(key);
+      String value = map.get(K1);
 
       assertNull(value);
     });
@@ -192,8 +189,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void getShouldReturnNullIfNoSuchValueInEmptySnapshot() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = map.get(key);
+      String value = map.get(K1);
 
       assertNull(value);
     });
@@ -202,35 +198,33 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void putPrefixKeys() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] fullKey = bytes("A long key we will take prefixes of");
+      String fullKey = "A long key to take prefixes of";
 
       // Generate a stream of key-value pairs, where each key is a prefix of the longest key:
       // 'A' -> V1
       // 'A ' -> V2
       // 'A l' -> V3
       // …
-      Stream<Integer> keySizes = IntStream.range(1, fullKey.length).boxed();
-      Stream<byte[]> values = TestStorageItems.values.stream();
-      List<MapEntry> entries = Streams.zip(keySizes, values,
-          (size, value) -> new MapEntry(prefix(fullKey, size), value)
-      )
+      Stream<String> keys = IntStream.range(1, fullKey.length())
+          .boxed()
+          .map(size -> prefix(fullKey, size));
+      Stream<String> values = TestStorageItems.values.stream();
+      List<MapEntry<String, String>> entries = Streams.zip(keys, values, MapEntry::from)
           .collect(Collectors.toList());
 
       // Shuffle so that we don't add in a certain order.
       Collections.shuffle(entries);
 
       // Add them to the map
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      putAll(map, entries);
 
       // Check that each key maps to the correct value.
-      for (MapEntry e : entries) {
-        byte[] key = e.getKey();
+      for (MapEntry<String, String> e : entries) {
+        String key = e.getKey();
         assertTrue(map.containsKey(key));
 
-        byte[] value = map.get(key);
-        byte[] expectedValue = e.getValue();
+        String value = map.get(key);
+        String expectedValue = e.getValue();
         assertThat(value, equalTo(expectedValue));
       }
     });
@@ -239,13 +233,12 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void removeSuccessfullyPutValue() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = bytes(1, 2, 3, 4);
+      String key = K1;
 
-      map.put(key, value);
+      map.put(key, V1);
       map.remove(key);
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
       assertNull(storedValue);
     });
   }
@@ -253,7 +246,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysShouldReturnEmptyIterIfNoEntries() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      try (StorageIterator<byte[]> iterator = map.keys()) {
+      try (StorageIterator<String> iterator = map.keys()) {
         assertFalse(iterator.hasNext());
       }
     });
@@ -262,20 +255,14 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysShouldReturnIterWithAllKeys() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<MapEntry> entries = createSortedMapEntries((byte) 3);
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      List<MapEntry<String, String>> entries = createSortedMapEntries(3);
+      putAll(map, entries);
 
-      try (StorageIterator<byte[]> iterator = map.keys()) {
-        int i = 0;
-        while (iterator.hasNext()) {
-          byte[] keyInIter = iterator.next();
-          byte[] keyInMap = entries.get(i).getKey();
-          assertThat(keyInIter, equalTo(keyInMap));
-          i++;
-        }
-        assertFalse(iterator.hasNext());
+      try (StorageIterator<String> iterator = map.keys()) {
+        List<String> keysFromIter = ImmutableList.copyOf(iterator);
+        List<String> keysInMap = MapEntries.extractKeys(entries);
+
+        assertThat(keysFromIter, equalTo(keysInMap));
       }
     });
   }
@@ -283,14 +270,12 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfThisMapModifiedAfterNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<MapEntry> entries = createMapEntries((byte) 3);
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      List<MapEntry<String, String>> entries = createMapEntries(3);
+      putAll(map, entries);
 
-      try (StorageIterator<byte[]> iterator = map.keys()) {
+      try (StorageIterator<String> iterator = map.keys()) {
         iterator.next();
-        map.put(bytes("new key"), bytes("new value"));
+        map.put("new key", "new value");
 
         expectedException.expect(ConcurrentModificationException.class);
         iterator.next();
@@ -301,13 +286,11 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfThisMapModifiedBeforeNext() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<MapEntry> entries = createMapEntries((byte) 3);
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      List<MapEntry<String, String>> entries = createMapEntries(3);
+      putAll(map, entries);
 
-      try (StorageIterator<byte[]> iterator = map.keys()) {
-        map.put(bytes("new key"), bytes("new value"));
+      try (StorageIterator<String> iterator = map.keys()) {
+        map.put("new key", "new value");
 
         expectedException.expect(ConcurrentModificationException.class);
         iterator.next();
@@ -318,15 +301,13 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void keysIterNextShouldFailIfOtherIndexModified() throws Exception {
     runTestWithView(database::createFork, (view, map) -> {
-      List<MapEntry> entries = createMapEntries((byte) 3);
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      List<MapEntry<String, String>> entries = createMapEntries(3);
+      putAll(map, entries);
 
-      try (StorageIterator<byte[]> iterator = map.keys()) {
+      try (StorageIterator<String> iterator = map.keys()) {
         iterator.next();
-        try (MapIndexProxy otherMap = new MapIndexProxy("other_map", view)) {
-          otherMap.put(bytes("new key"), bytes("new value"));
+        try (MapIndexProxy<String, String> otherMap = createMap("other_map", view)) {
+          otherMap.put("new key", "new value");
         }
 
         expectedException.expect(ConcurrentModificationException.class);
@@ -338,7 +319,7 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void valuesShouldReturnEmptyIterIfNoEntries() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      try (StorageIterator<byte[]> iterator = map.values()) {
+      try (StorageIterator<String> iterator = map.values()) {
         assertFalse(iterator.hasNext());
       }
     });
@@ -347,20 +328,14 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void valuesShouldReturnIterWithAllValues() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<MapEntry> entries = createSortedMapEntries((byte) 3);
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      List<MapEntry<String, String>> entries = createSortedMapEntries(3);
+      putAll(map, entries);
 
-      try (StorageIterator<byte[]> iterator = map.values()) {
-        int i = 0;
-        while (iterator.hasNext()) {
-          byte[] valueInIter = iterator.next();
-          byte[] valueInMap = entries.get(i).getValue();
-          assertThat(valueInIter, equalTo(valueInMap));
-          i++;
-        }
-        assertFalse(iterator.hasNext());
+      try (StorageIterator<String> iterator = map.values()) {
+        List<String> valuesFromIter = ImmutableList.copyOf(iterator);
+        List<String> valuesInMap = MapEntries.extractValues(entries);
+
+        assertThat(valuesFromIter, equalTo(valuesInMap));
       }
     });
   }
@@ -368,26 +343,13 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void entriesShouldReturnIterWithAllValues() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      List<MapEntry> entries = createSortedMapEntries((byte) 3);
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      List<MapEntry<String, String>> entries = createSortedMapEntries(3);
+      putAll(map, entries);
 
-      try (StorageIterator<MapEntry> iterator = map.entries()) {
-        List<MapEntry> iterEntries = ImmutableList.copyOf(iterator);
+      try (StorageIterator<MapEntry<String, String>> iterator = map.entries()) {
+        List<MapEntry<String, String>> iterEntries = ImmutableList.copyOf(iterator);
 
-        assertThat(iterEntries.size(), equalTo(entries.size()));
-
-        for (MapEntry e : iterEntries) {
-          assertThat(map.get(e.getKey()), equalTo(e.getValue()));
-        }
-
-        for (int i = 0; i < entries.size(); i++) {
-          MapEntry expected = entries.get(i);
-          MapEntry actual = iterEntries.get(i);
-          assertThat(actual.getKey(), equalTo(expected.getKey()));
-          assertThat(actual.getValue(), equalTo(expected.getValue()));
-        }
+        assertThat(iterEntries, equalTo(entries));
       }
     });
   }
@@ -405,13 +367,12 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void clearSingleItemFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = bytes(1);
-      byte[] value = bytes(1, 2, 3, 4);
+      String key = K1;
+      map.put(key, V1);
 
-      map.put(key, value);
       map.clear();
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
       assertNull(storedValue);
     });
   }
@@ -419,13 +380,12 @@ public class MapIndexProxyIntegrationTest {
   @Test
   public void clearSingleItemByEmptyKey() throws Exception {
     runTestWithView(database::createFork, (map) -> {
-      byte[] key = new byte[]{};
-      byte[] value = bytes(1, 2, 3, 4);
+      String key = "";
+      map.put(key, V1);
 
-      map.put(key, value);
       map.clear();
 
-      byte[] storedValue = map.get(key);
+      String storedValue = map.get(key);
       assertNull(storedValue);
     });
   }
@@ -434,62 +394,61 @@ public class MapIndexProxyIntegrationTest {
   public void clearMultipleItemFork() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte numOfEntries = 5;
-      List<MapEntry> entries = createMapEntries(numOfEntries);
+      List<MapEntry<String, String>> entries = createMapEntries(numOfEntries);
 
-      // Put all entries
-      for (MapEntry e : entries) {
-        map.put(e.getKey(), e.getValue());
-      }
+      putAll(map, entries);
 
-      // Clear the map
       map.clear();
 
       // Check there are no entries left.
-      for (MapEntry e : entries) {
-        byte[] storedValue = map.get(e.getKey());
+      for (MapEntry<String, String> e : entries) {
+        String storedValue = map.get(e.getKey());
         assertNull(storedValue);
       }
     });
   }
 
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      Consumer<MapIndexProxy> mapTest) {
+                                      Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
   }
 
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, MapIndexProxy> mapTest) {
-    IndicesTests.runTestWithView(
-        viewSupplier,
-        MAP_NAME,
-        MapIndexProxy::new,
-        mapTest
-    );
+                                      BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
+    try (View view = viewSupplier.get();
+         MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
+      mapTest.accept(view, map);
+    }
   }
 
-  private static byte[] prefix(byte[] source, int prefixSize) {
-    checkArgument(prefixSize <= source.length);
-    return Arrays.copyOf(source, prefixSize);
+  private static MapIndexProxy<String, String> createMap(String name, View view) {
+    return new MapIndexProxy<>(name, view, StandardSerializers.string(),
+        StandardSerializers.string());
+  }
+
+  private static String prefix(String source, int prefixSize) {
+    checkArgument(prefixSize <= source.length());
+    return source.substring(0, prefixSize);
   }
 
   /**
-   * Creates `numOfEntries` map entries: [(0, 1), (1, 2), … (i, i+1)].
+   * Creates `numOfEntries` map entries: [('a', 'v1'), ('b', 'v2'), … ('z', 'vN+1')].
    */
-  private static List<MapEntry> createMapEntries(byte numOfEntries) {
+  private static List<MapEntry<String, String>> createMapEntries(int numOfEntries) {
     return createSortedMapEntries(numOfEntries);
   }
 
   /**
    * Creates `numOfEntries` map entries, sorted by key:
-   * [(0, 1), (1, 2), … (i, i+1)].
+   * [('a', 'v1'), ('b', 'v2'), … ('z', 'vN+1')].
    */
-  private static List<MapEntry> createSortedMapEntries(byte numOfEntries) {
-    assert (numOfEntries < Byte.MAX_VALUE);
-    List<MapEntry> l = new ArrayList<>(numOfEntries);
-    for (byte k = 0; k < numOfEntries; k++) {
-      byte[] key = bytes(k);
-      byte[] value = bytes((byte) (k + 1));
-      l.add(new MapEntry(key, value));
+  private static List<MapEntry<String, String>> createSortedMapEntries(int numOfEntries) {
+    assert (numOfEntries < 'z' - 'a');
+    List<MapEntry<String, String>> l = new ArrayList<>(numOfEntries);
+    for (int i = 0; i < numOfEntries; i++) {
+      String key = Character.toString((char) ('a' + i));
+      String value = "v" + (i + 1);
+      l.add(MapEntry.from(key, value));
     }
     return l;
   }

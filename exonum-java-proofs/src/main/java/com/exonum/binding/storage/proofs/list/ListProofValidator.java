@@ -9,24 +9,29 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.hash.PrimitiveSink;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
 /**
  * A validator of list proofs.
+ *
+ * @param <E> the type of elements in the corresponding list
  */
-public class ListProofValidator implements ListProofVisitor {
+public class ListProofValidator<E> implements ListProofVisitor {
 
   private final HashCode expectedRootHash;
+
+  private final CheckingSerializerDecorator<E> serializer;
 
   private final HashFunction hashFunction;
 
   private final int expectedLeafDepth;
 
-  private final Map<Long, byte[]> elements;
+  private final Map<Long, E> elements;
 
   private long index;
 
@@ -48,9 +53,10 @@ public class ListProofValidator implements ListProofVisitor {
    * @param expectedRootHash an expected value of a root hash
    * @param numElements the number of elements in the proof list.
    *                    The same as the number of leaf nodes in the Merkle tree.
+   * @param serializer a serializer of list elements
    */
-  public ListProofValidator(byte[] expectedRootHash, long numElements) {
-    this(HashCode.fromBytes(expectedRootHash), numElements);
+  public ListProofValidator(byte[] expectedRootHash, long numElements, Serializer<E> serializer) {
+    this(HashCode.fromBytes(expectedRootHash), numElements, serializer);
   }
 
   /**
@@ -59,23 +65,18 @@ public class ListProofValidator implements ListProofVisitor {
    * @param expectedRootHash an expected value of a root hash
    * @param numElements the number of elements in the proof list.
    *                    The same as the number of leaf nodes in the Merkle tree.
+   * @param serializer a serializer of list elements
    */
-  public ListProofValidator(HashCode expectedRootHash, long numElements) {
-    this(expectedRootHash, numElements, Hashing.defaultHashFunction());
+  public ListProofValidator(HashCode expectedRootHash, long numElements, Serializer<E> serializer) {
+    this(expectedRootHash, numElements, serializer, Hashing.defaultHashFunction());
   }
 
-  /**
-   * Creates a new ListProofValidator.
-   *
-   * @param expectedRootHash an expected value of a root hash
-   * @param numElements the number of elements in the proof list.
-   *                    The same as the number of leaf nodes in the Merkle tree.
-   * @param hashFunction a hashFunction to use
-   */
-  @VisibleForTesting
-  ListProofValidator(HashCode expectedRootHash, long numElements, HashFunction hashFunction) {
+  @VisibleForTesting  // to easily inject a mock of a hash function.
+  ListProofValidator(HashCode expectedRootHash, long numElements, Serializer<E> serializer,
+                     HashFunction hashFunction) {
     checkArgument(0 < numElements, "numElements (%s) must be positive", numElements);
     this.expectedRootHash = checkNotNull(expectedRootHash);
+    this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
     expectedLeafDepth = getExpectedLeafDepth(numElements);
     elements = new TreeMap<>();
@@ -117,11 +118,12 @@ public class ListProofValidator implements ListProofVisitor {
   public void visit(ProofListElement value) {
     assert !elements.containsKey(index) :
         "Error: already an element by such index in the map: i=" + index
-            + ", e=" + Arrays.toString(elements.get(index));
+            + ", e=" + elements.get(index);
 
     isBalanced &= (depth == expectedLeafDepth);
     if (isBalanced) {
-      elements.put(index, value.getElement());
+      E element = serializer.fromBytes(value.getElement());
+      elements.put(index, element);
       hash = hashFunction.hashObject(value, ProofListElement.funnel());
     }
   }
@@ -169,7 +171,7 @@ public class ListProofValidator implements ListProofVisitor {
    *
    * @throws IllegalStateException if proof is not valid
    */
-  public Map<Long, byte[]> getElements() {
+  public Map<Long, E> getElements() {
     checkState(isValid(), "Proof is not valid: %s", getReason());
     return elements;
   }

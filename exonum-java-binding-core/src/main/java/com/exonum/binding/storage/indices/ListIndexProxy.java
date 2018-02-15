@@ -4,6 +4,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
 
 /**
@@ -23,9 +24,10 @@ import java.util.NoSuchElementException;
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
+ * @param <E> the type of elements in this list
  * @see View
  */
-public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex {
+public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
   /**
    * Creates a new ListIndexProxy.
@@ -34,12 +36,13 @@ public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex 
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
+   * @param serializer a serializer of elements
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ListIndexProxy(String name, View view) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+  public ListIndexProxy(String name, View view, Serializer<E> serializer) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view, serializer);
   }
 
   /**
@@ -50,13 +53,13 @@ public class ListIndexProxy extends AbstractListIndexProxy implements ListIndex 
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  public byte[] removeLast() {
+  public E removeLast() {
     notifyModified();
     byte[] e = nativeRemoveLast(getNativeHandle());
     if (e == null) {
       throw new NoSuchElementException("List is empty");
     }
-    return e;
+    return serializer.fromBytes(e);
   }
 
   /**

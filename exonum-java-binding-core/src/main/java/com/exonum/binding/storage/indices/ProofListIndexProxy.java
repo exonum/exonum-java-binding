@@ -7,6 +7,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkPosit
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
+import com.exonum.binding.storage.serialization.Serializer;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -26,9 +27,10 @@ import com.exonum.binding.storage.proofs.list.ListProof;
  * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
+ * @param <E> the type of elements in this list
  * @see View
  */
-public class ProofListIndexProxy extends AbstractListIndexProxy implements ListIndex {
+public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
   /**
    * Creates a new ProofListIndexProxy.
@@ -37,12 +39,13 @@ public class ProofListIndexProxy extends AbstractListIndexProxy implements ListI
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
+   * @param serializer a serializer of elements
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofListIndexProxy(String name, View view) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+  public ProofListIndexProxy(String name, View view, Serializer<E> serializer) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view, serializer);
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);

@@ -10,14 +10,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * A builder of binary Exonum messages.
  */
 public class BinaryMessageBuilder {
 
-  private static final Function<Integer, ByteBuffer> messageBufferAllocator = ByteBuffer::allocate;
+  private static final IntFunction<ByteBuffer> messageBufferAllocator = ByteBuffer::allocate;
 
   private final Message message;
 

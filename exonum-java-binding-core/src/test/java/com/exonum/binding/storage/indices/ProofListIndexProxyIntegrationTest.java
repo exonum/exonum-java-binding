@@ -104,8 +104,9 @@ public class ProofListIndexProxyIntegrationTest {
   @Test
   public void getProofMultipleItemList() throws Exception {
     runTestWithView(database::createFork, (list) -> {
-      List<byte[]> values = TestStorageItems.values;
-      values.forEach(list::add);
+      List<String> values = TestStorageItems.values;
+
+      list.addAll(values);
 
       for (int i = 0; i < values.size(); i++) {
         assertThat(list, provesThatContains(i, values.get(i)));
@@ -116,8 +117,8 @@ public class ProofListIndexProxyIntegrationTest {
   @Test
   public void getRangeProofMultipleItemList_FullRange() throws Exception {
     runTestWithView(database::createFork, (list) -> {
-      List<byte[]> values = TestStorageItems.values;
-      values.forEach(list::add);
+      List<String> values = TestStorageItems.values;
+      list.addAll(values);
 
       assertThat(list, provesThatContains(0, values));
     });
@@ -126,8 +127,8 @@ public class ProofListIndexProxyIntegrationTest {
   @Test
   public void getRangeProofMultipleItemList_1stHalf() throws Exception {
     runTestWithView(database::createFork, (list) -> {
-      List<byte[]> values = TestStorageItems.values;
-      values.forEach(list::add);
+      List<String> values = TestStorageItems.values;
+      list.addAll(values);
 
       int from = 0;
       int to = values.size() / 2;
@@ -138,8 +139,8 @@ public class ProofListIndexProxyIntegrationTest {
   @Test
   public void getRangeProofMultipleItemList_2ndHalf() throws Exception {
     runTestWithView(database::createFork, (list) -> {
-      List<byte[]> values = TestStorageItems.values;
-      values.forEach(list::add);
+      List<String> values = TestStorageItems.values;
+      list.addAll(values);
 
       int from = values.size() / 2;
       int to = values.size();
@@ -148,12 +149,12 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<ProofListIndexProxy> listTest) {
+                               Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ProofListIndexProxy> listTest) {
+                               BiConsumer<View, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_NAME,

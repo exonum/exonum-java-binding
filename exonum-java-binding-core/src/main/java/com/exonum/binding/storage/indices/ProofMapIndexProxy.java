@@ -1,12 +1,12 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -28,9 +28,14 @@ import com.exonum.binding.storage.proofs.map.MapProof;
  * <p>As any native proxy, the map <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed map is prohibited and will result in {@link IllegalStateException}.
  *
+ * @param <K> the type of keys in this map. Must be 32-byte long in the serialized form
+ * @param <V> the type of values in this map
  * @see View
  */
-public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
+public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+
+  private final ProofMapKeyCheckingSerializerDecorator<K> keySerializer;
+  private final CheckingSerializerDecorator<V> valueSerializer;
 
   /**
    * Creates a ProofMapIndexProxy.
@@ -39,19 +44,27 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
+   * @param keySerializer a serializer of keys, must always produce 32-byte long values
+   * @param valueSerializer a serializer of values
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofMapIndexProxy(String name, View view) {
+  public ProofMapIndexProxy(String name, View view, Serializer<K> keySerializer,
+                            Serializer<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    this.keySerializer = new ProofMapKeyCheckingSerializerDecorator<>(
+        CheckingSerializerDecorator.from(keySerializer)
+    );
+    this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
   }
 
   private static native long nativeCreate(String name, long viewNativeHandle);
 
   @Override
-  public boolean containsKey(byte[] key) {
-    return nativeContainsKey(getNativeHandle(), checkProofKey(key));
+  public boolean containsKey(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    return nativeContainsKey(getNativeHandle(), dbKey);
   }
 
   private native boolean nativeContainsKey(long nativeHandle, byte[] key);
@@ -59,7 +72,7 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   /**
    * {@inheritDoc}
    *
-   * @param key a proof map key, must be 32-byte long
+   * @param key a proof map key, must be 32-byte long when serialized
    * @param value a storage value to associate with the key
    * @throws NullPointerException if any argument is null
    * @throws IllegalStateException if this map is not valid
@@ -67,16 +80,20 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
    * @throws UnsupportedOperationException if this map is read-only
    */
   @Override
-  public void put(byte[] key, byte[] value) {
+  public void put(K key, V value) {
     notifyModified();
-    nativePut(getNativeHandle(), checkProofKey(key), checkStorageValue(value));
+    byte[] dbKey = keySerializer.toBytes(key);
+    byte[] dbValue = valueSerializer.toBytes(value);
+    nativePut(getNativeHandle(), dbKey, dbValue);
   }
 
   private native void nativePut(long nativeHandle, byte[] key, byte[] value);
 
   @Override
-  public byte[] get(byte[] key) {
-    return nativeGet(getNativeHandle(), checkProofKey(key));
+  public V get(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    byte[] dbValue = nativeGet(getNativeHandle(), dbKey);
+    return (dbValue == null) ? null : valueSerializer.fromBytes(dbValue);
   }
 
   private native byte[] nativeGet(long nativeHandle, byte[] key);
@@ -90,8 +107,9 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
    * @throws IllegalStateException  if this map is not valid
    * @throws IllegalArgumentException if the size of the key is not 32 bytes
    */
-  public MapProof getProof(byte[] key) {
-    return nativeGetProof(getNativeHandle(), checkProofKey(key));
+  public MapProof getProof(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    return nativeGetProof(getNativeHandle(), dbKey);
   }
 
   private native MapProof nativeGetProof(long nativeHandle, byte[] key);
@@ -108,21 +126,24 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native byte[] nativeGetRootHash(long nativeHandle);
 
   @Override
-  public void remove(byte[] key) {
+  public void remove(K key) {
     notifyModified();
-    nativeRemove(getNativeHandle(), checkProofKey(key));
+    byte[] dbKey = keySerializer.toBytes(key);
+    nativeRemove(getNativeHandle(), dbKey);
   }
 
   private native void nativeRemove(long nativeHandle, byte[] key);
 
   @Override
-  public StorageIterator<byte[]> keys() {
+  public StorageIterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
         this,
-        modCounter);
+        modCounter,
+        keySerializer::fromBytes
+    );
   }
 
   private native long nativeCreateKeysIter(long nativeHandle);
@@ -132,13 +153,15 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native void nativeKeysIterFree(long iterNativeHandle);
 
   @Override
-  public StorageIterator<byte[]> values() {
+  public StorageIterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
         this::nativeValuesIterFree,
         this,
-        modCounter);
+        modCounter,
+        valueSerializer::fromBytes
+    );
   }
 
   private native long nativeCreateValuesIter(long nativeHandle);
@@ -148,18 +171,20 @@ public class ProofMapIndexProxy extends AbstractIndexProxy implements MapIndex {
   private native void nativeValuesIterFree(long iterNativeHandle);
 
   @Override
-  public StorageIterator<MapEntry> entries() {
+  public StorageIterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
         this,
-        modCounter);
+        modCounter,
+        (entry) -> MapEntry.fromInternal(entry, keySerializer, valueSerializer)
+    );
   }
 
   private native long nativeCreateEntriesIter(long nativeHandle);
 
-  private native MapEntry nativeEntriesIterNext(long iterNativeHandle);
+  private native MapEntryInternal nativeEntriesIterNext(long iterNativeHandle);
 
   private native void nativeEntriesIterFree(long iterNativeHandle);
 

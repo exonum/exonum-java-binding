@@ -1,11 +1,12 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
 
 /**
@@ -24,9 +25,13 @@ import java.util.NoSuchElementException;
  * Subsequent use of the closed entry is prohibited
  * and will result in {@link IllegalStateException}.
  *
+ * @param <T> the type of an element in this entry
+ *
  * @see View
  */
-public class EntryIndexProxy extends AbstractIndexProxy {
+public class EntryIndexProxy<T> extends AbstractIndexProxy {
+
+  private final CheckingSerializerDecorator<T> serializer;
 
   /**
    * Creates a new Entry.
@@ -35,13 +40,15 @@ public class EntryIndexProxy extends AbstractIndexProxy {
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
+   * @param serializer an entry serializer
    *
    * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
-  public EntryIndexProxy(String name, View view) {
+  public EntryIndexProxy(String name, View view, Serializer<T> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    this.serializer = CheckingSerializerDecorator.from(serializer);
   }
 
   /**
@@ -52,9 +59,10 @@ public class EntryIndexProxy extends AbstractIndexProxy {
    * @throws NullPointerException if value is null
    * @throws IllegalStateException if the proxy is invalid
    */
-  public void set(byte[] value) {
+  public void set(T value) {
     notifyModified();
-    nativeSet(getNativeHandle(), checkStorageValue(value));
+    byte[] valueBytes = serializer.toBytes(value);
+    nativeSet(getNativeHandle(), valueBytes);
   }
 
   /**
@@ -73,13 +81,14 @@ public class EntryIndexProxy extends AbstractIndexProxy {
    * @return a non-null value
    * @throws NoSuchElementException if a value is not present in the Entry
    * @throws IllegalStateException if the proxy is invalid
+   * @throws IllegalArgumentException if the supplied serializer cannot decode the value
    */
-  public byte[] get() {
+  public T get() {
     byte[] value = nativeGet(getNativeHandle());
     if (value == null) {
       throw new NoSuchElementException("No value in this entry");
     }
-    return value;
+    return serializer.fromBytes(value);
   }
 
   // TODO(dt): add getHash when you clarify why on Earth it returns a default (= zero) hash when

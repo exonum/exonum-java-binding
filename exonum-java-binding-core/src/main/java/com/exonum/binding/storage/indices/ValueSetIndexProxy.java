@@ -1,12 +1,16 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
+import com.google.auto.value.AutoValue;
+import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nullable;
 
 /**
@@ -30,10 +34,13 @@ import javax.annotation.Nullable;
  * <p>As any native proxy, the set <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed set is prohibited and will result in {@link IllegalStateException}.
  *
+ * @param <E> the type of elements in this set
  * @see KeySetIndexProxy
  * @see View
  */
-public class ValueSetIndexProxy extends AbstractIndexProxy {
+public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
+
+  private final CheckingSerializerDecorator<E> serializer;
 
   /**
    * Creates a new value set proxy.
@@ -42,12 +49,14 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
+   * @param serializer a serializer of values
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ValueSetIndexProxy(String name, View view) {
+  public ValueSetIndexProxy(String name, View view, Serializer<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    this.serializer = CheckingSerializerDecorator.from(serializer);
   }
 
   /**
@@ -59,9 +68,10 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
-  public void add(byte[] e) {
+  public void add(E e) {
     notifyModified();
-    nativeAdd(getNativeHandle(), checkStorageKey(e));
+    byte[] dbElement = serializer.toBytes(e);
+    nativeAdd(getNativeHandle(), dbElement);
   }
 
   /**
@@ -83,8 +93,9 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @throws IllegalStateException if this set is not valid
    * @see #containsByHash(HashCode)
    */
-  public boolean contains(byte[] e) {
-    return nativeContains(getNativeHandle(), checkStorageKey(e));
+  public boolean contains(E e) {
+    byte[] dbElement = serializer.toBytes(e);
+    return nativeContains(getNativeHandle(), dbElement);
   }
 
   /**
@@ -111,13 +122,11 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
   public StorageIterator<HashCode> hashes() {
     return StorageIterators.createIterator(
         nativeCreateHashIterator(getNativeHandle()),
-        (handle) -> {
-          byte[] next = nativeHashIteratorNext(handle);
-          return next == null ? null : HashCode.fromBytes(next);
-        },
+        this::nativeHashIteratorNext,
         this::nativeHashIteratorFree,
         this,
-        modCounter);
+        modCounter,
+        HashCode::fromBytes);
   }
 
   /**
@@ -130,18 +139,19 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
-  public StorageIterator<Entry> iterator() {
+  public StorageIterator<Entry<E>> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
         this,
-        modCounter);
+        modCounter,
+        (e) -> Entry.fromInternal(e, serializer));
   }
 
   private native long nativeCreateIterator(long nativeHandle);
 
-  private native Entry nativeIteratorNext(long iterNativeHandle);
+  private native EntryInternal nativeIteratorNext(long iterNativeHandle);
 
   private native void nativeIteratorFree(long iterNativeHandle);
 
@@ -151,28 +161,48 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * <p>An entry contains <em>a copy</em> of the data in the value set index.
    * It does not reflect the changes made to the index since this entry had been created.
    */
-  public static class Entry {
-    private final HashCode hash;
-    private final byte[] value;
-
-    @SuppressWarnings("unused")  // native API
-    private Entry(byte[] hash, byte[] value) {
-      this.hash = HashCode.fromBytes(hash);
-      this.value = checkStorageValue(value);
-    }
+  @AutoValue
+  public abstract static class Entry<E> {
 
     /**
      * Returns a hash of the element of the set.
      */
-    public HashCode getHash() {
-      return hash;
-    }
+    public abstract HashCode getHash();
 
     /**
      * Returns an element of the set.
      */
-    public byte[] getValue() {
-      return value;
+    public abstract E getValue();
+
+    // Do not include (potentially) large value in the hash code: we already have a SHA-256 hash.
+    @Override
+    public final int hashCode() {
+      return getHash().hashCode();
+    }
+
+    private static <E> Entry<E> fromInternal(EntryInternal e, Serializer<E> serializer) {
+      HashCode hash = HashCode.fromBytes(e.hash);
+      E value = serializer.fromBytes(e.value);
+      return from(hash, value);
+    }
+
+    @VisibleForTesting
+    static <E> Entry<E> from(HashCode hash, E value) {
+      return new AutoValue_ValueSetIndexProxy_Entry<>(hash, value);
+    }
+  }
+
+  /**
+   * An internal entry: native API.
+   */
+  private static class EntryInternal {
+    final byte[] hash;
+    final byte[] value;
+
+    @SuppressWarnings("unused")  // native API
+    private EntryInternal(byte[] hash, byte[] value) {
+      this.hash = checkNotNull(hash);
+      this.value = checkStorageValue(value);
     }
   }
 
@@ -184,9 +214,10 @@ public class ValueSetIndexProxy extends AbstractIndexProxy {
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
-  public void remove(byte[] e) {
+  public void remove(E e) {
     notifyModified();
-    nativeRemove(getNativeHandle(), checkStorageKey(e));
+    byte[] dbElement = serializer.toBytes(e);
+    nativeRemove(getNativeHandle(), dbElement);
   }
 
   /**

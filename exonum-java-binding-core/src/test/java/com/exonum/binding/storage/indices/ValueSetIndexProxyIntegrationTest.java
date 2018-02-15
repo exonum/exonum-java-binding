@@ -13,6 +13,7 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
@@ -35,8 +36,6 @@ public class ValueSetIndexProxyIntegrationTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
-
-  private static final String EXONUM_DEFAULT_HASHING_ALGORITHM = "SHA-256";
 
   private static final String VALUE_SET_NAME = "test_value_set";
 
@@ -76,7 +75,7 @@ public class ValueSetIndexProxyIntegrationTest {
   @Test
   public void clearNonEmptyRemovesAllElements() throws Exception {
     runTestWithView(database::createFork, (set) -> {
-      List<byte[]> elements = TestStorageItems.values.subList(0, 3);
+      List<String> elements = TestStorageItems.values.subList(0, 3);
 
       elements.forEach(set::add);
 
@@ -141,26 +140,17 @@ public class ValueSetIndexProxyIntegrationTest {
   @Test
   public void testHashesIter() throws Exception {
     runTestWithView(database::createFork, (set) -> {
-      List<byte[]> elements = TestStorageItems.values;
+      List<String> elements = TestStorageItems.values;
 
       elements.forEach(set::add);
 
       try (StorageIterator<HashCode> iter = set.hashes()) {
         List<HashCode> iterHashes = ImmutableList.copyOf(iter);
+        List<HashCode> expectedHashes = getOrderedHashes(elements);
 
-        // Check that there are as many hashes as elements
-        assertThat(elements.size(), equalTo(iterHashes.size()));
-
-        // Check that all hashes correspond to elements in the set.
-        for (HashCode hash: iterHashes) {
-          assertTrue(set.containsByHash(hash));
-        }
-
-        // Check that hashes appear in lexicographical order
-        List<HashCode> orderedHashes = getOrderedHashes(elements);
-        for (int i = 0; i < elements.size(); i++) {
-          assertThat(iterHashes.get(i), equalTo(orderedHashes.get(i)));
-        }
+        // Check that the hashes appear in lexicographical order,
+        // and are equal to the expected.
+        assertThat(iterHashes, equalTo(expectedHashes));
       }
     });
   }
@@ -168,40 +158,31 @@ public class ValueSetIndexProxyIntegrationTest {
   @Test
   public void testIterator() throws Exception {
     runTestWithView(database::createFork, (set) -> {
-      List<byte[]> elements = TestStorageItems.values;
+      List<String> elements = TestStorageItems.values;
 
       elements.forEach(set::add);
 
-      try (StorageIterator<ValueSetIndexProxy.Entry> iterator = set.iterator()) {
-        List<ValueSetIndexProxy.Entry> entriesFromIter = ImmutableList.copyOf(iterator);
+      try (StorageIterator<ValueSetIndexProxy.Entry<String>> iterator = set.iterator()) {
+        List<ValueSetIndexProxy.Entry<String>> entriesFromIter = ImmutableList.copyOf(iterator);
+        List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
 
-        assertThat(entriesFromIter.size(), equalTo(elements.size()));
-
-        for (ValueSetIndexProxy.Entry e : entriesFromIter) {
-          assertTrue(set.containsByHash(e.getHash()));
-          assertTrue(set.contains(e.getValue()));
-        }
-
-        for (ValueSetIndexProxy.Entry e : entriesFromIter) {
-          assertThat(e.getHash(), equalTo(getHashOf(e.getValue())));
-        }
-
-        List<HashCode> actualHashes = entriesFromIter.stream()
-            .map((e) -> e.getHash())
-            .collect(Collectors.toList());
-
-        List<HashCode> orderedHashes = getOrderedHashes(elements);
-        assertThat(actualHashes, equalTo(orderedHashes));
+        assertThat(entriesFromIter, equalTo(entriesExpected));
       }
     });
   }
 
-  private static List<HashCode> getOrderedHashes(List<byte[]> elements) {
+  private static List<HashCode> getOrderedHashes(List<String> elements) {
+    return getOrderedEntries(elements).stream()
+        .map(ValueSetIndexProxy.Entry::getHash)
+        .collect(Collectors.toList());
+  }
+
+  private static List<ValueSetIndexProxy.Entry<String>> getOrderedEntries(List<String> elements) {
     return elements.stream()
-            .map(ValueSetIndexProxyIntegrationTest::getHashOf)
-            .sorted((h1, h2) -> UnsignedBytes.lexicographicalComparator()
-                .compare(h1.asBytes(), h2.asBytes()))
-            .collect(Collectors.toList());
+        .map(value -> ValueSetIndexProxy.Entry.from(getHashOf(value), value))
+        .sorted((e1, e2) -> UnsignedBytes.lexicographicalComparator()
+            .compare(e1.getHash().asBytes(), e2.getHash().asBytes()))
+        .collect(Collectors.toList());
   }
 
   @Test
@@ -274,13 +255,13 @@ public class ValueSetIndexProxyIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    ValueSetIndexProxy set = new ValueSetIndexProxy(VALUE_SET_NAME, view);
+    ValueSetIndexProxy<String> set = new ValueSetIndexProxy<>(VALUE_SET_NAME, view,
+        StandardSerializers.string());
 
     view.close();  // a set must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
     set.close();
   }
-
 
   /**
    * Creates a view, a value set index and runs a test against the view and the set.
@@ -290,7 +271,7 @@ public class ValueSetIndexProxyIntegrationTest {
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      Consumer<ValueSetIndexProxy> valueSetTest) {
+                                      Consumer<ValueSetIndexProxy<String>> valueSetTest) {
     runTestWithView(viewSupplier,
         (view, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
     );
@@ -304,7 +285,7 @@ public class ValueSetIndexProxyIntegrationTest {
    * @param valueSetTest a test to run. Receives the created view and the set as arguments.
    */
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, ValueSetIndexProxy> valueSetTest) {
+                                      BiConsumer<View, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         VALUE_SET_NAME,
@@ -313,8 +294,9 @@ public class ValueSetIndexProxyIntegrationTest {
     );
   }
 
-  private static HashCode getHashOf(byte[] value) {
+  private static HashCode getHashOf(String value) {
+    byte[] stringBytes = StandardSerializers.string().toBytes(value);
     return Hashing.defaultHashFunction()
-        .hashBytes(value);
+        .hashBytes(stringBytes);
   }
 }

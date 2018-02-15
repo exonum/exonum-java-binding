@@ -10,6 +10,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.Optional;
@@ -18,8 +20,10 @@ import javax.annotation.Nullable;
 
 /**
  * A validator of map proofs.
+ *
+ * @param <V> the type of values in the corresponding map
  */
-public class MapProofValidator implements MapProofVisitor {
+public class MapProofValidator<V> implements MapProofVisitor {
 
   /**
    * Various statuses of the proof: why it may not be valid.
@@ -33,10 +37,6 @@ public class MapProofValidator implements MapProofVisitor {
         "Left or right subtree may contain the requested key which contradicts the proof");
 
     final String description;
-
-    Status() {
-      this("");
-    }
 
     Status(String description) {
       this.description = description;
@@ -58,6 +58,8 @@ public class MapProofValidator implements MapProofVisitor {
 
   private final byte[] key;
 
+  private final CheckingSerializerDecorator<V> valueSerializer;
+
   private final HashFunction hashFunction;
 
   /**
@@ -73,7 +75,7 @@ public class MapProofValidator implements MapProofVisitor {
   private HashCode rootHash;
 
   @Nullable
-  private byte[] value;
+  private V value;
 
   /**
    * A height of the proof tree, calculated as the validator goes down the tree.
@@ -85,9 +87,10 @@ public class MapProofValidator implements MapProofVisitor {
    *
    * @param rootHash a root hash of the proof map to validate against
    * @param key a requested key
+   * @param valueSerializer a serializer of map values
    */
-  public MapProofValidator(byte[] rootHash, byte[] key) {
-    this(HashCode.fromBytes(rootHash), key, Hashing.defaultHashFunction());
+  public MapProofValidator(byte[] rootHash, byte[] key, Serializer<V> valueSerializer) {
+    this(HashCode.fromBytes(rootHash), key, valueSerializer, Hashing.defaultHashFunction());
   }
 
   /**
@@ -95,17 +98,20 @@ public class MapProofValidator implements MapProofVisitor {
    *
    * @param rootHash a root hash of the proof map to validate against
    * @param key a requested key
+   * @param valueSerializer a serializer of map values
    */
-  public MapProofValidator(HashCode rootHash, byte[] key) {
-    this(rootHash, key, Hashing.defaultHashFunction());
+  public MapProofValidator(HashCode rootHash, byte[] key, Serializer<V> valueSerializer) {
+    this(rootHash, key, valueSerializer, Hashing.defaultHashFunction());
   }
 
   @VisibleForTesting  // to easily inject a mock of a hash function.
-  MapProofValidator(HashCode rootHash, byte[] key, HashFunction hashFunction) {
+  MapProofValidator(HashCode rootHash, byte[] key, Serializer<V> valueSerializer,
+                    HashFunction hashFunction) {
     checkArgument(rootHash.bits() == HASH_SIZE_BITS,
         "Root hash must be 256 bit long (actual length %s)", rootHash.bits());
     this.expectedRootHash = rootHash;
     this.key = checkNotNull(key);
+    this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
     keyBits = getKeyAsBitSet(key);
     this.hashFunction = checkNotNull(hashFunction);
     status = Status.VALID;
@@ -135,7 +141,7 @@ public class MapProofValidator implements MapProofVisitor {
    *
    * @throws IllegalStateException if the proof is not valid
    */
-  public Optional<byte[]> getValue() {
+  public Optional<V> getValue() {
     checkState(isValid(), "Proof is not valid: %s", this);
     return Optional.ofNullable(value);
   }
@@ -147,8 +153,9 @@ public class MapProofValidator implements MapProofVisitor {
       status = Status.INVALID_DB_KEY_OF_ROOT_NODE;
       return;
     }
-    value = node.getValue();
-    HashCode valueHash = hashFunction.hashBytes(node.getValue());
+    byte[] dbValue = node.getValue();
+    setValue(dbValue);
+    HashCode valueHash = hashFunction.hashBytes(dbValue);
     rootHash = getSingletonTreeHash(node.getDatabaseKey(), valueHash);
   }
 
@@ -247,8 +254,14 @@ public class MapProofValidator implements MapProofVisitor {
       return;
     }
 
-    value = leafMapProofNode.getValue();
-    rootHash = hashFunction.hashBytes(value);
+    byte[] dbValue = leafMapProofNode.getValue();
+    setValue(dbValue);
+    rootHash = hashFunction.hashBytes(dbValue);
+  }
+
+  private void setValue(byte[] serializedValue) {
+    checkState(value == null, "Setting the value for the 2nd time, current value=%s", value);
+    value = valueSerializer.fromBytes(serializedValue);
   }
 
   private void checkPathToRootNode(MapProof node) {
@@ -308,7 +321,7 @@ public class MapProofValidator implements MapProofVisitor {
         + ", status=" + status
         + ", key=" + Arrays.toString(key)
         + ", keyBits=" + keyBits
-        + ", value=" + Arrays.toString(value)
+        + ", value=" + value
         + ", bstHeight=" + bstHeight
         + '}';
   }

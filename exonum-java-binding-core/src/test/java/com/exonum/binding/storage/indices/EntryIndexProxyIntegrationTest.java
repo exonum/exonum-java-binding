@@ -1,8 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.storage.indices.TestStorageItems.V1;
-import static com.exonum.binding.storage.indices.TestStorageItems.V2;
-import static com.exonum.binding.storage.indices.TestStorageItems.V3;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -11,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -23,6 +21,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class EntryIndexProxyIntegrationTest {
+
+  // fixme: move them back to Storage values in non-WIP PR
+  private static final String V1 = "v1";
+  private static final String V2 = "v2";
+  private static final String V3 = "v3";
+
   static {
     LibraryLoader.load();
   }
@@ -117,7 +121,8 @@ public class EntryIndexProxyIntegrationTest {
   @Test
   public void closeMustDetectUseAfterViewFreed() throws Exception {
     View view = database.createSnapshot();
-    EntryIndexProxy entry = new EntryIndexProxy(ENTRY_NAME, view);
+    EntryIndexProxy<String> entry = new EntryIndexProxy<>(ENTRY_NAME, view,
+        StandardSerializers.string());
 
     view.close();
 
@@ -126,12 +131,12 @@ public class EntryIndexProxyIntegrationTest {
   }
 
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      Consumer<EntryIndexProxy> entryTest) {
+                                      Consumer<EntryIndexProxy<String>> entryTest) {
     runTestWithView(viewSupplier, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
   private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, EntryIndexProxy> entryTest) {
+                                      BiConsumer<View, EntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         ENTRY_NAME,

@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
+import java.util.Arrays;
+import java.util.Collection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -108,6 +110,13 @@ public class StoragePreconditionsTest {
   @Test(expected = NullPointerException.class)
   public void checkStorageValueDoesNotAcceptNull() throws Exception {
     StoragePreconditions.checkStorageKey(null);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void checkNoNulls() {
+    Collection<String> c = Arrays.asList("hello", null);
+
+    StoragePreconditions.checkNoNulls(c);
   }
 
   @Test

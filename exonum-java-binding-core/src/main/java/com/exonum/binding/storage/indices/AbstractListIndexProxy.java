@@ -1,10 +1,11 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValues;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkNoNulls;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -13,53 +14,61 @@ import java.util.NoSuchElementException;
  *
  * <p>Implements all methods from ListIndex.
  */
-abstract class AbstractListIndexProxy extends AbstractIndexProxy implements ListIndex {
+abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements ListIndex<T> {
 
-  AbstractListIndexProxy(long nativeHandle, View view) {
+  final CheckingSerializerDecorator<T> serializer;
+
+  AbstractListIndexProxy(long nativeHandle, View view, Serializer<T> userSerializer) {
     super(nativeHandle, view);
+    this.serializer = CheckingSerializerDecorator.from(userSerializer);
   }
 
   @Override
-  public final void add(byte[] e) {
+  public final void add(T e) {
     notifyModified();
-    nativeAdd(getNativeHandle(), checkStorageValue(e));
+    byte[] dbElement = serializer.toBytes(e);
+    nativeAdd(getNativeHandle(), dbElement);
   }
 
   @Override
-  public void addAll(Collection<byte[]> elements) {
+  public void addAll(Collection<? extends T> elements) {
     notifyModified();
-    addAllUnchecked(checkStorageValues(elements));
+    checkNoNulls(elements);
+    addAllUnchecked(elements);
   }
 
-  private void addAllUnchecked(Collection<byte[]> elements) {
+  private void addAllUnchecked(Collection<? extends T> elements) {
     // Cache the nativeHandle to avoid repeated 'isValid' checks.
     // It's OK to do that during this call, as this class is not thread-safe.
     long nativeHandle = getNativeHandle();
-    for (byte[] e : elements) {
-      nativeAdd(nativeHandle, e);
-    }
+    elements.stream()
+        .map(serializer::toBytes)
+        .forEach((e) -> nativeAdd(nativeHandle, e));
   }
 
   @Override
-  public final void set(long index, byte[] e) {
+  public final void set(long index, T e) {
     checkElementIndex(index, size());
     notifyModified();
-    nativeSet(getNativeHandle(), index, checkStorageValue(e));
+    byte[] dbElement = serializer.toBytes(e);
+    nativeSet(getNativeHandle(), index, dbElement);
   }
 
   @Override
-  public final byte[] get(long index) {
-    return nativeGet(getNativeHandle(), checkElementIndex(index, size()));
+  public final T get(long index) {
+    checkElementIndex(index, size());
+    byte[] e = nativeGet(getNativeHandle(), index);
+    return serializer.fromBytes(e);
   }
 
   @Override
-  public final byte[] getLast() {
+  public final T getLast() {
     byte[] e = nativeGetLast(getNativeHandle());
     // This method does not check if the list is empty first to use only a single native call.
     if (e == null) {
       throw new NoSuchElementException("List is empty");
     }
-    return e;
+    return serializer.fromBytes(e);
   }
 
   @Override
@@ -79,13 +88,14 @@ abstract class AbstractListIndexProxy extends AbstractIndexProxy implements List
   }
 
   @Override
-  public final StorageIterator<byte[]> iterator() {
+  public final StorageIterator<T> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIter(getNativeHandle()),
         this::nativeIterNext,
         this::nativeIterFree,
         this,
-        modCounter);
+        modCounter,
+        serializer::fromBytes);
   }
 
   @Override

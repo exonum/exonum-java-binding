@@ -7,12 +7,12 @@ import static org.junit.runners.Parameterized.Parameter;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.exonum.binding.util.LibraryLoader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,7 +31,7 @@ public class PrefixNameParameterizedIntegrationTest {
   public String name;
 
   @Parameter(1)
-  public FunctionHolder indexFactory;
+  public PartiallyAppliedIndexConstructor indexFactory;
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -41,7 +41,7 @@ public class PrefixNameParameterizedIntegrationTest {
     try (Database database = new MemoryDb();
          Snapshot view = database.createSnapshot()) {
       expectedException.expect(Exception.class);
-      indexFactory.indexCtor.apply(name, view);
+      indexFactory.create(name, view);
     }
   }
 
@@ -61,17 +61,17 @@ public class PrefixNameParameterizedIntegrationTest {
             parameters("name#1"),
             parameters("name-1")),
         asList(
-            parameters(new FunctionHolder(ListIndexProxy::new)),
-            parameters(new FunctionHolder(ProofListIndexProxy::new)),
-            parameters(new FunctionHolder(MapIndexProxy::new)),
-            parameters(new FunctionHolder(ProofMapIndexProxy::new)),
-            parameters(new FunctionHolder(ValueSetIndexProxy::new)),
-            parameters(new FunctionHolder(KeySetIndexProxy::new)),
-            parameters(new FunctionHolder(EntryIndexProxy::new))
+            parameters(IndexConstructors.from(ListIndexProxy::new)),
+            parameters(IndexConstructors.from(ProofListIndexProxy::new)),
+            parameters(IndexConstructors.from(MapIndexProxy::new)),
+            parameters(IndexConstructors.from(ProofMapIndexProxy::new)),
+            parameters(IndexConstructors.from(ValueSetIndexProxy::new)),
+            parameters(IndexConstructors.from(KeySetIndexProxy::new)),
+            parameters(IndexConstructors.from(EntryIndexProxy::new))
         ));
-
   }
 
+  @SuppressWarnings("unchecked")
   private static <T> Collection<T[]> merge(Collection<T[]> a, Collection<T[]> b) {
     int size = a.size() * b.size();
     List<T[]> merged = new ArrayList<>(size);
@@ -84,14 +84,5 @@ public class PrefixNameParameterizedIntegrationTest {
       }
     }
     return merged;
-  }
-
-  private static class FunctionHolder {
-
-    BiFunction<String, View, Object> indexCtor;
-
-    FunctionHolder(BiFunction<String, View, Object> indexCtor) {
-      this.indexCtor = indexCtor;
-    }
   }
 }

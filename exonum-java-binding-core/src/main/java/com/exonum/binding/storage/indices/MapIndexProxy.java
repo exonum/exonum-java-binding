@@ -1,10 +1,10 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
-import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -23,9 +23,14 @@ import com.exonum.binding.storage.database.View;
  * <p>As any native proxy, the map <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed map is prohibited and will result in {@link IllegalStateException}.
  *
+ * @param <K> the type of keys in this map
+ * @param <V> the type of values in this map
  * @see View
  */
-public class MapIndexProxy extends AbstractIndexProxy implements MapIndex {
+public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+
+  private final CheckingSerializerDecorator<K> keySerializer;
+  private final CheckingSerializerDecorator<V> valueSerializer;
 
   /**
    * Creates a new MapIndexProxy.
@@ -34,69 +39,86 @@ public class MapIndexProxy extends AbstractIndexProxy implements MapIndex {
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
+   * @param keySerializer a serializer of keys
+   * @param valueSerializer a serializer of values
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public MapIndexProxy(String name, View view) {
+  public MapIndexProxy(String name, View view, Serializer<K> keySerializer,
+                       Serializer<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    this.keySerializer = CheckingSerializerDecorator.from(keySerializer);
+    this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
   }
 
   @Override
-  public boolean containsKey(byte[] key) {
-    return nativeContainsKey(getNativeHandle(), checkStorageKey(key));
+  public boolean containsKey(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    return nativeContainsKey(getNativeHandle(), dbKey);
   }
 
   @Override
-  public void put(byte[] key, byte[] value) {
+  public void put(K key, V value) {
     notifyModified();
-    nativePut(getNativeHandle(), checkStorageKey(key), checkStorageValue(value));
+    byte[] dbKey = keySerializer.toBytes(key);
+    byte[] dbValue = valueSerializer.toBytes(value);
+    nativePut(getNativeHandle(), dbKey, dbValue);
   }
 
   @Override
-  public byte[] get(byte[] key) {
-    return nativeGet(getNativeHandle(), checkStorageKey(key));
+  public V get(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    byte[] dbValue = nativeGet(getNativeHandle(), dbKey);
+    return (dbValue == null) ? null : valueSerializer.fromBytes(dbValue);
   }
 
   @Override
-  public void remove(byte[] key) {
+  public void remove(K key) {
     notifyModified();
-    nativeRemove(getNativeHandle(), checkStorageKey(key));
+    byte[] dbKey = keySerializer.toBytes(key);
+    nativeRemove(getNativeHandle(), dbKey);
   }
 
   @Override
-  public StorageIterator<byte[]> keys() {
+  public StorageIterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
         this,
-        modCounter);
+        modCounter,
+        keySerializer::fromBytes
+    );
   }
 
   @Override
-  public StorageIterator<byte[]> values() {
+  public StorageIterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
         this::nativeValuesIterFree,
         this,
-        modCounter);
+        modCounter,
+        valueSerializer::fromBytes
+    );
   }
 
   @Override
-  public StorageIterator<MapEntry> entries() {
+  public StorageIterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
         this,
-        modCounter);
+        modCounter,
+        (entry) -> MapEntry.fromInternal(entry, keySerializer, valueSerializer)
+    );
   }
 
   private native long nativeCreateEntriesIter(long nativeHandle);
 
-  private native MapEntry nativeEntriesIterNext(long iterNativeHandle);
+  private native MapEntryInternal nativeEntriesIterNext(long iterNativeHandle);
 
   private native void nativeEntriesIterFree(long iterNativeHandle);
 

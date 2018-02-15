@@ -5,8 +5,8 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.LongConsumer;
+import java.util.function.LongFunction;
 
 /**
  * A fail-fast iterator.
@@ -15,8 +15,8 @@ import java.util.function.Function;
  */
 class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
-  private final Function<Long, E> nextFunction;
-  private final Consumer<Long> disposeOperation;
+  private final LongFunction<E> nextFunction;
+  private final LongConsumer disposeOperation;
   private final View collectionView;
   private final ViewModificationCounter modificationCounter;
   private final Integer initialModCount;
@@ -31,8 +31,8 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
    * @param modificationCounter a view modification counter
    */
   ConfigurableRustIter(long nativeHandle,
-                       Function<Long, E> nextFunction,
-                       Consumer<Long> disposeOperation,
+                       LongFunction<E> nextFunction,
+                       LongConsumer disposeOperation,
                        AbstractIndexProxy collection,
                        ViewModificationCounter modificationCounter) {
     super(nativeHandle, true, collection);
