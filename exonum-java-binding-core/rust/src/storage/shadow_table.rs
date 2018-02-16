@@ -1,7 +1,7 @@
 use exonum::storage::MapIndex;
 use exonum::storage::{Fork, Snapshot};
 
-const SHADOW_TABLE_NAME: &str = "__SHADOW_TABLE__";
+const SHADOW_TABLE_NAME: &str = "__INDEXES_INFO__";
 
 encoding_struct!(
     struct IndexInfo {
@@ -37,16 +37,17 @@ impl From<TableType> for u8 {
 impl From<u8> for TableType {
     fn from(num: u8) -> Self {
         match num {
-            0 => TableType::Entry,
-            1 => TableType::KeySet,
-            2 => TableType::List,
-            3 => TableType::Map,
-            4 => TableType::ProofList,
-            5 => TableType::ProofMap,
-            6 => TableType::ValueSet,
-            _ => {
+            0 => Self::Entry,
+            1 => Self::KeySet,
+            2 => Self::List,
+            3 => Self::Map,
+            4 => Self::ProofList,
+            5 => Self::ProofMap,
+            6 => Self::ValueSet,
+            invalid => {
                 panic!(
-                    "Unreachable pattern while constructing table type. Storage data is probably corrupted"
+                    "Unreachable pattern ({:?}) while constructing table type. Storage data is probably corrupted",
+                    invalid
                 )
             }
         }
@@ -61,16 +62,15 @@ pub fn check_read<T: AsRef<Snapshot>>(name: &str, table_type: TableType, view: T
     let shadow_table = shadow_table(view);
     if let Some(value) = shadow_table.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
-        if stored_type != table_type {
-            panic!(
-                "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
-                table_type,
-                stored_type,
-            );
-        }
+        assert_eq!(
+            stored_type,
+            table_type,
+            "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
+            table_type,
+            stored_type
+        );
     }
 }
-
 
 pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
     if name == SHADOW_TABLE_NAME {
@@ -79,18 +79,17 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
     let mut shadow_table = shadow_table(view);
     if let Some(value) = shadow_table.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
-        if stored_type != table_type {
-            panic!(
-                "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
-                table_type,
-                stored_type,
-            );
-        }
+        assert_eq!(
+            stored_type,
+            table_type,
+            "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
+            table_type,
+            stored_type
+        );
     } else {
         shadow_table.put(&name.to_owned(), IndexInfo::new(table_type.into()));
     }
 }
-
 
 #[cfg(test)]
 mod tests {
