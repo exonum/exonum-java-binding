@@ -16,7 +16,6 @@
 
   <name>Exonum Java Binding: Proofs</name>
 
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -41,6 +40,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${java.vm.assertionFlag}
+          </argLine>
+        </configuration>
       </plugin>
     </plugins>
   </build>
