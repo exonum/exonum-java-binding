@@ -1,5 +1,5 @@
 mod executors;
-mod tx;
+mod transaction;
 
 pub use self::executors::*;
-pub use self::tx::*;
+pub use self::transaction::*;

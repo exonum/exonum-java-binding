@@ -8,6 +8,7 @@ use jni::*;
 use jni::errors::Result;
 use jni::objects::GlobalRef;
 use jni::objects::JValue;
+use serde_json;
 use serde_json::value::Value;
 
 use std::fmt;
@@ -24,6 +25,7 @@ where
 {
     exec: E,
     adapter: GlobalRef,
+    raw: RawMessage,
 }
 
 // FIXME docs
@@ -48,8 +50,8 @@ where
 {
     /// Creates an instance of `TransactionProxy` with already prepared global ref
     /// to `UserTransactionAdapter`.
-    pub unsafe fn from_global_ref(exec: E, adapter: GlobalRef) -> Self {
-        TransactionProxy { exec, adapter }
+    pub unsafe fn from_global_ref(exec: E, adapter: GlobalRef, raw: RawMessage) -> Self {
+        TransactionProxy { exec, adapter, raw }
     }
 }
 
@@ -57,13 +59,32 @@ impl<E> ExonumJson for TransactionProxy<E>
 where
     E: Executor + 'static,
 {
-    fn deserialize_field<B: WriteBufferWrapper>(value: &Value, buffer: &mut B, from: Offset, to: Offset) -> ::std::result::Result<(), Box<::std::error::Error>> where
-        Self: Sized {
+    fn deserialize_field<B>(_value: &Value, _buffer: &mut B, _from: Offset, _to: Offset)
+        -> ::std::result::Result<(), Box<::std::error::Error>>
+    where
+        Self: Sized,
+        B: WriteBufferWrapper,
+    {
         unimplemented!()
     }
 
-    fn serialize_field(&self) -> ::std::result::Result<Value, Box<::std::error::Error + Send + Sync>> {
-        unimplemented!()
+    fn serialize_field(&self)
+        -> ::std::result::Result<Value, Box<::std::error::Error + Send + Sync>>
+    {
+        use exonum::api::ApiError;
+        let json_string = self.exec.with_attached(|env| {
+            let name = env.call_method(
+                self.adapter.as_obj(),
+                "info",
+                "()Ljava/lang/String;",
+                &[],
+            )?
+                .l()?;
+            Ok(String::from(env.get_string(name.into())?))
+        })
+            // FIXME here should be a panic
+            .map_err(|e| ApiError::Serialize(format!("{:?}", e).into()))?;
+        Ok(serde_json::from_str(&json_string)?)
     }
 }
 
@@ -72,7 +93,6 @@ where
     E: Executor + 'static,
 {
     fn verify(&self) -> bool {
-        println!("UserTransactionAdapter::verify()");
         let res = self.exec.with_attached(|env: &JNIEnv| {
             env.call_method(
                 self.adapter.as_obj(),
@@ -87,7 +107,6 @@ where
     }
 
     fn execute(&self, fork: &mut Fork) {
-        println!("UserTransactionAdapter::execute()");
         let res = (|| -> Result<()> {
             self.exec.with_attached(|env: &JNIEnv| {
                 let view_handle = utils::to_handle(View::from_ref_fork(fork));
@@ -109,12 +128,12 @@ impl<E> Message for TransactionProxy<E>
 where
     E: Executor,
 {
-    fn from_raw(raw: RawMessage) -> ::std::result::Result<Self, ::exonum::encoding::Error> where
+    fn from_raw(_raw: RawMessage) -> ::std::result::Result<Self, ::exonum::encoding::Error> where
         Self: Sized {
-        unimplemented!()
+        unreachable!()
     }
 
     fn raw(&self) -> &RawMessage {
-        unimplemented!()
+        &self.raw
     }
 }
