@@ -1,12 +1,10 @@
 use exonum::storage::MapIndex;
 use exonum::storage::{Fork, Snapshot};
 
-type Key = String;
-
 const SHADOW_TABLE_NAME: &str = "__SHADOW_TABLE__";
 
 encoding_struct!(
-    struct Value {
+    struct IndexInfo {
         table_type: u8,
     }
 );
@@ -55,10 +53,12 @@ impl From<u8> for TableType {
     }
 }
 
-type Index<T> = MapIndex<T, Key, Value>;
+fn shadow_table<T>(view: T) -> MapIndex<T, String, IndexInfo> {
+    MapIndex::new(SHADOW_TABLE_NAME, view)
+}
 
 pub fn check_read<T: AsRef<Snapshot>>(name: &str, table_type: TableType, view: T) {
-    let shadow_table: Index<T> = MapIndex::new(SHADOW_TABLE_NAME, view);
+    let shadow_table = shadow_table(view);
     if let Some(value) = shadow_table.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
         if stored_type != table_type {
@@ -76,7 +76,7 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
     if name == SHADOW_TABLE_NAME {
         panic!("Attempt to access an internal storage infrastructure");
     }
-    let mut shadow_table: Index<&mut Fork> = MapIndex::new(SHADOW_TABLE_NAME, view);
+    let mut shadow_table = shadow_table(view);
     if let Some(value) = shadow_table.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
         if stored_type != table_type {
@@ -87,7 +87,7 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
             );
         }
     } else {
-        shadow_table.put(&name.to_owned(), Value::new(table_type.into()));
+        shadow_table.put(&name.to_owned(), IndexInfo::new(table_type.into()));
     }
 }
 
