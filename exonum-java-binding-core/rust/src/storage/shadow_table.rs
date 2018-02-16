@@ -57,46 +57,38 @@ impl From<u8> for TableType {
 
 type Index<T> = MapIndex<T, Key, Value>;
 
-pub fn try_read<T: AsRef<Snapshot>>(
-    name: &str,
-    table_type: TableType,
-    view: T,
-) -> Result<(), String> {
+pub fn check_read<T: AsRef<Snapshot>>(name: &str, table_type: TableType, view: T) {
     let shadow_table: Index<T> = MapIndex::new(SHADOW_TABLE_NAME, view);
     if let Some(value) = shadow_table.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
         if stored_type != table_type {
-            return Err(format!(
+            panic!(
                 "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
                 table_type,
                 stored_type,
-            ));
+            );
         }
     }
-    Ok(())
 }
 
 
-pub fn try_write(name: &str, table_type: TableType, view: &mut Fork) -> Result<(), String> {
+pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
     if name == SHADOW_TABLE_NAME {
-        return Err(
-            "Attempt to access an internal storage infrastructure".to_owned(),
-        );
+        panic!("Attempt to access an internal storage infrastructure");
     }
     let mut shadow_table: Index<&mut Fork> = MapIndex::new(SHADOW_TABLE_NAME, view);
     if let Some(value) = shadow_table.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
         if stored_type != table_type {
-            return Err(format!(
+            panic!(
                 "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
                 table_type,
                 stored_type,
-            ));
+            );
         }
     } else {
         shadow_table.put(&name.to_owned(), Value::new(table_type.into()));
     }
-    Ok(())
 }
 
 

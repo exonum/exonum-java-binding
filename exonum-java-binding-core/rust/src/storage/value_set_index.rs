@@ -9,7 +9,7 @@ use exonum::storage::{Snapshot, Fork, ValueSetIndex};
 use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
 use utils::{self, Handle, PairIter};
 use super::db::{View, ViewRef, Value};
-use super::shadow_table::{TableType, try_read, try_write};
+use super::shadow_table::{TableType, check_read, check_write};
 
 type Index<T> = ValueSetIndex<T, Value>;
 
@@ -35,11 +35,11 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    try_read(&name, TableType::ValueSet, &*snapshot)?;
+                    check_read(&name, TableType::ValueSet, &*snapshot);
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
                 ViewRef::Fork(ref mut fork) => {
-                    try_write(&name, TableType::ValueSet, fork)?;
+                    check_write(&name, TableType::ValueSet, fork);
                     IndexType::ForkIndex(Index::new(name, fork))
                 }
             },

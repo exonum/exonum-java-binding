@@ -9,7 +9,7 @@ use exonum::storage::{Snapshot, Fork, KeySetIndex};
 use exonum::storage::key_set_index::KeySetIndexIter;
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Key};
-use super::shadow_table::{TableType, try_read, try_write};
+use super::shadow_table::{TableType, check_read, check_write};
 
 type Index<T> = KeySetIndex<T, Key>;
 
@@ -31,11 +31,11 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    try_read(&name, TableType::KeySet, &*snapshot)?;
+                    check_read(&name, TableType::KeySet, &*snapshot);
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
                 ViewRef::Fork(ref mut fork) => {
-                    try_write(&name, TableType::KeySet, fork)?;
+                    check_write(&name, TableType::KeySet, fork);
                     IndexType::ForkIndex(Index::new(name, fork))
                 }
             },

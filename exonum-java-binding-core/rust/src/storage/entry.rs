@@ -8,7 +8,7 @@ use std::ptr;
 use exonum::storage::{Snapshot, Fork, Entry};
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Value};
-use super::shadow_table::{TableType, try_read, try_write};
+use super::shadow_table::{TableType, check_read, check_write};
 
 type Index<T> = Entry<T, Value>;
 
@@ -30,11 +30,11 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    try_read(&name, TableType::Entry, &*snapshot)?;
+                    check_read(&name, TableType::Entry, &*snapshot);
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
                 ViewRef::Fork(ref mut fork) => {
-                    try_write(&name, TableType::Entry, fork)?;
+                    check_write(&name, TableType::Entry, fork);
                     IndexType::ForkIndex(Index::new(name, fork))
                 }
             },

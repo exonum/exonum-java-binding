@@ -9,7 +9,7 @@ use exonum::storage::{Snapshot, Fork, MapIndex};
 use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use utils::{self, Handle, PairIter};
 use super::db::{View, ViewRef, Key, Value};
-use super::shadow_table::{TableType, try_read, try_write};
+use super::shadow_table::{TableType, check_read, check_write};
 
 type Index<T> = MapIndex<T, Key, Value>;
 
@@ -35,11 +35,11 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    try_read(&name, TableType::Map, &*snapshot)?;
+                    check_read(&name, TableType::Map, &*snapshot);
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
                 ViewRef::Fork(ref mut fork) => {
-                    try_write(&name, TableType::Map, fork)?;
+                    check_write(&name, TableType::Map, fork);
                     IndexType::ForkIndex(Index::new(name, fork))
                 }
             },
