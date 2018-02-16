@@ -22,28 +22,30 @@ pub enum TableType {
 
 impl From<TableType> for u8 {
     fn from(tt: TableType) -> Self {
+        use self::TableType::*;
         match tt {
-            TableType::Entry => 0,
-            TableType::KeySet => 1,
-            TableType::List => 2,
-            TableType::Map => 3,
-            TableType::ProofList => 4,
-            TableType::ProofMap => 5,
-            TableType::ValueSet => 6,
+            Entry => 0,
+            KeySet => 1,
+            List => 2,
+            Map => 3,
+            ProofList => 4,
+            ProofMap => 5,
+            ValueSet => 6,
         }
     }
 }
 
 impl From<u8> for TableType {
     fn from(num: u8) -> Self {
+        use self::TableType::*;
         match num {
-            0 => Self::Entry,
-            1 => Self::KeySet,
-            2 => Self::List,
-            3 => Self::Map,
-            4 => Self::ProofList,
-            5 => Self::ProofMap,
-            6 => Self::ValueSet,
+            0 => Entry,
+            1 => KeySet,
+            2 => List,
+            3 => Map,
+            4 => ProofList,
+            5 => ProofMap,
+            6 => ValueSet,
             invalid => {
                 panic!(
                     "Unreachable pattern ({:?}) while constructing table type. Storage data is probably corrupted",
