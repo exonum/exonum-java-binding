@@ -94,7 +94,11 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
 
 #[cfg(test)]
 mod tests {
-    use super::TableType;
+    use std::panic;
+    use std::ops::DerefMut;
+
+    use super::{TableType, check_read, check_write, SHADOW_TABLE_NAME};
+    use exonum::storage::{MemoryDB, Database};
 
     #[test]
     fn table_type_roundtrip() {
@@ -103,5 +107,76 @@ mod tests {
             let num: u8 = table_type.into();
             assert_eq!(i, num);
         }
+    }
+
+    #[test]
+    fn access_indexes_metadata() {
+        let database = MemoryDB::new();
+        let mut fork = database.fork();
+
+        check_read(SHADOW_TABLE_NAME, TableType::Map, &mut fork);
+
+        let result = {
+            let mut fork = panic::AssertUnwindSafe(&mut fork);
+            panic::catch_unwind(move || {
+                check_write(SHADOW_TABLE_NAME, TableType::Map, fork.deref_mut());
+            })
+        };
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn invalid_table_type() {
+        let database = MemoryDB::new();
+        let mut fork = database.fork();
+
+        check_write("test_index", TableType::ProofMap, &mut fork);
+
+        let result = {
+            let mut fork = panic::AssertUnwindSafe(&mut fork);
+            panic::catch_unwind(move || {
+                check_read("test_index", TableType::Map, fork.deref_mut());
+            })
+        };
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn valid_table_type() {
+        let database = MemoryDB::new();
+        let mut fork = database.fork();
+
+        check_write("test_index", TableType::ProofMap, &mut fork);
+        check_read("test_index", TableType::ProofMap, &mut fork);
+    }
+
+    #[test]
+    fn multiple_read_before_write() {
+        let database = MemoryDB::new();
+        let mut fork = database.fork();
+
+        check_read("test_index", TableType::Map, &mut fork);
+        check_read("test_index", TableType::List, &mut fork);
+        check_read("test_index", TableType::Entry, &mut fork);
+        check_read("test_index", TableType::KeySet, &mut fork);
+        check_read("test_index", TableType::ValueSet, &mut fork);
+        check_read("test_index", TableType::ProofMap, &mut fork);
+        check_read("test_index", TableType::ProofList, &mut fork);
+
+        // Lock the type
+        check_write("test_index", TableType::ProofMap, &mut fork);
+        check_read("test_index", TableType::ProofMap, &mut fork);
+
+        // Make sure we're unable to read with different type now
+        let result = {
+            let mut fork = panic::AssertUnwindSafe(&mut fork);
+            panic::catch_unwind(move || {
+                check_write(SHADOW_TABLE_NAME, TableType::Map, fork.deref_mut());
+            })
+        };
+
+        assert!(result.is_err());
     }
 }
