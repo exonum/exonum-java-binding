@@ -1,17 +1,15 @@
 extern crate java_bindings;
-extern crate jni;
 #[macro_use]
 extern crate lazy_static;
-extern crate exonum;
 
 mod util;
 
-use exonum::blockchain::Transaction;
-use exonum::messages::{MessageBuffer, RawMessage};
-use exonum::storage::{Database, Entry, MemoryDB};
 use java_bindings::{DumbExecutor, Executor, TransactionProxy};
-use jni::JavaVM;
-use jni::objects::{AutoLocal, JObject, JValue};
+use java_bindings::exonum::blockchain::Transaction;
+use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
+use java_bindings::exonum::storage::{Database, Entry, MemoryDB};
+use java_bindings::jni::JavaVM;
+use java_bindings::jni::objects::{AutoLocal, JObject, JValue};
 
 use std::sync::Arc;
 

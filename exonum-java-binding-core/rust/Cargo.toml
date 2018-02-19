@@ -7,11 +7,12 @@ authors = ["Exonum Team <exonum@bitfury.com>"]
 members = ["integration_tests"]
 
 [lib]
-crate-type = ["rlib", "cdylib"]
+crate-type = ["dylib"]
 
 [features]
 # Enables native handles checking. Useful for debugging.
 resource-manager = []
+invocation = ["jni/invocation"]
 
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,

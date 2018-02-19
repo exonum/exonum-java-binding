@@ -1,5 +1,4 @@
 extern crate java_bindings;
-extern crate jni;
 #[macro_use]
 extern crate lazy_static;
 
@@ -7,8 +6,8 @@ mod example_proxy;
 mod util;
 
 use java_bindings::DumbExecutor;
-use jni::JavaVM;
-use jni::sys::jint;
+use java_bindings::jni::JavaVM;
+use java_bindings::jni::sys::jint;
 
 use std::sync::{Arc, Barrier};
 use std::thread::spawn;

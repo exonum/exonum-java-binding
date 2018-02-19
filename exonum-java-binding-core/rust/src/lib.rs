@@ -10,8 +10,8 @@
 #![allow(non_snake_case)]
 
 #[macro_use]
-extern crate exonum;
-extern crate jni;
+pub extern crate exonum;
+pub extern crate jni;
 #[macro_use]
 extern crate log;
 extern crate serde_json;
