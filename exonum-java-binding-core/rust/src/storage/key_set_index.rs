@@ -9,7 +9,7 @@ use exonum::storage::{Snapshot, Fork, KeySetIndex};
 use exonum::storage::key_set_index::KeySetIndexIter;
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Key};
-use super::shadow_table::{TableType, check_read, check_write};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = KeySetIndex<T, Key>;
 

@@ -56,21 +56,26 @@ impl From<u8> for TableType {
     }
 }
 
-fn shadow_table<T>(view: T) -> MapIndex<T, String, IndexInfo> {
+fn indexes_metadata<T>(view: T) -> MapIndex<T, String, IndexInfo> {
     MapIndex::new(SHADOW_TABLE_NAME, view)
 }
 
+fn assert_table_type(name: &str, table_type: TableType, stored_type: TableType) {
+    assert_eq!(
+        stored_type,
+        table_type,
+        "Attempt to access index '{}' of type {:?}, while said index was initially created with type {:?}",
+        name,
+        table_type,
+        stored_type
+    );
+}
+
 pub fn check_read<T: AsRef<Snapshot>>(name: &str, table_type: TableType, view: T) {
-    let shadow_table = shadow_table(view);
-    if let Some(value) = shadow_table.get(&name.to_owned()) {
+    let metadata = indexes_metadata(view);
+    if let Some(value) = metadata.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
-        assert_eq!(
-            stored_type,
-            table_type,
-            "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
-            table_type,
-            stored_type
-        );
+        assert_table_type(name, table_type, stored_type);
     }
 }
 
@@ -78,18 +83,12 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
     if name == SHADOW_TABLE_NAME {
         panic!("Attempt to access an internal storage infrastructure");
     }
-    let mut shadow_table = shadow_table(view);
-    if let Some(value) = shadow_table.get(&name.to_owned()) {
+    let mut metadata = indexes_metadata(view);
+    if let Some(value) = metadata.get(&name.to_owned()) {
         let stored_type = TableType::from(value.table_type());
-        assert_eq!(
-            stored_type,
-            table_type,
-            "Attempt to access index of type {:?}, while said index was initially created with type {:?}",
-            table_type,
-            stored_type
-        );
+        assert_table_type(name, table_type, stored_type);
     } else {
-        shadow_table.put(&name.to_owned(), IndexInfo::new(table_type.into()));
+        metadata.put(&name.to_owned(), IndexInfo::new(table_type.into()));
     }
 }
 

@@ -9,7 +9,7 @@ use exonum::storage::{Snapshot, Fork, ValueSetIndex};
 use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
 use utils::{self, Handle, PairIter};
 use super::db::{View, ViewRef, Value};
-use super::shadow_table::{TableType, check_read, check_write};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ValueSetIndex<T, Value>;
 

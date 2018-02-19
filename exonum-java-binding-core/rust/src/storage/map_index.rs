@@ -9,7 +9,7 @@ use exonum::storage::{Snapshot, Fork, MapIndex};
 use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use utils::{self, Handle, PairIter};
 use super::db::{View, ViewRef, Key, Value};
-use super::shadow_table::{TableType, check_read, check_write};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = MapIndex<T, Key, Value>;
 

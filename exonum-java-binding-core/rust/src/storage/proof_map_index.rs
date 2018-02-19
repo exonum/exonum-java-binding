@@ -12,7 +12,7 @@ use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, Pro
                                        ProofPath, BranchProofNode, ProofNode, PROOF_MAP_KEY_SIZE};
 use utils::{self, Handle, PairIter};
 use super::db::{View, ViewRef, Value};
-use super::shadow_table::{TableType, check_read, check_write};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;

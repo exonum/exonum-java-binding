@@ -8,7 +8,7 @@ use std::ptr;
 use exonum::storage::{Snapshot, Fork, Entry};
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Value};
-use super::shadow_table::{TableType, check_read, check_write};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = Entry<T, Value>;
 
