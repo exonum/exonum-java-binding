@@ -1,10 +1,10 @@
 use exonum::storage::MapIndex;
 use exonum::storage::{Fork, Snapshot};
 
-const SHADOW_TABLE_NAME: &str = "__INDEXES_INFO__";
+const SHADOW_TABLE_NAME: &str = "__INDEXES_METADATA__";
 
 encoding_struct!(
-    struct IndexInfo {
+    struct IndexMetadata {
         table_type: u8,
     }
 );
@@ -56,7 +56,7 @@ impl From<u8> for TableType {
     }
 }
 
-fn indexes_metadata<T>(view: T) -> MapIndex<T, String, IndexInfo> {
+fn indexes_metadata<T>(view: T) -> MapIndex<T, String, IndexMetadata> {
     MapIndex::new(SHADOW_TABLE_NAME, view)
 }
 
@@ -88,15 +88,12 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
         let stored_type = TableType::from(value.table_type());
         assert_table_type(name, table_type, stored_type);
     } else {
-        metadata.put(&name.to_owned(), IndexInfo::new(table_type.into()));
+        metadata.put(&name.to_owned(), IndexMetadata::new(table_type.into()));
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::panic;
-    use std::ops::DerefMut;
-
     use super::{TableType, check_read, check_write, SHADOW_TABLE_NAME};
     use exonum::storage::{MemoryDB, Database};
 
@@ -115,32 +112,25 @@ mod tests {
         let mut fork = database.fork();
 
         check_read(SHADOW_TABLE_NAME, TableType::Map, &mut fork);
-
-        let result = {
-            let mut fork = panic::AssertUnwindSafe(&mut fork);
-            panic::catch_unwind(move || {
-                check_write(SHADOW_TABLE_NAME, TableType::Map, fork.deref_mut());
-            })
-        };
-
-        assert!(result.is_err());
     }
 
     #[test]
+    #[should_panic(expected = "Attempt to access an internal storage infrastructure")]
+    fn access_indexes_metadata_mut() {
+        let database = MemoryDB::new();
+        let mut fork = database.fork();
+
+        check_write(SHADOW_TABLE_NAME, TableType::Map, &mut fork);
+    }
+
+    #[test]
+    #[should_panic(expected = "Attempt to access index 'test_index' of type Map, while said index was initially created with type ProofMap")]
     fn invalid_table_type() {
         let database = MemoryDB::new();
         let mut fork = database.fork();
 
         check_write("test_index", TableType::ProofMap, &mut fork);
-
-        let result = {
-            let mut fork = panic::AssertUnwindSafe(&mut fork);
-            panic::catch_unwind(move || {
-                check_read("test_index", TableType::Map, fork.deref_mut());
-            })
-        };
-
-        assert!(result.is_err());
+        check_read("test_index", TableType::Map, &mut fork);
     }
 
     #[test]
@@ -153,6 +143,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "Attempt to access index 'test_index' of type Map, while said index was initially created with type ProofMap")]
     fn multiple_read_before_write() {
         let database = MemoryDB::new();
         let mut fork = database.fork();
@@ -170,13 +161,6 @@ mod tests {
         check_read("test_index", TableType::ProofMap, &mut fork);
 
         // Make sure we're unable to read with different type now
-        let result = {
-            let mut fork = panic::AssertUnwindSafe(&mut fork);
-            panic::catch_unwind(move || {
-                check_write(SHADOW_TABLE_NAME, TableType::Map, fork.deref_mut());
-            })
-        };
-
-        assert!(result.is_err());
+        check_write("test_index", TableType::Map, &mut fork);
     }
 }
