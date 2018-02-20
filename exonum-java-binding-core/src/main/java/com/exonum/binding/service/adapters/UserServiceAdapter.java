@@ -30,7 +30,7 @@ public class UserServiceAdapter {
   private NodeProxy node;
 
   @Inject
-  UserServiceAdapter(Service service, Server server) {
+  public UserServiceAdapter(Service service, Server server) {
     this.service = checkNotNull(service, "service");
     this.server = checkNotNull(server, "server");
   }

@@ -21,17 +21,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class ServerIntegrationTest {
+public class VertxServerIntegrationTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final int PORT = 0;
 
-  private Server server;
+  private VertxServer server;
 
   @Before
   public void setUp() throws Exception {
-    server = new Server();
+    server = new VertxServer();
   }
 
   @Test
