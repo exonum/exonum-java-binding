@@ -10,16 +10,20 @@ import com.google.inject.Module;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A Java service bootstrap loader.
  */
 class ServiceBootstrap {
 
+  private static final Logger LOG = LogManager.getLogger(ServiceBootstrap.class);
+
   /**
    * Bootstraps the Java service.
    *
-   * @param serviceModuleName a module name of the user service
+   * @param serviceModuleName a fully-qualified class name of the user service module
    * @param serverPort a port to listen for connections on
    * @return a new service
    */
@@ -33,8 +37,7 @@ class ServiceBootstrap {
           try {
             server.stop().get();
           } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Failed to stop the server during VM shutdown: "
-                + e.getMessage());
+            LOG.warn("Failed to stop the server during VM shutdown", e);
           }
         })
     );
