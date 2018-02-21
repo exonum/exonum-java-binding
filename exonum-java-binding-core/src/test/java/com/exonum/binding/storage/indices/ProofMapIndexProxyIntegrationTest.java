@@ -25,7 +25,6 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.storage.serialization.StandardSerializers;
@@ -582,17 +581,5 @@ public class ProofMapIndexProxyIntegrationTest {
     }
 
     return entries;
-  }
-
-  /** Creates a leaf database key, given a user key (32-byte-long). */
-  private static HashCode leafDbKey(HashCode userProofMapKey) {
-    checkArgument(userProofMapKey.bits() == PROOF_MAP_KEY_SIZE * Byte.SIZE);
-    byte[] rawLeafKey = new byte[PROOF_MAP_KEY_SIZE + 2];
-    System.arraycopy(userProofMapKey.asBytes(), 0, rawLeafKey, 1,
-        PROOF_MAP_KEY_SIZE);
-    // Set the first byte to a leaf
-    rawLeafKey[0] = Type.LEAF.code;
-    // last byte is zero for a leaf.
-    return HashCode.fromBytes(rawLeafKey);
   }
 }
