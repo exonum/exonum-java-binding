@@ -7,8 +7,6 @@ import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesT
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
-import static com.exonum.binding.storage.indices.TestStorageItems.V2;
-import static com.exonum.binding.storage.indices.TestStorageItems.V3;
 import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
@@ -27,7 +25,6 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.storage.serialization.StandardSerializers;
@@ -48,7 +45,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -476,26 +472,21 @@ public class ProofMapIndexProxyIntegrationTest {
     map.close();
   }
 
-  @Ignore // a failing test: messes with proof map internals
+  /**
+   * A simple integration test that ensures that:
+   *   - ProofMap constructor preserves the index type and
+   *   - Map constructor checks it, preventing illegal access to ProofMap internals.
+   */
   @Test
-  public void messWithProofMap() {
+  public void constructorShallPreserveTypeInformation() {
     runTestWithView(database::createFork, (view, proofMap) -> {
-      // Put some stuff into the proof map
-      proofMap.put(PK1, V1);
-      proofMap.put(PK2, V2);
+      expectedException.expectMessage("Attempt to access index '" + MAP_NAME
+          + "' of type Map, while said index was initially created with type ProofMap");
+      expectedException.expect(RuntimeException.class);
 
-      // Create a *regular* map with the *same* name as the proof map above.
-      //
-      // A reliable framework must kick you in the balls right away.
+      // Create a regular map with the same name as the proof map above.
       MapIndexProxy<HashCode, String> regularMap = new MapIndexProxy<>(MAP_NAME, view,
           StandardSerializers.hash(), StandardSerializers.string());
-
-      // Put V3, using a clever key, replacing a previous value in the proof map,
-      // identified by PK1.
-      regularMap.put(leafDbKey(PK1), V3);
-
-      // Oops, we have affected the state of the proof map, haven't we?
-      assertThat(proofMap.get(PK1), equalTo(V1)); // boom
     });
   }
 
@@ -590,17 +581,5 @@ public class ProofMapIndexProxyIntegrationTest {
     }
 
     return entries;
-  }
-
-  /** Creates a leaf database key, given a user key (32-byte-long). */
-  private static HashCode leafDbKey(HashCode userProofMapKey) {
-    checkArgument(userProofMapKey.bits() == PROOF_MAP_KEY_SIZE * Byte.SIZE);
-    byte[] rawLeafKey = new byte[PROOF_MAP_KEY_SIZE + 2];
-    System.arraycopy(userProofMapKey.asBytes(), 0, rawLeafKey, 1,
-        PROOF_MAP_KEY_SIZE);
-    // Set the first byte to a leaf
-    rawLeafKey[0] = Type.LEAF.code;
-    // last byte is zero for a leaf.
-    return HashCode.fromBytes(rawLeafKey);
   }
 }
