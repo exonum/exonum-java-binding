@@ -25,7 +25,7 @@
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
-    <build.nativeLibPath>rust/target/debug</build.nativeLibPath>
+    <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <guice.version>4.1.0</guice.version>
     <auto-value.version>1.5.3</auto-value.version>
   </properties>
