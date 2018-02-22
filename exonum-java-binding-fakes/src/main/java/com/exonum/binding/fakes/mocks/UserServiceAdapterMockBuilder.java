@@ -38,9 +38,9 @@ public final class UserServiceAdapterMockBuilder {
    * Sets up the mock to reject any transaction message,
    * as if it is does not belong to this service.
    */
-  public void convertTransactionThrowing(Throwable t) {
+  public void convertTransactionThrowing(Class<? extends Throwable> exceptionType) {
     when(service.convertTransaction(any(byte[].class)))
-        .thenThrow(t);
+        .thenThrow(exceptionType);
   }
 
   public void stateHashes(byte[][] stateHashes) {
@@ -48,9 +48,9 @@ public final class UserServiceAdapterMockBuilder {
         .thenReturn(checkNotNull(stateHashes));
   }
 
-  public void stateHashesThrowing(Throwable t) {
+  public void stateHashesThrowing(Class<? extends Throwable> exceptionType) {
     when(service.getStateHashes(anyLong()))
-        .thenThrow(t);
+        .thenThrow(exceptionType);
   }
 
   public void initialGlobalConfig(String initialGlobalConfig) {
@@ -58,13 +58,13 @@ public final class UserServiceAdapterMockBuilder {
         .thenReturn(checkNotNull(initialGlobalConfig));
   }
 
-  public void initialGlobalConfigThrowing(Throwable t) {
+  public void initialGlobalConfigThrowing(Class<? extends Throwable> exceptionType) {
     when(service.initalize(anyLong()))
-        .thenThrow(t);
+        .thenThrow(exceptionType);
   }
 
-  public void mountPublicApiHandlerThrowing(Throwable t) {
-    doThrow(t)
+  public void mountPublicApiHandlerThrowing(Class<? extends Throwable> exceptionType) {
+    doThrow(exceptionType)
         .when(service).mountPublicApiHandler(anyLong());
   }
 
