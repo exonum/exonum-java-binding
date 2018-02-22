@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
@@ -13,7 +14,7 @@ import com.exonum.binding.storage.database.ViewModificationCounter;
  * <p>Each index is created with a database view, either an immutable Snapshot or a read-write Fork.
  * An index has a modification counter to detect when it or the corresponding view is modified.
  */
-abstract class AbstractIndexProxy extends AbstractNativeProxy {
+abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
 
   final View dbView;
 
@@ -22,19 +23,29 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy {
    */
   final ViewModificationCounter modCounter;
 
+  private final String name;
+
   /**
    * Creates a new index.
    *
    * <p>Subclasses shall create a native object and pass a native handle to this constructor.
    *
    * @param nativeHandle a native handle of the created index
+   * @param name a name of this index
    * @param view a database view from which the index has been created
-   * @throws NullPointerException if view is null
+   * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(long nativeHandle, View view) {
+  AbstractIndexProxy(long nativeHandle, String name, View view) {
     super(nativeHandle, true, view);
+    this.name = checkIndexName(name);
     this.dbView = checkNotNull(view);
     this.modCounter = ViewModificationCounter.getInstance();
+  }
+
+  /** Returns the name of this index. */
+  @Override
+  public final String getName() {
+    return name;
   }
 
   /**
@@ -58,5 +69,11 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy {
           + "\nUse a Fork to modify any collection.");
     }
     return (Fork) dbView;
+  }
+
+  @Override
+  public String toString() {
+    // test_map: ProofMap
+    return name + ": " + getClass().getName();
   }
 }

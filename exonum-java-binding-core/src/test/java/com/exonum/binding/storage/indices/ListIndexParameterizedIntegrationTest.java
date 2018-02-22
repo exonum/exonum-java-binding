@@ -11,11 +11,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +22,6 @@ import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,11 +33,8 @@ import org.junit.runners.Parameterized.Parameters;
  * A test of common ListIndex methods.
  */
 @RunWith(Parameterized.class)
-public class ListIndexParameterizedIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
+public class ListIndexParameterizedIntegrationTest
+    extends BaseIndexProxyTestable<AbstractListIndexProxy<String>> {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -53,18 +46,6 @@ public class ListIndexParameterizedIntegrationTest {
   public String testName;
 
   private static final String LIST_NAME = "test_list";
-
-  private MemoryDb database;
-
-  @Before
-  public void setUp() throws Exception {
-    database = new MemoryDb();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    database.close();
-  }
 
   @Test
   public void addSingleElementToEmptyList() throws Exception {
@@ -347,6 +328,11 @@ public class ListIndexParameterizedIntegrationTest {
          ListIndex<String> list = createList(view)) {
       listTest.accept(view, list);
     }
+  }
+
+  @Override
+  AbstractListIndexProxy<String> create(String name, View view) {
+    return (AbstractListIndexProxy<String>) listFactory.create(name, view);
   }
 
   private ListIndex<String> createList(View view) {

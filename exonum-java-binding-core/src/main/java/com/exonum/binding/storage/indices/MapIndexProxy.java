@@ -47,7 +47,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
    */
   public MapIndexProxy(String name, View view, Serializer<K> keySerializer,
                        Serializer<V> valueSerializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.keySerializer = CheckingSerializerDecorator.from(keySerializer);
     this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
   }
