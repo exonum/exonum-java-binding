@@ -3,6 +3,7 @@ package com.exonum.binding.fakes.mocks;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.messages.Transaction;
+import java.lang.reflect.Constructor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -35,15 +36,16 @@ public final class ThrowingTransactions {
     private void checkCanInstantiate(Class<? extends Throwable> exceptionType) {
       try {
         // Try to create an exception of the given type, discard the instance if successful.
-        exceptionType.newInstance();
-      } catch (IllegalAccessException | InstantiationException e) {
+        Constructor constructor = exceptionType.getDeclaredConstructor();
+        constructor.newInstance();
+      } catch (Exception e) {
         throw new IllegalArgumentException("Un-instantiable exception type: " + exceptionType, e);
       }
     }
 
     @Override
     public Object answer(InvocationOnMock invocation) throws Throwable {
-      throw exceptionType.newInstance();
+      throw exceptionType.getDeclaredConstructor().newInstance();
     }
   }
 
