@@ -1,5 +1,8 @@
 package com.exonum.binding.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * A loader of the native shared library with Exonum framework bindings.
  *
@@ -9,7 +12,10 @@ package com.exonum.binding.util;
  */
 public final class LibraryLoader {
 
-  private static final String BINDINGS_LIB_NAME = "java_bindings";
+  private static final String BINDING_LIB_NAME = "java_bindings";
+  private static final Logger LOG = LogManager.getLogger(LibraryLoader.class);
+  private static final String JAVA_LIBRARY_PATH_PROPERTY = "java.library.path";
+  private static final String DYNAMIC_LIBRARIES_ENV_VAR = "LD_LIBRARY_PATH";
 
   /**
    * Loads the native library with Exonum framework bindings.
@@ -19,7 +25,28 @@ public final class LibraryLoader {
   }
 
   private static void loadOnce() {
-    System.loadLibrary(BINDINGS_LIB_NAME);
+    try {
+      System.loadLibrary(BINDING_LIB_NAME);
+    } catch (UnsatisfiedLinkError e) {
+      LOG.error("Failed to load '{}' library: {}…\n{}",
+          BINDING_LIB_NAME, e, extraLibLoadErrorInfo());
+      throw e;
+    }
+  }
+
+  private static String extraLibLoadErrorInfo() {
+    String javaLibPath = System.getProperty(JAVA_LIBRARY_PATH_PROPERTY);
+    String dynamicLibPath = System.getenv(DYNAMIC_LIBRARIES_ENV_VAR);
+    // todo: clarify this message when LD_LIBRARY_PATH becomes required.
+    return "java.library.path=" + javaLibPath + ", \n"
+        + DYNAMIC_LIBRARIES_ENV_VAR + "=" + dynamicLibPath
+        + "\nMake sure that:\n"
+        + "1. The path to a directory containing '" + BINDING_LIB_NAME
+        + "' dynamic library image is included in either java.library.path system property or "
+        + DYNAMIC_LIBRARIES_ENV_VAR + " environment variable.\n"
+        + "2. The paths to directories containing dynamic libraries required by '"
+        + BINDING_LIB_NAME + "', if any, are included in " + DYNAMIC_LIBRARIES_ENV_VAR
+        + " environment variable";
   }
 
   private LibraryLoader() {}

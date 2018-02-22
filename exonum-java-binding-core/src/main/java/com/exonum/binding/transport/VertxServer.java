@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An HTTP server providing transport for Exonum transactions and read-requests.
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  * <p>The class is thread-safe. It does not support client-side locking.
  */
 final class VertxServer implements Server {
+  private static final Logger LOG = LogManager.getLogger(VertxServer.class);
   private final Vertx vertx;
   private final HttpServer server;
   private final Router rootRouter;
@@ -77,6 +80,7 @@ final class VertxServer implements Server {
       }
       state = STARTED;
       server.listen(port);
+      LOG.info("Listening at {}", server.actualPort());
     }
   }
 
@@ -90,6 +94,8 @@ final class VertxServer implements Server {
       state = STOPPED;
       stopFuture = new CompletableFuture<>();
 
+      LOG.info("Requesting to stop");
+
       // Request the vertx instance to close itself
       vertx.close((r) -> {
         // Clear the routes when it's closed
@@ -97,6 +103,8 @@ final class VertxServer implements Server {
 
         // Notify that the server is stopped
         stopFuture.complete(null);
+
+        LOG.info("Stopped");
       });
       return stopFuture;
     }
