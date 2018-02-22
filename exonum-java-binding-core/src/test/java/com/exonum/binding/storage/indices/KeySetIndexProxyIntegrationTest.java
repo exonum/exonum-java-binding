@@ -7,44 +7,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class KeySetIndexProxyIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
+public class KeySetIndexProxyIntegrationTest
+    extends BaseIndexProxyTestable<KeySetIndexProxy<String>> {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final String KEY_SET_NAME = "test_key_set";
-
-  private Database database;
-
-  @Before
-  public void setUp() throws Exception {
-    database = new MemoryDb();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    database.close();
-  }
 
   @Test
   public void addSingleElement() throws Exception {
@@ -157,8 +137,7 @@ public class KeySetIndexProxyIntegrationTest {
   @Test
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
-    KeySetIndexProxy<String> set = new KeySetIndexProxy<>(KEY_SET_NAME, view,
-        StandardSerializers.string());
+    KeySetIndexProxy<String> set = create(KEY_SET_NAME, view);
 
     view.close();  // a set must be closed before the corresponding view.
     expectedException.expect(IllegalStateException.class);
@@ -192,5 +171,10 @@ public class KeySetIndexProxyIntegrationTest {
         KeySetIndexProxy::new,
         keySetTest
     );
+  }
+
+  @Override
+  KeySetIndexProxy<String> create(String name, View view) {
+    return new KeySetIndexProxy<>(name, view, StandardSerializers.string());
   }
 }

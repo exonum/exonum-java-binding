@@ -45,7 +45,7 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    * @throws NullPointerException if any argument is null
    */
   public ProofListIndexProxy(String name, View view, Serializer<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view, serializer);
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);

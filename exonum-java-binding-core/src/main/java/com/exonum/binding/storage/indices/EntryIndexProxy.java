@@ -47,7 +47,7 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    * @throws IllegalStateException if the view proxy is invalid
    */
   public EntryIndexProxy(String name, View view, Serializer<T> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.serializer = CheckingSerializerDecorator.from(serializer);
   }
 

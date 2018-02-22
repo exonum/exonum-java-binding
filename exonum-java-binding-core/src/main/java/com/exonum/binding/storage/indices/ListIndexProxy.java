@@ -42,7 +42,7 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @throws NullPointerException if any argument is null
    */
   public ListIndexProxy(String name, View view, Serializer<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view, serializer);
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 
   /**

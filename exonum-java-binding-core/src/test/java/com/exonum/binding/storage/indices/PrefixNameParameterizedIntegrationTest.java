@@ -9,7 +9,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.exonum.binding.util.LibraryLoader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +19,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+// todo: Move to BaseIndexProxyTestable when ECR-642 is resolved
+// (currently not possible due to ExpectedException incompatibility)
 @RunWith(Parameterized.class)
 public class PrefixNameParameterizedIntegrationTest {
 

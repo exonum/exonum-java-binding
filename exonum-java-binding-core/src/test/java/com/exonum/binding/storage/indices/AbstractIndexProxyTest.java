@@ -92,7 +92,7 @@ public class AbstractIndexProxyTest {
     private static final long NATIVE_HANDLE = 0x11L;
 
     IndexProxyImpl(View view) {
-      super(NATIVE_HANDLE, view);
+      super(NATIVE_HANDLE, "index_name", view);
     }
 
     @Override

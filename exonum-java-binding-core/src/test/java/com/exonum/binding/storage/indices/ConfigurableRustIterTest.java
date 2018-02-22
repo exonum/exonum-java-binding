@@ -177,7 +177,7 @@ public class ConfigurableRustIterTest {
   }
 
   private static AbstractIndexProxy createIndex(View view) {
-    return new AbstractIndexProxy(0x01, view) {
+    return new AbstractIndexProxy(0x01, "test_index", view) {
 
       @Override
       protected void disposeInternal() {
