@@ -43,7 +43,6 @@
                 <configuration>
                     <argLine>
                         -Djava.library.path=${ejb-core.nativeLibPath}
-                        -Xcheck:jni
                         ${java.vm.assertionFlag}
                     </argLine>
                 </configuration>
