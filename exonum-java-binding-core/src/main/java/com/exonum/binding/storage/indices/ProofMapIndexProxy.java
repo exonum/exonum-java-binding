@@ -52,7 +52,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    */
   public ProofMapIndexProxy(String name, View view, Serializer<K> keySerializer,
                             Serializer<V> valueSerializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), view);
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.keySerializer = new ProofMapKeyCheckingSerializerDecorator<>(
         CheckingSerializerDecorator.from(keySerializer)
     );

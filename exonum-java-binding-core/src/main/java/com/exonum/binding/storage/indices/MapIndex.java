@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.proxy.NativeProxy;
 import com.exonum.binding.storage.database.Fork;
 
 /**
@@ -16,7 +15,7 @@ import com.exonum.binding.storage.database.Fork;
  * @param <K> the type of keys in this map
  * @param <V> the type of values in this map
  */
-public interface MapIndex<K, V> extends NativeProxy {
+public interface MapIndex<K, V> extends StorageIndex {
 
   /**
    * Returns true if this map contains a mapping for the specified key.

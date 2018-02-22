@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.proxy.NativeProxy;
 import com.exonum.binding.storage.database.Fork;
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -19,7 +18,7 @@ import java.util.NoSuchElementException;
  *
  * @param <T> the type of elements in this list
  */
-public interface ListIndex<T> extends NativeProxy {
+public interface ListIndex<T> extends StorageIndex {
 
   /**
    * Adds a new element to the end of the list.

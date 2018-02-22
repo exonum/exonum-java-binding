@@ -1,9 +1,9 @@
 package com.exonum.binding.fakes.mocks;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
+import com.exonum.binding.messages.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,6 +13,8 @@ public class UserServiceAdapterMockBuilderTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
+
+  private static final int MIN_MESSAGE_SIZE = Message.messageSize(0);
 
   @Test
   public void buildWithId() {
@@ -27,12 +29,12 @@ public class UserServiceAdapterMockBuilderTest {
   @Test
   public void buildThrowing() {
     UserServiceAdapterMockBuilder builder = new UserServiceAdapterMockBuilder();
-    Exception conversionException = new IllegalArgumentException("invalid transaction");
-    builder.convertTransactionThrowing(conversionException);
+    Class<? extends Throwable> exceptionType = IllegalArgumentException.class;
+    builder.convertTransactionThrowing(exceptionType);
     UserServiceAdapter service = builder.build();
 
-    byte[] rawTxMessage = new byte[64];
-    expectedException.expect(sameInstance(conversionException));
+    byte[] rawTxMessage = new byte[MIN_MESSAGE_SIZE];
+    expectedException.expect(exceptionType);
     service.convertTransaction(rawTxMessage);
   }
 }

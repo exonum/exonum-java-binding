@@ -12,12 +12,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
@@ -30,36 +27,17 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class MapIndexProxyIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
+public class MapIndexProxyIntegrationTest
+    extends BaseIndexProxyTestable<MapIndexProxy<String, String>> {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final String MAP_NAME = "test_map";
-
-  private Database database;
-
-  @Before
-  public void setUp() throws Exception {
-    database = new MemoryDb();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    if (database != null) {
-      database.close();
-    }
-  }
 
   /**
    * This test verifies that if a client destroys native objects through their proxies
@@ -419,6 +397,11 @@ public class MapIndexProxyIntegrationTest {
          MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
       mapTest.accept(view, map);
     }
+  }
+
+  @Override
+  MapIndexProxy<String, String> create(String name, View view) {
+    return createMap(name, view);
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {
