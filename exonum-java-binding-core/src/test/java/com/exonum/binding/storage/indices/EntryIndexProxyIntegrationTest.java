@@ -1,5 +1,7 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.TestStorageItems.V1;
+import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -21,11 +23,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class EntryIndexProxyIntegrationTest {
-
-  // fixme: move them back to Storage values in non-WIP PR
-  private static final String V1 = "v1";
-  private static final String V2 = "v2";
-  private static final String V3 = "v3";
 
   static {
     LibraryLoader.load();
@@ -104,7 +101,7 @@ public class EntryIndexProxyIntegrationTest {
   @Test
   public void removeValue() throws Exception {
     runTestWithView(database::createFork, (e) -> {
-      e.set(V3);
+      e.set(V1);
       e.remove();
       assertFalse(e.isPresent());
     });
