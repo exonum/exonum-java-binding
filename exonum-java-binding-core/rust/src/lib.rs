@@ -20,10 +20,11 @@ extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
-mod utils;
 mod init;
 mod proxy;
 mod storage;
+#[doc(hidden)]
+pub mod utils;
 
 pub use init::*;
 pub use proxy::*;
