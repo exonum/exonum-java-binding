@@ -64,7 +64,7 @@ fn throw(env: &JNIEnv, description: &str) {
 // TODO: Remove `allow(borrowed_box)` after https://github.com/Manishearth/rust-clippy/issues/1884
 // is fixed.
 #[cfg_attr(feature = "cargo-clippy", allow(borrowed_box))]
-fn any_to_string(any: &Box<Any + Send>) -> String {
+pub fn any_to_string(any: &Box<Any + Send>) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
         s.to_string()
     } else if let Some(s) = any.downcast_ref::<String>() {

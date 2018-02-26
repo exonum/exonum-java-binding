@@ -1,11 +1,13 @@
+use std::marker::{Send, Sync};
 use std::sync::Arc;
+
 
 use jni::*;
 use jni::JNIEnv;
 use jni::errors::Result;
 
 /// An interface for JNI thread attachment manager.
-pub trait Executor: Clone {
+pub trait Executor: Clone + Send + Sync {
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM
     fn with_attached<F, R>(&self, f: F) -> Result<R>

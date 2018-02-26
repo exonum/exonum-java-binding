@@ -39,12 +39,17 @@ before_install:
   - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
     # Install a toolchain and set it as a default.
   - rustup default "$RUST_VERSION"
+  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
     # Install rustfmt if it's not already.
   - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
     # Install cargo-audit if it's not already.
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
   - cargo install --list
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RUST_LIB_PATH:$HOME/.local/lib
+#  - ln -f -s $HOME/.rustup/toolchains/stable-x86_64-apple-darwin/lib/libstd-*.dylib /usr/local/lib
+#  - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/lib/pkgconfig
+
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:

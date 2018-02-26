@@ -1,10 +1,8 @@
 use java_bindings::Executor;
-use jni::*;
-use jni::errors::Result;
-use jni::objects::AutoLocal;
-use jni::objects::GlobalRef;
-use jni::objects::JValue;
-use jni::sys::jint;
+use java_bindings::jni::*;
+use java_bindings::jni::errors::Result;
+use java_bindings::jni::objects::{AutoLocal, GlobalRef, JValue};
+use java_bindings::jni::sys::jint;
 
 /// A temporary example of a native-to-JNI proxy
 #[derive(Clone)]
