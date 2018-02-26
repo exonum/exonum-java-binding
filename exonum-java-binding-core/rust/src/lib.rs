@@ -14,7 +14,7 @@ pub extern crate exonum;
 pub extern crate jni;
 #[macro_use]
 extern crate log;
-extern crate serde_json;
+pub extern crate serde_json;
 
 #[cfg(feature = "resource-manager")]
 #[macro_use]

@@ -5,7 +5,6 @@ use exonum::encoding::serialize::WriteBufferWrapper;
 use exonum::storage::Fork;
 use exonum::messages::{Message, RawMessage};
 use jni::JNIEnv;
-use jni::errors::Error as JNIError;
 use jni::objects::{GlobalRef, JValue};
 use serde_json;
 use serde_json::value::Value;
@@ -17,6 +16,7 @@ use Executor;
 use storage::View;
 use utils;
 
+static CLASS_JL_ERROR: &str = "java/lang/Error";
 
 /// A proxy for `Transaction`s
 #[derive(Clone)]
@@ -29,12 +29,12 @@ where
     raw: RawMessage,
 }
 
-// FIXME docs
 // `TransactionProxy` is immutable, so it can be safely used in different threads.
-unsafe impl <E> Sync for TransactionProxy<E>
+unsafe impl<E> Sync for TransactionProxy<E>
 where
     E: Executor + 'static,
-{}
+{
+}
 
 impl<E> fmt::Debug for TransactionProxy<E>
 where
@@ -60,31 +60,47 @@ impl<E> ExonumJson for TransactionProxy<E>
 where
     E: Executor + 'static,
 {
-    fn deserialize_field<B>(_value: &Value, _buffer: &mut B, _from: Offset, _to: Offset)
-        -> Result<(), Box<Error>>
+    fn deserialize_field<B>(
+        _value: &Value,
+        _buffer: &mut B,
+        _from: Offset,
+        _to: Offset,
+    ) -> Result<(), Box<Error>>
     where
         Self: Sized,
         B: WriteBufferWrapper,
     {
-        unimplemented!()
+        unreachable!()
     }
 
-    fn serialize_field(&self)
-        -> Result<Value, Box<Error + Send + Sync>>
-    {
+    fn serialize_field(&self) -> Result<Value, Box<Error + Send + Sync>> {
         use exonum::api::ApiError;
-        let json_string = self.exec.with_attached(|env| {
-            let name = env.call_method(
-                self.adapter.as_obj(),
-                "info",
-                "()Ljava/lang/String;",
-                &[],
-            )?
+        let res = self.exec.with_attached(|env| {
+            let name = env.call_method(self.adapter.as_obj(), "info", "()Ljava/lang/String;", &[])?
                 .l()?;
             Ok(String::from(env.get_string(name.into())?))
-        })
-            // FIXME here should be a panic
-            .map_err(|e| ApiError::Serialize(format!("{:?}", e).into()))?;
+        });
+        let json_string = match res {
+            Ok(json_string) => json_string,
+            Err(jni_error) => {
+                let res = self.exec.with_attached(|env| {
+                    if !env.exception_check()? {
+                        Err("")?;
+                    }
+                    let exception = env.exception_occurred()?;
+                    if env.is_instance_of(exception.into(), CLASS_JL_ERROR)? {
+                        panic!("Fatal exception in Java: {:?}", jni_error);
+                    } else {
+                        env.exception_clear()?;
+                        Ok(ApiError::Serialize(format!("{:?}", jni_error).into()))
+                    }
+                });
+                match res {
+                    Ok(tx_error) => Err(tx_error)?,
+                    Err(jni_error) => panic!("Unknown error in JNI: {:?}", jni_error),
+                }
+            }
+        };
         Ok(serde_json::from_str(&json_string)?)
     }
 }
@@ -95,12 +111,7 @@ where
 {
     fn verify(&self) -> bool {
         let res = self.exec.with_attached(|env: &JNIEnv| {
-            env.call_method(
-                self.adapter.as_obj(),
-                "isValid",
-                "()Z",
-                &[],
-            )?
+            env.call_method(self.adapter.as_obj(), "isValid", "()Z", &[])?
                 .z()
         });
         match res {
@@ -131,8 +142,10 @@ impl<E> Message for TransactionProxy<E>
 where
     E: Executor,
 {
-    fn from_raw(_raw: RawMessage) -> Result<Self, ::exonum::encoding::Error> where
-        Self: Sized {
+    fn from_raw(_raw: RawMessage) -> Result<Self, ::exonum::encoding::Error>
+    where
+        Self: Sized,
+    {
         unreachable!()
     }
 

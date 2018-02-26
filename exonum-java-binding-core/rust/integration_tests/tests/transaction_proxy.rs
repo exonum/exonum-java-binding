@@ -4,17 +4,22 @@ extern crate lazy_static;
 
 mod util;
 
+use std::any::Any;
+use std::error::Error;
 use std::panic;
+
 
 use java_bindings::{DumbExecutor, Executor, TransactionProxy};
 use java_bindings::exonum::blockchain::Transaction;
+use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB};
 use java_bindings::jni::{JavaVM, JNIEnv};
 use java_bindings::jni::descriptors::Desc;
-use java_bindings::jni::errors::{Error as JNIError, Result as JNIResult};
+use java_bindings::jni::errors::{Error as JNIError};
 use java_bindings::jni::errors::ErrorKind;
 use java_bindings::jni::objects::{AutoLocal, JClass, JObject, JValue};
+use java_bindings::serde_json::Value;
 
 use std::sync::Arc;
 
@@ -22,6 +27,8 @@ use util::create_vm;
 
 static ENTRY_NAME: &str = "test_entry";
 static ENTRY_VALUE: &str = "test_value";
+static INFO_JSON: &str = r#""test_info""#;
+static INFO_VALUE: &str = r"test_info";
 
 static TRANSACTION_ADAPTER_CLASS: &str =
     "com/exonum/binding/service/adapters/UserTransactionAdapter";
@@ -35,7 +42,7 @@ lazy_static! {
 fn create_transaction_mock<E: Executor>(executor: E, valid: bool) -> TransactionProxy<E> {
     let (adapter, raw) = executor.with_attached(|env| {
         let value = env.new_string(ENTRY_VALUE)?;
-        let info = env.new_string("")?;
+        let info = env.new_string(INFO_JSON)?;
         let adapter = env.call_static_method(
             NATIVE_FACADE_CLASS,
             "createTransaction",
@@ -96,9 +103,6 @@ fn create_entry<V>(view: V) -> Entry<V, String> {
     Entry::new(ENTRY_NAME, view)
 }
 
-use std::any::Any;
-use std::error::Error;
-
 pub fn any_to_string(any: &Any) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
         s.to_string()
@@ -108,17 +112,6 @@ pub fn any_to_string(any: &Any) -> String {
         error.description().to_string()
     } else {
         "Unknown error occurred".to_string()
-    }
-}
-
-#[test]
-pub fn catch_panic_example() {
-    let catch_result = panic::catch_unwind(panic::AssertUnwindSafe(
-        || panic!("Civil Disorder in Las Vegas! Mayor flees in panic.")));
-
-    match catch_result {
-        Ok(()) => unreachable!(),
-        Err(err) => println!("Catched the panic: {:?}", any_to_string(&err)),
     }
 }
 
@@ -144,12 +137,13 @@ pub fn verify_panic() {
 
     let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.verify()))
         .expect_err("This transaction should panic, but it doesn't!");
-    executor.with_attached(|env| Ok(check_exception(env, &*any_err, exception_class)));
+    executor.with_attached(|env| Ok(check_exception(env, &*any_err, exception_class)))
+        .unwrap();
 }
 
-pub fn check_exception<'c, C>(env: &'c JNIEnv<'c>, any_err: &Any, class: C)
+pub fn check_exception<'e, C>(env: &'e JNIEnv<'e>, any_err: &Any, class: C)
 where
-    C: Desc<'c, JClass<'c>>,
+    C: Desc<'e, JClass<'e>>,
 {
     let err = any_err.downcast_ref::<JNIError>()
         .unwrap_or_else(||
@@ -177,7 +171,6 @@ pub fn execute_valid() {
         assert!(valid_tx.verify());
         let result = valid_tx.execute(&mut fork);
         // TODO here should be `ExecutionResult` in the next Exonum release
-        // FIXME here should be `catch_panic` and it's `Result` now
         assert_eq!(result, ());
         db.merge(fork.into_patch()).expect("Failed to merge transaction");
     }
@@ -187,8 +180,9 @@ pub fn execute_valid() {
 }
 
 #[test]
-#[should_panic]
 pub fn execute_invalid() {
+    let exception_class = "java/lang/Throwable";
+
     let executor = DumbExecutor { vm: VM.clone() };
     let db = MemoryDB::new();
     {
@@ -198,12 +192,14 @@ pub fn execute_invalid() {
     }
     {
         let mut fork = db.fork();
-        let invalid_tx = create_transaction_mock(executor, false);
+        let invalid_tx = create_transaction_mock(executor.clone(), false);
         assert!(!invalid_tx.verify());
-        let result = invalid_tx.execute(&mut fork);
         // TODO here should be `ExecutionResult` in the next Exonum release
-        // FIXME here should be `catch_panic` and it's `Result` now
-        assert_eq!(result, ());
+        let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| invalid_tx.execute(&mut fork)))
+            .expect_err("This transaction should panic, but it doesn't!");
+        executor.with_attached(|env| Ok(check_exception(env, &*any_err, exception_class)))
+            .unwrap();
+
         db.merge(fork.into_patch()).expect("Failed to merge transaction");
     }
     let snapshot = db.snapshot();
@@ -212,15 +208,93 @@ pub fn execute_invalid() {
 }
 
 #[test]
-pub fn execute_panic() {
+pub fn execute_exception_panic() {
     let executor = DumbExecutor { vm: VM.clone() };
-    let exception_class = "java/lang/Exception";
+    let exception_class = "java/lang/Error";
     let panic_tx = create_transaction_panic_mock(executor.clone(), exception_class);
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
     let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.execute(&mut fork)))
         .expect_err("This transaction should panic, but it doesn't!");
-    executor.with_attached(|env| Ok(check_exception(env, &*any_err, exception_class)));
+    executor.with_attached(|env| Ok(check_exception(env, &*any_err, exception_class)))
+        .unwrap();
 }
 
+#[test]
+pub fn execute_exception_panic_heir() {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let exception_class = "java/lang/OutOfMemoryError";
+    let interception_class = "java/lang/Error";
+    let panic_tx = create_transaction_panic_mock(executor.clone(), exception_class);
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+
+    let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.execute(&mut fork)))
+        .expect_err("This transaction should panic, but it doesn't!");
+    executor.with_attached(|env| Ok(check_exception(env, &*any_err, interception_class)))
+        .unwrap();
+}
+
+#[test]
+pub fn execute_exception_error() {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let exception_class = "java/lang/ArithmeticException";
+    let interception_class = "java/lang/Error";
+    let panic_tx = create_transaction_panic_mock(executor.clone(), exception_class);
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+
+    // TODO this behaviour should change in the next release of Exonum.
+    let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.execute(&mut fork)))
+        .expect_err("This transaction should panic, but it doesn't!");
+    executor.with_attached(|env| Ok(check_exception(env, &*any_err, interception_class)))
+        .unwrap();
+}
+
+#[test]
+pub fn info() {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let valid_tx = create_transaction_mock(executor, true);
+    assert_eq!(valid_tx.serialize_field().unwrap(), Value::String(INFO_VALUE.into()));
+}
+
+#[test]
+#[ignore]
+pub fn info_exception_panic() {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let exception_class = "java/lang/Error";
+    let panic_tx = create_transaction_panic_mock(executor.clone(), exception_class);
+    let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.serialize_field()))
+        .expect_err("This transaction should panic, but it doesn't!");
+    executor.with_attached(|env| Ok(check_exception(env, &*any_err, exception_class)))
+        .unwrap();
+}
+
+#[test]
+#[ignore]
+pub fn info_exception_panic_heir() {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let exception_class = "java/lang/OutOfMemoryError";
+    let interception_class = "java/lang/Error";
+    let panic_tx = create_transaction_panic_mock(executor.clone(), exception_class);
+
+    let any_err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.serialize_field()))
+        .expect_err("This transaction should panic, but it doesn't!");
+    executor.with_attached(|env| Ok(check_exception(env, &*any_err, interception_class)))
+        .unwrap();
+}
+
+#[test]
+#[ignore]
+pub fn info_exception_error() {
+    let executor = DumbExecutor { vm: VM.clone() };
+    let exception_class = "java/lang/ArithmeticException";
+    let panic_tx = create_transaction_panic_mock(executor.clone(), exception_class);
+
+    let err = panic::catch_unwind(panic::AssertUnwindSafe(|| panic_tx.serialize_field()))
+        .expect("This transaction should not panic, but it does!")
+        .expect_err("This transaction should be serialized with error!");
+    // FIXME string representation of an error
+    assert_eq!(err.description(), "");
+}
