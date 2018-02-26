@@ -8,6 +8,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Database;
@@ -146,6 +147,21 @@ public class ProofListIndexProxyIntegrationTest {
       int to = values.size();
       assertThat(list, provesThatContains(from, values.subList(from, to)));
     });
+  }
+
+  @Test
+  public void constructorShallNotLeakNativePeerIfSomeArgumentsAreInvalid() {
+    try (View view = database.createSnapshot()) {
+      // Pass null as a reference to a serializer, constructor must throw.
+      try (ProofListIndexProxy<String> list =
+               new ProofListIndexProxy<>(LIST_NAME, view, null)) {
+        fail("Constructor must throw: " + list);
+      } catch (NullPointerException | IllegalArgumentException expected) {
+        // It throws indeed, but it also leaks a native peer!
+        //
+        // How do we assert there are no leaks?
+      }
+    }
   }
 
   private void runTestWithView(Supplier<View> viewSupplier,
