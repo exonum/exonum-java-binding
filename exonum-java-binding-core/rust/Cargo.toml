@@ -14,6 +14,9 @@ crate-type = ["dylib"]
 resource-manager = []
 invocation = ["jni/invocation"]
 
+[patch.crates-io]
+exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumoxide.git", branch = "exclude-1604-ECR-846" }
+
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,
 # so that users are directed to the correct build instructions!
