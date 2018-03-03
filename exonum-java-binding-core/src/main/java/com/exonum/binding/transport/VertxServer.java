@@ -97,26 +97,32 @@ final class VertxServer implements Server {
       LOG.info("Requesting to stop");
 
       // Request the vertx instance to close itself
-      vertx.close((r) -> {
-        // Clear the routes when it's closed
-        rootRouter.clear();
-
-        // Notify that the server is stopped
-        stopFuture.complete(null);
-
-        LOG.info("Stopped");
-      });
+      vertx.close((r) -> notifyVertxStopped());
       return stopFuture;
+    }
+  }
+
+  private void notifyVertxStopped() {
+    LOG.info("Stopped");
+
+    synchronized (lock) {
+      // Clear the routes when it’s fully stopped
+      rootRouter.clear();
+
+      // Notify the clients that the server is stopped
+      stopFuture.complete(null);
     }
   }
 
   @Override
   public String toString() {
-    return "Server{"
-        + "port=" + server.actualPort()
-        + ", state=" + state
-        + ", stopFuture=" + stopFuture
-        + '}';
+    synchronized (lock) {
+      return "Server{"
+              + "port=" + server.actualPort()
+              + ", state=" + state
+              + ", stopFuture=" + stopFuture
+              + '}';
+    }
   }
 
   /**
