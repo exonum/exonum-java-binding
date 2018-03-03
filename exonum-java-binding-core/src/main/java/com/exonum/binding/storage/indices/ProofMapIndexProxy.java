@@ -7,6 +7,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -135,6 +136,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   private native void nativeRemove(long nativeHandle, byte[] key);
 
   @Override
+  @MustBeClosed
   public StorageIterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
@@ -153,6 +155,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   private native void nativeKeysIterFree(long iterNativeHandle);
 
   @Override
+  @MustBeClosed
   public StorageIterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
@@ -171,6 +174,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   private native void nativeValuesIterFree(long iterNativeHandle);
 
   @Override
+  @MustBeClosed
   public StorageIterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),

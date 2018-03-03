@@ -11,6 +11,7 @@ import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.MustBeClosed;
 import javax.annotation.Nullable;
 
 /**
@@ -119,6 +120,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
    */
+  @MustBeClosed
   public StorageIterator<HashCode> hashes() {
     return StorageIterators.createIterator(
         nativeCreateHashIterator(getNativeHandle()),
@@ -139,6 +141,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
+  @MustBeClosed
   public StorageIterator<Entry<E>> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
