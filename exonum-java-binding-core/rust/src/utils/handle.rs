@@ -1,5 +1,5 @@
 // TODO: Should be removed when Transaction proxy is implemented.
-#![allow(dead_code)]
+//#![allow(dead_code)]
 
 use jni::JNIEnv;
 use jni::sys::jlong;

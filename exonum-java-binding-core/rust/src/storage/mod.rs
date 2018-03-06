@@ -10,7 +10,6 @@ mod proof_map_index;
 mod indexes_metadata;
 
 pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
-// FIXME how this is intended to be?
 pub(crate) use self::db::View;
 pub use self::memorydb::*;
 pub use self::entry::*;

@@ -16,7 +16,7 @@ use example_proxy::AtomicIntegerProxy;
 use util::create_vm;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(true));
+    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(true, false));
 }
 
 #[test]

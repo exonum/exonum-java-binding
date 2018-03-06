@@ -9,4 +9,4 @@ workspace = ".."
 
 [dependencies]
 java_bindings = { path = "..", features = ["invocation"] }
-lazy_static = "1"
+lazy_static = "1.0.0"

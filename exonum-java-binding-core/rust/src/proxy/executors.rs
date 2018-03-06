@@ -1,7 +1,6 @@
 use std::marker::{Send, Sync};
 use std::sync::Arc;
 
-
 use jni::*;
 use jni::JNIEnv;
 use jni::errors::Result;

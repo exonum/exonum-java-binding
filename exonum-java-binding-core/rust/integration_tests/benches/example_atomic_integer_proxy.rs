@@ -1,7 +1,6 @@
 #![feature(test)]
 
 extern crate java_bindings;
-extern crate jni;
 #[macro_use]
 extern crate lazy_static;
 extern crate test;
@@ -12,7 +11,7 @@ mod example_proxy;
 mod util;
 
 use java_bindings::DumbExecutor;
-use jni::JavaVM;
+use java_bindings::jni::JavaVM;
 
 use std::sync::Arc;
 use test::{black_box, Bencher};
@@ -21,7 +20,7 @@ use example_proxy::AtomicIntegerProxy;
 use util::create_vm;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(false));
+    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(false, false));
 }
 
 #[bench]
