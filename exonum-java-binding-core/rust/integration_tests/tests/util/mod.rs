@@ -19,11 +19,11 @@ pub fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     }
 
     let jvm_args = jvm_args_builder.build().unwrap_or_else(
-        |e| panic!(format!("{:#?}", e)),
+        |e| panic!("{:#?}", e),
     );
 
     JavaVM::new(jvm_args)
-        .unwrap_or_else(|e| panic!(format!("{:#?}", e)))
+        .unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
 fn get_libpath_option() -> String {

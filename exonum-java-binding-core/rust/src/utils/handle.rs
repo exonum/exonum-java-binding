@@ -1,5 +1,5 @@
-// TODO: Should be removed when Transaction proxy is implemented.
-//#![allow(dead_code)]
+// TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
+#![allow(dead_code)]
 
 use jni::JNIEnv;
 use jni::sys::jlong;

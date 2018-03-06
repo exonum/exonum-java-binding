@@ -50,7 +50,7 @@ pub fn verify_invalid_transaction() {
 }
 
 #[test]
-#[should_panic(expected="Java exception occurred: java.lang.ArithmeticException")]
+#[should_panic(expected="Java exception: java.lang.ArithmeticException")]
 pub fn verify_should_panic_if_java_exception_occured() {
     let executor = DumbExecutor { vm: VM.clone() };
     let panic_tx = create_transaction_panic_mock(executor.clone(), ARITHMETIC_EXCEPTION_CLASS);
@@ -80,7 +80,7 @@ pub fn execute_valid_transaction() {
 }
 
 #[test]
-#[should_panic(expected="Java exception occurred: java.lang.Error")]
+#[should_panic(expected="Java exception: java.lang.Error")]
 pub fn execute_should_panic_if_java_error_occurred() {
     let executor = DumbExecutor { vm: VM.clone() };
     let panic_tx = create_transaction_panic_mock(executor.clone(), ERROR_CLASS);
@@ -90,8 +90,8 @@ pub fn execute_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-// TODO this behaviour should change to "return_err" in the next release of Exonum.
-#[should_panic(expected="Java exception occurred: java.lang.ArithmeticException")]
+// TODO Change behaviour to "return_err" with Exonum 0.6 [https://jira.bf.local/browse/ECR-912].
+#[should_panic(expected="Java exception: java.lang.ArithmeticException")]
 pub fn execute_should_panic_if_java_exception_occurred() {
     let executor = DumbExecutor { vm: VM.clone() };
     let panic_tx = create_transaction_panic_mock(executor.clone(), ARITHMETIC_EXCEPTION_CLASS);
@@ -108,9 +108,9 @@ pub fn json_serialize() {
 }
 
 #[test]
-// This test expects that a fake Java transaction class will throw an exception
+// This test expects that a fake Java transaction class will throw an exception.
 #[ignore]
-#[should_panic(expected="Java exception occurred: java.lang.Error")]
+#[should_panic(expected="Java exception: java.lang.Error")]
 pub fn json_serialize_should_panic_if_java_error_occurred() {
     let executor = DumbExecutor { vm: VM.clone() };
     let panic_tx = create_transaction_panic_mock(executor.clone(), ERROR_CLASS);
@@ -118,7 +118,7 @@ pub fn json_serialize_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-// This test expects that a fake Java transaction class will throw an exception
+// This test expects that a fake Java transaction class will throw an exception.
 #[ignore]
 pub fn json_serialize_should_return_err_if_java_exception_occurred() {
     let executor = DumbExecutor { vm: VM.clone() };

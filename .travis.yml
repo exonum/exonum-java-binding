@@ -34,14 +34,14 @@ cache:
 
 before_install:
   - export PATH="$PATH":"$HOME/.cargo/bin"
-    # Install rustup if it's not already installed (i.e., not in CI cache)
+    # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
     # Install nightly rust version and clippy.
   - rustup toolchain install $RUST_NIGHTLY_VERSION
   - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    # Install a toolchain and set it as a default.
+    # Set a toolchain as default.
   - rustup default "$RUST_VERSION"
-    # Save the path to stdlib of default Rust installation to use in scripts
+    # Save the path to stdlib of the default toolchain to use it in scripts.
   - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
     # Install rustfmt if it's not already.
   - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
@@ -49,7 +49,7 @@ before_install:
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
   - cargo install --list
-    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so)
+    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
   - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
 
 install: true  # Skip the installation step, as Maven requires
