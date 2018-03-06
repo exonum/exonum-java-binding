@@ -21,33 +21,30 @@ use util::create_vm;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(false, false));
+    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
 }
 
 #[bench]
 pub fn create_drop(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: Arc::clone(&VM) };
     b.iter(move || {
-        black_box(AtomicIntegerProxy::new(executor.clone(), 0).unwrap())
+        black_box(AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap())
     });
 }
 
 #[bench]
 pub fn increment(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: Arc::clone(&VM) };
-    let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
+    let mut aip = AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap();
     b.iter(move || black_box(aip.increment_and_get().unwrap()));
 }
 
 #[bench]
 pub fn add(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: Arc::clone(&VM) };
-    let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
+    let mut aip = AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap();
     b.iter(move || black_box(aip.add_and_get(2).unwrap()));
 }
 
 #[bench]
 pub fn get(b: &mut Bencher) {
-    let executor = DumbExecutor { vm: Arc::clone(&VM) };
-    let mut aip = AtomicIntegerProxy::new(executor, 0).unwrap();
+    let mut aip = AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap();
     b.iter(move || black_box(aip.get().unwrap()));
 }
