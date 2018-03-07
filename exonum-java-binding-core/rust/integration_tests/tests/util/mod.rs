@@ -4,9 +4,31 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-/// Creates a configured instance of `JavaVM`.
-/// _This function should be called only *once*._
-pub fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
+
+/// Creates a configured `JavaVM` for benchmarks.
+/// _`JavaVM` should be created only *once*._
+#[allow(dead_code)]
+pub fn create_vm_for_benchmarks() -> JavaVM {
+    create_vm(false, false)
+}
+
+/// Creates a configured `JavaVM` for tests.
+/// _`JavaVM` should be created only *once*._
+#[allow(dead_code)]
+pub fn create_vm_for_tests() -> JavaVM {
+    create_vm(true, false)
+}
+
+/// Creates a configured `JavaVM` for tests with fake classes.
+/// _`JavaVM` should be created only *once*._
+#[allow(dead_code)]
+pub fn create_vm_for_tests_with_fake_classes() -> JavaVM {
+    create_vm(true, true)
+}
+
+/// Creates a configured `JavaVM`.
+/// _JavaVM should be created only *once*._
+fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     let mut jvm_args_builder = InitArgsBuilder::new()
         .version(JNIVersion::V8)
         .option(&get_libpath_option());

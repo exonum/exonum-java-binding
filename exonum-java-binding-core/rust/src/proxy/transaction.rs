@@ -17,7 +17,7 @@ use Executor;
 use storage::View;
 use utils;
 
-static CLASS_JL_ERROR: &str = "java/lang/Error";
+const CLASS_JL_ERROR: &str = "java/lang/Error";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -74,24 +74,18 @@ where
         Self: Sized,
         B: WriteBufferWrapper,
     {
-        unimplemented!("Does not used in Java bindings")
+        unimplemented!("Is not used in Java bindings")
     }
 
     fn serialize_field(&self) -> Result<Value, Box<Error + Send + Sync>> {
-        enum Res {
-            Json(String),
-            Error(String),
-        }
-        let res = self.exec
+        let res: Result<String, String> = self.exec
             .with_attached(|env| match env.call_method(
                 self.transaction.as_obj(),
                 "info",
                 "()Ljava/lang/String;",
                 &[],
             ) {
-                Ok(json_string) => Ok(Res::Json(
-                    String::from(env.get_string(json_string.l()?.into())?),
-                )),
+                Ok(json_string) => Ok(Ok(String::from(env.get_string(json_string.l()?.into())?))),
                 Err(jni_error) => {
                     match jni_error.0 {
                         ErrorKind::JavaException => {
@@ -105,7 +99,7 @@ where
                                     jni_error.backtrace(),
                                 )
                             }
-                            Ok(Res::Error(format!("Serialization error: {:?}", &jni_error)))
+                            Ok(Err(format!("Serialization error: {:?}", &jni_error)))
                         }
                         _ => Err(jni_error),
                     }
@@ -113,10 +107,7 @@ where
             })
             .unwrap_or_else(|err| panic!("JNI error: {:?}", err));
 
-        match res {
-            Res::Json(json_string) => Ok(serde_json::from_str(&json_string)?),
-            Res::Error(err) => Err(err)?,
-        }
+        Ok(serde_json::from_str(&res?)?)
     }
 }
 
@@ -128,18 +119,7 @@ where
         self.exec
             .with_attached(|env: &JNIEnv| {
                 let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
-                if let Err(ref jni_error) = res {
-                    if let ErrorKind::JavaException = jni_error.0 {
-                        let exception: JObject = env.exception_occurred()?.into();
-                        env.exception_clear()?;
-                        assert!(!exception.is_null());
-                        panic!(
-                            "Java exception: {}\n{:#?}",
-                            utils::get_class_name(env, exception)?,
-                            jni_error.backtrace()
-                        )
-                    }
-                }
+                utils::panic_on_exception(env, &res)?;
                 res?.z()
             })
             .unwrap_or_else(|err| panic!("JNI error: {:?}", err))
@@ -155,18 +135,7 @@ where
                     "(J)V",
                     &[JValue::from(view_handle)],
                 );
-                if let Err(ref jni_error) = res {
-                    if let ErrorKind::JavaException = jni_error.0 {
-                        let exception: JObject = env.exception_occurred()?.into();
-                        env.exception_clear()?;
-                        assert!(!exception.is_null());
-                        panic!(
-                            "Java exception: {}\n{:#?}",
-                            utils::get_class_name(env, exception)?,
-                            jni_error.backtrace()
-                        )
-                    }
-                }
+                utils::panic_on_exception(env, &res)?;
                 res?.v()
             })
             .unwrap_or_else(|err| panic!("JNI error: {:?}", err))
@@ -181,7 +150,7 @@ where
     where
         Self: Sized,
     {
-        unimplemented!("Does not used in Java bindings")
+        unimplemented!("Is not used in Java bindings")
     }
 
     fn raw(&self) -> &RawMessage {

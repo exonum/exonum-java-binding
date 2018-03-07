@@ -13,10 +13,10 @@ use std::sync::{Arc, Barrier};
 use std::thread::spawn;
 
 use example_proxy::AtomicIntegerProxy;
-use util::create_vm;
+use util::create_vm_for_tests;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(true, false));
+    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());
     pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
 }
 

@@ -17,10 +17,10 @@ use std::sync::Arc;
 use test::{black_box, Bencher};
 
 use example_proxy::AtomicIntegerProxy;
-use util::create_vm;
+use util::create_vm_for_benchmarks;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm(false, false));
+    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_benchmarks());
     pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
 }
 
