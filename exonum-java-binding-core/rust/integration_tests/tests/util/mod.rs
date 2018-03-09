@@ -60,14 +60,11 @@ fn get_libpath_option() -> String {
 }
 
 fn rust_project_root_dir() -> PathBuf {
-    project_root_dir().join("exonum-java-binding-core/rust")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("..").canonicalize().unwrap()
 }
 
 fn project_root_dir() -> PathBuf {
-    // TODO get the real project root path. It relies on an unsteady environment state now.
-    // The current OS path is expected to be
-    // `<exonum-java-bindings project root>/exonum-java-binding-core/rust/integration_tests/`
-    Path::new("../../..").canonicalize().unwrap()
+    rust_project_root_dir().join("../..").canonicalize().unwrap()
 }
 
 #[cfg(debug_assertions)]
