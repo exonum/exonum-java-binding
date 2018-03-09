@@ -25,7 +25,7 @@ lazy_static! {
 #[should_panic(expected="Java exception: java.lang.Exception")]
 fn catch_exact_class() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
-        panic_on_exception(env, &throw(env, EXCEPTION_CLASS))
+        Ok(panic_on_exception(env, &throw(env, EXCEPTION_CLASS)))
     })
         .unwrap();
 }
@@ -34,7 +34,7 @@ fn catch_exact_class() {
 #[should_panic(expected="Java exception: java.lang.ArithmeticException")]
 fn catch_subclass() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
-        panic_on_exception(env, &throw(env, ARITHMETIC_EXCEPTION_CLASS))
+        Ok(panic_on_exception(env, &throw(env, ARITHMETIC_EXCEPTION_CLASS)))
     })
         .unwrap();
 }
@@ -42,7 +42,7 @@ fn catch_subclass() {
 #[test]
 fn dont_catch_without_exception() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
-        panic_on_exception(env, &Ok(()))
+        Ok(panic_on_exception(env, &Ok(())))
     })
         .unwrap();
 }

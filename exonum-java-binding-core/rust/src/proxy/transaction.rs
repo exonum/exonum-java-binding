@@ -5,8 +5,7 @@ use exonum::encoding::serialize::WriteBufferWrapper;
 use exonum::storage::Fork;
 use exonum::messages::{Message, RawMessage};
 use jni::JNIEnv;
-use jni::errors::ErrorKind;
-use jni::objects::{GlobalRef, JValue, JObject};
+use jni::objects::{GlobalRef, JValue};
 use serde_json;
 use serde_json::value::Value;
 
@@ -15,9 +14,7 @@ use std::fmt;
 
 use Executor;
 use storage::View;
-use utils;
-
-const CLASS_JL_ERROR: &str = "java/lang/Error";
+use utils::{check_error_on_exception, panic_on_exception, to_handle, unwrap_jni};
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -78,35 +75,21 @@ where
     }
 
     fn serialize_field(&self) -> Result<Value, Box<Error + Send + Sync>> {
-        let res: Result<String, String> = self.exec
-            .with_attached(|env| match env.call_method(
+        let res: Result<String, String> = unwrap_jni(self.exec.with_attached(|env| {
+            let res = env.call_method(
                 self.transaction.as_obj(),
                 "info",
                 "()Ljava/lang/String;",
                 &[],
-            ) {
-                Ok(json_string) => Ok(Ok(String::from(env.get_string(json_string.l()?.into())?))),
-                Err(jni_error) => {
-                    match jni_error.0 {
-                        ErrorKind::JavaException => {
-                            let exception: JObject = env.exception_occurred()?.into();
-                            env.exception_clear()?;
-                            assert!(!exception.is_null());
-                            if env.is_instance_of(exception, CLASS_JL_ERROR)? {
-                                panic!(
-                                    "Java exception: {}\n{:#?}",
-                                    utils::get_class_name(env, exception)?,
-                                    jni_error.backtrace(),
-                                )
-                            }
-                            Ok(Err(format!("Serialization error: {:?}", &jni_error)))
-                        }
-                        _ => Err(jni_error),
-                    }
+            );
+            match check_error_on_exception(env, res) {
+                Ok(json_string) => {
+                    let obj = unwrap_jni(json_string.l()).into();
+                    Ok(Ok(String::from(unwrap_jni(env.get_string(obj)))))
                 }
-            })
-            .unwrap_or_else(|err| panic!("JNI error: {:?}", err));
-
+                Err(err) => Ok(Err(err)),
+            }
+        }));
         Ok(serde_json::from_str(&res?)?)
     }
 }
@@ -116,29 +99,27 @@ where
     E: Executor + 'static,
 {
     fn verify(&self) -> bool {
-        self.exec
-            .with_attached(|env: &JNIEnv| {
-                let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
-                utils::panic_on_exception(env, &res)?;
-                res?.z()
-            })
-            .unwrap_or_else(|err| panic!("JNI error: {:?}", err))
+        let res = self.exec.with_attached(|env: &JNIEnv| {
+            let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
+            panic_on_exception(env, &res);
+            res?.z()
+        });
+        unwrap_jni(res)
     }
 
     fn execute(&self, fork: &mut Fork) {
-        self.exec
-            .with_attached(|env: &JNIEnv| {
-                let view_handle = utils::to_handle(View::from_ref_fork(fork));
-                let res = env.call_method(
-                    self.transaction.as_obj(),
-                    "execute",
-                    "(J)V",
-                    &[JValue::from(view_handle)],
-                );
-                utils::panic_on_exception(env, &res)?;
-                res?.v()
-            })
-            .unwrap_or_else(|err| panic!("JNI error: {:?}", err))
+        let res = self.exec.with_attached(|env: &JNIEnv| {
+            let view_handle = to_handle(View::from_ref_fork(fork));
+            let res = env.call_method(
+                self.transaction.as_obj(),
+                "execute",
+                "(J)V",
+                &[JValue::from(view_handle)],
+            );
+            panic_on_exception(env, &res);
+            res?.v()
+        });
+        unwrap_jni(res)
     }
 }
 

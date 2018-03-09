@@ -100,8 +100,6 @@ pub fn json_serialize() {
 }
 
 #[test]
-// This test expects that a fake Java transaction class will throw an exception from `info()`.
-#[ignore]
 #[should_panic(expected="Java exception: java.lang.Error")]
 pub fn json_serialize_should_panic_if_java_error_occurred() {
     let panic_tx = create_throwing_mock(EXECUTOR.clone(), ERROR_CLASS);
@@ -109,15 +107,12 @@ pub fn json_serialize_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-// This test expects that a fake Java transaction class will throw an exception from `info()`.
-#[ignore]
 pub fn json_serialize_should_return_err_if_java_exception_occurred() {
     let panic_tx = create_throwing_mock(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
 
     let err = panic_tx.serialize_field()
         .expect_err("This transaction should be serialized with an error!");
-    // FIXME string representation of an error
-    assert_eq!(err.description(), "");
+    assert!(err.description().starts_with("Java exception: java.lang.ArithmeticException"));
 }
 
 fn create_transaction_mock<E: Executor>(executor: E, valid: bool) -> TransactionProxy<E> {
