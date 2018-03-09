@@ -82,13 +82,10 @@ where
                 "()Ljava/lang/String;",
                 &[],
             );
-            match check_error_on_exception(env, res) {
-                Ok(json_string) => {
-                    let obj = unwrap_jni(json_string.l()).into();
-                    Ok(Ok(String::from(unwrap_jni(env.get_string(obj)))))
-                }
-                Err(err) => Ok(Err(err)),
-            }
+            Ok(check_error_on_exception(env, res).map(|json_string| {
+                let obj = unwrap_jni(json_string.l()).into();
+                String::from(unwrap_jni(env.get_string(obj)))
+            }))
         }));
         Ok(serde_json::from_str(&res?)?)
     }
@@ -101,8 +98,7 @@ where
     fn verify(&self) -> bool {
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
-            panic_on_exception(env, &res);
-            res?.z()
+            panic_on_exception(env, res).z()
         });
         unwrap_jni(res)
     }
@@ -116,8 +112,7 @@ where
                 "(J)V",
                 &[JValue::from(view_handle)],
             );
-            panic_on_exception(env, &res);
-            res?.v()
+            panic_on_exception(env, res).v()
         });
         unwrap_jni(res)
     }
