@@ -115,6 +115,7 @@ pub fn json_serialize_should_return_err_if_java_exception_occurred() {
     assert!(err.description().starts_with("Java exception: java.lang.ArithmeticException"));
 }
 
+/// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
 fn create_transaction_mock<E: Executor>(executor: E, valid: bool) -> TransactionProxy<E> {
     let (java_tx_mock, raw) = executor.with_attached(|env| {
         let value = env.new_string(ENTRY_VALUE)?;
@@ -131,7 +132,6 @@ fn create_transaction_mock<E: Executor>(executor: E, valid: bool) -> Transaction
         )?
             .l()?;
         let java_tx_mock = env.new_global_ref(AutoLocal::new(env, java_tx_mock).as_obj())?;
-        // TODO remove this stub and get a real byte buffer
         let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
         Ok((java_tx_mock, raw))
     }).unwrap();
