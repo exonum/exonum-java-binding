@@ -48,7 +48,7 @@ where
     E: Executor + 'static,
 {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub unsafe fn from_global_ref(exec: E, transaction: GlobalRef, raw: RawMessage) -> Self {
+    pub fn from_global_ref(exec: E, transaction: GlobalRef, raw: RawMessage) -> Self {
         TransactionProxy {
             exec,
             transaction,

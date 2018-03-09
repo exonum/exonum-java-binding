@@ -136,7 +136,7 @@ fn create_transaction_mock<E: Executor>(executor: E, valid: bool) -> Transaction
         Ok((java_tx_mock, raw))
     }).unwrap();
 
-    unsafe { TransactionProxy::from_global_ref(executor, java_tx_mock, raw) }
+    TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
 
 fn create_throwing_mock<E: Executor>(executor: E, exception_class: &str) -> TransactionProxy<E> {
@@ -154,7 +154,7 @@ fn create_throwing_mock<E: Executor>(executor: E, exception_class: &str) -> Tran
         Ok((java_tx_mock, raw))
     }).unwrap();
 
-    unsafe { TransactionProxy::from_global_ref(executor, java_tx_mock, raw) }
+    TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
 
 fn create_entry<V>(view: V) -> Entry<V, String> {
