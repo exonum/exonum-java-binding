@@ -135,6 +135,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
     KeySetIndexProxy<String> set = create(KEY_SET_NAME, view);

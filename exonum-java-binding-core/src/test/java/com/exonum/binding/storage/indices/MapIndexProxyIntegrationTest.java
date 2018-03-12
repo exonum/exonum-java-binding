@@ -44,6 +44,7 @@ public class MapIndexProxyIntegrationTest
    * in the wrong order, he will get a runtime exception before a (possible) JVM crash.
    */
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
     MapIndexProxy<String, String> map = createMap(MAP_NAME, view);

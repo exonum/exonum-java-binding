@@ -1,7 +1,10 @@
 package com.exonum.binding.storage.serialization;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.exonum.binding.hash.HashCode;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
@@ -15,6 +18,11 @@ import java.nio.charset.StandardCharsets;
 // (ECR-642)
 public final class StandardSerializers {
 
+  /** Returns a serializer of longs in little-endian byte order. */
+  public static Serializer<Long> longs() {
+    return LongSerializer.INSTANCE;
+  }
+
   /** Returns a serializer of strings in UTF-8. */
   public static Serializer<String> string() {
     return StringSerializer.INSTANCE;
@@ -23,6 +31,28 @@ public final class StandardSerializers {
   /** Returns a serializer of hash codes. */
   public static Serializer<HashCode> hash() {
     return HashCodeSerializer.INSTANCE;
+  }
+
+  enum LongSerializer implements Serializer<Long> {
+    INSTANCE;
+
+    @Override
+    public byte[] toBytes(Long value) {
+      ByteBuffer buf = ByteBuffer.allocate(Long.BYTES)
+          .order(ByteOrder.LITTLE_ENDIAN);
+      buf.putLong(value);
+      return buf.array();
+    }
+
+    @Override
+    public Long fromBytes(byte[] serializedValue) {
+      checkArgument(serializedValue.length == Long.BYTES,
+          "Expected an array of size 8, but was %s", serializedValue.length);
+
+      return ByteBuffer.wrap(serializedValue)
+          .order(ByteOrder.LITTLE_ENDIAN)
+          .getLong();
+    }
   }
 
   enum StringSerializer implements Serializer<String> {

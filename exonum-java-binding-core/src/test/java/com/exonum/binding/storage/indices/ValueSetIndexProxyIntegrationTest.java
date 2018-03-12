@@ -233,6 +233,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
     ValueSetIndexProxy<String> set = create(VALUE_SET_NAME, view);
