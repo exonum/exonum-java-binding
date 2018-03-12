@@ -7,16 +7,21 @@ authors = ["Exonum Team <exonum@bitfury.com>"]
 members = ["integration_tests"]
 
 [lib]
-crate-type = ["rlib", "cdylib"]
+crate-type = ["dylib"]
 
 [features]
 # Enables native handles checking. Useful for debugging.
 resource-manager = []
+invocation = ["jni/invocation"]
+
+[patch.crates-io]
+exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumoxide.git", branch = "exclude-1604-ECR-846" }
 
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,
 # so that users are directed to the correct build instructions!
 exonum = "0.5.1"
-log = "0.4.1"
-jni = "0.9.3"
+jni = { version = "0.9.3", git = "https://github.com/alexander-irbis/jni-rs", branch = "isinstanceof" }
 lazy_static = "1.0.0"
+log = "0.4.1"
+serde_json = "1.0.2"
