@@ -62,7 +62,7 @@ fn panic_on_exception_dont_catch_good_result() {
 
 #[test]
 #[should_panic(expected="Java exception: java.lang.Error")]
-fn check_error_on_exception_catch_javaerror_exact_class() {
+fn check_error_on_exception_catch_java_error_exact_class() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
         Ok(check_error_on_exception(env, throw(env, ERROR_CLASS)))
     })
@@ -71,7 +71,7 @@ fn check_error_on_exception_catch_javaerror_exact_class() {
 
 #[test]
 #[should_panic(expected="Java exception: java.lang.OutOfMemoryError")]
-fn check_error_on_exception_catch_javaerror_subclass() {
+fn check_error_on_exception_catch_java_error_subclass() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
         Ok(check_error_on_exception(env, throw(env, OOM_ERROR_CLASS)))
     })
@@ -79,7 +79,7 @@ fn check_error_on_exception_catch_javaerror_subclass() {
 }
 
 #[test]
-fn check_error_on_exception_catch_javaexception_exact_class() {
+fn check_error_on_exception_catch_java_exception_exact_class() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
         Ok(check_error_on_exception(env, throw(env, EXCEPTION_CLASS))
             .map_err(|e| assert!(e.starts_with("Java exception: java.lang.Exception")))
@@ -89,7 +89,7 @@ fn check_error_on_exception_catch_javaexception_exact_class() {
 }
 
 #[test]
-fn check_error_on_exception_catch_javaexception_subclass() {
+fn check_error_on_exception_catch_java_exception_subclass() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
         Ok(check_error_on_exception(env, throw(env, ARITHMETIC_EXCEPTION_CLASS))
             .map_err(|e| assert!(e.starts_with("Java exception: java.lang.ArithmeticException")))
@@ -116,26 +116,21 @@ fn check_error_on_exception_dont_catch_good_result() {
 }
 
 #[test]
-fn get_and_clear_java_exception_valid_object() {
+fn get_and_clear_java_exception_if_exception_occurred() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
         // Error should be handled, not raised
         throw(env, ARITHMETIC_EXCEPTION_CLASS).unwrap_err();
         let exception = get_and_clear_java_exception(env);
         assert_eq!(get_class_name(env, exception)?, ARITHMETIC_EXCEPTION_CLASS_FQN);
+        assert!(!env.exception_check()?);
         Ok(())
     })
         .unwrap();
 }
 
 #[test]
-#[should_panic(expected="Exception object is null")]
-fn get_and_clear_java_exception_null() {
-    EXECUTOR.with_attached(|env: &JNIEnv| {
-        // Error should be handled, not raised
-        throw(env, ARITHMETIC_EXCEPTION_CLASS).unwrap_err();
-        Ok(())
-    })
-        .unwrap();
+#[should_panic(expected="No exception thrown")]
+fn get_and_clear_java_exception_if_no_exception_occurred() {
     EXECUTOR.with_attached(|env: &JNIEnv| {
         let _exception = get_and_clear_java_exception(env);
         Ok(())

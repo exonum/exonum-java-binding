@@ -53,13 +53,14 @@ pub fn unwrap_jni<T>(res: JNIResult<T>) -> T {
 
 pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
     let exception: JObject = unwrap_jni(env.exception_occurred()).into();
+    // A null exception from #exception_occurred indicates that there is no pending exception.
+    // It is possible if current thread is reattached to JVM.
+    assert!(!exception.is_null(), "No exception thrown.");
     unwrap_jni(env.exception_clear());
-    // It is possible for the exception to be null if current thread is reattached to JVM.
-    assert!(!exception.is_null(), "Exception object is null");
     exception
 }
 
-pub fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JNIError) -> String {
+fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JNIError) -> String {
     format!(
         "Java exception: {}\n{:#?}",
         unwrap_jni(get_class_name(env, exception)),
