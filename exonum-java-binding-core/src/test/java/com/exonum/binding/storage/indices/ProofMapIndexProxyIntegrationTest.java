@@ -441,6 +441,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeShallFailIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
     ProofMapIndexProxy map = createProofMap(MAP_NAME, view);

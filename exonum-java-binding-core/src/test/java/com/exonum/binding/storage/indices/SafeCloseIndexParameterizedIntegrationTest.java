@@ -106,6 +106,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeEverything() throws Exception {
     Fork view = database.createFork();
     I index = indexProvider.apply(view);
@@ -117,6 +118,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeMemoryDbBeforeAnything() throws Exception {
     Snapshot view = database.createSnapshot();
     I index = indexProvider.apply(view);

@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.database;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * Represents an underlying Exonum Storage database.
@@ -24,6 +25,7 @@ public abstract class Database extends AbstractNativeProxy {
    *
    *  @return a new snapshot of the database state
    */
+  @MustBeClosed
   public abstract Snapshot createSnapshot();
 
   /**
@@ -36,5 +38,6 @@ public abstract class Database extends AbstractNativeProxy {
    *
    * @return a new database fork
    */
+  @MustBeClosed
   public abstract Fork createFork();
 }

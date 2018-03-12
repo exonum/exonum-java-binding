@@ -308,6 +308,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
     ListIndex list = createList(view);
