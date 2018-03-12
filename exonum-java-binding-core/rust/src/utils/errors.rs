@@ -1,41 +1,42 @@
 use jni::JNIEnv;
-use jni::errors::{ErrorKind, Result as JNIResult};
+use jni::errors::{Error as JNIError, ErrorKind, Result as JNIResult};
 use jni::objects::JObject;
 
 use super::get_class_name;
 
 const CLASS_JL_ERROR: &str = "java/lang/Error";
 
-/// Checks if Java exception occurred and then panics.
+/// Unwraps the result, returning its content.
+///
+/// Panics:
+/// - Panics if there is some JNI error.
+/// - If there is a pending Java exception of any type,
+///   handles it and panics with a message from the exception.
+
 pub fn panic_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> T {
-    result.unwrap_or_else(|jni_error| if let ErrorKind::JavaException = jni_error.0 {
-        let exception: JObject = unwrap_jni(env.exception_occurred()).into();
-        unwrap_jni(env.exception_clear());
-        assert!(!exception.is_null());
-        panic!(
-            "Java exception: {}\n{:#?}",
-            unwrap_jni(get_class_name(env, exception)),
-            jni_error.backtrace()
-        )
-    } else {
-        unwrap_jni(Err(jni_error))
+    result.unwrap_or_else(|jni_error| match jni_error.0 {
+        ErrorKind::JavaException => {
+            let exception = get_and_clear_java_exception(env);
+            panic!(describe_java_exception(env, exception, &jni_error));
+        }
+        _ => unwrap_jni(Err(jni_error)),
     })
 }
 
-/// Checks if Java exception occurred and then panics if it is a Java error
-/// otherwise, converts it into a Rust error.
+/// Handles and describes non-fatal Java exceptions.
+///
+/// Java exceptions are converted into `Error`s with their descriptions, Java errors and JNI errors
+/// are treated as unrecoverable and result in a panic.
+///
+/// Panics:
+/// - Panics if there is some JNI error.
+/// - If there is a pending Java exception that is a subclass of `java.lang.Error`.
+
 pub fn check_error_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> Result<T, String> {
     result.map_err(|jni_error| match jni_error.0 {
         ErrorKind::JavaException => {
-            let exception: JObject = unwrap_jni(env.exception_occurred()).into();
-            unwrap_jni(env.exception_clear());
-            assert!(!exception.is_null());
-            let message =
-                format!(
-                "Java exception: {}\n{:#?}",
-                unwrap_jni(get_class_name(env, exception)),
-                jni_error.backtrace(),
-            );
+            let exception = get_and_clear_java_exception(env);
+            let message = describe_java_exception(env, exception, &jni_error);
             if unwrap_jni(env.is_instance_of(exception, CLASS_JL_ERROR)) {
                 panic!(message);
             }
@@ -48,4 +49,20 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> Result
 /// Panics if an error occurred in the JNI API.
 pub fn unwrap_jni<T>(res: JNIResult<T>) -> T {
     res.unwrap_or_else(|err| panic!("JNI error: {:?}", err))
+}
+
+pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
+    let exception: JObject = unwrap_jni(env.exception_occurred()).into();
+    unwrap_jni(env.exception_clear());
+    // It is possible for the exception to be null if current thread is reattached to JVM.
+    assert!(!exception.is_null(), "Exception object is null");
+    exception
+}
+
+pub fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JNIError) -> String {
+    format!(
+        "Java exception: {}\n{:#?}",
+        unwrap_jni(get_class_name(env, exception)),
+        jni_error.backtrace(),
+    )
 }

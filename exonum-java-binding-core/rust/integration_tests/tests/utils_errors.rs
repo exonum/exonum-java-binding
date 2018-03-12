@@ -7,7 +7,8 @@ mod util;
 use java_bindings::{DumbExecutor, Executor};
 use java_bindings::jni::{JNIEnv, JavaVM};
 use java_bindings::jni::errors::{ErrorKind, Result as JNIResult};
-use java_bindings::utils::{check_error_on_exception, panic_on_exception};
+use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
+                           panic_on_exception};
 
 use std::sync::Arc;
 
@@ -17,6 +18,7 @@ const ERROR_CLASS: &str = "java/lang/Error";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 const EXCEPTION_CLASS: &str = "java/lang/Exception";
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
+const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());
@@ -113,11 +115,39 @@ fn check_error_on_exception_dont_catch_good_result() {
         .unwrap().unwrap();
 }
 
+#[test]
+fn get_and_clear_java_exception_valid_object() {
+    EXECUTOR.with_attached(|env: &JNIEnv| {
+        // Error should be handled, not raised
+        throw(env, ARITHMETIC_EXCEPTION_CLASS).unwrap_err();
+        let exception = get_and_clear_java_exception(env);
+        assert_eq!(get_class_name(env, exception)?, ARITHMETIC_EXCEPTION_CLASS_FQN);
+        Ok(())
+    })
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected="Exception object is null")]
+fn get_and_clear_java_exception_null() {
+    EXECUTOR.with_attached(|env: &JNIEnv| {
+        // Error should be handled, not raised
+        throw(env, ARITHMETIC_EXCEPTION_CLASS).unwrap_err();
+        Ok(())
+    })
+        .unwrap();
+    EXECUTOR.with_attached(|env: &JNIEnv| {
+        let _exception = get_and_clear_java_exception(env);
+        Ok(())
+    })
+        .unwrap();
+}
+
 fn throw(env: &JNIEnv, e: &str) -> JNIResult<()> {
     env.throw((e, ""))?;
     Err(ErrorKind::JavaException.into())
 }
 
 fn make_jni_error() -> JNIResult<()> {
-    Err(ErrorKind::Other(111).into())
+    Err(ErrorKind::Msg("Custom test error".to_string()).into())
 }
