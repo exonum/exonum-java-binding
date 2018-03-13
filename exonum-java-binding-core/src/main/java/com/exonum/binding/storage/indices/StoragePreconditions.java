@@ -3,6 +3,7 @@ package com.exonum.binding.storage.indices;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Collection;
 
 final class StoragePreconditions {
@@ -17,6 +18,7 @@ final class StoragePreconditions {
    * @throws NullPointerException if the name is null
    * @throws IllegalArgumentException if the name has zero length
    */
+  @CanIgnoreReturnValue
   static String checkIndexName(String name) {
     checkArgument(!name.isEmpty(), "name is empty");
     return name;
@@ -29,6 +31,7 @@ final class StoragePreconditions {
    * @return an unmodified key if it's valid.
    * @throws NullPointerException if key is null.
    */
+  @CanIgnoreReturnValue
   static byte[] checkStorageKey(byte[] key) {
     return checkNotNull(key, "Storage key is null");
   }
@@ -42,6 +45,7 @@ final class StoragePreconditions {
    * @throws IllegalArgumentException if the size of the key is not 32 bytes
    * @apiNote prefer {@link ProofMapKeyCheckingSerializerDecorator}
    */
+  @CanIgnoreReturnValue
   static byte[] checkProofKey(byte[] key) {
     checkNotNull(key, "Proof map key is null");
     checkArgument(key.length == PROOF_MAP_KEY_SIZE,
@@ -56,6 +60,7 @@ final class StoragePreconditions {
    * @return an unmodified value if it's valid.
    * @throws NullPointerException if value is null.
    */
+  @CanIgnoreReturnValue
   static byte[] checkStorageValue(byte[] value) {
     return checkNotNull(value, "Storage value is null");
   }
@@ -78,6 +83,7 @@ final class StoragePreconditions {
    * @return a valid index
    * @throws IndexOutOfBoundsException if index is not in range [0, size).
    */
+  @CanIgnoreReturnValue
   static long checkElementIndex(long index, long size) {
     if (index < 0L || size <= index) {
       throw new IndexOutOfBoundsException("Index must be in range [0, " + size + "),"
@@ -95,6 +101,7 @@ final class StoragePreconditions {
    * @throws IndexOutOfBoundsException if the index is not in range [0, size]
    * @throws IllegalArgumentException if size is negative
    */
+  @CanIgnoreReturnValue
   static long checkPositionIndex(long index, long size) {
     if (index < 0 || index > size) {
       throw new IndexOutOfBoundsException(badPositionIndex(index, size));

@@ -24,7 +24,7 @@
     <junit.version>4.12</junit.version>
     <powermock.version>1.7.1</powermock.version>
     <mockito-core.version>2.8.47</mockito-core.version>
-    <guava.version>23.0</guava.version>
+    <guava.version>24.0-jre</guava.version>
     <vertx.version>3.5.1</vertx.version>
   </properties>
 
@@ -109,6 +109,16 @@
          <plugin>
            <artifactId>maven-clean-plugin</artifactId>
            <version>3.0.0</version>
+         </plugin>
+
+         <!-- You may explicitly run `mvn spotbugs:spotbugs` from the command line,
+              but it’s not bound to any phases in the default profile.
+              See: https://spotbugs.readthedocs.io/en/latest/maven.html
+            -->
+         <plugin>
+           <groupId>com.github.spotbugs</groupId>
+           <artifactId>spotbugs-maven-plugin</artifactId>
+           <version>3.1.2</version>
          </plugin>
        </plugins>
      </pluginManagement>
