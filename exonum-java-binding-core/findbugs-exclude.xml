@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <!-- Spotbugs does not support @CanIgnoreReturnValue properly -->
+  <Match>
+    <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
+  </Match>
+
+  <!-- Exclude the auto-generated Message_Builder2.java -->
+  <Match>
+    <Source name="~.*Message_Builder2\.java"/>
+  </Match>
+</FindBugsFilter>
