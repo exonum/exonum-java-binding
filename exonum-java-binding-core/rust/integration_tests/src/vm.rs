@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]

@@ -1,19 +1,16 @@
+extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-mod example_proxy;
-mod util;
-
+use integration_tests::example_proxy::AtomicIntegerProxy;
+use integration_tests::vm::create_vm_for_tests;
 use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
 use java_bindings::jni::sys::jint;
 
 use std::sync::{Arc, Barrier};
 use std::thread::spawn;
-
-use example_proxy::AtomicIntegerProxy;
-use util::create_vm_for_tests;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());

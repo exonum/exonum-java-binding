@@ -140,16 +140,16 @@ where
     }
 
     fn initialize(&self, fork: &mut Fork) -> Value {
-        let json_config = unwrap_jni(self.exec.with_attached(|env: &JNIEnv| {
+        let json_config = unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let json_config = panic_on_exception(env, env.call_method(
-                self.adapter.as_obj(),
+                self.service.as_obj(),
                 "initialize",
                 "(J)Ljava/lang/String;",
                 &[JValue::from(view_handle)],
             ))
                 .l()?;
-            Ok(convert_to_string(env, json_config))
+            convert_to_string(env, json_config)
         }));
         serde_json::from_str(&json_config).expect("JSON deserialization error")
     }
