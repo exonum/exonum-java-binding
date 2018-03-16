@@ -3,9 +3,10 @@ package com.exonum.binding.qaservice.transactions;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.qaservice.PromoteToCore;
 import com.exonum.binding.qaservice.QaService;
 
-// TODO: consider moving that to the library, because you have to check these ids all the time!
+@PromoteToCore("You have to check these preconditions all the time!")
 final class TransactionPreconditions {
 
   private static final short SERVICE_ID = QaService.ID;
