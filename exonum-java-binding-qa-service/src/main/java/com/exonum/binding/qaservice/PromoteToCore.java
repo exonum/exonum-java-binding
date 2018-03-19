@@ -12,5 +12,8 @@ import java.lang.annotation.Target;
     ElementType.METHOD
 })
 public @interface PromoteToCore {
+  /**
+   * Why the element might be promoted to the core library.
+   */
   String value() default "";
 }

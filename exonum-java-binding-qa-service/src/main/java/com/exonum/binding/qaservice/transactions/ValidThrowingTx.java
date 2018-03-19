@@ -1,32 +1,29 @@
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.messages.Message;
+import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Objects;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Map;
 
-final class ValidThrowingTx extends AbstractTransaction {
+final class ValidThrowingTx implements Transaction {
+
   private static final short ID = QaTransaction.VALID_THROWING.id;
-  private static final int BODY_SIZE = Long.BYTES;
 
   private final long seed;
 
-  ValidThrowingTx(BinaryMessage message) {
-    super(checkTransaction(message, ID));
-    checkMessageSize(message, BODY_SIZE);
-
-    seed = message.getBody()
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getLong();
+  ValidThrowingTx(long seed) {
+    this.seed = seed;
   }
 
   @Override
@@ -55,15 +52,69 @@ final class ValidThrowingTx extends AbstractTransaction {
 
   @Override
   public String info() {
-    Map<String, ?> parameters = ImmutableMap.of("seed", Long.toHexString(seed));
-    return new QaTransactionJsonWriter().toJson(ID, parameters);
+    return new QaTransactionJsonWriter().toJson(ID, this);
   }
 
   @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("message", message)
-        .add("seed", seed)
-        .toString();
+  public BinaryMessage getMessage() {
+    return converter().toMessage(this);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ValidThrowingTx that = (ValidThrowingTx) o;
+    return seed == that.seed;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(seed);
+  }
+
+  static TransactionMessageConverter<ValidThrowingTx> converter() {
+    return TransactionConverter.INSTANCE;
+  }
+
+  private enum TransactionConverter implements TransactionMessageConverter<ValidThrowingTx> {
+    INSTANCE;
+
+    static final int BODY_SIZE = Long.BYTES;
+
+    @Override
+    public ValidThrowingTx fromMessage(Message message) {
+      checkMessage(message);
+
+      long seed = message.getBody()
+          .order(ByteOrder.LITTLE_ENDIAN)
+          .getLong();
+
+      return new ValidThrowingTx(seed);
+    }
+
+    @Override
+    public BinaryMessage toMessage(ValidThrowingTx transaction) {
+      return newQaTransactionBuilder(ID)
+          .setBody(serialize(transaction))
+          .buildRaw();
+    }
+
+    private void checkMessage(Message txMessage) {
+      checkTransaction(txMessage, ID);
+      checkMessageSize(txMessage, BODY_SIZE);
+    }
+
+    private static ByteBuffer serialize(ValidThrowingTx transaction) {
+      ByteBuffer body = ByteBuffer.allocate(Long.BYTES)
+          .order(ByteOrder.LITTLE_ENDIAN)
+          .putLong(transaction.seed);
+      body.rewind();
+      return body;
+    }
   }
 }

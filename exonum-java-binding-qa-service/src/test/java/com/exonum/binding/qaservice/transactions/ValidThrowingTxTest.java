@@ -7,10 +7,11 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaService;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,12 +28,35 @@ public class ValidThrowingTxTest {
       .buildPartial();
 
   @Test
-  public void isValid() {
+  public void converterFromMessage() {
+    long seed = 10L;
     BinaryMessage message = new Message.Builder()
         .mergeFrom(VALID_THROWING_TEMPLATE)
+        .setBody(body(seed))
         .buildRaw();
 
-    ValidThrowingTx tx = new ValidThrowingTx(message);
+    ValidThrowingTx tx = ValidThrowingTx.converter().fromMessage(message);
+
+    ValidThrowingTx expectedTx = new ValidThrowingTx(seed);
+    assertThat(tx, equalTo(expectedTx));
+  }
+
+  @Test
+  public void converterRoundtrip() {
+    long seed = 10L;
+    ValidThrowingTx tx = new ValidThrowingTx(seed);
+
+    BinaryMessage message = ValidThrowingTx.converter().toMessage(tx);
+
+    ValidThrowingTx txFromMessage = ValidThrowingTx.converter().fromMessage(message);
+
+    assertThat(txFromMessage, equalTo(tx));
+  }
+
+  @Test
+  public void isValid() {
+    long seed = 10L;
+    ValidThrowingTx tx = new ValidThrowingTx(seed);
 
     assertTrue(tx.isValid());
   }
@@ -40,20 +64,22 @@ public class ValidThrowingTxTest {
   @Test
   public void info() {
     long seed = 10L;
-    BinaryMessage message = new Message.Builder()
-        .mergeFrom(VALID_THROWING_TEMPLATE)
-        .setBody(body(seed))
-        .buildRaw();
-
-    ValidThrowingTx tx = new ValidThrowingTx(message);
+    ValidThrowingTx tx = new ValidThrowingTx(seed);
     String info = tx.info();
 
-    Gson gson = new Gson();
-    AnyTransaction txParams = gson.fromJson(info, AnyTransaction.class);
+    Gson gson = QaTransactionJsonWriter.instance();
+    AnyTransaction<ValidThrowingTx> txParams = gson.fromJson(info,
+        new TypeToken<AnyTransaction<ValidThrowingTx>>(){}.getType());
 
     assertThat(txParams.service_id, equalTo(QaService.ID));
     assertThat(txParams.message_id, equalTo(QaTransaction.VALID_THROWING.id));
-    assertThat(txParams.body, equalTo(ImmutableMap.of("seed", Long.toHexString(seed))));
+    assertThat(txParams.body, equalTo(tx));
+  }
+
+  @Test
+  public void equals() {
+    EqualsVerifier.forClass(ValidThrowingTx.class)
+        .verify();
   }
 
   private static ByteBuffer body(long seed) {
