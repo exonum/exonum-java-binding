@@ -4,7 +4,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::mock::transaction::{create_transaction_mock, create_throwing_mock,
-                                           ENTRY_VALUE};
+                                           ENTRY_NAME, ENTRY_VALUE, INFO_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{DumbExecutor};
 use java_bindings::exonum::blockchain::Transaction;
@@ -15,12 +15,8 @@ use java_bindings::serde_json::Value;
 
 use std::sync::Arc;
 
-
-const ENTRY_NAME: &str = "test_entry";
-const INFO_VALUE: &str = r"test_info";
-
-const ERROR_CLASS: &str = "java/lang/Error";
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
+const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests_with_fake_classes());
@@ -68,9 +64,9 @@ pub fn execute_valid_transaction() {
 }
 
 #[test]
-#[should_panic(expected="Java exception: java.lang.Error")]
+#[should_panic(expected="Java exception: java.lang.OutOfMemoryError")]
 pub fn execute_should_panic_if_java_error_occurred() {
-    let panic_tx = create_throwing_mock(EXECUTOR.clone(), ERROR_CLASS);
+    let panic_tx = create_throwing_mock(EXECUTOR.clone(), OOM_ERROR_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
     panic_tx.execute(&mut fork);
@@ -93,16 +89,15 @@ pub fn json_serialize() {
 }
 
 #[test]
-#[should_panic(expected="Java exception: java.lang.Error")]
+#[should_panic(expected="Java exception: java.lang.OutOfMemoryError")]
 pub fn json_serialize_should_panic_if_java_error_occurred() {
-    let panic_tx = create_throwing_mock(EXECUTOR.clone(), ERROR_CLASS);
+    let panic_tx = create_throwing_mock(EXECUTOR.clone(), OOM_ERROR_CLASS);
     panic_tx.serialize_field().unwrap();
 }
 
 #[test]
 pub fn json_serialize_should_return_err_if_java_exception_occurred() {
     let panic_tx = create_throwing_mock(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
-
     let err = panic_tx.serialize_field()
         .expect_err("This transaction should be serialized with an error!");
     assert!(err.description().starts_with("Java exception: java.lang.ArithmeticException"));

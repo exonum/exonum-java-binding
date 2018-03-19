@@ -1,8 +1,14 @@
 use java_bindings::exonum::crypto::Hash;
 use java_bindings::{Executor, ServiceProxy, TransactionProxy};
-use java_bindings::jni::JNIEnv;
 use java_bindings::jni::objects::{JObject, JValue, GlobalRef};
+use java_bindings::jni::strings::JNIString;
+use java_bindings::jni::sys::jsize;
 use java_bindings::utils::unwrap_jni;
+
+use super::NATIVE_FACADE_CLASS;
+
+pub const SERVICE_ID: u16 = 42;
+pub const SERVICE_NAME: &str = "42";
 
 pub struct ServiceMockBuilder<E>
 where
@@ -10,6 +16,8 @@ where
 {
     exec: E,
     builder: GlobalRef,
+    has_id: bool,
+    has_name: bool,
 }
 
 impl<E> ServiceMockBuilder<E>
@@ -19,17 +27,18 @@ where
     pub fn new(exec: E) -> Self {
         let builder = unwrap_jni(exec.with_attached(|env| {
             let value = env.call_static_method(
-                "com/exonum/binding/fakes/services/NativeAdapterFakes",
+                NATIVE_FACADE_CLASS,
                 "createServiceFakeBuilder",
-                "()Lcom/exonum/binding/service/adapters/UserServiceAdapterMockBuilder;",
+                "()Lcom/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder;",
                 &[],
             )?;
             env.new_global_ref(env.auto_local(value.l()?).as_obj())
         }));
-        ServiceMockBuilder { exec, builder }
+        let (has_id, has_name) = (false, false);
+        ServiceMockBuilder { exec, builder, has_id, has_name }
     }
 
-    pub fn id(self, id: u16) -> Self {
+    pub fn id(mut self, id: u16) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             env.call_method(
                 self.builder.as_obj(),
@@ -39,10 +48,14 @@ where
             )?;
             Ok(())
         }));
+        self.has_id = true;
         self
     }
 
-    pub fn name(self, name: String) -> Self {
+    pub fn name<S>(mut self, name: S) -> Self
+    where
+        S: Into<JNIString>,
+    {
         unwrap_jni(self.exec.with_attached(|env| {
             let name = env.new_string(name)?;
             env.call_method(
@@ -53,20 +66,33 @@ where
             )?;
             Ok(())
         }));
+        self.has_name = true;
         self
     }
 
-    pub fn converting_to(self, transaction: TransactionProxy<E>) -> Self {
-        unimplemented!()
-    }
-
-    pub fn rejecting_raw_transactions(self) -> Self {
+    pub fn convert_transaction(self, transaction: TransactionProxy<E>) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             env.call_method(
                 self.builder.as_obj(),
-                "rejectingRawTransactions",
-                "()V",
+                "convertTransaction",
+                "(Ljava/lang/Class;)V",
+                // FIXME can't access a private field
                 &[],
+                // &[JValue::from(transaction.transaction)],
+            )?;
+            Ok(())
+        }));
+        self
+    }
+
+    pub fn convert_transaction_throwing(self, exception_class: &str) -> Self {
+        unwrap_jni(self.exec.with_attached(|env| {
+            let exception = env.find_class(exception_class)?;
+            env.call_method(
+                self.builder.as_obj(),
+                "convertTransactionThrowing",
+                "(Ljava/lang/Class;)V",
+                &[JValue::from(JObject::from(exception.into_inner()))],
             )?;
             Ok(())
         }));
@@ -75,12 +101,23 @@ where
 
     pub fn state_hashes(self, hashes: &[Hash]) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
-            let byte_array_array = unimplemented!();
+            let byte_array_class = env.find_class("[B")?;
+            let default_hash = Hash::zero();
+            let default_byte_array = JObject::from(env.byte_array_from_slice(default_hash.as_ref())?);
+            let byte_array_array = env.new_object_array(
+                hashes.len() as jsize,
+                byte_array_class,
+                default_byte_array,
+            )?;
+            for (i, hash) in hashes.iter().enumerate() {
+                let hash = JObject::from(env.byte_array_from_slice(hash.as_ref())?);
+                env.set_object_array_element(byte_array_array, i as jsize, hash)?;
+            }
             env.call_method(
                 self.builder.as_obj(),
                 "stateHashes",
                 "([[B)V",
-                &[JValue::from(byte_array_array)],
+                &[JValue::from(JObject::from(byte_array_array))],
             )?;
             Ok(())
         }));
@@ -101,17 +138,37 @@ where
         self
     }
 
-    pub fn build(self) -> ServiceProxy<E> {
-        let service = unwrap_jni(self.exec.with_attached(|env| {
+    pub fn initial_global_config_throwing(self, exception_class: &str) -> Self {
+        unwrap_jni(self.exec.with_attached(|env| {
+            let exception = env.find_class(exception_class)?;
+            env.call_method(
+                self.builder.as_obj(),
+                "initialGlobalConfigThrowing",
+                "(Ljava/lang/Class;)V",
+                &[JValue::from(JObject::from(exception.into_inner()))],
+            )?;
+            Ok(())
+        }));
+        self
+    }
+
+    pub fn build(mut self) -> ServiceProxy<E> {
+        let (executor, service) = unwrap_jni(self.exec.clone().with_attached(|env| {
+            if !self.has_id {
+                self = self.id(SERVICE_ID);
+            }
+            if !self.has_name {
+                self = self.name(SERVICE_NAME);
+            }
             let value = env.call_method(
                 self.builder.as_obj(),
                 "build",
                 "()Lcom/exonum/binding/service/adapters/UserServiceAdapter;",
                 &[],
             )?;
-            env.new_global_ref(env.auto_local(value.l()?).as_obj())
+            Ok((self.exec, env.new_global_ref(env.auto_local(value.l()?).as_obj())?))
         }));
 
-        ServiceProxy::from_global_ref(self.exec, service)
+        ServiceProxy::from_global_ref(executor, service)
     }
 }

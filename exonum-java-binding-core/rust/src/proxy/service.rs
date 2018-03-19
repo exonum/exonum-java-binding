@@ -98,11 +98,10 @@ where
             let byte_array_array = panic_on_exception(env, env.call_method(
                 self.service.as_obj(),
                 "getStateHashes",
-                "(J)[[B", // FIXME sig
+                "(J)[[B", // FIXME sig?
                 &[JValue::from(view_handle)],
-            ))
-                .l()?
-                .into_inner();
+            ));
+            let byte_array_array = byte_array_array.l()?.into_inner();
             let len = env.get_array_length(byte_array_array)?;
             let mut hashes: Vec<Hash> = Vec::with_capacity(len as usize);
             for i in 0..len {
@@ -120,7 +119,7 @@ where
                 self.service.as_obj(),
                 "convertTransaction",
                 "([B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
-                &[transaction_message.into()],
+                &[JValue::from(transaction_message)],
             );
             // TODO consider whether `NullPointerException` should raise a panic:
             // [https://jira.bf.local/browse/ECR-944]
@@ -133,7 +132,7 @@ where
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 },
                 Err(error_message) => {
-                    Err(MessageError::Other(error_message.into()))
+                    Err(MessageError::Basic(error_message.into()))
                 }
             })
         }))

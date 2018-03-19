@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use jni::*;
 use jni::JNIEnv;
-use jni::errors::Result;
+use jni::errors::{ErrorKind, Result};
 
 /// An interface for JNI thread attachment manager.
 pub trait Executor: Clone + Send + Sync {
@@ -28,7 +28,14 @@ impl Executor for DumbExecutor {
     where
         F: FnOnce(&JNIEnv) -> Result<R>,
     {
-        let env = self.vm.attach_current_thread()?;
-        f(&env)
+        match self.vm.get_env() {
+            Ok(jni_env) => f(&jni_env),
+            Err(jni_err) => if let ErrorKind::ThreadDetached = jni_err.0 {
+                let attach_guard = self.vm.attach_current_thread()?;
+                f(&attach_guard)
+            } else {
+                Err(jni_err)
+            },
+        }
     }
 }

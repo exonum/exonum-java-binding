@@ -2,12 +2,15 @@ use java_bindings::{Executor, TransactionProxy};
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::jni::objects::{AutoLocal, JObject, JValue};
 
+use super::NATIVE_FACADE_CLASS;
+
 const TRANSACTION_ADAPTER_CLASS: &str =
     "com/exonum/binding/service/adapters/UserTransactionAdapter";
-const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
 
+pub const ENTRY_NAME: &str = "test_entry";
 pub const ENTRY_VALUE: &str = "test_value";
 pub const INFO_JSON: &str = r#""test_info""#;
+pub const INFO_VALUE: &str = r"test_info";
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
 pub fn create_transaction_mock<E: Executor>(executor: E, valid: bool) -> TransactionProxy<E> {
