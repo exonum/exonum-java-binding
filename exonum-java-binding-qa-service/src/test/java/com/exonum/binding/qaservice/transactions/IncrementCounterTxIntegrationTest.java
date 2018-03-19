@@ -13,16 +13,20 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class IncrementCounterTxIntegrationTest {
 
@@ -36,11 +40,46 @@ public class IncrementCounterTxIntegrationTest {
       .setBody(ByteBuffer.allocate(IncrementCounterTx.BODY_SIZE))
       .buildPartial();
 
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Test
+  public void converterFromMessageRejectsWrongServiceId() {
+    BinaryMessage message = messageBuilder()
+        .setServiceId((short) (QaService.ID + 1))
+        .buildRaw();
+
+    expectedException.expect(IllegalArgumentException.class);
+    IncrementCounterTx.converter().fromMessage(message);
+  }
+
+  @Test
+  public void converterFromMessageRejectsWrongTxId() {
+    BinaryMessage message = messageBuilder()
+        .setMessageType((short) (INCREMENT_COUNTER.id + 1))
+        .buildRaw();
+
+    expectedException.expect(IllegalArgumentException.class);
+    IncrementCounterTx.converter().fromMessage(message);
+  }
+
+  @Test
+  public void converterRoundtrip() {
+    long seed = 0;
+    HashCode counterId = Hashing.sha256().hashInt(0);
+
+    IncrementCounterTx tx = new IncrementCounterTx(seed, counterId);
+    BinaryMessage message = tx.getMessage();
+    IncrementCounterTx txFromMessage = IncrementCounterTx.converter().fromMessage(message);
+
+    assertThat(txFromMessage, equalTo(tx));
+  }
+
   @Test
   public void isValid() {
-    BinaryMessage message = messageBuilder()
-        .buildRaw();
-    IncrementCounterTx tx = new IncrementCounterTx(message);
+    long seed = 0;
+    HashCode counterId = Hashing.sha256().hashInt(0);
+    IncrementCounterTx tx = new IncrementCounterTx(seed, counterId);
 
     assertTrue(tx.isValid());
   }
@@ -54,13 +93,10 @@ public class IncrementCounterTxIntegrationTest {
       long initialValue = 0;
       createCounter(view, name, initialValue);
 
-
       // Create and execute the transaction
+      long seed = 0L;
       HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
-      BinaryMessage message = messageBuilder()
-          .setBody(bodyOf(1L, nameHash))
-          .buildRaw();
-      IncrementCounterTx tx = new IncrementCounterTx(message);
+      IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
       tx.execute(view);
 
       // Check the counter has an incremented value
@@ -77,12 +113,10 @@ public class IncrementCounterTxIntegrationTest {
     try (Database db = new MemoryDb();
          Fork view = db.createFork()) {
       // Create and execute the transaction that attempts to update an unknown counter
+      long seed = 0L;
       String name = "unknown-counter";
       HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
-      BinaryMessage message = messageBuilder()
-          .setBody(bodyOf(1L, nameHash))
-          .buildRaw();
-      IncrementCounterTx tx = new IncrementCounterTx(message);
+      IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
       tx.execute(view);
 
       // Check there isn’t such a counter after tx execution
@@ -102,35 +136,28 @@ public class IncrementCounterTxIntegrationTest {
     String name = "new_counter";
     HashCode nameHash = Hashing.defaultHashFunction()
         .hashString(name, UTF_8);
-    BinaryMessage message = messageBuilder()
-        .setBody(bodyOf(seed, nameHash))
-        .buildRaw();
-    IncrementCounterTx tx = new IncrementCounterTx(message);
+    IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
 
     String info = tx.info();
 
     // Check the transaction parameters in JSON
-    Gson gson = new Gson();
-    AnyTransaction txParameters = gson.fromJson(info, AnyTransaction.class);
+    Gson gson = QaTransactionJsonWriter.instance();
 
-    long actualSeed = Long.parseLong((String) txParameters.body.get("seed"), 16);
-    assertThat(actualSeed, equalTo(seed));
+    AnyTransaction<IncrementCounterTx> txParameters = gson.fromJson(info,
+        new TypeToken<AnyTransaction<IncrementCounterTx>>(){}.getType());
 
-    HashCode counterId = HashCode.fromString((String) txParameters.body.get("counter_id"));
-    assertThat(counterId, equalTo(nameHash));
+    assertThat(txParameters.body, equalTo(tx));
+  }
+
+  @Test
+  public void equals() {
+    EqualsVerifier.forClass(IncrementCounterTx.class)
+        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
+        .verify();
   }
 
   private static Message.Builder messageBuilder() {
     return new Message.Builder()
         .mergeFrom(INC_COUNTER_TX_MESSAGE_TEMPLATE);
-  }
-
-  private static ByteBuffer bodyOf(long seed, HashCode nameHash) {
-    ByteBuffer body = ByteBuffer.allocate(IncrementCounterTx.BODY_SIZE)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .putLong(seed)
-        .put(nameHash.asBytes());
-    body.rewind();
-    return body;
   }
 }

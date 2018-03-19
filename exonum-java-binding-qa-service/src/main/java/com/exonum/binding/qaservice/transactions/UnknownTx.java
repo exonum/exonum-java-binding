@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  */
 final class UnknownTx extends AbstractTransaction {
 
-  private static final short ID = 9999;
+  static final short ID = 9999;
 
   // todo: do we need seed here? Won't we pollute the local tx pool if allow the seed?
   UnknownTx() {

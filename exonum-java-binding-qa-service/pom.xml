@@ -95,5 +95,12 @@
             <version>3.9.0</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>2.4.4</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -9,8 +9,6 @@ import static org.junit.Assert.fail;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -35,10 +33,7 @@ public class ValidThrowingTxIntegrationTest {
       createCounter(view, name, value);
 
       // Create the transaction
-      BinaryMessage txMessage = new Message.Builder()
-          .mergeFrom(ValidThrowingTxTest.VALID_THROWING_TEMPLATE)
-          .buildRaw();
-      ValidThrowingTx tx = new ValidThrowingTx(txMessage);
+      ValidThrowingTx tx = new ValidThrowingTx(0L);
 
       try {
         // Execute the transaction

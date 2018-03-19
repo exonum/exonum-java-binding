@@ -3,7 +3,6 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -19,9 +18,10 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.nio.ByteBuffer;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,60 +38,77 @@ public class CreateCounterTxIntegrationTest {
   static final Message CREATE_COUNTER_MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
       .setMessageType(CREATE_COUNTER.id)
+      .setBody(serialize("counter"))
       .buildPartial();
 
   @Test
-  public void rejectsWrongServiceId() {
+  public void converterFromMessageRejectsWrongServiceId() {
     BinaryMessage message = messageBuilder()
         .setServiceId((short) (QaService.ID + 1))
         .buildRaw();
 
     expectedException.expect(IllegalArgumentException.class);
-    new CreateCounterTx(message);
+    CreateCounterTx.converter().fromMessage(message);
   }
 
   @Test
-  public void rejectsWrongTxId() {
+  public void converterFromMessageRejectsWrongTxId() {
     BinaryMessage message = messageBuilder()
         .setMessageType((short) (CREATE_COUNTER.id + 1))
         .buildRaw();
 
     expectedException.expect(IllegalArgumentException.class);
-    new CreateCounterTx(message);
+    CreateCounterTx.converter().fromMessage(message);
   }
 
   @Test
-  public void isValidNonEmptyName() {
+  public void converterToMessage() {
     String name = "counter";
-    BinaryMessage message = messageBuilder()
-        .setBody(toBuffer(name))
+    CreateCounterTx tx = new CreateCounterTx(name);
+
+    BinaryMessage expectedMessage = messageBuilder()
+        .setMessageType(CREATE_COUNTER.id)
+        .setBody(serialize(name))
         .buildRaw();
 
-    CreateCounterTx tx = new CreateCounterTx(message);
-
-    assertTrue(tx.isValid());
+    // todo: remove extra #getMessage when MessageReader has equals: ECR-992
+    assertThat(tx.getMessage().getMessage(), equalTo(expectedMessage.getMessage()));
   }
 
   @Test
-  public void isValidEmptyName() {
+  public void converterRoundtrip() {
+    String name = "counter";
+    CreateCounterTx tx = new CreateCounterTx(name);
+
+    BinaryMessage message = tx.getMessage();
+
+    CreateCounterTx txFromMessage = CreateCounterTx.converter().fromMessage(message);
+
+    assertThat(txFromMessage, equalTo(tx));
+  }
+
+  @Test
+  public void rejectsEmptyName() {
     String name = "";
-    BinaryMessage message = messageBuilder()
-        .setBody(toBuffer(name))
-        .buildRaw();
 
-    CreateCounterTx tx = new CreateCounterTx(message);
+    expectedException.expectMessage("Name must not be blank");
+    expectedException.expect(IllegalArgumentException.class);
+    new CreateCounterTx(name);
+  }
 
-    assertFalse(tx.isValid());
+  @Test
+  public void isValid() {
+    String name = "counter";
+
+    CreateCounterTx tx = new CreateCounterTx(name);
+    assertTrue(tx.isValid());
   }
 
   @Test
   public void executeNewCounter() {
     String name = "counter";
-    BinaryMessage message = messageBuilder()
-        .setBody(toBuffer(name))
-        .buildRaw();
 
-    CreateCounterTx tx = new CreateCounterTx(message);
+    CreateCounterTx tx = new CreateCounterTx(name);
 
     try (Database db = new MemoryDb();
          Fork view = db.createFork()) {
@@ -125,10 +142,7 @@ public class CreateCounterTxIntegrationTest {
       createCounter(view, name, value);
 
       // Execute the transaction, that has the same name.
-      BinaryMessage message = messageBuilder()
-          .setBody(toBuffer(name))
-          .buildRaw();
-      CreateCounterTx tx = new CreateCounterTx(message);
+      CreateCounterTx tx = new CreateCounterTx(name);
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
@@ -144,19 +158,23 @@ public class CreateCounterTxIntegrationTest {
   @Test
   public void info() {
     String name = "counter";
-    BinaryMessage message = messageBuilder()
-        .setBody(toBuffer(name))
-        .buildRaw();
-
-    CreateCounterTx tx = new CreateCounterTx(message);
+    CreateCounterTx tx = new CreateCounterTx(name);
 
     String info = tx.info();
 
-    Gson gson = new Gson();
-    AnyTransaction txParams = gson.fromJson(info, AnyTransaction.class);
+    Gson gson = QaTransactionJsonWriter.instance();
+    AnyTransaction<CreateCounterTx> txParams = gson.fromJson(info,
+        new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
+    );
     assertThat(txParams.service_id, equalTo(QaService.ID));
     assertThat(txParams.message_id, equalTo(CREATE_COUNTER.id));
-    assertThat(txParams.body, equalTo(ImmutableMap.of("name", name)));
+    assertThat(txParams.body, equalTo(tx));
+  }
+
+  @Test
+  public void equals() {
+    EqualsVerifier.forClass(CreateCounterTx.class)
+        .verify();
   }
 
   /** Creates a builder of create counter transaction message. */
@@ -165,8 +183,8 @@ public class CreateCounterTxIntegrationTest {
         .mergeFrom(CREATE_COUNTER_MESSAGE_TEMPLATE);
   }
 
-  private static ByteBuffer toBuffer(String s) {
-    return ByteBuffer.wrap(StandardSerializers.string().toBytes(s));
+  private static ByteBuffer serialize(String txName) {
+    return ByteBuffer.wrap(StandardSerializers.string().toBytes(txName));
   }
 
   /** Creates a counter in the storage with the given name and initial value. */
