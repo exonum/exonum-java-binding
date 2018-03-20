@@ -1,11 +1,16 @@
 use java_bindings::exonum::crypto::Hash;
-use java_bindings::{Executor, ServiceProxy, TransactionProxy};
+use java_bindings::{Executor, ServiceProxy};
 use java_bindings::jni::objects::{JObject, JValue, GlobalRef};
 use java_bindings::jni::strings::JNIString;
 use java_bindings::jni::sys::jsize;
 use java_bindings::utils::unwrap_jni;
 
 use super::NATIVE_FACADE_CLASS;
+use super::transaction::TRANSACTION_ADAPTER_CLASS;
+
+pub const SERVICE_ADAPTER_CLASS: &str = "com/exonum/binding/service/adapters/UserServiceAdapter";
+pub const SERVICE_MOCK_BUILDER_CLASS: &str =
+    "com/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder";
 
 pub const SERVICE_ID: u16 = 42;
 pub const SERVICE_NAME: &str = "42";
@@ -29,7 +34,7 @@ where
             let value = env.call_static_method(
                 NATIVE_FACADE_CLASS,
                 "createServiceFakeBuilder",
-                "()Lcom/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder;",
+                format!("()L{};", SERVICE_MOCK_BUILDER_CLASS),
                 &[],
             )?;
             env.new_global_ref(env.auto_local(value.l()?).as_obj())
@@ -70,15 +75,13 @@ where
         self
     }
 
-    pub fn convert_transaction(self, transaction: TransactionProxy<E>) -> Self {
+    pub fn convert_transaction(self, transaction: GlobalRef) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             env.call_method(
                 self.builder.as_obj(),
                 "convertTransaction",
-                "(Ljava/lang/Class;)V",
-                // FIXME can't access a private field
-                &[],
-                // &[JValue::from(transaction.transaction)],
+                format!("(L{};)V", TRANSACTION_ADAPTER_CLASS),
+                 &[JValue::from(transaction.as_obj())],
             )?;
             Ok(())
         }));
@@ -163,7 +166,7 @@ where
             let value = env.call_method(
                 self.builder.as_obj(),
                 "build",
-                "()Lcom/exonum/binding/service/adapters/UserServiceAdapter;",
+                format!("()L{};", SERVICE_ADAPTER_CLASS),
                 &[],
             )?;
             Ok((self.exec, env.new_global_ref(env.auto_local(value.l()?).as_obj())?))

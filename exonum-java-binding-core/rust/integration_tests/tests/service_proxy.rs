@@ -4,13 +4,13 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::mock::service::{ServiceMockBuilder, SERVICE_ID, SERVICE_NAME};
-use integration_tests::mock::transaction::create_transaction_mock;
+use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::DumbExecutor;
 use java_bindings::exonum::blockchain::Service;
 use java_bindings::exonum::crypto::hash;
 use java_bindings::exonum::encoding::Error as MessageError;
-use java_bindings::exonum::messages::{Message, RawTransaction};
+use java_bindings::exonum::messages::RawTransaction;
 use java_bindings::exonum::storage::{Database, MemoryDB};
 use java_bindings::jni::JavaVM;
 use java_bindings::serde_json::Value;
@@ -57,16 +57,13 @@ pub fn state_hash() {
 }
 
 #[test]
-// FIXME currently can't be implemented, since java transaction is private field in TransactionProxy
-#[ignore]
 pub fn tx_from_raw() {
-    let sample_transaction = create_transaction_mock(EXECUTOR.clone(), true);
-    let raw = sample_transaction.raw().clone();
+    let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .convert_transaction(sample_transaction.clone())
+        .convert_transaction(java_transaction)
         .build();
-    let decoded_transaction = service.tx_from_raw(raw).expect("Failed to get transaction");
-    assert_eq!(sample_transaction.hash(), decoded_transaction.hash());
+    let decoded_transaction = service.tx_from_raw(raw_message).expect("Failed to get transaction");
+    assert_eq!(decoded_transaction.serialize_field().unwrap(), Value::String(INFO_VALUE.into()));
 }
 
 #[test]
