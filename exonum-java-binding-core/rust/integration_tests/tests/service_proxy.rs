@@ -5,6 +5,8 @@ extern crate lazy_static;
 
 use integration_tests::mock::service::{ServiceMockBuilder, SERVICE_ID, SERVICE_NAME};
 use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
+use integration_tests::test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY,
+                                      INITIAL_ENTRY_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::DumbExecutor;
 use java_bindings::exonum::blockchain::Service;
@@ -115,4 +117,19 @@ pub fn initialize_should_panic_if_java_exception_occurred() {
         .build();
 
     service.initialize(&mut fork);
+}
+
+#[test]
+pub fn initialize_test_service() {
+    let db = MemoryDB::new();
+    let service = create_test_service(EXECUTOR.clone());
+    {
+        let mut fork = db.fork();
+        service.initialize(&mut fork);
+        db.merge(fork.into_patch()).expect("Failed to merge changes");
+    }
+    let snapshot = db.snapshot();
+    let test_map = create_test_map(&*snapshot, service.service_name());
+    let key = hash(INITIAL_ENTRY_KEY.as_ref());
+    assert_eq!(Some(INITIAL_ENTRY_VALUE.to_string()), test_map.get(&key));
 }
