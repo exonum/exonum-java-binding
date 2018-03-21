@@ -50,23 +50,15 @@ where
     /// Creates a `ServiceProxy` of the given Java service.
     pub fn from_global_ref(exec: E, service: GlobalRef) -> Self {
         let (id, name) = unwrap_jni(exec.with_attached(|env| {
-            let id = panic_on_exception(env, env.call_method(
-                service.as_obj(),
-                "getId",
-                "()S",
-                &[],
-            ))
-                .s()?;
-            let name = panic_on_exception(env, env.call_method(
-                service.as_obj(),
-                "getName",
-                "()Ljava/lang/String;",
-                &[],
-            ))
-                .l()?;
+            let id =
+                panic_on_exception(env, env.call_method(service.as_obj(), "getId", "()S", &[]));
+            let name = panic_on_exception(
+                env,
+                env.call_method(service.as_obj(), "getName", "()Ljava/lang/String;", &[]),
+            );
             // There is no u16 in Java.
             // FIXME document i16 <-> u16
-            Ok((id as u16, convert_to_string(env, name)?))
+            Ok((id.s()? as u16, convert_to_string(env, name.l()?)?))
         }));
         ServiceProxy {
             exec,
@@ -95,12 +87,15 @@ where
     fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let byte_array_array = panic_on_exception(env, env.call_method(
-                self.service.as_obj(),
-                "getStateHashes",
-                "(J)[[B", // FIXME sig?
-                &[JValue::from(view_handle)],
-            ));
+            let byte_array_array = panic_on_exception(
+                env,
+                env.call_method(
+                    self.service.as_obj(),
+                    "getStateHashes",
+                    "(J)[[B", // FIXME sig?
+                    &[JValue::from(view_handle)],
+                ),
+            );
             let byte_array_array = byte_array_array.l()?.into_inner();
             let len = env.get_array_length(byte_array_array)?;
             let mut hashes: Vec<Hash> = Vec::with_capacity(len as usize);
@@ -127,13 +122,11 @@ where
                 Ok(java_transaction) => {
                     let local_ref = env.auto_local(java_transaction.l()?);
                     let global_ref = env.new_global_ref(local_ref.as_obj())?;
-                    let java_transaction_proxy = TransactionProxy::from_global_ref(
-                        self.exec.clone(), global_ref, raw);
+                    let java_transaction_proxy =
+                        TransactionProxy::from_global_ref(self.exec.clone(), global_ref, raw);
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
-                },
-                Err(error_message) => {
-                    Err(MessageError::Basic(error_message.into()))
                 }
+                Err(error_message) => Err(MessageError::Basic(error_message.into())),
             })
         }))
     }
@@ -141,13 +134,15 @@ where
     fn initialize(&self, fork: &mut Fork) -> Value {
         let json_config = unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_fork(fork));
-            let json_config = panic_on_exception(env, env.call_method(
-                self.service.as_obj(),
-                "initialize",
-                "(J)Ljava/lang/String;",
-                &[JValue::from(view_handle)],
-            ))
-                .l()?;
+            let json_config = panic_on_exception(
+                env,
+                env.call_method(
+                    self.service.as_obj(),
+                    "initialize",
+                    "(J)Ljava/lang/String;",
+                    &[JValue::from(view_handle)],
+                ),
+            ).l()?;
             convert_to_string(env, json_config)
         }));
         serde_json::from_str(&json_config).expect("JSON deserialization error")

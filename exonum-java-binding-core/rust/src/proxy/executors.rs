@@ -30,12 +30,14 @@ impl Executor for DumbExecutor {
     {
         match self.vm.get_env() {
             Ok(jni_env) => f(&jni_env),
-            Err(jni_err) => if let ErrorKind::ThreadDetached = jni_err.0 {
-                let attach_guard = self.vm.attach_current_thread()?;
-                f(&attach_guard)
-            } else {
-                Err(jni_err)
-            },
+            Err(jni_err) => {
+                if let ErrorKind::ThreadDetached = jni_err.0 {
+                    let attach_guard = self.vm.attach_current_thread()?;
+                    f(&attach_guard)
+                } else {
+                    Err(jni_err)
+                }
+            }
         }
     }
 }

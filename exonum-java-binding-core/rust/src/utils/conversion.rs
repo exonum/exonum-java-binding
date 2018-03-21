@@ -22,7 +22,7 @@ pub fn convert_hash(env: &JNIEnv, hash: &Hash) -> Result<jbyteArray> {
 /// Converts JNI `JString` into Rust `String`
 pub fn convert_to_string<'e, V>(env: &JNIEnv<'e>, val: V) -> Result<String>
 where
-    V: Into<JString<'e>>
+    V: Into<JString<'e>>,
 {
     Ok(env.get_string(val.into())?.into())
 }
