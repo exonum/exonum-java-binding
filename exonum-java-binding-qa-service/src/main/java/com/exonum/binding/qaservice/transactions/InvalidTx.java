@@ -9,13 +9,17 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.storage.database.Fork;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * An invalid transaction always returning false in {@link #isValid()}.
  */
-final class InvalidTx implements Transaction {
+public final class InvalidTx implements Transaction {
 
-  private static final short ID = QaTransaction.INVALID.id;
+  private static final short ID = QaTransaction.INVALID.id();
+  private static final String INVALID_TX_JSON = QaTransactionGson.instance()
+      .toJson(new AnyTransaction<Map>(ID, Collections.emptyMap()));
 
   @Override
   public boolean isValid() {
@@ -25,6 +29,11 @@ final class InvalidTx implements Transaction {
   @Override
   public void execute(Fork view) {
     throw new AssertionError("Must never be executed by the framework: " + this);
+  }
+
+  @Override
+  public String info() {
+    return INVALID_TX_JSON;
   }
 
   @Override

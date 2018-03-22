@@ -21,11 +21,11 @@ public final class QaTransactionConverter implements TransactionConverter {
   @VisibleForTesting
   static final ImmutableMap<Short, Function<BinaryMessage, Transaction>> TRANSACTION_FACTORIES =
       ImmutableMap.of(
-          INCREMENT_COUNTER.id, IncrementCounterTx.converter()::fromMessage,
-          CREATE_COUNTER.id, CreateCounterTx.converter()::fromMessage,
-          INVALID.id, InvalidTx.converter()::fromMessage,
-          INVALID_THROWING.id, InvalidThrowingTx.converter()::fromMessage,
-          VALID_THROWING.id, ValidThrowingTx.converter()::fromMessage
+          INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromMessage,
+          CREATE_COUNTER.id(), CreateCounterTx.converter()::fromMessage,
+          INVALID.id(), InvalidTx.converter()::fromMessage,
+          INVALID_THROWING.id(), InvalidThrowingTx.converter()::fromMessage,
+          VALID_THROWING.id(), ValidThrowingTx.converter()::fromMessage
       );
 
   @Override

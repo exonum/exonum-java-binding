@@ -21,7 +21,7 @@ import com.google.errorprone.annotations.MustBeClosed;
 public final class QaSchema implements Schema {
 
   /** A namespace of QA service collections. */
-  private static final String NAMESPACE = QaService.NAME.replace('-', '_');
+  private static final String NAMESPACE = QaServiceImpl.NAME.replace('-', '_');
 
   private final View view;
 
