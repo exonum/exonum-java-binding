@@ -67,7 +67,7 @@ public class ValidThrowingTxTest {
     ValidThrowingTx tx = new ValidThrowingTx(seed);
     String info = tx.info();
 
-    Gson gson = QaTransactionJsonWriter.instance();
+    Gson gson = QaTransactionGson.instance();
     AnyTransaction<ValidThrowingTx> txParams = gson.fromJson(info,
         new TypeToken<AnyTransaction<ValidThrowingTx>>(){}.getType());
 

@@ -162,7 +162,7 @@ public class CreateCounterTxIntegrationTest {
 
     String info = tx.info();
 
-    Gson gson = QaTransactionJsonWriter.instance();
+    Gson gson = QaTransactionGson.instance();
     AnyTransaction<CreateCounterTx> txParams = gson.fromJson(info,
         new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
     );

@@ -141,7 +141,7 @@ public class IncrementCounterTxIntegrationTest {
     String info = tx.info();
 
     // Check the transaction parameters in JSON
-    Gson gson = QaTransactionJsonWriter.instance();
+    Gson gson = QaTransactionGson.instance();
 
     AnyTransaction<IncrementCounterTx> txParameters = gson.fromJson(info,
         new TypeToken<AnyTransaction<IncrementCounterTx>>(){}.getType());
