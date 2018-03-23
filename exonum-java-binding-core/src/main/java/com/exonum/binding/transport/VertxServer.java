@@ -22,7 +22,8 @@ import org.apache.logging.log4j.Logger;
  * <p>The class is thread-safe. It does not support client-side locking.
  */
 final class VertxServer implements Server {
-  private static final Logger LOG = LogManager.getLogger(VertxServer.class);
+  private static final Logger logger = LogManager.getLogger(VertxServer.class);
+
   private final Vertx vertx;
   private final HttpServer server;
   private final Router rootRouter;
@@ -80,7 +81,7 @@ final class VertxServer implements Server {
       }
       state = STARTED;
       server.listen(port);
-      LOG.info("Listening at {}", server.actualPort());
+      logger.info("Listening at {}", server.actualPort());
     }
   }
 
@@ -94,7 +95,7 @@ final class VertxServer implements Server {
       state = STOPPED;
       stopFuture = new CompletableFuture<>();
 
-      LOG.info("Requesting to stop");
+      logger.info("Requesting to stop");
 
       // Request the vertx instance to close itself
       vertx.close((r) -> notifyVertxStopped());
@@ -103,7 +104,7 @@ final class VertxServer implements Server {
   }
 
   private void notifyVertxStopped() {
-    LOG.info("Stopped");
+    logger.info("Stopped");
 
     synchronized (lock) {
       // Clear the routes when it’s fully stopped
