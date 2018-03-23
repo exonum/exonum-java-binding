@@ -120,7 +120,7 @@ pub fn initialize_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
-pub fn initialize_test_service() {
+pub fn test_service_initialize() {
     let db = MemoryDB::new();
     let service = create_test_service(EXECUTOR.clone());
     {
