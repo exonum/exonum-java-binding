@@ -157,7 +157,8 @@ public class ApiController2ExperimentalIntegrationTest {
 
           // Check the response body
           String response = result.bodyAsString();
-          String expectedResponse = "Unknown service id \\(\\d+\\), must be \\(" + QaService.ID + "\\)";
+          String expectedResponse = "Unknown service id \\(\\d+\\), must be \\(" + QaService.ID
+              + "\\)";
           assertThat(response).matches(expectedResponse);
 
           try {
@@ -209,7 +210,7 @@ public class ApiController2ExperimentalIntegrationTest {
   }
 
   @Test
-  public void badRequestOnInvalidTransaction(TestContext context) throws InvalidTransactionException, InternalServerError {
+  public void badRequestOnInvalidTransaction(TestContext context) throws Exception {
     int port = httpServer.actualPort();
     InvalidTx tx = new InvalidTx();
     String txMessageJson = tx.info();
@@ -246,7 +247,7 @@ public class ApiController2ExperimentalIntegrationTest {
   }
 
   @Test
-  public void serverErrorOnError(TestContext context) throws InvalidTransactionException, InternalServerError {
+  public void serverErrorOnError(TestContext context) throws Exception {
     int port = httpServer.actualPort();
     Transaction tx = new CreateCounterTx("new-counter");
     String txMessageJson = tx.info();

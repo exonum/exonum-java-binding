@@ -15,11 +15,13 @@ public class AnyTransaction<BodyT> {
   public final short message_id;
   public final BodyT body;
 
+  /** Creates a new transaction message. */
   public AnyTransaction(short message_id,
                         BodyT body) {
     this(QaService.ID, message_id, body);
   }
 
+  /** Creates a new transaction message. */
   public AnyTransaction(short service_id,
                         short message_id,
                         BodyT body) {

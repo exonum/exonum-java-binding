@@ -36,7 +36,7 @@ public class IncrementCounterTxIntegrationTest {
 
   static Message INC_COUNTER_TX_MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-      .setMessageType(INCREMENT_COUNTER.id)
+      .setMessageType(INCREMENT_COUNTER.id())
       .setBody(ByteBuffer.allocate(IncrementCounterTx.BODY_SIZE))
       .buildPartial();
 
@@ -56,7 +56,7 @@ public class IncrementCounterTxIntegrationTest {
   @Test
   public void converterFromMessageRejectsWrongTxId() {
     BinaryMessage message = messageBuilder()
-        .setMessageType((short) (INCREMENT_COUNTER.id + 1))
+        .setMessageType((short) (INCREMENT_COUNTER.id() + 1))
         .buildRaw();
 
     expectedException.expect(IllegalArgumentException.class);

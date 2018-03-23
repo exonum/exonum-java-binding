@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
  */
 public final class CreateCounterTx implements Transaction {
 
-  private static final short ID = QaTransaction.CREATE_COUNTER.id;
+  private static final short ID = QaTransaction.CREATE_COUNTER.id();
 
   private final String name;
 

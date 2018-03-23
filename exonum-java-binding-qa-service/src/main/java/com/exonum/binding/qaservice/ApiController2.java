@@ -1,5 +1,7 @@
 package com.exonum.binding.qaservice;
 
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.InternalServerError;
@@ -23,7 +25,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,9 +33,7 @@ import org.apache.logging.log4j.Logger;
  */
 class ApiController2 {
 
-  private static final int BAD_REQUEST = 400;
-  private static final int INTERNAL_SERVER_ERROR = 500;
-  private static final Logger LOG = LogManager.getLogger(ApiController.class);
+  private static final Logger logger = LogManager.getLogger(ApiController2.class);
 
   @VisibleForTesting
   static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
@@ -66,7 +65,7 @@ class ApiController2 {
     short serviceId = rawTxMessage.service_id;
     if (serviceId != QaService.ID) {
       rc.response()
-          .setStatusCode(BAD_REQUEST)
+          .setStatusCode(HTTP_BAD_REQUEST)
           .end(String.format("Unknown service id (%d), must be (%d)", rawTxMessage.service_id,
               QaService.ID));
       return;
@@ -89,13 +88,13 @@ class ApiController2 {
           .end(String.valueOf(txHash));
     } catch (InvalidTransactionException e) {
       rc.response()
-          .setStatusCode(BAD_REQUEST)
+          .setStatusCode(HTTP_BAD_REQUEST)
           .setStatusMessage("Bad Request: transaction is not valid")
           .end();
     } catch (InternalServerError e) {
-      LOG.log(Level.ERROR, e);
+      logger.error(e);
       rc.response()
-          .setStatusCode(INTERNAL_SERVER_ERROR)
+          .setStatusCode(HTTP_INTERNAL_ERROR)
           .end();
     }
   }
@@ -103,7 +102,7 @@ class ApiController2 {
   private Optional<Transaction> txFromMessage(RoutingContext rc, short txId, String txMessageJson) {
     if (!TX_MESSAGE_TYPES.containsKey(txId)) {
       rc.response()
-          .setStatusCode(BAD_REQUEST)
+          .setStatusCode(HTTP_BAD_REQUEST)
           .end(String.format("Unknown transaction id (%d)", txId));
       return Optional.empty();
     }
@@ -116,7 +115,7 @@ class ApiController2 {
       throw new AssertionError("JSON must have been already validated");
     } catch (JsonParseException e) {
       rc.response()
-          .setStatusCode(BAD_REQUEST)
+          .setStatusCode(HTTP_BAD_REQUEST)
           .end(String.format("Cannot convert transaction (%d) into an instance "
               + "of the corresponding class (%s)", txId, txMessageType));
       return Optional.empty();

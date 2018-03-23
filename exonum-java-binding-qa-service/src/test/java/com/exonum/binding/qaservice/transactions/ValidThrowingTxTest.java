@@ -23,7 +23,7 @@ public class ValidThrowingTxTest {
 
   static final Message VALID_THROWING_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-      .setMessageType(QaTransaction.VALID_THROWING.id)
+      .setMessageType(QaTransaction.VALID_THROWING.id())
       .setBody(body(0))
       .buildPartial();
 
@@ -72,7 +72,7 @@ public class ValidThrowingTxTest {
         new TypeToken<AnyTransaction<ValidThrowingTx>>(){}.getType());
 
     assertThat(txParams.service_id, equalTo(QaService.ID));
-    assertThat(txParams.message_id, equalTo(QaTransaction.VALID_THROWING.id));
+    assertThat(txParams.message_id, equalTo(QaTransaction.VALID_THROWING.id()));
     assertThat(txParams.body, equalTo(tx));
   }
 

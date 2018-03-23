@@ -18,7 +18,7 @@ import java.nio.ByteOrder;
 
 public final class ValidThrowingTx implements Transaction {
 
-  private static final short ID = QaTransaction.VALID_THROWING.id;
+  private static final short ID = QaTransaction.VALID_THROWING.id();
 
   private final long seed;
 

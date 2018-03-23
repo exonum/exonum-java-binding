@@ -19,8 +19,8 @@ public enum QaTransaction {
   INVALID_THROWING(11, InvalidThrowingTx.class),
   VALID_THROWING(12, ValidThrowingTx.class);
 
-  final short id;
-  final Class<? extends Transaction> transactionClass;
+  private final short id;
+  private final Class<? extends Transaction> transactionClass;
 
   QaTransaction(int id, Class<? extends Transaction> txClass) {
     this.id = Shorts.checkedCast(id);

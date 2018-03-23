@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public final class InvalidTx implements Transaction {
 
-  private static final short ID = QaTransaction.INVALID.id;
+  private static final short ID = QaTransaction.INVALID.id();
   private static final String INVALID_TX_JSON = QaTransactionGson.instance()
       .toJson(new AnyTransaction<Map>(ID, Collections.emptyMap()));
 

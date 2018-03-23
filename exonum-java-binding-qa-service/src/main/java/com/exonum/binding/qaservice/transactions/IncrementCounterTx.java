@@ -25,7 +25,7 @@ import java.nio.ByteOrder;
  */
 public final class IncrementCounterTx implements Transaction {
 
-  private static final short ID = QaTransaction.INCREMENT_COUNTER.id;
+  private static final short ID = QaTransaction.INCREMENT_COUNTER.id();
 
   /** A size of message body of this transaction: seed + hash code of the counter name. */
   @VisibleForTesting
