@@ -1,5 +1,6 @@
 package com.exonum.binding.qaservice.transactions;
 
+import com.exonum.binding.messages.Transaction;
 import com.google.common.primitives.Shorts;
 
 
@@ -8,23 +9,31 @@ import com.google.common.primitives.Shorts;
  *
  * @implNote Keep in sync with {@link QaTransactionConverter#TRANSACTION_FACTORIES}.
  */
-enum QaTransaction {
+public enum QaTransaction {
   // Well-behaved transactions.
-  CREATE_COUNTER(0),
-  INCREMENT_COUNTER(1),
+  CREATE_COUNTER(0, CreateCounterTx.class),
+  INCREMENT_COUNTER(1, IncrementCounterTx.class),
 
   // Badly-behaved transactions, do some crazy things.
-  INVALID(10),
-  INVALID_THROWING(11),
-  VALID_THROWING(12);
+  INVALID(10, InvalidTx.class),
+  INVALID_THROWING(11, InvalidThrowingTx.class),
+  VALID_THROWING(12, ValidThrowingTx.class);
 
-  final short id;
+  private final short id;
+  private final Class<? extends Transaction> transactionClass;
 
-  QaTransaction(int id) {
+  QaTransaction(int id, Class<? extends Transaction> txClass) {
     this.id = Shorts.checkedCast(id);
+    this.transactionClass = txClass;
   }
 
-  short id() {
+  /** Returns the unique id of this transaction. */
+  public short id() {
     return id;
+  }
+
+  /** Returns the class implementing this transaction. */
+  public Class<? extends Transaction> transactionClass() {
+    return transactionClass;
   }
 }

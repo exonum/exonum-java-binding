@@ -21,13 +21,13 @@ import java.nio.ByteBuffer;
 /**
  * A transaction creating a new named counter.
  */
-final class CreateCounterTx implements Transaction {
+public final class CreateCounterTx implements Transaction {
 
-  private static final short ID = QaTransaction.CREATE_COUNTER.id;
+  private static final short ID = QaTransaction.CREATE_COUNTER.id();
 
   private final String name;
 
-  CreateCounterTx(String name) {
+  public CreateCounterTx(String name) {
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
     this.name = name;
   }
@@ -57,7 +57,7 @@ final class CreateCounterTx implements Transaction {
 
   @Override
   public String info() {
-    return new QaTransactionJsonWriter().toJson(ID, this);
+    return new QaTransactionGson().toJson(ID, this);
   }
 
   @Override
