@@ -86,12 +86,7 @@ public final class NativeFacade {
   }
 
   private static Server createServerMock() {
-    Server server = mock(Server.class);
-    if (false) {
-      Router router = mock(Router.class);
-      when(server.createRouter()).thenReturn(router);
-    }
-    return server;
+    return mock(Server.class);
   }
 
   private NativeFacade() {}

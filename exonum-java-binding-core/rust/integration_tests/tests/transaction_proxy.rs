@@ -6,7 +6,7 @@ extern crate lazy_static;
 use integration_tests::mock::transaction::{create_mock_transaction_proxy, create_throwing_mock_transaction_proxy,
                                            ENTRY_NAME, ENTRY_VALUE, INFO_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::{DumbExecutor};
+use java_bindings::DumbExecutor;
 use java_bindings::exonum::blockchain::Transaction;
 use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB};

@@ -16,6 +16,11 @@ use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_
             to_handle, unwrap_jni};
 
 /// A proxy for `Service`s.
+///
+/// Note: Exonum uses an unsigned `u16` int value for ids, while Java must use signed `short` ints.
+/// Service ids from the higher half of `u16` (from 32768 to 65535) will be translated
+/// into negative values in Java (respectively from -32768 to -1) and vise versa.
+/// This can lead to misunderstandings, for example when reading logs.
 #[derive(Clone)]
 pub struct ServiceProxy<E>
 where
@@ -56,9 +61,9 @@ where
                 env,
                 env.call_method(service.as_obj(), "getName", "()Ljava/lang/String;", &[]),
             );
-            // There is no u16 in Java.
-            // FIXME document i16 <-> u16
-            Ok((id.s()? as u16, convert_to_string(env, name.l()?)?))
+            let id = id.s()? as u16;
+            let name = convert_to_string(env, name.l()?)?;
+            Ok((id, name))
         }));
         ServiceProxy {
             exec,
@@ -87,16 +92,16 @@ where
     fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let byte_array_array = panic_on_exception(
+            let java_service_hashes = panic_on_exception(
                 env,
                 env.call_method(
                     self.service.as_obj(),
                     "getStateHashes",
-                    "(J)[[B", // FIXME sig?
+                    "(J)[[B",
                     &[JValue::from(view_handle)],
                 ),
             );
-            let byte_array_array = byte_array_array.l()?.into_inner();
+            let byte_array_array = java_service_hashes.l()?.into_inner();
             let len = env.get_array_length(byte_array_array)?;
             let mut hashes: Vec<Hash> = Vec::with_capacity(len as usize);
             for i in 0..len {
@@ -120,10 +125,10 @@ where
             // [https://jira.bf.local/browse/ECR-944]
             Ok(match check_error_on_exception(env, res) {
                 Ok(java_transaction) => {
-                    let local_ref = env.auto_local(java_transaction.l()?);
-                    let global_ref = env.new_global_ref(local_ref.as_obj())?;
+                    let java_transaction = env.auto_local(java_transaction.l()?);
+                    let java_transaction = env.new_global_ref(java_transaction.as_obj())?;
                     let java_transaction_proxy =
-                        TransactionProxy::from_global_ref(self.exec.clone(), global_ref, raw);
+                        TransactionProxy::from_global_ref(self.exec.clone(), java_transaction, raw);
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
                 Err(error_message) => Err(MessageError::Basic(error_message.into())),
@@ -145,6 +150,14 @@ where
             ).l()?;
             convert_to_string(env, json_config)
         }));
-        serde_json::from_str(&json_config).expect("JSON deserialization error")
+        serde_json::from_str(&json_config)
+            .map_err(|e| {
+                panic!(
+                    "JSON deserialization error: {:?}; json string: {:?}",
+                    e,
+                    json_config
+                )
+            })
+            .unwrap()
     }
 }

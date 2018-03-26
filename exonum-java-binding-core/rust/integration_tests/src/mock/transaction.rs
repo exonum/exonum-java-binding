@@ -1,6 +1,7 @@
 use java_bindings::{Executor, TransactionProxy};
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::jni::objects::{AutoLocal, GlobalRef, JObject, JValue};
+use java_bindings::serde_json::Value;
 
 use super::NATIVE_FACADE_CLASS;
 
@@ -10,7 +11,9 @@ pub const TRANSACTION_ADAPTER_CLASS: &str =
 pub const ENTRY_NAME: &str = "test_entry";
 pub const ENTRY_VALUE: &str = "test_value";
 pub const INFO_JSON: &str = r#""test_info""#;
-pub const INFO_VALUE: &str = r"test_info";
+lazy_static! {
+    pub static ref INFO_VALUE: Value = Value::String("test_info".to_string());
+}
 
 /// Creates `TransactionProxy` which throws an exception on any call.
 pub fn create_throwing_mock_transaction_proxy<E: Executor>(executor: E, exception_class: &str) -> TransactionProxy<E> {

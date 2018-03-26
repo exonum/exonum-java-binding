@@ -3,7 +3,7 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::mock::service::{ServiceMockBuilder, SERVICE_ID, SERVICE_NAME};
+use integration_tests::mock::service::ServiceMockBuilder;
 use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
 use integration_tests::test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY,
                                       INITIAL_ENTRY_VALUE};
@@ -32,18 +32,26 @@ lazy_static! {
     static ref TEST_CONFIG_VALUE: Value = Value::String("test config".to_string());
 }
 
+const SERVICE_ID: u16 = 24;
+const SERVICE_ID_NEGATIVE: u16 = 65512; // -24_i16 as u16;
+const SERVICE_NAME: &str = "test_service";
 
 #[test]
 pub fn service_id() {
-    let executor = DumbExecutor { vm: VM.clone() };
-    let service = ServiceMockBuilder::new(executor).build();
+    let service = ServiceMockBuilder::new(EXECUTOR.clone(), SERVICE_ID, SERVICE_NAME).build();
     assert_eq!(SERVICE_ID, service.service_id());
 }
 
 #[test]
+pub fn service_id_negative() {
+    // Check that value is converted between rust `u16` and java `short` without loss.
+    let service = ServiceMockBuilder::new(EXECUTOR.clone(), SERVICE_ID_NEGATIVE, SERVICE_NAME).build();
+    assert_eq!(SERVICE_ID_NEGATIVE, service.service_id());
+}
+
+#[test]
 pub fn service_name() {
-    let executor = DumbExecutor { vm: VM.clone() };
-    let service = ServiceMockBuilder::new(executor).build();
+    let service = ServiceMockBuilder::new(EXECUTOR.clone(), SERVICE_ID, SERVICE_NAME).build();
     assert_eq!(SERVICE_NAME, service.service_name());
 }
 
@@ -52,7 +60,7 @@ pub fn state_hash() {
     let db = MemoryDB::new();
     let snapshot = db.snapshot();
     let hashes = [hash(&[1]), hash(&[2]), hash(&[3])];
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+    let service = ServiceMockBuilder::new_with_defaults(EXECUTOR.clone())
         .state_hashes(&hashes)
         .build();
     assert_eq!(&hashes, service.state_hash(&*snapshot).as_slice());
@@ -61,18 +69,19 @@ pub fn state_hash() {
 #[test]
 pub fn tx_from_raw() {
     let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+    let service = ServiceMockBuilder::new_with_defaults(EXECUTOR.clone())
         .convert_transaction(java_transaction)
         .build();
-    let decoded_transaction = service.tx_from_raw(raw_message).expect("Failed to get transaction");
-    assert_eq!(decoded_transaction.serialize_field().unwrap(), Value::String(INFO_VALUE.into()));
+    let executable_transaction = service.tx_from_raw(raw_message)
+        .expect("Failed to convert transaction");
+    assert_eq!(executable_transaction.serialize_field().unwrap(), *INFO_VALUE);
 }
 
 #[test]
 #[should_panic(expected="Java exception: java.lang.OutOfMemoryError")]
 pub fn tx_from_raw_should_panic_if_java_error_occurred() {
     let raw = RawTransaction::from_vec(vec![]);
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+    let service = ServiceMockBuilder::new_with_defaults(EXECUTOR.clone())
         .convert_transaction_throwing(OOM_ERROR_CLASS)
         .build();
     service.tx_from_raw(raw).unwrap();
@@ -81,7 +90,7 @@ pub fn tx_from_raw_should_panic_if_java_error_occurred() {
 #[test]
 pub fn tx_from_raw_should_return_err_if_java_exception_occurred() {
     let raw = RawTransaction::from_vec(vec![]);
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+    let service = ServiceMockBuilder::new_with_defaults(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
         .build();
     let err = service.tx_from_raw(raw)
@@ -98,7 +107,7 @@ pub fn initialize_config() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+    let service = ServiceMockBuilder::new_with_defaults(EXECUTOR.clone())
         .initial_global_config(TEST_CONFIG_JSON.to_string())
         .build();
 
@@ -112,7 +121,7 @@ pub fn initialize_should_panic_if_java_exception_occurred() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+    let service = ServiceMockBuilder::new_with_defaults(EXECUTOR.clone())
         .initial_global_config_throwing(EXCEPTION_CLASS)
         .build();
 
@@ -120,7 +129,7 @@ pub fn initialize_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
-pub fn test_service_initialize() {
+pub fn service_can_modify_db_on_initialize() {
     let db = MemoryDB::new();
     let service = create_test_service(EXECUTOR.clone());
     {
@@ -128,8 +137,12 @@ pub fn test_service_initialize() {
         service.initialize(&mut fork);
         db.merge(fork.into_patch()).expect("Failed to merge changes");
     }
+    // Check that the Java service implementation has successfully written the initial value.
+    // into the storage
     let snapshot = db.snapshot();
     let test_map = create_test_map(&*snapshot, service.service_name());
     let key = hash(INITIAL_ENTRY_KEY.as_ref());
-    assert_eq!(Some(INITIAL_ENTRY_VALUE.to_string()), test_map.get(&key));
+    let value = test_map.get(&key)
+        .expect("Failed to find the entry created in the test service");
+    assert_eq!(INITIAL_ENTRY_VALUE, value);
 }

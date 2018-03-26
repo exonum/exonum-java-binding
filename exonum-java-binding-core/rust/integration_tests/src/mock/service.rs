@@ -12,8 +12,8 @@ pub const SERVICE_ADAPTER_CLASS: &str = "com/exonum/binding/service/adapters/Use
 pub const SERVICE_MOCK_BUILDER_CLASS: &str =
     "com/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder";
 
-pub const SERVICE_ID: u16 = 42;
-pub const SERVICE_NAME: &str = "42";
+pub const SERVICE_DEFAULT_ID: u16 = 42;
+pub const SERVICE_DEFAULT_NAME: &str = "42";
 
 pub struct ServiceMockBuilder<E>
 where
@@ -21,15 +21,20 @@ where
 {
     exec: E,
     builder: GlobalRef,
-    has_id: bool,
-    has_name: bool,
 }
 
 impl<E> ServiceMockBuilder<E>
 where
     E: Executor + 'static,
 {
-    pub fn new(exec: E) -> Self {
+    pub fn new_with_defaults(exec: E) -> Self {
+        ServiceMockBuilder::new(exec, SERVICE_DEFAULT_ID, SERVICE_DEFAULT_NAME)
+    }
+
+    pub fn new<S>(exec: E, service_id: u16, service_name: S) -> Self
+    where
+        S: Into<JNIString>,
+    {
         let builder = unwrap_jni(exec.with_attached(|env| {
             let value = env.call_static_method(
                 NATIVE_FACADE_CLASS,
@@ -39,11 +44,12 @@ where
             )?;
             env.new_global_ref(env.auto_local(value.l()?).as_obj())
         }));
-        let (has_id, has_name) = (false, false);
-        ServiceMockBuilder { exec, builder, has_id, has_name }
+        ServiceMockBuilder { exec, builder }
+            .id(service_id)
+            .name(service_name)
     }
 
-    pub fn id(mut self, id: u16) -> Self {
+    fn id(self, id: u16) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             env.call_method(
                 self.builder.as_obj(),
@@ -53,11 +59,10 @@ where
             )?;
             Ok(())
         }));
-        self.has_id = true;
         self
     }
 
-    pub fn name<S>(mut self, name: S) -> Self
+    fn name<S>(self, name: S) -> Self
     where
         S: Into<JNIString>,
     {
@@ -71,7 +76,6 @@ where
             )?;
             Ok(())
         }));
-        self.has_name = true;
         self
     }
 
@@ -105,22 +109,20 @@ where
     pub fn state_hashes(self, hashes: &[Hash]) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             let byte_array_class = env.find_class("[B")?;
-            let default_hash = Hash::zero();
-            let default_byte_array = JObject::from(env.byte_array_from_slice(default_hash.as_ref())?);
-            let byte_array_array = env.new_object_array(
+            let java_service_hashes = env.new_object_array(
                 hashes.len() as jsize,
                 byte_array_class,
-                default_byte_array,
+                JObject::null(),
             )?;
             for (i, hash) in hashes.iter().enumerate() {
                 let hash = JObject::from(env.byte_array_from_slice(hash.as_ref())?);
-                env.set_object_array_element(byte_array_array, i as jsize, hash)?;
+                env.set_object_array_element(java_service_hashes, i as jsize, hash)?;
             }
             env.call_method(
                 self.builder.as_obj(),
                 "stateHashes",
                 "([[B)V",
-                &[JValue::from(JObject::from(byte_array_array))],
+                &[JValue::from(JObject::from(java_service_hashes))],
             )?;
             Ok(())
         }));
@@ -155,14 +157,8 @@ where
         self
     }
 
-    pub fn build(mut self) -> ServiceProxy<E> {
+    pub fn build(self) -> ServiceProxy<E> {
         let (executor, service) = unwrap_jni(self.exec.clone().with_attached(|env| {
-            if !self.has_id {
-                self = self.id(SERVICE_ID);
-            }
-            if !self.has_name {
-                self = self.name(SERVICE_NAME);
-            }
             let value = env.call_method(
                 self.builder.as_obj(),
                 "build",
@@ -171,7 +167,6 @@ where
             )?;
             Ok((self.exec, env.new_global_ref(env.auto_local(value.l()?).as_obj())?))
         }));
-
         ServiceProxy::from_global_ref(executor, service)
     }
 }
