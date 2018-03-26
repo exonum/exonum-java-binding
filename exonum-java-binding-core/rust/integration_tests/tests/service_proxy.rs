@@ -31,6 +31,7 @@ const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 const TEST_CONFIG_JSON: &str = r#""test config""#;
 const TEST_CONFIG_NOT_JSON: &str = r#"()"#;
+
 lazy_static! {
     static ref TEST_CONFIG_VALUE: Value = Value::String("test config".to_string());
 }
@@ -164,8 +165,8 @@ pub fn service_can_modify_db_on_initialize() {
         service.initialize(&mut fork);
         db.merge(fork.into_patch()).expect("Failed to merge changes");
     }
-    // Check that the Java service implementation has successfully written the initial value.
-    // into the storage
+    // Check that the Java service implementation has successfully written the initial value
+    // into the storage.
     let snapshot = db.snapshot();
     let test_map = create_test_map(&*snapshot, service.service_name());
     let key = hash(INITIAL_ENTRY_KEY.as_ref());

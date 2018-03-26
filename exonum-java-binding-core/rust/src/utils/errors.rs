@@ -61,19 +61,23 @@ pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JNIResult<T>) -> T {
         static IN_RECURSION: Cell<bool> = Cell::new(false);
     }
     IN_RECURSION.with(|in_recursion| {
-        res.unwrap_or_else(|jni_error| if in_recursion.get() {
-            in_recursion.set(false);
-            panic!("Recursive JNI error: {:?}", jni_error);
-        } else {
-            match jni_error.0 {
-                ErrorKind::JavaException => {
-                    in_recursion.set(true);
-                    let exception = get_and_clear_java_exception(env);
-                    let message = describe_java_exception(env, exception, &jni_error);
-                    in_recursion.set(false);
-                    panic!(message);
+        res.unwrap_or_else(|jni_error| {
+            // If we get another JNI error whilst handling one — stop processing both and panic.
+            if in_recursion.get() {
+                // Reset the flag to allow future use of this method.
+                in_recursion.set(false);
+                panic!("Recursive JNI error: {:?}", jni_error);
+            } else {
+                match jni_error.0 {
+                    ErrorKind::JavaException => {
+                        in_recursion.set(true);
+                        let exception = get_and_clear_java_exception(env);
+                        let message = describe_java_exception(env, exception, &jni_error);
+                        in_recursion.set(false);
+                        panic!(message);
+                    }
+                    _ => unwrap_jni(Err(jni_error)),
                 }
-                _ => unwrap_jni(Err(jni_error)),
             }
         })
     })
