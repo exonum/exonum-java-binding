@@ -4,6 +4,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::example_proxy::AtomicIntegerProxy;
+use integration_tests::executor::call_recursively;
 use integration_tests::vm::create_vm_for_tests;
 use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
@@ -64,4 +65,9 @@ pub fn it_works_in_concurrent_threads() {
     }
     let expected = (ITERS_PER_THREAD * THREAD_NUM) as jint;
     assert_eq!(expected, atomic.get().unwrap());
+}
+
+#[test]
+pub fn recursive_call() {
+    call_recursively(&VM, EXECUTOR.clone());
 }

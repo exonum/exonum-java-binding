@@ -65,18 +65,16 @@ pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JNIResult<T>) -> T {
             in_recursion.set(false);
             panic!("Recursive JNI error: {:?}", jni_error);
         } else {
-            in_recursion.set(true);
-            let result = match jni_error.0 {
+            match jni_error.0 {
                 ErrorKind::JavaException => {
+                    in_recursion.set(true);
                     let exception = get_and_clear_java_exception(env);
                     let message = describe_java_exception(env, exception, &jni_error);
                     in_recursion.set(false);
                     panic!(message);
                 }
                 _ => unwrap_jni(Err(jni_error)),
-            };
-            in_recursion.set(false);
-            result
+            }
         })
     })
 }

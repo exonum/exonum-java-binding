@@ -11,7 +11,6 @@ use java_bindings::exonum::blockchain::Transaction;
 use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB};
 use java_bindings::jni::JavaVM;
-use java_bindings::serde_json::Value;
 
 use std::sync::Arc;
 
@@ -85,7 +84,7 @@ pub fn execute_should_panic_if_java_exception_occurred() {
 #[test]
 pub fn json_serialize() {
     let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-    assert_eq!(valid_tx.serialize_field().unwrap(), Value::String(INFO_VALUE.into()));
+    assert_eq!(valid_tx.serialize_field().unwrap(), *INFO_VALUE);
 }
 
 #[test]

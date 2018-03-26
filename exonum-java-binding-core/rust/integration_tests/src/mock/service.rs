@@ -13,7 +13,7 @@ pub const SERVICE_MOCK_BUILDER_CLASS: &str =
     "com/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder";
 
 pub const SERVICE_DEFAULT_ID: u16 = 42;
-pub const SERVICE_DEFAULT_NAME: &str = "42";
+pub const SERVICE_DEFAULT_NAME: &str = "service 42";
 
 pub struct ServiceMockBuilder<E>
 where
@@ -27,14 +27,7 @@ impl<E> ServiceMockBuilder<E>
 where
     E: Executor + 'static,
 {
-    pub fn new_with_defaults(exec: E) -> Self {
-        ServiceMockBuilder::new(exec, SERVICE_DEFAULT_ID, SERVICE_DEFAULT_NAME)
-    }
-
-    pub fn new<S>(exec: E, service_id: u16, service_name: S) -> Self
-    where
-        S: Into<JNIString>,
-    {
+    pub fn new(exec: E) -> Self {
         let builder = unwrap_jni(exec.with_attached(|env| {
             let value = env.call_static_method(
                 NATIVE_FACADE_CLASS,
@@ -45,11 +38,11 @@ where
             env.new_global_ref(env.auto_local(value.l()?).as_obj())
         }));
         ServiceMockBuilder { exec, builder }
-            .id(service_id)
-            .name(service_name)
+            .id(SERVICE_DEFAULT_ID)
+            .name(SERVICE_DEFAULT_NAME)
     }
 
-    fn id(self, id: u16) -> Self {
+    pub fn id(self, id: u16) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             env.call_method(
                 self.builder.as_obj(),
@@ -62,7 +55,7 @@ where
         self
     }
 
-    fn name<S>(self, name: S) -> Self
+    pub fn name<S>(self, name: S) -> Self
     where
         S: Into<JNIString>,
     {
