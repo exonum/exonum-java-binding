@@ -17,6 +17,7 @@
     <java.compiler.target>8</java.compiler.target>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
+    <betachecker.version>1.0</betachecker.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.1.0</guice.version>
@@ -44,7 +45,34 @@
              <forceJavacCompilerUse>true</forceJavacCompilerUse>
              <source>${java.compiler.source}</source>
              <target>${java.compiler.target}</target>
+             <annotationProcessorPaths>
+               <!-- Adds a Beta checker to ensure that our library code does not use beta APIs.
+
+                    If you absolutely need to use Beta APIs in non-library code (e.g., fakes or
+                    QA service), then you may move this configuration to POM definition
+                    of each library. -->
+               <path>
+                 <groupId>com.google.guava</groupId>
+                 <artifactId>guava-beta-checker</artifactId>
+                 <version>${betachecker.version}</version>
+               </path>
+             </annotationProcessorPaths>
            </configuration>
+           <executions>
+             <execution>
+               <id>default-testCompile</id>
+               <phase>test-compile</phase>
+               <goals>
+                 <goal>testCompile</goal>
+               </goals>
+               <configuration>
+                 <!-- Disable Beta Checker for tests -->
+                 <compilerArgs>
+                   <arg>-Xep:BetaApi:OFF</arg>
+                 </compilerArgs>
+               </configuration>
+             </execution>
+           </executions>
            <dependencies>
              <dependency>
                <groupId>org.codehaus.plexus</groupId>
