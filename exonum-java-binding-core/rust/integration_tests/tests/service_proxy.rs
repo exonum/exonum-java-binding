@@ -81,13 +81,17 @@ pub fn tx_from_raw() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction(java_transaction)
         .build();
-    let executable_transaction = service.tx_from_raw(raw_message)
-        .expect("Failed to convert transaction");
-    assert_eq!(executable_transaction.serialize_field().unwrap(), *INFO_VALUE);
+    let executable_transaction = service.tx_from_raw(raw_message).expect(
+        "Failed to convert transaction",
+    );
+    assert_eq!(
+        executable_transaction.serialize_field().unwrap(),
+        *INFO_VALUE
+    );
 }
 
 #[test]
-#[should_panic(expected="Java exception: java.lang.OutOfMemoryError")]
+#[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 pub fn tx_from_raw_should_panic_if_java_error_occurred() {
     let raw = RawTransaction::from_vec(vec![]);
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -102,8 +106,9 @@ pub fn tx_from_raw_should_return_err_if_java_exception_occurred() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
         .build();
-    let err = service.tx_from_raw(raw)
-        .expect_err("This transaction should be de-serialized with an error!");
+    let err = service.tx_from_raw(raw).expect_err(
+        "This transaction should be de-serialized with an error!",
+    );
     if let MessageError::Basic(ref s) = err {
         assert!(s.starts_with("Java exception: java.lang.Exception"));
     } else {
@@ -144,7 +149,7 @@ pub fn initialize_config_parse_error() {
 }
 
 #[test]
-#[should_panic(expected="Java exception: java.lang.Exception")]
+#[should_panic(expected = "Java exception: java.lang.Exception")]
 pub fn initialize_should_panic_if_java_exception_occurred() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -163,14 +168,17 @@ pub fn service_can_modify_db_on_initialize() {
     {
         let mut fork = db.fork();
         service.initialize(&mut fork);
-        db.merge(fork.into_patch()).expect("Failed to merge changes");
+        db.merge(fork.into_patch()).expect(
+            "Failed to merge changes",
+        );
     }
     // Check that the Java service implementation has successfully written the initial value
     // into the storage.
     let snapshot = db.snapshot();
     let test_map = create_test_map(&*snapshot, service.service_name());
     let key = hash(INITIAL_ENTRY_KEY.as_ref());
-    let value = test_map.get(&key)
-        .expect("Failed to find the entry created in the test service");
+    let value = test_map.get(&key).expect(
+        "Failed to find the entry created in the test service",
+    );
     assert_eq!(INITIAL_ENTRY_VALUE, value);
 }

@@ -56,7 +56,7 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt -- --write-mode=diff
+  - cargo fmt --all -- --write-mode=diff
   - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings
   - cargo audit
   - cd -
