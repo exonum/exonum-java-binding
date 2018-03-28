@@ -1,6 +1,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.cryptocurrency.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.hash.HashCode;
@@ -10,20 +11,20 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMap;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Map;
 
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
-public final class TransferTx implements Transaction {
+/**
+ * A transaction that transfers cryptocurrency between two wallets.
+ */
+final public class TransferTx extends BaseTx implements Transaction {
 
     private static final short ID = CryptocurrencyTransaction.TRANSFER.getId();
 
@@ -36,6 +37,7 @@ public final class TransferTx implements Transaction {
     private final long sum;
 
     public TransferTx(long seed, HashCode fromWallet, HashCode toWallet, long sum) {
+        super(CryptocurrencyService.ID, ID);
         this.seed = seed;
         this.fromWallet = fromWallet;
         this.toWallet = toWallet;
@@ -49,9 +51,6 @@ public final class TransferTx implements Transaction {
 
     @Override
     public void execute(Fork view) {
-        System.out.println("FROM" + fromWallet);
-        System.out.println("TO" + toWallet);
-        System.out.println("SUM" + sum);
         CryptocurrencySchema schema = new CryptocurrencySchema(view);
         try (ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets()) {
             if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
@@ -66,13 +65,7 @@ public final class TransferTx implements Transaction {
 
     @Override
     public String info() {
-        Map<String, Object> txBody = ImmutableMap.of(
-                "seed", Long.toHexString(seed),
-                "from_wallet", fromWallet,
-                "to_wallet", toWallet,
-                "sum", Long.toHexString(sum)
-        );
-        return new CryptocurrencyTransactionGson().toJson(ID, txBody);
+        return CryptocurrencyTransactionGson.instance().toJson(this);
     }
 
     @Override
@@ -123,28 +116,8 @@ public final class TransferTx implements Transaction {
             return new TransferTx(seed, fromWallet, toWallet, sum);
         }
 
-        private static String getUtf8String(ByteBuffer buffer) {
-            byte[] s = getRemainingBytes(buffer);
-
-            return StandardSerializers.string()
-                    .fromBytes(s);
-        }
-
-        private static byte[] getRemainingBytes(ByteBuffer buffer) {
-            int numBytes = buffer.remaining();
-            byte[] dst = new byte[numBytes];
-            buffer.get(dst);
-            return dst;
-        }
-
         @Override
         public BinaryMessage toMessage(TransferTx transaction) {
-            return newCryptocurrencyTransactionBuilder(ID)
-                    .setBody(serialize(transaction))
-                    .buildRaw();
-        }
-
-        private static ByteBuffer serialize(TransferTx transaction) {
             ByteBuffer body = ByteBuffer.allocate(BODY_SIZE)
                     .order(ByteOrder.LITTLE_ENDIAN)
                     .putLong(transaction.seed)
@@ -152,7 +125,10 @@ public final class TransferTx implements Transaction {
                     .put(transaction.toWallet.asBytes())
                     .putLong(transaction.sum);
             body.rewind();
-            return body;
+
+            return newCryptocurrencyTransactionBuilder(ID)
+                    .setBody(body)
+                    .buildRaw();
         }
     }
 }

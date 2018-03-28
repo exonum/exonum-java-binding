@@ -5,7 +5,6 @@ import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-// TODO: consider moving that to the library, because you have to check these ids all the time!
 final class TransactionPreconditions {
 
   private static final short SERVICE_ID = CryptocurrencyService.ID;
@@ -21,7 +20,6 @@ final class TransactionPreconditions {
     checkArgument(txId == expectedTxId,
         "This message (%s) has wrong transaction getId (%s), must be %s", message, txId, expectedTxId);
 
-    // todo: check empty signature?
     return message;
   }
 

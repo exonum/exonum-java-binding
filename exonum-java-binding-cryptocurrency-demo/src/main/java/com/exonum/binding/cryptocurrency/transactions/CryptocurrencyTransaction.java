@@ -5,8 +5,8 @@ import com.google.common.primitives.Shorts;
 
 public enum CryptocurrencyTransaction {
 
-    CREATE_WALLET(0, CreateWalletTx.class),
-    TRANSFER(1, TransferTx.class);
+    CREATE_WALLET(1, CreateWalletTx.class),
+    TRANSFER(2, TransferTx.class);
 
     private final short id;
     private final Class<? extends Transaction> transactionClass;

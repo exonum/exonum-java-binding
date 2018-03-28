@@ -3,8 +3,6 @@ package com.exonum.binding.cryptocurrency;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.errorprone.annotations.MustBeClosed;

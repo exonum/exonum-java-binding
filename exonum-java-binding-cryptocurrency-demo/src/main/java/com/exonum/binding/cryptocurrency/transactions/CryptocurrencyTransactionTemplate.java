@@ -4,12 +4,12 @@ import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.messages.Message;
 import java.nio.ByteBuffer;
 
-class CryptocurrencyTransactionTemplate {
+final class CryptocurrencyTransactionTemplate {
 
     private static final short INVALID_MESSAGE_TYPE = 0;
 
     /**
-     * A template of any transaction of cryptocurrency service. It has an getId of cryptocurrency service,
+     * A template of any transaction of cryptocurrency service. It has an ID of cryptocurrency service,
      * empty body and all-zero signature.
      */
     private static final Message CRYPTOCURRENCY_TRANSACTION_TEMPLATE = new Message.Builder()
@@ -23,7 +23,7 @@ class CryptocurrencyTransactionTemplate {
      * Creates a new builder of cryptocurrency service transaction.
      *
      * @param transactionId a message type of transaction
-     * @return a message builder that has an getId of cryptocurrency service, the given transaction getId, empty body
+     * @return a message builder that has an getId of cryptocurrency service, the given transaction ID, empty body
      *     and all-zero signature
      */
     static Message.Builder newCryptocurrencyTransactionBuilder(short transactionId) {

@@ -10,15 +10,12 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -50,7 +47,7 @@ public class CreateWalletTxTest {
     }
 
     @Test
-    public void executeNewWallet() {
+    public void executeCreateWalletTx() {
         String name = "wallet";
 
         CreateWalletTx tx = new CreateWalletTx(name);
@@ -73,7 +70,7 @@ public class CreateWalletTxTest {
     }
 
     @Test
-    public void executeAlreadyExistingWallet() {
+    public void executeAlreadyExistingWalletTx() {
         try (Database db = new MemoryDb();
              Fork view = db.createFork()) {
             String name = "wallet";
@@ -107,10 +104,8 @@ public class CreateWalletTxTest {
 
         String info = tx.info();
 
-        Gson gson = new Gson();
-        AnyTransaction txParams = gson.fromJson(info, AnyTransaction.class);
+        BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
         assertThat(txParams.getService_id(), equalTo(CryptocurrencyService.ID));
         assertThat(txParams.getMessage_id(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
-        assertThat(txParams.getBody(), equalTo(ImmutableMap.of("name", name)));
     }
 }

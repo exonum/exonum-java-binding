@@ -15,8 +15,7 @@ public enum WalletSerializer implements Serializer<Wallet> {
             os.writeObject(value);
             return out.toByteArray();
         } catch (IOException e) {
-            //TODO: do something
-            throw new RuntimeException();
+            throw new RuntimeException("Serialization error: " + e.getMessage());
         }
     }
 
@@ -27,8 +26,7 @@ public enum WalletSerializer implements Serializer<Wallet> {
             ObjectInputStream is = new ObjectInputStream(in);
             return (Wallet) is.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            //TODO: do something
-            throw new RuntimeException();
+            throw new RuntimeException("Deserialization error: " + e.getMessage());
         }
     }
 }

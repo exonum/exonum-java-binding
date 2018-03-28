@@ -4,10 +4,9 @@ import com.exonum.binding.hash.HashCode;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 
 /** A converter of transaction parameters of cryptocurrency service to JSON. */
-public class CryptocurrencyTransactionGson {
+public final class CryptocurrencyTransactionGson {
 
   private static final Gson GSON = new GsonBuilder()
       .registerTypeHierarchyAdapter(HashCode.class, new HashCodeSerializer())
@@ -26,11 +25,6 @@ public class CryptocurrencyTransactionGson {
                                 JsonDeserializationContext context) throws JsonParseException {
       return HashCode.fromString(json.getAsString());
     }
-  }
-
-  public String toJson(short txId, Map<String, ?> txBody) {
-    AnyTransaction txParams = new AnyTransaction(txId, txBody);
-    return GSON.toJson(txParams);
   }
 
   public static Gson instance() {

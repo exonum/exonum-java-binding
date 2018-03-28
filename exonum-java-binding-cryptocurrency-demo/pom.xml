@@ -46,9 +46,6 @@
     </build>
 
     <dependencies>
-        <!-- todo: All these 'provided' dependencies must be in BOM: see ECR-796 -->
-        <!-- Exonum Java Binding Core, Guava & Vert.x are provided by the native app,
-             therefore, must not be bundled with this QA service. -->
         <dependency>
             <groupId>com.exonum.binding</groupId>
             <artifactId>exonum-java-binding-core</artifactId>

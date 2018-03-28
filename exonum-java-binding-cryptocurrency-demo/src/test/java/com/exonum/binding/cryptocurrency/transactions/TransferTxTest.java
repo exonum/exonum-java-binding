@@ -6,6 +6,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -17,7 +18,6 @@ import com.google.gson.Gson;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction.TRANSFER;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -26,23 +26,21 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class TransferTxTest {
+
     static {
         LibraryLoader.load();
     }
 
-    static Message TX_MESSAGE_TEMPLATE = new Message.Builder()
-            .mergeFrom(Transactions.TX_MESSAGE_TEMPLATE)
-            .setMessageType(TRANSFER.getId())
-            .setBody(ByteBuffer.allocate(TransferTx.BODY_SIZE))
-            .buildPartial();
-
     @Test
     public void isValid() {
-//        BinaryMessage message = messageBuilder()
-//                .buildRaw();
-//        TransferTx tx = new TransferTx(message);
-//
-//        assertTrue(tx.isValid());
+        long seed = 1L;
+        HashCode fromWallet = Hashing.defaultHashFunction().hashString("from", UTF_8);
+        HashCode toWallet = Hashing.defaultHashFunction().hashString("to", UTF_8);
+        long sum = 50L;
+
+        TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
+
+        assertTrue(tx.isValid());
     }
 
     @Test
@@ -108,7 +106,7 @@ public class TransferTxTest {
             String to = "to-wallet";
             HashCode fromWallet = Hashing.defaultHashFunction().hashString(from, UTF_8);
             HashCode toWallet = Hashing.defaultHashFunction().hashString(to, UTF_8);
-            long initialValue = 50L;
+            long initialValue = 100L;
             createWallet(view, to, initialValue);
             long transferValue = 50L;
             long seed = 1L;
@@ -141,9 +139,7 @@ public class TransferTxTest {
 
     @Test
     public void info() {
-        // Create a transaction with the given parameters.
-//        long seed = Long.MAX_VALUE - 1;
-        long seed = 1L;
+        long seed = Long.MAX_VALUE - 1;
         String name = "new_wallet";
         HashCode nameHash = Hashing.defaultHashFunction()
                 .hashString(name, UTF_8);
@@ -154,15 +150,10 @@ public class TransferTxTest {
         // Check the transaction parameters in JSON
         Gson gson = CryptocurrencyTransactionGson.instance();
 
-        AnyTransaction<TransferTx> txParameters = gson.fromJson(info,
-                new TypeToken<AnyTransaction<TransferTx>>(){}.getType());
+        Transaction txParameters = gson.fromJson(info,
+                new TypeToken<TransferTx>(){}.getType());
 
-        assertThat(txParameters.getBody(), equalTo(tx));
-    }
-
-    private static Message.Builder messageBuilder() {
-        return new Message.Builder()
-                .mergeFrom(TX_MESSAGE_TEMPLATE);
+        assertThat(txParameters, equalTo(tx));
     }
 
     private void createWallet(Fork view, String name, Long initialValue) {

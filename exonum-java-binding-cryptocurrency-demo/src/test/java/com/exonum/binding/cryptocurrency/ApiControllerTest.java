@@ -79,7 +79,7 @@ public class ApiControllerTest {
     @Test
     public void handlesAllKnownTransactions(TestContext context) {
         Map<CryptocurrencyTransaction, Transaction> transactionTemplates = ImmutableMap.of(
-//                CryptocurrencyTransaction.CREATE_WALLET, new CreateWalletTx("wallet_name"),
+                CryptocurrencyTransaction.CREATE_WALLET, new CreateWalletTx("wallet_name"),
                 CryptocurrencyTransaction.TRANSFER, new TransferTx(0L,
                         Hashing.defaultHashFunction().hashString("from", UTF_8),
                         Hashing.defaultHashFunction().hashString("to", UTF_8),

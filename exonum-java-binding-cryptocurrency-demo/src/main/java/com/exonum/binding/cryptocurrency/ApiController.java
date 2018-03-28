@@ -1,6 +1,6 @@
 package com.exonum.binding.cryptocurrency;
 
-import com.exonum.binding.cryptocurrency.transactions.AnyTransaction;
+import com.exonum.binding.cryptocurrency.transactions.BaseTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.hash.HashCode;
@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-import com.google.inject.util.Types;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -28,11 +27,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * With JSON and stuff.
+ * Controller for submitting transactions.
  */
 class ApiController {
 
-    private static final Logger LOG = LogManager.getLogger(ApiController.class);
+    private static final Logger log = LogManager.getLogger(ApiController.class);
 
     @VisibleForTesting
     static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
@@ -40,7 +39,7 @@ class ApiController {
     private static final Map<Short, Type> TX_MESSAGE_TYPES = Arrays.stream(CryptocurrencyTransaction.values())
             .collect(Collectors.toMap(
                     CryptocurrencyTransaction::getId,
-                    tx -> Types.newParameterizedType(tx.transactionClass(), AnyTransaction.class)
+                    CryptocurrencyTransaction::transactionClass
             ));
 
     private final Node node;
@@ -60,7 +59,7 @@ class ApiController {
         Gson gson = CryptocurrencyTransactionGson.instance();
         // Extract the transaction type from the body
         String body = rc.getBodyAsString();
-        AnyTransaction rawTxMessage = gson.fromJson(body, AnyTransaction.class);
+        BaseTx rawTxMessage = gson.fromJson(body, BaseTx.class);
         short serviceId = rawTxMessage.getService_id();
         if (serviceId != CryptocurrencyService.ID) {
             rc.response()
@@ -70,7 +69,6 @@ class ApiController {
             return;
         }
 
-        // Convert JSON -> Transaction (or directly Map<String, Object> -> Transaction?)
         short txId = rawTxMessage.getMessage_id();
         Optional<Transaction> maybeTx = txFromMessage(rc, txId, body);
         if (!maybeTx.isPresent()) {
@@ -91,7 +89,7 @@ class ApiController {
                     .setStatusMessage("Bad Request: transaction is not valid")
                     .end();
         } catch (InternalServerError e) {
-            LOG.log(Level.ERROR, e);
+            log.log(Level.ERROR, e);
             rc.response()
                     .setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
                     .end();
@@ -108,9 +106,8 @@ class ApiController {
         Gson gson = CryptocurrencyTransactionGson.instance();
         Type txMessageType = TX_MESSAGE_TYPES.get(txId);
         try {
-//            AnyTransaction<? extends Transaction> txMessage = gson.fromJson(txMessageJson, txMessageType);
-            AnyTransaction<? extends Transaction> txMessage = gson.fromJson(txMessageJson, txMessageType);
-            return Optional.of(txMessage.getBody());
+            Transaction txMessage = gson.fromJson(txMessageJson, txMessageType);
+            return Optional.of(txMessage);
         } catch (JsonSyntaxException e) {
             throw new AssertionError("JSON must have been already validated");
         } catch (JsonParseException e) {
