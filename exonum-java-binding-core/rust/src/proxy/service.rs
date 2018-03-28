@@ -16,11 +16,6 @@ use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_
             to_handle, unwrap_jni};
 
 /// A proxy for `Service`s.
-///
-/// Note: Exonum uses an unsigned `u16` int value for ids, while Java must use signed `short` ints.
-/// Service ids from the higher half of `u16` (from 32768 to 65535) will be translated
-/// into negative values in Java (respectively from -32768 to -1) and vise versa.
-/// This can lead to misunderstandings, for example when reading logs.
 #[derive(Clone)]
 pub struct ServiceProxy<E>
 where
@@ -61,6 +56,10 @@ where
                 env,
                 env.call_method(service.as_obj(), "getName", "()Ljava/lang/String;", &[]),
             );
+            // Note: Exonum uses an unsigned `u16` int value for ids, while Java can only use
+            // signed `short` ints.
+            // Service negative values in Java (from -32768 to -1) will be translated
+            // into the higher half of `u16` (respectively from 32768 to 65535).
             let id = id.s()? as u16;
             let name = convert_to_string(env, name.l()?)?;
             Ok((id, name))

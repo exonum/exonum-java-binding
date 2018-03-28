@@ -53,7 +53,10 @@ pub fn unwrap_jni<T>(res: JNIResult<T>) -> T {
     res.unwrap_or_else(|err| panic!("JNI error: {:?}", err))
 }
 
-/// Unwraps `jni::Result` with verbose error if Java exception occurred.
+/// Unwraps `jni::Result` with verbose error message if Java exception occurred.
+/// To get an additional info about the exception, it calls JNI API, which can lead
+/// to another exception. In that case it gives up to get verbose error message to prevent
+/// an infinite recursion and stack overflow.
 ///
 /// Panics if there is some JNI error.
 pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JNIResult<T>) -> T {
