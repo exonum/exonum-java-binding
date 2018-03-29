@@ -12,12 +12,13 @@ use java_bindings::DumbExecutor;
 use java_bindings::exonum::blockchain::Service;
 use java_bindings::exonum::crypto::hash;
 use java_bindings::exonum::encoding::Error as MessageError;
-use java_bindings::exonum::messages::RawTransaction;
+use java_bindings::exonum::messages::{Message, RawTransaction};
 use java_bindings::exonum::storage::{Database, MemoryDB};
 use java_bindings::jni::JavaVM;
 use java_bindings::serde_json::Value;
 use java_bindings::utils::any_to_string;
 
+use std::error::Error;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 
@@ -181,4 +182,36 @@ pub fn service_can_modify_db_on_initialize() {
         "Failed to find the entry created in the test service",
     );
     assert_eq!(INITIAL_ENTRY_VALUE, value);
+}
+
+// FIXME this test depends on changes at Java side [https://jira.bf.local/browse/ECR-472]
+#[test]
+pub fn test_service_decode_and_execute() {
+    // Test should decode a raw message into an executable transaction,
+    // execute it, and then check changes in the db.
+
+    const VALUE: &str = "test value";
+
+    // FIXME get the raw message
+    let put_transaction = PutTransaction::new(VALUE, &secret_key);
+    let raw_message = put_transaction.raw();
+
+    let db = MemoryDB::new();
+    let service = create_test_service(EXECUTOR.clone());
+    let transaction = service
+        .tx_from_raw(raw_message.clone())
+        .map_err(|err| panic!("Can't decode message: {}", err.description()))
+        .unwrap();
+    assert!(transaction.verify(), "Can't validate transaction");
+    {
+        let mut fork = db.fork();
+        transaction.execute(&mut fork);
+        db.merge(fork.into_patch()).expect(
+            "Failed to merge changes",
+        );
+    }
+    let snapshot = db.snapshot();
+    let test_map = create_test_map(&*snapshot, service.service_name());
+    let key = hash(VALUE.as_ref());
+    assert_eq!(Some("test body".to_string()), test_map.get(&key));
 }
