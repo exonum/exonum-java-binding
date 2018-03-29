@@ -19,6 +19,10 @@ pub fn convert_hash(env: &JNIEnv, hash: &Hash) -> Result<jbyteArray> {
     env.byte_array_from_slice(hash.as_ref())
 }
 
-pub fn convert_to_string(env: &JNIEnv, val: JString) -> Result<String> {
-    Ok(env.get_string(val)?.into())
+/// Converts JNI `JString` into Rust `String`
+pub fn convert_to_string<'e, V>(env: &JNIEnv<'e>, val: V) -> Result<String>
+where
+    V: Into<JString<'e>>,
+{
+    Ok(env.get_string(val.into())?.into())
 }

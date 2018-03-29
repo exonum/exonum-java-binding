@@ -1,23 +1,19 @@
 #![feature(test)]
 
+extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 extern crate test;
 
-#[path = "../tests/example_proxy/mod.rs"]
-mod example_proxy;
-#[path = "../tests/util/mod.rs"]
-mod util;
-
+use integration_tests::example_proxy::AtomicIntegerProxy;
+use integration_tests::vm::create_vm_for_benchmarks;
 use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
 
 use std::sync::Arc;
 use test::{black_box, Bencher};
 
-use example_proxy::AtomicIntegerProxy;
-use util::create_vm_for_benchmarks;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_benchmarks());

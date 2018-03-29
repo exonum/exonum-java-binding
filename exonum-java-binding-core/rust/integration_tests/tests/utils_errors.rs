@@ -1,9 +1,9 @@
+extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-mod util;
-
+use integration_tests::vm::create_vm_for_tests;
 use java_bindings::{DumbExecutor, Executor};
 use java_bindings::jni::{JNIEnv, JavaVM};
 use java_bindings::jni::errors::{ErrorKind, Result as JNIResult};
@@ -11,8 +11,6 @@ use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exceptio
                            panic_on_exception};
 
 use std::sync::Arc;
-
-use util::create_vm_for_tests;
 
 const ERROR_CLASS: &str = "java/lang/Error";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";

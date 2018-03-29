@@ -5,6 +5,9 @@ authors = ["Exonum Team <exonum@bitfury.com>"]
 publish = false
 workspace = ".."
 
+[lib]
+crate-type = ["dylib"]
+
 [features]
 
 [dependencies]

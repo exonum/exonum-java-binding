@@ -72,7 +72,7 @@ public final class NativeFacade {
    * <p>This method creates a service, not a mock of one, therefore, use it to test
    * the storage operations and transaction conversion:
    * <ul>
-   *   <li>{@link UserServiceAdapter#initalize(long)}</li>
+   *   <li>{@link UserServiceAdapter#initialize(long)}</li>
    *   <li>{@link UserServiceAdapter#getStateHashes(long)}</li>
    *   <li>{@link UserServiceAdapter#convertTransaction(byte[])}</li>
    * </ul>
@@ -86,10 +86,7 @@ public final class NativeFacade {
   }
 
   private static Server createServerMock() {
-    Server server = mock(Server.class);
-    Router router = mock(Router.class);
-    when(server.createRouter()).thenReturn(router);
-    return server;
+    return mock(Server.class);
   }
 
   private NativeFacade() {}

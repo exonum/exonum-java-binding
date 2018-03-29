@@ -1,19 +1,17 @@
+extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-mod example_proxy;
-mod util;
-
+use integration_tests::example_proxy::AtomicIntegerProxy;
+use integration_tests::executor::call_recursively;
+use integration_tests::vm::create_vm_for_tests;
 use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
 use java_bindings::jni::sys::jint;
 
 use std::sync::{Arc, Barrier};
 use std::thread::spawn;
-
-use example_proxy::AtomicIntegerProxy;
-use util::create_vm_for_tests;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());
@@ -67,4 +65,9 @@ pub fn it_works_in_concurrent_threads() {
     }
     let expected = (ITERS_PER_THREAD * THREAD_NUM) as jint;
     assert_eq!(expected, atomic.get().unwrap());
+}
+
+#[test]
+pub fn recursive_call() {
+    call_recursively(&VM, EXECUTOR.clone());
 }
