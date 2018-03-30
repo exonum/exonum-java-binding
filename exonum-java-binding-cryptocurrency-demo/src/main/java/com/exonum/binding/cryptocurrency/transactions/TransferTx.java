@@ -56,7 +56,9 @@ final public class TransferTx extends BaseTx implements Transaction {
             if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
                 Wallet from = wallets.get(fromWallet);
                 Wallet to = wallets.get(toWallet);
-                assert from.getBalance() >= sum;
+                if (from.getBalance() < sum) {
+                    return;
+                }
                 wallets.put(fromWallet, new Wallet(from.getName(), from.getBalance() - sum));
                 wallets.put(toWallet, new Wallet(to.getName(), to.getBalance() + sum));
             }

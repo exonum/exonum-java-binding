@@ -1,7 +1,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.messages.Message;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
+import com.exonum.binding.messages.Message;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -13,12 +13,12 @@ final class TransactionPreconditions {
                                                               short expectedTxId) {
     short serviceId = message.getServiceId();
     checkArgument(serviceId == SERVICE_ID,
-        "This message (%s) does not belong to this service: wrong service getId (%s), must be %s",
+            "This message (%s) does not belong to this service: wrong service ID (%s), must be %s",
         message, serviceId, SERVICE_ID);
 
     short txId = message.getMessageType();
     checkArgument(txId == expectedTxId,
-        "This message (%s) has wrong transaction getId (%s), must be %s", message, txId, expectedTxId);
+            "This message (%s) has wrong transaction ID (%s), must be %s", message, txId, expectedTxId);
 
     return message;
   }

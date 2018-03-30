@@ -16,9 +16,12 @@ import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.Node;
 import com.google.common.collect.ImmutableMap;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -26,6 +29,8 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+
+import java.net.HttpURLConnection;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
@@ -93,28 +98,23 @@ public class ApiControllerTest {
 
             String sourceTxMessage = sourceTx.info();
 
-            Async async = context.async();
             // Send a request to submitTransaction
             webClient.post(port, HOST, ApiController.SUBMIT_TRANSACTION_PATH)
-                    .putHeader("content-type", "application/json")
-                    .sendBuffer(Buffer.buffer(sourceTxMessage), ar -> context.verify(v -> {
-                        assertThat(ar.succeeded())
-                                .as("Response to %s: %s", sourceTx, ar)
-                                .isTrue();
+//                    .putHeader("content-type", "application/json")
+                    .sendJsonObject(new JsonObject(sourceTxMessage), context.asyncAssertSuccess(v -> {
 
                         // Check the response status
-                        HttpResponse<Buffer> result = ar.result();
-                        int statusCode = result.statusCode();
-                        assertThat(statusCode).isEqualTo(200);
+                        int statusCode = v.statusCode();
+                        assertThat(statusCode).isEqualTo(HttpURLConnection.HTTP_OK);
 
                         // Check the response body
-                        String response = result.bodyAsString();
+                        String response = v.bodyAsString();
                         assertThat(response).isEqualTo(expectedResponse);
 
                         try {
                             // Verify that a proper transaction was submitted to the network
                             verify(node).submitTransaction(any(sourceTx.getClass()));
-                            async.complete();
+//                            async.complete();
                         } catch (InvalidTransactionException | InternalServerError e) {
                             throw new AssertionError(e);
                         }
@@ -123,7 +123,7 @@ public class ApiControllerTest {
     }
 
     @Test
-    public void serverErrorOnError(TestContext context) throws InvalidTransactionException, InternalServerError {
+    public void serverErrorOnError(TestContext context) throws Exception {
         int port = httpServer.actualPort();
         Transaction tx = new CreateWalletTx("new-wallet");
         String txMessageJson = tx.info();
@@ -131,24 +131,18 @@ public class ApiControllerTest {
         doThrow(InternalServerError.class)
                 .when(node).submitTransaction(any(Transaction.class));
 
-        Async async = context.async();
         // Send a request to submitTransaction
         webClient.post(port, HOST, ApiController.SUBMIT_TRANSACTION_PATH)
                 .putHeader("content-type", "application/json")
-                .sendBuffer(Buffer.buffer(txMessageJson), ar -> context.verify(v -> {
-                    assertThat(ar.succeeded())
-                            .as("Response: %s", ar)
-                            .isTrue();
+                .sendJsonObject(new JsonObject(txMessageJson), context.asyncAssertSuccess(v -> {
 
                     // Check the response status
-                    HttpResponse<Buffer> result = ar.result();
-                    int statusCode = result.statusCode();
+                    int statusCode = v.statusCode();
                     assertThat(statusCode).isEqualTo(500);
 
                     try {
                         // Verify that transaction was attempted to be submitted to the network
                         verify(node).submitTransaction(any());
-                        async.complete();
                     } catch (InvalidTransactionException | InternalServerError e) {
                         throw new AssertionError("Unexpected exception", e);
                     }

@@ -16,15 +16,16 @@ import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Controller for submitting transactions.
@@ -55,21 +56,21 @@ class ApiController {
         router.route(submitTxPath).handler(this::submitTransaction);
     }
 
-    void submitTransaction(RoutingContext rc) {
+    private void submitTransaction(RoutingContext rc) {
         Gson gson = CryptocurrencyTransactionGson.instance();
         // Extract the transaction type from the body
         String body = rc.getBodyAsString();
         BaseTx rawTxMessage = gson.fromJson(body, BaseTx.class);
-        short serviceId = rawTxMessage.getService_id();
+        short serviceId = rawTxMessage.getServiceId();
         if (serviceId != CryptocurrencyService.ID) {
             rc.response()
                     .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
-                    .end(String.format("Unknown service getId (%d), must be (%d)", rawTxMessage.getService_id(),
+                    .end(String.format("Unknown service ID (%d), must be (%d)", rawTxMessage.getServiceId(),
                             CryptocurrencyService.ID));
             return;
         }
 
-        short txId = rawTxMessage.getMessage_id();
+        short txId = rawTxMessage.getMessageId();
         Optional<Transaction> maybeTx = txFromMessage(rc, txId, body);
         if (!maybeTx.isPresent()) {
             return;
@@ -89,7 +90,7 @@ class ApiController {
                     .setStatusMessage("Bad Request: transaction is not valid")
                     .end();
         } catch (InternalServerError e) {
-            log.log(Level.ERROR, e);
+            log.error(Level.ERROR, e);
             rc.response()
                     .setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
                     .end();
@@ -100,7 +101,7 @@ class ApiController {
         if (!TX_MESSAGE_TYPES.containsKey(txId)) {
             rc.response()
                     .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
-                    .end(String.format("Unknown transaction getId (%d)", txId));
+                    .end(String.format("Unknown transaction ID (%d)", txId));
             return Optional.empty();
         }
         Gson gson = CryptocurrencyTransactionGson.instance();

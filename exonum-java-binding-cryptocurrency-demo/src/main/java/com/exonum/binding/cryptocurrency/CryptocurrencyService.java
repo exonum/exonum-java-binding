@@ -36,5 +36,7 @@ public class CryptocurrencyService extends AbstractService {
 
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
+      ApiController controller = new ApiController(node);
+      controller.mountApi(router);
   }
 }

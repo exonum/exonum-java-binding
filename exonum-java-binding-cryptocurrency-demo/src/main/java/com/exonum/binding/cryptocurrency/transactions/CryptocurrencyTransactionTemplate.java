@@ -2,6 +2,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.messages.Message;
+
 import java.nio.ByteBuffer;
 
 final class CryptocurrencyTransactionTemplate {
@@ -23,7 +24,7 @@ final class CryptocurrencyTransactionTemplate {
      * Creates a new builder of cryptocurrency service transaction.
      *
      * @param transactionId a message type of transaction
-     * @return a message builder that has an getId of cryptocurrency service, the given transaction ID, empty body
+     * @return a message builder that has an ID of cryptocurrency service, the given transaction ID, empty body
      *     and all-zero signature
      */
     static Message.Builder newCryptocurrencyTransactionBuilder(short transactionId) {

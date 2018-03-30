@@ -9,11 +9,19 @@ import java.lang.reflect.Type;
 public final class CryptocurrencyTransactionGson {
 
   private static final Gson GSON = new GsonBuilder()
-      .registerTypeHierarchyAdapter(HashCode.class, new HashCodeSerializer())
-      .create();
+          .registerTypeHierarchyAdapter(HashCode.class, new HashCodeSerializer())
+          .setLongSerializationPolicy(LongSerializationPolicy.STRING)
+          .create();
+
+  /**
+   * Returns a configured instance of Gson.
+   */
+  public static Gson instance() {
+    return GSON;
+  }
 
   private static class HashCodeSerializer implements JsonSerializer<HashCode>,
-      JsonDeserializer<HashCode> {
+          JsonDeserializer<HashCode> {
 
     @Override
     public JsonElement serialize(HashCode src, Type typeOfSrc, JsonSerializationContext context) {
@@ -25,9 +33,5 @@ public final class CryptocurrencyTransactionGson {
                                 JsonDeserializationContext context) throws JsonParseException {
       return HashCode.fromString(json.getAsString());
     }
-  }
-
-  public static Gson instance() {
-    return GSON;
   }
 }

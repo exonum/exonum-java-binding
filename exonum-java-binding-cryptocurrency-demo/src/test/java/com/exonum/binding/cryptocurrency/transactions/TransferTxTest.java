@@ -5,7 +5,6 @@ import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
@@ -17,9 +16,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction.TRANSFER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -34,8 +32,8 @@ public class TransferTxTest {
     @Test
     public void isValid() {
         long seed = 1L;
-        HashCode fromWallet = Hashing.defaultHashFunction().hashString("from", UTF_8);
-        HashCode toWallet = Hashing.defaultHashFunction().hashString("to", UTF_8);
+        HashCode fromWallet = hashString("from", UTF_8);
+        HashCode toWallet = hashString("to", UTF_8);
         long sum = 50L;
 
         TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
@@ -47,18 +45,18 @@ public class TransferTxTest {
     public void executeTransfer() {
         try (Database db = new MemoryDb();
              Fork view = db.createFork()) {
-            // Add a new wallet with the given name and initial value
+            // Create source and target wallets with the given initial values
             String from = "wallet-1";
             String to = "wallet-2";
-            long seed = 1;
             long initialValue = 100;
-            long transferSum = 40;
             createWallet(view, from, initialValue);
             createWallet(view, to, initialValue);
 
             // Create and execute the transaction
-            HashCode fromWallet = Hashing.defaultHashFunction().hashString(from, UTF_8);
-            HashCode toWallet = Hashing.defaultHashFunction().hashString(to, UTF_8);
+            long seed = 1;
+            HashCode fromWallet = hashString(from, UTF_8);
+            HashCode toWallet = hashString(to, UTF_8);
+            long transferSum = 40;
             TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferSum);
             tx.execute(view);
 
@@ -80,12 +78,13 @@ public class TransferTxTest {
             // Create and execute the transaction that attempts to transfer to unknown wallet
             String from = "from-wallet";
             String to = "unknown-wallet";
-            HashCode fromWallet = Hashing.defaultHashFunction().hashString(from, UTF_8);
-            HashCode toWallet = Hashing.defaultHashFunction().hashString(to, UTF_8);
             long initialValue = 50L;
             createWallet(view, from, initialValue);
-            long transferValue = 50L;
+
             long seed = 1L;
+            HashCode fromWallet = hashString(from, UTF_8);
+            HashCode toWallet = hashString(to, UTF_8);
+            long transferValue = 50L;
             TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferValue);
             tx.execute(view);
 
@@ -104,8 +103,8 @@ public class TransferTxTest {
             // Create and execute the transaction that attempts to transfer from unknown wallet
             String from = "unknown-wallet";
             String to = "to-wallet";
-            HashCode fromWallet = Hashing.defaultHashFunction().hashString(from, UTF_8);
-            HashCode toWallet = Hashing.defaultHashFunction().hashString(to, UTF_8);
+            HashCode fromWallet = hashString(from, UTF_8);
+            HashCode toWallet = hashString(to, UTF_8);
             long initialValue = 100L;
             createWallet(view, to, initialValue);
             long transferValue = 50L;
@@ -126,8 +125,8 @@ public class TransferTxTest {
         long seed = 0;
         String from = "from-wallet";
         String to = "to-wallet";
-        HashCode fromWallet = Hashing.defaultHashFunction().hashString(from, UTF_8);
-        HashCode toWallet = Hashing.defaultHashFunction().hashString(to, UTF_8);
+        HashCode fromWallet = hashString(from, UTF_8);
+        HashCode toWallet = hashString(to, UTF_8);
         long sum = 50L;
 
         TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
@@ -157,10 +156,14 @@ public class TransferTxTest {
     }
 
     private void createWallet(Fork view, String name, Long initialValue) {
-        HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+        HashCode nameHash = hashString(name, UTF_8);
         CryptocurrencySchema schema = new CryptocurrencySchema(view);
         try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
             wallets.put(nameHash, new Wallet(name, initialValue));
         }
+    }
+
+    private static HashCode hashString(CharSequence input, Charset charset) {
+        return Hashing.defaultHashFunction().hashString(input, charset);
     }
 }

@@ -12,11 +12,11 @@ public class BaseTx {
     this.message_id = message_id;
   }
 
-  public short getService_id() {
+    public short getServiceId() {
     return service_id;
   }
 
-  public short getMessage_id() {
+    public short getMessageId() {
     return message_id;
   }
 }

@@ -105,7 +105,7 @@ public class CreateWalletTxTest {
         String info = tx.info();
 
         BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
-        assertThat(txParams.getService_id(), equalTo(CryptocurrencyService.ID));
-        assertThat(txParams.getMessage_id(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
+        assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
+        assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
     }
 }
