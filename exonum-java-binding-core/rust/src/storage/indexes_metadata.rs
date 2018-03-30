@@ -77,7 +77,10 @@ pub fn check_write(name: &str, table_type: TableType, view: &mut Fork) {
     }
 }
 
-fn indexes_metadata<T>(view: T) -> MapIndex<T, String, IndexMetadata> {
+fn indexes_metadata<T>(view: T) -> MapIndex<T, String, IndexMetadata>
+where
+    T: AsRef<Snapshot + 'static>
+{
     MapIndex::new(SHADOW_TABLE_NAME, view)
 }
 

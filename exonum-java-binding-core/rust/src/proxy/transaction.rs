@@ -1,4 +1,4 @@
-use exonum::blockchain::Transaction;
+use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction};
 use exonum::encoding::Offset;
 use exonum::encoding::serialize::json::ExonumJson;
 use exonum::encoding::serialize::WriteBufferWrapper;
@@ -103,7 +103,7 @@ where
         unwrap_jni(res)
     }
 
-    fn execute(&self, fork: &mut Fork) {
+    fn execute(&self, fork: &mut Fork) -> ExecutionResult {
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let res = env.call_method(
@@ -111,10 +111,12 @@ where
                 "execute",
                 "(J)V",
                 &[JValue::from(view_handle)],
-            );
-            panic_on_exception(env, res).v()
+            )
+                .and_then(JValue::v);
+            Ok(check_error_on_exception(env, res))
         });
         unwrap_jni(res)
+            .map_err(|err: String| ExecutionError::with_description(0, err))
     }
 }
 
