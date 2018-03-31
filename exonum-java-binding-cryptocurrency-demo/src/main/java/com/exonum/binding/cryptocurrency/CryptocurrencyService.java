@@ -11,9 +11,7 @@ import io.vertx.ext.web.Router;
 
 import java.util.Optional;
 
-/**
- * A cryptocurrency demo service.
- */
+/** A cryptocurrency demo service. */
 public class CryptocurrencyService extends AbstractService {
 
   public static final short ID = 42;
@@ -36,7 +34,7 @@ public class CryptocurrencyService extends AbstractService {
 
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
-      ApiController controller = new ApiController(node);
-      controller.mountApi(router);
+    ApiController controller = new ApiController(node);
+    controller.mountApi(router);
   }
 }

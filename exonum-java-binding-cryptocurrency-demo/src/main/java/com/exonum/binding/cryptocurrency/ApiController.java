@@ -27,96 +27,93 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Controller for submitting transactions.
- */
+/** Controller for submitting transactions. */
 class ApiController {
 
-    private static final Logger log = LogManager.getLogger(ApiController.class);
+  @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
+  private static final Logger log = LogManager.getLogger(ApiController.class);
+  private static final Map<Short, Type> TX_MESSAGE_TYPES =
+      Arrays.stream(CryptocurrencyTransaction.values())
+          .collect(
+              Collectors.toMap(
+                  CryptocurrencyTransaction::getId, CryptocurrencyTransaction::transactionClass));
 
-    @VisibleForTesting
-    static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
+  private final Node node;
 
-    private static final Map<Short, Type> TX_MESSAGE_TYPES = Arrays.stream(CryptocurrencyTransaction.values())
-            .collect(Collectors.toMap(
-                    CryptocurrencyTransaction::getId,
-                    CryptocurrencyTransaction::transactionClass
-            ));
+  @Inject
+  ApiController(Node node) {
+    this.node = node;
+  }
 
-    private final Node node;
+  void mountApi(Router router) {
+    String submitTxPath = SUBMIT_TRANSACTION_PATH;
+    router.route(submitTxPath).handler(BodyHandler.create());
+    router.route(submitTxPath).handler(this::submitTransaction);
+  }
 
-    @Inject
-    ApiController(Node node) {
-        this.node = node;
+  private void submitTransaction(RoutingContext rc) {
+    Gson gson = CryptocurrencyTransactionGson.instance();
+    // Extract the transaction type from the body
+    String body = rc.getBodyAsString();
+    BaseTx rawTxMessage = gson.fromJson(body, BaseTx.class);
+    short serviceId = rawTxMessage.getServiceId();
+    if (serviceId != CryptocurrencyService.ID) {
+      rc.response()
+          .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
+          .end(
+              String.format(
+                  "Unknown service ID (%d), must be (%d)",
+                  rawTxMessage.getServiceId(), CryptocurrencyService.ID));
+      return;
     }
 
-    void mountApi(Router router) {
-        String submitTxPath = SUBMIT_TRANSACTION_PATH;
-        router.route(submitTxPath).handler(BodyHandler.create());
-        router.route(submitTxPath).handler(this::submitTransaction);
+    short txId = rawTxMessage.getMessageId();
+    Optional<Transaction> maybeTx = txFromMessage(rc, txId, body);
+    if (!maybeTx.isPresent()) {
+      return;
     }
+    Transaction tx = maybeTx.get();
 
-    private void submitTransaction(RoutingContext rc) {
-        Gson gson = CryptocurrencyTransactionGson.instance();
-        // Extract the transaction type from the body
-        String body = rc.getBodyAsString();
-        BaseTx rawTxMessage = gson.fromJson(body, BaseTx.class);
-        short serviceId = rawTxMessage.getServiceId();
-        if (serviceId != CryptocurrencyService.ID) {
-            rc.response()
-                    .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
-                    .end(String.format("Unknown service ID (%d), must be (%d)", rawTxMessage.getServiceId(),
-                            CryptocurrencyService.ID));
-            return;
-        }
-
-        short txId = rawTxMessage.getMessageId();
-        Optional<Transaction> maybeTx = txFromMessage(rc, txId, body);
-        if (!maybeTx.isPresent()) {
-            return;
-        }
-        Transaction tx = maybeTx.get();
-
-        try {
-            // Submit an executable transaction to the network
-            node.submitTransaction(tx);
-            // Send the OK response with the hash of submitted transaction
-            HashCode txHash = tx.hash();
-            rc.response()
-                    .end(String.valueOf(txHash));
-        } catch (InvalidTransactionException e) {
-            rc.response()
-                    .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
-                    .setStatusMessage("Bad Request: transaction is not valid")
-                    .end();
-        } catch (InternalServerError e) {
-            log.error(Level.ERROR, e);
-            rc.response()
-                    .setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
-                    .end();
-        }
+    try {
+      // Submit an executable transaction to the network
+      node.submitTransaction(tx);
+      // Send the OK response with the hash of submitted transaction
+      HashCode txHash = tx.hash();
+      rc.response().end(String.valueOf(txHash));
+    } catch (InvalidTransactionException e) {
+      rc.response()
+          .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
+          .setStatusMessage("Bad Request: transaction is not valid")
+          .end();
+    } catch (InternalServerError e) {
+      log.error(Level.ERROR, e);
+      rc.response().setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR).end();
     }
+  }
 
-    private Optional<Transaction> txFromMessage(RoutingContext rc, short txId, String txMessageJson) {
-        if (!TX_MESSAGE_TYPES.containsKey(txId)) {
-            rc.response()
-                    .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
-                    .end(String.format("Unknown transaction ID (%d)", txId));
-            return Optional.empty();
-        }
-        Gson gson = CryptocurrencyTransactionGson.instance();
-        Type txMessageType = TX_MESSAGE_TYPES.get(txId);
-        try {
-            Transaction txMessage = gson.fromJson(txMessageJson, txMessageType);
-            return Optional.of(txMessage);
-        } catch (JsonSyntaxException e) {
-            throw new AssertionError("JSON must have been already validated");
-        } catch (JsonParseException e) {
-            rc.response()
-                    .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
-                    .end(String.format("Cannot convert transaction (%d) into an instance "
-                            + "of the corresponding class (%s)", txId, txMessageType));
-            return Optional.empty();
-        }
+  private Optional<Transaction> txFromMessage(RoutingContext rc, short txId, String txMessageJson) {
+    if (!TX_MESSAGE_TYPES.containsKey(txId)) {
+      rc.response()
+          .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
+          .end(String.format("Unknown transaction ID (%d)", txId));
+      return Optional.empty();
     }
+    Gson gson = CryptocurrencyTransactionGson.instance();
+    Type txMessageType = TX_MESSAGE_TYPES.get(txId);
+    try {
+      Transaction txMessage = gson.fromJson(txMessageJson, txMessageType);
+      return Optional.of(txMessage);
+    } catch (JsonSyntaxException e) {
+      throw new AssertionError("JSON must have been already validated");
+    } catch (JsonParseException e) {
+      rc.response()
+          .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
+          .end(
+              String.format(
+                  "Cannot convert transaction (%d) into an instance "
+                      + "of the corresponding class (%s)",
+                  txId, txMessageType));
+      return Optional.empty();
+    }
+  }
 }

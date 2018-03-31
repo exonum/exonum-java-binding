@@ -12,8 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A schema of the cryptocurrency service.
  *
- * <p>Has one collection:
- * Wallets (names and values) (Merklized)
+ * <p>Has one collection: Wallets (names and values) (Merklized)
  */
 public final class CryptocurrencySchema implements Schema {
 
@@ -26,14 +25,14 @@ public final class CryptocurrencySchema implements Schema {
     this.view = checkNotNull(view);
   }
 
+  private static String fullIndexName(String name) {
+    return NAMESPACE + "__" + name;
+  }
+
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return new ProofMapIndexProxy<>(name, view, StandardSerializers.hash(),
-            WalletSerializer.INSTANCE);
-  }
-
-  private static String fullIndexName(String name) {
-    return NAMESPACE + "__" + name;
+    return new ProofMapIndexProxy<>(
+        name, view, StandardSerializers.hash(), WalletSerializer.INSTANCE);
   }
 }

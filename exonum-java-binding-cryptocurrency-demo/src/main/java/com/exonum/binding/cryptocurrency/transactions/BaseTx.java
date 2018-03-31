@@ -1,8 +1,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
-/**
- * Base transaction with common fields, used by all transaction types.
- */
+/** Base transaction with common fields, used by all transaction types. */
 public class BaseTx {
   private final short service_id;
   private final short message_id;
@@ -12,11 +10,11 @@ public class BaseTx {
     this.message_id = message_id;
   }
 
-    public short getServiceId() {
+  public short getServiceId() {
     return service_id;
   }
 
-    public short getMessageId() {
+  public short getMessageId() {
     return message_id;
   }
 }

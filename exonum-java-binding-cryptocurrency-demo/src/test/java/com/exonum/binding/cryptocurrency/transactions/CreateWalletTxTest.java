@@ -21,91 +21,88 @@ import static org.junit.Assert.assertTrue;
 
 public class CreateWalletTxTest {
 
-    static {
-        LibraryLoader.load();
+  static {
+    LibraryLoader.load();
+  }
+
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
+
+  @Test
+  public void isValidNonEmptyName() {
+    String name = "wallet";
+
+    CreateWalletTx tx = new CreateWalletTx(name);
+
+    assertTrue(tx.isValid());
+  }
+
+  @Test
+  public void isValidEmptyName() {
+    String name = "";
+
+    expectedException.expectMessage("Name must not be blank");
+    expectedException.expect(IllegalArgumentException.class);
+    new CreateWalletTx(name);
+  }
+
+  @Test
+  public void executeCreateWalletTx() {
+    String name = "wallet";
+
+    CreateWalletTx tx = new CreateWalletTx(name);
+
+    try (Database db = new MemoryDb();
+        Fork view = db.createFork()) {
+      tx.execute(view);
+
+      // Check that entries have been added.
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+
+        HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+
+        assertThat(wallets.get(nameHash).getName(), equalTo(name));
+        assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
+      }
     }
+  }
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
+  @Test
+  public void executeAlreadyExistingWalletTx() {
+    try (Database db = new MemoryDb();
+        Fork view = db.createFork()) {
+      String name = "wallet";
+      Long value = 100L;
+      HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
 
-    @Test
-    public void isValidNonEmptyName() {
-        String name = "wallet";
+      // Create a wallet manually.
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+        wallets.put(nameHash, new Wallet(name, value));
+      }
 
-        CreateWalletTx tx = new CreateWalletTx(name);
+      // Execute the transaction, that has the same name.
+      CreateWalletTx tx = new CreateWalletTx(name);
+      tx.execute(view);
 
-        assertTrue(tx.isValid());
+      // Check it has not changed the entries in the maps.
+      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+        assertThat(wallets.get(nameHash).getName(), equalTo(name));
+        assertThat(wallets.get(nameHash).getBalance(), equalTo(value));
+      }
     }
+  }
 
-    @Test
-    public void isValidEmptyName() {
-        String name = "";
+  @Test
+  public void info() {
+    String name = "wallet";
 
-        expectedException.expectMessage("Name must not be blank");
-        expectedException.expect(IllegalArgumentException.class);
-        new CreateWalletTx(name);
-    }
+    CreateWalletTx tx = new CreateWalletTx(name);
 
-    @Test
-    public void executeCreateWalletTx() {
-        String name = "wallet";
+    String info = tx.info();
 
-        CreateWalletTx tx = new CreateWalletTx(name);
-
-        try (Database db = new MemoryDb();
-             Fork view = db.createFork()) {
-            tx.execute(view);
-
-            // Check that entries have been added.
-            CryptocurrencySchema schema = new CryptocurrencySchema(view);
-            try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-
-                HashCode nameHash = Hashing.defaultHashFunction()
-                        .hashString(name, UTF_8);
-
-                assertThat(wallets.get(nameHash).getName(), equalTo(name));
-                assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
-            }
-        }
-    }
-
-    @Test
-    public void executeAlreadyExistingWalletTx() {
-        try (Database db = new MemoryDb();
-             Fork view = db.createFork()) {
-            String name = "wallet";
-            Long value = 100L;
-            HashCode nameHash = Hashing.defaultHashFunction()
-                    .hashString(name, UTF_8);
-
-            // Create a wallet manually.
-            CryptocurrencySchema schema = new CryptocurrencySchema(view);
-            try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-                wallets.put(nameHash, new Wallet(name, value));
-            }
-
-            // Execute the transaction, that has the same name.
-            CreateWalletTx tx = new CreateWalletTx(name);
-            tx.execute(view);
-
-            // Check it has not changed the entries in the maps.
-            try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-                assertThat(wallets.get(nameHash).getName(), equalTo(name));
-                assertThat(wallets.get(nameHash).getBalance(), equalTo(value));
-            }
-        }
-    }
-
-    @Test
-    public void info() {
-        String name = "wallet";
-
-        CreateWalletTx tx = new CreateWalletTx(name);
-
-        String info = tx.info();
-
-        BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
-        assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
-        assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
-    }
+    BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
+    assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
+    assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
+  }
 }
