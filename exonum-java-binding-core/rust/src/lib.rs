@@ -9,7 +9,6 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
-#[macro_use]
 pub extern crate exonum;
 pub extern crate jni;
 #[macro_use]
