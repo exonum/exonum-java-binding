@@ -7,7 +7,6 @@ mod key_set_index;
 mod value_set_index;
 mod proof_list_index;
 mod proof_map_index;
-mod indexes_metadata;
 
 pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
 pub use self::memorydb::*;
