@@ -1,5 +1,10 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
@@ -14,14 +19,8 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import org.junit.Test;
-
 import java.nio.charset.Charset;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 public class TransferTxTest {
 

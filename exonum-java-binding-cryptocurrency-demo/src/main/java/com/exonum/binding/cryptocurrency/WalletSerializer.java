@@ -1,8 +1,11 @@
 package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.storage.serialization.Serializer;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public enum WalletSerializer implements Serializer<Wallet> {
   INSTANCE;

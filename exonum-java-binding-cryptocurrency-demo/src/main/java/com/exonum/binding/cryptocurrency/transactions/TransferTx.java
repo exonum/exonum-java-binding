@@ -1,5 +1,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkMessageSize;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
+
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -13,19 +17,15 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkMessageSize;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
 /** A transaction that transfers cryptocurrency between two wallets. */
 public final class TransferTx extends BaseTx implements Transaction {
 
   @VisibleForTesting
   static final int BODY_SIZE = Long.BYTES * 2 + Hashing.DEFAULT_HASH_SIZE_BYTES * 2;
+
   private static final short ID = CryptocurrencyTransaction.TRANSFER.getId();
   private final long seed;
   private final HashCode fromWallet;

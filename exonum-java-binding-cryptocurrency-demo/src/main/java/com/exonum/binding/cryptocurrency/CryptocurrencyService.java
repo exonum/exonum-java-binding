@@ -8,7 +8,6 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-
 import java.util.Optional;
 
 /** A cryptocurrency demo service. */

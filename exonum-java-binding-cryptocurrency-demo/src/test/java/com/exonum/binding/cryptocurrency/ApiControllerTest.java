@@ -1,5 +1,12 @@
 package com.exonum.binding.cryptocurrency;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
 import com.exonum.binding.cryptocurrency.transactions.TransferTx;
@@ -18,19 +25,13 @@ import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
+import java.net.HttpURLConnection;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.net.HttpURLConnection;
-import java.util.Map;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(VertxUnitRunner.class)
 public class ApiControllerTest {

@@ -1,9 +1,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.messages.Message;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 final class TransactionPreconditions {
 

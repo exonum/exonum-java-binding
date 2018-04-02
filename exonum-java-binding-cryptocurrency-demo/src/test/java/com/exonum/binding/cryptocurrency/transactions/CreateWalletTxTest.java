@@ -1,5 +1,10 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -13,11 +18,6 @@ import com.exonum.binding.util.LibraryLoader;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class CreateWalletTxTest {
 

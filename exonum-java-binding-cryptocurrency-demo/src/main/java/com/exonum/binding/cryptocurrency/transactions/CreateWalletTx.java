@@ -1,5 +1,10 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -13,13 +18,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.base.Objects;
-
 import java.nio.ByteBuffer;
-
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /** A transaction that creates a new named wallet with zero balance. */
 public final class CreateWalletTx extends BaseTx implements Transaction {

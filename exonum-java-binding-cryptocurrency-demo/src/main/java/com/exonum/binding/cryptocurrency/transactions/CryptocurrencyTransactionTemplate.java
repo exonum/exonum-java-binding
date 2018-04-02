@@ -2,7 +2,6 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.messages.Message;
-
 import java.nio.ByteBuffer;
 
 final class CryptocurrencyTransactionTemplate {
