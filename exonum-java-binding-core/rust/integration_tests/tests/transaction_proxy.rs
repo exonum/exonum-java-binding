@@ -58,7 +58,11 @@ pub fn execute_valid_transaction() {
             .execute(&mut fork)
             .map_err(TransactionError::from)
             .unwrap_or_else(|err| {
-                panic!("Execution error: {:?}; {}", err.error_type(), err.description().unwrap_or_default())
+                panic!(
+                    "Execution error: {:?}; {}",
+                    err.error_type(),
+                    err.description().unwrap_or_default()
+                )
             });
         db.merge(fork.into_patch()).expect(
             "Failed to merge transaction",
