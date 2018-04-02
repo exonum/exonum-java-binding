@@ -464,6 +464,8 @@ public class ProofMapIndexProxyIntegrationTest
           + "' of type Map, while said index was initially created with type ProofMap");
       expectedException.expect(RuntimeException.class);
 
+      proofMap.put(Hashing.defaultHashFunction().hashBytes(Bytes.bytes(0x08)), "42");
+
       // Create a regular map with the same name as the proof map above.
       MapIndexProxy<HashCode, String> regularMap = new MapIndexProxy<>(MAP_NAME, view,
           StandardSerializers.hash(), StandardSerializers.string());
