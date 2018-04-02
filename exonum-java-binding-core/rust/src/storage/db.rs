@@ -161,7 +161,7 @@ mod tests {
 
     fn entry<T>(view: T) -> Entry<T, i32>
     where
-        T: AsRef<Snapshot + 'static>
+        T: AsRef<Snapshot + 'static>,
     {
         Entry::new("test", view)
     }

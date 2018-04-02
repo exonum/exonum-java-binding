@@ -54,12 +54,15 @@ pub fn execute_valid_transaction() {
     {
         let mut fork = db.fork();
         let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-        let _ = valid_tx.execute(&mut fork)
+        let _ = valid_tx
+            .execute(&mut fork)
             .map_err(TransactionError::from)
             .unwrap_or_else(|err| {
                 panic!("Execution error: {}", err.description().unwrap_or_default())
             });
-        db.merge(fork.into_patch()).expect("Failed to merge transaction");
+        db.merge(fork.into_patch()).expect(
+            "Failed to merge transaction",
+        );
     }
     // Check the transaction has successfully written the expected value into the entry index.
     let snapshot = db.snapshot();
@@ -78,13 +81,17 @@ pub fn execute_should_panic_if_java_error_occurred() {
 
 #[test]
 pub fn execute_should_return_err_if_java_exception_occurred() {
-    let invalid_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
+    let invalid_tx =
+        create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let err = invalid_tx.execute(&mut fork)
+    let err = invalid_tx
+        .execute(&mut fork)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
-    assert!(err.description().unwrap().starts_with("Java exception: java.lang.ArithmeticException"));
+    assert!(err.description().unwrap().starts_with(
+        "Java exception: java.lang.ArithmeticException",
+    ));
 }
 
 #[test]
@@ -105,16 +112,16 @@ pub fn json_serialize_should_return_err_if_java_exception_occurred() {
     let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let err = invalid_tx.serialize_field().expect_err(
-        "This transaction should be serialized with an error!"
+        "This transaction should be serialized with an error!",
     );
     assert!(err.description().starts_with(
-        "Java exception: java.lang.ArithmeticException"
+        "Java exception: java.lang.ArithmeticException",
     ));
 }
 
 fn create_entry<V>(view: V) -> Entry<V, String>
 where
-    V: AsRef<Snapshot + 'static>
+    V: AsRef<Snapshot + 'static>,
 {
     Entry::new(ENTRY_NAME, view)
 }

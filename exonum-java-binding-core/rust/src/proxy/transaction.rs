@@ -111,12 +111,10 @@ where
                 "execute",
                 "(J)V",
                 &[JValue::from(view_handle)],
-            )
-                .and_then(JValue::v);
+            ).and_then(JValue::v);
             Ok(check_error_on_exception(env, res))
         });
-        unwrap_jni(res)
-            .map_err(|err: String| ExecutionError::with_description(0, err))
+        unwrap_jni(res).map_err(|err: String| ExecutionError::with_description(0, err))
     }
 }
 
