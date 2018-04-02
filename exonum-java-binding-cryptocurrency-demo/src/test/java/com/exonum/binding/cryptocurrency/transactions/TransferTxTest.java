@@ -78,7 +78,7 @@ public class TransferTxTest {
   public void executeNoSuchFromWallet() {
     try (Database db = new MemoryDb();
         Fork view = db.createFork()) {
-      // Create and execute the transaction that attempts to transfer to unknown wallet
+      // Create source wallet with the given initial value
       String from = "from-wallet";
       String to = "unknown-wallet";
       long initialValue = 50L;
@@ -89,6 +89,7 @@ public class TransferTxTest {
       HashCode toWallet = hashString(to, UTF_8);
       long transferValue = 50L;
       TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferValue);
+      // Execute the transaction that attempts to transfer to an unknown wallet
       tx.execute(view);
 
       // Check that balance of fromWallet is unchanged

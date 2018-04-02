@@ -27,6 +27,9 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
   private final String name;
 
+  /**
+   * Creates a new wallet creation transaction with given name.
+   */
   public CreateWalletTx(String name) {
     super(CryptocurrencyService.ID, ID);
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);

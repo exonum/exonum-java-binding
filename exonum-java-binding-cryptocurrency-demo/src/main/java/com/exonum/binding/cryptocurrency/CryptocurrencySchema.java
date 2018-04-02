@@ -29,6 +29,9 @@ public final class CryptocurrencySchema implements Schema {
     return NAMESPACE + "__" + name;
   }
 
+  /**
+   * Returns a proof map of wallets. Must be closed.
+   */
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");

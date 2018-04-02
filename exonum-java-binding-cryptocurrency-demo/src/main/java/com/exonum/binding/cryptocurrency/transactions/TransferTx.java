@@ -32,6 +32,10 @@ public final class TransferTx extends BaseTx implements Transaction {
   private final HashCode toWallet;
   private final long sum;
 
+  /**
+   * Creates a new transfer transaction with given seed, fromWallet and toWallet HashCode
+   * and sum of the transfer.
+   */
   public TransferTx(long seed, HashCode fromWallet, HashCode toWallet, long sum) {
     super(CryptocurrencyService.ID, ID);
     this.seed = seed;

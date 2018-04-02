@@ -1,7 +1,6 @@
 package com.exonum.binding.cryptocurrency;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -97,7 +96,6 @@ public class ApiControllerTest {
       // Send a request to submitTransaction
       webClient
           .post(port, HOST, ApiController.SUBMIT_TRANSACTION_PATH)
-          //                    .putHeader("content-type", "application/json")
           .sendJsonObject(
               new JsonObject(sourceTxMessage),
               context.asyncAssertSuccess(
@@ -105,16 +103,15 @@ public class ApiControllerTest {
 
                     // Check the response status
                     int statusCode = v.statusCode();
-                    assertThat(statusCode).isEqualTo(HttpURLConnection.HTTP_OK);
+                    context.assertEquals(statusCode, HttpURLConnection.HTTP_OK);
 
                     // Check the response body
                     String response = v.bodyAsString();
-                    assertThat(response).isEqualTo(expectedResponse);
+                    context.assertEquals(response, expectedResponse);
 
                     try {
                       // Verify that a proper transaction was submitted to the network
                       verify(node).submitTransaction(any(sourceTx.getClass()));
-                      //                            async.complete();
                     } catch (InvalidTransactionException | InternalServerError e) {
                       throw new AssertionError(e);
                     }
@@ -133,7 +130,6 @@ public class ApiControllerTest {
     // Send a request to submitTransaction
     webClient
         .post(port, HOST, ApiController.SUBMIT_TRANSACTION_PATH)
-        .putHeader("content-type", "application/json")
         .sendJsonObject(
             new JsonObject(txMessageJson),
             context.asyncAssertSuccess(
@@ -141,7 +137,7 @@ public class ApiControllerTest {
 
                   // Check the response status
                   int statusCode = v.statusCode();
-                  assertThat(statusCode).isEqualTo(500);
+                  context.assertEquals(statusCode, HttpURLConnection.HTTP_INTERNAL_ERROR);
 
                   try {
                     // Verify that transaction was attempted to be submitted to the network
