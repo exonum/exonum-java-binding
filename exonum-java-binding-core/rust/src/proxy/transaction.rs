@@ -104,6 +104,10 @@ where
     }
 
     fn execute(&self, fork: &mut Fork) -> ExecutionResult {
+        // A required code for a TransactionProxy#execute error result.
+        // This code has no special meaning.
+        const ERROR_CODE: u8 = 0;
+
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let res = env.call_method(
@@ -114,7 +118,9 @@ where
             ).and_then(JValue::v);
             Ok(check_error_on_exception(env, res))
         });
-        unwrap_jni(res).map_err(|err: String| ExecutionError::with_description(0, err))
+        unwrap_jni(res).map_err(|err: String| {
+            ExecutionError::with_description(ERROR_CODE, err)
+        })
     }
 }
 
