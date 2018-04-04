@@ -8,9 +8,9 @@ use integration_tests::mock::transaction::{create_mock_transaction_proxy,
                                            ENTRY_VALUE, INFO_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::DumbExecutor;
-use java_bindings::exonum::blockchain::Transaction;
+use java_bindings::exonum::blockchain::{Transaction, TransactionError};
 use java_bindings::exonum::encoding::serialize::json::ExonumJson;
-use java_bindings::exonum::storage::{Database, Entry, MemoryDB};
+use java_bindings::exonum::storage::{Database, Entry, MemoryDB, Snapshot};
 use java_bindings::jni::JavaVM;
 
 use std::sync::Arc;
@@ -54,8 +54,16 @@ pub fn execute_valid_transaction() {
     {
         let mut fork = db.fork();
         let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-        let result = valid_tx.execute(&mut fork);
-        assert_eq!(result, ());
+        valid_tx
+            .execute(&mut fork)
+            .map_err(TransactionError::from)
+            .unwrap_or_else(|err| {
+                panic!(
+                    "Execution error: {:?}; {}",
+                    err.error_type(),
+                    err.description().unwrap_or_default()
+                )
+            });
         db.merge(fork.into_patch()).expect(
             "Failed to merge transaction",
         );
@@ -72,18 +80,22 @@ pub fn execute_should_panic_if_java_error_occurred() {
     let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    panic_tx.execute(&mut fork);
+    panic_tx.execute(&mut fork).unwrap();
 }
 
 #[test]
-// TODO Change behaviour to "return_err" with Exonum 0.6 [https://jira.bf.local/browse/ECR-912].
-#[should_panic(expected = "Java exception: java.lang.ArithmeticException")]
-pub fn execute_should_panic_if_java_exception_occurred() {
-    let panic_tx =
+pub fn execute_should_return_err_if_java_exception_occurred() {
+    let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    panic_tx.execute(&mut fork);
+    let err = invalid_tx
+        .execute(&mut fork)
+        .map_err(TransactionError::from)
+        .expect_err("This transaction should be executed with an error!");
+    assert!(err.description().unwrap().starts_with(
+        "Java exception: java.lang.ArithmeticException",
+    ));
 }
 
 #[test]
@@ -101,9 +113,9 @@ pub fn json_serialize_should_panic_if_java_error_occurred() {
 
 #[test]
 pub fn json_serialize_should_return_err_if_java_exception_occurred() {
-    let panic_tx =
+    let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
-    let err = panic_tx.serialize_field().expect_err(
+    let err = invalid_tx.serialize_field().expect_err(
         "This transaction should be serialized with an error!",
     );
     assert!(err.description().starts_with(
@@ -111,6 +123,9 @@ pub fn json_serialize_should_return_err_if_java_exception_occurred() {
     ));
 }
 
-fn create_entry<V>(view: V) -> Entry<V, String> {
+fn create_entry<V>(view: V) -> Entry<V, String>
+where
+    V: AsRef<Snapshot + 'static>,
+{
     Entry::new(ENTRY_NAME, view)
 }

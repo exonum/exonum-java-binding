@@ -1,5 +1,6 @@
 use java_bindings::{Executor, ServiceProxy};
 use java_bindings::exonum::crypto::Hash;
+use java_bindings::exonum::storage::Snapshot;
 use java_bindings::exonum::storage::proof_map_index::ProofMapIndex;
 use java_bindings::utils::unwrap_jni;
 
@@ -25,6 +26,9 @@ pub fn create_test_service<E: Executor>(executor: E) -> ServiceProxy<E> {
     ServiceProxy::from_global_ref(executor, test_service)
 }
 
-pub fn create_test_map<V>(view: V, service_name: &str) -> ProofMapIndex<V, Hash, String> {
+pub fn create_test_map<V>(view: V, service_name: &str) -> ProofMapIndex<V, Hash, String>
+where
+    V: AsRef<Snapshot + 'static>,
+{
     ProofMapIndex::new(format!("{}_{}", service_name, TEST_MAP_NAME), view)
 }
