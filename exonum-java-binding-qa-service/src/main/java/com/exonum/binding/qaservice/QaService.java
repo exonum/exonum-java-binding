@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface QaService extends Service {
 
   short ID = 127;
+  String NAME = "ejb-qa-service";
 
   HashCode submitCreateCounter(String counterName);
 

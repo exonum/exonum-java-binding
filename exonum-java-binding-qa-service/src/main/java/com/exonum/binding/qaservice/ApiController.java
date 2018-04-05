@@ -20,7 +20,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -69,13 +68,10 @@ final class ApiController {
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
             .build();
-    for (Map.Entry<String, Handler<RoutingContext>> e : handlers.entrySet()) {
-      String path = e.getKey();
-      Handler<RoutingContext> handler = e.getValue();
 
-      router.route(path)
-          .handler(handler);
-    }
+    handlers.forEach((path, handler) ->
+        router.route(path).handler(handler)
+    );
   }
 
   private void submitCreateCounter(RoutingContext rc) {

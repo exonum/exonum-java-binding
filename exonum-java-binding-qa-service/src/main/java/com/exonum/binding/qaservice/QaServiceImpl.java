@@ -38,8 +38,6 @@ import javax.annotation.Nullable;
  */
 final class QaServiceImpl extends AbstractService implements QaService {
 
-  static final String NAME = "ejb-qa-service";
-
   @VisibleForTesting
   static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
 
