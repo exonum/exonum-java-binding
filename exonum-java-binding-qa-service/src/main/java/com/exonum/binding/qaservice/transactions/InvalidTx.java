@@ -7,7 +7,6 @@ import static com.exonum.binding.qaservice.transactions.TransactionPreconditions
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.qaservice.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.storage.database.Fork;
 import java.util.Collections;
 import java.util.Map;
