@@ -15,8 +15,8 @@ env:
   global:
     - RUST_VERSION=stable
     - RUSTFMT_VERSION=0.9.0
-    - RUST_NIGHTLY_VERSION=nightly-2017-12-11
-    - RUST_CLIPPY_VERSION=0.0.175
+    - RUST_NIGHTLY_VERSION=nightly-2018-03-06
+    - RUST_CLIPPY_VERSION=0.0.187
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     - ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
     - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
