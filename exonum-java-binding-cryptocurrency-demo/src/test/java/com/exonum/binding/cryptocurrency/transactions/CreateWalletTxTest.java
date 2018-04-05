@@ -15,6 +15,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -104,5 +105,12 @@ public class CreateWalletTxTest {
     BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
     assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
     assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
+  }
+
+  @Test
+  public void verifyEquals() {
+    EqualsVerifier
+        .forClass(CreateWalletTx.class)
+        .verify();
   }
 }

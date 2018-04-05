@@ -20,8 +20,6 @@ final class CryptocurrencyTransactionTemplate {
           .setSignature(allocateReadOnly(Message.SIGNATURE_SIZE))
           .build();
 
-  private CryptocurrencyTransactionTemplate() {}
-
   /**
    * Creates a new builder of cryptocurrency service transaction.
    *
@@ -38,4 +36,6 @@ final class CryptocurrencyTransactionTemplate {
   private static ByteBuffer allocateReadOnly(int size) {
     return ByteBuffer.allocate(size).asReadOnlyBuffer();
   }
+
+  private CryptocurrencyTransactionTemplate() {}
 }

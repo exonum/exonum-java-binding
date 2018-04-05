@@ -80,12 +80,14 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
       return false;
     }
     CreateWalletTx that = (CreateWalletTx) o;
-    return Objects.equal(name, that.name);
+    return service_id == that.service_id
+        && message_id == that.message_id
+        && Objects.equal(name, that.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(name);
+    return Objects.hashCode(service_id, message_id, name);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {
@@ -119,7 +121,9 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
     @Override
     public BinaryMessage toMessage(CreateWalletTx transaction) {
-      return newCryptocurrencyTransactionBuilder(ID).setBody(serialize(transaction)).buildRaw();
+      return newCryptocurrencyTransactionBuilder(ID)
+          .setBody(serialize(transaction))
+          .buildRaw();
     }
   }
 }

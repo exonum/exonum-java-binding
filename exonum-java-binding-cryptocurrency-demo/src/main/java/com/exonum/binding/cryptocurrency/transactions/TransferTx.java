@@ -33,8 +33,8 @@ public final class TransferTx extends BaseTx implements Transaction {
   private final long sum;
 
   /**
-   * Creates a new transfer transaction with given seed, fromWallet and toWallet HashCode
-   * and sum of the transfer.
+   * Creates a new transfer transaction with given seed, fromWallet and toWallet HashCode and sum of
+   * the transfer.
    */
   public TransferTx(long seed, HashCode fromWallet, HashCode toWallet, long sum) {
     super(CryptocurrencyService.ID, ID);
@@ -88,7 +88,9 @@ public final class TransferTx extends BaseTx implements Transaction {
       return false;
     }
     TransferTx that = (TransferTx) o;
-    return seed == that.seed
+    return service_id == that.service_id
+        && message_id == that.message_id
+        && seed == that.seed
         && sum == that.sum
         && Objects.equal(fromWallet, that.fromWallet)
         && Objects.equal(toWallet, that.toWallet);
@@ -96,7 +98,7 @@ public final class TransferTx extends BaseTx implements Transaction {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(seed, fromWallet, toWallet, sum);
+    return Objects.hashCode(service_id, message_id, seed, fromWallet, toWallet, sum);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<TransferTx> {

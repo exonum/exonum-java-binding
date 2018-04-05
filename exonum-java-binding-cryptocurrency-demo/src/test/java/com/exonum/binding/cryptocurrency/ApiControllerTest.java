@@ -2,6 +2,7 @@ package com.exonum.binding.cryptocurrency;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -99,19 +100,19 @@ public class ApiControllerTest {
           .sendJsonObject(
               new JsonObject(sourceTxMessage),
               context.asyncAssertSuccess(
-                  v -> {
+                  r -> {
 
                     // Check the response status
-                    int statusCode = v.statusCode();
+                    int statusCode = r.statusCode();
                     context.assertEquals(statusCode, HttpURLConnection.HTTP_OK);
 
                     // Check the response body
-                    String response = v.bodyAsString();
+                    String response = r.bodyAsString();
                     context.assertEquals(response, expectedResponse);
 
                     try {
                       // Verify that a proper transaction was submitted to the network
-                      verify(node).submitTransaction(any(sourceTx.getClass()));
+                      verify(node).submitTransaction(eq(sourceTx));
                     } catch (InvalidTransactionException | InternalServerError e) {
                       throw new AssertionError(e);
                     }
@@ -133,10 +134,10 @@ public class ApiControllerTest {
         .sendJsonObject(
             new JsonObject(txMessageJson),
             context.asyncAssertSuccess(
-                v -> {
+                r -> {
 
                   // Check the response status
-                  int statusCode = v.statusCode();
+                  int statusCode = r.statusCode();
                   context.assertEquals(statusCode, HttpURLConnection.HTTP_INTERNAL_ERROR);
 
                   try {

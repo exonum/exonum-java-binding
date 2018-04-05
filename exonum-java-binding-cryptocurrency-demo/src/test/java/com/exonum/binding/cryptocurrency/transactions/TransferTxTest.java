@@ -20,6 +20,7 @@ import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import java.nio.charset.Charset;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
 public class TransferTxTest {
@@ -155,6 +156,14 @@ public class TransferTxTest {
     Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {}.getType());
 
     assertThat(txParameters, equalTo(tx));
+  }
+
+  @Test
+  public void verifyEquals() {
+    EqualsVerifier
+        .forClass(TransferTx.class)
+        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
+        .verify();
   }
 
   private void createWallet(Fork view, String name, Long initialValue) {
