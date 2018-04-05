@@ -18,6 +18,7 @@ use utils::{cast_handle, drop_handle, Handle, to_handle, unwrap_jni_verbose};
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
 ///
+#[derive(Clone)]
 pub struct NodeContext {
     executor: DumbExecutor,
     db: Arc<Database>,
@@ -41,19 +42,23 @@ impl NodeContext {
         }
     }
 
-    fn executor(&self) -> &DumbExecutor {
+    #[doc(hidden)]
+    pub fn executor(&self) -> &DumbExecutor {
         &self.executor
     }
 
-    fn create_snapshot(&self) -> Box<Snapshot> {
+    #[doc(hidden)]
+    pub fn create_snapshot(&self) -> Box<Snapshot> {
         self.db.snapshot()
     }
 
-    fn public_key(&self) -> PublicKey {
+    #[doc(hidden)]
+    pub fn public_key(&self) -> PublicKey {
         self.public_key
     }
 
-    fn submit(&self, transaction: Box<Transaction>) -> io::Result<()> {
+    #[doc(hidden)]
+    pub fn submit(&self, transaction: Box<Transaction>) -> io::Result<()> {
         self.channel.send(transaction)
     }
 }
@@ -130,7 +135,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSna
 ///
 /// Returns the public key of this node.
 ///
-/// @throws IllegalStateException if the node proxy is closed
+/// Throws `IllegalStateException` if the node proxy is closed
 ///
 /*
  * Class:     com.exonum.binding.service.NodeProxy
