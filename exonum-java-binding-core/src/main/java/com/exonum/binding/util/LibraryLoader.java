@@ -13,9 +13,10 @@ import org.apache.logging.log4j.Logger;
 public final class LibraryLoader {
 
   private static final String BINDING_LIB_NAME = "java_bindings";
-  private static final Logger LOG = LogManager.getLogger(LibraryLoader.class);
   private static final String JAVA_LIBRARY_PATH_PROPERTY = "java.library.path";
   private static final String DYNAMIC_LIBRARIES_ENV_VAR = "LD_LIBRARY_PATH";
+
+  private static final Logger logger = LogManager.getLogger(LibraryLoader.class);
 
   /**
    * Loads the native library with Exonum framework bindings.
@@ -28,7 +29,7 @@ public final class LibraryLoader {
     try {
       System.loadLibrary(BINDING_LIB_NAME);
     } catch (UnsatisfiedLinkError e) {
-      LOG.error("Failed to load '{}' library: {}…\n{}",
+      logger.error("Failed to load '{}' library: {}…\n{}",
           BINDING_LIB_NAME, e, extraLibLoadErrorInfo());
       throw e;
     }
