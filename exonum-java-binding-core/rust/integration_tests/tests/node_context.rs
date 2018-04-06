@@ -48,7 +48,9 @@ pub fn node_works_in_concurrent_threads() {
             barrier.wait();
             for _ in 0..ITERS_PER_THREAD {
                 let transaction = create_mock_transaction_proxy(node.executor().clone(), true);
-                node.submit(Box::new(transaction)).expect("Can't submit the transaction");
+                node.submit(Box::new(transaction)).expect(
+                    "Can't submit the transaction",
+                );
             }
         });
         threads.push(jh);
