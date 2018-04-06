@@ -7,12 +7,20 @@ use jni::JNIEnv;
 use jni::objects::{GlobalRef, JClass};
 use jni::sys::{jbyteArray, jint, jobject};
 
+use std::error::Error;
 use std::io;
+use std::panic;
 use std::sync::Arc;
 
 use proxy::{DumbExecutor, TransactionProxy};
 use storage::View;
-use utils::{cast_handle, drop_handle, Handle, to_handle, unwrap_jni_verbose};
+use utils::{cast_handle, drop_handle, Handle, to_handle, unwrap_exc_or_default, unwrap_exc_or,
+            unwrap_jni_verbose};
+use std::ptr;
+
+const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerError";
+const INVALID_TRANSACTION_EXCEPTION: &str = "com/exonum/binding/messages/InvalidTransactionException";
+const VERIFY_ERROR: &str = "Unable to verify transaction";
 
 ///
 /// An Exonum node context. Allows to add transactions to Exonum network
@@ -87,21 +95,30 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     offset: jint,
     size: jint,
 ) {
-    assert!(offset >= 0, "Offset can't be negative");
-    assert!(size >= 0, "Size can't be negative");
-    let node = cast_handle::<NodeContext>(node_handle);
-    let message = unwrap_jni_verbose(&env, env.convert_byte_array(message));
-    // TODO нужно ли?
-    let message = message[offset as usize..(offset + size) as usize].to_vec();
-    let message = RawMessage::from_vec(message);
-    let vm = unwrap_jni_verbose(&env, env.get_java_vm());
-    let transaction = unsafe { GlobalRef::from_raw(vm, transaction) };
-    let exec = node.executor().clone();
-    let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
-    if let Err(_err) = node.submit(Box::new(transaction)) {
-        // FIXME throw an exception on error
-        unimplemented!()
-    }
+    let res = panic::catch_unwind(|| {
+        assert!(offset >= 0, "Offset can't be negative");
+        assert!(size >= 0, "Size can't be negative");
+        let node = cast_handle::<NodeContext>(node_handle);
+        let message = unwrap_jni_verbose(&env, env.convert_byte_array(message));
+        // TODO нужно ли?
+        let message = message[offset as usize..(offset + size) as usize].to_vec();
+        let message = RawMessage::from_vec(message);
+        let vm = unwrap_jni_verbose(&env, env.get_java_vm());
+        let transaction = unsafe { GlobalRef::from_raw(vm, transaction) };
+        let exec = node.executor().clone();
+        let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
+        if let Err(err) = node.submit(Box::new(transaction)) {
+            let class =
+                if err.kind() == io::ErrorKind::Other && err.description() == VERIFY_ERROR {
+                    INVALID_TRANSACTION_EXCEPTION
+                } else {
+                    INTERNAL_SERVER_ERROR
+                };
+            unwrap_jni_verbose(&env, env.throw_new(class, err.description()));
+        }
+        Ok(())
+    });
+    unwrap_exc_or_default(&env, res);
 }
 
 ///
@@ -122,14 +139,17 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
  */
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSnapshot(
-    _env: JNIEnv,
+    env: JNIEnv,
     _: JClass,
     node_handle: Handle,
 ) -> Handle {
-    let node = cast_handle::<NodeContext>(node_handle);
-    let snapshot = node.create_snapshot();
-    let view = View::from_owned_snapshot(snapshot);
-    to_handle(view)
+    let res = panic::catch_unwind(|| {
+        let node = cast_handle::<NodeContext>(node_handle);
+        let snapshot = node.create_snapshot();
+        let view = View::from_owned_snapshot(snapshot);
+        Ok(to_handle(view))
+    });
+    unwrap_exc_or_default(&env, res)
 }
 
 ///
@@ -148,9 +168,15 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeGetPublic
     _: JClass,
     node_handle: Handle,
 ) -> jbyteArray {
-    let node = cast_handle::<NodeContext>(node_handle);
-    let public_key = node.public_key();
-    unwrap_jni_verbose(&env, env.byte_array_from_slice(public_key.as_ref()))
+    let res = panic::catch_unwind(|| {
+        let node = cast_handle::<NodeContext>(node_handle);
+        let public_key = node.public_key();
+        Ok(unwrap_jni_verbose(
+            &env,
+            env.byte_array_from_slice(public_key.as_ref()),
+        ))
+    });
+    unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Destroys node context.
