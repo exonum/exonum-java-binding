@@ -8,7 +8,8 @@ public final class MyTransactionConverter implements TransactionConverter {
 
   @Override
   public Transaction toTransaction(BinaryMessage message) {
-    return null;
+    // TODO: implement transaction conversion
+    throw new UnsupportedOperationException("Unimplemented");
   }
 
 }

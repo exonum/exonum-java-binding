@@ -20,4 +20,6 @@ mvn verify \
 
 # Run native integration tests that require a JVM
 ./run_native_integration_tests.sh
-./test_archetype.sh
+
+# Generate archetype and run its tests
+mvn install -pl exonum-java-binding-core,exonum-java-binding-service-archetype -am

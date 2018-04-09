@@ -5,7 +5,7 @@ import com.exonum.binding.storage.database.View;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class MySchema implements Schema {
+public final class MySchema implements Schema {
 
   private final View view;
 

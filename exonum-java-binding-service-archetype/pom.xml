@@ -14,12 +14,17 @@
   <name>Exonum Service Maven Archetype: Quickstart</name>
   <description>Archetype for creating Exonum Service application.</description>
 
+  <properties>
+    <maven-archetype.version>3.0.1</maven-archetype.version>
+    <maven-resourcesPlugin.version>3.0.2</maven-resourcesPlugin.version>
+  </properties>
+
   <build>
     <extensions>
       <extension>
         <groupId>org.apache.maven.archetype</groupId>
         <artifactId>archetype-packaging</artifactId>
-        <version>2.2</version>
+        <version>${maven-archetype.version}</version>
       </extension>
     </extensions>
     <pluginManagement>
@@ -27,16 +32,22 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-archetype-plugin</artifactId>
-          <version>2.2</version>
+          <version>${maven-archetype.version}</version>
+          <executions>
+          	<execution>
+          		<goals>
+          			<goal>integration-test</goal>
+          		</goals>
+          	</execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>2.6</version>
+          <version>${maven-resourcesPlugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
-
 
 </project>

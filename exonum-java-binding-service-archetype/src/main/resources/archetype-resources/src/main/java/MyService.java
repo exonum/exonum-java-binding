@@ -11,10 +11,10 @@ import io.vertx.ext.web.Router;
 
 import java.util.Optional;
 
-public class MyService extends AbstractService {
+public final class MyService extends AbstractService {
 
   public static final short ID = 42;
-  static final String NAME = "my-service";
+  static final String NAME = ${serviceName};
   static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
 
   @Inject
