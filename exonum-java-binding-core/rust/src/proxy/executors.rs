@@ -9,8 +9,8 @@ pub trait JniExecutor: Clone + Send + Sync {
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM.
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
-        where
-            F: FnOnce(&JNIEnv) -> JniResult<R>;
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>;
 
     /// Returns a reference to the main JVM interface, which allows to attach threads.
     fn vm(&self) -> &Arc<JavaVM>;
@@ -19,7 +19,7 @@ pub trait JniExecutor: Clone + Send + Sync {
 impl<'t, T: JniExecutor> JniExecutor for &'t T {
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
     where
-        F: FnOnce(&JNIEnv) -> JniResult<R>
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         (*self).with_attached(f)
     }

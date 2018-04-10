@@ -26,8 +26,7 @@ pub struct ServiceProxy {
 }
 
 // `ServiceProxy` is immutable, so it can be safely used in different threads.
-unsafe impl Sync for ServiceProxy {
-}
+unsafe impl Sync for ServiceProxy {}
 
 impl fmt::Debug for ServiceProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -151,7 +150,7 @@ impl Service for ServiceProxy {
             self.exec.clone(),
             context.blockchain().clone(),
             *context.public_key(),
-            context.node_channel().clone()
+            context.node_channel().clone(),
         );
         unwrap_jni(self.exec.with_attached(|env| {
             let node_handle = to_handle(node);

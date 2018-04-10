@@ -36,7 +36,13 @@ pub fn node_works_in_concurrent_threads() {
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = MemoryDB::new();
-    let blockchain = Blockchain::new(storage, vec![], service_keypair.0, service_keypair.1, app_tx.clone());
+    let blockchain = Blockchain::new(
+        storage,
+        vec![],
+        service_keypair.0,
+        service_keypair.1,
+        app_tx.clone(),
+    );
     let node = NodeContext::new(EXECUTOR.clone(), blockchain, service_keypair.0, app_tx);
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
     let mut threads = Vec::new();
