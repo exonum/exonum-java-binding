@@ -26,8 +26,10 @@ mod proxy;
 mod storage;
 #[doc(hidden)]
 pub mod utils;
+mod runtime;
 
 pub use error::*;
 pub use init::*;
 pub use proxy::*;
 pub use storage::*;
+pub use runtime::*;
