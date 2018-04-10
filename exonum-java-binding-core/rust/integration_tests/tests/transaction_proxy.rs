@@ -7,11 +7,10 @@ use integration_tests::mock::transaction::{create_mock_transaction_proxy,
                                            create_throwing_mock_transaction_proxy, ENTRY_NAME,
                                            ENTRY_VALUE, INFO_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::DumbExecutor;
+use java_bindings::MainExecutor;
 use java_bindings::exonum::blockchain::{Transaction, TransactionError};
 use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB, Snapshot};
-use java_bindings::jni::JavaVM;
 
 use std::sync::Arc;
 
@@ -19,8 +18,8 @@ const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests_with_fake_classes());
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
+    pub static ref EXECUTOR: MainExecutor =
+        MainExecutor::new(Arc::new(create_vm_for_tests_with_fake_classes()));
 }
 
 #[test]

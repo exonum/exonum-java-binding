@@ -12,43 +12,31 @@ use serde_json::value::Value;
 use std::error::Error;
 use std::fmt;
 
-use Executor;
+use {JniExecutor, MainExecutor};
 use storage::View;
 use utils::{check_error_on_exception, panic_on_exception, to_handle, unwrap_jni};
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
-pub struct TransactionProxy<E>
-where
-    E: Executor + 'static,
-{
-    exec: E,
+pub struct TransactionProxy {
+    exec: MainExecutor,
     transaction: GlobalRef,
     raw: RawMessage,
 }
 
 // `TransactionProxy` is immutable, so it can be safely used in different threads.
-unsafe impl<E> Sync for TransactionProxy<E>
-where
-    E: Executor + 'static,
-{
+unsafe impl Sync for TransactionProxy {
 }
 
-impl<E> fmt::Debug for TransactionProxy<E>
-where
-    E: Executor + 'static,
-{
+impl fmt::Debug for TransactionProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "TransactionProxy")
     }
 }
 
-impl<E> TransactionProxy<E>
-where
-    E: Executor + 'static,
-{
+impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(exec: E, transaction: GlobalRef, raw: RawMessage) -> Self {
+    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawMessage) -> Self {
         TransactionProxy {
             exec,
             transaction,
@@ -57,10 +45,7 @@ where
     }
 }
 
-impl<E> ExonumJson for TransactionProxy<E>
-where
-    E: Executor + 'static,
-{
+impl ExonumJson for TransactionProxy {
     fn deserialize_field<B>(
         _value: &Value,
         _buffer: &mut B,
@@ -91,10 +76,7 @@ where
     }
 }
 
-impl<E> Transaction for TransactionProxy<E>
-where
-    E: Executor + 'static,
-{
+impl Transaction for TransactionProxy {
     fn verify(&self) -> bool {
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
@@ -124,10 +106,7 @@ where
     }
 }
 
-impl<E> Message for TransactionProxy<E>
-where
-    E: Executor,
-{
+impl Message for TransactionProxy {
     fn from_raw(_raw: RawMessage) -> Result<Self, ::exonum::encoding::Error>
     where
         Self: Sized,

@@ -4,8 +4,8 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::{DumbExecutor, Executor, JniErrorKind, JniResult};
-use java_bindings::jni::{JNIEnv, JavaVM};
+use java_bindings::{JniExecutor, JniErrorKind, JniResult, MainExecutor};
+use java_bindings::jni::JNIEnv;
 use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
                            panic_on_exception};
 
@@ -18,8 +18,7 @@ const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(Arc::new(create_vm_for_tests()));
 }
 
 #[test]

@@ -8,11 +8,11 @@ use futures::{Future, Stream};
 use futures::sync::mpsc;
 use integration_tests::mock::transaction::create_mock_transaction_proxy;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::{DumbExecutor, NodeContext};
+use java_bindings::{MainExecutor, NodeContext};
+use java_bindings::exonum::blockchain::Blockchain;
 use java_bindings::exonum::crypto::gen_keypair;
 use java_bindings::exonum::node::ApiSender;
 use java_bindings::exonum::storage::MemoryDB;
-use java_bindings::jni::JavaVM;
 
 use std::cell::Cell;
 use std::sync::{Arc, Barrier};
@@ -20,8 +20,8 @@ use std::thread::{sleep, spawn};
 use std::time::Duration;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests_with_fake_classes());
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
+    pub static ref EXECUTOR: MainExecutor =
+        MainExecutor::new(Arc::new(create_vm_for_tests_with_fake_classes()));
 }
 
 #[test]
@@ -35,8 +35,9 @@ pub fn node_works_in_concurrent_threads() {
     let api_channel = mpsc::channel(8);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
-    let db = Arc::new(MemoryDB::new());
-    let node = NodeContext::new(EXECUTOR.clone(), db, service_keypair.0, app_tx);
+    let storage = MemoryDB::new();
+    let blockchain = Blockchain::new(storage, vec![], service_keypair.0, service_keypair.1, app_tx.clone());
+    let node = NodeContext::new(EXECUTOR.clone(), blockchain, service_keypair.0, app_tx);
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
     let mut threads = Vec::new();
 

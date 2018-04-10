@@ -1,22 +1,19 @@
-use exonum::blockchain::Transaction;
+use exonum::blockchain::{Blockchain, Transaction};
 use exonum::crypto::PublicKey;
 use exonum::messages::RawMessage;
 use exonum::node::{ApiSender, TransactionSend};
-use exonum::storage::{Database, Snapshot};
+use exonum::storage::Snapshot;
 use jni::JNIEnv;
 use jni::objects::{GlobalRef, JClass};
 use jni::sys::{jbyteArray, jint, jobject};
 
 use std::error::Error;
-use std::io;
-use std::panic;
-use std::sync::Arc;
+use std::{io, panic, ptr};
 
-use proxy::{DumbExecutor, TransactionProxy};
+use proxy::{MainExecutor, TransactionProxy};
 use storage::View;
 use utils::{cast_handle, drop_handle, Handle, to_handle, unwrap_exc_or_default, unwrap_exc_or,
             unwrap_jni_verbose};
-use std::ptr;
 
 const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerError";
 const INVALID_TRANSACTION_EXCEPTION: &str = "com/exonum/binding/messages/InvalidTransactionException";
@@ -28,8 +25,8 @@ const VERIFY_ERROR: &str = "Unable to verify transaction";
 ///
 #[derive(Clone)]
 pub struct NodeContext {
-    executor: DumbExecutor,
-    db: Arc<Database>,
+    executor: MainExecutor,
+    blockchain: Blockchain,
     public_key: PublicKey,
     channel: ApiSender,
 }
@@ -37,27 +34,27 @@ pub struct NodeContext {
 impl NodeContext {
     /// Creates a node context for a service.
     pub fn new(
-        executor: DumbExecutor,
-        db: Arc<Database>,
+        executor: MainExecutor,
+        blockchain: Blockchain,
         public_key: PublicKey,
         channel: ApiSender,
     ) -> Self {
         NodeContext {
             executor,
-            db,
+            blockchain,
             public_key,
             channel,
         }
     }
 
     #[doc(hidden)]
-    pub fn executor(&self) -> &DumbExecutor {
+    pub fn executor(&self) -> &MainExecutor {
         &self.executor
     }
 
     #[doc(hidden)]
     pub fn create_snapshot(&self) -> Box<Snapshot> {
-        self.db.snapshot()
+        self.blockchain.snapshot()
     }
 
     #[doc(hidden)]

@@ -20,7 +20,8 @@ exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumox
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,
 # so that users are directed to the correct build instructions!
-exonum = "0.6"
+exonum = "0.6.0"
+iron = "0.6.0"
 jni = { version = "0.9.3", git = "https://github.com/alexander-irbis/jni-rs", branch = "isinstanceof" }
 lazy_static = "1.0.0"
 log = "0.4.1"

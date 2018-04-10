@@ -9,45 +9,33 @@ use serde_json::value::Value;
 
 use std::fmt;
 
-use {Executor, TransactionProxy};
+use {JniExecutor, MainExecutor, TransactionProxy};
 use storage::View;
 use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception,
             to_handle, unwrap_jni};
 
 /// A proxy for `Service`s.
 #[derive(Clone)]
-pub struct ServiceProxy<E>
-where
-    E: Executor + 'static,
-{
-    exec: E,
+pub struct ServiceProxy {
+    exec: MainExecutor,
     service: GlobalRef,
     id: u16,
     name: String,
 }
 
 // `ServiceProxy` is immutable, so it can be safely used in different threads.
-unsafe impl<E> Sync for ServiceProxy<E>
-where
-    E: Executor + 'static,
-{
+unsafe impl Sync for ServiceProxy {
 }
 
-impl<E> fmt::Debug for ServiceProxy<E>
-where
-    E: Executor + 'static,
-{
+impl fmt::Debug for ServiceProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "ServiceProxy(id={},name={})", self.id, self.name)
     }
 }
 
-impl<E> ServiceProxy<E>
-where
-    E: Executor + 'static,
-{
+impl ServiceProxy {
     /// Creates a `ServiceProxy` of the given Java service.
-    pub fn from_global_ref(exec: E, service: GlobalRef) -> Self {
+    pub fn from_global_ref(exec: MainExecutor, service: GlobalRef) -> Self {
         let (id, name) = unwrap_jni(exec.with_attached(|env| {
             let id =
                 panic_on_exception(env, env.call_method(service.as_obj(), "getId", "()S", &[]));
@@ -72,10 +60,7 @@ where
     }
 }
 
-impl<E> Service for ServiceProxy<E>
-where
-    E: Executor + 'static,
-{
+impl Service for ServiceProxy {
     fn service_id(&self) -> u16 {
         self.id
     }

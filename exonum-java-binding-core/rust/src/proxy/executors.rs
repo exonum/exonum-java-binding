@@ -1,29 +1,50 @@
 use jni::{JavaVM, JNIEnv};
 
-use std::marker::{Send, Sync};
 use std::sync::Arc;
 
 use {JniErrorKind, JniResult};
 
 /// An interface for JNI thread attachment manager.
-pub trait Executor: Clone + Send + Sync {
+pub trait JniExecutor: Clone + Send + Sync {
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM.
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
-    where
-        F: FnOnce(&JNIEnv) -> JniResult<R>;
+        where
+            F: FnOnce(&JNIEnv) -> JniResult<R>;
+
+    /// Returns a reference to the main JVM interface, which allows to attach threads.
+    fn vm(&self) -> &Arc<JavaVM>;
 }
 
-/// A "dumb" implementation of `Executor`.
+impl<'t, T: JniExecutor> JniExecutor for &'t T {
+    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>
+    {
+        (*self).with_attached(f)
+    }
+
+    fn vm(&self) -> &Arc<JavaVM> {
+        (*self).vm()
+    }
+}
+
+/// A "dumb" implementation of `JniExecutor`.
 /// It attaches the current thread to JVM and then detaches.
 /// It just works, but it leads to very poor performance.
 #[derive(Clone)]
 pub struct DumbExecutor {
-    /// Main JVM interface, which allows to attach threads.
-    pub vm: Arc<JavaVM>,
+    vm: Arc<JavaVM>,
 }
 
-impl Executor for DumbExecutor {
+impl DumbExecutor {
+    /// Creates a `DumbExecutor`
+    pub fn new(vm: Arc<JavaVM>) -> Self {
+        DumbExecutor { vm }
+    }
+}
+
+impl JniExecutor for DumbExecutor {
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
@@ -39,5 +60,35 @@ impl Executor for DumbExecutor {
                 }
             }
         }
+    }
+
+    /// Returns a reference to the main JVM interface, which allows to attach threads.
+    fn vm(&self) -> &Arc<JavaVM> {
+        &self.vm
+    }
+}
+
+/// An interface for JNI thread attachment manager.
+/// It attaches the current thread to JVM and then detaches.
+#[derive(Clone)]
+pub struct MainExecutor(DumbExecutor);
+
+impl MainExecutor {
+    /// Creates a `MainExecutor`
+    pub fn new(vm: Arc<JavaVM>) -> Self {
+        MainExecutor(DumbExecutor::new(vm))
+    }
+}
+
+impl JniExecutor for MainExecutor {
+    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+        where
+            F: FnOnce(&JNIEnv) -> JniResult<R>,
+    {
+        self.0.with_attached(f)
+    }
+
+    fn vm(&self) -> &Arc<JavaVM> {
+        self.0.vm()
     }
 }

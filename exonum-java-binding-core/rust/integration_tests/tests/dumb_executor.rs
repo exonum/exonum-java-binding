@@ -6,7 +6,7 @@ extern crate lazy_static;
 use integration_tests::example_proxy::AtomicIntegerProxy;
 use integration_tests::executor::call_recursively;
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::DumbExecutor;
+use java_bindings::{DumbExecutor, MainExecutor};
 use java_bindings::jni::JavaVM;
 use java_bindings::jni::sys::jint;
 
@@ -15,12 +15,13 @@ use std::thread::spawn;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
+    pub static ref DUMB_EXECUTOR: DumbExecutor = DumbExecutor::new(VM.clone());
+    pub static ref MAIN_EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 #[test]
 pub fn it_works() {
-    let mut atomic = AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap();
+    let mut atomic = AtomicIntegerProxy::new(MAIN_EXECUTOR.clone(), 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     assert_eq!(1, atomic.increment_and_get().unwrap());
     assert_eq!(3, atomic.add_and_get(2).unwrap());
@@ -29,7 +30,7 @@ pub fn it_works() {
 
 #[test]
 pub fn it_works_in_another_thread() {
-    let mut atomic = AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap();
+    let mut atomic = AtomicIntegerProxy::new(MAIN_EXECUTOR.clone(), 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     let jh = spawn(move || {
         assert_eq!(1, atomic.increment_and_get().unwrap());
@@ -45,7 +46,7 @@ pub fn it_works_in_concurrent_threads() {
     const ITERS_PER_THREAD: usize = 10_000;
     const THREAD_NUM: usize = 8;
 
-    let mut atomic = AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap();
+    let mut atomic = AtomicIntegerProxy::new(MAIN_EXECUTOR.clone(), 0).unwrap();
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
     let mut threads = Vec::new();
 
@@ -69,5 +70,5 @@ pub fn it_works_in_concurrent_threads() {
 
 #[test]
 pub fn recursive_call() {
-    call_recursively(&VM, EXECUTOR.clone());
+    call_recursively(&*DUMB_EXECUTOR);
 }

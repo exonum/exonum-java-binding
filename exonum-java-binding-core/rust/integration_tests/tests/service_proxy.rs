@@ -8,13 +8,12 @@ use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
 use integration_tests::test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY,
                                       INITIAL_ENTRY_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::DumbExecutor;
+use java_bindings::MainExecutor;
 use java_bindings::exonum::blockchain::Service;
 use java_bindings::exonum::crypto::hash;
 use java_bindings::exonum::encoding::Error as MessageError;
 use java_bindings::exonum::messages::RawTransaction;
 use java_bindings::exonum::storage::{Database, MemoryDB};
-use java_bindings::jni::JavaVM;
 use java_bindings::serde_json::Value;
 use java_bindings::utils::any_to_string;
 
@@ -22,8 +21,8 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests_with_fake_classes());
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
+    pub static ref EXECUTOR: MainExecutor =
+        MainExecutor::new(Arc::new(create_vm_for_tests_with_fake_classes()));
 }
 
 const EXCEPTION_CLASS: &str = "java/lang/Exception";
