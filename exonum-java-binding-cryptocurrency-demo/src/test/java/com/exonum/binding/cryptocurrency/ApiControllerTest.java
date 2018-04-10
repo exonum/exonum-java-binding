@@ -6,15 +6,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
+import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionConverter;
 import com.exonum.binding.cryptocurrency.transactions.TransferTx;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.service.Node;
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -40,7 +41,7 @@ public class ApiControllerTest {
 
   @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
 
-  Node node;
+  CryptocurrencyService service;
 
   ApiController controller;
 
@@ -52,8 +53,8 @@ public class ApiControllerTest {
 
   @Before
   public void setup(TestContext context) {
-    node = mock(Node.class);
-    controller = new ApiController(node);
+    service = mock(CryptocurrencyService.class);
+    controller = new ApiController(service);
 
     vertx = rule.vertx();
 
@@ -94,6 +95,13 @@ public class ApiControllerTest {
 
       String sourceTxMessage = sourceTx.info();
 
+      try {
+        when(service.submitTransaction(eq(sourceTx)))
+            .thenReturn(sourceTx.hash());
+      } catch (InvalidTransactionException | InternalServerError e) {
+        throw new AssertionError(e);
+      }
+
       // Send a request to submitTransaction
       webClient
           .post(port, HOST, ApiController.SUBMIT_TRANSACTION_PATH)
@@ -112,7 +120,7 @@ public class ApiControllerTest {
 
                     try {
                       // Verify that a proper transaction was submitted to the network
-                      verify(node).submitTransaction(eq(sourceTx));
+                      verify(service).submitTransaction(eq(sourceTx));
                     } catch (InvalidTransactionException | InternalServerError e) {
                       throw new AssertionError(e);
                     }
@@ -126,7 +134,7 @@ public class ApiControllerTest {
     Transaction tx = new CreateWalletTx("new-wallet");
     String txMessageJson = tx.info();
 
-    doThrow(InternalServerError.class).when(node).submitTransaction(any(Transaction.class));
+    doThrow(InternalServerError.class).when(service).submitTransaction(any(Transaction.class));
 
     // Send a request to submitTransaction
     webClient
@@ -142,7 +150,7 @@ public class ApiControllerTest {
 
                   try {
                     // Verify that transaction was attempted to be submitted to the network
-                    verify(node).submitTransaction(any());
+                    verify(service).submitTransaction(any());
                   } catch (InvalidTransactionException | InternalServerError e) {
                     throw new AssertionError("Unexpected exception", e);
                   }

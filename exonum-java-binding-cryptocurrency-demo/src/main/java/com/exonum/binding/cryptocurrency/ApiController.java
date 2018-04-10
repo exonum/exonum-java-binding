@@ -7,7 +7,6 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.service.Node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -22,7 +21,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,11 +35,11 @@ class ApiController {
               Collectors.toMap(
                   CryptocurrencyTransaction::getId, CryptocurrencyTransaction::transactionClass));
 
-  private final Node node;
+  private final CryptocurrencyService service;
 
   @Inject
-  ApiController(Node node) {
-    this.node = node;
+  ApiController(CryptocurrencyService service) {
+    this.service = service;
   }
 
   void mountApi(Router router) {
@@ -75,9 +73,7 @@ class ApiController {
 
     try {
       // Submit an executable transaction to the network
-      node.submitTransaction(tx);
-      // Send the OK response with the hash of submitted transaction
-      HashCode txHash = tx.hash();
+      HashCode txHash = service.submitTransaction(tx);
       rc.response().end(String.valueOf(txHash));
     } catch (InvalidTransactionException e) {
       rc.response()

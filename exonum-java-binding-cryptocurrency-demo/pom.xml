@@ -17,8 +17,7 @@
 
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/checkstyle.xml</checkstyle.configLocation>
-    <ejb-core.nativeLibPath>${project.parent.basedir}/exonum-java-binding-core/rust/target/debug
-    </ejb-core.nativeLibPath>
+    <ejb-core.nativeLibPath>${project.parent.basedir}/exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
   </properties>
 
   <build>
@@ -30,8 +29,7 @@
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
-          <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml
-          </suppressionsLocation>
+          <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
         </configuration>
       </plugin>
 
