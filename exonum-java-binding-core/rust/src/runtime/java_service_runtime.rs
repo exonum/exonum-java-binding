@@ -7,44 +7,49 @@ use utils::unwrap_jni;
 use exonum::helpers::fabric::ServiceFactory;
 use exonum::blockchain::Service;
 use exonum::helpers::fabric::Context;
+use runtime::config::{Config, JvmConfig, ServiceConfig};
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
 const START_SERVICE_SIGNATURE: &str =
     "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 pub struct JavaServiceRuntime {
-    executor: DumbExecutor,
-    service_proxy: ServiceProxy<DumbExecutor>,
+    pub executor: DumbExecutor,
+    pub service_proxy: ServiceProxy<DumbExecutor>,
 }
 
 impl JavaServiceRuntime {
-    pub fn new(classpath: &str, port: i32) -> Self {
+    pub fn new(config: Config) -> Self {
+        let executor = Self::create_executor(config.jvm_config);
+        let service_proxy = Self::create_service(config.service_config, executor.clone());
+        Self {
+            executor,
+            service_proxy,
+        }
+    }
+
+    pub fn create_executor(config: JvmConfig) -> DumbExecutor {
         let java_vm = {
             let args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
             let args = args_builder.build().unwrap();
             jni::JavaVM::new(args).unwrap()
         };
-        let executor = DumbExecutor { vm: Arc::new(java_vm) };
-        Self::with_executor(executor, classpath, port)
+        DumbExecutor { vm: Arc::new(java_vm) }
     }
 
-    pub fn with_executor(executor: DumbExecutor, classpath: &str, port: i32) -> Self {
+    pub fn create_service(config: ServiceConfig, executor: DumbExecutor) -> ServiceProxy<DumbExecutor> {
         let service = unwrap_jni(executor.with_attached(|env| {
-            let classpath = env.new_string(classpath).unwrap();
+            let classpath = env.new_string(config.classpath).unwrap();
             let classpath: jni::objects::JObject = *classpath;
             let service = env.call_static_method(
                 SERVICE_BOOTSTRAP_PATH,
                 "startService",
                 START_SERVICE_SIGNATURE,
-                &[classpath.into(), port.into()],
+                &[classpath.into(), config.port.into()],
             )?.l()?;
             env.new_global_ref(env.auto_local(service).as_obj())
         }));
-        let service_proxy = ServiceProxy::from_global_ref(executor.clone(), service);
-        Self {
-            executor,
-            service_proxy,
-        }
+        ServiceProxy::from_global_ref(executor, service)
     }
 }
 
