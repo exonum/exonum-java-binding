@@ -45,6 +45,7 @@ public class CryptocurrencyServiceImpl extends AbstractService implements Crypto
     controller.mountApi(router);
   }
 
+  @Override
   @SuppressWarnings("ConstantConditions")
   public HashCode submitTransaction(Transaction tx)
       throws InvalidTransactionException, InternalServerError {

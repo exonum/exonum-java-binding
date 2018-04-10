@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
  */
 class ServiceBootstrap {
 
-  private static final Logger LOG = LogManager.getLogger(ServiceBootstrap.class);
+  private static final Logger logger = LogManager.getLogger(ServiceBootstrap.class);
 
   /**
    * Bootstraps the Java service.
@@ -37,7 +37,7 @@ class ServiceBootstrap {
           try {
             server.stop().get();
           } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Failed to stop the server during VM shutdown", e);
+            logger.warn("Failed to stop the server during VM shutdown", e);
           }
         })
     );

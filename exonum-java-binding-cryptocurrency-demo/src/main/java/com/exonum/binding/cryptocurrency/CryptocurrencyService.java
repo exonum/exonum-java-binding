@@ -9,5 +9,6 @@ public interface CryptocurrencyService {
   short ID = 42;
   String NAME = "cryptocurrency-demo-service";
 
-  HashCode submitTransaction(Transaction tx) throws InvalidTransactionException, InternalServerError;
+  HashCode submitTransaction(Transaction tx)
+      throws InvalidTransactionException, InternalServerError;
 }
