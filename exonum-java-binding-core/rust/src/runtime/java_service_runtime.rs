@@ -30,7 +30,10 @@ impl JavaServiceRuntime {
 
     pub fn create_executor(config: JvmConfig) -> DumbExecutor {
         let java_vm = {
-            let args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
+            let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
+            if config.debug {
+                args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
+            }
             let args = args_builder.build().unwrap();
             jni::JavaVM::new(args).unwrap()
         };

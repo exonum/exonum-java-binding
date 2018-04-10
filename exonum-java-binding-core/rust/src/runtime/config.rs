@@ -5,8 +5,6 @@ pub struct Config {
 
 pub struct JvmConfig {
     pub debug: bool,
-    pub with_fakes: bool,
-    pub library_path: String,
 }
 
 pub struct ServiceConfig {
