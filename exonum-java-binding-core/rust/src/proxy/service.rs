@@ -1,8 +1,9 @@
-use exonum::blockchain::{Service, Transaction};
+use exonum::blockchain::{ApiContext, Service, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
-use exonum::storage::{Fork, Snapshot};
 use exonum::messages::RawMessage;
+use exonum::storage::{Fork, Snapshot};
+use iron::Handler;
 use jni::objects::{GlobalRef, JObject, JValue};
 use serde_json;
 use serde_json::value::Value;
@@ -10,6 +11,7 @@ use serde_json::value::Value;
 use std::fmt;
 
 use {JniExecutor, MainExecutor, TransactionProxy};
+use proxy::node::NodeContext;
 use storage::View;
 use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception,
             to_handle, unwrap_jni};
@@ -142,5 +144,28 @@ impl Service for ServiceProxy {
                 )
             })
             .unwrap()
+    }
+
+    fn public_api_handler(&self, context: &ApiContext) -> Option<Box<Handler>> {
+        let node = NodeContext::new(
+            self.exec.clone(),
+            context.blockchain().clone(),
+            *context.public_key(),
+            context.node_channel().clone()
+        );
+        unwrap_jni(self.exec.with_attached(|env| {
+            let node_handle = to_handle(node);
+            panic_on_exception(
+                env,
+                env.call_method(
+                    self.service.as_obj(),
+                    "mountPublicApiHandler",
+                    "(J)V",
+                    &[JValue::from(node_handle)],
+                ),
+            );
+            Ok(())
+        }));
+        None
     }
 }
