@@ -19,10 +19,8 @@ const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerE
 const INVALID_TRANSACTION_EXCEPTION: &str = "com/exonum/binding/messages/InvalidTransactionException";
 const VERIFY_ERROR: &str = "Unable to verify transaction";
 
-///
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
-///
 #[derive(Clone)]
 pub struct NodeContext {
     executor: MainExecutor,
@@ -68,7 +66,6 @@ impl NodeContext {
     }
 }
 
-///
 /// Submits a transaction into the network.
 ///
 /// Parameters:
@@ -77,11 +74,6 @@ impl NodeContext {
 /// - `message` - an array containing the transaction message
 /// - `offset` - an offset from which the message starts
 /// - `size` - a size of the message in bytes
-/*
- * Class:     com.exonum.binding.service.NodeProxy
- * Method:    nativeSubmit
- * Signature: (JLcom/exonum/binding/messages/Transaction;[BII)V
- */
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
@@ -97,7 +89,6 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
         assert!(size >= 0, "Size can't be negative");
         let node = cast_handle::<NodeContext>(node_handle);
         let message = unwrap_jni_verbose(&env, env.convert_byte_array(message));
-        // TODO нужно ли?
         let message = message[offset as usize..(offset + size) as usize].to_vec();
         let message = RawMessage::from_vec(message);
         let vm = unwrap_jni_verbose(&env, env.get_java_vm());
@@ -118,7 +109,6 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     unwrap_exc_or_default(&env, res);
 }
 
-///
 /// Creates a new snapshot of the current database state.
 ///
 /// The caller is responsible to **close** the snapshot
@@ -128,12 +118,6 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
 /// - `node_handle` - a native handle to the native node object
 ///
 /// Returns a `Snapshot` of the database state
-///
-/*
- * Class:     com.exonum.binding.service.NodeProxy
- * Method:    nativeCreateSnapshot
- * Signature: (J)J
- */
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSnapshot(
     env: JNIEnv,
@@ -149,16 +133,9 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSna
     unwrap_exc_or_default(&env, res)
 }
 
-///
 /// Returns the public key of this node.
 ///
 /// Throws `IllegalStateException` if the node proxy is closed
-///
-/*
- * Class:     com.exonum.binding.service.NodeProxy
- * Method:    nativeGetPublicKey
- * Signature: (J)[B
- */
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeGetPublicKey(
     env: JNIEnv,
