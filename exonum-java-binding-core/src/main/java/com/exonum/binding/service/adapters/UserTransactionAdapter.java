@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
 
 /**
  * An adapter of a user-facing interface {@link Transaction} to an interface with a native code.
@@ -15,6 +16,7 @@ public class UserTransactionAdapter {
   @VisibleForTesting
   final Transaction transaction;
 
+  @Inject
   public UserTransactionAdapter(Transaction transaction) {
     this.transaction = checkNotNull(transaction, "Transaction must not be null");
   }
