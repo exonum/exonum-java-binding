@@ -13,6 +13,9 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
+/**
+ * A log4j test appender, used for logs assertions.
+ */
 @Plugin(name = "TestAppender", category = "Core", elementType = "appender", printObject = true)
 public class TestAppender extends AbstractAppender {
 
@@ -27,6 +30,9 @@ public class TestAppender extends AbstractAppender {
     getMessages().add(event.getMessage().toString());
   }
 
+  /**
+   * Creates a new test appender.
+   */
   @PluginFactory
   public static TestAppender createAppender(
       @PluginAttribute("name") String name,
