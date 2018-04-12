@@ -1,6 +1,5 @@
-use java_bindings::Executor;
+use java_bindings::{Executor, JniErrorKind};
 use java_bindings::jni::JavaVM;
-use java_bindings::jni::errors::ErrorKind;
 
 pub fn call_recursively<E: Executor>(vm: &JavaVM, executor: E) {
     check_detached(vm);
@@ -30,7 +29,7 @@ pub fn is_attached(vm: &JavaVM) -> bool {
     vm.get_env()
         .map(|_| true)
         .or_else(|jni_err| match jni_err.0 {
-            ErrorKind::ThreadDetached => Ok(false),
+            JniErrorKind::ThreadDetached => Ok(false),
             _ => Err(jni_err),
         })
         .expect("An unexpected JNI error occurred")

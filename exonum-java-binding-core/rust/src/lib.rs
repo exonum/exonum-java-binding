@@ -19,12 +19,14 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
+mod error;
 mod init;
 mod proxy;
 mod storage;
 #[doc(hidden)]
 pub mod utils;
 
+pub use error::*;
 pub use init::*;
 pub use proxy::*;
 pub use storage::*;

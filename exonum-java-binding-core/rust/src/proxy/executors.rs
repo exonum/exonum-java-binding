@@ -1,17 +1,17 @@
+use jni::{JavaVM, JNIEnv};
+
 use std::marker::{Send, Sync};
 use std::sync::Arc;
 
-use jni::*;
-use jni::JNIEnv;
-use jni::errors::{ErrorKind, Result};
+use {JniErrorKind, JniResult};
 
 /// An interface for JNI thread attachment manager.
 pub trait Executor: Clone + Send + Sync {
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM.
-    fn with_attached<F, R>(&self, f: F) -> Result<R>
+    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
     where
-        F: FnOnce(&JNIEnv) -> Result<R>;
+        F: FnOnce(&JNIEnv) -> JniResult<R>;
 }
 
 /// A "dumb" implementation of `Executor`.
@@ -24,14 +24,14 @@ pub struct DumbExecutor {
 }
 
 impl Executor for DumbExecutor {
-    fn with_attached<F, R>(&self, f: F) -> Result<R>
+    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
     where
-        F: FnOnce(&JNIEnv) -> Result<R>,
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         match self.vm.get_env() {
             Ok(jni_env) => f(&jni_env),
             Err(jni_err) => {
-                if let ErrorKind::ThreadDetached = jni_err.0 {
+                if let JniErrorKind::ThreadDetached = jni_err.0 {
                     let attach_guard = self.vm.attach_current_thread()?;
                     f(&attach_guard)
                 } else {

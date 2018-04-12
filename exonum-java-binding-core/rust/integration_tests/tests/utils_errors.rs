@@ -4,9 +4,8 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::{DumbExecutor, Executor};
+use java_bindings::{DumbExecutor, Executor, JniErrorKind, JniResult};
 use java_bindings::jni::{JNIEnv, JavaVM};
-use java_bindings::jni::errors::{ErrorKind, Result as JNIResult};
 use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
                            panic_on_exception};
 
@@ -162,11 +161,11 @@ fn get_and_clear_java_exception_if_no_exception_occurred() {
         .unwrap();
 }
 
-fn throw(env: &JNIEnv, e: &str) -> JNIResult<()> {
+fn throw(env: &JNIEnv, e: &str) -> JniResult<()> {
     env.throw((e, ""))?;
-    Err(ErrorKind::JavaException.into())
+    Err(JniErrorKind::JavaException.into())
 }
 
-fn make_jni_error() -> JNIResult<()> {
-    Err(ErrorKind::Msg("Custom test error".to_string()).into())
+fn make_jni_error() -> JniResult<()> {
+    Err(JniErrorKind::Msg("Custom test error".to_string()).into())
 }

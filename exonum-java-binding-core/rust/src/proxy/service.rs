@@ -2,15 +2,14 @@ use exonum::blockchain::{Service, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
 use exonum::storage::{Fork, Snapshot};
-use exonum::messages::RawTransaction;
+use exonum::messages::RawMessage;
 use jni::objects::{GlobalRef, JObject, JValue};
 use serde_json;
 use serde_json::value::Value;
 
 use std::fmt;
 
-use Executor;
-use TransactionProxy;
+use {Executor, TransactionProxy};
 use storage::View;
 use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception,
             to_handle, unwrap_jni};
@@ -111,7 +110,7 @@ where
         }))
     }
 
-    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<Transaction>, MessageError> {
+    fn tx_from_raw(&self, raw: RawMessage) -> Result<Box<Transaction>, MessageError> {
         unwrap_jni(self.exec.with_attached(|env| {
             let transaction_message = JObject::from(env.byte_array_from_slice(raw.as_ref())?);
             let res = env.call_method(
