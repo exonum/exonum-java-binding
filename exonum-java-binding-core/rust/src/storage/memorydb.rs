@@ -1,11 +1,11 @@
+use exonum::storage::{Database, MemoryDB};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
 
 use std::panic;
 
-use exonum::storage::{Database, MemoryDB};
+use storage::db::{View, ViewRef};
 use utils::{self, Handle};
-use super::db::{View, ViewRef};
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]

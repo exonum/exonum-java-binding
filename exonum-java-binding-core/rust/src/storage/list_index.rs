@@ -1,3 +1,5 @@
+use exonum::storage::{Snapshot, Fork, ListIndex};
+use exonum::storage::list_index::ListIndexIter;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jlong, jbyteArray, jboolean};
@@ -5,10 +7,8 @@ use jni::sys::{jlong, jbyteArray, jboolean};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, ListIndex};
-use exonum::storage::list_index::ListIndexIter;
+use storage::db::{View, ViewRef, Value};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = ListIndex<T, Value>;
 

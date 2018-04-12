@@ -1,6 +1,6 @@
+use exonum::storage::{Fork, Snapshot};
 use jni::JNIEnv;
 use jni::objects::JClass;
-use exonum::storage::{Fork, Snapshot};
 
 use utils::{self, Handle};
 

@@ -1,10 +1,10 @@
+use exonum::helpers;
 use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::jlong;
 
 use std::panic;
 
-use exonum::helpers;
 use utils;
 
 /// Performs the logger initialization.

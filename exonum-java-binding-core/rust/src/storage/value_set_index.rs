@@ -1,3 +1,5 @@
+use exonum::storage::{Snapshot, Fork, ValueSetIndex};
+use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jbyteArray, jboolean, jobject};
@@ -5,10 +7,8 @@ use jni::sys::{jbyteArray, jboolean, jobject};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, ValueSetIndex};
-use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
+use storage::db::{View, ViewRef, Value};
 use utils::{self, Handle, PairIter};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = ValueSetIndex<T, Value>;
 

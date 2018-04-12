@@ -1,6 +1,5 @@
-use java_bindings::Executor;
-use java_bindings::jni::*;
-use java_bindings::jni::errors::Result;
+use java_bindings::{Executor, JniResult};
+use java_bindings::jni::JNIEnv;
 use java_bindings::jni::objects::{AutoLocal, GlobalRef, JValue};
 use java_bindings::jni::sys::jint;
 
@@ -19,7 +18,7 @@ where
     E: Executor,
 {
     /// Creates a new instance of `AtomicIntegerProxy`
-    pub fn new(exec: E, init_value: jint) -> Result<Self> {
+    pub fn new(exec: E, init_value: jint) -> JniResult<Self> {
         let obj = exec.with_attached(|env: &JNIEnv| {
             let local_ref = AutoLocal::new(
                 env,
@@ -35,14 +34,14 @@ where
     }
 
     /// Gets a current value from java object
-    pub fn get(&mut self) -> Result<jint> {
+    pub fn get(&mut self) -> JniResult<jint> {
         self.exec.with_attached(|env| {
             env.call_method(self.obj.as_obj(), "get", "()I", &[])?.i()
         })
     }
 
     /// Increments a value of java object and then gets it
-    pub fn increment_and_get(&mut self) -> Result<jint> {
+    pub fn increment_and_get(&mut self) -> JniResult<jint> {
         self.exec.with_attached(|env| {
             env.call_method(self.obj.as_obj(), "incrementAndGet", "()I", &[])?
                 .i()
@@ -50,7 +49,7 @@ where
     }
 
     /// Adds some value to the value of java object and then gets a resulting value
-    pub fn add_and_get(&mut self, delta: jint) -> Result<jint> {
+    pub fn add_and_get(&mut self, delta: jint) -> JniResult<jint> {
         let delta = JValue::from(delta);
         self.exec.with_attached(|env| {
             env.call_method(self.obj.as_obj(), "addAndGet", "(I)I", &[delta])?

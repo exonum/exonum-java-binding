@@ -1,6 +1,6 @@
 use std::any::TypeId;
-use std::sync::RwLock;
 use std::collections::HashMap;
+use std::sync::RwLock;
 
 use utils::Handle;
 

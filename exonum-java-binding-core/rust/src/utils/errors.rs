@@ -1,10 +1,10 @@
 use jni::JNIEnv;
-use jni::errors::{Error as JNIError, ErrorKind, Result as JNIResult};
 use jni::objects::JObject;
 
 use std::cell::Cell;
 
-use super::{get_class_name, get_exception_message, get_exception_stack_trace};
+use {JniError, JniErrorKind, JniResult};
+use utils::{get_class_name, get_exception_message, get_exception_stack_trace};
 
 const CLASS_JL_ERROR: &str = "java/lang/Error";
 
@@ -14,9 +14,9 @@ const CLASS_JL_ERROR: &str = "java/lang/Error";
 /// - Panics if there is some JNI error.
 /// - If there is a pending Java exception of any type,
 ///   handles it and panics with a message from the exception.
-pub fn panic_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> T {
+pub fn panic_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> T {
     result.unwrap_or_else(|jni_error| match jni_error.0 {
-        ErrorKind::JavaException => {
+        JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             panic!(describe_java_exception(env, exception, &jni_error));
         }
@@ -32,9 +32,9 @@ pub fn panic_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> T {
 /// Panics:
 /// - Panics if there is some JNI error.
 /// - If there is a pending Java exception that is a subclass of `java.lang.Error`.
-pub fn check_error_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> Result<T, String> {
+pub fn check_error_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> Result<T, String> {
     result.map_err(|jni_error| match jni_error.0 {
-        ErrorKind::JavaException => {
+        JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = describe_java_exception(env, exception, &jni_error);
             if unwrap_jni_verbose(env, env.is_instance_of(exception, CLASS_JL_ERROR)) {
@@ -49,7 +49,7 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JNIResult<T>) -> Result
 /// Unwraps `jni::Result`
 ///
 /// Panics if there is some JNI error.
-pub fn unwrap_jni<T>(res: JNIResult<T>) -> T {
+pub fn unwrap_jni<T>(res: JniResult<T>) -> T {
     res.unwrap_or_else(|err| panic!("JNI error: {:?}", err))
 }
 
@@ -59,7 +59,7 @@ pub fn unwrap_jni<T>(res: JNIResult<T>) -> T {
 /// an infinite recursion and stack overflow.
 ///
 /// Panics if there is some JNI error.
-pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JNIResult<T>) -> T {
+pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JniResult<T>) -> T {
     thread_local! {
         static IN_RECURSION: Cell<bool> = Cell::new(false);
     }
@@ -72,7 +72,7 @@ pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JNIResult<T>) -> T {
                 panic!("Recursive JNI error: {:?}", jni_error);
             } else {
                 match jni_error.0 {
-                    ErrorKind::JavaException => {
+                    JniErrorKind::JavaException => {
                         in_recursion.set(true);
                         let exception = get_and_clear_java_exception(env);
                         let message = describe_java_exception(env, exception, &jni_error);
@@ -95,7 +95,7 @@ pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
     exception
 }
 
-fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JNIError) -> String {
+fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JniError) -> String {
     assert!(!exception.is_null(), "No exception thrown.");
     format!(
         "Java exception: {}; {:?}\n{}{:#?}",

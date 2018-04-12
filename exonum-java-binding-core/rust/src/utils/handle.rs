@@ -7,8 +7,7 @@ use jni::sys::jlong;
 use std::panic;
 use std::marker::PhantomData;
 
-use super::exception;
-use super::resource_manager;
+use utils::{exception, resource_manager};
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
