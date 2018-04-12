@@ -4,6 +4,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collections;
@@ -21,8 +22,11 @@ public final class TestSchema implements Schema {
 
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, String> testMap() {
-    return new ProofMapIndexProxy<>(TEST_MAP_NAME, view, StandardSerializers.hash(),
-        StandardSerializers.string());
+    return new ProofMapIndexProxy<>(
+        TEST_MAP_NAME,
+        view,
+        CheckingSerializerDecorator.from(StandardSerializers.hash()),
+        CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 
   @Override

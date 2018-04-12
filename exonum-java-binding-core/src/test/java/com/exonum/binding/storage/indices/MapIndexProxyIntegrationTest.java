@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
@@ -406,8 +407,11 @@ public class MapIndexProxyIntegrationTest
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {
-    return new MapIndexProxy<>(name, view, StandardSerializers.string(),
-        StandardSerializers.string());
+    return new MapIndexProxy<>(
+        name,
+        view,
+        CheckingSerializerDecorator.from(StandardSerializers.string()),
+        CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 
   private static String prefix(String source, int prefixSize) {

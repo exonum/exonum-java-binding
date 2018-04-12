@@ -3,6 +3,7 @@ package com.exonum.binding.storage.indices;
 import com.exonum.binding.proxy.NativeProxy;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorOne;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -25,7 +26,9 @@ class IndicesTests {
                            IndexConstructorOne<IndexT, String> indexSupplier,
                            BiConsumer<View, IndexT> indexTest) {
     try (View view = viewSupplier.get();
-         IndexT index = indexSupplier.create(indexName, view, StandardSerializers.string())) {
+        IndexT index =
+            indexSupplier.create(
+                indexName, view, CheckingSerializerDecorator.from(StandardSerializers.string()))) {
       indexTest.accept(view, index);
     }
   }

@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -176,6 +177,7 @@ public class KeySetIndexProxyIntegrationTest
 
   @Override
   KeySetIndexProxy<String> create(String name, View view) {
-    return new KeySetIndexProxy<>(name, view, StandardSerializers.string());
+    return new KeySetIndexProxy<>(
+        name, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 }

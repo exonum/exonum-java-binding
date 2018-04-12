@@ -4,6 +4,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
 
@@ -41,7 +42,7 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ListIndexProxy(String name, View view, Serializer<E> serializer) {
+  public ListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 

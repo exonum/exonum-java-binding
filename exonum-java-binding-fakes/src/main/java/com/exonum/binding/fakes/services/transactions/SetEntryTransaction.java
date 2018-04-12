@@ -7,6 +7,7 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 
 /**
@@ -63,6 +64,7 @@ public final class SetEntryTransaction implements Transaction {
   }
 
   private EntryIndexProxy<String> createEntry(Fork view) {
-    return new EntryIndexProxy<>(ENTRY_NAME, view, StandardSerializers.string());
+    return new EntryIndexProxy<>(
+        ENTRY_NAME, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 }

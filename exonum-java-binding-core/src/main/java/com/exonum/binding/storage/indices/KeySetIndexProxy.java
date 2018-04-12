@@ -49,9 +49,9 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public KeySetIndexProxy(String name, View view, Serializer<E> serializer) {
+  public KeySetIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.serializer = CheckingSerializerDecorator.from(serializer);
+    this.serializer = serializer;
   }
 
   /**

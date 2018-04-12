@@ -7,6 +7,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkPosit
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 
 /**
@@ -44,7 +45,7 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofListIndexProxy(String name, View view, Serializer<E> serializer) {
+  public ProofListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 

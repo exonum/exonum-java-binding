@@ -12,10 +12,10 @@ import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.TestStorageItems;
+import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MemoryDbIntegrationTest {
@@ -118,11 +118,14 @@ public class MemoryDbIntegrationTest {
   }
 
   private static ListIndex<String> newList(String name, View view) {
-    return new ListIndexProxy<>(name, view, StandardSerializers.string());
+    return new ListIndexProxy<>(name, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 
   private static MapIndex<String, String> newMap(String name, View view) {
-    return new MapIndexProxy<>(name, view, StandardSerializers.string(),
-        StandardSerializers.string());
+    return new MapIndexProxy<>(
+        name,
+        view,
+        CheckingSerializerDecorator.from(StandardSerializers.string()),
+        CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 }
