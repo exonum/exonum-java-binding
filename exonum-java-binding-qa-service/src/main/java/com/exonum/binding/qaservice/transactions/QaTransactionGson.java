@@ -17,7 +17,7 @@ import java.lang.reflect.Type;
 /** A converter of transaction parameters of QA service to JSON. */
 @PromoteToCore("… in some form or another. You may add a constructor that accepts extra "
     + "type hierarchy adapters to create a proper GSON.")
-class QaTransactionJsonWriter {
+public final class QaTransactionGson {
 
   private static final Gson GSON = new GsonBuilder()
       .registerTypeHierarchyAdapter(HashCode.class, new HashCodeSerializer())
@@ -40,11 +40,19 @@ class QaTransactionJsonWriter {
   }
 
   /** Returns a configured instance of Gson. */
-  static Gson instance() {
+  public static Gson instance() {
     return GSON;
   }
 
-  String toJson(short txId, Object txBody) {
+  /**
+   * Converts a transaction of QA service with the given body into its JSON representation.
+   *
+   * @param txId a transaction id
+   * @param txBody a body of the transaction
+   * @return a transaction message serialized in JSON
+   * @see AnyTransaction
+   */
+  public String toJson(short txId, Object txBody) {
     AnyTransaction txParams = new AnyTransaction<>(txId, txBody);
     return GSON.toJson(txParams);
   }

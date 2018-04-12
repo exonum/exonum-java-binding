@@ -37,7 +37,7 @@ public class CreateCounterTxIntegrationTest {
 
   static final Message CREATE_COUNTER_MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-      .setMessageType(CREATE_COUNTER.id)
+      .setMessageType(CREATE_COUNTER.id())
       .setBody(serialize("counter"))
       .buildPartial();
 
@@ -54,7 +54,7 @@ public class CreateCounterTxIntegrationTest {
   @Test
   public void converterFromMessageRejectsWrongTxId() {
     BinaryMessage message = messageBuilder()
-        .setMessageType((short) (CREATE_COUNTER.id + 1))
+        .setMessageType((short) (CREATE_COUNTER.id() + 1))
         .buildRaw();
 
     expectedException.expect(IllegalArgumentException.class);
@@ -67,7 +67,7 @@ public class CreateCounterTxIntegrationTest {
     CreateCounterTx tx = new CreateCounterTx(name);
 
     BinaryMessage expectedMessage = messageBuilder()
-        .setMessageType(CREATE_COUNTER.id)
+        .setMessageType(CREATE_COUNTER.id())
         .setBody(serialize(name))
         .buildRaw();
 
@@ -162,12 +162,12 @@ public class CreateCounterTxIntegrationTest {
 
     String info = tx.info();
 
-    Gson gson = QaTransactionJsonWriter.instance();
+    Gson gson = QaTransactionGson.instance();
     AnyTransaction<CreateCounterTx> txParams = gson.fromJson(info,
         new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
     );
     assertThat(txParams.service_id, equalTo(QaService.ID));
-    assertThat(txParams.message_id, equalTo(CREATE_COUNTER.id));
+    assertThat(txParams.message_id, equalTo(CREATE_COUNTER.id()));
     assertThat(txParams.body, equalTo(tx));
   }
 

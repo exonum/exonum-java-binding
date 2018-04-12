@@ -8,7 +8,7 @@ import com.google.common.primitives.Shorts;
  *
  * @implNote Keep in sync with {@link QaTransactionConverter#TRANSACTION_FACTORIES}.
  */
-enum QaTransaction {
+public enum QaTransaction {
   // Well-behaved transactions.
   CREATE_COUNTER(0),
   INCREMENT_COUNTER(1),
@@ -18,13 +18,15 @@ enum QaTransaction {
   INVALID_THROWING(11),
   VALID_THROWING(12);
 
-  final short id;
+  private final short id;
 
   QaTransaction(int id) {
     this.id = Shorts.checkedCast(id);
   }
 
-  short id() {
+  /** Returns the unique id of this transaction. */
+  public short id() {
     return id;
   }
+
 }
