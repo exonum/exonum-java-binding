@@ -118,7 +118,8 @@ public class MemoryDbIntegrationTest {
   }
 
   private static ListIndex<String> newList(String name, View view) {
-    return new ListIndexProxy<>(name, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
+    return new ListIndexProxy<>(
+        name, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
   }
 
   private static MapIndex<String, String> newMap(String name, View view) {

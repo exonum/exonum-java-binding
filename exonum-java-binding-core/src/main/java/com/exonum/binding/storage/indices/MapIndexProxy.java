@@ -4,7 +4,6 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
 import com.google.errorprone.annotations.MustBeClosed;
 
 /**

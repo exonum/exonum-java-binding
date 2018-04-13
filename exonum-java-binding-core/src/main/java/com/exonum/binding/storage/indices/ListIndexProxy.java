@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
 
 /**
