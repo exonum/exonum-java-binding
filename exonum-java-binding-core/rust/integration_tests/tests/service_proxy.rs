@@ -14,15 +14,15 @@ use java_bindings::exonum::crypto::hash;
 use java_bindings::exonum::encoding::Error as MessageError;
 use java_bindings::exonum::messages::RawTransaction;
 use java_bindings::exonum::storage::{Database, MemoryDB};
+use java_bindings::jni::JavaVM;
 use java_bindings::serde_json::Value;
 use java_bindings::utils::any_to_string;
 
 use std::panic::{catch_unwind, AssertUnwindSafe};
-use std::sync::Arc;
 
 lazy_static! {
-    pub static ref EXECUTOR: MainExecutor =
-        MainExecutor::new(Arc::new(create_vm_for_tests_with_fake_classes()));
+    static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
 }
 
 const EXCEPTION_CLASS: &str = "java/lang/Exception";

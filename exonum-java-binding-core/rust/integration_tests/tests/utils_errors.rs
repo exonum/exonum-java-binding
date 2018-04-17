@@ -5,11 +5,9 @@ extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
 use java_bindings::{JniExecutor, JniErrorKind, JniResult, MainExecutor};
-use java_bindings::jni::JNIEnv;
+use java_bindings::jni::{JavaVM, JNIEnv};
 use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
                            panic_on_exception};
-
-use std::sync::Arc;
 
 const ERROR_CLASS: &str = "java/lang/Error";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
@@ -18,7 +16,8 @@ const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 
 lazy_static! {
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(Arc::new(create_vm_for_tests()));
+    static ref VM: JavaVM = create_vm_for_tests();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
 }
 
 #[test]

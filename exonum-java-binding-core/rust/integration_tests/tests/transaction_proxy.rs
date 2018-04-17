@@ -11,15 +11,14 @@ use java_bindings::MainExecutor;
 use java_bindings::exonum::blockchain::{Transaction, TransactionError};
 use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB, Snapshot};
-
-use std::sync::Arc;
+use java_bindings::jni::JavaVM;
 
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 lazy_static! {
-    pub static ref EXECUTOR: MainExecutor =
-        MainExecutor::new(Arc::new(create_vm_for_tests_with_fake_classes()));
+    static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
 }
 
 #[test]

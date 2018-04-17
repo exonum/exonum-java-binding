@@ -14,9 +14,9 @@ use std::sync::{Arc, Barrier};
 use std::thread::spawn;
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests());
-    pub static ref DUMB_EXECUTOR: DumbExecutor = DumbExecutor::new(VM.clone());
-    pub static ref MAIN_EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
+    pub static ref VM: JavaVM = create_vm_for_tests();
+    pub static ref DUMB_EXECUTOR: DumbExecutor = DumbExecutor::new(&VM);
+    pub static ref MAIN_EXECUTOR: MainExecutor = MainExecutor::new(&VM);
 }
 
 #[test]

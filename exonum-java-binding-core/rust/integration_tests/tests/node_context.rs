@@ -13,6 +13,7 @@ use java_bindings::exonum::blockchain::Blockchain;
 use java_bindings::exonum::crypto::gen_keypair;
 use java_bindings::exonum::node::ApiSender;
 use java_bindings::exonum::storage::MemoryDB;
+use java_bindings::jni::JavaVM;
 
 use std::cell::Cell;
 use std::sync::{Arc, Barrier};
@@ -20,8 +21,8 @@ use std::thread::{sleep, spawn};
 use std::time::Duration;
 
 lazy_static! {
-    pub static ref EXECUTOR: MainExecutor =
-        MainExecutor::new(Arc::new(create_vm_for_tests_with_fake_classes()));
+    static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
 }
 
 #[test]
