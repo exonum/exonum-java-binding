@@ -4,7 +4,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::example_proxy::AtomicIntegerProxy;
-use integration_tests::executor::call_recursively;
+use integration_tests::executor::check_nested_attach_guards;
 use integration_tests::vm::create_vm_for_tests;
 use java_bindings::{DumbExecutor, MainExecutor};
 use java_bindings::jni::JavaVM;
@@ -69,6 +69,6 @@ pub fn it_works_in_concurrent_threads() {
 }
 
 #[test]
-pub fn recursive_call() {
-    call_recursively(&*DUMB_EXECUTOR);
+pub fn nested_attach_guards() {
+    check_nested_attach_guards(&VM, &*DUMB_EXECUTOR);
 }

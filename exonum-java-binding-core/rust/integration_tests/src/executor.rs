@@ -1,8 +1,7 @@
 use java_bindings::{JniExecutor, JniErrorKind};
 use java_bindings::jni::JavaVM;
 
-pub fn call_recursively<E: JniExecutor>(executor: E) {
-    let vm = executor.vm();
+pub fn check_nested_attach_guards<E: JniExecutor>(vm: &JavaVM, executor: E) {
     check_detached(vm);
     executor
         .with_attached(|_| {

@@ -11,9 +11,6 @@ pub trait JniExecutor: Clone + Send + Sync {
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>;
-
-    /// Returns a reference to the main JVM interface, which allows to attach threads.
-    fn vm(&self) -> &Arc<JavaVM>;
 }
 
 impl<'t, T: JniExecutor> JniExecutor for &'t T {
@@ -23,10 +20,6 @@ impl<'t, T: JniExecutor> JniExecutor for &'t T {
     {
         (*self).with_attached(f)
     }
-
-    fn vm(&self) -> &Arc<JavaVM> {
-        (*self).vm()
-    }
 }
 
 /// A "dumb" implementation of `JniExecutor`.
@@ -34,6 +27,7 @@ impl<'t, T: JniExecutor> JniExecutor for &'t T {
 /// It just works, but it leads to very poor performance.
 #[derive(Clone)]
 pub struct DumbExecutor {
+    /// The main JVM interface, which allows to attach threads.
     vm: Arc<JavaVM>,
 }
 
@@ -61,11 +55,6 @@ impl JniExecutor for DumbExecutor {
             }
         }
     }
-
-    /// Returns a reference to the main JVM interface, which allows to attach threads.
-    fn vm(&self) -> &Arc<JavaVM> {
-        &self.vm
-    }
 }
 
 /// An interface for JNI thread attachment manager.
@@ -88,9 +77,5 @@ impl JniExecutor for MainExecutor {
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         self.0.with_attached(f)
-    }
-
-    fn vm(&self) -> &Arc<JavaVM> {
-        self.0.vm()
     }
 }
