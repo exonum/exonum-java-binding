@@ -84,8 +84,8 @@ impl MainExecutor {
 
 impl JniExecutor for MainExecutor {
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
-        where
-            F: FnOnce(&JNIEnv) -> JniResult<R>,
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         self.0.with_attached(f)
     }
