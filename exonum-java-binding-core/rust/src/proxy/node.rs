@@ -4,7 +4,7 @@ use exonum::messages::RawMessage;
 use exonum::node::{ApiSender, TransactionSend};
 use exonum::storage::Snapshot;
 use jni::JNIEnv;
-use jni::objects::{GlobalRef, JClass};
+use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 
 use std::error::Error;
@@ -17,7 +17,7 @@ use utils::{cast_handle, drop_handle, Handle, to_handle, unwrap_exc_or_default, 
 
 const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerError";
 const INVALID_TRANSACTION_EXCEPTION: &str = "com/exonum/binding/messages/InvalidTransactionException";
-const VERIFY_ERROR: &str = "Unable to verify transaction";
+const VERIFY_ERROR_MESSAGE: &str = "Unable to verify transaction";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
@@ -91,17 +91,17 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
         let message = unwrap_jni_verbose(&env, env.convert_byte_array(message));
         let message = message[offset as usize..(offset + size) as usize].to_vec();
         let message = RawMessage::from_vec(message);
-        let vm = unwrap_jni_verbose(&env, env.get_java_vm());
-        let transaction = unsafe { GlobalRef::from_raw(vm, transaction) };
+        let transaction = unwrap_jni_verbose(&env, env.new_global_ref(transaction.into()));
         let exec = node.executor().clone();
         let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
         if let Err(err) = node.submit(Box::new(transaction)) {
-            let class =
-                if err.kind() == io::ErrorKind::Other && err.description() == VERIFY_ERROR {
-                    INVALID_TRANSACTION_EXCEPTION
-                } else {
-                    INTERNAL_SERVER_ERROR
-                };
+            let class = if err.kind() == io::ErrorKind::Other &&
+                err.description() == VERIFY_ERROR_MESSAGE
+            {
+                INVALID_TRANSACTION_EXCEPTION
+            } else {
+                INTERNAL_SERVER_ERROR
+            };
             unwrap_jni_verbose(&env, env.throw_new(class, err.description()));
         }
         Ok(())
@@ -134,8 +134,6 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSna
 }
 
 /// Returns the public key of this node.
-///
-/// Throws `IllegalStateException` if the node proxy is closed
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeGetPublicKey(
     env: JNIEnv,

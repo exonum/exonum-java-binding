@@ -32,7 +32,7 @@ pub fn node_works_in_concurrent_threads() {
     let iter_delay = Duration::new(0, 100);
 
     let service_keypair = gen_keypair();
-    let api_channel = mpsc::channel(8);
+    let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = MemoryDB::new();

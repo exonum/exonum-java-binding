@@ -70,6 +70,8 @@ impl JniExecutor for DumbExecutor {
 
 /// An interface for JNI thread attachment manager.
 /// It attaches the current thread to JVM and then detaches.
+/// This struct incapsulates an actual implementation of `JniExecutor`
+/// (currently - `DumbExecutor`)
 #[derive(Clone)]
 pub struct MainExecutor(DumbExecutor);
 
