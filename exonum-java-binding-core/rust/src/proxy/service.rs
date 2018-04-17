@@ -66,11 +66,8 @@ impl Service for ServiceProxy {
         self.id
     }
 
-    fn service_name(&self) -> &'static str {
-        // FIXME `'static` lifetime removed in Exonum 0.6 [https://jira.bf.local/browse/ECR-912].
-        // dirty hack
-        unsafe { &*(self.name.as_str() as *const str) }
-        // &self.name
+    fn service_name(&self) -> &str {
+        &self.name
     }
 
     fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
