@@ -17,6 +17,8 @@
     <java.compiler.target>8</java.compiler.target>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
+
+    <assertj.version>3.9.1</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.1.0</guice.version>
@@ -221,6 +223,13 @@
         <groupId>org.powermock</groupId>
         <artifactId>powermock-api-mockito2</artifactId>
         <version>${powermock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
