@@ -13,17 +13,20 @@ const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstra
 const START_SERVICE_SIGNATURE: &str =
     "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
+/// Controls JVM and java service.
 pub struct JavaServiceRuntime {
     executor: DumbExecutor,
     service_proxy: ServiceProxy<DumbExecutor>,
 }
 
 impl JavaServiceRuntime {
+    /// Create new runtime from config.
     pub fn new(config: Config) -> Self {
         let executor = Self::create_executor(config.jvm_config);
         Self::with_executor(executor)
     }
 
+    /// Create new runtime with prepared `Executor`.
     pub fn with_executor(executor: DumbExecutor) -> Self {
         let service_proxy = Self::create_service(config.service_config, executor.clone());
         Self {
@@ -32,7 +35,7 @@ impl JavaServiceRuntime {
         }
     }
 
-    pub fn create_executor(config: JvmConfig) -> DumbExecutor {
+    fn create_executor(config: JvmConfig) -> DumbExecutor {
         let java_vm = {
             let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
