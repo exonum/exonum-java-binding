@@ -16,8 +16,8 @@ import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -50,12 +50,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
+  protected Schema createDataSchema(ViewProxy view) {
     return new QaSchema(view);
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public Optional<String> initialize(ForkProxy fork) {
     // Add a default counter to the blockchain.
     String defaultCounterName = "default";
     new CreateCounterTx(defaultCounterName)
@@ -112,7 +112,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
-    try (View view = node.createSnapshot()) {
+    try (ViewProxy view = node.createSnapshot()) {
       QaSchema schema = new QaSchema(view);
       try (MapIndex<HashCode, Long> counters = schema.counters();
            MapIndex<HashCode, String> counterNames = schema.counterNames()) {

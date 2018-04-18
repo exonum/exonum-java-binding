@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 
@@ -23,18 +23,18 @@ final class IndexConstructors {
 
   @FunctionalInterface
   interface IndexConstructorOne<IndexT, ElementT> {
-    IndexT create(String name, View view, Serializer<ElementT> serializer);
+    IndexT create(String name, ViewProxy view, Serializer<ElementT> serializer);
   }
 
   @FunctionalInterface
   interface IndexConstructorTwo<IndexT, KeyT, ValueT> {
-    IndexT create(String name, View view, Serializer<KeyT> keySerializer,
+    IndexT create(String name, ViewProxy view, Serializer<KeyT> keySerializer,
                   Serializer<ValueT> valueSerializer);
   }
 
   @FunctionalInterface
   interface PartiallyAppliedIndexConstructor<IndexT> {
-    IndexT create(String name, View view);
+    IndexT create(String name, ViewProxy view);
   }
 
   private IndexConstructors() {}

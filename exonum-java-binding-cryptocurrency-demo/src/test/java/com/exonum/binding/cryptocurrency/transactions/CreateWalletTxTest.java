@@ -11,7 +11,7 @@ import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
@@ -53,7 +53,7 @@ public class CreateWalletTxTest {
     CreateWalletTx tx = new CreateWalletTx(name);
 
     try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+        ForkProxy view = db.createFork()) {
       tx.execute(view);
 
       // Check that entries have been added.
@@ -71,7 +71,7 @@ public class CreateWalletTxTest {
   @Test
   public void executeAlreadyExistingWalletTx() {
     try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+        ForkProxy view = db.createFork()) {
       String name = "wallet";
       Long value = 100L;
       HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);

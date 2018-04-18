@@ -17,8 +17,8 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.TemplateMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.Service;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.transport.Server;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
@@ -102,7 +102,7 @@ public class UserServiceAdapterTest {
 
   @Test
   public void getStateHashes_EmptyList() throws Exception {
-    when(service.getStateHashes(any(Snapshot.class)))
+    when(service.getStateHashes(any(SnapshotProxy.class)))
         .thenReturn(emptyList());
 
     byte[][] hashes = serviceAdapter.getStateHashes(0x0A);
@@ -113,7 +113,7 @@ public class UserServiceAdapterTest {
   @Test
   public void getStateHashes_SingletonList() throws Exception {
     byte[] h1 = bytes("hash1");
-    when(service.getStateHashes(any(Snapshot.class)))
+    when(service.getStateHashes(any(SnapshotProxy.class)))
         .thenReturn(singletonList(HashCode.fromBytes(h1)));
 
     byte[][] hashes = serviceAdapter.getStateHashes(0x0A);
@@ -133,7 +133,7 @@ public class UserServiceAdapterTest {
         .map(HashCode::fromBytes)
         .collect(Collectors.toList());
 
-    when(service.getStateHashes(any(Snapshot.class)))
+    when(service.getStateHashes(any(SnapshotProxy.class)))
         .thenReturn(hashesFromService);
 
     byte[][] actualHashes = serviceAdapter.getStateHashes(0x0A);
@@ -146,10 +146,10 @@ public class UserServiceAdapterTest {
     long snapshotHandle = 0x0A;
     byte[][] hashes = serviceAdapter.getStateHashes(snapshotHandle);
 
-    ArgumentCaptor<Snapshot> ac = ArgumentCaptor.forClass(Snapshot.class);
+    ArgumentCaptor<SnapshotProxy> ac = ArgumentCaptor.forClass(SnapshotProxy.class);
     verify(service).getStateHashes(ac.capture());
 
-    Snapshot snapshot = ac.getValue();
+    SnapshotProxy snapshot = ac.getValue();
 
     // Try to use a snapshot after the method has returned: it must be closed.
     expectedException.expect(IllegalStateException.class);
@@ -161,10 +161,10 @@ public class UserServiceAdapterTest {
     long forkHandle = 0x0A;
     String ignored = serviceAdapter.initalize(forkHandle);
 
-    ArgumentCaptor<Fork> ac = ArgumentCaptor.forClass(Fork.class);
+    ArgumentCaptor<ForkProxy> ac = ArgumentCaptor.forClass(ForkProxy.class);
     verify(service).initialize(ac.capture());
 
-    Fork fork = ac.getValue();
+    ForkProxy fork = ac.getValue();
 
     // Try to use the fork after the method has returned: it must be closed.
     expectedException.expect(IllegalStateException.class);

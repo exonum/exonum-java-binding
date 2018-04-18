@@ -20,9 +20,9 @@ import com.exonum.binding.service.Node;
 import com.exonum.binding.service.NodeFake;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
@@ -65,7 +65,7 @@ public class QaServiceImplIntegrationTest {
 
   @Test
   public void createDataSchema() {
-    View view = mock(View.class);
+    ViewProxy view = mock(ViewProxy.class);
     Schema dataSchema = service.createDataSchema(view);
 
     assertThat(dataSchema).isInstanceOf(QaSchema.class);
@@ -74,7 +74,7 @@ public class QaServiceImplIntegrationTest {
   @Test
   public void initialize() {
     try (MemoryDb db = new MemoryDb();
-         Fork view = db.createFork()) {
+         ForkProxy view = db.createFork()) {
       Optional<String> initialConfiguration = service.initialize(view);
 
       // Check the configuration.
@@ -179,7 +179,7 @@ public class QaServiceImplIntegrationTest {
 
       // Create a counter with the given name
       String counterName = "bids";
-      try (Fork view = db.createFork()) {
+      try (ForkProxy view = db.createFork()) {
         new CreateCounterTx(counterName)
             .execute(view);
 

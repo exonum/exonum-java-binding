@@ -3,7 +3,7 @@ package com.exonum.binding.qaservice.transactions;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -25,6 +25,6 @@ public class UnknownTxTest {
     UnknownTx tx = new UnknownTx();
 
     expectedException.expect(AssertionError.class);
-    tx.execute(mock(Fork.class));
+    tx.execute(mock(ForkProxy.class));
   }
 }

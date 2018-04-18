@@ -3,7 +3,7 @@ package com.exonum.binding.service;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.SnapshotProxy;
 
 /**
  * An Exonum node context. Allows to add transactions to Exonum network
@@ -34,9 +34,9 @@ public interface Node {
    * to destroy the corresponding native objects.
    *
    * @return a snapshot of the database state
-   * @see Snapshot
+   * @see SnapshotProxy
    */
-  Snapshot createSnapshot();
+  SnapshotProxy createSnapshot();
 
   /**
    * Returns the public key of this node.

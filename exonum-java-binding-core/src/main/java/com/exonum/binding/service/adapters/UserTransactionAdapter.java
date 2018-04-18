@@ -3,7 +3,9 @@ package com.exonum.binding.service.adapters;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.proxy.ProxyContext;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -24,9 +26,16 @@ public class UserTransactionAdapter {
   }
 
   public void execute(long forkNativeHandle) {
-    assert forkNativeHandle != 0L : "Fork handle must not be 0";
-    try (Fork view = new Fork(forkNativeHandle, false)) {
+    assert forkNativeHandle != 0L : "ForkProxy handle must not be 0";
+
+    try (ProxyContext context = new ProxyContext()) {
+      ForkProxy view = new ForkProxy(forkNativeHandle, false);
+      context.add(view);
+
       transaction.execute(view);
+    } catch (CloseFailuresException e) {
+      // todo: log properly
+      e.printStackTrace();
     }
   }
 

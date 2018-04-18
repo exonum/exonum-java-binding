@@ -1,7 +1,7 @@
 package com.exonum.binding.messages;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 
 /**
  * An Exonum transaction.
@@ -32,7 +32,7 @@ public interface Transaction {
    *
    * @param view a database view, which allows to modify the blockchain state
    */
-  void execute(Fork view);
+  void execute(ForkProxy view);
 
 
   /**

@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.ForkProxy;
-import com.google.errorprone.annotations.MustBeClosed;
+import com.exonum.binding.storage.database.ViewProxy;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -12,24 +12,25 @@ import java.util.NoSuchElementException;
  * are specified to throw {@link UnsupportedOperationException} if
  * this list has been created with a read-only database view.
  *
- * <p>This interface prohibits null elements.
+ * <p>This interface prohibits null elements. All methods are non-null by default
+ * and are specified to throw {@link NullPointerException} if a null referenced is passed
+ * as an argument.
  *
- * <p>As any native proxy, the list index <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>As any exonum collection, the list is valid as long as the corresponding {@link ViewProxy}.
+ * Use of an invalid list is prohibited and will result in {@link IllegalStateException}.
  *
- * @param <T> the type of elements in this list
+ * @param <E> the type of elements in this list
  */
-public interface ListIndex<T> extends StorageIndex {
+public interface XList<E> /* todo: extends XStorageCollection */ {
 
   /**
    * Adds a new element to the end of the list.
    *
    * @param e an element to append to the list
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  void add(T e);
+  void add(E e);
 
   /**
    * Adds all elements from the specified collection to this list.
@@ -38,11 +39,11 @@ public interface ListIndex<T> extends StorageIndex {
    *
    * @param elements elements to add to this list
    * @throws NullPointerException if the collection is null or it contains null elements.
-   *                              In this case the collection is not modified.
+   *                              In this case this collection is not modified.
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  void addAll(Collection<? extends T> elements);
+  void addAll(Collection<? extends E> elements);
 
   /**
    * Replaces the element at the given index of the list with the specified element.
@@ -50,11 +51,10 @@ public interface ListIndex<T> extends StorageIndex {
    * @param index an index of the element to replace
    * @param e an element to add
    * @throws IndexOutOfBoundsException if the index is invalid
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
-  void set(long index, T e);
+  void set(long index, E e);
 
   /**
    * Returns the element at the given index.
@@ -64,7 +64,7 @@ public interface ListIndex<T> extends StorageIndex {
    * @throws IndexOutOfBoundsException if index is invalid
    * @throws IllegalStateException if this list is not valid
    */
-  T get(long index);
+  E get(long index);
 
   /**
    * Returns the last element of the list.
@@ -73,7 +73,7 @@ public interface ListIndex<T> extends StorageIndex {
    * @throws NoSuchElementException if the list is empty
    * @throws IllegalStateException if this list is not valid
    */
-  T getLast();
+  E getLast();
 
   /**
    * Clears the list.
@@ -105,6 +105,32 @@ public interface ListIndex<T> extends StorageIndex {
    *
    * @throws IllegalStateException if this list is not valid
    */
-  @MustBeClosed
-  StorageIterator<T> iterator();
+  StorageIterator<E> iterator();
+
+  /**
+   * Removes the last element of the list and returns it. This is an <em>optional</em>
+   * operation.
+   *
+   * @return the last element of the list.
+   * @throws NoSuchElementException if the list is empty
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only or this operation
+   *     is not supported
+   */
+  E removeLast();
+
+  /**
+   * Truncates the list, reducing its size to {@code newSize}. This is an <em>optional</em>
+   * operation.
+   *
+   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
+   * If {@code newSize >= size()}, has no effect.
+   *
+   * @param newSize the maximum number of elements to keep
+   * @throws IllegalArgumentException if the new size is negative
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only or this operation
+   *     is not supported
+   */
+  void truncate(long newSize);
 }

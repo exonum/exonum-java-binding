@@ -3,7 +3,7 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
 
@@ -25,9 +25,9 @@ import java.util.NoSuchElementException;
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
- * @see View
+ * @see ViewProxy
  */
-public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E>, XList<E> {
 
   /**
    * Creates a new ListIndexProxy.
@@ -41,18 +41,11 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ListIndexProxy(String name, View view, Serializer<E> serializer) {
+  public ListIndexProxy(String name, ViewProxy view, Serializer<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 
-  /**
-   * Removes the last element of the list and returns it.
-   *
-   * @return the last element of the list.
-   * @throws NoSuchElementException if the list is empty
-   * @throws IllegalStateException if this list is not valid
-   * @throws UnsupportedOperationException if this list is read-only
-   */
+  @Override
   public E removeLast() {
     notifyModified();
     byte[] e = nativeRemoveLast(getNativeHandle());
@@ -62,17 +55,7 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
     return serializer.fromBytes(e);
   }
 
-  /**
-   * Truncates the list, reducing its size to {@code newSize}.
-   *
-   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
-   * If {@code newSize >= size()}, has no effect.
-   *
-   * @param newSize the maximum number of elements to keep
-   * @throws IllegalArgumentException if the new size is negative
-   * @throws IllegalStateException if this list is not valid
-   * @throws UnsupportedOperationException if this list is read-only
-   */
+  @Override
   public void truncate(long newSize) {
     checkArgument(newSize >= 0, "New size must be non-negative: %s", newSize);
     notifyModified();

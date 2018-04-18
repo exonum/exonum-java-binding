@@ -12,7 +12,7 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
@@ -48,7 +48,7 @@ public class TransferTxTest {
   @Test
   public void executeTransfer() {
     try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+        ForkProxy view = db.createFork()) {
       // Create source and target wallets with the given initial values
       String from = "wallet-1";
       String to = "wallet-2";
@@ -78,7 +78,7 @@ public class TransferTxTest {
   @Test
   public void executeNoSuchFromWallet() {
     try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+        ForkProxy view = db.createFork()) {
       // Create source wallet with the given initial value
       String from = "from-wallet";
       String to = "unknown-wallet";
@@ -104,7 +104,7 @@ public class TransferTxTest {
   @Test
   public void executeNoSuchToWallet() {
     try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+        ForkProxy view = db.createFork()) {
       // Create and execute the transaction that attempts to transfer from unknown wallet
       String from = "unknown-wallet";
       String to = "to-wallet";
@@ -166,7 +166,7 @@ public class TransferTxTest {
         .verify();
   }
 
-  private void createWallet(Fork view, String name, Long initialValue) {
+  private void createWallet(ForkProxy view, String name, Long initialValue) {
     HashCode nameHash = hashString(name, UTF_8);
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {

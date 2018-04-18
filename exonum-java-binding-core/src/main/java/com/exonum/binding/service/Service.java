@@ -3,8 +3,8 @@ package com.exonum.binding.service;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import io.vertx.ext.web.Router;
@@ -48,7 +48,7 @@ public interface Service {
    *         does not have any configuration parameters.
    * @see <a href="https://exonum.com/doc/architecture/services/#genesis-block-handler">Genesis block handler</a>
    */
-  default Optional<String> initialize(Fork fork) {
+  default Optional<String> initialize(ForkProxy fork) {
     return Optional.empty();
   }
 
@@ -77,7 +77,7 @@ public interface Service {
    * @see ProofListIndexProxy#getRootHash()
    * @see ProofMapIndexProxy#getRootHash()
    */
-  default List<HashCode> getStateHashes(Snapshot snapshot) {
+  default List<HashCode> getStateHashes(SnapshotProxy snapshot) {
     return Collections.emptyList();
   }
 

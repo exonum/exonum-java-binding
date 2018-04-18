@@ -3,7 +3,7 @@ package com.exonum.binding.service.adapters;
 import static org.mockito.Mockito.doNothing;
 
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,13 +27,13 @@ public class UserTransactionAdapterTest {
 
   @Test
   public void execute_closesForkAfterExecution() throws Exception {
-    ArgumentCaptor<Fork> ac = ArgumentCaptor.forClass(Fork.class);
+    ArgumentCaptor<ForkProxy> ac = ArgumentCaptor.forClass(ForkProxy.class);
     doNothing().when(transaction).execute(ac.capture());
 
     long forkHandle = 0x0B;
     transactionAdapter.execute(forkHandle);
 
-    Fork fork = ac.getValue();
+    ForkProxy fork = ac.getValue();
     expectedException.expect(IllegalStateException.class);
     fork.getViewNativeHandle();
   }

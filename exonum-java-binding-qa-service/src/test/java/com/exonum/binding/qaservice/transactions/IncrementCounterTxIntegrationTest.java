@@ -15,7 +15,7 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
@@ -87,7 +87,7 @@ public class IncrementCounterTxIntegrationTest {
   @Test
   public void executeIncrementsCounter() {
     try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+         ForkProxy view = db.createFork()) {
       // Add a new counter with the given name and initial value
       String name = "counter";
       long initialValue = 0;
@@ -111,7 +111,7 @@ public class IncrementCounterTxIntegrationTest {
   @Test
   public void executeNoSuchCounter() {
     try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+         ForkProxy view = db.createFork()) {
       // Create and execute the transaction that attempts to update an unknown counter
       long seed = 0L;
       String name = "unknown-counter";

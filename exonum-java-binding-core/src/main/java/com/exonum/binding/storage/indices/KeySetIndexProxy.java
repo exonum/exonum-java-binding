@@ -2,8 +2,8 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.errorprone.annotations.MustBeClosed;
@@ -31,7 +31,7 @@ import com.google.errorprone.annotations.MustBeClosed;
  *
  * @param <E> the type of elements in this set
  * @see ValueSetIndexProxy
- * @see View
+ * @see ViewProxy
  */
 public class KeySetIndexProxy<E> extends AbstractIndexProxy {
 
@@ -49,7 +49,7 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public KeySetIndexProxy(String name, View view, Serializer<E> serializer) {
+  public KeySetIndexProxy(String name, ViewProxy view, Serializer<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.serializer = CheckingSerializerDecorator.from(serializer);
   }
@@ -95,7 +95,7 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
   /**
    * Creates an iterator over the set elements. The elements are ordered lexicographically.
    * 
-   * <p>Any destructive operation on the same {@link Fork} this set uses
+   * <p>Any destructive operation on the same {@link ForkProxy} this set uses
    * (but not necessarily on <em>this set</em>) will invalidate the iterator.
    * 
    * @return an iterator over the elements of this set

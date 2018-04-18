@@ -1,8 +1,8 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
-import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
+import com.exonum.binding.storage.database.ViewProxy;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
 import java.util.function.LongConsumer;
@@ -17,7 +17,7 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
 
   private final LongFunction<E> nextFunction;
   private final LongConsumer disposeOperation;
-  private final View collectionView;
+  private final ViewProxy collectionView;
   private final ViewModificationCounter modificationCounter;
   private final Integer initialModCount;
 
@@ -51,7 +51,7 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
 
   private void checkNotModified() {
     if (modificationCounter.isModifiedSince(collectionView, initialModCount)) {
-      throw new ConcurrentModificationException("Fork was modified during iteration: "
+      throw new ConcurrentModificationException("ForkProxy was modified during iteration: "
           + collectionView);
     }
   }

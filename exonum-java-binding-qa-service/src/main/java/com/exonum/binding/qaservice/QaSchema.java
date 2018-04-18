@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
@@ -23,9 +23,9 @@ public final class QaSchema implements Schema {
   /** A namespace of QA service collections. */
   private static final String NAMESPACE = QaService.NAME.replace('-', '_');
 
-  private final View view;
+  private final ViewProxy view;
 
-  public QaSchema(View view) {
+  public QaSchema(ViewProxy view) {
     this.view = checkNotNull(view);
   }
 

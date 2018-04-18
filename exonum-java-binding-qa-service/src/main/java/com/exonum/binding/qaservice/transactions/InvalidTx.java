@@ -7,7 +7,7 @@ import static com.exonum.binding.qaservice.transactions.TransactionPreconditions
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,7 +26,7 @@ public final class InvalidTx implements Transaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 

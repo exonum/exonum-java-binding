@@ -2,7 +2,7 @@ package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.errorprone.annotations.MustBeClosed;
@@ -13,9 +13,9 @@ public final class TestSchema implements Schema {
   @SuppressWarnings("WeakerAccess")
   static final String TEST_MAP_NAME = TestService.NAME + "_test_map";
 
-  private final View view;
+  private final ViewProxy view;
 
-  public TestSchema(View view) {
+  public TestSchema(ViewProxy view) {
     this.view = view;
   }
 

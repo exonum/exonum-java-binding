@@ -5,7 +5,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.serialization.Serializer;
 
@@ -28,7 +28,7 @@ import com.exonum.binding.storage.serialization.Serializer;
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
- * @see View
+ * @see ViewProxy
  */
 public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
@@ -44,7 +44,7 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofListIndexProxy(String name, View view, Serializer<E> serializer) {
+  public ProofListIndexProxy(String name, ViewProxy view, Serializer<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 

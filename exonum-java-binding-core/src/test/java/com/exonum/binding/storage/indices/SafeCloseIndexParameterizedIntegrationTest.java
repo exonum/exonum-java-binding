@@ -6,10 +6,10 @@ import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static java.util.Arrays.asList;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorOne;
 import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorTwo;
 import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
@@ -28,12 +28,12 @@ import org.junit.runners.Parameterized.Parameters;
 
 // The order in which objects are created:
 //
-// Database > View > Index > (opt) Iterator
+// Database > ViewProxy > Index > (opt) Iterator
 //
 // MemoryDb
-//            Snapshot & Fork
+//            SnapshotProxy & ForkProxy
 //
-//                   BiFunction<String, View, Index>
+//                   BiFunction<String, ViewProxy, Index>
 @RunWith(Parameterized.class)
 public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexProxy> {
 
@@ -48,7 +48,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
   private MemoryDb database;
 
-  private Function<View, I> indexProvider;
+  private Function<ViewProxy, I> indexProvider;
 
   private Consumer<I> indexConsumer;
 
@@ -71,7 +71,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
   @Test
   public void happyPath() throws Exception {
-    try (Snapshot snapshot = database.createSnapshot();
+    try (SnapshotProxy snapshot = database.createSnapshot();
          I index = indexProvider.apply(snapshot)) {
       indexConsumer.accept(index);
     }
@@ -79,7 +79,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
   @Test
   public void closeSnapshotBeforeCollection() throws Exception {
-    try (Snapshot view = database.createSnapshot();
+    try (SnapshotProxy view = database.createSnapshot();
          I index = indexProvider.apply(view)) {
 
       // Must do that after index
@@ -94,7 +94,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
 
   @Test
   public void closeForkBeforeCollection() throws Exception {
-    try (Fork view = database.createFork();
+    try (ForkProxy view = database.createFork();
          I index = indexProvider.apply(view)) {
 
       // Must do that after index
@@ -108,7 +108,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void closeEverything() throws Exception {
-    Fork view = database.createFork();
+    ForkProxy view = database.createFork();
     I index = indexProvider.apply(view);
     index.close();
     view.close();
@@ -120,7 +120,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void closeMemoryDbBeforeAnything() throws Exception {
-    Snapshot view = database.createSnapshot();
+    SnapshotProxy view = database.createSnapshot();
     I index = indexProvider.apply(view);
 
     database.close();

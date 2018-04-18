@@ -2,20 +2,18 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import java.util.NoSuchElementException;
 
 /**
  * An Entry is a database index that can contain no or a single value.
  *
  * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying ("destructive")
- * operations when created with a {@link Fork}.
+ * operations when created with a {@link ForkProxy}.
  * Such methods are specified to throw {@link UnsupportedOperationException} if
- * the entry is created with a {@link Snapshot} — a read-only database view.
+ * the entry is created with a {@link SnapshotProxy} — a read-only database view.
  *
  * <p>All method arguments are non-null by default.
  *
@@ -25,13 +23,9 @@ import java.util.NoSuchElementException;
  * Subsequent use of the closed entry is prohibited
  * and will result in {@link IllegalStateException}.
  *
- * @param <T> the type of an element in this entry
- *
- * @see View
+ * @see ViewProxy
  */
-public class EntryIndexProxy<T> extends AbstractIndexProxy {
-
-  private final CheckingSerializerDecorator<T> serializer;
+public class EntryIndexProxy extends AbstractIndexProxy {
 
   /**
    * Creates a new Entry.
@@ -40,15 +34,18 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
-   * @param serializer an entry serializer
    *
    * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
-  public EntryIndexProxy(String name, View view, Serializer<T> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.serializer = CheckingSerializerDecorator.from(serializer);
+  public static EntryIndexProxy newInstance(String name, ViewProxy view) {
+    long entryNativeHandle = nativeCreate(checkIndexName(name), view.getViewNativeHandle());
+    return new EntryIndexProxy(entryNativeHandle, name, view);
+  }
+
+  private EntryIndexProxy(long entryNativeHandle, String name, ViewProxy view) {
+    super(entryNativeHandle, name, view);
   }
 
   /**
@@ -59,10 +56,9 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    * @throws NullPointerException if value is null
    * @throws IllegalStateException if the proxy is invalid
    */
-  public void set(T value) {
+  public void set(byte[] value) {
     notifyModified();
-    byte[] valueBytes = serializer.toBytes(value);
-    nativeSet(getNativeHandle(), valueBytes);
+    nativeSet(getNativeHandle(), value);
   }
 
   /**
@@ -83,12 +79,12 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    * @throws IllegalStateException if the proxy is invalid
    * @throws IllegalArgumentException if the supplied serializer cannot decode the value
    */
-  public T get() {
+  public byte[] get() {
     byte[] value = nativeGet(getNativeHandle());
     if (value == null) {
       throw new NoSuchElementException("No value in this entry");
     }
-    return serializer.fromBytes(value);
+    return value;
   }
 
   // TODO(dt): add getHash when you clarify why on Earth it returns a default (= zero) hash when

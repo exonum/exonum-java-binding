@@ -1,9 +1,9 @@
 package com.exonum.binding.proxy;
 
 import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class NativeResourceManagerIntegrationTest {
   @Test
   public void nativeResourceManagerShallThrowIfUnknownForkHandle() throws Exception {
     long unknownNativeHandle = 0x110B;
-    Fork f = new Fork(unknownNativeHandle);
+    ForkProxy f = new ForkProxy(unknownNativeHandle);
 
     expectedException.expect(RuntimeException.class);
     expectedException.expectMessage("Invalid handle value: '110B'");
@@ -35,7 +35,7 @@ public class NativeResourceManagerIntegrationTest {
   @Test
   public void nativeResourceManagerShallThrowIfUnknownSnapshotHandle() throws Exception {
     long unknownNativeHandle = 0xABCD;
-    Snapshot s = new Snapshot(unknownNativeHandle);
+    SnapshotProxy s = new SnapshotProxy(unknownNativeHandle);
 
     expectedException.expect(RuntimeException.class);
     expectedException.expectMessage("Invalid handle value: 'ABCD'");
@@ -45,7 +45,7 @@ public class NativeResourceManagerIntegrationTest {
   @Test
   public void nativeResourceManagerShallThrowIfHandleUsedWithOtherType() throws Exception {
     try (Database database = new MemoryDb()) {
-      Fork f = new Fork(database.getNativeHandle());
+      ForkProxy f = new ForkProxy(database.getNativeHandle());
 
       expectedException.expect(RuntimeException.class);
       expectedException.expectMessage("Wrong type id for");

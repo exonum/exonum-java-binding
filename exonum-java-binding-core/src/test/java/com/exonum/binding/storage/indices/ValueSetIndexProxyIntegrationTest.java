@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
@@ -235,7 +235,7 @@ public class ValueSetIndexProxyIntegrationTest
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
+    ViewProxy view = database.createSnapshot();
     ValueSetIndexProxy<String> set = create(VALUE_SET_NAME, view);
 
     view.close();  // a set must be closed before the corresponding view.
@@ -250,7 +250,7 @@ public class ValueSetIndexProxyIntegrationTest
    * @param viewSupplier a function creating a database view
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                       Consumer<ValueSetIndexProxy<String>> valueSetTest) {
     runTestWithView(viewSupplier,
         (view, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
@@ -264,8 +264,8 @@ public class ValueSetIndexProxyIntegrationTest
    * @param viewSupplier a function creating a database view
    * @param valueSetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, ValueSetIndexProxy<String>> valueSetTest) {
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                                      BiConsumer<ViewProxy, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         VALUE_SET_NAME,
@@ -281,7 +281,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Override
-  ValueSetIndexProxy<String> create(String name, View view) {
+  ValueSetIndexProxy<String> create(String name, ViewProxy view) {
     return new ValueSetIndexProxy<>(name, view, StandardSerializers.string());
   }
 }

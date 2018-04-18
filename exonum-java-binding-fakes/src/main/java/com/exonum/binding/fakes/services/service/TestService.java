@@ -4,8 +4,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +31,7 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  protected TestSchema createDataSchema(View view) {
+  protected TestSchema createDataSchema(ViewProxy view) {
     return schemaFactory.from(view);
   }
 
@@ -39,7 +39,7 @@ public final class TestService extends AbstractService {
    * Always puts the same value identified by the same key and returns the same configuration.
    */
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public Optional<String> initialize(ForkProxy fork) {
     TestSchema schema = createDataSchema(fork);
     try (ProofMapIndexProxy<HashCode, String> testMap = schema.testMap()) {
       testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);

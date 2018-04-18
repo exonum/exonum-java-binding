@@ -5,8 +5,8 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkStora
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.auto.value.AutoValue;
@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
  *
  * @param <E> the type of elements in this set
  * @see KeySetIndexProxy
- * @see View
+ * @see ViewProxy
  */
 public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
 
@@ -55,7 +55,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ValueSetIndexProxy(String name, View view, Serializer<E> serializer) {
+  public ValueSetIndexProxy(String name, ViewProxy view, Serializer<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.serializer = CheckingSerializerDecorator.from(serializer);
   }
@@ -114,7 +114,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * Creates an iterator over the hashes of the elements in this set.
    * The hashes are ordered lexicographically.
    *
-   * <p>Any destructive operation on the same {@link Fork} this set uses
+   * <p>Any destructive operation on the same {@link ForkProxy} this set uses
    * (but not necessarily on <em>this set</em>) will invalidate the iterator.
    *
    * @return an iterator over the hashes of the elements in this set
@@ -135,7 +135,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * Returns an iterator over the entries of this set. An entry is a hash-value pair.
    * The entries are ordered by keys lexicographically.
    *
-   * <p>Any destructive operation on the same {@link Fork} this set uses
+   * <p>Any destructive operation on the same {@link ForkProxy} this set uses
    * (but not necessarily on <em>this set</em>) will invalidate the iterator.
    *
    * @return an iterator over the entries of this set

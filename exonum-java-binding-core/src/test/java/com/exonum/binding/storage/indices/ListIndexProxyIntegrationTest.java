@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -147,13 +147,13 @@ public class ListIndexProxyIntegrationTest {
     runTestWithView(database::createSnapshot, (l) -> l.truncate(0L));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                Consumer<ListIndexProxy<String>> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ListIndexProxy<String>> listTest) {
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                               BiConsumer<ViewProxy, ListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_NAME,

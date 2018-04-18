@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.After;
 import org.junit.Before;
@@ -33,12 +33,12 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     }
   }
 
-  abstract IndexT create(String name, View view);
+  abstract IndexT create(String name, ViewProxy view);
 
   @Test
   public void getName() {
     String name = "test_index";
-    try (View view = database.createSnapshot();
+    try (ViewProxy view = database.createSnapshot();
          IndexT index = create(name, view)) {
       assertThat(index.getName(), equalTo(name));
     }
@@ -47,7 +47,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   @Test
   public void toStringIncludesNameAndType() {
     String name = "test_index";
-    try (View view = database.createSnapshot();
+    try (ViewProxy view = database.createSnapshot();
          IndexT index = create(name, view)) {
       String indexInfo = index.toString();
       assertThat(indexInfo, containsString(name));

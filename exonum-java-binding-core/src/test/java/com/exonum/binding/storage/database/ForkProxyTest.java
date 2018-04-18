@@ -18,9 +18,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
     Views.class,
     ViewModificationCounter.class,
 })
-public class ForkTest {
+public class ForkProxyTest {
 
-  private Fork fork;
+  private ForkProxy fork;
 
   private ViewModificationCounter modCounter;
 
@@ -35,7 +35,7 @@ public class ForkTest {
   @Test
   public void disposeInternal_OwningProxy() throws Exception {
     int nativeHandle = 0x0A;
-    fork = new Fork(nativeHandle, true);
+    fork = new ForkProxy(nativeHandle, true);
 
     fork.close();
 
@@ -48,7 +48,7 @@ public class ForkTest {
   @Test
   public void disposeInternal_NotOwningProxy() throws Exception {
     int nativeHandle = 0x0A;
-    fork = new Fork(nativeHandle, false);
+    fork = new ForkProxy(nativeHandle, false);
 
     fork.close();
 

@@ -7,7 +7,7 @@ import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.AbstractNativeProxy;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import java.nio.ByteBuffer;
 
 /**
@@ -68,8 +68,8 @@ public final class NodeProxy extends AbstractNativeProxy implements Node {
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(getNativeHandle()));
+  public SnapshotProxy createSnapshot() {
+    return new SnapshotProxy(nativeCreateSnapshot(getNativeHandle()));
   }
 
   private native long nativeCreateSnapshot(long nativeHandle);

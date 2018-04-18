@@ -6,7 +6,7 @@ import static org.junit.runners.Parameterized.Parameter;
 
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class PrefixNameParameterizedIntegrationTest {
   @Test
   public void testIndexCtor_ThrowsIfInvalidName() throws Exception {
     try (Database database = new MemoryDb();
-         Snapshot view = database.createSnapshot()) {
+         SnapshotProxy view = database.createSnapshot()) {
       expectedException.expect(Exception.class);
       indexFactory.create(name, view);
     }

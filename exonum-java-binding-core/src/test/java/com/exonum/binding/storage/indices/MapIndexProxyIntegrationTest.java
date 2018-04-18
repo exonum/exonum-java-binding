@@ -12,8 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
@@ -46,7 +46,7 @@ public class MapIndexProxyIntegrationTest
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
-    Snapshot view = database.createSnapshot();
+    SnapshotProxy view = database.createSnapshot();
     MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
 
     // Destroy a view before the map.
@@ -387,25 +387,25 @@ public class MapIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                       Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
-    try (View view = viewSupplier.get();
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                                      BiConsumer<ViewProxy, MapIndexProxy<String, String>> mapTest) {
+    try (ViewProxy view = viewSupplier.get();
          MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
       mapTest.accept(view, map);
     }
   }
 
   @Override
-  MapIndexProxy<String, String> create(String name, View view) {
+  MapIndexProxy<String, String> create(String name, ViewProxy view) {
     return createMap(name, view);
   }
 
-  private static MapIndexProxy<String, String> createMap(String name, View view) {
+  private static MapIndexProxy<String, String> createMap(String name, ViewProxy view) {
     return new MapIndexProxy<>(name, view, StandardSerializers.string(),
         StandardSerializers.string());
   }

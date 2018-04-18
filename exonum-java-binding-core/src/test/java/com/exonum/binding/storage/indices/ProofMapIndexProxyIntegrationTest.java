@@ -21,8 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.storage.serialization.StandardSerializers;
@@ -443,7 +443,7 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void closeShallFailIfViewFreedBeforeMap() throws Exception {
-    Snapshot view = database.createSnapshot();
+    SnapshotProxy view = database.createSnapshot();
     ProofMapIndexProxy map = createProofMap(MAP_NAME, view);
 
     // Destroy a view before the map.
@@ -495,25 +495,25 @@ public class ProofMapIndexProxyIntegrationTest
     return checkProofKey(proofKey);
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                Consumer<ProofMapIndexProxy<HashCode, String>> mapTest) {
     runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ProofMapIndexProxy<HashCode, String>> mapTest) {
-    try (View view = viewSupplier.get();
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                               BiConsumer<ViewProxy, ProofMapIndexProxy<HashCode, String>> mapTest) {
+    try (ViewProxy view = viewSupplier.get();
          ProofMapIndexProxy<HashCode, String> map = createProofMap(MAP_NAME, view)) {
       mapTest.accept(view, map);
     }
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> create(String name, View view) {
+  ProofMapIndexProxy<HashCode, String> create(String name, ViewProxy view) {
     return createProofMap(name, view);
   }
 
-  private ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
+  private ProofMapIndexProxy<HashCode, String> createProofMap(String name, ViewProxy view) {
     return new ProofMapIndexProxy<>(name, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }

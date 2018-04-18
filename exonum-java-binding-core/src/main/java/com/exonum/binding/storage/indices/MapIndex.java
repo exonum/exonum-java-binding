@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.google.errorprone.annotations.MustBeClosed;
 
 /**
@@ -68,7 +68,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * <p>The iterator must be explicitly closed.
    *
-   * <p>Any destructive operation on the same {@link Fork} this map uses
+   * <p>Any destructive operation on the same {@link ForkProxy} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
@@ -81,7 +81,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * <p>The iterator must be explicitly closed.
    *
-   * <p>Any destructive operation on the same {@link Fork} this map uses
+   * <p>Any destructive operation on the same {@link ForkProxy} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
@@ -95,7 +95,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * <p>The iterator must be explicitly closed.
    *
-   * <p>Any destructive operation on the same {@link Fork} this map uses
+   * <p>Any destructive operation on the same {@link ForkProxy} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid

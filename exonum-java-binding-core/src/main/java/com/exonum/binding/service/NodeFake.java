@@ -6,7 +6,7 @@ import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.google.errorprone.annotations.MustBeClosed;
 
 /**
@@ -17,7 +17,7 @@ import com.google.errorprone.annotations.MustBeClosed;
  *   MemoryDb db = new MemoryDb();
  *
  *   // Setup database to include some test data
- *   try (Fork fork = db.createFork();
+ *   try (ForkProxy fork = db.createFork();
  *        MapIndex balance = new MapIndex("balance", fork)) {
  *     balance.put("John Doe", "$1000.00");
  *     db.merge(fork);
@@ -75,7 +75,7 @@ public class NodeFake implements Node {
 
   @Override
   @MustBeClosed
-  public Snapshot createSnapshot() {
+  public SnapshotProxy createSnapshot() {
     return database.createSnapshot();
   }
 

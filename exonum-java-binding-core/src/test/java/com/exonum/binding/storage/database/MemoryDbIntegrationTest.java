@@ -15,7 +15,6 @@ import com.exonum.binding.storage.indices.TestStorageItems;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MemoryDbIntegrationTest {
@@ -33,7 +32,7 @@ public class MemoryDbIntegrationTest {
   @Test
   public void getSnapshotShallCreateNonNullSnapshot() throws Exception {
     try (MemoryDb database = new MemoryDb();
-         Snapshot snapshot = database.createSnapshot()) {
+         SnapshotProxy snapshot = database.createSnapshot()) {
       assertNotNull(snapshot);
     }
   }
@@ -41,7 +40,7 @@ public class MemoryDbIntegrationTest {
   @Test
   public void getForkShallCreateNonNullFork() throws Exception {
     try (MemoryDb database = new MemoryDb();
-         Fork fork = database.createFork()) {
+         ForkProxy fork = database.createFork()) {
       assertNotNull(fork);
     }
   }
@@ -51,14 +50,14 @@ public class MemoryDbIntegrationTest {
     try (MemoryDb db = new MemoryDb()) {
       String listName = "list";
 
-      try (Fork fork = db.createFork();
+      try (ForkProxy fork = db.createFork();
            ListIndex<String> list = newList(listName, fork)) {
         list.add(V1);
 
         db.merge(fork);
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
+      try (SnapshotProxy snapshot = db.createSnapshot();
            ListIndex<String> list = newList(listName, snapshot)) {
         assertThat(list.size(), equalTo(1L));
         assertThat(list.get(0), equalTo(V1));
@@ -72,7 +71,7 @@ public class MemoryDbIntegrationTest {
       String listName = "list";
       String mapName = "map";
 
-      try (Fork fork = db.createFork();
+      try (ForkProxy fork = db.createFork();
            ListIndex<String> list = newList(listName, fork);
            MapIndex<String, String> map = newMap(mapName, fork)) {
         list.add(V1);
@@ -81,7 +80,7 @@ public class MemoryDbIntegrationTest {
         db.merge(fork);
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
+      try (SnapshotProxy snapshot = db.createSnapshot();
            ListIndex<String> list = newList(listName, snapshot);
            MapIndex<String, String> map = newMap(mapName, snapshot)) {
         assertThat(list.size(), equalTo(1L));
@@ -100,14 +99,14 @@ public class MemoryDbIntegrationTest {
       List<String> values = TestStorageItems.values.subList(0, 3);
 
       for (String v : values) {
-        try (Fork fork = db.createFork();
+        try (ForkProxy fork = db.createFork();
              ListIndex<String> list = newList(listName, fork)) {
           list.add(v);
           db.merge(fork);
         }
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
+      try (SnapshotProxy snapshot = db.createSnapshot();
            ListIndex<String> list = newList(listName, snapshot)) {
         assertThat(list.size(), equalTo((long) values.size()));
         for (int i = 0; i < values.size(); i++) {
@@ -117,11 +116,11 @@ public class MemoryDbIntegrationTest {
     }
   }
 
-  private static ListIndex<String> newList(String name, View view) {
+  private static ListIndex<String> newList(String name, ViewProxy view) {
     return new ListIndexProxy<>(name, view, StandardSerializers.string());
   }
 
-  private static MapIndex<String, String> newMap(String name, View view) {
+  private static MapIndex<String, String> newMap(String name, ViewProxy view) {
     return new MapIndexProxy<>(name, view, StandardSerializers.string(),
         StandardSerializers.string());
   }

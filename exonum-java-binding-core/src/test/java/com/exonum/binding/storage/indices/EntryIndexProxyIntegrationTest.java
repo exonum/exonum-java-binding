@@ -7,7 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -96,7 +96,7 @@ public class EntryIndexProxyIntegrationTest
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void closeMustDetectUseAfterViewFreed() throws Exception {
-    View view = database.createSnapshot();
+    ViewProxy view = database.createSnapshot();
     EntryIndexProxy<String> entry = create(ENTRY_NAME, view);
 
     view.close();
@@ -105,13 +105,13 @@ public class EntryIndexProxyIntegrationTest
     entry.close();
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                       Consumer<EntryIndexProxy<String>> entryTest) {
     runTestWithView(viewSupplier, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, EntryIndexProxy<String>> entryTest) {
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                                      BiConsumer<ViewProxy, EntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         ENTRY_NAME,
@@ -121,7 +121,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Override
-  EntryIndexProxy<String> create(String name, View view) {
+  EntryIndexProxy<String> create(String name, ViewProxy view) {
     return new EntryIndexProxy<>(name, view, StandardSerializers.string());
   }
 }

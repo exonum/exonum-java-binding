@@ -7,7 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -137,7 +137,7 @@ public class KeySetIndexProxyIntegrationTest
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
+    ViewProxy view = database.createSnapshot();
     KeySetIndexProxy<String> set = create(KEY_SET_NAME, view);
 
     view.close();  // a set must be closed before the corresponding view.
@@ -152,7 +152,7 @@ public class KeySetIndexProxyIntegrationTest
    * @param viewSupplier a function creating a database view
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                       Consumer<KeySetIndexProxy<String>> keySetTest) {
     runTestWithView(viewSupplier, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
@@ -164,8 +164,8 @@ public class KeySetIndexProxyIntegrationTest
    * @param viewSupplier a function creating a database view
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
-                                      BiConsumer<View, KeySetIndexProxy<String>> keySetTest) {
+  private static void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                                      BiConsumer<ViewProxy, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         KEY_SET_NAME,
@@ -175,7 +175,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Override
-  KeySetIndexProxy<String> create(String name, View view) {
+  KeySetIndexProxy<String> create(String name, ViewProxy view) {
     return new KeySetIndexProxy<>(name, view, StandardSerializers.string());
   }
 }

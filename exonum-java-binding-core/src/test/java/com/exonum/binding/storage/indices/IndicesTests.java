@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.proxy.NativeProxy;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorOne;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.function.BiConsumer;
@@ -20,11 +20,11 @@ class IndicesTests {
    * @param indexTest a test to run. Receives the created view and the index as arguments.
    */
   static <IndexT extends NativeProxy>
-      void runTestWithView(Supplier<View> viewSupplier,
+      void runTestWithView(Supplier<ViewProxy> viewSupplier,
                            String indexName,
                            IndexConstructorOne<IndexT, String> indexSupplier,
-                           BiConsumer<View, IndexT> indexTest) {
-    try (View view = viewSupplier.get();
+                           BiConsumer<ViewProxy, IndexT> indexTest) {
+    try (ViewProxy view = viewSupplier.get();
          IndexT index = indexSupplier.create(indexName, view, StandardSerializers.string())) {
       indexTest.accept(view, index);
     }

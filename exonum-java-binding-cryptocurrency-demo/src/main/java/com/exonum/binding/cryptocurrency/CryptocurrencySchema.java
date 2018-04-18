@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.errorprone.annotations.MustBeClosed;
@@ -19,9 +19,9 @@ public final class CryptocurrencySchema implements Schema {
   /** A namespace of cryptocurrency service collections. */
   private static final String NAMESPACE = CryptocurrencyService.NAME.replace('-', '_');
 
-  private final View view;
+  private final ViewProxy view;
 
-  public CryptocurrencySchema(View view) {
+  public CryptocurrencySchema(ViewProxy view) {
     this.view = checkNotNull(view);
   }
 

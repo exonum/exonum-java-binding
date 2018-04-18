@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.database;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
-import com.google.errorprone.annotations.MustBeClosed;
+import com.exonum.binding.proxy.ProxyContext;
 
 /**
  * Represents an underlying Exonum Storage database.
@@ -21,12 +21,11 @@ public abstract class Database extends AbstractNativeProxy {
   /**
    * Creates a new snapshot of the database state.
    *
-   * <p>A caller is responsible to close the snapshot (see {@link View#close()}).
+   * @param context a context to register the snapshot in
    *
    *  @return a new snapshot of the database state
    */
-  @MustBeClosed
-  public abstract Snapshot createSnapshot();
+  public abstract Snapshot createSnapshot(ProxyContext context);
 
   /**
    * Creates a new database fork.
@@ -34,10 +33,9 @@ public abstract class Database extends AbstractNativeProxy {
    * <p>A fork allows to perform a transaction: a number of independent writes to a database,
    * which then may be <em>atomically</em> applied to the database.
    *
-   * <p>A caller is responsible to close the fork (see {@link View#close()}).
+   * @param context a context to register the fork in
    *
    * @return a new database fork
    */
-  @MustBeClosed
-  public abstract Fork createFork();
+  public abstract Fork createFork(ProxyContext context);
 }

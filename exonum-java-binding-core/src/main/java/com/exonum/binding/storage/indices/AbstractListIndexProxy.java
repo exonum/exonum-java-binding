@@ -3,7 +3,7 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkNoNulls;
 
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.errorprone.annotations.MustBeClosed;
@@ -19,7 +19,7 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(long nativeHandle, String name, View view, Serializer<T> userSerializer) {
+  AbstractListIndexProxy(long nativeHandle, String name, ViewProxy view, Serializer<T> userSerializer) {
     super(nativeHandle, name, view);
     this.serializer = CheckingSerializerDecorator.from(userSerializer);
   }

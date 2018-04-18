@@ -10,10 +10,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.storage.database.ViewModificationCounter;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.google.common.collect.ImmutableList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -39,13 +39,13 @@ public class ConfigurableRustIterTest {
   @Before
   public void setUp() throws Exception {
     modCounter = mock(ViewModificationCounter.class);
-    when(modCounter.getModificationCount(any(View.class)))
+    when(modCounter.getModificationCount(any(ViewProxy.class)))
         .thenReturn(INITIAL_MOD_COUNT);
   }
 
   @Test
   public void nextGoesThroughAllElements() throws Exception {
-    Fork fork = createFork();
+    ForkProxy fork = createFork();
     List<Integer> underlyingList = asList(1, 2, 3);
     createFromIterable(underlyingList, fork);
 
@@ -56,11 +56,11 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextIsNotAffectedByUnrelatedModifications() throws Exception {
-    Snapshot view = createSnapshot();
+    SnapshotProxy view = createSnapshot();
     List<Integer> underlyingList = asList(1, 2);
     createFromIterable(underlyingList, view);
 
-    Fork unrelatedFork = createFork();
+    ForkProxy unrelatedFork = createFork();
     notifyModified(unrelatedFork);
 
     List<Integer> iterElements = ImmutableList.copyOf(new RustIterAdapter<>(iter));
@@ -70,7 +70,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextFailsIfModifiedBeforeFirstNext() throws Exception {
-    Fork fork = createFork();
+    ForkProxy fork = createFork();
     createFromIterable(emptyList(), fork);
 
     notifyModified(fork);
@@ -81,7 +81,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextFailsIfModifiedAfterFirstNext() throws Exception {
-    Fork fork = createFork();
+    ForkProxy fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
     iter.next();  // 1st must succeed
@@ -94,7 +94,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextFailsIfCollectionClosed() throws Exception {
-    Snapshot view = createSnapshot();
+    SnapshotProxy view = createSnapshot();
     AbstractIndexProxy index = createIndex(view);
 
     createFromIterable(asList(1, 2), index);
@@ -106,7 +106,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void nextFailsIfViewClosed() throws Exception {
-    Snapshot view = createSnapshot();
+    SnapshotProxy view = createSnapshot();
     createFromIterable(asList(1, 2), view);
 
     view.close();
@@ -116,12 +116,12 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void viewModificationResultsInTerminalState() throws Exception {
-    Fork fork = createFork();
+    ForkProxy fork = createFork();
     createFromIterable(asList(1, 2), fork);
     try {
       notifyModified(fork);
       iter.next();  // Must throw.
-      fail("Fork is modified, but view is still valid");
+      fail("ForkProxy is modified, but view is still valid");
     } catch (ConcurrentModificationException e) {
       // Exception above is well expected.
       // Subsequent attempt to get the next item must result in the same exception:
@@ -132,7 +132,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void closeDoesNotFailIfModifiedAfterTheLastNext() throws Exception {
-    Fork fork = createFork();
+    ForkProxy fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
     while (iter.next().isPresent()) {
@@ -146,7 +146,7 @@ public class ConfigurableRustIterTest {
 
   @Test
   public void closeFailsIfViewClosedBefore() throws Exception {
-    Fork fork = createFork();
+    ForkProxy fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
     fork.close();
@@ -154,15 +154,15 @@ public class ConfigurableRustIterTest {
     iter.close();
   }
 
-  private static Fork createFork() {
-    return new Fork(1L, false);
+  private static ForkProxy createFork() {
+    return new ForkProxy(1L, false);
   }
 
-  private static Snapshot createSnapshot() {
-    return new Snapshot(2L, false);
+  private static SnapshotProxy createSnapshot() {
+    return new SnapshotProxy(2L, false);
   }
 
-  private void createFromIterable(Iterable<Integer> it, View parentView) {
+  private void createFromIterable(Iterable<Integer> it, ViewProxy parentView) {
     AbstractIndexProxy collection = createIndex(parentView);
     createFromIterable(it, collection);
   }
@@ -176,7 +176,7 @@ public class ConfigurableRustIterTest {
         modCounter);
   }
 
-  private static AbstractIndexProxy createIndex(View view) {
+  private static AbstractIndexProxy createIndex(ViewProxy view) {
     return new AbstractIndexProxy(0x01, "test_index", view) {
 
       @Override
@@ -186,7 +186,7 @@ public class ConfigurableRustIterTest {
     };
   }
 
-  private void notifyModified(Fork fork) {
+  private void notifyModified(ForkProxy fork) {
     when(modCounter.isModifiedSince(eq(fork), eq(INITIAL_MOD_COUNT)))
         .thenReturn(true);
   }

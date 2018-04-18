@@ -1,14 +1,12 @@
 package com.exonum.binding.storage.database;
 
+import com.exonum.binding.proxy.ProxyContext;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.MustBeClosed;
 
 /**
- * An in-memory database for testing purposes. Although it can create
- * both read-only snapshots and read-write forks, the changes made to database forks
- * cannot be applied to the database state, making it effectively stateless.
- *
- * <p>If you need a stateful database for tests, feel free to file a JIRA ticket.
+ * An in-memory database for testing purposes. It can create read-only snapshots and read-write
+ * forks. The changes made to database forks can be applied to the database state
+ * with {@link MemoryDb#merge(Fork)}.
  */
 @VisibleForTesting
 public class MemoryDb extends Database {
@@ -21,15 +19,15 @@ public class MemoryDb extends Database {
   }
 
   @Override
-  @MustBeClosed
-  public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(getNativeHandle()), this);
+  public Snapshot createSnapshot(ProxyContext context) {
+    SnapshotProxy proxy = new SnapshotProxy(nativeCreateSnapshot(getNativeHandle()), this);
+    return new Snapshot(proxy, context);
   }
 
   @Override
-  @MustBeClosed
-  public Fork createFork() {
-    return new Fork(nativeCreateFork(getNativeHandle()), this);
+  public Fork createFork(ProxyContext context) {
+    ForkProxy proxy = new ForkProxy(nativeCreateFork(getNativeHandle()), this);
+    return new Fork(proxy, context);
   }
 
   /**
@@ -38,7 +36,10 @@ public class MemoryDb extends Database {
    * @param fork a fork to get changes from
    */
   public void merge(Fork fork) {
-    nativeMerge(getNativeHandle(), fork.getViewNativeHandle());
+    ForkProxy proxy = fork.getProxy();
+    // This code breaks the law of Demeter :/
+    long forkHandle = proxy.getViewNativeHandle();
+    nativeMerge(getNativeHandle(), forkHandle);
   }
 
   @Override

@@ -15,7 +15,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({
     Views.class,
 })
-public class SnapshotTest {
+public class SnapshotProxyTest {
 
   @Before
   public void setUp() throws Exception {
@@ -24,7 +24,7 @@ public class SnapshotTest {
 
   @Test
   public void disposeInternal_NotOwning() throws Exception {
-    Snapshot snapshot = new Snapshot(0x0A, false);
+    SnapshotProxy snapshot = new SnapshotProxy(0x0A, false);
 
     snapshot.close();
 
@@ -35,7 +35,7 @@ public class SnapshotTest {
   @Test
   public void disposeInternal_Owning() throws Exception {
     int nativeHandle = 0x0A;
-    Snapshot snapshot = new Snapshot(nativeHandle, true);
+    SnapshotProxy snapshot = new SnapshotProxy(nativeHandle, true);
 
     snapshot.close();
 

@@ -7,7 +7,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -63,7 +63,7 @@ final class PutValueTransaction extends AbstractTransaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     TestSchema schema = schemaFactory.from(view);
     try (ProofMapIndexProxy<HashCode, String> map = schema.testMap()) {
       map.put(getKey(), value);

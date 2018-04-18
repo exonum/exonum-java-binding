@@ -5,13 +5,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 
 /**
  * A transaction whose behaviour can be configured. It's not a mock: it writes a given value
- * into the database in its {@link #execute(Fork)}.
+ * into the database in its {@link #execute(ForkProxy)}.
  *
  * <p>Such transaction is supposed to be used in TransactionProxy integration tests.
  */
@@ -44,7 +44,7 @@ public final class SetEntryTransaction implements Transaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     checkState(valid, "Cannot execute an invalid transaction");
     try (EntryIndexProxy<String> entry = createEntry(view)) {
       entry.set(value);
@@ -62,7 +62,7 @@ public final class SetEntryTransaction implements Transaction {
     throw new UnsupportedOperationException("Transaction#getMessage is not implemented");
   }
 
-  private EntryIndexProxy<String> createEntry(Fork view) {
+  private EntryIndexProxy<String> createEntry(ForkProxy view) {
     return new EntryIndexProxy<>(ENTRY_NAME, view, StandardSerializers.string());
   }
 }

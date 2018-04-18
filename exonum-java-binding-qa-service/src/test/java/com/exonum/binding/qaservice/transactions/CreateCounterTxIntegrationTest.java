@@ -13,7 +13,7 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.StandardSerializers;
@@ -111,7 +111,7 @@ public class CreateCounterTxIntegrationTest {
     CreateCounterTx tx = new CreateCounterTx(name);
 
     try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+         ForkProxy view = db.createFork()) {
       // Execute the transaction
       tx.execute(view);
 
@@ -132,7 +132,7 @@ public class CreateCounterTxIntegrationTest {
   @Test
   public void executeAlreadyExistingCounter() {
     try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+         ForkProxy view = db.createFork()) {
       String name = "counter";
       Long value = 100500L;
       HashCode nameHash = Hashing.defaultHashFunction()
@@ -188,7 +188,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   /** Creates a counter in the storage with the given name and initial value. */
-  static void createCounter(Fork view, String name, Long initialValue) {
+  static void createCounter(ForkProxy view, String name, Long initialValue) {
     HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
     QaSchema schema = new QaSchema(view);
     try (MapIndex<HashCode, Long> counters = schema.counters();

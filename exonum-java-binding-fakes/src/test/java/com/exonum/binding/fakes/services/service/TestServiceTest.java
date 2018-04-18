@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.util.Optional;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class TestServiceTest {
   @Test
   @SuppressWarnings("unchecked") // No type parameters for clarity
   public void initialize() {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     TestSchema schema = mock(TestSchema.class);
     ProofMapIndexProxy testMap = mock(ProofMapIndexProxy.class);
     when(schema.testMap()).thenReturn(testMap);

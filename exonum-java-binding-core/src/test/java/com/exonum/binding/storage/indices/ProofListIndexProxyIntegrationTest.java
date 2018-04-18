@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -148,13 +148,13 @@ public class ProofListIndexProxyIntegrationTest {
     });
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ProofListIndexProxy<String>> listTest) {
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                               BiConsumer<ViewProxy, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_NAME,

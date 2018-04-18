@@ -8,8 +8,8 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -76,7 +76,7 @@ public class UserServiceAdapter {
    *
    * @param snapshotHandle a handle to a native snapshot object
    * @return an array of state hashes
-   * @see Service#getStateHashes(Snapshot)
+   * @see Service#getStateHashes(SnapshotProxy)
    */
   // todo: if the native code is better of with a flattened array, change the signature
   public byte[][] getStateHashes(long snapshotHandle) {
@@ -89,7 +89,7 @@ public class UserServiceAdapter {
     // check that the children of a proxy are 'live' each time a native object is used
     // (e.g., ANP#getNativeHandle)?
     assert snapshotHandle != 0;
-    try (Snapshot snapshot = new Snapshot(snapshotHandle, false)) {
+    try (SnapshotProxy snapshot = new SnapshotProxy(snapshotHandle, false)) {
       List<HashCode> stateHashes = service.getStateHashes(snapshot);
       return stateHashes.stream()
           .map(HashCode::asBytes)
@@ -104,11 +104,11 @@ public class UserServiceAdapter {
    *
    * @param forkHandle a handle to a native fork object
    * @return the service global configuration as a JSON string or null if it does not have any
-   * @see Service#initialize(Fork)
+   * @see Service#initialize(ForkProxy)
    */
   public String initalize(long forkHandle) {
     assert forkHandle != 0;
-    try (Fork fork = new Fork(forkHandle, false)) {
+    try (ForkProxy fork = new ForkProxy(forkHandle, false)) {
       return service.initialize(fork)
           .orElse(null);
     }

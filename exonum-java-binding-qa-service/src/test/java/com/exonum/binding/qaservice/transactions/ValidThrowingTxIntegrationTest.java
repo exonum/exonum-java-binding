@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
@@ -25,7 +25,7 @@ public class ValidThrowingTxIntegrationTest {
   @Test
   public void executeClearsQaServiceData() {
     try (MemoryDb db = new MemoryDb();
-         Fork view = db.createFork()) {
+         ForkProxy view = db.createFork()) {
 
       // Initialize storage with a counter equal to 10
       String name = "counter";

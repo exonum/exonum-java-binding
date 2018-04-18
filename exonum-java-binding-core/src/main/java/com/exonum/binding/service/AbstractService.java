@@ -6,8 +6,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import java.util.List;
 
 /**
@@ -50,7 +50,7 @@ public abstract class AbstractService implements Service {
   }
 
   @Override
-  public List<HashCode> getStateHashes(Snapshot snapshot) {
+  public List<HashCode> getStateHashes(SnapshotProxy snapshot) {
     return createDataSchema(snapshot).getStateHashes();
   }
 
@@ -60,5 +60,5 @@ public abstract class AbstractService implements Service {
    * @param view a database view
    * @return a data schema of the service
    */
-  protected abstract Schema createDataSchema(View view);
+  protected abstract Schema createDataSchema(ViewProxy view);
 }

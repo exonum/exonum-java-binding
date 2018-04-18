@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * <p>Forks are added lazily when they are modified.
  *
- * <p>The class is thread-safe if {@link View}s <strong>are not shared</strong> among threads
+ * <p>The class is thread-safe if {@link ViewProxy}s <strong>are not shared</strong> among threads
  * (i.e., if each thread has its own Views, which must be the case for Views are not thread-safe).
  * Such property is useful in the integration tests.
  */
@@ -23,7 +23,7 @@ public class ViewModificationCounter {
 
   private static final ViewModificationCounter instance = new ViewModificationCounter();
 
-  private final ConcurrentMap<Fork, Integer> modificationCounters;
+  private final ConcurrentMap<ForkProxy, Integer> modificationCounters;
 
   ViewModificationCounter() {
     modificationCounters = new ConcurrentHashMap<>();
@@ -36,7 +36,7 @@ public class ViewModificationCounter {
   /**
    * Remove the fork from the listener.
    */
-  void remove(Fork fork) {
+  void remove(ForkProxy fork) {
     modificationCounters.remove(fork);
   }
 
@@ -47,7 +47,7 @@ public class ViewModificationCounter {
    * @param fork a modified (or about to be modified) fork.
    * @throws NullPointerException if fork is null.
    */
-  public void notifyModified(Fork fork) {
+  public void notifyModified(ForkProxy fork) {
     Integer nextCount = getModificationCount(fork) + 1;
     modificationCounters.put(fork, nextCount);
   }
@@ -55,8 +55,8 @@ public class ViewModificationCounter {
   /**
    * Returns true if the view has been modified since the given modCount.
    */
-  public boolean isModifiedSince(View view, Integer modCount) {
-    if (view instanceof Snapshot) {
+  public boolean isModifiedSince(ViewProxy view, Integer modCount) {
+    if (view instanceof SnapshotProxy) {
       return false;
     }
     Integer currentModCount = getModificationCount(view);
@@ -66,11 +66,11 @@ public class ViewModificationCounter {
   /**
    * Returns the current value of the modification counter of the given view.
    *
-   * @return zero for {@link Snapshot}s, the current value of the modification counter
-   *         for a {@link Fork} (may be negative).
+   * @return zero for {@link SnapshotProxy}s, the current value of the modification counter
+   *         for a {@link ForkProxy} (may be negative).
    */
-  public Integer getModificationCount(View view) {
-    if (view instanceof Snapshot) {
+  public Integer getModificationCount(ViewProxy view) {
+    if (view instanceof SnapshotProxy) {
       return 0;
     }
     return modificationCounters.getOrDefault(view, INITIAL_COUNT);

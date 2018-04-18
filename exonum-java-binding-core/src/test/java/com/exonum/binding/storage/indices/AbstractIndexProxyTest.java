@@ -8,10 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
 import com.exonum.binding.storage.database.ViewModificationCounter;
+import com.exonum.binding.storage.database.ViewProxy;
 import java.util.regex.Pattern;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,7 +44,7 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void testConstructor() throws Exception {
-    View view = createFork();
+    ViewProxy view = createFork();
     proxy = new IndexProxyImpl(view);
 
     assertThat(proxy.dbView, equalTo(view));
@@ -52,7 +52,7 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void constructorFailsIfNullView() throws Exception {
-    View dbView = null;
+    ViewProxy dbView = null;
 
     expectedException.expect(NullPointerException.class);
     proxy = new IndexProxyImpl(dbView);
@@ -60,7 +60,7 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void checkCanModifyThrowsIfSnapshotPassed() throws Exception {
-    Snapshot dbView = createSnapshot();
+    SnapshotProxy dbView = createSnapshot();
     proxy = new IndexProxyImpl(dbView);
 
     Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
@@ -72,26 +72,26 @@ public class AbstractIndexProxyTest {
 
   @Test
   public void checkCanModifyAcceptsFork() throws Exception {
-    Fork dbView = createFork();
+    ForkProxy dbView = createFork();
     proxy = new IndexProxyImpl(dbView);
 
     proxy.notifyModified();
     verify(modCounter).notifyModified(eq(dbView));
   }
 
-  private Fork createFork() {
-    return new Fork(1L, false);
+  private ForkProxy createFork() {
+    return new ForkProxy(1L, false);
   }
 
-  private Snapshot createSnapshot() {
-    return new Snapshot(2L, false);
+  private SnapshotProxy createSnapshot() {
+    return new SnapshotProxy(2L, false);
   }
 
   private static class IndexProxyImpl extends AbstractIndexProxy {
 
     private static final long NATIVE_HANDLE = 0x11L;
 
-    IndexProxyImpl(View view) {
+    IndexProxyImpl(ViewProxy view) {
       super(NATIVE_HANDLE, "index_name", view);
     }
 

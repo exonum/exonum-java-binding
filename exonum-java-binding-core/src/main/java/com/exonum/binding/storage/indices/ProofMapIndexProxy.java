@@ -3,7 +3,7 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
@@ -31,7 +31,7 @@ import com.google.errorprone.annotations.MustBeClosed;
  *
  * @param <K> the type of keys in this map. Must be 32-byte long in the serialized form
  * @param <V> the type of values in this map
- * @see View
+ * @see ViewProxy
  */
 public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
@@ -51,7 +51,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofMapIndexProxy(String name, View view, Serializer<K> keySerializer,
+  public ProofMapIndexProxy(String name, ViewProxy view, Serializer<K> keySerializer,
                             Serializer<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.keySerializer = new ProofMapKeyCheckingSerializerDecorator<>(

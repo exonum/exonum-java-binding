@@ -13,7 +13,7 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
@@ -54,7 +54,7 @@ public final class TransferTx extends BaseTx implements Transaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     try (ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets()) {
       if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {

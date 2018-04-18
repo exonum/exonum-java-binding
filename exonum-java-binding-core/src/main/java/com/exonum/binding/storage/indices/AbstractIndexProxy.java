@@ -4,19 +4,19 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.database.ViewModificationCounter;
+import com.exonum.binding.storage.database.ViewProxy;
 
 /**
  * An abstract super class for proxies of all indices.
  *
- * <p>Each index is created with a database view, either an immutable Snapshot or a read-write Fork.
+ * <p>Each index is created with a database view, either an immutable SnapshotProxy or a read-write ForkProxy.
  * An index has a modification counter to detect when it or the corresponding view is modified.
  */
 abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
 
-  final View dbView;
+  final ViewProxy dbView;
 
   /**
    * Needed to detect modifications of this index during iteration over this (or other) indices.
@@ -35,7 +35,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * @param view a database view from which the index has been created
    * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(long nativeHandle, String name, View view) {
+  AbstractIndexProxy(long nativeHandle, String name, ViewProxy view) {
     super(nativeHandle, true, view);
     this.name = checkIndexName(name);
     this.dbView = checkNotNull(view);
@@ -58,17 +58,17 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
   }
 
   /**
-   * Checks that a database view is an instance of {@link Fork} — a modifiable database view.
+   * Checks that a database view is an instance of {@link ForkProxy} — a modifiable database view.
    *
-   * @return a modifiable view: a Fork.
+   * @return a modifiable view: a ForkProxy.
    * @throws UnsupportedOperationException if view is read-only or null.
    */
-  private Fork castViewToFork() {
-    if (!(dbView instanceof Fork)) {
+  private ForkProxy castViewToFork() {
+    if (!(dbView instanceof ForkProxy)) {
       throw new UnsupportedOperationException("Cannot modify the view: " + dbView
-          + "\nUse a Fork to modify any collection.");
+          + "\nUse a ForkProxy to modify any collection.");
     }
-    return (Fork) dbView;
+    return (ForkProxy) dbView;
   }
 
   @Override

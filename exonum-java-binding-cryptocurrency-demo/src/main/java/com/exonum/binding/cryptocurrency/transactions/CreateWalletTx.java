@@ -14,7 +14,7 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.base.Objects;
@@ -46,7 +46,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
 

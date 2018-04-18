@@ -10,8 +10,8 @@ import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.Optional;
@@ -28,12 +28,12 @@ public class CryptocurrencyServiceImpl extends AbstractService implements Crypto
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
+  protected Schema createDataSchema(ViewProxy view) {
     return new CryptocurrencySchema(view);
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public Optional<String> initialize(ForkProxy fork) {
     return Optional.empty();
   }
 

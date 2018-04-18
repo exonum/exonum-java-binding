@@ -12,7 +12,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -69,7 +69,7 @@ public class PutValueTransactionTest {
         .setBody(encode(value))
         .buildRaw();
 
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     TestSchema schema = mock(TestSchema.class);
     ProofMapIndexProxy testMap = mock(ProofMapIndexProxy.class);
     when(schema.testMap()).thenReturn(testMap);

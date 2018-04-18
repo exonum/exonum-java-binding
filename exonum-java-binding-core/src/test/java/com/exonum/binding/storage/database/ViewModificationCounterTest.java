@@ -22,7 +22,7 @@ public class ViewModificationCounterTest {
 
   @Test
   public void modCountShallChangeSinceNotification() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     Integer prevModCount = listener.getModificationCount(fork);
     listener.notifyModified(fork);
 
@@ -32,13 +32,13 @@ public class ViewModificationCounterTest {
 
   @Test
   public void snapshotShallNotBeModified() throws Exception {
-    Snapshot s = mock(Snapshot.class);
+    SnapshotProxy s = mock(SnapshotProxy.class);
     assertFalse(listener.isModifiedSince(s, INITIAL_COUNT));
   }
 
   @Test
   public void forkShallNotBeModifiedIfNoNotifications() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     Integer modCount = listener.getModificationCount(fork);
 
     assertFalse(listener.isModifiedSince(fork, modCount));
@@ -46,7 +46,7 @@ public class ViewModificationCounterTest {
 
   @Test
   public void forkShallBeModifiedIfNotifiedExplicitGetModCount() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     Integer modCount = listener.getModificationCount(fork);
 
     listener.notifyModified(fork);
@@ -55,7 +55,7 @@ public class ViewModificationCounterTest {
 
   @Test
   public void forkShallBeModifiedIfNotifiedImplicitGetModCount() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     listener.notifyModified(fork);
 
     assertTrue(listener.isModifiedSince(fork, INITIAL_COUNT));
@@ -63,7 +63,7 @@ public class ViewModificationCounterTest {
 
   @Test
   public void forkShallNotBeModifiedIfNoNotificationsAfterModCount() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     listener.notifyModified(fork);
 
     int modCount = listener.getModificationCount(fork);
@@ -72,7 +72,7 @@ public class ViewModificationCounterTest {
 
   @Test
   public void forkShallBeModifiedIfNotifiedMultipleTimes() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     int numModifications = 5;
     for (int i = INITIAL_COUNT; i < numModifications; i++) {
       listener.notifyModified(fork);
@@ -82,10 +82,10 @@ public class ViewModificationCounterTest {
 
   @Test
   public void forkModificationShallNotAffectOtherFork() throws Exception {
-    Fork modifiedFork = mock(Fork.class);
+    ForkProxy modifiedFork = mock(ForkProxy.class);
     int modifiedModCount = listener.getModificationCount(modifiedFork);
 
-    Fork otherFork = mock(Fork.class);
+    ForkProxy otherFork = mock(ForkProxy.class);
     int otherModCount = listener.getModificationCount(otherFork);
 
     listener.notifyModified(modifiedFork);
@@ -96,13 +96,13 @@ public class ViewModificationCounterTest {
 
   @Test
   public void getModCountNewSnapshot() throws Exception {
-    Snapshot s = mock(Snapshot.class);
+    SnapshotProxy s = mock(SnapshotProxy.class);
     assertThat(listener.getModificationCount(s), equalTo(INITIAL_COUNT));
   }
 
   @Test
   public void getModCountNewFork() throws Exception {
-    Fork fork = mock(Fork.class);
+    ForkProxy fork = mock(ForkProxy.class);
     assertThat(listener.getModificationCount(fork), equalTo(INITIAL_COUNT));
   }
 }

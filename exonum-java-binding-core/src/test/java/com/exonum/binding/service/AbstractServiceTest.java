@@ -3,8 +3,8 @@ package com.exonum.binding.service;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import io.vertx.ext.web.Router;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +36,7 @@ public class AbstractServiceTest {
   @Test
   public void getStateHashes_EmptySchema() throws Exception {
     Service service = new ServiceUnderTest((short) 1, "s1", mock(TransactionConverter.class));
-    assertTrue(service.getStateHashes(mock(Snapshot.class)).isEmpty());
+    assertTrue(service.getStateHashes(mock(SnapshotProxy.class)).isEmpty());
   }
 
   static class ServiceUnderTest extends AbstractService {
@@ -47,7 +47,7 @@ public class AbstractServiceTest {
     }
 
     @Override
-    protected Schema createDataSchema(View view) {
+    protected Schema createDataSchema(ViewProxy view) {
       return mock(Schema.class);
     }
 

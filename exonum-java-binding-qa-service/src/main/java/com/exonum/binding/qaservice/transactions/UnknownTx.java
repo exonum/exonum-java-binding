@@ -4,7 +4,7 @@ import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import java.nio.ByteBuffer;
 
 /**
@@ -26,7 +26,7 @@ public final class UnknownTx extends AbstractTransaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 

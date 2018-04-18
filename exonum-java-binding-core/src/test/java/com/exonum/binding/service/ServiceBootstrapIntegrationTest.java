@@ -10,8 +10,8 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -53,7 +53,7 @@ class UserModule extends AbstractModule {
           }
 
           @Override
-          public void execute(Fork view) {
+          public void execute(ForkProxy view) {
             System.out.println("Transaction#execute");
           }
         });
@@ -71,7 +71,7 @@ class UserService extends AbstractService {
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
+  protected Schema createDataSchema(ViewProxy view) {
     return new Schema() {};
   }
 

@@ -10,9 +10,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.database.ForkProxy;
+import com.exonum.binding.storage.database.SnapshotProxy;
+import com.exonum.binding.storage.database.ViewProxy;
 import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
@@ -193,14 +193,14 @@ public class ListIndexParameterizedIntegrationTest
   @Test(expected = UnsupportedOperationException.class)
   public void setWithSnapshot() throws Exception {
     // Initialize the list.
-    try (Fork fork = database.createFork();
+    try (ForkProxy fork = database.createFork();
          ListIndex<String> list = createList(fork)) {
       list.add(V1);
       database.merge(fork);
     }
 
     // Expect the read-only list to throw an exception.
-    try (Snapshot snapshot = database.createSnapshot();
+    try (SnapshotProxy snapshot = database.createSnapshot();
          ListIndex<String> list = createList(snapshot)) {
       list.set(0, V2);
     }
@@ -310,7 +310,7 @@ public class ListIndexParameterizedIntegrationTest
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
+    ViewProxy view = database.createSnapshot();
     ListIndex list = createList(view);
 
     view.close();  // a list must be closed before the corresponding view.
@@ -318,25 +318,25 @@ public class ListIndexParameterizedIntegrationTest
     list.close();
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
                                Consumer<ListIndex<String>> listTest) {
     runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ListIndex<String>> listTest) {
-    try (View view = viewSupplier.get();
+  private void runTestWithView(Supplier<ViewProxy> viewSupplier,
+                               BiConsumer<ViewProxy, ListIndex<String>> listTest) {
+    try (ViewProxy view = viewSupplier.get();
          ListIndex<String> list = createList(view)) {
       listTest.accept(view, list);
     }
   }
 
   @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
+  AbstractListIndexProxy<String> create(String name, ViewProxy view) {
     return (AbstractListIndexProxy<String>) listFactory.create(name, view);
   }
 
-  private ListIndex<String> createList(View view) {
+  private ListIndex<String> createList(ViewProxy view) {
     return listFactory.create(LIST_NAME, view);
   }
 

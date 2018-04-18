@@ -11,7 +11,7 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ForkProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
@@ -50,7 +50,7 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(ForkProxy view) {
     QaSchema schema = new QaSchema(view);
     try (ProofMapIndexProxy<HashCode, Long> counters = schema.counters()) {
       // Increment the counter if there is such.
