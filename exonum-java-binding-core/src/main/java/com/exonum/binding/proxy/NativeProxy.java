@@ -17,7 +17,7 @@ public interface NativeProxy extends AutoCloseable {
    * <p>Notifies the native code that the native object is no longer needed, and may be safely
    * destroyed. Once closed, the proxy becomes invalid.
    *
-   * <p>On consecutive invocations does nothing.
+   * <p>The implementations must be idempotent — do nothing on consecutive invocations.
    */
   @Override
   void close();
