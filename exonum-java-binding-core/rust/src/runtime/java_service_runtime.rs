@@ -14,13 +14,17 @@ const START_SERVICE_SIGNATURE: &str =
     "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 pub struct JavaServiceRuntime {
-    pub executor: DumbExecutor,
-    pub service_proxy: ServiceProxy<DumbExecutor>,
+    executor: DumbExecutor,
+    service_proxy: ServiceProxy<DumbExecutor>,
 }
 
 impl JavaServiceRuntime {
     pub fn new(config: Config) -> Self {
         let executor = Self::create_executor(config.jvm_config);
+        Self::with_executor(executor)
+    }
+
+    pub fn with_executor(executor: DumbExecutor) -> Self {
         let service_proxy = Self::create_service(config.service_config, executor.clone());
         Self {
             executor,
@@ -40,7 +44,7 @@ impl JavaServiceRuntime {
         DumbExecutor { vm: Arc::new(java_vm) }
     }
 
-    pub fn create_service(config: ServiceConfig, executor: DumbExecutor) -> ServiceProxy<DumbExecutor> {
+    fn create_service(config: ServiceConfig, executor: DumbExecutor) -> ServiceProxy<DumbExecutor> {
         let service = unwrap_jni(executor.with_attached(|env| {
             let classpath = env.new_string(config.classpath).unwrap();
             let classpath: jni::objects::JObject = *classpath;
