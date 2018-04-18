@@ -5,9 +5,10 @@ pub struct Config {
 
 pub struct JvmConfig {
     pub debug: bool,
+    pub classpath: Option<String>,
 }
 
 pub struct ServiceConfig {
-    pub classpath: String,
+    pub module_name: String,
     pub port: i32,
 }

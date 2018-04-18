@@ -35,9 +35,15 @@ impl JavaServiceRuntime {
     pub fn create_executor(config: JvmConfig) -> DumbExecutor {
         let java_vm = {
             let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
+
             if config.debug {
                 args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
             }
+
+            if let Some(classpath) = config.classpath {
+                args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
+            }
+
             let args = args_builder.build().unwrap();
             jni::JavaVM::new(args).unwrap()
         };
@@ -46,13 +52,13 @@ impl JavaServiceRuntime {
 
     fn create_service(config: ServiceConfig, executor: DumbExecutor) -> ServiceProxy<DumbExecutor> {
         let service = unwrap_jni(executor.with_attached(|env| {
-            let classpath = env.new_string(config.classpath).unwrap();
-            let classpath: jni::objects::JObject = *classpath;
+            let module_name = env.new_string(config.module_name).unwrap();
+            let module_name: jni::objects::JObject = *module_name;
             let service = env.call_static_method(
                 SERVICE_BOOTSTRAP_PATH,
                 "startService",
                 START_SERVICE_SIGNATURE,
-                &[classpath.into(), config.port.into()],
+                &[module_name.into(), config.port.into()],
             )?.l()?;
             env.new_global_ref(env.auto_local(service).as_obj())
         }));
