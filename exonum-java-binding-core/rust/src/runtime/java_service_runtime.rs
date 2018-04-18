@@ -14,6 +14,7 @@ const START_SERVICE_SIGNATURE: &str =
     "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
+#[allow(dead_code)]
 pub struct JavaServiceRuntime {
     executor: DumbExecutor,
     service_proxy: ServiceProxy<DumbExecutor>,
@@ -23,12 +24,12 @@ impl JavaServiceRuntime {
     /// Create new runtime from config.
     pub fn new(config: Config) -> Self {
         let executor = Self::create_executor(config.jvm_config);
-        Self::with_executor(executor)
+        Self::with_executor(executor, config.service_config)
     }
 
     /// Create new runtime with prepared `Executor`.
-    pub fn with_executor(executor: DumbExecutor) -> Self {
-        let service_proxy = Self::create_service(config.service_config, executor.clone());
+    pub fn with_executor(executor: DumbExecutor, config: ServiceConfig) -> Self {
+        let service_proxy = Self::create_service(config, executor.clone());
         Self {
             executor,
             service_proxy,
@@ -43,7 +44,7 @@ impl JavaServiceRuntime {
                 args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
             }
 
-            if let Some(classpath) = config.classpath {
+            if let Some(class_path) = config.class_path {
                 args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
             }
 
