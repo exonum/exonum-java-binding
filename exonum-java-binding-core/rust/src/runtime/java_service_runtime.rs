@@ -1,13 +1,13 @@
-use jni;
-use Executor;
-use DumbExecutor;
-use proxy::ServiceProxy;
-use std::sync::Arc;
-use utils::unwrap_jni;
-use exonum::helpers::fabric::ServiceFactory;
 use exonum::blockchain::Service;
-use exonum::helpers::fabric::Context;
+use exonum::helpers::fabric::{Context, ServiceFactory};
+
+use jni;
+use std::sync::Arc;
+
+use proxy::ServiceProxy;
 use runtime::config::{Config, JvmConfig, ServiceConfig};
+use utils::unwrap_jni;
+use {Executor, DumbExecutor};
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
 const START_SERVICE_SIGNATURE: &str =
