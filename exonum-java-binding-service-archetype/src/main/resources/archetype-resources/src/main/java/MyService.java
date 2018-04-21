@@ -14,7 +14,7 @@ import java.util.Optional;
 public final class MyService extends AbstractService {
 
   public static final short ID = 42;
-  static final String NAME = ${serviceName};
+  static final String NAME = "${serviceName}";
   static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
 
   @Inject
