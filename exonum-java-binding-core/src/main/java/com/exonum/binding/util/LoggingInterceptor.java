@@ -14,13 +14,11 @@ public class LoggingInterceptor implements MethodInterceptor {
 
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
-    Object returnValue;
     try {
-      returnValue = invocation.proceed();
+      return invocation.proceed();
     } catch (Throwable e) {
-      logger.error("Method threw an exception: " + e.getMessage());
+      logger.error(e);
       throw e;
     }
-    return returnValue;
   }
 }
