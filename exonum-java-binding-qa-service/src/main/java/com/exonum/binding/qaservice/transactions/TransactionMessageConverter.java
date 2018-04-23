@@ -1,4 +1,4 @@
-package com.exonum.binding.qaservice.transactions.converters;
+package com.exonum.binding.qaservice.transactions;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
@@ -19,7 +19,7 @@ import com.exonum.binding.qaservice.PromoteToCore;
     + "is known (and must be known by transaction): a network id, a protocol version, "
     + "the signature. These things do not comprise the transaction parameters."
 )
-public interface TransactionMessageConverter<TransactionT extends Transaction> {
+interface TransactionMessageConverter<TransactionT extends Transaction> {
 
   /**
    * Converts a message into an executable transaction.
