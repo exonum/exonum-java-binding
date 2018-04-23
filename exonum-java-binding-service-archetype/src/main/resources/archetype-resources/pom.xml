@@ -9,6 +9,8 @@
     <url>https://exonum.com/</url>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.compiler.source>8</java.compiler.source>
         <java.compiler.target>8</java.compiler.target>
         <exonum-core.version>1.0-SNAPSHOT</exonum-core.version>
