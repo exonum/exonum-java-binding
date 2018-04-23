@@ -15,9 +15,14 @@ import com.exonum.binding.storage.database.View;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ServiceBootstrapIntegrationTest {
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void startService() throws Exception {
@@ -34,6 +39,16 @@ public class ServiceBootstrapIntegrationTest {
 
     UserTransactionAdapter transactionAdapter = service.convertTransaction(messageBytes);
     assertTrue(transactionAdapter.isValid());
+  }
+
+  @Test
+  public void startServiceNotModule() {
+    String invalidModuleName = Object.class.getCanonicalName();
+
+    expectedException.expectMessage("class java.lang.Object is not a sub-class "
+        + "of com.google.inject.Module");
+    expectedException.expect(IllegalArgumentException.class);
+    ServiceBootstrap.startService(invalidModuleName, 0);
   }
 }
 

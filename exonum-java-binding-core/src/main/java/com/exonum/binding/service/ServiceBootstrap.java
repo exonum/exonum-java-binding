@@ -27,23 +27,30 @@ class ServiceBootstrap {
    * @param serverPort a port to listen for connections on
    * @return a new service
    */
+  @SuppressWarnings({"unused", "SameParameterValue"})  // Native API
   static UserServiceAdapter startService(String serviceModuleName, int serverPort) {
-    Injector injector = Guice.createInjector(new FrameworkModule(),
-        createUserModule(serviceModuleName));
+    try {
+      Injector injector = Guice.createInjector(new FrameworkModule(),
+          createUserModule(serviceModuleName));
 
-    Server server = injector.getInstance(Server.class);
-    Runtime.getRuntime().addShutdownHook(
-        new Thread(() -> {
-          try {
-            server.stop().get();
-          } catch (InterruptedException | ExecutionException e) {
-            logger.warn("Failed to stop the server during VM shutdown", e);
-          }
-        })
-    );
-    server.start(serverPort);
+      Server server = injector.getInstance(Server.class);
+      Runtime.getRuntime().addShutdownHook(
+          new Thread(() -> {
+            try {
+              server.stop().get();
+            } catch (InterruptedException | ExecutionException e) {
+              logger.warn("Failed to stop the server during VM shutdown", e);
+            }
+          })
+      );
+      server.start(serverPort);
 
-    return injector.getInstance(UserServiceAdapter.class);
+      return injector.getInstance(UserServiceAdapter.class);
+    } catch (Throwable t) {
+      String message = "Failed to start a service " + serviceModuleName + ":";
+      logger.fatal(message, t);
+      throw t;
+    }
   }
 
   /**
@@ -54,8 +61,8 @@ class ServiceBootstrap {
       Class<?> moduleClass = Class.forName(moduleName);
       Constructor constructor = moduleClass.getDeclaredConstructor();
       Object moduleObject = constructor.newInstance();
-      checkArgument(moduleObject instanceof Module, "Class is not a sub-class of %s",
-          Module.class.getCanonicalName());
+      checkArgument(moduleObject instanceof Module, "%s is not a sub-class of %s",
+          moduleClass, Module.class.getCanonicalName());
       return (Module) moduleObject;
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException("Module class cannot be found", e);
