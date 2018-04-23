@@ -80,7 +80,7 @@ public class StoragePreconditionsTest {
     byte[] key = new byte[1];
 
     expected.expect(IllegalArgumentException.class);
-    expected.expectMessage("Proof map key has invalid size: 1");
+    expected.expectMessage("Proof map key has invalid size (1)");
     StoragePreconditions.checkProofKey(key);
   }
 
@@ -89,7 +89,7 @@ public class StoragePreconditionsTest {
     byte[] key = new byte[64];
 
     expected.expect(IllegalArgumentException.class);
-    expected.expectMessage("Proof map key has invalid size: 64");
+    expected.expectMessage("Proof map key has invalid size (64)");
     StoragePreconditions.checkProofKey(key);
   }
 

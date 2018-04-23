@@ -5,6 +5,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -81,6 +82,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
+  @MustBeClosed
   public StorageIterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
@@ -93,6 +95,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
+  @MustBeClosed
   public StorageIterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
@@ -105,6 +108,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
+  @MustBeClosed
   public StorageIterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),

@@ -3,7 +3,7 @@
 [![Build Status](https://www.travis-ci.com/exonum/exonum-java-binding.svg?token=2dVYazsUZFvBqHW82g4U&branch=master)](https://www.travis-ci.com/exonum/exonum-java-binding)
 
 ## How to build
-You need JDK 1.8+, [Maven 3](https://maven.apache.org/download.cgi) 
+You need JDK 8, [Maven 3](https://maven.apache.org/download.cgi) 
 and [Rust](https://www.rust-lang.org/).
 
 ### Install system dependencies

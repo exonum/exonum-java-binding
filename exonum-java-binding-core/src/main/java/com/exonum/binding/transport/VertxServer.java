@@ -22,7 +22,8 @@ import org.apache.logging.log4j.Logger;
  * <p>The class is thread-safe. It does not support client-side locking.
  */
 final class VertxServer implements Server {
-  private static final Logger LOG = LogManager.getLogger(VertxServer.class);
+  private static final Logger logger = LogManager.getLogger(VertxServer.class);
+
   private final Vertx vertx;
   private final HttpServer server;
   private final Router rootRouter;
@@ -80,7 +81,7 @@ final class VertxServer implements Server {
       }
       state = STARTED;
       server.listen(port);
-      LOG.info("Listening at {}", server.actualPort());
+      logger.info("Listening at {}", server.actualPort());
     }
   }
 
@@ -94,29 +95,35 @@ final class VertxServer implements Server {
       state = STOPPED;
       stopFuture = new CompletableFuture<>();
 
-      LOG.info("Requesting to stop");
+      logger.info("Requesting to stop");
 
       // Request the vertx instance to close itself
-      vertx.close((r) -> {
-        // Clear the routes when it's closed
-        rootRouter.clear();
-
-        // Notify that the server is stopped
-        stopFuture.complete(null);
-
-        LOG.info("Stopped");
-      });
+      vertx.close((r) -> notifyVertxStopped());
       return stopFuture;
+    }
+  }
+
+  private void notifyVertxStopped() {
+    logger.info("Stopped");
+
+    synchronized (lock) {
+      // Clear the routes when it’s fully stopped
+      rootRouter.clear();
+
+      // Notify the clients that the server is stopped
+      stopFuture.complete(null);
     }
   }
 
   @Override
   public String toString() {
-    return "Server{"
-        + "port=" + server.actualPort()
-        + ", state=" + state
-        + ", stopFuture=" + stopFuture
-        + '}';
+    synchronized (lock) {
+      return "Server{"
+              + "port=" + server.actualPort()
+              + ", state=" + state
+              + ", stopFuture=" + stopFuture
+              + '}';
+    }
   }
 
   /**

@@ -8,12 +8,17 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class NativeFacadeTest {
 
   private static final String TX_VALUE = "value";
   private static final String TX_INFO = "{}";
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void createValidTransaction() {
@@ -27,6 +32,15 @@ public class NativeFacadeTest {
     UserTransactionAdapter tx = NativeFacade.createTransaction(false, TX_VALUE, TX_INFO);
 
     assertFalse(tx.isValid());
+  }
+
+  @Test
+  public void createThrowingIllegalArgumentInInfo() {
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    UserTransactionAdapter transaction = NativeFacade.createThrowingTransaction(exceptionType);
+
+    expectedException.expect(exceptionType);
+    transaction.info();
   }
 
   @Test

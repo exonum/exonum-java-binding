@@ -94,6 +94,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeMustDetectUseAfterViewFreed() throws Exception {
     View view = database.createSnapshot();
     EntryIndexProxy<String> entry = create(ENTRY_NAME, view);
