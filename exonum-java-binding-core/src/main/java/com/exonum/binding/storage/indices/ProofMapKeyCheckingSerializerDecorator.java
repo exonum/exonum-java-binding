@@ -14,7 +14,14 @@ final class ProofMapKeyCheckingSerializerDecorator<T> implements Serializer<T> {
 
   private final Serializer<T> delegate;
 
-  ProofMapKeyCheckingSerializerDecorator(Serializer<T> delegate) {
+  public static <T> ProofMapKeyCheckingSerializerDecorator<T> from(Serializer<T> serializer) {
+    if (serializer instanceof ProofMapKeyCheckingSerializerDecorator) {
+      return (ProofMapKeyCheckingSerializerDecorator<T>) serializer;
+    }
+    return new ProofMapKeyCheckingSerializerDecorator<>(serializer);
+  }
+
+  private ProofMapKeyCheckingSerializerDecorator(Serializer<T> delegate) {
     this.delegate = checkNotNull(delegate);
   }
 

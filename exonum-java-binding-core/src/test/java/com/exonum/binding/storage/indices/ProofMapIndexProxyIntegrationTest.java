@@ -25,7 +25,6 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
@@ -461,23 +460,16 @@ public class ProofMapIndexProxyIntegrationTest
    */
   @Test
   public void constructorShallPreserveTypeInformation() {
-    runTestWithView(
-        database::createFork,
-        (view, proofMap) -> {
-          expectedException.expectMessage(
-              "Attempt to access index '"
-                  + MAP_NAME
-                  + "' of type Map, while said index was initially created with type ProofMap");
-          expectedException.expect(RuntimeException.class);
+    runTestWithView(database::createFork, (view, proofMap) -> {
+      expectedException.expectMessage(
+          "Attempt to access index '" + MAP_NAME
+              + "' of type Map, while said index was initially created with type ProofMap");
+      expectedException.expect(RuntimeException.class);
 
-          // Create a regular map with the same name as the proof map above.
-          MapIndexProxy<HashCode, String> regularMap =
-              new MapIndexProxy<>(
-                  MAP_NAME,
-                  view,
-                  CheckingSerializerDecorator.from(StandardSerializers.hash()),
-                  CheckingSerializerDecorator.from(StandardSerializers.string()));
-        });
+      // Create a regular map with the same name as the proof map above.
+      MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
+          StandardSerializers.hash(), StandardSerializers.string());
+    });
   }
 
   /**
@@ -523,11 +515,8 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   private ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
-    return new ProofMapIndexProxy<>(
-        name,
-        view,
-        CheckingSerializerDecorator.from(StandardSerializers.hash()),
-        CheckingSerializerDecorator.from(StandardSerializers.string()));
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+        StandardSerializers.string());
   }
 
   /**

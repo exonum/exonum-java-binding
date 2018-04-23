@@ -8,6 +8,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -44,11 +45,16 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
+  private ProofListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
+
+  public static <E> ProofListIndexProxy<E> newInstance(
+      String name, View view, Serializer<E> serializer) {
+    return new ProofListIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+  }
 
   /**
    * Returns a proof that an element exists at the specified index in this list.

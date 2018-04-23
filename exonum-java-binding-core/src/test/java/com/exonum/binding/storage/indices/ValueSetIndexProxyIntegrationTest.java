@@ -11,7 +11,6 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
@@ -270,7 +269,7 @@ public class ValueSetIndexProxyIntegrationTest
     IndicesTests.runTestWithView(
         viewSupplier,
         VALUE_SET_NAME,
-        ValueSetIndexProxy::new,
+        ValueSetIndexProxy::newInstance,
         valueSetTest
     );
   }
@@ -283,7 +282,6 @@ public class ValueSetIndexProxyIntegrationTest
 
   @Override
   ValueSetIndexProxy<String> create(String name, View view) {
-    return new ValueSetIndexProxy<>(
-        name, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
+    return ValueSetIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 }

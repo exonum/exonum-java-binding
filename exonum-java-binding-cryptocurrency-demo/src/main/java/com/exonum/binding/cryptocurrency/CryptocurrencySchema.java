@@ -6,7 +6,6 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.errorprone.annotations.MustBeClosed;
 
@@ -36,10 +35,7 @@ public final class CryptocurrencySchema implements Schema {
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return new ProofMapIndexProxy<>(
-        name,
-        view,
-        CheckingSerializerDecorator.from(StandardSerializers.hash()),
-        CheckingSerializerDecorator.from(WalletSerializer.INSTANCE));
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+        WalletSerializer.INSTANCE);
   }
 }

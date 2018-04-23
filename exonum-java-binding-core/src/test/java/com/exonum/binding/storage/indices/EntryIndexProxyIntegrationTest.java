@@ -8,7 +8,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -116,14 +115,13 @@ public class EntryIndexProxyIntegrationTest
     IndicesTests.runTestWithView(
         viewSupplier,
         ENTRY_NAME,
-        EntryIndexProxy::new,
+        EntryIndexProxy::newInstance,
         entryTest
     );
   }
 
   @Override
   EntryIndexProxy<String> create(String name, View view) {
-    return new EntryIndexProxy<>(
-        name, view, CheckingSerializerDecorator.from(StandardSerializers.string()));
+    return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 }

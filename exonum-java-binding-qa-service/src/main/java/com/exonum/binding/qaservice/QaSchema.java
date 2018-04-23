@@ -8,7 +8,6 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.errorprone.annotations.MustBeClosed;
 
@@ -36,11 +35,8 @@ public final class QaSchema implements Schema {
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, Long> counters() {
     String name = fullIndexName("counters");
-    return new ProofMapIndexProxy<>(
-        name,
-        view,
-        CheckingSerializerDecorator.from(StandardSerializers.hash()),
-        CheckingSerializerDecorator.from(StandardSerializers.longs()));
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+        StandardSerializers.longs());
   }
 
   /**
@@ -49,11 +45,8 @@ public final class QaSchema implements Schema {
   @MustBeClosed
   public MapIndex<HashCode, String> counterNames() {
     String name = fullIndexName("counterNames");
-    return new MapIndexProxy<>(
-        name,
-        view,
-        CheckingSerializerDecorator.from(StandardSerializers.hash()),
-        CheckingSerializerDecorator.from(StandardSerializers.string()));
+    return MapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+        StandardSerializers.string());
   }
 
   private static String fullIndexName(String name) {

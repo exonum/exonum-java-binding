@@ -9,7 +9,6 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.Test;
@@ -31,11 +30,8 @@ public class SetEntryTransactionIntegrationTest {
       }
 
       try (Snapshot snapshot = database.createSnapshot()) {
-        EntryIndexProxy entry =
-            new EntryIndexProxy<>(
-                ENTRY_NAME,
-                snapshot,
-                CheckingSerializerDecorator.from(StandardSerializers.string()));
+        EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
+            StandardSerializers.string());
         assertTrue(entry.isPresent());
         assertThat(entry.get(), equalTo(value));
       }

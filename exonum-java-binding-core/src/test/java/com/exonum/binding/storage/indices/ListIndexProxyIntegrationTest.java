@@ -157,7 +157,7 @@ public class ListIndexProxyIntegrationTest {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_NAME,
-        ListIndexProxy::new,
+        ListIndexProxy::newInstance,
         listTest
     );
   }

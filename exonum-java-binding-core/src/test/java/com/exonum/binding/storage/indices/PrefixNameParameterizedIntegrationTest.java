@@ -62,13 +62,13 @@ public class PrefixNameParameterizedIntegrationTest {
             parameters("name#1"),
             parameters("name-1")),
         asList(
-            parameters(IndexConstructors.from(ListIndexProxy::new)),
-            parameters(IndexConstructors.from(ProofListIndexProxy::new)),
-            parameters(IndexConstructors.from(MapIndexProxy::new)),
-            parameters(IndexConstructors.from(ProofMapIndexProxy::new)),
-            parameters(IndexConstructors.from(ValueSetIndexProxy::new)),
-            parameters(IndexConstructors.from(KeySetIndexProxy::new)),
-            parameters(IndexConstructors.from(EntryIndexProxy::new))
+            parameters(IndexConstructors.from(ListIndexProxy::newInstance)),
+            parameters(IndexConstructors.from(ProofListIndexProxy::newInstance)),
+            parameters(IndexConstructors.from(MapIndexProxy::newInstance)),
+            parameters(IndexConstructors.from(ProofMapIndexProxy::newInstance)),
+            parameters(IndexConstructors.from(ValueSetIndexProxy::newInstance)),
+            parameters(IndexConstructors.from(KeySetIndexProxy::newInstance)),
+            parameters(IndexConstructors.from(EntryIndexProxy::newInstance))
         ));
   }
 

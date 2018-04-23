@@ -6,6 +6,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.storage.serialization.Serializer;
 import com.google.errorprone.annotations.MustBeClosed;
 
 /**
@@ -50,13 +51,18 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofMapIndexProxy(String name, View view, CheckingSerializerDecorator<K> keySerializer,
+  private ProofMapIndexProxy(String name, View view, ProofMapKeyCheckingSerializerDecorator<K> keySerializer,
       CheckingSerializerDecorator<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.keySerializer = new ProofMapKeyCheckingSerializerDecorator<>(
-        keySerializer
-    );
+    this.keySerializer = keySerializer;
     this.valueSerializer = valueSerializer;
+  }
+
+  public static <K, V> ProofMapIndexProxy<K, V> newInstance(
+      String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return new ProofMapIndexProxy<>(name, view,
+        ProofMapKeyCheckingSerializerDecorator.from(keySerializer),
+        CheckingSerializerDecorator.from(valueSerializer));
   }
 
   private static native long nativeCreate(String name, long viewNativeHandle);
