@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.test.appender.ListAppender;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class LoggingInterceptorTest {
 
   private static String EXCEPTION_MESSAGE = "Some exception";
 
-  private TestAppender appender;
+  private ListAppender appender;
 
   private UserServiceAdapter serviceAdapter;
 
@@ -37,7 +38,7 @@ public class LoggingInterceptorTest {
   public void setUp() {
     final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
     final Configuration config = ctx.getConfiguration();
-    appender = (TestAppender) config.getAppenders().get("TestAppender");
+    appender = (ListAppender) config.getAppenders().get("ListAppender");
 
     Injector injector = Guice.createInjector(new TestModule());
     serviceAdapter = injector.getInstance(UserServiceAdapter.class);
