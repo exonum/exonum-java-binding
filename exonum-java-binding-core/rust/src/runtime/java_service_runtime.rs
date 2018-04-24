@@ -2,7 +2,10 @@ use exonum::blockchain::Service;
 use exonum::helpers::fabric::{Context, ServiceFactory};
 
 use jni;
+
 use std::sync::Arc;
+use std::path::PathBuf;
+use std::path::Path;
 
 use proxy::ServiceProxy;
 use runtime::config::{Config, JvmConfig, ServiceConfig};
@@ -24,12 +27,7 @@ impl JavaServiceRuntime {
     /// Create new runtime from config.
     pub fn new(config: Config) -> Self {
         let executor = Self::create_executor(config.jvm_config);
-        Self::with_executor(executor, config.service_config)
-    }
-
-    /// Create new runtime with prepared `Executor`.
-    pub fn with_executor(executor: DumbExecutor, config: ServiceConfig) -> Self {
-        let service_proxy = Self::create_service(config, executor.clone());
+        let service_proxy = Self::create_service(config.service_config, executor.clone());
         Self {
             executor,
             service_proxy,
@@ -38,15 +36,15 @@ impl JavaServiceRuntime {
 
     fn create_executor(config: JvmConfig) -> DumbExecutor {
         let java_vm = {
-            let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
+            let mut args_builder = jni::InitArgsBuilder::new()
+                .version(jni::JNIVersion::V8)
+                .option(&get_libpath_option());
 
             if config.debug {
                 args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
             }
 
-            if let Some(class_path) = config.class_path {
-                args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
-            }
+            args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
 
             let args = args_builder.build().unwrap();
             jni::JavaVM::new(args).unwrap()
@@ -68,6 +66,45 @@ impl JavaServiceRuntime {
         }));
         ServiceProxy::from_global_ref(executor, service)
     }
+}
+
+fn get_libpath_option() -> String {
+    let library_path = rust_project_root_dir()
+        .join(target_path())
+        .canonicalize()
+        .expect(
+            "Target path not found, but there should be \
+            the libjava_bindings dynamically loading library",
+        );
+    let library_path = library_path.to_str().expect(
+        "Failed to convert FS path into utf-8",
+    );
+
+    format!("-Djava.library.path={}", library_path)
+}
+
+fn rust_project_root_dir() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .canonicalize()
+        .unwrap()
+}
+
+fn project_root_dir() -> PathBuf {
+    rust_project_root_dir()
+        .join("../..")
+        .canonicalize()
+        .unwrap()
+}
+
+#[cfg(debug_assertions)]
+fn target_path() -> &'static str {
+    "target/debug"
+}
+
+#[cfg(not(debug_assertions))]
+fn target_path() -> &'static str {
+    "target/release"
 }
 
 impl ServiceFactory for JavaServiceRuntime {

@@ -11,7 +11,7 @@ pub struct JvmConfig {
     /// Whether to create JVM with `Xdebug` option or not.
     pub debug: bool,
     /// Optional classpath.
-    pub class_path: Option<String>,
+    pub class_path: String,
 }
 
 /// Java service configuration.

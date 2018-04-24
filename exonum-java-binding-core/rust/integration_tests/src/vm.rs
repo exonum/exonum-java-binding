@@ -85,7 +85,11 @@ fn target_path() -> &'static str {
     "target/release"
 }
 
-fn get_classpath_option() -> String {
+pub fn get_classpath_option() -> String {
+    format!("-Djava.class.path={}", get_classpath())
+}
+
+pub fn get_classpath() -> String {
     let classpath_txt_path =
         project_root_dir().join("exonum-java-binding-fakes/target/ejb-fakes-classpath.txt");
 
@@ -101,5 +105,5 @@ fn get_classpath_option() -> String {
     );
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
-    format!("-Djava.class.path={}:{}", class_path, fakes_classes)
+    format!("{}:{}", class_path, fakes_classes)
 }
