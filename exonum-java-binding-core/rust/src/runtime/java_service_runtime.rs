@@ -85,14 +85,6 @@ fn get_libpath_option() -> String {
 
 fn rust_project_root_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
-        .canonicalize()
-        .unwrap()
-}
-
-fn project_root_dir() -> PathBuf {
-    rust_project_root_dir()
-        .join("../..")
         .canonicalize()
         .unwrap()
 }

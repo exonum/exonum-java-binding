@@ -10,7 +10,7 @@ pub struct Config {
 pub struct JvmConfig {
     /// Whether to create JVM with `Xdebug` option or not.
     pub debug: bool,
-    /// Optional classpath.
+    /// Сlasspath.
     pub class_path: String,
 }
 
