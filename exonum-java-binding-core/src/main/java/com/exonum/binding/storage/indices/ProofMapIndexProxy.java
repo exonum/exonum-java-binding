@@ -58,7 +58,8 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
         CheckingSerializerDecorator.from(valueSerializer));
   }
 
-  private ProofMapIndexProxy(String name, View view, ProofMapKeyCheckingSerializerDecorator<K> keySerializer,
+  private ProofMapIndexProxy(String name, View view,
+      ProofMapKeyCheckingSerializerDecorator<K> keySerializer,
       CheckingSerializerDecorator<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
     this.keySerializer = keySerializer;
