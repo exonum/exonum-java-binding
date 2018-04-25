@@ -14,6 +14,11 @@ final class ProofMapKeyCheckingSerializerDecorator<T> implements Serializer<T> {
 
   private final Serializer<T> delegate;
 
+  /**
+   * Creates a proof map key checking serializer decorator. Will not decorate itself.
+   *
+   * @param serializer a serializer to decorate
+   */
   public static <T> ProofMapKeyCheckingSerializerDecorator<T> from(Serializer<T> serializer) {
     if (serializer instanceof ProofMapKeyCheckingSerializerDecorator) {
       return (ProofMapKeyCheckingSerializerDecorator<T>) serializer;

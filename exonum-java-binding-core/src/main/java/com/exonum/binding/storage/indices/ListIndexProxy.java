@@ -42,13 +42,13 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  private ListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
-  }
-
   public static <E> ListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
     return new ListIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+  }
+
+  private ListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
+    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
   }
 
   /**
