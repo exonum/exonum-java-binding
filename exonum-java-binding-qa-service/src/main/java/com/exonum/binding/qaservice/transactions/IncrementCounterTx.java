@@ -11,7 +11,6 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.qaservice.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
@@ -23,9 +22,9 @@ import java.nio.ByteOrder;
  * A transaction incrementing the given counter. Always valid, does nothing if the counter
  * is unknown.
  */
-final class IncrementCounterTx implements Transaction {
+public final class IncrementCounterTx implements Transaction {
 
-  private static final short ID = QaTransaction.INCREMENT_COUNTER.id;
+  private static final short ID = QaTransaction.INCREMENT_COUNTER.id();
 
   /** A size of message body of this transaction: seed + hash code of the counter name. */
   @VisibleForTesting
@@ -40,7 +39,7 @@ final class IncrementCounterTx implements Transaction {
    * @param seed transaction seed
    * @param counterId counter id, a hash of the counter name
    */
-  IncrementCounterTx(long seed, HashCode counterId) {
+  public IncrementCounterTx(long seed, HashCode counterId) {
     this.seed = seed;
     this.counterId = checkNotNull(counterId);
   }
@@ -64,7 +63,7 @@ final class IncrementCounterTx implements Transaction {
 
   @Override
   public String info() {
-    return new QaTransactionJsonWriter().toJson(ID, this);
+    return new QaTransactionGson().toJson(ID, this);
   }
 
   @Override

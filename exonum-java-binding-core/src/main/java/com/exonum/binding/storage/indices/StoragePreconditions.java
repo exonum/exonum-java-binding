@@ -49,7 +49,7 @@ final class StoragePreconditions {
   static byte[] checkProofKey(byte[] key) {
     checkNotNull(key, "Proof map key is null");
     checkArgument(key.length == PROOF_MAP_KEY_SIZE,
-        "Proof map key has invalid size: %s", key.length);
+        "Proof map key has invalid size (%s), must be 32 bytes", key.length);
     return key;
   }
 

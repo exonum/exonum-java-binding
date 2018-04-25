@@ -9,20 +9,19 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.qaservice.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-final class ValidThrowingTx implements Transaction {
+public final class ValidThrowingTx implements Transaction {
 
-  private static final short ID = QaTransaction.VALID_THROWING.id;
+  private static final short ID = QaTransaction.VALID_THROWING.id();
 
   private final long seed;
 
-  ValidThrowingTx(long seed) {
+  public ValidThrowingTx(long seed) {
     this.seed = seed;
   }
 
@@ -52,7 +51,7 @@ final class ValidThrowingTx implements Transaction {
 
   @Override
   public String info() {
-    return new QaTransactionJsonWriter().toJson(ID, this);
+    return new QaTransactionGson().toJson(ID, this);
   }
 
   @Override

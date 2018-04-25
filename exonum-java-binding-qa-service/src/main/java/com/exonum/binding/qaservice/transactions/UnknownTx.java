@@ -11,12 +11,12 @@ import java.nio.ByteBuffer;
  * A transaction that has QA service identifier, but an unknown transaction id.
  * Such transaction must be rejected when received by other nodes.
  */
-final class UnknownTx extends AbstractTransaction {
+public final class UnknownTx extends AbstractTransaction {
 
   static final short ID = 9999;
 
   // todo: do we need seed here? Won't we pollute the local tx pool if allow the seed?
-  UnknownTx() {
+  public UnknownTx() {
     super(createMessage(0L));
   }
 
