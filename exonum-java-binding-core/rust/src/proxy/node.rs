@@ -115,8 +115,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
 
 /// Creates a new snapshot of the current database state.
 ///
-/// The caller is responsible to **free** the snapshot
-/// to destroy the corresponding native objects.
+/// The snapshot must be explicitly destroyed by the caller from Java.
 ///
 /// Parameters:
 /// - `node_handle` - a native handle to the native node object
