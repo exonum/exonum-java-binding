@@ -15,7 +15,6 @@ set -eu -o pipefail
 # See build definitions of the modules for more.
 mvn verify \
   --activate-profiles ci-build \
-  --threads 1C \
   -Drust.compiler.version="stable"
 
 # Run native integration tests that require a JVM

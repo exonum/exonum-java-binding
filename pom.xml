@@ -248,5 +248,6 @@
     <module>exonum-java-binding-fakes</module>
     <module>exonum-java-binding-qa-service</module>
     <module>exonum-java-binding-cryptocurrency-demo</module>
+    <module>exonum-java-binding-service-archetype</module>
   </modules>
 </project>
