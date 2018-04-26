@@ -7,14 +7,18 @@ pub struct Config {
 }
 
 /// JVM configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JvmConfig {
     /// Whether to create JVM with `Xdebug` option or not.
     pub debug: bool,
     /// Сlasspath.
     pub class_path: String,
+    /// Libpath.
+    pub lib_path: String,
 }
 
 /// Java service configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServiceConfig {
     /// Fully qualified service module name.
     ///

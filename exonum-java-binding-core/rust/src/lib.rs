@@ -10,13 +10,17 @@
 #![allow(non_snake_case)]
 
 pub extern crate exonum;
+extern crate failure;
+extern crate toml;
 pub extern crate iron;
 pub extern crate jni;
 #[macro_use]
 extern crate log;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 pub extern crate serde_json;
 
-#[cfg(feature = "resource-manager")]
 #[macro_use]
 extern crate lazy_static;
 

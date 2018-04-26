@@ -46,7 +46,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-fn get_libpath_option() -> String {
+pub fn get_libpath() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
@@ -54,11 +54,9 @@ fn get_libpath_option() -> String {
             "Target path not found, but there should be \
             the libjava_bindings dynamically loading library",
         );
-    let library_path = library_path.to_str().expect(
+    library_path.to_str().expect(
         "Failed to convert FS path into utf-8",
-    );
-
-    format!("-Djava.library.path={}", library_path)
+    ).to_owned()
 }
 
 fn rust_project_root_dir() -> PathBuf {
@@ -85,8 +83,12 @@ fn target_path() -> &'static str {
     "target/release"
 }
 
-pub fn get_classpath_option() -> String {
+fn get_classpath_option() -> String {
     format!("-Djava.class.path={}", get_classpath())
+}
+
+fn get_libpath_option() -> String {
+    format!("-Djava.library.path={}", get_libpath())
 }
 
 pub fn get_classpath() -> String {

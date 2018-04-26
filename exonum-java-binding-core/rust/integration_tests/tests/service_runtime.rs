@@ -7,7 +7,7 @@ use java_bindings::jni::JavaVM;
 use std::sync::Arc;
 use java_bindings::{DumbExecutor, ServiceConfig, JvmConfig, Config, JavaServiceRuntime};
 use java_bindings::exonum::helpers::fabric::NodeBuilder;
-use integration_tests::vm::{create_vm_for_tests_with_fake_classes, get_classpath};
+use integration_tests::vm::{create_vm_for_tests_with_fake_classes, get_classpath, get_libpath};
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_tests_with_fake_classes());
@@ -25,6 +25,7 @@ fn bootstrap() {
     let jvm_config = JvmConfig {
         debug: true,
         class_path: get_classpath(),
+        lib_path: get_libpath(),
     };
 
     let service_runtime = JavaServiceRuntime::new(Config {
