@@ -115,13 +115,13 @@ public class EntryIndexProxyIntegrationTest
     IndicesTests.runTestWithView(
         viewSupplier,
         ENTRY_NAME,
-        EntryIndexProxy::new,
+        EntryIndexProxy::newInstance,
         entryTest
     );
   }
 
   @Override
   EntryIndexProxy<String> create(String name, View view) {
-    return new EntryIndexProxy<>(name, view, StandardSerializers.string());
+    return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 }

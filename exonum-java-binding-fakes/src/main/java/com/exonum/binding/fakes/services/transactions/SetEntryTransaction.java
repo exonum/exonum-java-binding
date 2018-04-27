@@ -63,6 +63,6 @@ public final class SetEntryTransaction implements Transaction {
   }
 
   private EntryIndexProxy<String> createEntry(Fork view) {
-    return new EntryIndexProxy<>(ENTRY_NAME, view, StandardSerializers.string());
+    return EntryIndexProxy.newInstance(ENTRY_NAME, view, StandardSerializers.string());
   }
 }
