@@ -31,7 +31,7 @@ public class QaTransactionConverterTest {
     // Check that the QaTransaction enum is kept in sync with the map of transaction factories,
     // i.e., each transaction type is mapped to the corresponding factory.
     for (QaTransaction tx : QaTransaction.values()) {
-      short id = tx.id;
+      short id = tx.id();
 
       assertThat(QaTransactionConverter.TRANSACTION_FACTORIES)
           .as("No entry for transaction %s with id=%d", tx, id)
@@ -43,7 +43,7 @@ public class QaTransactionConverterTest {
   public void toTransactionTransactionOfAnotherService() {
     BinaryMessage message = new Message.Builder()
         .setServiceId((short) (QaService.ID + 1))
-        .setMessageType(QaTransaction.INCREMENT_COUNTER.id)
+        .setMessageType(QaTransaction.INCREMENT_COUNTER.id())
         .setBody(ByteBuffer.allocate(0))
         .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
         .buildRaw();
@@ -71,11 +71,11 @@ public class QaTransactionConverterTest {
         IncrementCounterTx.class, IncrementCounterTxIntegrationTest.INC_COUNTER_TX_MESSAGE_TEMPLATE,
         InvalidThrowingTx.class, new Message.Builder()
             .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-            .setMessageType(QaTransaction.INVALID_THROWING.id)
+            .setMessageType(QaTransaction.INVALID_THROWING.id())
             .buildRaw(),
         InvalidTx.class, new Message.Builder()
             .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-            .setMessageType(QaTransaction.INVALID.id)
+            .setMessageType(QaTransaction.INVALID.id())
             .buildRaw(),
         ValidThrowingTx.class, ValidThrowingTxTest.VALID_THROWING_TEMPLATE
     );
