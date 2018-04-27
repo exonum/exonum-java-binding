@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class LoggingInterceptor implements MethodInterceptor {
 
-  private static Logger logger = LogManager.getLogger(LoggingInterceptor.class);
+  private static final Logger logger = LogManager.getLogger(LoggingInterceptor.class);
 
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
