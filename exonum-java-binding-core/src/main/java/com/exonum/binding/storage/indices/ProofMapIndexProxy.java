@@ -51,13 +51,19 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ProofMapIndexProxy(String name, View view, Serializer<K> keySerializer,
-                            Serializer<V> valueSerializer) {
+  public static <K, V> ProofMapIndexProxy<K, V> newInstance(
+      String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return new ProofMapIndexProxy<>(name, view,
+        ProofMapKeyCheckingSerializerDecorator.from(keySerializer),
+        CheckingSerializerDecorator.from(valueSerializer));
+  }
+
+  private ProofMapIndexProxy(String name, View view,
+      ProofMapKeyCheckingSerializerDecorator<K> keySerializer,
+      CheckingSerializerDecorator<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.keySerializer = new ProofMapKeyCheckingSerializerDecorator<>(
-        CheckingSerializerDecorator.from(keySerializer)
-    );
-    this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
+    this.keySerializer = keySerializer;
+    this.valueSerializer = valueSerializer;
   }
 
   private static native long nativeCreate(String name, long viewNativeHandle);

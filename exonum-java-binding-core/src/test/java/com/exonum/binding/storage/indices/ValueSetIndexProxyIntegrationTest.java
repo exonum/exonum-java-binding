@@ -269,7 +269,7 @@ public class ValueSetIndexProxyIntegrationTest
     IndicesTests.runTestWithView(
         viewSupplier,
         VALUE_SET_NAME,
-        ValueSetIndexProxy::new,
+        ValueSetIndexProxy::newInstance,
         valueSetTest
     );
   }
@@ -282,6 +282,6 @@ public class ValueSetIndexProxyIntegrationTest
 
   @Override
   ValueSetIndexProxy<String> create(String name, View view) {
-    return new ValueSetIndexProxy<>(name, view, StandardSerializers.string());
+    return ValueSetIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 }

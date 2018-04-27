@@ -21,7 +21,7 @@ public final class TestSchema implements Schema {
 
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, String> testMap() {
-    return new ProofMapIndexProxy<>(TEST_MAP_NAME, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

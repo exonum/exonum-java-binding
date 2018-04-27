@@ -35,7 +35,7 @@ public final class QaSchema implements Schema {
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, Long> counters() {
     String name = fullIndexName("counters");
-    return new ProofMapIndexProxy<>(name, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
         StandardSerializers.longs());
   }
 
@@ -45,7 +45,7 @@ public final class QaSchema implements Schema {
   @MustBeClosed
   public MapIndex<HashCode, String> counterNames() {
     String name = fullIndexName("counterNames");
-    return new MapIndexProxy<>(name, view, StandardSerializers.hash(),
+    return MapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

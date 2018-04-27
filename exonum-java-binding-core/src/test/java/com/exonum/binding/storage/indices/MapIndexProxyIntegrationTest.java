@@ -406,7 +406,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {
-    return new MapIndexProxy<>(name, view, StandardSerializers.string(),
+    return MapIndexProxy.newInstance(name, view, StandardSerializers.string(),
         StandardSerializers.string());
   }
 

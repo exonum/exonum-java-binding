@@ -158,7 +158,7 @@ public class ProofListIndexProxyIntegrationTest {
     IndicesTests.runTestWithView(
         viewSupplier,
         LIST_NAME,
-        ProofListIndexProxy::new,
+        ProofListIndexProxy::newInstance,
         listTest
     );
   }
