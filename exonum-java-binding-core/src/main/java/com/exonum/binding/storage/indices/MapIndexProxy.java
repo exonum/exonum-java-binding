@@ -46,11 +46,17 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public MapIndexProxy(String name, View view, Serializer<K> keySerializer,
-                       Serializer<V> valueSerializer) {
+  public static <K, V> MapIndexProxy<K, V> newInstance(
+      String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return new MapIndexProxy<>(name, view, CheckingSerializerDecorator.from(keySerializer),
+        CheckingSerializerDecorator.from(valueSerializer));
+  }
+
+  private MapIndexProxy(String name, View view, CheckingSerializerDecorator<K> keySerializer,
+      CheckingSerializerDecorator<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.keySerializer = CheckingSerializerDecorator.from(keySerializer);
-    this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
+    this.keySerializer = keySerializer;
+    this.valueSerializer = valueSerializer;
   }
 
   @Override

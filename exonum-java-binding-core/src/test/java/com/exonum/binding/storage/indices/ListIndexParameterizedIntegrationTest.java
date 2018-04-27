@@ -343,8 +343,8 @@ public class ListIndexParameterizedIntegrationTest
   @Parameters(name = "{index}: {1}")
   public static Collection<Object[]> testData() {
     return asList(
-        parameters(IndexConstructors.from(ListIndexProxy::new), "ListIndex"),
-        parameters(IndexConstructors.from(ProofListIndexProxy::new), "ProofListIndex")
+        parameters(IndexConstructors.from(ListIndexProxy::newInstance), "ListIndex"),
+        parameters(IndexConstructors.from(ProofListIndexProxy::newInstance), "ProofListIndex")
     );
   }
 }

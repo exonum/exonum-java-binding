@@ -35,7 +35,7 @@ public final class CryptocurrencySchema implements Schema {
   @MustBeClosed
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return new ProofMapIndexProxy<>(
-        name, view, StandardSerializers.hash(), WalletSerializer.INSTANCE);
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+        WalletSerializer.INSTANCE);
   }
 }
