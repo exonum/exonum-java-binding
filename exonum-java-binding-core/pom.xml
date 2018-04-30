@@ -26,7 +26,6 @@
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
-    <guice.version>4.1.0</guice.version>
     <auto-value.version>1.5.3</auto-value.version>
   </properties>
 
@@ -174,12 +173,9 @@
         </executions>
       </plugin>
 
-      <!-- you may explicitly run `mvn findbugs:check` from the command line,
-           but it's not bound to any phases in the default profile -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.4</version>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
         <configuration>
           <effort>max</effort>
           <threshold>medium</threshold>
@@ -219,11 +215,11 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>findbugs-maven-plugin</artifactId>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>findbugs-during-verify</id>
+                <id>spotbugs-during-verify</id>
                 <phase>verify</phase>
                 <goals>
                   <goal>check</goal>
@@ -268,7 +264,6 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>${guice.version}</version>
-      <classifier>no_aop</classifier>
     </dependency>
 
     <dependency>
@@ -293,6 +288,14 @@
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 

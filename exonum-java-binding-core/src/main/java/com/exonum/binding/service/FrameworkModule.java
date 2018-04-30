@@ -1,7 +1,11 @@
 package com.exonum.binding.service;
 
+import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.subclassesOf;
+
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
+import com.exonum.binding.util.LoggingInterceptor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
@@ -15,6 +19,7 @@ class FrameworkModule extends AbstractModule {
     bind(Server.class).toProvider(Server::create).in(Singleton.class);
     //  fixme: if that's a proxy of a NodeProxy :-)
     // bind(Node.class);
+    bindInterceptor(subclassesOf(UserServiceAdapter.class), any(), new LoggingInterceptor());
     bind(UserServiceAdapter.class);
   }
 }

@@ -5,6 +5,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -45,11 +46,17 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public MapIndexProxy(String name, View view, Serializer<K> keySerializer,
-                       Serializer<V> valueSerializer) {
+  public static <K, V> MapIndexProxy<K, V> newInstance(
+      String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return new MapIndexProxy<>(name, view, CheckingSerializerDecorator.from(keySerializer),
+        CheckingSerializerDecorator.from(valueSerializer));
+  }
+
+  private MapIndexProxy(String name, View view, CheckingSerializerDecorator<K> keySerializer,
+      CheckingSerializerDecorator<V> valueSerializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.keySerializer = CheckingSerializerDecorator.from(keySerializer);
-    this.valueSerializer = CheckingSerializerDecorator.from(valueSerializer);
+    this.keySerializer = keySerializer;
+    this.valueSerializer = valueSerializer;
   }
 
   @Override
@@ -81,6 +88,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
+  @MustBeClosed
   public StorageIterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
@@ -93,6 +101,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
+  @MustBeClosed
   public StorageIterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
@@ -105,6 +114,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
+  @MustBeClosed
   public StorageIterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),

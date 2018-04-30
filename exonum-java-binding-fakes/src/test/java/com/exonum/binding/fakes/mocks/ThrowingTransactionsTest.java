@@ -20,6 +20,16 @@ public class ThrowingTransactionsTest {
   }
 
   @Test
+  public void createThrowingIllegalArgumentInInfo() {
+    // Transaction#info is a default method, check it separately
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
+
+    expectedException.expect(exceptionType);
+    transaction.info();
+  }
+
+  @Test
   public void createThrowingOutOfMemoryError() {
     Class<OutOfMemoryError> exceptionType = OutOfMemoryError.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);

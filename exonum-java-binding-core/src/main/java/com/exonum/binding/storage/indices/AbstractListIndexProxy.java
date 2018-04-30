@@ -5,7 +5,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkNoNul
 
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
+import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -18,9 +18,10 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(long nativeHandle, String name, View view, Serializer<T> userSerializer) {
+  AbstractListIndexProxy(
+      long nativeHandle, String name, View view, CheckingSerializerDecorator<T> userSerializer) {
     super(nativeHandle, name, view);
-    this.serializer = CheckingSerializerDecorator.from(userSerializer);
+    this.serializer = userSerializer;
   }
 
   @Override
@@ -88,6 +89,7 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
   }
 
   @Override
+  @MustBeClosed
   public final StorageIterator<T> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIter(getNativeHandle()),

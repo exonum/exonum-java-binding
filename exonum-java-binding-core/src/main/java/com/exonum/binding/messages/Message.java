@@ -83,7 +83,14 @@ public interface Message {
 
   class Builder extends Message_Builder2 {
 
-    // todo: add defaults?
+    private static final byte DEFAULT_NETWORK_ID = 0;
+    private static final byte DEFAULT_PROTOCOL_VERSION = 0;
+
+    public Builder() {
+      // Set defaults. Currently the only valid values of network and protocol version are 0.
+      setNetworkId(DEFAULT_NETWORK_ID);
+      setVersion(DEFAULT_PROTOCOL_VERSION);
+    }
 
     @Override
     public Builder setBody(ByteBuffer body) {

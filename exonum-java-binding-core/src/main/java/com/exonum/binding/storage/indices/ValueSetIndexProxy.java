@@ -11,6 +11,7 @@ import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.MustBeClosed;
 import javax.annotation.Nullable;
 
 /**
@@ -54,9 +55,14 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public ValueSetIndexProxy(String name, View view, Serializer<E> serializer) {
+  public static <E> ValueSetIndexProxy<E> newInstance(
+      String name, View view, Serializer<E> serializer) {
+    return new ValueSetIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+  }
+
+  private ValueSetIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.serializer = CheckingSerializerDecorator.from(serializer);
+    this.serializer = serializer;
   }
 
   /**
@@ -119,6 +125,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
    */
+  @MustBeClosed
   public StorageIterator<HashCode> hashes() {
     return StorageIterators.createIterator(
         nativeCreateHashIterator(getNativeHandle()),
@@ -139,6 +146,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
+  @MustBeClosed
   public StorageIterator<Entry<E>> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),

@@ -14,10 +14,9 @@ set -eu -o pipefail
 #  - Checkstyle checks as errors.
 #  - Native unit & integration tests that do not require a JVM.
 # See build definitions of the modules for more.
-mvn verify \
+mvn install \
   -DskipTests \
   --activate-profiles ci-build \
-  --threads 1C \
   -Drust.compiler.version="stable"
 
 # Run native integration tests that require a JVM

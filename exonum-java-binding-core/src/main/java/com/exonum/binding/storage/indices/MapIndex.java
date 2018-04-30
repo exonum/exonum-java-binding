@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.Fork;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -72,6 +73,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @throws IllegalStateException if this map is not valid
    */
+  @MustBeClosed
   StorageIterator<K> keys();
 
   /**
@@ -84,6 +86,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @throws IllegalStateException if this map is not valid
    */
+  @MustBeClosed
   StorageIterator<V> values();
 
   /**
@@ -97,6 +100,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @throws IllegalStateException if this map is not valid
    */
+  @MustBeClosed
   StorageIterator<MapEntry<K, V>> entries();
 
   /**
