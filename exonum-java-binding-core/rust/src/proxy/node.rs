@@ -89,25 +89,28 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
         assert!(offset >= 0, "Offset can't be negative");
         assert!(size >= 0, "Size can't be negative");
         let node = cast_handle::<NodeContext>(node_handle);
-        unwrap_jni_verbose(&env, || -> JniResult<()> {
-            let message = env.convert_byte_array(message)?;
-            let message = message[offset as usize..(offset + size) as usize].to_vec();
-            let message = RawMessage::from_vec(message);
-            let transaction = env.new_global_ref(transaction.into())?;
-            let exec = node.executor().clone();
-            let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
-            if let Err(err) = node.submit(Box::new(transaction)) {
-                let class = if err.kind() == io::ErrorKind::Other &&
-                    err.description() == VERIFY_ERROR_MESSAGE
-                {
-                    INVALID_TRANSACTION_EXCEPTION
-                } else {
-                    INTERNAL_SERVER_ERROR
-                };
-                env.throw_new(class, err.description())?;
-            }
-            Ok(())
-        } ());
+        unwrap_jni_verbose(
+            &env,
+            || -> JniResult<()> {
+                let message = env.convert_byte_array(message)?;
+                let message = message[offset as usize..(offset + size) as usize].to_vec();
+                let message = RawMessage::from_vec(message);
+                let transaction = env.new_global_ref(transaction.into())?;
+                let exec = node.executor().clone();
+                let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
+                if let Err(err) = node.submit(Box::new(transaction)) {
+                    let class = if err.kind() == io::ErrorKind::Other &&
+                        err.description() == VERIFY_ERROR_MESSAGE
+                    {
+                        INVALID_TRANSACTION_EXCEPTION
+                    } else {
+                        INTERNAL_SERVER_ERROR
+                    };
+                    env.throw_new(class, err.description())?;
+                }
+                Ok(())
+            }(),
+        );
         Ok(())
     });
     unwrap_exc_or_default(&env, res);
