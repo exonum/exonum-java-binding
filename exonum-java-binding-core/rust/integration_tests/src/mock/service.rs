@@ -119,9 +119,12 @@ impl ServiceMockBuilder {
         self
     }
 
-    pub fn initial_global_config(self, config: String) -> Self {
+    pub fn initial_global_config<S>(self, config: S) -> Self
+    where
+        S: Into<String>,
+    {
         unwrap_jni(self.exec.with_attached(|env| {
-            let config = env.new_string(config)?;
+            let config = env.new_string(config.into())?;
             env.call_method(
                 self.builder.as_obj(),
                 "initialGlobalConfig",

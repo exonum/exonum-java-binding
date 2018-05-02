@@ -129,17 +129,26 @@ impl Service for ServiceProxy {
                     &[JValue::from(view_handle)],
                 ),
             ).l()?;
-            convert_to_string(env, json_config)
+            if json_config.is_null() {
+                Ok(None)
+            } else {
+                Ok(Some(convert_to_string(env, json_config)?))
+            }
         }));
-        serde_json::from_str(&json_config)
-            .map_err(|e| {
-                panic!(
-                    "JSON deserialization error: {:?}; json string: {:?}",
-                    e,
-                    json_config
-                )
-            })
-            .unwrap()
+        match json_config {
+            None => Value::Null,
+            Some(json_config) => {
+                serde_json::from_str(&json_config)
+                    .map_err(|e| {
+                        panic!(
+                            "JSON deserialization error: {:?}; json string: {:?}",
+                            e,
+                            json_config
+                        )
+                    })
+                    .unwrap()
+            }
+        }
     }
 
     fn public_api_handler(&self, context: &ApiContext) -> Option<Box<Handler>> {

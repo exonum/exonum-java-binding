@@ -121,11 +121,22 @@ pub fn initialize_config() {
     let mut fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .initial_global_config(TEST_CONFIG_JSON.to_string())
+        .initial_global_config(TEST_CONFIG_JSON)
         .build();
 
     let config = service.initialize(&mut fork);
     assert_eq!(config, *TEST_CONFIG_VALUE);
+}
+
+#[test]
+pub fn initialize_config_default() {
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+
+    let service = ServiceMockBuilder::new(EXECUTOR.clone()).build();
+
+    let config = service.initialize(&mut fork);
+    assert_eq!(config, Value::Null);
 }
 
 #[test]
@@ -134,7 +145,7 @@ pub fn initialize_config_parse_error() {
     let mut fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .initial_global_config(TEST_CONFIG_NOT_JSON.to_string())
+        .initial_global_config(TEST_CONFIG_NOT_JSON)
         .build();
 
     match catch_unwind(AssertUnwindSafe(|| service.initialize(&mut fork))) {
