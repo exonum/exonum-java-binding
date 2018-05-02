@@ -8,7 +8,7 @@ use futures::Stream;
 use futures::sync::mpsc::{self, Receiver};
 use integration_tests::mock::transaction::create_mock_transaction;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::{JniExecutor, MainExecutor, NodeContext,
+use java_bindings::{JniExecutor, JniResult, MainExecutor, NodeContext,
                     Java_com_exonum_binding_service_NodeProxy_nativeSubmit};
 use java_bindings::exonum::blockchain::Blockchain;
 use java_bindings::exonum::crypto::gen_keypair;
@@ -16,7 +16,7 @@ use java_bindings::exonum::messages::RawMessage;
 use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::MemoryDB;
 use java_bindings::jni::{JavaVM, JNIEnv};
-use java_bindings::jni::objects::JObject;
+use java_bindings::jni::objects::{AutoLocal, JObject};
 use java_bindings::utils::{get_and_clear_java_exception, get_class_name, to_handle, unwrap_jni,
                            unwrap_jni_verbose};
 
@@ -34,19 +34,24 @@ pub fn submit_valid_transaction() {
     let marker_raw = RawMessage::from_vec(vec![1, 2, 3]);
     let raw_message = marker_raw.clone();
     unwrap_jni(EXECUTOR.with_attached(move |env: &JNIEnv| {
-        let message = unwrap_jni_verbose(&env, env.byte_array_from_slice(raw_message.as_ref()));
-        Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
-            env.clone(),
-            jclass,
-            node_handle,
-            java_transaction.as_obj().into_inner(),
-            message,
-            0,
-            raw_message.len() as i32,
-        );
-        let exception = JObject::from(unwrap_jni_verbose(&env, env.exception_occurred()));
-        assert!(exception.is_null());
-        Ok(())
+        Ok(unwrap_jni_verbose(
+            &env,
+            (|| {
+                let message = message_from_raw(env, &raw_message)?;
+                Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
+                    env.clone(),
+                    jclass,
+                    node_handle,
+                    *java_transaction.as_obj(),
+                    *message.as_obj(),
+                    0,
+                    raw_message.len() as i32,
+                );
+                let exception: JObject = env.exception_occurred()?.into();
+                assert!(exception.is_null());
+                Ok(())
+            })(),
+        ))
     }));
     let sent_message = app_rx.wait().next().unwrap().unwrap();
     match sent_message {
@@ -64,22 +69,28 @@ pub fn submit_not_valid_transaction() {
     let node_handle = to_handle(node);
     let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), false);
     unwrap_jni(EXECUTOR.with_attached(|env: &JNIEnv| {
-        let message = unwrap_jni_verbose(&env, env.byte_array_from_slice(raw_message.as_ref()));
-        Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
-            env.clone(),
-            jclass,
-            node_handle,
-            java_transaction.as_obj().into_inner(),
-            message,
-            0,
-            0,
-        );
-        let exception = get_and_clear_java_exception(&env);
-        assert_eq!(
-            get_class_name(&env, exception).unwrap(),
-            INVALID_TRANSACTION_EXCEPTION
-        );
-        Ok(())
+        Ok(unwrap_jni_verbose(
+            &env,
+            (|| {
+                let message = message_from_raw(env, &raw_message)?;
+                Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
+                    env.clone(),
+                    jclass,
+                    node_handle,
+                    *java_transaction.as_obj(),
+                    *message.as_obj(),
+                    0,
+                    raw_message.len() as i32,
+                );
+                let exception = get_and_clear_java_exception(&env);
+                let exception = env.auto_local(exception.into());
+                assert_eq!(
+                    get_class_name(&env, exception.as_obj())?,
+                    INVALID_TRANSACTION_EXCEPTION
+                );
+                Ok(())
+            })(),
+        ))
     }));
 }
 
@@ -98,4 +109,12 @@ fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
     );
     let node = NodeContext::new(EXECUTOR.clone(), blockchain, service_keypair.0, app_tx);
     (node, app_rx)
+}
+
+fn message_from_raw<'e, R>(env: &'e JNIEnv<'e>, raw_message: R) -> JniResult<AutoLocal<'e>>
+where
+    R: AsRef<[u8]>,
+{
+    let message = env.byte_array_from_slice(raw_message.as_ref())?;
+    Ok(env.auto_local(message.into()))
 }
