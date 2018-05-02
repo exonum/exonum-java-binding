@@ -135,6 +135,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
     View view = database.createSnapshot();
     KeySetIndexProxy<String> set = create(KEY_SET_NAME, view);
@@ -168,13 +169,13 @@ public class KeySetIndexProxyIntegrationTest
     IndicesTests.runTestWithView(
         viewSupplier,
         KEY_SET_NAME,
-        KeySetIndexProxy::new,
+        KeySetIndexProxy::newInstance,
         keySetTest
     );
   }
 
   @Override
   KeySetIndexProxy<String> create(String name, View view) {
-    return new KeySetIndexProxy<>(name, view, StandardSerializers.string());
+    return KeySetIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 }

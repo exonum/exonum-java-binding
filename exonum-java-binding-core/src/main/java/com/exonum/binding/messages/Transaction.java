@@ -44,6 +44,8 @@ public interface Transaction {
 
   /**
    * Returns a hash of this transaction — a SHA-256 hash of the transaction message.
+   *
+   * @implSpec Default implementation returns {@code getMessage().hash()}.
    */
   default HashCode hash() {
     return getMessage().hash();

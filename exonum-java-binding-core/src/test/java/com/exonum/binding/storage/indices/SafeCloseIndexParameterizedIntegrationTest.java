@@ -106,6 +106,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeEverything() throws Exception {
     Fork view = database.createFork();
     I index = indexProvider.apply(view);
@@ -117,6 +118,7 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeMemoryDbBeforeAnything() throws Exception {
     Snapshot view = database.createSnapshot();
     I index = indexProvider.apply(view);
@@ -130,19 +132,19 @@ public class SafeCloseIndexParameterizedIntegrationTest<I extends AbstractIndexP
   @Parameters
   public static Collection<Object[]> data() {
     return asList(
-        parameters(ListIndexProxy::new, AbstractListIndexProxy::size),
+        parameters(ListIndexProxy::newInstance, AbstractListIndexProxy::size),
 
-        parameters(ProofListIndexProxy::new, AbstractListIndexProxy::size),
+        parameters(ProofListIndexProxy::newInstance, AbstractListIndexProxy::size),
 
-        parameters(MapIndexProxy::new, (map) -> map.containsKey(PK1)),
+        parameters(MapIndexProxy::newInstance, (map) -> map.containsKey(PK1)),
 
-        parameters(ProofMapIndexProxy::new, (map) -> map.containsKey(PK1)),
+        parameters(ProofMapIndexProxy::newInstance, (map) -> map.containsKey(PK1)),
 
-        parameters(KeySetIndexProxy::new, (set) -> set.contains(K1)),
+        parameters(KeySetIndexProxy::newInstance, (set) -> set.contains(K1)),
 
-        parameters(ValueSetIndexProxy::new, (set) -> set.contains(V1)),
+        parameters(ValueSetIndexProxy::newInstance, (set) -> set.contains(V1)),
 
-        parameters(EntryIndexProxy::new, (entry) -> entry.isPresent())
+        parameters(EntryIndexProxy::newInstance, (entry) -> entry.isPresent())
     );
   }
 

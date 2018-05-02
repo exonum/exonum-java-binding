@@ -6,6 +6,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A key set is an index that contains no duplicate elements (keys).
@@ -48,9 +49,14 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
    */
-  public KeySetIndexProxy(String name, View view, Serializer<E> serializer) {
+  public static <E> KeySetIndexProxy<E> newInstance(
+      String name, View view, Serializer<E> serializer) {
+    return new KeySetIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+  }
+
+  private KeySetIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
     super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
-    this.serializer = CheckingSerializerDecorator.from(serializer);
+    this.serializer = serializer;
   }
 
   /**
@@ -100,6 +106,7 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 
    */
+  @MustBeClosed
   public StorageIterator<E> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),

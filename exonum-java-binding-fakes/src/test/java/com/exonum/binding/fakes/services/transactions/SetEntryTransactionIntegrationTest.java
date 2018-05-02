@@ -30,7 +30,7 @@ public class SetEntryTransactionIntegrationTest {
       }
 
       try (Snapshot snapshot = database.createSnapshot()) {
-        EntryIndexProxy entry = new EntryIndexProxy<>(ENTRY_NAME, snapshot,
+        EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
             StandardSerializers.string());
         assertTrue(entry.isPresent());
         assertThat(entry.get(), equalTo(value));

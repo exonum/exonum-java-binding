@@ -7,6 +7,7 @@ import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * An implementation of a Node interface for testing purposes.
@@ -73,6 +74,7 @@ public class NodeFake implements Node {
   }
 
   @Override
+  @MustBeClosed
   public Snapshot createSnapshot() {
     return database.createSnapshot();
   }

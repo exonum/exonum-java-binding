@@ -15,6 +15,7 @@
     <packaging>jar</packaging>
 
     <name>Exonum Java Binding: Fakes</name>
+    <description>A module providing mocks and test fakes of Java Services and Transactions.</description>
 
     <properties>
         <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>

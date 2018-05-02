@@ -441,6 +441,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @SuppressWarnings("MustBeClosedChecker")
   public void closeShallFailIfViewFreedBeforeMap() throws Exception {
     Snapshot view = database.createSnapshot();
     ProofMapIndexProxy map = createProofMap(MAP_NAME, view);
@@ -459,14 +460,15 @@ public class ProofMapIndexProxyIntegrationTest
    */
   @Test
   public void constructorShallPreserveTypeInformation() {
-    runTestWithView(database::createFork, (view, proofMap) -> {        
+    runTestWithView(database::createFork, (view, proofMap) -> {
       proofMap.put(PK1, "v1");
 
-      expectedException.expectMessage("Attempt to access index '" + MAP_NAME
-          + "' of type Map, while said index was initially created with type ProofMap");
+      expectedException.expectMessage(
+          "Attempt to access index '" + MAP_NAME
+              + "' of type Map, while said index was initially created with type ProofMap");
       expectedException.expect(RuntimeException.class);
       // Create a regular map with the same name as the proof map above.
-      MapIndexProxy<HashCode, String> regularMap = new MapIndexProxy<>(MAP_NAME, view,
+      MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
           StandardSerializers.hash(), StandardSerializers.string());
     });
   }
@@ -514,7 +516,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   private ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
-    return new ProofMapIndexProxy<>(name, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

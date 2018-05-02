@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.database;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * An in-memory database for testing purposes. Although it can create
@@ -20,11 +21,13 @@ public class MemoryDb extends Database {
   }
 
   @Override
+  @MustBeClosed
   public Snapshot createSnapshot() {
     return new Snapshot(nativeCreateSnapshot(getNativeHandle()), this);
   }
 
   @Override
+  @MustBeClosed
   public Fork createFork() {
     return new Fork(nativeCreateFork(getNativeHandle()), this);
   }

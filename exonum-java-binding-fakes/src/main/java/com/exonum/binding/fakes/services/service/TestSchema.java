@@ -5,6 +5,7 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,15 +19,17 @@ public final class TestSchema implements Schema {
     this.view = view;
   }
 
+  @MustBeClosed
   public ProofMapIndexProxy<HashCode, String> testMap() {
-    return new ProofMapIndexProxy<>(TEST_MAP_NAME, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 
   @Override
   public List<HashCode> getStateHashes() {
-    return Collections.singletonList(
-        testMap().getRootHash()
-    );
+    try (ProofMapIndexProxy<HashCode, String> testMap = testMap()) {
+      HashCode rootHash = testMap.getRootHash();
+      return Collections.singletonList(rootHash);
+    }
   }
 }
