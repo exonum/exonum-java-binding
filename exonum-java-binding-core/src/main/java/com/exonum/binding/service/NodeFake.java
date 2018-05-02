@@ -2,20 +2,23 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.function.Function;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An implementation of a Node interface for testing purposes.
  * Use it in tests of your handlers that need some data in the database:
  *
  * <pre><code>
- *   MemoryDb db = new MemoryDb();
+ *   MemoryDb db = MemoryDb.newInstance();
  *
+ *   // FIXME: Invalid (non-compiling) example.
  *   // Setup database to include some test data
  *   try (Fork fork = db.createFork();
  *        MapIndex balance = new MapIndex("balance", fork)) {
@@ -36,6 +39,8 @@ import com.google.errorprone.annotations.MustBeClosed;
  * </code></pre>
  */
 public class NodeFake implements Node {
+
+  private static final Logger logger = LogManager.getLogger(NodeFake.class);
 
   private final MemoryDb database;
 
@@ -68,15 +73,19 @@ public class NodeFake implements Node {
    * @throws NullPointerException if the transaction is null
    */
   @Override
-  public void submitTransaction(Transaction transaction)
-      throws InvalidTransactionException, InternalServerError {
+  public void submitTransaction(Transaction transaction) {
     checkNotNull(transaction);
   }
 
   @Override
-  @MustBeClosed
-  public Snapshot createSnapshot() {
-    return database.createSnapshot();
+  public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
+    try (Cleaner cleaner = new Cleaner()) {
+      Snapshot snapshot = database.createSnapshot(cleaner);
+      return snapshotFunction.apply(snapshot);
+    } catch (CloseFailuresException e) {
+      logger.error(e);
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

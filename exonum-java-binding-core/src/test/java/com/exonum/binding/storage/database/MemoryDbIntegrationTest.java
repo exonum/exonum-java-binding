@@ -7,6 +7,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
@@ -25,40 +26,42 @@ public class MemoryDbIntegrationTest {
 
   @Test
   public void databaseMustClosePromptly() throws Exception {
-    MemoryDb database = new MemoryDb();
+    MemoryDb database = MemoryDb.newInstance();
     database.close();  // No exceptions.
   }
 
   @Test
   public void getSnapshotShallCreateNonNullSnapshot() throws Exception {
-    try (MemoryDb database = new MemoryDb();
-         Snapshot snapshot = database.createSnapshot()) {
+    try (MemoryDb database = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot snapshot = database.createSnapshot(cleaner);
       assertNotNull(snapshot);
     }
   }
 
   @Test
   public void getForkShallCreateNonNullFork() throws Exception {
-    try (MemoryDb database = new MemoryDb();
-         Fork fork = database.createFork()) {
+    try (MemoryDb database = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork fork = database.createFork(cleaner);
       assertNotNull(fork);
     }
   }
 
   @Test
   public void merge_singleList() throws Exception {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
-      try (Fork fork = db.createFork();
-           ListIndex<String> list = newList(listName, fork)) {
+      Fork fork = db.createFork(cleaner);
+      try (ListIndex<String> list = newList(listName, fork)) {
         list.add(V1);
-
-        db.merge(fork);
       }
+      db.merge(fork);
 
-      try (Snapshot snapshot = db.createSnapshot();
-           ListIndex<String> list = newList(listName, snapshot)) {
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      try (ListIndex<String> list = newList(listName, snapshot)) {
         assertThat(list.size(), equalTo(1L));
         assertThat(list.get(0), equalTo(V1));
       }
@@ -67,21 +70,22 @@ public class MemoryDbIntegrationTest {
 
   @Test
   public void merge_twoIndices() throws Exception {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String listName = "list";
       String mapName = "map";
 
-      try (Fork fork = db.createFork();
-           ListIndex<String> list = newList(listName, fork);
+      Fork fork = db.createFork(cleaner);
+      try (ListIndex<String> list = newList(listName, fork);
            MapIndex<String, String> map = newMap(mapName, fork)) {
         list.add(V1);
         map.put(K2, V2);
-
-        db.merge(fork);
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
-           ListIndex<String> list = newList(listName, snapshot);
+      db.merge(fork);
+
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      try (ListIndex<String> list = newList(listName, snapshot);
            MapIndex<String, String> map = newMap(mapName, snapshot)) {
         assertThat(list.size(), equalTo(1L));
         assertThat(list.get(0), equalTo(V1));
@@ -93,21 +97,22 @@ public class MemoryDbIntegrationTest {
 
   @Test
   public void merge_multipleForks() throws Exception {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
       List<String> values = TestStorageItems.values.subList(0, 3);
 
       for (String v : values) {
-        try (Fork fork = db.createFork();
-             ListIndex<String> list = newList(listName, fork)) {
+        Fork fork = db.createFork(cleaner);
+        try (ListIndex<String> list = newList(listName, fork)) {
           list.add(v);
-          db.merge(fork);
         }
+        db.merge(fork);
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
-           ListIndex<String> list = newList(listName, snapshot)) {
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      try (ListIndex<String> list = newList(listName, snapshot)) {
         assertThat(list.size(), equalTo((long) values.size()));
         for (int i = 0; i < values.size(); i++) {
           assertThat(values.get(i), equalTo(list.get(i)));

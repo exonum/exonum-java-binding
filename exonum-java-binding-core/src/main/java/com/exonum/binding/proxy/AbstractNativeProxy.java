@@ -29,7 +29,7 @@ public abstract class AbstractNativeProxy implements NativeProxy {
   /**
    * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
    */
-  static final long INVALID_NATIVE_HANDLE = 0L;
+  protected static final long INVALID_NATIVE_HANDLE = 0L;
 
   /**
    * Whether this proxy shall dispose any resources when closed

@@ -3,7 +3,7 @@ package com.exonum.binding.proxy;
 /**
  * Indicates that there were failures when it was attempted to close some native proxies.
  *
- * @see ProxyContext#close()
+ * @see Cleaner#close()
  */
 public final class CloseFailuresException extends Exception {
 

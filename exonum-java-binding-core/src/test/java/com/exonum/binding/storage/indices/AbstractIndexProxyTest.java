@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -80,11 +81,13 @@ public class AbstractIndexProxyTest {
   }
 
   private Fork createFork() {
-    return new Fork(1L, false);
+    Cleaner unnecessaryCleaner = new Cleaner();
+    return Fork.newInstance(1L, false, unnecessaryCleaner);
   }
 
   private Snapshot createSnapshot() {
-    return new Snapshot(2L, false);
+    Cleaner unnecessaryCleaner = new Cleaner();
+    return Snapshot.newInstance(2L, false, unnecessaryCleaner);
   }
 
   private static class IndexProxyImpl extends AbstractIndexProxy {

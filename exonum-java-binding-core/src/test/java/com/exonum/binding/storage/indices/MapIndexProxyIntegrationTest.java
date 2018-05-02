@@ -12,7 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
@@ -23,7 +24,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,23 +39,6 @@ public class MapIndexProxyIntegrationTest
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final String MAP_NAME = "test_map";
-
-  /**
-   * This test verifies that if a client destroys native objects through their proxies
-   * in the wrong order, he will get a runtime exception before a (possible) JVM crash.
-   */
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
-    Snapshot view = database.createSnapshot();
-    MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
-
-    // Destroy a view before the map.
-    view.close();
-
-    expectedException.expect(IllegalStateException.class);
-    map.close();
-  }
 
   @Test
   public void containsKeyShouldReturnFalseIfNoSuchKey() throws Exception {
@@ -387,16 +371,20 @@ public class MapIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<MapIndexProxy<String, String>> mapTest) {
-    runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
+    runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
-    try (View view = viewSupplier.get();
-         MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
-      mapTest.accept(view, map);
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = viewFactory.apply(cleaner);
+      try (MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
+        mapTest.accept(view, map);
+      }
+    } catch (CloseFailuresException e) {
+      throw new AssertionError("Unexpected exception", e);
     }
   }
 

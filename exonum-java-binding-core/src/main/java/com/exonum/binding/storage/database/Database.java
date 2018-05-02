@@ -1,32 +1,20 @@
 package com.exonum.binding.storage.database;
 
-import com.exonum.binding.proxy.AbstractNativeProxy;
-import com.google.errorprone.annotations.MustBeClosed;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeProxy;
 
 /**
  * Represents an underlying Exonum Storage database.
  */
-public abstract class Database extends AbstractNativeProxy {
-
-  /**
-   * Create a new database proxy.
-   *
-   * @param nativeHandle a native handle: an implementation-specific reference to a native object
-   * @param owningHandle true if this proxy is responsible to release any native resources
-   */
-  Database(long nativeHandle, boolean owningHandle) {
-    super(nativeHandle, owningHandle);
-  }
+public interface Database extends NativeProxy {
 
   /**
    * Creates a new snapshot of the database state.
    *
-   * <p>A caller is responsible to close the snapshot (see {@link View#close()}).
-   *
-   *  @return a new snapshot of the database state
+   * @param cleaner a cleaner to register the snapshot
+   * @return a new snapshot of the database state
    */
-  @MustBeClosed
-  public abstract Snapshot createSnapshot();
+  Snapshot createSnapshot(Cleaner cleaner);
 
   /**
    * Creates a new database fork.
@@ -34,10 +22,8 @@ public abstract class Database extends AbstractNativeProxy {
    * <p>A fork allows to perform a transaction: a number of independent writes to a database,
    * which then may be <em>atomically</em> applied to the database.
    *
-   * <p>A caller is responsible to close the fork (see {@link View#close()}).
-   *
+   * @param cleaner a cleaner to register the fork
    * @return a new database fork
    */
-  @MustBeClosed
-  public abstract Fork createFork();
+  Fork createFork(Cleaner cleaner);
 }

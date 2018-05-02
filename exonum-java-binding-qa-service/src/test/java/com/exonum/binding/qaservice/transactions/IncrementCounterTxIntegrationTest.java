@@ -12,6 +12,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
@@ -85,9 +87,11 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeIncrementsCounter() {
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeIncrementsCounter() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
+
       // Add a new counter with the given name and initial value
       String name = "counter";
       long initialValue = 0;
@@ -109,9 +113,10 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeNoSuchCounter() {
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeNoSuchCounter() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to update an unknown counter
       long seed = 0L;
       String name = "unknown-counter";

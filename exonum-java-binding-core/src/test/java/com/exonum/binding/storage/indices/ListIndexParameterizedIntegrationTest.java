@@ -10,6 +10,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -193,16 +195,18 @@ public class ListIndexParameterizedIntegrationTest
   @Test(expected = UnsupportedOperationException.class)
   public void setWithSnapshot() throws Exception {
     // Initialize the list.
-    try (Fork fork = database.createFork();
-         ListIndex<String> list = createList(fork)) {
-      list.add(V1);
+    try (Cleaner cleaner = new Cleaner()) {
+      Fork fork = database.createFork(cleaner);
+      try (ListIndex<String> list = createList(fork)) {
+        list.add(V1);
+      }
       database.merge(fork);
-    }
 
-    // Expect the read-only list to throw an exception.
-    try (Snapshot snapshot = database.createSnapshot();
-         ListIndex<String> list = createList(snapshot)) {
-      list.set(0, V2);
+      // Expect the read-only list to throw an exception.
+      Snapshot snapshot = database.createSnapshot(cleaner);
+      try (ListIndex<String> list = createList(snapshot)) {
+        list.set(0, V2);
+      }
     }
   }
 
@@ -307,27 +311,20 @@ public class ListIndexParameterizedIntegrationTest
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
-    ListIndex list = createList(view);
-
-    view.close();  // a list must be closed before the corresponding view.
-    expectedException.expect(IllegalStateException.class);
-    list.close();
-  }
-
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Function<Cleaner, View> viewFactory,
                                Consumer<ListIndex<String>> listTest) {
-    runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
+    runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Function<Cleaner, View> viewFactory,
                                BiConsumer<View, ListIndex<String>> listTest) {
-    try (View view = viewSupplier.get();
-         ListIndex<String> list = createList(view)) {
-      listTest.accept(view, list);
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = viewFactory.apply(cleaner);
+      try (ListIndex<String> list = createList(view)) {
+        listTest.accept(view, list);
+      }
+    } catch (CloseFailuresException e) {
+      throw new RuntimeException(e);
     }
   }
 

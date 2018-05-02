@@ -159,7 +159,7 @@ public class UserServiceAdapterTest {
   @Test
   public void initalize_ClosesFork() throws Exception {
     long forkHandle = 0x0A;
-    String ignored = serviceAdapter.initalize(forkHandle);
+    String ignored = serviceAdapter.initialize(forkHandle);
 
     ArgumentCaptor<Fork> ac = ArgumentCaptor.forClass(Fork.class);
     verify(service).initialize(ac.capture());

@@ -1,11 +1,9 @@
+use exonum::storage::{Database, MemoryDB};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
-
 use std::panic;
-
-use exonum::storage::{Database, MemoryDB};
-use utils::{self, Handle};
 use super::db::{View, ViewRef};
+use utils::{self, Handle};
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
@@ -21,7 +19,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     db_handle: Handle,
 ) {
     utils::drop_handle::<MemoryDB>(&env, db_handle);

@@ -36,7 +36,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * @throws NullPointerException if any parameter is null
    */
   AbstractIndexProxy(long nativeHandle, String name, View view) {
-    super(nativeHandle, true, view);
+    super(nativeHandle, true);
     this.name = checkIndexName(name);
     this.dbView = checkNotNull(view);
     this.modCounter = ViewModificationCounter.getInstance();

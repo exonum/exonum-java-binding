@@ -10,6 +10,8 @@ import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -47,13 +49,14 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void executeCreateWalletTx() {
+  public void executeCreateWalletTx() throws CloseFailuresException {
     String name = "wallet";
 
     CreateWalletTx tx = new CreateWalletTx(name);
 
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       tx.execute(view);
 
       // Check that entries have been added.
@@ -69,9 +72,10 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void executeAlreadyExistingWalletTx() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeAlreadyExistingWalletTx() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       String name = "wallet";
       Long value = 100L;
       HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);

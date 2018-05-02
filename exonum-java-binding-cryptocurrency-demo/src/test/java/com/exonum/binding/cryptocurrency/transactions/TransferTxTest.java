@@ -11,6 +11,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -46,9 +48,10 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeTransfer() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeTransfer() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create source and target wallets with the given initial values
       String from = "wallet-1";
       String to = "wallet-2";
@@ -76,9 +79,10 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeNoSuchFromWallet() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeNoSuchFromWallet() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create source wallet with the given initial value
       String from = "from-wallet";
       String to = "unknown-wallet";
@@ -102,9 +106,10 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeNoSuchToWallet() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeNoSuchToWallet() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to transfer from unknown wallet
       String from = "unknown-wallet";
       String to = "to-wallet";

@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
@@ -23,7 +25,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
 
   @Before
   public void setUp() throws Exception {
-    database = new MemoryDb();
+    database = MemoryDb.newInstance();
   }
 
   @After
@@ -36,23 +38,27 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   abstract IndexT create(String name, View view);
 
   @Test
-  public void getName() {
+  public void getName() throws CloseFailuresException {
     String name = "test_index";
-    try (View view = database.createSnapshot();
-         IndexT index = create(name, view)) {
-      assertThat(index.getName(), equalTo(name));
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = database.createSnapshot(cleaner);
+      try (IndexT index = create(name, view)) {
+        assertThat(index.getName(), equalTo(name));
+      }
     }
   }
 
   @Test
-  public void toStringIncludesNameAndType() {
+  public void toStringIncludesNameAndType() throws CloseFailuresException {
     String name = "test_index";
-    try (View view = database.createSnapshot();
-         IndexT index = create(name, view)) {
-      String indexInfo = index.toString();
-      assertThat(indexInfo, containsString(name));
-      String className = index.getClass().getSimpleName();
-      assertThat(indexInfo, containsString(className));
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = database.createSnapshot(cleaner);
+      try (IndexT index = create(name, view)) {
+        String indexInfo = index.toString();
+        assertThat(indexInfo, containsString(name));
+        String className = index.getClass().getSimpleName();
+        assertThat(indexInfo, containsString(className));
+      }
     }
   }
 }

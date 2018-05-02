@@ -10,6 +10,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
@@ -105,13 +107,14 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeNewCounter() {
+  public void executeNewCounter() throws CloseFailuresException {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
 
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Execute the transaction
       tx.execute(view);
 
@@ -130,9 +133,10 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeAlreadyExistingCounter() {
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeAlreadyExistingCounter() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       String name = "counter";
       Long value = 100500L;
       HashCode nameHash = Hashing.defaultHashFunction()

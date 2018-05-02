@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")  // todo: Add back to Cleaner.
 final class FrequencyStatsFormatter {
 
   static <T> String itemsByTypeFrequency(Collection<T> items) {

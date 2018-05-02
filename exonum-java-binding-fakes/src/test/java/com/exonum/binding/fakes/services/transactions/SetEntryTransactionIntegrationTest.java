@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
@@ -20,18 +22,20 @@ public class SetEntryTransactionIntegrationTest {
   }
 
   @Test
-  public void executePutsTheValueIntoEntry() {
-    try (MemoryDb database = new MemoryDb()) {
+  public void executePutsTheValueIntoEntry() throws CloseFailuresException {
+    try (MemoryDb database = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String value = "A value to set into entry";
-      try (Fork fork = database.createFork()) {
-        SetEntryTransaction tx = new SetEntryTransaction(true, value, "");
-        tx.execute(fork);
-        database.merge(fork);
-      }
 
-      try (Snapshot snapshot = database.createSnapshot()) {
-        EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
-            StandardSerializers.string());
+      Fork fork = database.createFork(cleaner);
+      SetEntryTransaction tx = new SetEntryTransaction(true, value, "");
+      tx.execute(fork);
+
+      database.merge(fork);
+
+      Snapshot snapshot = database.createSnapshot(cleaner);
+      try (EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
+          StandardSerializers.string())) {
         assertTrue(entry.isPresent());
         assertThat(entry.get(), equalTo(value));
       }

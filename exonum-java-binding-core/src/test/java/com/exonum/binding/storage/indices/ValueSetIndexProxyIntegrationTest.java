@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
@@ -17,7 +18,7 @@ import com.google.common.primitives.UnsignedBytes;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.Rule;
 import org.junit.Test;
@@ -232,27 +233,16 @@ public class ValueSetIndexProxyIntegrationTest
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
-    ValueSetIndexProxy<String> set = create(VALUE_SET_NAME, view);
-
-    view.close();  // a set must be closed before the corresponding view.
-    expectedException.expect(IllegalStateException.class);
-    set.close();
-  }
-
   /**
    * Creates a view, a value set index and runs a test against the view and the set.
    * Automatically closes the view and the set.
    *
-   * @param viewSupplier a function creating a database view
+   * @param viewFactory a function creating a database view
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<ValueSetIndexProxy<String>> valueSetTest) {
-    runTestWithView(viewSupplier,
+    runTestWithView(viewFactory,
         (view, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
     );
   }
@@ -261,13 +251,13 @@ public class ValueSetIndexProxyIntegrationTest
    * Creates a view, a value set index and runs a test against the view and the set.
    * Automatically closes the view and the set.
    *
-   * @param viewSupplier a function creating a database view
+   * @param viewFactory a function creating a database view
    * @param valueSetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       BiConsumer<View, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         VALUE_SET_NAME,
         ValueSetIndexProxy::newInstance,
         valueSetTest

@@ -54,7 +54,7 @@ public final class NativeFacade {
    * Creates a builder of UserServiceAdapter mocks. Use it to configure custom behaviour
    * of a system-under-test, including illegal behaviour.
    *
-   * @see UserServiceAdapterMockBuilder#stateHashesThrowing(Throwable)
+   * @see UserServiceAdapterMockBuilder#stateHashesThrowing(Class)
    * @see #createTestService()
    */
   public static UserServiceAdapterMockBuilder createServiceFakeBuilder() {
@@ -67,7 +67,7 @@ public final class NativeFacade {
    * <p>This method creates a service, not a mock of one, therefore, use it to test
    * the storage operations and transaction conversion:
    * <ul>
-   *   <li>{@link UserServiceAdapter#initalize(long)}</li>
+   *   <li>{@link UserServiceAdapter#initialize(long)}</li>
    *   <li>{@link UserServiceAdapter#getStateHashes(long)}</li>
    *   <li>{@link UserServiceAdapter#convertTransaction(byte[])}</li>
    * </ul>

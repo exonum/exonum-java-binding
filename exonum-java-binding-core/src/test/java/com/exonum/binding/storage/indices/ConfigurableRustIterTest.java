@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -105,16 +106,6 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextFailsIfViewClosed() throws Exception {
-    Snapshot view = createSnapshot();
-    createFromIterable(asList(1, 2), view);
-
-    view.close();
-    expectedException.expect(IllegalStateException.class);
-    iter.next();
-  }
-
-  @Test
   public void viewModificationResultsInTerminalState() throws Exception {
     Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
@@ -144,22 +135,15 @@ public class ConfigurableRustIterTest {
     iter.close();  // It's OK to modify after the last element was retrieved.
   }
 
-  @Test
-  public void closeFailsIfViewClosedBefore() throws Exception {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
-
-    fork.close();
-    expectedException.expect(IllegalStateException.class);
-    iter.close();
+  private Fork createFork() {
+    // todo: de-dupe these two?
+    Cleaner unnecessaryCleaner = new Cleaner();
+    return Fork.newInstance(1L, false, unnecessaryCleaner);
   }
 
-  private static Fork createFork() {
-    return new Fork(1L, false);
-  }
-
-  private static Snapshot createSnapshot() {
-    return new Snapshot(2L, false);
+  private Snapshot createSnapshot() {
+    Cleaner unnecessaryCleaner = new Cleaner();
+    return Snapshot.newInstance(2L, false, unnecessaryCleaner);
   }
 
   private void createFromIterable(Iterable<Integer> it, View parentView) {

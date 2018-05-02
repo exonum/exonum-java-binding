@@ -21,7 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
@@ -36,7 +37,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -73,7 +74,7 @@ public class ProofMapIndexProxyIntegrationTest
       .map(HashCode::fromBytes)
       .collect(Collectors.toList());
 
-  static final HashCode PK1 = PROOF_KEYS.get(0);
+  private static final HashCode PK1 = PROOF_KEYS.get(0);
   private static final HashCode PK2 = PROOF_KEYS.get(1);
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
@@ -440,19 +441,6 @@ public class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void closeShallFailIfViewFreedBeforeMap() throws Exception {
-    Snapshot view = database.createSnapshot();
-    ProofMapIndexProxy map = createProofMap(MAP_NAME, view);
-
-    // Destroy a view before the map.
-    view.close();
-
-    expectedException.expect(IllegalStateException.class);
-    map.close();
-  }
-
   /**
    * A simple integration test that ensures that:
    *   - ProofMap constructor preserves the index type and
@@ -496,16 +484,21 @@ public class ProofMapIndexProxyIntegrationTest
     return checkProofKey(proofKey);
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               Consumer<ProofMapIndexProxy<HashCode, String>> mapTest) {
-    runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+                                      Consumer<ProofMapIndexProxy<HashCode, String>> mapTest) {
+    runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
-                               BiConsumer<View, ProofMapIndexProxy<HashCode, String>> mapTest) {
-    try (View view = viewSupplier.get();
-         ProofMapIndexProxy<HashCode, String> map = createProofMap(MAP_NAME, view)) {
-      mapTest.accept(view, map);
+  private static void runTestWithView(
+      Function<Cleaner, View> viewFactory,
+      BiConsumer<View, ProofMapIndexProxy<HashCode, String>> mapTest) {
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = viewFactory.apply(cleaner);
+      try (ProofMapIndexProxy<HashCode, String> map = createProofMap(MAP_NAME, view)) {
+        mapTest.accept(view, map);
+      }
+    } catch (CloseFailuresException e) {
+      throw new AssertionError("Unexpected exception", e);
     }
   }
 
@@ -514,7 +507,7 @@ public class ProofMapIndexProxyIntegrationTest
     return createProofMap(name, view);
   }
 
-  private ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
+  private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
     return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }

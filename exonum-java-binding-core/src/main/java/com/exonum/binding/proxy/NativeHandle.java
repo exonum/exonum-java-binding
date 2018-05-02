@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * An implementation-specific handle to the native object.
+ * An implementation-specific handle to the native object. Once closed, can no longer be accessed.
  */
 public final class NativeHandle implements AutoCloseable {
 
@@ -50,7 +50,6 @@ public final class NativeHandle implements AutoCloseable {
   /**
    * Returns true if this native handle is valid.
    */
-  @VisibleForTesting
   final boolean isValid() {
     return nativeHandle != INVALID_NATIVE_HANDLE;
   }

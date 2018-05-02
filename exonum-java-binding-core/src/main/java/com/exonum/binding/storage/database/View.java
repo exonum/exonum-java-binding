@@ -1,11 +1,7 @@
 package com.exonum.binding.storage.database;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-
-import com.exonum.binding.annotations.ImproveDocs;
-import com.exonum.binding.proxy.AbstractNativeProxy;
-import javax.annotation.Nullable;
+import com.exonum.binding.proxy.AbstractNativeProxy2;
+import com.exonum.binding.proxy.NativeHandle;
 
 /**
  * Represents a view of a database.
@@ -16,29 +12,18 @@ import javax.annotation.Nullable;
  *   <li>A fork, which is a <em>read-write</em> view.</li>
  * </ul>
  *
- * <p>As any native proxy, a view must be closed.
- *
  * @see Snapshot
  * @see Fork
  */
-@ImproveDocs(
-    assignee = "dt",
-    reason = "if all views become non-managed, consider changing the last paragraph."
-)
-public abstract class View extends AbstractNativeProxy {
+public abstract class View extends AbstractNativeProxy2 {
 
   /**
    * Create a new view proxy.
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
    */
-  View(long nativeHandle, boolean dispose) {
-    super(nativeHandle, dispose);
-  }
-
-  View(long nativeHandle, boolean dispose, @Nullable MemoryDb db) {
-    super(nativeHandle, dispose, (db == null) ? emptySet() : singleton(db));
+  View(NativeHandle nativeHandle) {
+    super(nativeHandle);
   }
 
   /**
