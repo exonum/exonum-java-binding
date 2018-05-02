@@ -3,7 +3,7 @@ use java_bindings::jni::JNIEnv;
 use java_bindings::jni::objects::{AutoLocal, GlobalRef, JValue};
 use java_bindings::jni::sys::jint;
 
-/// A temporary example of a native-to-JNI proxy
+/// An example of a native-to-JNI proxy
 #[derive(Clone)]
 pub struct AtomicIntegerProxy {
     exec: MainExecutor,
