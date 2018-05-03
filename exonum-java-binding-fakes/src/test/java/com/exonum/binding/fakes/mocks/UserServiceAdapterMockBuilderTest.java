@@ -1,6 +1,7 @@
 package com.exonum.binding.fakes.mocks;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.messages.Message;
@@ -36,5 +37,15 @@ public class UserServiceAdapterMockBuilderTest {
     byte[] rawTxMessage = new byte[MIN_MESSAGE_SIZE];
     expectedException.expect(exceptionType);
     service.convertTransaction(rawTxMessage);
+  }
+
+  @Test
+  public void buildWithNullConfig() {
+    UserServiceAdapterMockBuilder builder = new UserServiceAdapterMockBuilder();
+    builder.initialGlobalConfig(null);
+
+    UserServiceAdapter service = builder.build();
+
+    assertNull(service.initialize(10L));
   }
 }
