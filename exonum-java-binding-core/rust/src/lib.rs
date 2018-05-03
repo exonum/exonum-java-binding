@@ -10,6 +10,7 @@
 #![allow(non_snake_case)]
 
 pub extern crate exonum;
+pub extern crate iron;
 pub extern crate jni;
 #[macro_use]
 extern crate log;

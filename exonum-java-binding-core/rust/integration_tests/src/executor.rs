@@ -1,7 +1,7 @@
-use java_bindings::{Executor, JniErrorKind};
+use java_bindings::{JniExecutor, JniErrorKind};
 use java_bindings::jni::JavaVM;
 
-pub fn call_recursively<E: Executor>(vm: &JavaVM, executor: E) {
+pub fn check_nested_attach<E: JniExecutor>(vm: &JavaVM, executor: E) {
     check_detached(vm);
     executor
         .with_attached(|_| {

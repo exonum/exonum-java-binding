@@ -1,4 +1,4 @@
-use java_bindings::{Executor, TransactionProxy};
+use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::jni::objects::{AutoLocal, GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
@@ -16,10 +16,10 @@ lazy_static! {
 }
 
 /// Creates `TransactionProxy` which throws an exception on any call.
-pub fn create_throwing_mock_transaction_proxy<E: Executor>(
-    executor: E,
+pub fn create_throwing_mock_transaction_proxy(
+    executor: MainExecutor,
     exception_class: &str,
-) -> TransactionProxy<E> {
+) -> TransactionProxy {
     let (java_tx_mock, raw) = executor
         .with_attached(|env| {
             let exception = env.find_class(exception_class)?;
@@ -42,13 +42,13 @@ pub fn create_throwing_mock_transaction_proxy<E: Executor>(
 }
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction_proxy<E: Executor>(executor: E, valid: bool) -> TransactionProxy<E> {
+pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> TransactionProxy {
     let (java_tx_mock, raw) = create_mock_transaction(executor.clone(), valid);
     TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction<E: Executor>(executor: E, valid: bool) -> (GlobalRef, RawMessage) {
+pub fn create_mock_transaction(executor: MainExecutor, valid: bool) -> (GlobalRef, RawMessage) {
     executor
         .with_attached(|env| {
             let value = env.new_string(ENTRY_VALUE)?;

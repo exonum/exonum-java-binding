@@ -1,5 +1,5 @@
 use java_bindings::exonum::crypto::Hash;
-use java_bindings::{Executor, ServiceProxy};
+use java_bindings::{JniExecutor, MainExecutor, ServiceProxy};
 use java_bindings::jni::objects::{JObject, JValue, GlobalRef};
 use java_bindings::jni::strings::JNIString;
 use java_bindings::jni::sys::jsize;
@@ -14,19 +14,13 @@ pub const SERVICE_MOCK_BUILDER_CLASS: &str = "com/exonum/binding/fakes/mocks/Use
 pub const SERVICE_DEFAULT_ID: u16 = 42;
 pub const SERVICE_DEFAULT_NAME: &str = "service 42";
 
-pub struct ServiceMockBuilder<E>
-where
-    E: Executor + 'static,
-{
-    exec: E,
+pub struct ServiceMockBuilder {
+    exec: MainExecutor,
     builder: GlobalRef,
 }
 
-impl<E> ServiceMockBuilder<E>
-where
-    E: Executor + 'static,
-{
-    pub fn new(exec: E) -> Self {
+impl ServiceMockBuilder {
+    pub fn new(exec: MainExecutor) -> Self {
         let builder = unwrap_jni(exec.with_attached(|env| {
             let value = env.call_static_method(
                 NATIVE_FACADE_CLASS,
@@ -153,7 +147,7 @@ where
         self
     }
 
-    pub fn build(self) -> ServiceProxy<E> {
+    pub fn build(self) -> ServiceProxy {
         let (executor, service) = unwrap_jni(self.exec.clone().with_attached(|env| {
             let value = env.call_method(
                 self.builder.as_obj(),
