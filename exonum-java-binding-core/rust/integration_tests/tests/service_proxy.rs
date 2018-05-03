@@ -142,17 +142,6 @@ pub fn initialize_config_null() {
 }
 
 #[test]
-pub fn initialize_config_null_default() {
-    let db = MemoryDB::new();
-    let mut fork = db.fork();
-
-    let service = ServiceMockBuilder::new(EXECUTOR.clone()).build();
-
-    let config = service.initialize(&mut fork);
-    assert_eq!(config, Value::Null);
-}
-
-#[test]
 pub fn initialize_config_parse_error() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
