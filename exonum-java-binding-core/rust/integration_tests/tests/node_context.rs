@@ -17,8 +17,8 @@ use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::MemoryDB;
 use java_bindings::jni::{JavaVM, JNIEnv};
 use java_bindings::jni::objects::{AutoLocal, JObject};
-use java_bindings::utils::{get_and_clear_java_exception, get_class_name, to_handle, unwrap_jni,
-                           unwrap_jni_verbose};
+use java_bindings::utils::{as_handle, get_and_clear_java_exception, get_class_name, to_handle,
+                           unwrap_jni, unwrap_jni_verbose};
 
 lazy_static! {
     static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
@@ -28,8 +28,9 @@ lazy_static! {
 #[test]
 pub fn submit_valid_transaction() {
     let jclass = JObject::null().into();
-    let (node, app_rx) = create_node();
-    let node_handle = to_handle(node);
+    let (mut node, app_rx) = create_node();
+    let node_handle_guard = as_handle(&mut node);
+    let node_handle = node_handle_guard.get();
     let (java_transaction, _raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
     let marker_raw = RawMessage::from_vec(vec![1, 2, 3]);
     let raw_message = marker_raw.clone();
