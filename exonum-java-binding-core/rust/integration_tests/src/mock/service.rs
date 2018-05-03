@@ -121,15 +121,18 @@ impl ServiceMockBuilder {
 
     pub fn initial_global_config<S>(self, config: S) -> Self
     where
-        S: Into<String>,
+        S: Into<Option<String>>,
     {
         unwrap_jni(self.exec.with_attached(|env| {
-            let config = env.new_string(config.into())?;
+            let config = match config.into() {
+                None => JObject::null(),
+                Some(config) => env.new_string(config)?.into(),
+            };
             env.call_method(
                 self.builder.as_obj(),
                 "initialGlobalConfig",
                 "(Ljava/lang/String;)V",
-                &[JValue::from(JObject::from(config))],
+                &[JValue::from(config)],
             )?;
             Ok(())
         }));
