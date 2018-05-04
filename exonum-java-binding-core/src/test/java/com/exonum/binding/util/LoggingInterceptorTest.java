@@ -19,7 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,11 +51,11 @@ public class LoggingInterceptorTest {
     } catch (Throwable throwable) {
       assertThat(throwable, instanceOf(OutOfMemoryError.class));
       assertThat(throwable.getMessage(), equalTo(EXCEPTION_MESSAGE));
-      Assert.assertEquals(appender.getMessages().size(), 1);
+      assertThat(appender.getMessages().size(), equalTo(1));
     }
   }
 
-  class TestModule extends AbstractModule {
+  static class TestModule extends AbstractModule {
 
     @Override
     protected void configure() {
