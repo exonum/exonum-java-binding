@@ -129,6 +129,19 @@ pub fn initialize_config() {
 }
 
 #[test]
+pub fn initialize_config_null() {
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+
+    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+        .initial_global_config(None)
+        .build();
+
+    let config = service.initialize(&mut fork);
+    assert_eq!(config, Value::Null);
+}
+
+#[test]
 pub fn initialize_config_parse_error() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
