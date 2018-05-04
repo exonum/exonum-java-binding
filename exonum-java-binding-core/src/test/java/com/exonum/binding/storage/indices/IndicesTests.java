@@ -2,7 +2,6 @@ package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.proxy.NativeProxy;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorOne;
 import com.exonum.binding.storage.serialization.StandardSerializers;
@@ -23,18 +22,18 @@ class IndicesTests {
    * @throws RuntimeException if the native proxies (a view or an index) failed to destroy
    *     the corresponding native objects
    */
-  static <IndexT extends NativeProxy>
+  static <IndexT extends StorageIndex>
       void runTestWithView(Function<Cleaner, View> viewFactory,
                            String indexName,
                            IndexConstructorOne<IndexT, String> indexSupplier,
                            BiConsumer<View, IndexT> indexTest) {
     try (Cleaner cleaner = new Cleaner()) {
+      // Create a view and an index.
       View view = viewFactory.apply(cleaner);
+      IndexT index = indexSupplier.create(indexName, view, StandardSerializers.string());
 
-      try (IndexT index = indexSupplier.create(indexName, view, StandardSerializers.string())) {
-        indexTest.accept(view, index);
-      }
-
+      // Run the test
+      indexTest.accept(view, index);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
     }

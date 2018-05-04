@@ -7,7 +7,6 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
-import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A schema of the cryptocurrency service.
@@ -32,7 +31,6 @@ public final class CryptocurrencySchema implements Schema {
   /**
    * Returns a proof map of wallets. Must be closed.
    */
-  @MustBeClosed
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");
     return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),

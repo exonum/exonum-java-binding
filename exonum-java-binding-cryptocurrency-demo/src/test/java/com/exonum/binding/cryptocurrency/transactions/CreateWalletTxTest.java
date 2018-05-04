@@ -61,13 +61,12 @@ public class CreateWalletTxTest {
 
       // Check that entries have been added.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+      MapIndex<HashCode, Wallet> wallets = schema.wallets();
 
-        HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+      HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
 
-        assertThat(wallets.get(nameHash).getName(), equalTo(name));
-        assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
-      }
+      assertThat(wallets.get(nameHash).getName(), equalTo(name));
+      assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
     }
   }
 
@@ -82,7 +81,8 @@ public class CreateWalletTxTest {
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+      {
+        MapIndex<HashCode, Wallet> wallets = schema.wallets();
         wallets.put(nameHash, new Wallet(name, value));
       }
 
@@ -91,7 +91,8 @@ public class CreateWalletTxTest {
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+      {
+        MapIndex<HashCode, Wallet> wallets = schema.wallets();
         assertThat(wallets.get(nameHash).getName(), equalTo(name));
         assertThat(wallets.get(nameHash).getBalance(), equalTo(value));
       }

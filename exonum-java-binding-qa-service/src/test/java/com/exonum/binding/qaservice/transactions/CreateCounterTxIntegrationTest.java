@@ -120,15 +120,14 @@ public class CreateCounterTxIntegrationTest {
 
       // Check it has added entries in both maps.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-        HashCode nameHash = Hashing.defaultHashFunction()
-            .hashString(name, UTF_8);
+      HashCode nameHash = Hashing.defaultHashFunction()
+          .hashString(name, UTF_8);
 
-        assertThat(counters.get(nameHash), equalTo(0L));
-        assertThat(counterNames.get(nameHash), equalTo(name));
-      }
+      assertThat(counters.get(nameHash), equalTo(0L));
+      assertThat(counterNames.get(nameHash), equalTo(name));
     }
   }
 
@@ -151,11 +150,11 @@ public class CreateCounterTxIntegrationTest {
 
       // Check it has not changed the entries in the maps.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        assertThat(counters.get(nameHash), equalTo(value));
-        assertThat(counterNames.get(nameHash), equalTo(name));
-      }
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      assertThat(counterNames.get(nameHash), equalTo(name));
+
+      MapIndex<HashCode, Long> counters = schema.counters();
+      assertThat(counters.get(nameHash), equalTo(value));
     }
   }
 
@@ -195,10 +194,9 @@ public class CreateCounterTxIntegrationTest {
   static void createCounter(Fork view, String name, Long initialValue) {
     HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
     QaSchema schema = new QaSchema(view);
-    try (MapIndex<HashCode, Long> counters = schema.counters();
-         MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-      counters.put(nameHash, initialValue);
-      counterNames.put(nameHash, name);
-    }
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> counterNames = schema.counterNames();
+    counters.put(nameHash, initialValue);
+    counterNames.put(nameHash, name);
   }
 }

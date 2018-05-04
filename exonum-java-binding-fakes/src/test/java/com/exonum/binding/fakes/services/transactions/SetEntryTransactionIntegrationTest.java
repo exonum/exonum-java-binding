@@ -34,11 +34,10 @@ public class SetEntryTransactionIntegrationTest {
       database.merge(fork);
 
       Snapshot snapshot = database.createSnapshot(cleaner);
-      try (EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
-          StandardSerializers.string())) {
-        assertTrue(entry.isPresent());
-        assertThat(entry.get(), equalTo(value));
-      }
+      EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
+          StandardSerializers.string());
+      assertTrue(entry.isPresent());
+      assertThat(entry.get(), equalTo(value));
     }
   }
 }

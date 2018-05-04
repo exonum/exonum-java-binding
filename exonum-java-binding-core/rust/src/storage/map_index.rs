@@ -1,15 +1,13 @@
+use exonum::storage::{Fork, MapIndex, Snapshot};
+use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
-
 use std::panic;
 use std::ptr;
-
-use exonum::storage::{Snapshot, Fork, MapIndex};
-use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
+use super::db::{Key, Value, View, ViewRef};
+use super::indexes_metadata::{check_read, check_write, TableType};
 use utils::{self, Handle, PairIter};
-use super::db::{View, ViewRef, Key, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = MapIndex<T, Key, Value>;
 
@@ -52,7 +50,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     map_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, map_handle);

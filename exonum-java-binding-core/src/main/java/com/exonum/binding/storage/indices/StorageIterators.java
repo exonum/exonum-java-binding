@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
@@ -16,7 +17,7 @@ final class StorageIterators {
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
    * @param disposeOperation an operation to call to destroy the corresponding native iterator
-   * @param parent a collection over which to iterate
+   * @param collectionView a database view of the collection over which to iterate
    * @param modificationCounter a view modification counter
    * @param transformingFunction a function to apply to elements returned by native iterator
    *                             (usually, to an array of bytes)
@@ -25,7 +26,7 @@ final class StorageIterators {
       long nativeHandle,
       LongFunction<NativeT> nextFunction,
       LongConsumer disposeOperation,
-      AbstractIndexProxy parent,
+      View collectionView,
       ViewModificationCounter modificationCounter,
       Function<? super NativeT, ? extends ElementT> transformingFunction) {
     // todo: Use the Guava-provided iterator when ECR-595 is resolved (Iterators#transform)
@@ -34,7 +35,7 @@ final class StorageIterators {
             nativeHandle,
             nextFunction,
             disposeOperation,
-            parent,
+            collectionView,
             modificationCounter
         )
     );

@@ -1,15 +1,13 @@
+use exonum::storage::{Fork, ListIndex, Snapshot};
+use exonum::storage::list_index::ListIndexIter;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jlong, jbyteArray, jboolean};
-
+use jni::sys::{jboolean, jbyteArray, jlong};
 use std::panic;
 use std::ptr;
-
-use exonum::storage::{Snapshot, Fork, ListIndex};
-use exonum::storage::list_index::ListIndexIter;
+use super::db::{Value, View, ViewRef};
+use super::indexes_metadata::{check_read, check_write, TableType};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ListIndex<T, Value>;
 
@@ -48,7 +46,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     list_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, list_handle);

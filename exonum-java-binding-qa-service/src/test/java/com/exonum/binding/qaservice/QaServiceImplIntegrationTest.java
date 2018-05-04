@@ -86,15 +86,15 @@ public class QaServiceImplIntegrationTest {
 
       // Check the changes made to the database.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        String counterName = "default";
-        HashCode counterId = Hashing.sha256()
-            .hashString(counterName, UTF_8);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-        assertThat(counters.get(counterId)).isEqualTo(0L);
-        assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-      }
+      String counterName = "default";
+      HashCode counterId = Hashing.sha256()
+          .hashString(counterName, UTF_8);
+
+      assertThat(counters.get(counterId)).isEqualTo(0L);
+      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
     }
   }
 

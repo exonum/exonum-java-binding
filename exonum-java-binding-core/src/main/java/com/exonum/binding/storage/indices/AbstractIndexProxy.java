@@ -3,7 +3,8 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.exonum.binding.proxy.AbstractNativeProxy2;
+import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
@@ -14,7 +15,7 @@ import com.exonum.binding.storage.database.ViewModificationCounter;
  * <p>Each index is created with a database view, either an immutable Snapshot or a read-write Fork.
  * An index has a modification counter to detect when it or the corresponding view is modified.
  */
-abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
+abstract class AbstractIndexProxy extends AbstractNativeProxy2 implements StorageIndex {
 
   final View dbView;
 
@@ -35,8 +36,8 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * @param view a database view from which the index has been created
    * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(long nativeHandle, String name, View view) {
-    super(nativeHandle, true);
+  AbstractIndexProxy(NativeHandle nativeHandle, String name, View view) {
+    super(nativeHandle);
     this.name = checkIndexName(name);
     this.dbView = checkNotNull(view);
     this.modCounter = ViewModificationCounter.getInstance();

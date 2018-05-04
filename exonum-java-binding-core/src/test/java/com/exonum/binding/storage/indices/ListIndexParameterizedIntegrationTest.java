@@ -192,21 +192,21 @@ public class ListIndexParameterizedIntegrationTest
     });
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void setWithSnapshot() throws Exception {
     // Initialize the list.
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = database.createFork(cleaner);
-      try (ListIndex<String> list = createList(fork)) {
-        list.add(V1);
-      }
+      ListIndex<String> list1 = createList(fork);
+      list1.add(V1);
       database.merge(fork);
 
-      // Expect the read-only list to throw an exception.
       Snapshot snapshot = database.createSnapshot(cleaner);
-      try (ListIndex<String> list = createList(snapshot)) {
-        list.set(0, V2);
-      }
+      ListIndex<String> list2 = createList(snapshot);
+
+      // Expect the read-only list to throw an exception in a modifying operation.
+      expectedException.expect(UnsupportedOperationException.class);
+      list2.set(0, V2);
     }
   }
 
@@ -320,9 +320,9 @@ public class ListIndexParameterizedIntegrationTest
                                BiConsumer<View, ListIndex<String>> listTest) {
     try (Cleaner cleaner = new Cleaner()) {
       View view = viewFactory.apply(cleaner);
-      try (ListIndex<String> list = createList(view)) {
-        listTest.accept(view, list);
-      }
+      ListIndex<String> list = createList(view);
+
+      listTest.accept(view, list);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
     }

@@ -1,15 +1,13 @@
+use exonum::storage::{Fork, Snapshot, ValueSetIndex};
+use exonum::storage::value_set_index::{ValueSetIndexHashes, ValueSetIndexIter};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jbyteArray, jboolean, jobject};
-
+use jni::sys::{jboolean, jbyteArray, jobject};
 use std::panic;
 use std::ptr;
-
-use exonum::storage::{Snapshot, Fork, ValueSetIndex};
-use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
+use super::db::{Value, View, ViewRef};
+use super::indexes_metadata::{check_read, check_write, TableType};
 use utils::{self, Handle, PairIter};
-use super::db::{View, ViewRef, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ValueSetIndex<T, Value>;
 
@@ -52,7 +50,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     set_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, set_handle);

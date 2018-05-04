@@ -1,14 +1,12 @@
+use exonum::storage::{Entry, Fork, Snapshot};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jbyteArray, jboolean};
-
+use jni::sys::{jboolean, jbyteArray};
 use std::panic;
 use std::ptr;
-
-use exonum::storage::{Snapshot, Fork, Entry};
+use super::db::{Value, View, ViewRef};
+use super::indexes_metadata::{check_read, check_write, TableType};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = Entry<T, Value>;
 
@@ -47,7 +45,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     entry_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, entry_handle);

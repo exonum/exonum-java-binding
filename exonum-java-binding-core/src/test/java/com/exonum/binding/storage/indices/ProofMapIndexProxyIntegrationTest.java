@@ -494,9 +494,9 @@ public class ProofMapIndexProxyIntegrationTest
       BiConsumer<View, ProofMapIndexProxy<HashCode, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
       View view = viewFactory.apply(cleaner);
-      try (ProofMapIndexProxy<HashCode, String> map = createProofMap(MAP_NAME, view)) {
-        mapTest.accept(view, map);
-      }
+      ProofMapIndexProxy<HashCode, String> map = createProofMap(MAP_NAME, view);
+
+      mapTest.accept(view, map);
     } catch (CloseFailuresException e) {
       throw new AssertionError("Unexpected exception", e);
     }

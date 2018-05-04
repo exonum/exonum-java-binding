@@ -43,18 +43,16 @@ public class Snapshot extends View {
     checkNotNull(cleaner, "cleaner");
 
     NativeHandle h = new NativeHandle(nativeHandle);
-    Snapshot s = new Snapshot(h);
-
-    cleaner.add(new ProxyDestructor(h, nh -> {
+    ProxyDestructor.newRegistered(cleaner, h, nh -> {
       if (owningHandle) {
         Views.nativeFree(nh);
       }
-    }));
-    return s;
+    });
+
+    return new Snapshot(h, cleaner);
   }
 
-  private Snapshot(NativeHandle nativeHandle) {
-    super(nativeHandle);
+  private Snapshot(NativeHandle nativeHandle, Cleaner cleaner) {
+    super(nativeHandle, cleaner);
   }
-
 }

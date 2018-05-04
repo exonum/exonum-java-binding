@@ -1,15 +1,13 @@
+use exonum::storage::{Fork, KeySetIndex, Snapshot};
+use exonum::storage::key_set_index::KeySetIndexIter;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray};
-
 use std::panic;
 use std::ptr;
-
-use exonum::storage::{Snapshot, Fork, KeySetIndex};
-use exonum::storage::key_set_index::KeySetIndexIter;
+use super::db::{Key, View, ViewRef};
+use super::indexes_metadata::{check_read, check_write, TableType};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Key};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = KeySetIndex<T, Key>;
 
@@ -48,7 +46,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     set_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, set_handle);

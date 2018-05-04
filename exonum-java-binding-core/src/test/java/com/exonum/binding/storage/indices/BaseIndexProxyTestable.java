@@ -42,9 +42,9 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
       View view = database.createSnapshot(cleaner);
-      try (IndexT index = create(name, view)) {
-        assertThat(index.getName(), equalTo(name));
-      }
+      IndexT index = create(name, view);
+
+      assertThat(index.getName(), equalTo(name));
     }
   }
 
@@ -53,12 +53,12 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
       View view = database.createSnapshot(cleaner);
-      try (IndexT index = create(name, view)) {
-        String indexInfo = index.toString();
-        assertThat(indexInfo, containsString(name));
-        String className = index.getClass().getSimpleName();
-        assertThat(indexInfo, containsString(className));
-      }
+      IndexT index = create(name, view);
+
+      String indexInfo = index.toString();
+      assertThat(indexInfo, containsString(name));
+      String className = index.getClass().getSimpleName();
+      assertThat(indexInfo, containsString(className));
     }
   }
 }

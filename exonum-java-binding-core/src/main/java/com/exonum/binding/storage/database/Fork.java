@@ -36,14 +36,16 @@ public class Fork extends View {
     checkNotNull(cleaner, "cleaner");
 
     NativeHandle h = new NativeHandle(nativeHandle);
-    Fork f = new Fork(h);
-
     // Add an action destroying the native peer if necessary.
-    cleaner.add(new ProxyDestructor(h, nh -> {
+    ProxyDestructor.newRegistered(cleaner, h, nh -> {
       if (owningHandle) {
         Views.nativeFree(nh);
       }
-    }));
+    });
+
+    // Create the fork
+    Fork f = new Fork(h, cleaner);
+
     // Add the action that unregisters the fork separately so that it is always invoked.
     cleaner.add(() -> ViewModificationCounter.getInstance().remove(f));
 
@@ -55,7 +57,7 @@ public class Fork extends View {
    *
    * @param nativeHandle a handle of the native Fork object
    */
-  private Fork(NativeHandle nativeHandle) {
-    super(nativeHandle);
+  private Fork(NativeHandle nativeHandle, Cleaner cleaner) {
+    super(nativeHandle, cleaner);
   }
 }

@@ -69,12 +69,11 @@ public class TransferTxTest {
 
       // Check that wallets have correct values
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets()) {
-        long expectedFromValue = initialValue - transferSum;
-        assertThat(wallets.get(fromWallet).getBalance(), equalTo(expectedFromValue));
-        long expectedToValue = initialValue + transferSum;
-        assertThat(wallets.get(toWallet).getBalance(), equalTo(expectedToValue));
-      }
+      ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets();
+      long expectedFromValue = initialValue - transferSum;
+      assertThat(wallets.get(fromWallet).getBalance(), equalTo(expectedFromValue));
+      long expectedToValue = initialValue + transferSum;
+      assertThat(wallets.get(toWallet).getBalance(), equalTo(expectedToValue));
     }
   }
 
@@ -99,9 +98,8 @@ public class TransferTxTest {
 
       // Check that balance of fromWallet is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-        assertThat(wallets.get(fromWallet).getBalance(), equalTo(initialValue));
-      }
+      MapIndex<HashCode, Wallet> wallets = schema.wallets();
+      assertThat(wallets.get(fromWallet).getBalance(), equalTo(initialValue));
     }
   }
 
@@ -124,9 +122,8 @@ public class TransferTxTest {
 
       // Check that balance of toWallet is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-        assertThat(wallets.get(toWallet).getBalance(), equalTo(initialValue));
-      }
+      MapIndex<HashCode, Wallet> wallets = schema.wallets();
+      assertThat(wallets.get(toWallet).getBalance(), equalTo(initialValue));
     }
   }
 
@@ -174,8 +171,7 @@ public class TransferTxTest {
   private void createWallet(Fork view, String name, Long initialValue) {
     HashCode nameHash = hashString(name, UTF_8);
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-      wallets.put(nameHash, new Wallet(name, initialValue));
-    }
+    MapIndex<HashCode, Wallet> wallets = schema.wallets();
+    wallets.put(nameHash, new Wallet(name, initialValue));
   }
 }

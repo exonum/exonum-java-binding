@@ -1,5 +1,8 @@
 package com.exonum.binding.proxy;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.function.LongConsumer;
 
 /**
@@ -18,20 +21,45 @@ public final class ProxyDestructor implements CleanAction {
   private boolean destroyed;
 
   /**
-   * A destructor of a native proxy. Closes the native handle, so that it can no longer be accessed,
-   * and performs a clean action, passing the native handle.
+   * Creates a new destructor of a native proxy, registered in the given cleaner.
    *
-   * <p>If native handle is not valid, does nothing.
+   * @param cleaner a cleaner to register the destructor in
+   * @param nativeHandle a handle to the native object
+   * @param destructorFunction a clean function to perform
+   */
+  @CanIgnoreReturnValue
+  public static ProxyDestructor newRegistered(Cleaner cleaner,
+                                              NativeHandle nativeHandle,
+                                              LongConsumer destructorFunction) {
+    checkNotNull(cleaner);
+    checkNotNull(nativeHandle);
+    checkNotNull(destructorFunction);
+
+    ProxyDestructor d = new ProxyDestructor(nativeHandle, destructorFunction);
+    cleaner.add(d);
+    return d;
+  }
+
+  /**
+   * Creates a new destructor of a native proxy.
    *
    * @param nativeHandle a handle to the native object
-   * @param cleanFunction a clean function to perform
+   * @param destructorFunction a clean function to perform
    */
-  public ProxyDestructor(NativeHandle nativeHandle, LongConsumer cleanFunction) {
+  public ProxyDestructor(NativeHandle nativeHandle, LongConsumer destructorFunction) {
     this.nativeHandle = nativeHandle;
-    this.cleanFunction = cleanFunction;
+    this.cleanFunction = destructorFunction;
     destroyed = false;
   }
 
+  /**
+   * Closes the native handle, so that it can no longer be accessed, and performs a clean action,
+   * passing the native handle value.
+   *
+   *<p>If native handle is not valid, does nothing.
+   *
+   * <p>This method is idempotent.
+   */
   @Override
   public void clean() {
     if (destroyed) {

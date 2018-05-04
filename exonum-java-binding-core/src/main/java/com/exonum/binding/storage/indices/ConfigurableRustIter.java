@@ -27,18 +27,18 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
    * @param disposeOperation an operation to call to destroy the corresponding native iterator
-   * @param collection a collection over which to iterate
+   * @param collectionView a database view of the collection over which to iterate
    * @param modificationCounter a view modification counter
    */
   ConfigurableRustIter(long nativeHandle,
                        LongFunction<E> nextFunction,
                        LongConsumer disposeOperation,
-                       AbstractIndexProxy collection,
+                       View collectionView,
                        ViewModificationCounter modificationCounter) {
-    super(nativeHandle, true, collection);
+    super(nativeHandle, true);
     this.nextFunction = nextFunction;
     this.disposeOperation = disposeOperation;
-    this.collectionView = collection.dbView;
+    this.collectionView = collectionView;
     this.modificationCounter = modificationCounter;
     this.initialModCount = modificationCounter.getModificationCount(collectionView);
   }

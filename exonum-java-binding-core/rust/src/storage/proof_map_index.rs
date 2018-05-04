@@ -1,18 +1,16 @@
-use jni::JNIEnv;
-use jni::objects::{JClass, JObject, JString, AutoLocal};
-use jni::sys::{jboolean, jbyteArray, jobject};
+use exonum::crypto::Hash;
+use exonum::storage::{Fork, MapProof, ProofMapIndex, Snapshot, StorageKey};
+use exonum::storage::proof_map_index::{BranchProofNode, PROOF_MAP_KEY_SIZE, ProofMapIndexIter,
+                                       ProofMapIndexKeys, ProofMapIndexValues, ProofNode, ProofPath};
 use jni::errors::Result;
-
+use jni::JNIEnv;
+use jni::objects::{AutoLocal, JClass, JObject, JString};
+use jni::sys::{jboolean, jbyteArray, jobject};
 use std::panic;
 use std::ptr;
-
-use exonum::crypto::Hash;
-use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof, StorageKey};
-use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
-                                       ProofPath, BranchProofNode, ProofNode, PROOF_MAP_KEY_SIZE};
+use super::db::{Value, View, ViewRef};
+use super::indexes_metadata::{check_read, check_write, TableType};
 use utils::{self, Handle, PairIter};
-use super::db::{View, ViewRef, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
@@ -56,7 +54,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     map_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, map_handle);

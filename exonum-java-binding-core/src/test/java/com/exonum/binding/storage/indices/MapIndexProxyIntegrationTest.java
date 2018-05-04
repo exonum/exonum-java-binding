@@ -269,9 +269,9 @@ public class MapIndexProxyIntegrationTest
 
       try (StorageIterator<String> iterator = map.keys()) {
         iterator.next();
-        try (MapIndexProxy<String, String> otherMap = createMap("other_map", view)) {
-          otherMap.put("new key", "new value");
-        }
+
+        MapIndexProxy<String, String> otherMap = createMap("other_map", view);
+        otherMap.put("new key", "new value");
 
         expectedException.expect(ConcurrentModificationException.class);
         iterator.next();
@@ -380,9 +380,9 @@ public class MapIndexProxyIntegrationTest
                                       BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
       View view = viewFactory.apply(cleaner);
-      try (MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
-        mapTest.accept(view, map);
-      }
+      MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
+
+      mapTest.accept(view, map);
     } catch (CloseFailuresException e) {
       throw new AssertionError("Unexpected exception", e);
     }

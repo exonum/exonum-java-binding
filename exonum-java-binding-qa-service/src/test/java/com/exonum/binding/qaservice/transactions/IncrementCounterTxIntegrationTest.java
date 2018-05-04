@@ -105,10 +105,9 @@ public class IncrementCounterTxIntegrationTest {
 
       // Check the counter has an incremented value
       QaSchema schema = new QaSchema(view);
-      try (ProofMapIndexProxy<HashCode, Long> counters = schema.counters()) {
-        long expectedValue = initialValue + 1;
-        assertThat(counters.get(nameHash), equalTo(expectedValue));
-      }
+      ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
+      long expectedValue = initialValue + 1;
+      assertThat(counters.get(nameHash), equalTo(expectedValue));
     }
   }
 
@@ -126,11 +125,10 @@ public class IncrementCounterTxIntegrationTest {
 
       // Check there isn’t such a counter after tx execution
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        assertFalse(counters.containsKey(nameHash));
-        assertFalse(counterNames.containsKey(nameHash));
-      }
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      assertFalse(counters.containsKey(nameHash));
+      assertFalse(counterNames.containsKey(nameHash));
     }
   }
 

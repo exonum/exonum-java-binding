@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.database;
 
 import com.exonum.binding.proxy.AbstractNativeProxy2;
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 
 /**
@@ -17,13 +18,17 @@ import com.exonum.binding.proxy.NativeHandle;
  */
 public abstract class View extends AbstractNativeProxy2 {
 
+  private final Cleaner cleaner;
+
   /**
    * Create a new view proxy.
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
+   * @param cleaner a cleaner of resources
    */
-  View(NativeHandle nativeHandle) {
+  View(NativeHandle nativeHandle, Cleaner cleaner) {
     super(nativeHandle);
+    this.cleaner = cleaner;
   }
 
   /**
@@ -33,5 +38,12 @@ public abstract class View extends AbstractNativeProxy2 {
    */
   public long getViewNativeHandle() {
     return super.getNativeHandle();
+  }
+
+  /**
+   * Returns the cleaner of this view.
+   */
+  public Cleaner getCleaner() {
+    return cleaner;
   }
 }
