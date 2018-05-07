@@ -3,6 +3,7 @@ package com.exonum.binding.storage.indices;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.fail;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -36,6 +37,44 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   abstract IndexT create(String name, View view);
+
+  /**
+   * Get any element from this index.
+   */
+  abstract Object getAnyElement(IndexT index);
+
+  /**
+   * A test verifying that an index constructor adds its destructor to the cleaner.
+   * First it checks the number of actions registered before and after the constructor is executed,
+   * and then that the index becomes inaccessible after the cleaner is closed.
+   */
+  @Test
+  public void indexConstructorRegistersItsDestructor() throws CloseFailuresException {
+    String name = "test_index";
+
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = database.createSnapshot(cleaner);
+
+      int numAddedActions = cleaner.getNumRegisteredActions();
+      IndexT index = create(name, view);
+
+      // Check that the index constructor registered a single clean action.
+      int numActionsExpected = numAddedActions + 1;
+      assertThat(cleaner.getNumRegisteredActions(), equalTo(numActionsExpected));
+
+      // Close the cleaner (it’s OK to do that inside try-with-resources
+      // since this method is idempotent).
+      cleaner.close();
+
+      // Try to access the index
+      try {
+        getAnyElement(index);
+        fail("index must be inaccessible");
+      } catch (IllegalStateException e) {
+        // expected
+      }
+    }
+  }
 
   @Test
   public void getName() throws CloseFailuresException {

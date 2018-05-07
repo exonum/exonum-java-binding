@@ -187,4 +187,31 @@ public class CleanerTest {
     assertThat(r).contains("numRegisteredActions=0");
     assertThat(r).contains("closed=false");
   }
+
+  @Test
+  public void numRegisteredActions() {
+    int numActions = 3;
+
+    for (int numAdded = 0; numAdded < numActions; numAdded++) {
+      assertThat(context.getNumRegisteredActions())
+          .isEqualTo(numAdded);
+
+      CleanAction a = mock(CleanAction.class);
+      context.add(a);
+    }
+
+    assertThat(context.getNumRegisteredActions())
+        .isEqualTo(numActions);
+  }
+
+  @Test
+  public void numRegisteredActionsZeroAfterClose() throws CloseFailuresException {
+    CleanAction a = mock(CleanAction.class);
+    context.add(a);
+
+    context.close();
+
+    assertThat(context.getNumRegisteredActions())
+        .isZero();
+  }
 }

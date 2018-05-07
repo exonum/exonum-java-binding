@@ -273,4 +273,9 @@ public class ValueSetIndexProxyIntegrationTest
   ValueSetIndexProxy<String> create(String name, View view) {
     return ValueSetIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
+
+  @Override
+  Object getAnyElement(ValueSetIndexProxy<String> index) {
+    return index.contains("v1");
+  }
 }

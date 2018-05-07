@@ -505,6 +505,11 @@ public class ProofMapIndexProxyIntegrationTest
     return createProofMap(name, view);
   }
 
+  @Override
+  Object getAnyElement(ProofMapIndexProxy<HashCode, String> index) {
+    return index.get(PK1);
+  }
+
   private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
     return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
         StandardSerializers.string());

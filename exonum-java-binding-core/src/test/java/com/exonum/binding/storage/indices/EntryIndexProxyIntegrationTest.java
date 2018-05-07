@@ -113,4 +113,9 @@ public class EntryIndexProxyIntegrationTest
   EntryIndexProxy<String> create(String name, View view) {
     return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
+
+  @Override
+  Object getAnyElement(EntryIndexProxy<String> index) {
+    return index.get();
+  }
 }

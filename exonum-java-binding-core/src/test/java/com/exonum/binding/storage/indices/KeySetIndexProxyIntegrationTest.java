@@ -168,4 +168,9 @@ public class KeySetIndexProxyIntegrationTest
   KeySetIndexProxy<String> create(String name, View view) {
     return KeySetIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
+
+  @Override
+  Object getAnyElement(KeySetIndexProxy<String> index) {
+    return index.contains("k1");
+  }
 }

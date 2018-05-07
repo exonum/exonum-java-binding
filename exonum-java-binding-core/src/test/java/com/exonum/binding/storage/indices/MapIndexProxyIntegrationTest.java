@@ -387,6 +387,11 @@ public class MapIndexProxyIntegrationTest
     return createMap(name, view);
   }
 
+  @Override
+  Object getAnyElement(MapIndexProxy<String, String> index) {
+    return index.get(K1);
+  }
+
   private static MapIndexProxy<String, String> createMap(String name, View view) {
     return MapIndexProxy.newInstance(name, view, StandardSerializers.string(),
         StandardSerializers.string());

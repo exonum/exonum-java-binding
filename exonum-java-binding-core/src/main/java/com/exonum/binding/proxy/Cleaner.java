@@ -151,5 +151,12 @@ public final class Cleaner implements AutoCloseable {
         .toString();
   }
 
-  // todo: diagnostic info
+  /**
+   * Returns the number of the registered clean actions.
+   */
+  public int getNumRegisteredActions() {
+    return registeredCleanActions.size();
+  }
+
+  // todo: more diagnostic info?
 }

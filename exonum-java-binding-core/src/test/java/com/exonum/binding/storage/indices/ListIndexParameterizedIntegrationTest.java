@@ -333,6 +333,11 @@ public class ListIndexParameterizedIntegrationTest
     return (AbstractListIndexProxy<String>) listFactory.create(name, view);
   }
 
+  @Override
+  Object getAnyElement(AbstractListIndexProxy<String> index) {
+    return index.get(0L);
+  }
+
   private ListIndex<String> createList(View view) {
     return listFactory.create(LIST_NAME, view);
   }
