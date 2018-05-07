@@ -11,7 +11,6 @@ import com.google.common.annotations.VisibleForTesting;
 @VisibleForTesting
 public class MemoryDb extends AbstractNativeProxy implements Database {
 
-  // todo: Consider a memorydb that has a cleaner?
   /**
    * Creates a new empty MemoryDb.
    */
@@ -21,7 +20,7 @@ public class MemoryDb extends AbstractNativeProxy implements Database {
       nativeHandle = nativeCreate();
       return new MemoryDb(nativeHandle);
     } catch (Throwable t) {
-      if (nativeHandle != 0) {
+      if (nativeHandle != INVALID_NATIVE_HANDLE) {
         nativeFree(nativeHandle);
       }
       throw t;
