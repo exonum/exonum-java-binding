@@ -26,7 +26,7 @@ public class Snapshot extends View {
    * @param nativeHandle a handle of the native Snapshot object
    */
   // todo: consider making package-private so that clients aren't able to reference an invalid
-  // memory region (or use the knowledge of a registry of native allocations
+  // memory region (currently the registry of native allocations is required to be enabled
   // to safely discard such attempts).
   public static Snapshot newInstance(long nativeHandle, Cleaner cleaner) {
     return newInstance(nativeHandle, true, cleaner);
