@@ -16,15 +16,15 @@ import org.apache.logging.log4j.Logger;
  * Use it in tests of your handlers that need some data in the database:
  *
  * <pre><code>
- *   MemoryDb db = MemoryDb.newInstance();
+ * try (MemoryDb db = MemoryDb.newInstance();
+ *      Cleaner cleaner = new Cleaner()) {
  *
- *   // FIXME: Invalid (non-compiling) example.
  *   // Setup database to include some test data
- *   try (Fork fork = db.createFork();
- *        MapIndex balance = new MapIndex("balance", fork)) {
- *     balance.put("John Doe", "$1000.00");
- *     db.merge(fork);
- *   }
+ *   Fork fork = db.createFork(cleaner);
+ *   MapIndex balance = MapIndexProxy.newInstance("balance", fork, stringSerializer,
+ *       stringSerializer);
+ *   balance.put("John Doe", "$1000.00");
+ *   db.merge(fork);
  *
  *   // Create a node fake from the database
  *   NodeFake node = new NodeFake(db);
@@ -32,10 +32,7 @@ import org.apache.logging.log4j.Logger;
  *   WalletController controller = new WalletController(node);
  *
  *   assertThat(controller.getBalance("John Doe"), equalTo("$1000.00"));
- *
- *   //…
- *
- *   db.close();
+ * }
  * </code></pre>
  */
 public class NodeFake implements Node {
