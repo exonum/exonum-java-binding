@@ -54,14 +54,39 @@ public class CleanerTest {
   }
 
   @Test
-  public void addActionToClosed() throws CloseFailuresException {
+  public void addActionToClosedExecutesAction() throws CloseFailuresException {
     context.close();
 
     CleanAction action = mock(CleanAction.class);
 
-    expectedException.expectMessage("Cannot register a clean action");
-    expectedException.expect(IllegalStateException.class);
-    context.add(action);
+    try {
+      context.add(action);
+      fail("closed context ^ must throw");
+    } catch (IllegalStateException e) {
+      assertThat(e.getMessage()).startsWith("Cannot register a clean action");
+
+      // Verify that the action was executed once.
+      verify(action).clean();
+    }
+  }
+
+  @Test
+  public void addThrowingActionExceptionIncludesSuppressed() throws CloseFailuresException {
+    context.close();
+
+    // Create a throwing action.
+    CleanAction action = mock(CleanAction.class);
+    doThrow(RuntimeException.class).when(action).clean();
+
+    try {
+      context.add(action);
+      fail("closed context ^ must throw");
+    } catch (IllegalStateException e) {
+      // Check the suppressed exceptions are properly initialized.
+      Throwable[] suppressed = e.getSuppressed();
+      assertThat(suppressed).hasSize(1);
+      assertThat(suppressed[0]).isInstanceOf(RuntimeException.class);
+    }
   }
 
   @Test
@@ -97,7 +122,7 @@ public class CleanerTest {
 
       assertThat(logEvents.get(0))
           .contains("ERROR")
-          .contains("Exception occurred when context (" + context
+          .contains("Exception occurred when this context (" + context
               + ") attempted to perform a clean operation (" + action);
     }
   }

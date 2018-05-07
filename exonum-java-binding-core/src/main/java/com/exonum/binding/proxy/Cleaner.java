@@ -1,7 +1,5 @@
 package com.exonum.binding.proxy;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.MoreObjects;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -40,14 +38,33 @@ public final class Cleaner implements AutoCloseable {
   }
 
   /**
-   * Registers a new clean action with this context.
+   * Registers a new clean action with this context. If the context is already closed,
+   * the clean action will be executed immediately.
    *
    * @param cleanAction a clean action to register; must not be null
    *
    * @throws IllegalStateException if it’s attempted to add a clean action to a closed context
    */
   public void add(CleanAction cleanAction) {
-    checkState(!closed, "Cannot register a clean action (%s) in a closed context", cleanAction);
+    if (closed) {
+      // To avoid possible leaks, perform the clean action before throwing IllegalStateException.
+      Throwable cleanActionError = null;
+      try {
+        cleanAction.clean();
+      } catch (Throwable t) {
+        logCleanActionFailure(cleanAction, t);
+        cleanActionError = t;
+      }
+
+      String message = String.format("Cannot register a clean action (%s) in a closed context",
+          cleanAction);
+      RuntimeException e = new IllegalStateException(message);
+      if (cleanActionError != null) {
+        e.addSuppressed(cleanActionError);
+      }
+      throw e;
+    }
+
     registeredCleanActions.push(cleanAction);
 
     // As this class is used to automatically (from the user perspective) manage resources,
@@ -101,9 +118,7 @@ public final class Cleaner implements AutoCloseable {
         // Record the failure
         numFailures++;
         // Log the details
-        String message = String.format("Exception occurred when context (%s) attempted to perform "
-            + "a clean operation (%s): ", this, cleanAction);
-        logger.error(message, t);
+        logCleanActionFailure(cleanAction, t);
         // todo: Shall I throw Errors immediately: Throwables.throwIfInstanceOf(t, Error.class);
       }
     }
@@ -114,6 +129,11 @@ public final class Cleaner implements AutoCloseable {
           + "see the log messages above", numFailures, this);
       throw new CloseFailuresException(message);
     }
+  }
+
+  private void logCleanActionFailure(CleanAction cleanAction, Throwable cleanException) {
+    logger.error("Exception occurred when this context ({}) attempted to perform "
+        + "a clean operation ({}):", this, cleanAction, cleanException);
   }
 
   /**
