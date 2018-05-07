@@ -10,7 +10,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -159,8 +159,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   private native void nativeRemove(long nativeHandle, byte[] key);
 
   @Override
-  @MustBeClosed
-  public StorageIterator<K> keys() {
+  public Iterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
@@ -178,8 +177,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   private native void nativeKeysIterFree(long iterNativeHandle);
 
   @Override
-  @MustBeClosed
-  public StorageIterator<V> values() {
+  public Iterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
@@ -197,8 +195,7 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   private native void nativeValuesIterFree(long iterNativeHandle);
 
   @Override
-  @MustBeClosed
-  public StorageIterator<MapEntry<K, V>> entries() {
+  public Iterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,

@@ -19,6 +19,7 @@ import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedInde
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -303,11 +304,10 @@ public class ListIndexParameterizedIntegrationTest
 
       l.addAll(elements);
 
-      try (StorageIterator<String> iterator = l.iterator()) {
-        List<String> iterElements = ImmutableList.copyOf(iterator);
+      Iterator<String> iterator = l.iterator();
+      List<String> iterElements = ImmutableList.copyOf(iterator);
 
-        assertThat(iterElements, equalTo(elements));
-      }
+      assertThat(iterElements, equalTo(elements));
     });
   }
 

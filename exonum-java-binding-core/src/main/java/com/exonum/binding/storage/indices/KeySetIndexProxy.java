@@ -9,7 +9,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
 
 /**
  * A key set is an index that contains no duplicate elements (keys).
@@ -124,8 +124,7 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 
    */
-  @MustBeClosed
-  public StorageIterator<E> iterator() {
+  public Iterator<E> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,

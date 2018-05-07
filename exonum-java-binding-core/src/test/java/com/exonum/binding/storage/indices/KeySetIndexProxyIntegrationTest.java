@@ -11,6 +11,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -94,13 +95,12 @@ public class KeySetIndexProxyIntegrationTest
 
       elements.forEach(set::add);
 
-      try (StorageIterator<String> iterator = set.iterator()) {
-        List<String> iterElements = ImmutableList.copyOf(iterator);
+      Iterator<String> iterator = set.iterator();
+      List<String> iterElements = ImmutableList.copyOf(iterator);
 
-        // Check that iterator includes all the elements added
-        // and that they appear in lexicographical order (the order of TestStorageItems.keys).
-        assertThat(iterElements, equalTo(elements));
-      }
+      // Check that iterator includes all the elements added
+      // and that they appear in lexicographical order (the order of TestStorageItems.keys).
+      assertThat(iterElements, equalTo(elements));
     });
   }
 

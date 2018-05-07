@@ -1,7 +1,12 @@
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.LongFunction;
@@ -22,30 +27,29 @@ final class StorageIterators {
    * @param transformingFunction a function to apply to elements returned by native iterator
    *                             (usually, to an array of bytes)
    */
-  static <ElementT, NativeT> StorageIterator<ElementT> createIterator(
+  static <ElementT, NativeT> Iterator<ElementT> createIterator(
       long nativeHandle,
       LongFunction<NativeT> nextFunction,
       LongConsumer disposeOperation,
       View collectionView,
       ViewModificationCounter modificationCounter,
       Function<? super NativeT, ? extends ElementT> transformingFunction) {
-    // todo: Use the Guava-provided iterator when ECR-595 is resolved (Iterators#transform)
-    RustIterAdapter<NativeT> iterator = new RustIterAdapter<>(
+
+    // Register the destructor first.
+    NativeHandle handle = new NativeHandle(nativeHandle);
+    Cleaner cleaner = collectionView.getCleaner();
+    cleaner.add(new ProxyDestructor(handle, disposeOperation));
+
+    Iterator<NativeT> iterator = new RustIterAdapter<>(
         new ConfigurableRustIter<>(
-            nativeHandle,
+            handle,
             nextFunction,
-            disposeOperation,
             collectionView,
             modificationCounter
         )
     );
-    return transform(iterator, transformingFunction);
-  }
 
-  private static <InT, OutT> StorageIterator<OutT> transform(
-      StorageIterator<? extends InT> backingIterator,
-      Function<? super InT, ? extends OutT> transformingFunction) {
-    return new TransformedIterator<>(backingIterator, transformingFunction);
+    return Iterators.transform(iterator, transformingFunction::apply);
   }
 
   private StorageIterators() {}

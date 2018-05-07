@@ -1,8 +1,8 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.Fork;
-import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -105,6 +105,5 @@ public interface ListIndex<T> extends StorageIndex {
    *
    * @throws IllegalStateException if this list is not valid
    */
-  @MustBeClosed
-  StorageIterator<T> iterator();
+  Iterator<T> iterator();
 }

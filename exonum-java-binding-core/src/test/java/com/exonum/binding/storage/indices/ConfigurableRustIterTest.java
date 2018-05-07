@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
@@ -21,7 +20,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -96,18 +94,14 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  @Ignore // todo: decide what to do with this fucker. It used to throw ISE,
-  // because AbstractNativeProxy checked that all proxies this one depends on
-  // are still alive. AbstractNativeProxy2 (the second!) does not.
-  //   - Throws if next throws?
-  //   - Throws if view is not valid?
-  public void nextFailsIfCollectionClosed() throws Exception {
-    Snapshot view = createSnapshot();
-    AbstractIndexProxy index = createIndex(view);
+  public void nextFailsIfHandleClosed() throws Exception {
+    Fork fork = createFork();
+    NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
+    createFromIterable(nh, asList(1, 2), fork);
 
-    createFromIterable(asList(1, 2), /* used to be index */null);
+    // Close the native handle.
+    nh.close();
 
-    view.getCleaner().close();
     expectedException.expect(IllegalStateException.class);
     iter.next();
   }
@@ -128,42 +122,27 @@ public class ConfigurableRustIterTest {
     }
   }
 
-  @Test
-  public void closeDoesNotFailIfModifiedAfterTheLastNext() throws Exception {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
-
-    while (iter.next().isPresent()) {
-      // skip all elements
-    }
-
-    notifyModified(fork);
-
-    iter.close();  // It's OK to modify after the last element was retrieved.
-  }
-
+  /** Creates a mock of a fork. */
   private Fork createFork() {
-    // todo: de-dupe these two?
-    Cleaner unnecessaryCleaner = new Cleaner();
-    return Fork.newInstance(1L, false, unnecessaryCleaner);
+    return mock(Fork.class);
   }
 
+  /** Creates a mock of a snapshot. */
   private Snapshot createSnapshot() {
-    Cleaner unnecessaryCleaner = new Cleaner();
-    return Snapshot.newInstance(2L, false, unnecessaryCleaner);
+    return mock(Snapshot.class);
   }
 
   private void createFromIterable(Iterable<Integer> it, View dbView) {
-    Iterator<Integer> iterator = it.iterator();
-    iter = new ConfigurableRustIter<>(DEFAULT_NATIVE_HANDLE,
-        (h) -> iterator.hasNext() ? iterator.next() : null,
-        (h) -> { /* no-op dispose */ },
-        dbView,
-        modCounter);
+    NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
+    createFromIterable(nh, it, dbView);
   }
 
-  private static AbstractIndexProxy createIndex(View view) {
-    return new AbstractIndexProxy(new NativeHandle(0x01), "test_index", view) {};
+  private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it, View dbView) {
+    Iterator<Integer> iterator = it.iterator();
+    iter = new ConfigurableRustIter<>(nativeHandle,
+        (h) -> iterator.hasNext() ? iterator.next() : null,
+        dbView,
+        modCounter);
   }
 
   private void notifyModified(Fork fork) {

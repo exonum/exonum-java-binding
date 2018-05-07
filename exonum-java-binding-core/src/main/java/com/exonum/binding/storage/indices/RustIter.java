@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.proxy.NativeProxy;
 import java.util.Optional;
 
 /**
@@ -10,7 +9,7 @@ import java.util.Optional;
  *
  * @param <E> type of elements returned by this iterator
  */
-interface RustIter<E> extends NativeProxy {
+interface RustIter<E> {
 
   /**
    * Advance the iterator to the next item.

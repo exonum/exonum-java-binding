@@ -15,6 +15,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -125,14 +126,13 @@ public class ValueSetIndexProxyIntegrationTest
 
       elements.forEach(set::add);
 
-      try (StorageIterator<HashCode> iter = set.hashes()) {
-        List<HashCode> iterHashes = ImmutableList.copyOf(iter);
-        List<HashCode> expectedHashes = getOrderedHashes(elements);
+      Iterator<HashCode> iter = set.hashes();
+      List<HashCode> iterHashes = ImmutableList.copyOf(iter);
+      List<HashCode> expectedHashes = getOrderedHashes(elements);
 
-        // Check that the hashes appear in lexicographical order,
-        // and are equal to the expected.
-        assertThat(iterHashes, equalTo(expectedHashes));
-      }
+      // Check that the hashes appear in lexicographical order,
+      // and are equal to the expected.
+      assertThat(iterHashes, equalTo(expectedHashes));
     });
   }
 
@@ -143,12 +143,11 @@ public class ValueSetIndexProxyIntegrationTest
 
       elements.forEach(set::add);
 
-      try (StorageIterator<ValueSetIndexProxy.Entry<String>> iterator = set.iterator()) {
-        List<ValueSetIndexProxy.Entry<String>> entriesFromIter = ImmutableList.copyOf(iterator);
-        List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
+      Iterator<ValueSetIndexProxy.Entry<String>> iterator = set.iterator();
+      List<ValueSetIndexProxy.Entry<String>> entriesFromIter = ImmutableList.copyOf(iterator);
+      List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
 
-        assertThat(entriesFromIter, equalTo(entriesExpected));
-      }
+      assertThat(entriesFromIter, equalTo(entriesExpected));
     });
   }
 

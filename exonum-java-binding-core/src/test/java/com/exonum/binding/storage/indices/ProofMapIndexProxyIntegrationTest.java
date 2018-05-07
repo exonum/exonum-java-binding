@@ -34,6 +34,7 @@ import com.google.common.primitives.UnsignedBytes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -371,13 +372,12 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      try (StorageIterator<HashCode> keysIterator = map.keys()) {
-        List<HashCode> keysFromIter = ImmutableList.copyOf(keysIterator);
-        List<HashCode> keysInMap = MapEntries.extractKeys(entries);
+      Iterator<HashCode> keysIterator = map.keys();
+      List<HashCode> keysFromIter = ImmutableList.copyOf(keysIterator);
+      List<HashCode> keysInMap = MapEntries.extractKeys(entries);
 
-        // Keys must appear in a lexicographical order.
-        assertThat(keysFromIter, equalTo(keysInMap));
-      }
+      // Keys must appear in a lexicographical order.
+      assertThat(keysFromIter, equalTo(keysInMap));
     });
   }
 
@@ -388,13 +388,12 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      try (StorageIterator<String> valuesIterator = map.values()) {
-        List<String> valuesFromIter = ImmutableList.copyOf(valuesIterator);
-        List<String> valuesInMap = MapEntries.extractValues(entries);
+      Iterator<String> valuesIterator = map.values();
+      List<String> valuesFromIter = ImmutableList.copyOf(valuesIterator);
+      List<String> valuesInMap = MapEntries.extractValues(entries);
 
-        // Values must appear in a lexicographical order of keys.
-        assertThat(valuesFromIter, equalTo(valuesInMap));
-      }
+      // Values must appear in a lexicographical order of keys.
+      assertThat(valuesFromIter, equalTo(valuesInMap));
     });
   }
 
@@ -405,11 +404,10 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      try (StorageIterator<MapEntry<HashCode, String>> entriesIterator = map.entries()) {
-        List<MapEntry> entriesFromIter = ImmutableList.copyOf(entriesIterator);
-        // Entries must appear in a lexicographical order of keys.
-        assertThat(entriesFromIter, equalTo(entries));
-      }
+      Iterator<MapEntry<HashCode, String>> entriesIterator = map.entries();
+      List<MapEntry> entriesFromIter = ImmutableList.copyOf(entriesIterator);
+      // Entries must appear in a lexicographical order of keys.
+      assertThat(entriesFromIter, equalTo(entries));
     });
   }
 

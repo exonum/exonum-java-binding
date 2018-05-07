@@ -8,7 +8,7 @@ import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -107,8 +107,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
-  @MustBeClosed
-  public StorageIterator<K> keys() {
+  public Iterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
@@ -120,8 +119,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
-  @MustBeClosed
-  public StorageIterator<V> values() {
+  public Iterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
@@ -133,8 +131,7 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
-  @MustBeClosed
-  public StorageIterator<MapEntry<K, V>> entries() {
+  public Iterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
