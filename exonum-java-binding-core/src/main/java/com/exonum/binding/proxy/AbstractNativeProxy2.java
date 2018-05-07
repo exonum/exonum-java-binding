@@ -8,7 +8,7 @@ public abstract class AbstractNativeProxy2 {
   /** A handle to the native object. */
   protected final NativeHandle nativeHandle;
 
-  public AbstractNativeProxy2(NativeHandle nativeHandle) {
+  protected AbstractNativeProxy2(NativeHandle nativeHandle) {
     this.nativeHandle = nativeHandle;
   }
 
