@@ -20,7 +20,8 @@ lazy_static! {
 
 #[test]
 pub fn it_works() {
-    let mut atomic = AtomicIntegerProxy::new(HACKY_EXECUTOR.clone(), 0).unwrap();
+    let executor = HackyExecutor::new(&VM, 1);
+    let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     assert_eq!(1, atomic.increment_and_get().unwrap());
     assert_eq!(3, atomic.add_and_get(2).unwrap());
@@ -29,7 +30,8 @@ pub fn it_works() {
 
 #[test]
 pub fn it_works_in_another_thread() {
-    let mut atomic = AtomicIntegerProxy::new(HACKY_EXECUTOR.clone(), 0).unwrap();
+    let executor = HackyExecutor::new(&VM, 2);
+    let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     let jh = spawn(move || {
         assert_eq!(1, atomic.increment_and_get().unwrap());
@@ -45,7 +47,8 @@ pub fn it_works_in_concurrent_threads() {
     const ITERS_PER_THREAD: usize = 10_000;
     const THREAD_NUM: usize = 8;
 
-    let mut atomic = AtomicIntegerProxy::new(HACKY_EXECUTOR.clone(), 0).unwrap();
+    let executor = HackyExecutor::new(&VM, THREAD_NUM + 1);
+    let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
     let mut threads = Vec::new();
 
@@ -69,5 +72,6 @@ pub fn it_works_in_concurrent_threads() {
 
 #[test]
 pub fn nested_attach() {
-    check_nested_attach_hacky(&VM, &*HACKY_EXECUTOR);
+    let executor = HackyExecutor::new(&VM, 1);
+    check_nested_attach_hacky(&VM, executor);
 }
