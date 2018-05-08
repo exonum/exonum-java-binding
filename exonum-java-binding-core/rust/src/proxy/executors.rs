@@ -75,22 +75,30 @@ pub struct HackyExecutor {
 
 impl HackyExecutor {
     /// Creates `HackyExecutor`.
+    #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
     pub fn new(vm: &'static JavaVM, attach_limit: usize) -> Self {
         let attached_num = Arc::new(Mutex::new(0));
-        HackyExecutor { vm, attach_limit, attached_num }
+        HackyExecutor {
+            vm,
+            attach_limit,
+            attached_num,
+        }
     }
 
     fn attach_one_more(&self) -> JniResult<JNIEnv> {
-        let mut attached_num = self.attached_num.lock()
-            .expect("Failed to acquire the mutex on the attached threads number");
+        let mut attached_num = self.attached_num.lock().expect(
+            "Failed to acquire the mutex on the attached threads number",
+        );
         *attached_num += 1;
         let attached = *attached_num;
         // There is no need for the mutex lock anymore
         drop(attached_num);
         if attached > self.attach_limit {
-            panic!("The limit on thread attachment is exhausted: {} (limit is {})",
-                        attached,
-                        self.attach_limit);
+            panic!(
+                "The limit on thread attachment is exhausted: {} (limit is {})",
+                attached,
+                self.attach_limit
+            );
         }
         let attach_guard = self.vm.attach_current_thread()?;
         // We can't call detach from the right native thread,

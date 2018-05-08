@@ -64,7 +64,10 @@ pub fn test_executor_in_another_thread<E: JniExecutor + 'static>(executor: E) {
     assert_eq!(3, atomic.get().unwrap());
 }
 
-pub fn test_executor_in_concurrent_threads<E: JniExecutor + 'static>(executor: E, thread_num: usize) {
+pub fn test_executor_in_concurrent_threads<E: JniExecutor + 'static>(
+    executor: E,
+    thread_num: usize,
+) {
     const ITERS_PER_THREAD: usize = 10_000;
 
     let mut atomic = AtomicIntegerProxy::new(executor.clone(), 0).unwrap();

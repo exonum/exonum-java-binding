@@ -7,7 +7,7 @@ use integration_tests::executor::{check_detached, check_nested_attach, test_exec
                                   test_executor_in_another_thread,
                                   test_executor_in_concurrent_threads};
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::DumbExecutor;
+use java_bindings::{JniExecutor, DumbExecutor};
 use java_bindings::jni::JavaVM;
 
 lazy_static! {

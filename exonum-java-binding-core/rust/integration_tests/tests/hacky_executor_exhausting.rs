@@ -21,9 +21,7 @@ pub fn exhausted_thread_limit() {
     let executor = HackyExecutor::new(&VM, THREAD_NUM - 1);
     for _ in 0..THREAD_NUM - 1 {
         let executor = executor.clone();
-        let jh = spawn(move || {
-            executor.with_attached(|_| Ok(())).unwrap();
-        });
+        let jh = spawn(move || executor.with_attached(|_| Ok(())).unwrap());
         jh.join().unwrap();
     }
     executor.with_attached(|_| Ok(())).unwrap();

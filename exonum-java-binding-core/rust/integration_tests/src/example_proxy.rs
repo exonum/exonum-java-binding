@@ -10,7 +10,7 @@ pub struct AtomicIntegerProxy<E: JniExecutor> {
     obj: GlobalRef,
 }
 
-impl <E: JniExecutor> AtomicIntegerProxy<E> {
+impl<E: JniExecutor> AtomicIntegerProxy<E> {
     /// Creates a new instance of `AtomicIntegerProxy`
     pub fn new(exec: E, init_value: jint) -> JniResult<Self> {
         let obj = exec.with_attached(|env: &JNIEnv| {
