@@ -60,7 +60,8 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
     NativeHandle listNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy.class,
+        ListIndexProxy::nativeFree);
     return listNativeHandle;
   }
 

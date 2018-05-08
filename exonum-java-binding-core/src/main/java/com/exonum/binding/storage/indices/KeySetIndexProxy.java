@@ -67,7 +67,8 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
     NativeHandle setNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, setNativeHandle, KeySetIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, setNativeHandle, KeySetIndexProxy.class,
+        KeySetIndexProxy::nativeFree);
     return setNativeHandle;
   }
 

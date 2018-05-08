@@ -73,7 +73,8 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
     NativeHandle setNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, setNativeHandle, ValueSetIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, setNativeHandle, ValueSetIndexProxy.class,
+        ValueSetIndexProxy::nativeFree);
     return setNativeHandle;
   }
 

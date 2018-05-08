@@ -71,7 +71,8 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
     NativeHandle mapNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, mapNativeHandle, ProofMapIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, mapNativeHandle, ProofMapIndexProxy.class,
+        ProofMapIndexProxy::nativeFree);
     return mapNativeHandle;
   }
 

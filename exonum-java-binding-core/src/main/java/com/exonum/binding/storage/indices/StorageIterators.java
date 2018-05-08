@@ -38,7 +38,7 @@ final class StorageIterators {
     // Register the destructor first.
     NativeHandle handle = new NativeHandle(nativeHandle);
     Cleaner cleaner = collectionView.getCleaner();
-    cleaner.add(new ProxyDestructor(handle, disposeOperation));
+    cleaner.add(new ProxyDestructor(handle, RustIter.class, disposeOperation));
 
     Iterator<NativeT> iterator = new RustIterAdapter<>(
         new ConfigurableRustIter<>(

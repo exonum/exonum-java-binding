@@ -2,6 +2,7 @@ package com.exonum.binding.storage.database;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.proxy.CleanAction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -37,7 +38,7 @@ public class Fork extends View {
 
     NativeHandle h = new NativeHandle(nativeHandle);
     // Add an action destroying the native peer if necessary.
-    ProxyDestructor.newRegistered(cleaner, h, nh -> {
+    ProxyDestructor.newRegistered(cleaner, h, Fork.class, nh -> {
       if (owningHandle) {
         Views.nativeFree(nh);
       }
@@ -47,7 +48,9 @@ public class Fork extends View {
     Fork f = new Fork(h, cleaner);
 
     // Add the action that unregisters the fork separately so that it is always invoked.
-    cleaner.add(() -> ViewModificationCounter.getInstance().remove(f));
+    cleaner.add(CleanAction.from(() -> ViewModificationCounter.getInstance().remove(f),
+        "Fork in modification counter")
+    );
 
     return f;
   }

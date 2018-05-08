@@ -66,7 +66,8 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
     NativeHandle mapNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, mapNativeHandle, MapIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, mapNativeHandle, MapIndexProxy.class,
+        MapIndexProxy::nativeFree);
     return mapNativeHandle;
   }
 

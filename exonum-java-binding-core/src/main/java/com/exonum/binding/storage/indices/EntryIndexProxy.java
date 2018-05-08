@@ -63,7 +63,8 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
     NativeHandle entryNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, EntryIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, EntryIndexProxy.class,
+        EntryIndexProxy::nativeFree);
     return entryNativeHandle;
   }
 

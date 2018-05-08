@@ -3,6 +3,7 @@ package com.exonum.binding.proxy;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.util.Optional;
 import java.util.function.LongConsumer;
 
 /**
@@ -12,12 +13,15 @@ import java.util.function.LongConsumer;
  * so that there is no public #close method available in the interface of the proxy,
  * making the risk of misuse smaller.
  *
+ * <p>All method parameters are non-null by default.
+ *
  * <p>This class is not thread-safe.
  */
-public final class ProxyDestructor implements CleanAction {
+public final class ProxyDestructor implements CleanAction<Class<?>> {
 
   private final NativeHandle nativeHandle;
   private final LongConsumer cleanFunction;
+  private final Class<?> proxyClass;
   private boolean destroyed;
 
   /**
@@ -25,17 +29,15 @@ public final class ProxyDestructor implements CleanAction {
    *
    * @param cleaner a cleaner to register the destructor in
    * @param nativeHandle a handle to the native object
+   * @param proxyClass a class of proxy
    * @param destructorFunction a clean function to perform
    */
   @CanIgnoreReturnValue
   public static ProxyDestructor newRegistered(Cleaner cleaner,
                                               NativeHandle nativeHandle,
+                                              Class<?> proxyClass,
                                               LongConsumer destructorFunction) {
-    checkNotNull(cleaner);
-    checkNotNull(nativeHandle);
-    checkNotNull(destructorFunction);
-
-    ProxyDestructor d = new ProxyDestructor(nativeHandle, destructorFunction);
+    ProxyDestructor d = new ProxyDestructor(nativeHandle, proxyClass, destructorFunction);
     cleaner.add(d);
     return d;
   }
@@ -44,11 +46,14 @@ public final class ProxyDestructor implements CleanAction {
    * Creates a new destructor of a native proxy.
    *
    * @param nativeHandle a handle to the native object
+   * @param proxyClass a class of the proxy
    * @param destructorFunction a clean function to perform
    */
-  public ProxyDestructor(NativeHandle nativeHandle, LongConsumer destructorFunction) {
-    this.nativeHandle = nativeHandle;
-    this.cleanFunction = destructorFunction;
+  public ProxyDestructor(NativeHandle nativeHandle, Class<?> proxyClass,
+                         LongConsumer destructorFunction) {
+    this.nativeHandle = checkNotNull(nativeHandle);
+    this.cleanFunction = checkNotNull(destructorFunction);
+    this.proxyClass = checkNotNull(proxyClass);
     destroyed = false;
   }
 
@@ -80,5 +85,10 @@ public final class ProxyDestructor implements CleanAction {
 
     // Perform the clean action.
     cleanFunction.accept(handle);
+  }
+
+  @Override
+  public Optional<Class<?>> resourceType() {
+    return Optional.of(proxyClass);
   }
 }

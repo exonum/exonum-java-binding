@@ -3,6 +3,7 @@ package com.exonum.binding.proxy;
 import com.google.common.base.MoreObjects;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -77,14 +78,18 @@ public final class Cleaner implements AutoCloseable {
 
     if ((numRegisteredCleaners >= TOO_MANY_CLEAN_ACTIONS_LOG_THRESHOLD)
         && (numRegisteredCleaners % TOO_MANY_CLEAN_ACTIONS_LOG_FREQUENCY == 0)) {
-      // todo: is it an overkill?
-      // todo: enable!
-      //      String proxiesByTypeFrequency = FrequencyStatsFormatter
-      //          .itemsByTypeFrequency(registeredCleanActions);
 
-      logger.warn("Many cleaners (%d) are registered in a context (%s).",
-          numRegisteredCleaners, this);
+      String proxiesByTypeFrequency =
+          FrequencyStatsFormatter.itemsFrequency(registeredCleanActions, Cleaner::getActionType);
+
+      logger.warn("Many cleaners ({}) are registered in a context ({}): {}",
+          numRegisteredCleaners, this, proxiesByTypeFrequency);
     }
+  }
+
+  private static Object getActionType(CleanAction<Object> a) {
+    Optional<Object> rt = a.resourceType();
+    return rt.orElse("Unknown");
   }
 
   /**
