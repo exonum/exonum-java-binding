@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * A key bit set.
  */
-final class KeyBitSet {
+public final class KeyBitSet {
 
   private final BitSet keyBits;
 
@@ -25,10 +25,18 @@ final class KeyBitSet {
    * @param key key bytes
    * @param length a length in bits, i.e., the number of significant bits in key array
    */
-  KeyBitSet(byte[] key, int length) {
+  public KeyBitSet(byte[] key, int length) {
     checkArgument(length >= 0, "length (%s) must be non-negative", length);
     keyBits = BitSet.valueOf(key);
     this.length = length;
+  }
+
+  public int getLength() {
+    return length;
+  }
+
+  public BitSet getKeyBits() {
+    return keyBits;
   }
 
   /**
@@ -66,6 +74,17 @@ final class KeyBitSet {
     thisBits.xor(other.keyBits);
     int firstSetBitIndex = thisBits.nextSetBit(0);
     return (firstSetBitIndex >= this.length) || (firstSetBitIndex == -1);
+  }
+
+  public KeyBitSet commonPrefix(KeyBitSet other) {
+    if (other == this) {
+      return this;
+    }
+    BitSet thisBits = (BitSet) this.keyBits.clone();
+    thisBits.xor(other.keyBits);
+    int firstSetBitIndex = thisBits.nextSetBit(0);
+    BitSet resultingBitSet = this.keyBits.get(0, firstSetBitIndex);
+    return new KeyBitSet(resultingBitSet.toByteArray(), resultingBitSet.length());
   }
 
   @Override
