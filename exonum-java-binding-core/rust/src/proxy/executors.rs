@@ -4,7 +4,8 @@ use jni::sys::jint;
 use std::mem;
 use std::sync::{Arc, Mutex};
 
-use {JniError, JniErrorKind, JniResult};
+use {JniError, JniResult};
+use JniErrorKind::{Other, ThreadDetached};
 
 /// An interface for JNI thread attachment manager.
 pub trait JniExecutor: Clone + Send + Sync {
@@ -48,7 +49,7 @@ impl JniExecutor for DumbExecutor {
         match self.vm.get_env() {
             Ok(jni_env) => f(&jni_env),
             Err(jni_err) => {
-                if let JniErrorKind::ThreadDetached = jni_err.0 {
+                if let ThreadDetached = jni_err.0 {
                     let attach_guard = self.vm.attach_current_thread()?;
                     f(&attach_guard)
                 } else {
@@ -93,7 +94,7 @@ impl HackyExecutor {
             "Failed to acquire the mutex on the attached threads number",
         );
         if *attached_threads == self.attach_limit {
-            Err(JniErrorKind::Other(Self::LIMIT_EXHAUSTED))?;
+            Err(Other(Self::LIMIT_EXHAUSTED))?;
         }
         let attach_guard = self.vm.attach_current_thread()?;
         // We can't call detach from the right native thread,
@@ -111,13 +112,13 @@ impl HackyExecutor {
             Ok(jni_env) => Ok(jni_env),
             Err(jni_err) => {
                 match jni_err.0 {
-                    JniErrorKind::ThreadDetached => {
+                    ThreadDetached => {
                         let jni_env_result = self.attach_current_thread();
                         match jni_env_result {
-                            Err(JniError(JniErrorKind::ThreadDetached, ..)) => {
+                            Err(JniError(ThreadDetached, ..)) => {
                                 panic!("Thread should be attached");
                             }
-                            Err(JniError(JniErrorKind::Other(Self::LIMIT_EXHAUSTED), ..)) => {
+                            Err(JniError(Other(Self::LIMIT_EXHAUSTED), ..)) => {
                                 panic!(
                                     "The limit on thread attachment is exhausted (limit is {})",
                                     self.attach_limit
