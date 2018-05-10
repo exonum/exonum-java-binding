@@ -1,3 +1,4 @@
+/*
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -194,3 +195,4 @@ pub fn service_can_modify_db_on_initialize() {
     );
     assert_eq!(INITIAL_ENTRY_VALUE, value);
 }
+*/

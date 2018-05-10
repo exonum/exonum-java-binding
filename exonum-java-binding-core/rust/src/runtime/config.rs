@@ -1,4 +1,5 @@
 /// JavaServiceRuntime configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     /// JVM configuration.
     pub jvm_config: JvmConfig,

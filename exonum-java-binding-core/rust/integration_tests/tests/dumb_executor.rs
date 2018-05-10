@@ -1,3 +1,4 @@
+/*
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -72,3 +73,4 @@ pub fn it_works_in_concurrent_threads() {
 pub fn nested_attach() {
     check_nested_attach(&VM, &*DUMB_EXECUTOR);
 }
+*/

@@ -1,5 +1,7 @@
 use jni::{JavaVM, JNIEnv};
 
+use std::sync::Arc;
+
 use {JniErrorKind, JniResult};
 
 /// An interface for JNI thread attachment manager.
@@ -26,13 +28,13 @@ impl<'t, T: JniExecutor> JniExecutor for &'t T {
 #[derive(Clone)]
 pub struct DumbExecutor {
     /// The main JVM interface, which allows to attach threads.
-    vm: &'static JavaVM,
+    vm: Arc<JavaVM>,
 }
 
 impl DumbExecutor {
     /// Creates a `DumbExecutor`
-    pub fn new(vm: &'static JavaVM) -> Self {
-        DumbExecutor { vm }
+    pub fn new(vm: JavaVM) -> Self {
+        DumbExecutor { vm: Arc::new(vm) }
     }
 }
 
@@ -64,7 +66,7 @@ pub struct MainExecutor(DumbExecutor);
 
 impl MainExecutor {
     /// Creates a `MainExecutor`
-    pub fn new(vm: &'static JavaVM) -> Self {
+    pub fn new(vm: JavaVM) -> Self {
         MainExecutor(DumbExecutor::new(vm))
     }
 }

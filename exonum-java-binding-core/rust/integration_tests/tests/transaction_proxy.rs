@@ -1,3 +1,4 @@
+/*
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -127,3 +128,4 @@ where
 {
     Entry::new(ENTRY_NAME, view)
 }
+*/

@@ -1,3 +1,4 @@
+/*
 extern crate futures;
 extern crate integration_tests;
 extern crate java_bindings;
@@ -120,3 +121,4 @@ where
     let message = env.byte_array_from_slice(raw_message.as_ref())?;
     Ok(env.auto_local(message.into()))
 }
+*/

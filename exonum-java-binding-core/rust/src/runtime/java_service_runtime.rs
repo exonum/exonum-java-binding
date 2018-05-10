@@ -3,13 +3,12 @@ use exonum::helpers::fabric::{Context, ServiceFactory};
 
 use jni;
 
-use std::sync::Arc;
-
 use proxy::ServiceProxy;
+use proxy::JniExecutor;
 use runtime::config::{Config, JvmConfig, ServiceConfig};
-use runtime::cmd::GenerateNodeConfig;
+use runtime::cmd::{GenerateNodeConfig, Finalize};
 use utils::unwrap_jni;
-use {Executor, DumbExecutor};
+use MainExecutor;
 use exonum::helpers::fabric::CommandExtension;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
@@ -20,8 +19,8 @@ const START_SERVICE_SIGNATURE: &str =
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct JavaServiceRuntime {
-    executor: DumbExecutor,
-    service_proxy: ServiceProxy<DumbExecutor>,
+    executor: MainExecutor,
+    service_proxy: ServiceProxy,
 }
 
 impl JavaServiceRuntime {
@@ -36,11 +35,11 @@ impl JavaServiceRuntime {
     }
 
     /// Return internal service proxy.
-    pub fn service_proxy(&self) -> ServiceProxy<DumbExecutor> {
+    pub fn service_proxy(&self) -> ServiceProxy {
         self.service_proxy.clone()
     }
 
-    fn create_executor(config: JvmConfig) -> DumbExecutor {
+    fn create_executor(config: JvmConfig) -> MainExecutor {
         let java_vm = {
             let mut args_builder = jni::InitArgsBuilder::new()
                 .version(jni::JNIVersion::V8);
@@ -55,10 +54,10 @@ impl JavaServiceRuntime {
             let args = args_builder.build().unwrap();
             jni::JavaVM::new(args).unwrap()
         };
-        DumbExecutor { vm: Arc::new(java_vm) }
+        MainExecutor::new(java_vm)
     }
 
-    fn create_service(config: ServiceConfig, executor: DumbExecutor) -> ServiceProxy<DumbExecutor> {
+    fn create_service(config: ServiceConfig, executor: MainExecutor) -> ServiceProxy {
         let service = unwrap_jni(executor.with_attached(|env| {
             let module_name = env.new_string(config.module_name).unwrap();
             let module_name: jni::objects::JObject = *module_name;
@@ -88,6 +87,7 @@ impl ServiceFactory for JavaServiceFactory {
         use exonum::helpers::fabric;
         match command {
             v if v == fabric::GenerateNodeConfig::name() => Some(Box::new(GenerateNodeConfig)),
+            v if v == fabric::Finalize::name() => Some(Box::new(Finalize)),
             _ => None,
         }
     }
@@ -98,9 +98,8 @@ impl ServiceFactory for JavaServiceFactory {
             guard.clone().unwrap()
         } else {
             use exonum::helpers::fabric::keys;
-            let jvm_config: JvmConfig = context.get(keys::SERVICES_SECRET_CONFIGS).unwrap().get("ejb_jvm_config").unwrap().clone().try_into().unwrap();
-            let service_config: ServiceConfig = context.get(keys::SERVICES_SECRET_CONFIGS).unwrap().get("ejb_service_config").unwrap().clone().try_into().unwrap();
-            let runtime = JavaServiceRuntime::new(Config { jvm_config, service_config });
+            let config: Config = context.get(keys::NODE_CONFIG).unwrap().services_configs.get("ejb").unwrap().clone().try_into().unwrap();
+            let runtime = JavaServiceRuntime::new(config);
             *guard = Some(runtime.clone());
             runtime
         };

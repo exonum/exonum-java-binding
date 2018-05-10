@@ -1,3 +1,4 @@
+/*
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -167,3 +168,4 @@ fn throw(env: &JNIEnv, e: &str) -> JniResult<()> {
 fn make_jni_error() -> JniResult<()> {
     Err(JniErrorKind::Msg("Custom test error".to_string()).into())
 }
+*/
