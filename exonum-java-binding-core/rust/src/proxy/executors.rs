@@ -72,7 +72,7 @@ pub struct HackyExecutor {
     /// The main JVM interface, which allows to attach threads.
     vm: &'static JavaVM,
     attach_limit: usize,
-    attached_threads: Arc<Mutex<usize>>,
+    num_attached_threads: Arc<Mutex<usize>>,
 }
 
 impl HackyExecutor {
@@ -81,19 +81,19 @@ impl HackyExecutor {
     /// Creates `HackyExecutor`.
     #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
     pub fn new(vm: &'static JavaVM, attach_limit: usize) -> Self {
-        let attached_threads = Arc::new(Mutex::new(0));
+        let num_attached_threads = Arc::new(Mutex::new(0));
         HackyExecutor {
             vm,
             attach_limit,
-            attached_threads,
+            num_attached_threads,
         }
     }
 
     fn attach_current_thread(&self) -> JniResult<JNIEnv> {
-        let mut attached_threads = self.attached_threads.lock().expect(
+        let mut num_attached_threads = self.num_attached_threads.lock().expect(
             "Failed to acquire the mutex on the attached threads number",
         );
-        if *attached_threads == self.attach_limit {
+        if *num_attached_threads == self.attach_limit {
             Err(Other(Self::LIMIT_EXHAUSTED))?;
         }
         let attach_guard = self.vm.attach_current_thread()?;
@@ -102,7 +102,7 @@ impl HackyExecutor {
         // JVM will detach all threads on exit.
         mem::forget(attach_guard);
 
-        *attached_threads += 1;
+        *num_attached_threads += 1;
 
         self.vm.get_env()
     }
