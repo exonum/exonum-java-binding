@@ -69,7 +69,6 @@ public class FlatMapProof implements MapProof {
   public boolean containsKey(byte[] key) {
     for (MapProofEntry entry: proofList) {
       DbKey entryKey = entry.getDbKey();
-      //TODO: key = [x], keySlice = [x, 0, 0, 0, ...]
       if (entryKey.getNodeType() == Type.LEAF && Arrays.equals(entryKey.getKeySlice(), key)) {
         return true;
       }
@@ -89,7 +88,6 @@ public class FlatMapProof implements MapProof {
   public Optional<byte[]> get(byte[] key) {
     checkState(status == Status.VALID, "Proof is not valid: %s", status);
     checkState(keyValuePair != null, "Value node wasn't found");
-    //TODO: key = [x], keySlice = [x, 0, 0, 0, ...]
     if (Arrays.equals(keyValuePair.key.getKeySlice(), key)) {
       return Optional.of(keyValuePair.value);
     } else {

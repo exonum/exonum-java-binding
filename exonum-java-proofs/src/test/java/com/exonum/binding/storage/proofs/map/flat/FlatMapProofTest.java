@@ -28,16 +28,10 @@ public class FlatMapProofTest {
   @Test
   public void MapProofShouldBeValid() {
     KeyBitSet firstKey = new KeyBitSet(bytes(0x2D), 6);
-    byte[] rawKey = bytes(0x3D);
-    KeyBitSet secondKey = new KeyBitSet(rawKey, 6);
+    KeyBitSet secondKey = new KeyBitSet(bytes(0x3D), 6);
     KeyBitSet thirdKey = new KeyBitSet(bytes(0x1D), 5);
 
-    DbKey rootKey = createDbKey(Type.LEAF.code, secondKey);
-    HashCode expectedRootHash = HASH_FUNCTION
-        .newHasher()
-        .putObject(rootKey, dbKeyFunnel())
-        .putObject(HASH_FUNCTION.hashBytes(VALUE), hashCodeFunnel())
-        .hash();
+    DbKey valueKey = createDbKey(Type.LEAF.code, secondKey);
     MapProof flatMapProof =
         new FlatMapProof(
             Arrays.asList(
@@ -47,17 +41,13 @@ public class FlatMapProofTest {
 
 //    assertTrue(flatMapProof.isValid(expectedRootHash));
     ((FlatMapProof) flatMapProof).check();
-    assertTrue(flatMapProof.containsKey(rawKey));
-    assertThat(VALUE, equalTo(flatMapProof.get(rawKey)));
-    System.out.println(expectedRootHash);
-    System.out.println(flatMapProof.containsKey(rootKey.getKeySlice()));
-    System.out.println(flatMapProof.containsKey(rootKey.getKeySlice()));
+    assertTrue(flatMapProof.containsKey(valueKey.getKeySlice()));
+    assertThat(VALUE, equalTo(flatMapProof.get(valueKey.getKeySlice()).get()));
   }
 
   @Test
   public void MapProofWithOneElementShouldBeValid() {
-    byte[] rawKey = bytes(0x2);
-    KeyBitSet key = new KeyBitSet(rawKey, 2);
+    KeyBitSet key = new KeyBitSet(bytes(0x2), 2);
     DbKey dbKey = createDbKey(Type.LEAF.code, key);
     HashCode expectedRootHash = HASH_FUNCTION
         .newHasher()
@@ -68,8 +58,7 @@ public class FlatMapProofTest {
         new FlatMapProof(Collections.singletonList(createMapEntry(key, Type.LEAF, Optional.of(VALUE))));
     assertTrue(flatMapProof.isValid(expectedRootHash));
     assertTrue(flatMapProof.containsKey(dbKey.getKeySlice()));
-    assertThat(VALUE, equalTo(flatMapProof.get(rawKey)));
-    System.out.println(flatMapProof.containsKey(dbKey.getKeySlice()));
+    assertThat(VALUE, equalTo(flatMapProof.get(dbKey.getKeySlice()).get()));
   }
 
   private static DbKey createDbKey(int type, KeyBitSet keyBitSet) {
