@@ -1,4 +1,5 @@
 use jni::{JavaVM, JNIEnv};
+use jni::sys::jint;
 
 use std::mem;
 use std::sync::{Arc, Mutex};
@@ -70,35 +71,29 @@ pub struct HackyExecutor {
     /// The main JVM interface, which allows to attach threads.
     vm: &'static JavaVM,
     attach_limit: usize,
-    attached_num: Arc<Mutex<usize>>,
+    attached_threads: Arc<Mutex<usize>>,
 }
 
 impl HackyExecutor {
+    const LIMIT_EXHAUSTED: jint = 0;
+
     /// Creates `HackyExecutor`.
     #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
     pub fn new(vm: &'static JavaVM, attach_limit: usize) -> Self {
-        let attached_num = Arc::new(Mutex::new(0));
+        let attached_threads = Arc::new(Mutex::new(0));
         HackyExecutor {
             vm,
             attach_limit,
-            attached_num,
+            attached_threads,
         }
     }
 
-    fn attach_one_more(&self) -> JniResult<JNIEnv> {
-        let mut attached_num = self.attached_num.lock().expect(
+    fn attach_current_thread(&self) -> JniResult<JNIEnv> {
+        let mut attached_threads = self.attached_threads.lock().expect(
             "Failed to acquire the mutex on the attached threads number",
         );
-        *attached_num += 1;
-        let attached = *attached_num;
-        // There is no need for the mutex lock anymore
-        drop(attached_num);
-        if attached > self.attach_limit {
-            panic!(
-                "The limit on thread attachment is exhausted: {} (limit is {})",
-                attached,
-                self.attach_limit
-            );
+        if *attached_threads == self.attach_limit {
+            Err(JniErrorKind::Other(Self::LIMIT_EXHAUSTED))?;
         }
         let attach_guard = self.vm.attach_current_thread()?;
         // We can't call detach from the right native thread,
@@ -106,11 +101,9 @@ impl HackyExecutor {
         // JVM will detach all threads on exit.
         mem::forget(attach_guard);
 
-        let jni_env = self.vm.get_env();
-        if let Err(JniError(JniErrorKind::ThreadDetached, ..)) = jni_env {
-            panic!("Thread should be attached");
-        }
-        jni_env
+        *attached_threads += 1;
+
+        self.vm.get_env()
     }
 
     fn get_env(&self) -> JniResult<JNIEnv> {
@@ -118,7 +111,21 @@ impl HackyExecutor {
             Ok(jni_env) => Ok(jni_env),
             Err(jni_err) => {
                 match jni_err.0 {
-                    JniErrorKind::ThreadDetached => self.attach_one_more(),
+                    JniErrorKind::ThreadDetached => {
+                        let jni_env_result = self.attach_current_thread();
+                        match jni_env_result {
+                            Err(JniError(JniErrorKind::ThreadDetached, ..)) => {
+                                panic!("Thread should be attached");
+                            }
+                            Err(JniError(JniErrorKind::Other(Self::LIMIT_EXHAUSTED), ..)) => {
+                                panic!(
+                                    "The limit on thread attachment is exhausted (limit is {})",
+                                    self.attach_limit
+                                );
+                            }
+                            _ => jni_env_result,
+                        }
+                    }
                     _ => Err(jni_err),
                 }
             }

@@ -7,7 +7,7 @@ use integration_tests::executor::{check_detached, check_nested_attach, test_exec
                                   test_executor_in_another_thread,
                                   test_executor_in_concurrent_threads};
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::{JniExecutor, DumbExecutor};
+use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
 
 lazy_static! {
@@ -33,10 +33,6 @@ pub fn it_works_in_concurrent_threads() {
 
 #[test]
 pub fn nested_attach() {
-    test_nested_attach(&VM, &*EXECUTOR);
-}
-
-fn test_nested_attach<E: JniExecutor>(vm: &JavaVM, executor: E) {
-    check_nested_attach(vm, executor);
-    check_detached(vm);
+    check_nested_attach(&VM, &*EXECUTOR);
+    check_detached(&VM);
 }
