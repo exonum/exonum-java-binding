@@ -73,11 +73,10 @@ impl JavaServiceRuntime {
     }
 }
 
-use std::sync::Mutex;
+use std::sync::{Once, ONCE_INIT};
 
-lazy_static!{
-    static ref JAVA_SERVICE_RUNTIME: Mutex<Option<JavaServiceRuntime>> = Mutex::new(None);
-}
+static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
+static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
 /// TODO
 pub struct JavaServiceFactory;
@@ -93,15 +92,20 @@ impl ServiceFactory for JavaServiceFactory {
     }
 
     fn make_service(&mut self, context: &Context) -> Box<Service> {
-        let mut guard = JAVA_SERVICE_RUNTIME.lock().unwrap();
-        let runtime = if guard.is_some() {
-            guard.clone().unwrap()
-        } else {
-            use exonum::helpers::fabric::keys;
-            let config: Config = context.get(keys::NODE_CONFIG).unwrap().services_configs.get("ejb").unwrap().clone().try_into().unwrap();
-            let runtime = JavaServiceRuntime::new(config);
-            *guard = Some(runtime.clone());
-            runtime
+        let runtime = unsafe {
+            JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
+                use exonum::helpers::fabric::keys;
+                let config: Config = context.get(keys::NODE_CONFIG)
+                    .unwrap()
+                    .services_configs
+                    .get("ejb")
+                    .unwrap()
+                    .clone()
+                    .try_into()
+                    .unwrap();
+                JAVA_SERVICE_RUNTIME = Some(JavaServiceRuntime::new(config));
+            });
+            JAVA_SERVICE_RUNTIME.clone().unwrap()
         };
 
         Box::new(runtime.service_proxy().clone())
