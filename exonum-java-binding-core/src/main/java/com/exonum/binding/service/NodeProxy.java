@@ -76,7 +76,7 @@ public final class NodeProxy extends AbstractNativeProxy implements Node {
    */
   @Override
   public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
-    try (Cleaner cleaner = new Cleaner()) {
+    try (Cleaner cleaner = new Cleaner("NodeProxy#withSnapshot")) {
       long nodeNativeHandle = getNativeHandle();
       long snapshotNativeHandle = nativeCreateSnapshot(nodeNativeHandle);
       Snapshot snapshot = Snapshot.newInstance(snapshotNativeHandle, cleaner);

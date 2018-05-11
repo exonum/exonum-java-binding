@@ -189,6 +189,16 @@ public class CleanerTest {
   }
 
   @Test
+  public void toStringWithDescriptionIncludesContextInformation() {
+    String description = "Transaction#execute";
+    context = new Cleaner(description);
+
+    String r = context.toString();
+
+    assertThat(r).contains("description=" + description);
+  }
+
+  @Test
   public void numRegisteredActions() {
     int numActions = 3;
 

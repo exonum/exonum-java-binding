@@ -1,5 +1,7 @@
 package com.exonum.binding.proxy;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.MoreObjects;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -11,7 +13,11 @@ import org.apache.logging.log4j.Logger;
  * A context controlling lifecycle of native proxies. When a proxy of a native object is created,
  * it must register a cleaner of the native object in a context.
  * The context performs the cleaning actions in a reversed order of their registration
- * when it is {@linkplain #close() closed}.
+ * when it is {@linkplain #close() closed}. Once closed, the context must no longer be used
+ * to register new clean actions.
+ *
+ * <p>The context might have a description of its origin so that it can be identified
+ * for a particular context.
  *
  * <p>All methods are non-null by default.
  *
@@ -31,10 +37,25 @@ public final class Cleaner implements AutoCloseable {
   private static final int TOO_MANY_CLEAN_ACTIONS_LOG_FREQUENCY = 100;
 
   private final Deque<CleanAction> registeredCleanActions;
+  private final String description;
   private boolean closed;
 
+  /**
+   * Creates a new cleaner with no (an empty) description.
+   */
   public Cleaner() {
+    this("");
+  }
+
+  /**
+   * Creates a new cleaner.
+   *
+   * @param description a description of this context, which describes its origin
+   *                    and is included in {@link #toString()}
+   */
+  public Cleaner(String description) {
     registeredCleanActions = new ArrayDeque<>();
+    this.description = checkNotNull(description);
     closed = false;
   }
 
@@ -74,7 +95,7 @@ public final class Cleaner implements AutoCloseable {
   }
 
   private void logIfTooManyCleaners() {
-    int numRegisteredCleaners = registeredCleanActions.size();
+    int numRegisteredCleaners = getNumRegisteredActions();
 
     if ((numRegisteredCleaners >= TOO_MANY_CLEAN_ACTIONS_LOG_THRESHOLD)
         && (numRegisteredCleaners % TOO_MANY_CLEAN_ACTIONS_LOG_FREQUENCY == 0)) {
@@ -142,17 +163,10 @@ public final class Cleaner implements AutoCloseable {
   }
 
   /**
-   * Returns a string representation of this object, including its hash code so that this instance
-   * can be easily identified in the logs.
+   * Returns a description of this cleaner. May be empty.
    */
-  @Override
-  public String toString() {
-    String hash = Integer.toHexString(System.identityHashCode(this));
-    return MoreObjects.toStringHelper(this)
-        .add("hash", hash)
-        .add("numRegisteredActions", registeredCleanActions.size())
-        .add("closed", closed)
-        .toString();
+  public String getDescription() {
+    return description;
   }
 
   /**
@@ -160,6 +174,24 @@ public final class Cleaner implements AutoCloseable {
    */
   public int getNumRegisteredActions() {
     return registeredCleanActions.size();
+  }
+
+  /**
+   * Returns a string representation of this object, including its hash code so that this instance
+   * can be easily identified in the logs.
+   */
+  @Override
+  public String toString() {
+    String hash = Integer.toHexString(System.identityHashCode(this));
+    MoreObjects.ToStringHelper sh = MoreObjects.toStringHelper(this);
+    sh.add("hash", hash);
+    if (!description.isEmpty()) {
+      sh.add("description", description);
+    }
+    return sh
+        .add("numRegisteredActions", getNumRegisteredActions())
+        .add("closed", closed)
+        .toString();
   }
 
   // todo: more diagnostic info?

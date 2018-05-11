@@ -38,7 +38,7 @@ public class UserTransactionAdapter {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
-      try (Cleaner cleaner = new Cleaner()) {
+      try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
         Fork view = Fork.newInstance(forkNativeHandle, false, cleaner);
         transaction.execute(view);
       }

@@ -84,7 +84,7 @@ public class UserServiceAdapter {
   public byte[][] getStateHashes(long snapshotHandle) {
     assert snapshotHandle != 0;
 
-    try (Cleaner cleaner = new Cleaner()) {
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
       Snapshot snapshot = Snapshot.newInstance(snapshotHandle, false, cleaner);
       List<HashCode> stateHashes = service.getStateHashes(snapshot);
       return stateHashes.stream()
@@ -106,7 +106,7 @@ public class UserServiceAdapter {
    */
   public String initialize(long forkHandle) {
     assert forkHandle != 0;
-    try (Cleaner cleaner = new Cleaner()) {
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
       Fork fork = Fork.newInstance(forkHandle, false, cleaner);
       return service.initialize(fork)
           .orElse(null);

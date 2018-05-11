@@ -76,7 +76,7 @@ public class NodeFake implements Node {
 
   @Override
   public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
-    try (Cleaner cleaner = new Cleaner()) {
+    try (Cleaner cleaner = new Cleaner("NodeFake#withSnapshot")) {
       Snapshot snapshot = database.createSnapshot(cleaner);
       return snapshotFunction.apply(snapshot);
     } catch (CloseFailuresException e) {
