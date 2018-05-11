@@ -27,7 +27,8 @@ public class MemoryDb extends AbstractNativeProxy implements Database {
     }
   }
 
-  private MemoryDb(long nativeHandle) {
+  @VisibleForTesting  // Used in native resource manager tests, must not be exported.
+  MemoryDb(long nativeHandle) {
     super(nativeHandle, true);
   }
 
