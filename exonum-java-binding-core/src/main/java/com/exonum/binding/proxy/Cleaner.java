@@ -147,7 +147,6 @@ public final class Cleaner implements AutoCloseable {
    */
   @Override
   public String toString() {
-    // Fixme: Use an id instead of hash: a unique one?
     String hash = Integer.toHexString(System.identityHashCode(this));
     return MoreObjects.toStringHelper(this)
         .add("hash", hash)
