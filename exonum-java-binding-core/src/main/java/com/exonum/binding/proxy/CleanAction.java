@@ -8,12 +8,11 @@ import java.util.Optional;
  * A clean action is an operation that is performed to release some resources.
  * The type of resource may be optionally specified.
  *
- * @param <ResourceTypeT> type of resource this action cleans (usually, an instance
- *                       of {@link java.lang.Class}, {@link String}, {@link Enum}),
+ * @param <ResourceDescriptionT> type of resource this action cleans (usually, an instance
+ *                               of {@link java.lang.Class}, {@link String}, {@link Enum}),
  */
 @FunctionalInterface
-// fixme: Q: Or "ResourceDescriptionT"?
-public interface CleanAction<ResourceTypeT> {
+public interface CleanAction<ResourceDescriptionT> {
 
   /**
    * A clean operation to perform. It is recommended that this operation is idempotent.
@@ -23,7 +22,7 @@ public interface CleanAction<ResourceTypeT> {
   /**
    * Returns the description of the type of resource this action corresponds to.
    */
-  default Optional<ResourceTypeT> resourceType() {
+  default Optional<ResourceDescriptionT> resourceType() {
     return Optional.empty();
   }
 
@@ -32,20 +31,21 @@ public interface CleanAction<ResourceTypeT> {
    *
    * @param action a clean operation
    * @param resourceType a description of the resource (its class, textual description, etc.)
-   * @param <ResourceTypeT> a type of the resource description
+   * @param <ResourceDescriptionT> a type of the resource description
    */
-  static <ResourceTypeT> CleanAction<ResourceTypeT> from(Runnable action,
-                                                         ResourceTypeT resourceType) {
+  static <ResourceDescriptionT>
+      CleanAction<ResourceDescriptionT> from(Runnable action,
+                                             ResourceDescriptionT resourceType) {
     checkNotNull(resourceType, "resourceType must not be null");
 
-    return new CleanAction<ResourceTypeT>() {
+    return new CleanAction<ResourceDescriptionT>() {
       @Override
       public void clean() {
         action.run();
       }
 
       @Override
-      public Optional<ResourceTypeT> resourceType() {
+      public Optional<ResourceDescriptionT> resourceType() {
         return Optional.of(resourceType);
       }
     };
