@@ -2,6 +2,11 @@
 
 set -eu -o pipefail
 
+function realpath() {
+  python -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
+}
+
+
 # Use an already set JAVA_HOME, or infer it from java.home system property.
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
@@ -13,9 +18,18 @@ echo "JAVA_HOME=${JAVA_HOME}"
 export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
-EJB_CLASSPATH=$(cat ../../../exonum-java-binding-fakes/target/ejb-fakes-classpath.txt)
-EJB_CLASSPATH=$EJB_CLASSPATH:"/home/vitvakatu/Private/exonum-java-binding/exonum-java-binding-fakes/target/classes:/home/vitvakatu/Private/exonum-java-binding/exonum-java-binding-cryptocurrency-demo/target/classes"
-EJB_LIBPATH="/home/vitvakatu/Private/exonum-java-binding/exonum-java-binding-core/rust/target/debug"
+PROJ_ROOT=$(realpath "../../..")
+echo "PROJ_ROOT=${PROJ_ROOT}"
+
+EJB_CLASSPATH=$(cat ${PROJ_ROOT}/exonum-java-binding-fakes/target/ejb-fakes-classpath.txt)
+EJB_CLASSPATH=$EJB_CLASSPATH:"${PROJ_ROOT}/exonum-java-binding-fakes/target/classes:${PROJ_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
+echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
+EJB_LIBPATH="${PROJ_ROOT}/exonum-java-binding-core/rust/target/debug"
+echo "EJB_LIBPATH=${EJB_LIBPATH}"
+
+echo
+echo "===[ STARTING TESTNET ]================================================================================"
+echo
 
 # Clear test dir
 rm -rf testnet
