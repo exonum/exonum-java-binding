@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 
 [workspace]
-members = ["integration_tests"]
+members = ["integration_tests", "ejb-app"]
 
 [lib]
 crate-type = ["dylib"]
