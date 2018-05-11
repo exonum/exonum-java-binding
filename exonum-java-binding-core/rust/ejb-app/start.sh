@@ -25,20 +25,20 @@ PROJ_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${PROJ_ROOT}"
 
 echo
-echo "===[ PREPARING CLASSES ]======================================================="
+echo "===[ PREPARE CLASSES ]========================================================="
 echo
 
 cd $PROJ_ROOT
-mvn compile
 mvn generate-sources
 cd $CURRENT_DIR
 
 echo
-echo "===[ PREPARING PATHS ]========================================================="
+echo "===[ PREPARE PATHS ]==========================================================="
 echo
 
-EJB_CLASSPATH="$(cat ${PROJ_ROOT}/exonum-java-binding-core/target/ejb-core-classpath.txt)"
-EJB_CLASSPATH="${EJB_CLASSPATH}:$(cat ${PROJ_ROOT}/exonum-java-binding-cryptocurrency-demo/target/cryptocurrency-classpath.txt)"
+CORE_TXT="exonum-java-binding-core/target/ejb-core-classpath.txt"
+CRYPTOCURRENCY_TXT="exonum-java-binding-cryptocurrency-demo/target/cryptocurrency-classpath.txt"
+EJB_CLASSPATH="$(cat ${PROJ_ROOT}/${CORE_TXT}):$(cat ${PROJ_ROOT}/${CRYPTOCURRENCY_TXT})"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
 EJB_LIBPATH="${PROJ_ROOT}/exonum-java-binding-core/rust/target/debug"
@@ -70,7 +70,7 @@ echo
 cargo run -- finalize testnet/sec.toml testnet/node.toml --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' --ejb-port 6000 --public-configs testnet/pub.toml
 
 echo
-echo "===[ STARTING TESTNET ]========================================================"
+echo "===[ START TESTNET ]==========================================================="
 echo
 
 # Run
