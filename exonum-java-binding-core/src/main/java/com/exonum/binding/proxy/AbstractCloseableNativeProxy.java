@@ -24,12 +24,8 @@ import java.util.stream.Stream;
  * statement to do that in orderly fashion.
  * When a proxy is closed, it becomes invalid.
  */
-public abstract class AbstractCloseableNativeProxy implements CloseableNativeProxy {
-
-  /**
-   * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
-   */
-  protected static final long INVALID_NATIVE_HANDLE = 0L;
+public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
+    implements CloseableNativeProxy {
 
   /**
    * Whether this proxy shall dispose any resources when closed
@@ -42,8 +38,6 @@ public abstract class AbstractCloseableNativeProxy implements CloseableNativePro
    * Each of these must be valid at each native call.
    */
   private final Set<AbstractCloseableNativeProxy> referenced;
-
-  private long nativeHandle;
 
   /**
    * Creates a native proxy.
@@ -82,7 +76,7 @@ public abstract class AbstractCloseableNativeProxy implements CloseableNativePro
    */
   protected AbstractCloseableNativeProxy(long nativeHandle, boolean dispose,
                                          Collection<AbstractCloseableNativeProxy> referenced) {
-    this.nativeHandle = nativeHandle;
+    super(new NativeHandle(nativeHandle));
     this.dispose = dispose;
     this.referenced = getTransitivelyReferenced(referenced);
   }
@@ -107,19 +101,10 @@ public abstract class AbstractCloseableNativeProxy implements CloseableNativePro
    * @throws IllegalStateException if this native proxy or any directly or transitively referenced
    *     proxies are invalid (closed or nullptr).
    */
+  @Override
   protected final long getNativeHandle() {
     checkAllRefsValid();
-    return getNativeHandleUnsafe();
-  }
-
-  /**
-   * Returns a native handle.
-   *
-   * <p>If clients ever need to just get a value (e.g., in their {@link #toString()}
-   * implementation), make this package-local.
-   */
-  private long getNativeHandleUnsafe() {
-    return nativeHandle;
+    return super.getNativeHandle();
   }
 
   @Override
@@ -134,14 +119,6 @@ public abstract class AbstractCloseableNativeProxy implements CloseableNativePro
         invalidate();
       }
     }
-  }
-
-  /**
-   * Returns true if the proxy has a valid native handle.
-   * */
-  @VisibleForTesting
-  final boolean isValidHandle() {
-    return nativeHandle != INVALID_NATIVE_HANDLE;
   }
 
   private void checkAllRefsValid() {
@@ -180,6 +157,6 @@ public abstract class AbstractCloseableNativeProxy implements CloseableNativePro
   protected abstract void disposeInternal();
 
   private void invalidate() {
-    nativeHandle = INVALID_NATIVE_HANDLE;
+    nativeHandle.close();
   }
 }

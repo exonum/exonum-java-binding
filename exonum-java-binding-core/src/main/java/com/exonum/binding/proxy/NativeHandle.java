@@ -2,8 +2,6 @@ package com.exonum.binding.proxy;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * An implementation-specific handle to the native object. Once closed, can no longer be accessed.
  */
@@ -12,8 +10,7 @@ public final class NativeHandle implements AutoCloseable {
   /**
    * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
    */
-  @VisibleForTesting
-  static final long INVALID_NATIVE_HANDLE = 0L;
+  public static final long INVALID_NATIVE_HANDLE = 0L;
 
   private long nativeHandle;
 

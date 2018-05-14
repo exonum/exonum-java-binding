@@ -13,7 +13,8 @@ public abstract class AbstractNativeProxy {
   }
 
   /**
-   * Returns a handle to the native object. Equivalent to {@code nativeHandle.get()}.
+   * Returns a handle to the native object if it may be safely used to access the native object.
+   * Equivalent to {@code nativeHandle.get()}.
    *
    * <p>The returned value shall only be passed as an argument to native methods.
    *
@@ -22,7 +23,14 @@ public abstract class AbstractNativeProxy {
    *
    * @throws IllegalStateException if the native handle is invalid (closed or nullptr)
    */
-  protected final long getNativeHandle() {
+  protected long getNativeHandle() {
     return nativeHandle.get();
+  }
+
+  /**
+   * Returns true if this proxy has a valid native handle.
+   */
+  protected final boolean isValidHandle() {
+    return nativeHandle.isValid();
   }
 }

@@ -1,6 +1,6 @@
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.AbstractCloseableNativeProxy.INVALID_NATIVE_HANDLE;
+import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;

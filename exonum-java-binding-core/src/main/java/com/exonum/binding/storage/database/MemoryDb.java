@@ -1,5 +1,7 @@
 package com.exonum.binding.storage.database;
 
+import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
+
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.google.common.annotations.VisibleForTesting;
