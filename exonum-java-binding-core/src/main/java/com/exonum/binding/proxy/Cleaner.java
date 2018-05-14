@@ -64,6 +64,11 @@ public final class Cleaner implements AutoCloseable {
     closed = false;
   }
 
+  /** Returns true if this cleaner is closed. */
+  public boolean isClosed() {
+    return closed;
+  }
+
   /**
    * Registers a new clean action with this context. If the context is already closed,
    * the clean action will be executed immediately.
