@@ -44,7 +44,7 @@ pub fn is_attached(vm: &JavaVM) -> bool {
         .expect("An unexpected JNI error occurred")
 }
 
-pub fn test_executor<E: JniExecutor>(executor: E) {
+pub fn test_single_thread<E: JniExecutor>(executor: E) {
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     assert_eq!(1, atomic.increment_and_get().unwrap());
@@ -52,7 +52,7 @@ pub fn test_executor<E: JniExecutor>(executor: E) {
     assert_eq!(3, atomic.get().unwrap());
 }
 
-pub fn test_executor_in_another_thread<E: JniExecutor + 'static>(executor: E) {
+pub fn test_serialized_threads<E: JniExecutor + 'static>(executor: E) {
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     let jh = spawn(move || {
@@ -64,10 +64,7 @@ pub fn test_executor_in_another_thread<E: JniExecutor + 'static>(executor: E) {
     assert_eq!(3, atomic.get().unwrap());
 }
 
-pub fn test_executor_in_concurrent_threads<E: JniExecutor + 'static>(
-    executor: E,
-    thread_num: usize,
-) {
+pub fn test_concurrent_threads<E: JniExecutor + 'static>(executor: E, thread_num: usize) {
     const ITERS_PER_THREAD: usize = 10_000;
 
     let mut atomic = AtomicIntegerProxy::new(executor.clone(), 0).unwrap();
