@@ -5,6 +5,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
@@ -15,6 +16,8 @@ import com.exonum.binding.storage.database.View;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -87,7 +90,13 @@ class UserService extends AbstractService {
 
   @Override
   protected Schema createDataSchema(View view) {
-    return new Schema() {};
+    return new Schema() {
+
+      @Override
+      public List<HashCode> getStateHashes() {
+        return Collections.emptyList();
+      }
+    };
   }
 
   @Override
