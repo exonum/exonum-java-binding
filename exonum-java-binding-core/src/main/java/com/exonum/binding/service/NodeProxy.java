@@ -6,7 +6,7 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Snapshot;
@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-public final class NodeProxy extends AbstractNativeProxy implements Node {
+public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
 
   private static final Logger logger = LogManager.getLogger(NodeProxy.class);
 

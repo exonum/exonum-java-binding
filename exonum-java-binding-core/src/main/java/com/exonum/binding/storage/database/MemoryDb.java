@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.database;
 
-import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -9,7 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
  * and read-write forks. The changes made to database forks can be applied to the database state.
  */
 @VisibleForTesting
-public class MemoryDb extends AbstractNativeProxy implements Database {
+public class MemoryDb extends AbstractCloseableNativeProxy implements Database {
 
   /**
    * Creates a new empty MemoryDb.

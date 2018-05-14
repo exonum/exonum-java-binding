@@ -18,7 +18,7 @@ public class ProxyDestructorTest {
     NativeHandle handle = new NativeHandle(1L);
     LongConsumer destructor = (nh) -> { };
 
-    ProxyDestructor d = ProxyDestructor.newRegistered(cleaner, handle, NativeProxy.class,
+    ProxyDestructor d = ProxyDestructor.newRegistered(cleaner, handle, CloseableNativeProxy.class,
         destructor);
 
     // Check the destructor is not null.
@@ -69,7 +69,7 @@ public class ProxyDestructorTest {
   @Test
   public void getResourceType() {
     NativeHandle handle = new NativeHandle(1L);
-    Class<?> proxyClass = NativeProxy.class;
+    Class<?> proxyClass = CloseableNativeProxy.class;
     LongConsumer destructor = mock(LongConsumer.class);
 
     ProxyDestructor d = new ProxyDestructor(handle, proxyClass, destructor);

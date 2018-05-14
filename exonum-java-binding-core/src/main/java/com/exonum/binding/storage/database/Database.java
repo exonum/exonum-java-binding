@@ -1,12 +1,12 @@
 package com.exonum.binding.storage.database;
 
 import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.NativeProxy;
+import com.exonum.binding.proxy.CloseableNativeProxy;
 
 /**
  * Represents an underlying Exonum Storage database.
  */
-public interface Database extends NativeProxy {
+public interface Database extends CloseableNativeProxy {
 
   /**
    * Creates a new snapshot of the database state.

@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.database;
 
-import com.exonum.binding.proxy.AbstractNativeProxy2;
+import com.exonum.binding.proxy.AbstractNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 
@@ -16,7 +16,7 @@ import com.exonum.binding.proxy.NativeHandle;
  * @see Snapshot
  * @see Fork
  */
-public abstract class View extends AbstractNativeProxy2 {
+public abstract class View extends AbstractNativeProxy {
 
   private final Cleaner cleaner;
 

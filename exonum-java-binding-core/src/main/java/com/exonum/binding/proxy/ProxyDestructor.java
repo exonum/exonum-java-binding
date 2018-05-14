@@ -9,9 +9,9 @@ import java.util.function.LongConsumer;
 /**
  * ProxyDestructor is a clean action that destroys a native proxy and closes its native handle.
  *
- * <p>Native proxies do not implement any interface (e.g., NativeProxy) and use this class
- * so that there is no public #close method available in the interface of the proxy,
- * making the risk of misuse smaller.
+ * <p>Native proxies do not implement any interface (e.g., {@link CloseableNativeProxy})
+ * and use this class so that there is no public #close method available in the interface
+ * of the proxy, making the risk of misuse smaller.
  *
  * <p>All method parameters are non-null by default.
  *

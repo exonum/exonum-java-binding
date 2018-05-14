@@ -1,6 +1,6 @@
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.proxy.AbstractNativeProxy2;
+import com.exonum.binding.proxy.AbstractNativeProxy;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
@@ -13,7 +13,7 @@ import java.util.function.LongFunction;
  *
  * @param <E> type of elements returned by the iterator.
  */
-class ConfigurableRustIter<E> extends AbstractNativeProxy2 implements RustIter<E> {
+class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
   private final LongFunction<E> nextFunction;
   private final View collectionView;

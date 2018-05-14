@@ -1,185 +1,28 @@
 package com.exonum.binding.proxy;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.singleton;
-
-import com.google.common.annotations.VisibleForTesting;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
- * A proxy of a native object.
- *
- * <p>A native proxy references the corresponding native object by its
- * implementation-specific handle. If handle is zero, the proxy is considered invalid
- * and will not permit referencing any native object. It is perfectly possible to get
- * an invalid proxy (e.g., if a native method fails to allocate a native object).
- *
- * <p>You must close a native proxy when it is no longer needed
- * to release any resources it holds (e.g., destroy a native object).
- * You may use a <a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>
- * statement to do that in orderly fashion.
- * When a proxy is closed, it becomes invalid.
+ * A base class of a native proxy.
  */
-public abstract class AbstractNativeProxy implements NativeProxy {
+public abstract class AbstractNativeProxy {
 
-  /**
-   * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
-   */
-  protected static final long INVALID_NATIVE_HANDLE = 0L;
+  /** A handle to the native object. */
+  protected final NativeHandle nativeHandle;
 
-  /**
-   * Whether this proxy shall dispose any resources when closed
-   * (e.g., if it owns the corresponding native object and is responsible to clean it up).
-   */
-  private final boolean dispose;
-
-  /**
-   * Proxies that this one references, including transitive references.
-   * Each of these must be valid at each native call.
-   */
-  private final Set<AbstractNativeProxy> referenced;
-
-  private long nativeHandle;
-
-  /**
-   * Creates a native proxy.
-   *
-   * @param nativeHandle an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
-   *                by calling {@link #disposeInternal}; false — otherwise
-   */
-  protected AbstractNativeProxy(long nativeHandle, boolean dispose) {
-    this(nativeHandle, dispose, Collections.emptySet());
-  }
-
-
-  /**
-   * Creates a native proxy.
-   *
-   * @param nativeHandle an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
-   *                by calling {@link #disposeInternal}; false — otherwise
-   * @param referenced a referenced native object, that must be alive
-   *                   during the operation of this native proxy
-   */
-  protected AbstractNativeProxy(long nativeHandle, boolean dispose,
-                                AbstractNativeProxy referenced) {
-    this(nativeHandle, dispose, singleton(checkNotNull(referenced)));
-  }
-
-  /**
-   * Creates a native proxy.
-   *
-   * @param nativeHandle an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
-   *                by calling {@link #disposeInternal}; false — otherwise
-   * @param referenced a collection of referenced native objects, that must be alive
-   *                   during the operation of this native proxy
-   */
-  protected AbstractNativeProxy(long nativeHandle, boolean dispose,
-                                Collection<AbstractNativeProxy> referenced) {
+  protected AbstractNativeProxy(NativeHandle nativeHandle) {
     this.nativeHandle = nativeHandle;
-    this.dispose = dispose;
-    this.referenced = getTransitivelyReferenced(referenced);
-  }
-
-  private Set<AbstractNativeProxy> getTransitivelyReferenced(
-      Collection<AbstractNativeProxy> referenced) {
-    // You don't have to perform a recursive flat map because each of the proxies
-    // this proxy references has all its transitive dependencies.
-    return referenced.stream()
-        .flatMap((proxy) -> Stream.concat(Stream.of(proxy), proxy.referenced.stream()))
-        .collect(Collectors.toSet());
   }
 
   /**
-   * Returns a native implementation-specific handle if it may be safely used
-   * to access the native object.
+   * Returns a handle to the native object. Equivalent to {@code nativeHandle.get()}.
    *
    * <p>The returned value shall only be passed as an argument to native methods.
    *
-   * <p>Warning: do not cache the return value, as you won't be able to catch use-after-free.
+   * <p><strong>Warning:</strong> do not cache the return value, as you won't be able
+   * to catch use-after-free.
    *
-   * @throws IllegalStateException if this native proxy or any directly or transitively referenced
-   *     proxies are invalid (closed or nullptr).
+   * @throws IllegalStateException if the native handle is invalid (closed or nullptr)
    */
   protected final long getNativeHandle() {
-    checkAllRefsValid();
-    return getNativeHandleUnsafe();
-  }
-
-  /**
-   * Returns a native handle.
-   *
-   * <p>If clients ever need to just get a value (e.g., in their {@link #toString()}
-   * implementation), make this package-local.
-   */
-  private long getNativeHandleUnsafe() {
-    return nativeHandle;
-  }
-
-  @Override
-  public final void close() {
-    if (isValidHandle()) {
-      try {
-        checkAllRefsValid();
-        if (dispose) {
-          disposeInternal();
-        }
-      } finally {
-        invalidate();
-      }
-    }
-  }
-
-  /**
-   * Returns true if the proxy has a valid native handle.
-   * */
-  @VisibleForTesting
-  final boolean isValidHandle() {
-    return nativeHandle != INVALID_NATIVE_HANDLE;
-  }
-
-  private void checkAllRefsValid() {
-    if (!allRefsValid()) {
-      throw new IllegalStateException(getInvalidProxyErrMessage());
-    }
-  }
-
-  private boolean allRefsValid() {
-    return isValidHandle() && referenced.stream()
-        .allMatch(AbstractNativeProxy::isValidHandle);
-  }
-
-  private String getInvalidProxyErrMessage() {
-    if (!isValidHandle()) {
-      return String.format("This proxy (%s) is not valid", this);
-    }
-    Set<AbstractNativeProxy> invalidReferenced = getInvalidReferences();
-    return String.format("This proxy (%s) references some invalid proxies: %s",
-        this, invalidReferenced);
-  }
-
-  @VisibleForTesting
-  Set<AbstractNativeProxy> getInvalidReferences() {
-    return referenced.stream()
-        .filter(p -> !p.isValidHandle())
-        .collect(Collectors.toSet());
-  }
-
-  /**
-   * Releases any resources owned by this proxy (e.g., the corresponding native object).
-   *
-   * <p>This method is only called once from {@link #close()} for a <strong>valid</strong>
-   * proxy and shall not be called directly.
-   */
-  protected abstract void disposeInternal();
-
-  private void invalidate() {
-    nativeHandle = INVALID_NATIVE_HANDLE;
+    return nativeHandle.get();
   }
 }
