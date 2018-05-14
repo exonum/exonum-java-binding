@@ -22,6 +22,9 @@ import org.apache.logging.log4j.Logger;
  * <p>All methods are non-null by default.
  *
  * <p>This class is not thread-safe.
+ *
+ * @see <a href="https://github.com/exonum/exonum-java-binding/wiki/Native-peers-management-approaches">
+ *   Discussion of various approaches to the management of native peers</a>
  */
 public final class Cleaner implements AutoCloseable {
 
