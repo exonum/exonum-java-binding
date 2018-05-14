@@ -19,14 +19,6 @@
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
-    <guice.version>4.1.0</guice.version>
-    <log4j.version>2.10.0</log4j.version>
-    <hamcrest.version>2.0.0.0</hamcrest.version>
-    <junit.version>4.12</junit.version>
-    <powermock.version>1.7.1</powermock.version>
-    <mockito-core.version>2.8.47</mockito-core.version>
-    <guava.version>24.0-jre</guava.version>
-    <vertx.version>3.5.1</vertx.version>
   </properties>
 
   <build>
@@ -172,76 +164,8 @@
     </profile>
   </profiles>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
-        <scope>compile</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-bom</artifactId>
-        <version>${log4j.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.hamcrest</groupId>
-        <artifactId>java-hamcrest</artifactId>
-        <version>${hamcrest.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${mockito-core.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-module-junit4</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito2</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <!-- Shared test dependencies of all sub-modules. -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <modules>
+    <module>exonum-java-binding-bom</module>
     <module>exonum-java-testing</module>
     <module>exonum-java-proofs</module>
     <module>exonum-java-binding-core</module>

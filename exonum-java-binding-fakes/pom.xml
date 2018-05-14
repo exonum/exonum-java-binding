@@ -19,6 +19,7 @@
 
     <properties>
         <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
+        <exonum-bom.version>1.0.0</exonum-bom.version>
     </properties>
 
     <build>
@@ -69,11 +70,22 @@
         </plugins>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.exonum.binding</groupId>
+                <artifactId>exonum-java-binding-bom</artifactId>
+                <version>${exonum-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.exonum.binding</groupId>
             <artifactId>exonum-java-binding-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -91,7 +103,6 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>
-            <version>${vertx.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
