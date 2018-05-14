@@ -14,26 +14,26 @@ lazy_static! {
 }
 
 #[test]
-pub fn single_thread() {
+fn single_thread() {
     let executor = HackyExecutor::new(&VM, 1);
     test_single_thread(executor);
 }
 
 #[test]
-pub fn serialized_threads() {
+fn serialized_threads() {
     let executor = HackyExecutor::new(&VM, 2);
     test_serialized_threads(executor);
 }
 
 #[test]
-pub fn concurrent_threads() {
+fn concurrent_threads() {
     const THREAD_NUM: usize = 8;
     let executor = HackyExecutor::new(&VM, THREAD_NUM + 1);
     test_concurrent_threads(executor, THREAD_NUM)
 }
 
 #[test]
-pub fn nested_attach() {
+fn nested_attach() {
     let executor = HackyExecutor::new(&VM, 1);
     check_nested_attach(&VM, executor);
     check_attached(&VM);

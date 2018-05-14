@@ -36,7 +36,7 @@ lazy_static! {
 }
 
 #[test]
-pub fn service_id() {
+fn service_id() {
     let service_id: u16 = 24;
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .id(service_id)
@@ -45,7 +45,7 @@ pub fn service_id() {
 }
 
 #[test]
-pub fn service_id_negative() {
+fn service_id_negative() {
     // Check that value is converted between rust `u16` and java `short` without loss.
     let service_id: u16 = -24_i16 as u16; // 65512;
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -55,7 +55,7 @@ pub fn service_id_negative() {
 }
 
 #[test]
-pub fn service_name() {
+fn service_name() {
     let service_name: &str = "test_service";
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .name(service_name)
@@ -64,7 +64,7 @@ pub fn service_name() {
 }
 
 #[test]
-pub fn state_hash() {
+fn state_hash() {
     let db = MemoryDB::new();
     let snapshot = db.snapshot();
     let hashes = [hash(&[1]), hash(&[2]), hash(&[3])];
@@ -75,7 +75,7 @@ pub fn state_hash() {
 }
 
 #[test]
-pub fn tx_from_raw() {
+fn tx_from_raw() {
     let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction(java_transaction)
@@ -91,7 +91,7 @@ pub fn tx_from_raw() {
 
 #[test]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
-pub fn tx_from_raw_should_panic_if_java_error_occurred() {
+fn tx_from_raw_should_panic_if_java_error_occurred() {
     let raw = RawTransaction::from_vec(vec![]);
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(OOM_ERROR_CLASS)
@@ -100,7 +100,7 @@ pub fn tx_from_raw_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-pub fn tx_from_raw_should_return_err_if_java_exception_occurred() {
+fn tx_from_raw_should_return_err_if_java_exception_occurred() {
     let raw = RawTransaction::from_vec(vec![]);
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
@@ -116,7 +116,7 @@ pub fn tx_from_raw_should_return_err_if_java_exception_occurred() {
 }
 
 #[test]
-pub fn initialize_config() {
+fn initialize_config() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
@@ -129,7 +129,7 @@ pub fn initialize_config() {
 }
 
 #[test]
-pub fn initialize_config_null() {
+fn initialize_config_null() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
@@ -142,7 +142,7 @@ pub fn initialize_config_null() {
 }
 
 #[test]
-pub fn initialize_config_parse_error() {
+fn initialize_config_parse_error() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
@@ -162,7 +162,7 @@ pub fn initialize_config_parse_error() {
 
 #[test]
 #[should_panic(expected = "Java exception: java.lang.Exception")]
-pub fn initialize_should_panic_if_java_exception_occurred() {
+fn initialize_should_panic_if_java_exception_occurred() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
 
@@ -174,7 +174,7 @@ pub fn initialize_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
-pub fn service_can_modify_db_on_initialize() {
+fn service_can_modify_db_on_initialize() {
     let db = MemoryDB::new();
     let service = create_test_service(EXECUTOR.clone());
     {

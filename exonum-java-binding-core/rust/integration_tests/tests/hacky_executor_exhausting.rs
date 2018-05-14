@@ -15,7 +15,7 @@ lazy_static! {
 
 #[test]
 #[should_panic(expected = "The limit on thread attachment is exhausted (limit is 3)")]
-pub fn exhausted_thread_limit() {
+fn exhausted_thread_limit() {
     const THREAD_NUM: usize = 4;
 
     let executor = HackyExecutor::new(&VM, THREAD_NUM - 1);

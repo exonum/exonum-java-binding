@@ -15,23 +15,23 @@ lazy_static! {
 }
 
 #[test]
-pub fn single_thread() {
+fn single_thread() {
     test_single_thread(&*EXECUTOR);
 }
 
 #[test]
-pub fn serialized_threads() {
+fn serialized_threads() {
     test_serialized_threads(&*EXECUTOR);
 }
 
 #[test]
-pub fn concurrent_threads() {
+fn concurrent_threads() {
     const THREAD_NUM: usize = 8;
     test_concurrent_threads(&*EXECUTOR, THREAD_NUM)
 }
 
 #[test]
-pub fn nested_attach() {
+fn nested_attach() {
     check_nested_attach(&VM, &*EXECUTOR);
     check_detached(&VM);
 }

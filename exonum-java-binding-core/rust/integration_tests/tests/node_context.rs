@@ -26,7 +26,7 @@ lazy_static! {
 }
 
 #[test]
-pub fn submit_valid_transaction() {
+fn submit_valid_transaction() {
     let jclass = JObject::null().into();
     let (mut node, app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
@@ -62,7 +62,7 @@ pub fn submit_valid_transaction() {
 }
 
 #[test]
-pub fn submit_not_valid_transaction() {
+fn submit_not_valid_transaction() {
     const INVALID_TRANSACTION_EXCEPTION: &str = "com.exonum.binding.messages.InvalidTransactionException";
 
     let jclass = JObject::null().into();
