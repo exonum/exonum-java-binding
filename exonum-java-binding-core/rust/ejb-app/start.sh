@@ -39,6 +39,8 @@ echo
 CORE_TXT="exonum-java-binding-core/target/ejb-core-classpath.txt"
 CRYPTOCURRENCY_TXT="exonum-java-binding-cryptocurrency-demo/target/cryptocurrency-classpath.txt"
 EJB_CLASSPATH="$(cat ${PROJ_ROOT}/${CORE_TXT}):$(cat ${PROJ_ROOT}/${CRYPTOCURRENCY_TXT})"
+EJB_CLASSPATH="${EJB_CLASSPATH}:${PROJ_ROOT}/exonum-java-binding-core/target/classes"
+EJB_CLASSPATH="${EJB_CLASSPATH}:${PROJ_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
 EJB_LIBPATH="${PROJ_ROOT}/exonum-java-binding-core/rust/target/debug"
