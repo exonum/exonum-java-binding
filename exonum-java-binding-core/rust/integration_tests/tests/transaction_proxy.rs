@@ -22,27 +22,27 @@ lazy_static! {
 }
 
 #[test]
-pub fn verify_valid_transaction() {
+fn verify_valid_transaction() {
     let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
     assert_eq!(true, valid_tx.verify());
 }
 
 #[test]
-pub fn verify_invalid_transaction() {
+fn verify_invalid_transaction() {
     let invalid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), false);
     assert_eq!(false, invalid_tx.verify());
 }
 
 #[test]
 #[should_panic(expected = "Java exception: java.lang.ArithmeticException")]
-pub fn verify_should_panic_if_java_exception_occured() {
+fn verify_should_panic_if_java_exception_occured() {
     let panic_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     panic_tx.verify();
 }
 
 #[test]
-pub fn execute_valid_transaction() {
+fn execute_valid_transaction() {
     let db = MemoryDB::new();
     {
         let snapshot = db.snapshot();
@@ -74,7 +74,7 @@ pub fn execute_valid_transaction() {
 
 #[test]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
-pub fn execute_should_panic_if_java_error_occurred() {
+fn execute_should_panic_if_java_error_occurred() {
     let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -82,7 +82,7 @@ pub fn execute_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-pub fn execute_should_return_err_if_java_exception_occurred() {
+fn execute_should_return_err_if_java_exception_occurred() {
     let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let db = MemoryDB::new();
@@ -97,20 +97,20 @@ pub fn execute_should_return_err_if_java_exception_occurred() {
 }
 
 #[test]
-pub fn json_serialize() {
+fn json_serialize() {
     let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
     assert_eq!(valid_tx.serialize_field().unwrap(), *INFO_VALUE);
 }
 
 #[test]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
-pub fn json_serialize_should_panic_if_java_error_occurred() {
+fn json_serialize_should_panic_if_java_error_occurred() {
     let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
     panic_tx.serialize_field().unwrap();
 }
 
 #[test]
-pub fn json_serialize_should_return_err_if_java_exception_occurred() {
+fn json_serialize_should_return_err_if_java_exception_occurred() {
     let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let err = invalid_tx.serialize_field().expect_err(
