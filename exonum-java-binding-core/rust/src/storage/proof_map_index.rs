@@ -1,7 +1,8 @@
 use exonum::crypto::Hash;
 use exonum::storage::{Fork, MapProof, ProofMapIndex, Snapshot, StorageKey};
 use exonum::storage::proof_map_index::{BranchProofNode, PROOF_MAP_KEY_SIZE, ProofMapIndexIter,
-                                       ProofMapIndexKeys, ProofMapIndexValues, ProofNode, ProofPath};
+                                       ProofMapIndexKeys, ProofMapIndexValues, ProofNode,
+                                       ProofPath};
 use jni::errors::Result;
 use jni::JNIEnv;
 use jni::objects::{AutoLocal, JClass, JObject, JString};
