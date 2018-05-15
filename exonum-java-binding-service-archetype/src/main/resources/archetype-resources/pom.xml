@@ -13,12 +13,23 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.compiler.source>8</java.compiler.source>
         <java.compiler.target>8</java.compiler.target>
-        <exonum-core.version>1.0-SNAPSHOT</exonum-core.version>
-        <vertx.version>3.5.1</vertx.version>
         <gson.version>2.8.2</gson.version>
         <junit.version>4.12</junit.version>
         <mockito-core.version>2.8.47</mockito-core.version>
+        <exonum-bom.version>1.0.0</exonum-bom.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.exonum.binding</groupId>
+                <artifactId>exonum-java-binding-bom</artifactId>
+                <version>${exonum-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -63,14 +74,12 @@
         <dependency>
             <groupId>com.exonum.binding</groupId>
             <artifactId>exonum-java-binding-core</artifactId>
-            <version>${exonum-core.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
-            <version>${vertx.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -83,14 +92,12 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
-            <version>${vertx.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-unit</artifactId>
-            <version>${vertx.version}</version>
             <scope>test</scope>
         </dependency>
 
