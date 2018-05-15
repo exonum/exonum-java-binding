@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
@@ -116,18 +117,5 @@
       <version>${equalsverifier.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 </project>

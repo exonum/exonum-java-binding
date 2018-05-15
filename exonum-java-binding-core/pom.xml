@@ -27,7 +27,6 @@
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.5.3</auto-value.version>
-    <exonum-bom.version>1.0.0</exonum-bom.version>
   </properties>
 
   <build>
@@ -233,22 +232,11 @@
     </profile>
   </profiles>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.exonum.binding</groupId>
-        <artifactId>exonum-java-binding-bom</artifactId>
-        <version>${exonum-bom.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-proofs</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -269,11 +257,13 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
+      <version>${vertx.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
+      <version>${guice.version}</version>
     </dependency>
 
     <dependency>
@@ -304,6 +294,7 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -311,26 +302,15 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
+      <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
+      <version>1.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 </project>
