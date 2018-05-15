@@ -27,6 +27,20 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Exonum Java Binding artefacts. -->
+      <dependency>
+        <groupId>com.exonum.binding</groupId>
+        <artifactId>exonum-java-binding-core</artifactId>
+        <version>${exonum-core.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.exonum.binding</groupId>
+        <artifactId>exonum-java-proofs</artifactId>
+        <version>${exonum-java-proofs.version}</version>
+      </dependency>
+      
+      <!-- Exported third-party artefacts the services depend upon. -->
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web-client</artifactId>
@@ -43,18 +57,6 @@
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web</artifactId>
         <version>${vertx.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.exonum.binding</groupId>
-        <artifactId>exonum-java-binding-core</artifactId>
-        <version>${exonum-core.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.exonum.binding</groupId>
-        <artifactId>exonum-java-proofs</artifactId>
-        <version>${exonum-java-proofs.version}</version>
       </dependency>
 
       <dependency>
