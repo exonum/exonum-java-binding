@@ -7,7 +7,7 @@ import com.exonum.binding.storage.proofs.map.DbKey;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 
 /**
- * A branch proof entry for a flat map.
+ * A flat map proof entry, which stands for a branch node in the corresponding map tree.
  */
 public class MapProofEntryBranch extends MapProofEntry {
 
@@ -19,6 +19,10 @@ public class MapProofEntryBranch extends MapProofEntry {
     this.hash = hash;
   }
 
+  /**
+   * Returns a hash of this branch node.
+   * @return HashCode of this node
+   */
   @Override
   public HashCode getHash() {
     return hash;

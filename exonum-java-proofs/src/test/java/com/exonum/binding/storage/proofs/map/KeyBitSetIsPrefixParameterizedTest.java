@@ -57,12 +57,6 @@ public class KeyBitSetIsPrefixParameterizedTest {
   }
 
   @Test
-  public void findCommonPrefix() {
-    KeyBitSet keyBitSet = path.commonPrefix(other);
-    System.out.println(keyBitSet);
-  }
-
-  @Test
   public void isPrefixOfClone() throws Exception {
     KeyBitSet clone = new KeyBitSet(pathBytes, pathLength);
     assertTrue(path.isPrefixOf(clone));

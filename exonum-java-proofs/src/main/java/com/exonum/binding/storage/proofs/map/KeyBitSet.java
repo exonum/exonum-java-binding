@@ -76,17 +76,6 @@ public final class KeyBitSet {
     return (firstSetBitIndex >= this.length) || (firstSetBitIndex == -1);
   }
 
-  public KeyBitSet commonPrefix(KeyBitSet other) {
-    if (other == this) {
-      return this;
-    }
-    BitSet thisBits = (BitSet) this.keyBits.clone();
-    thisBits.xor(other.keyBits);
-    int firstSetBitIndex = thisBits.nextSetBit(0);
-    BitSet resultingBitSet = this.keyBits.get(0, firstSetBitIndex);
-    return new KeyBitSet(resultingBitSet.toByteArray(), resultingBitSet.length());
-  }
-
   @Override
   public String toString() {
     return "KeyBitSet{"

@@ -8,7 +8,7 @@ import com.exonum.binding.storage.proofs.map.DbKey;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 
 /**
- * A leaf proof entry for a flat map.
+ * A flat map proof entry, which stands for a leaf node in the corresponding map tree.
  */
 public class MapProofEntryLeaf extends MapProofEntry {
 
@@ -27,6 +27,10 @@ public class MapProofEntryLeaf extends MapProofEntry {
     return value;
   }
 
+  /**
+   * Returns a hash of the value of this leaf node.
+   * @return HashCode of this node
+   */
   @Override
   public HashCode getHash() {
     return hashFunction.hashBytes(value);

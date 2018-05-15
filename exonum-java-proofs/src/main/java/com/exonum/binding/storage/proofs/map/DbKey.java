@@ -105,8 +105,7 @@ public class DbKey {
     }
   }
 
-  @VisibleForTesting  // This constructor exists for tests only.
-  DbKey(DbKey.Type nodeType, byte[] keySlice, int numSignificantBits) {
+  public DbKey(DbKey.Type nodeType, byte[] keySlice, int numSignificantBits) {
     // TODO: consider extracting the checks below
     checkArgument(keySlice.length == KEY_SIZE);
     checkArgument(0 <= numSignificantBits && numSignificantBits <= KEY_SIZE_BITS);
@@ -170,5 +169,26 @@ public class DbKey {
    */
   public KeyBitSet keyBits() {
     return new KeyBitSet(keySlice, numSignificantBits);
+  }
+
+  /**
+   * Returns new branch DbKey, which is a common prefix of this and another DbKey.
+   */
+  public DbKey commonPrefix(DbKey other) {
+    if (other == this) {
+      return this;
+    }
+    BitSet thisBits = this.keyBits().getKeyBits();
+    thisBits.xor(other.keyBits().getKeyBits());
+    int firstSetBitIndex = thisBits.nextSetBit(0);
+
+    // firstSetBitIndex equals -1 when both keys are equal
+    if (firstSetBitIndex == -1) {
+      return new DbKey(this.rawDbKey);
+    }
+    byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, firstSetBitIndex).toByteArray();
+    byte[] newArray = new byte[DbKey.KEY_SIZE];
+    System.arraycopy(resultingByteArray, 0, newArray, 0, resultingByteArray.length);
+    return new DbKey(Type.BRANCH, newArray, DbKey.KEY_SIZE);
   }
 }

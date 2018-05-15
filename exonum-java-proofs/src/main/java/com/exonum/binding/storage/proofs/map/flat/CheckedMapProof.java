@@ -2,14 +2,15 @@ package com.exonum.binding.storage.proofs.map.flat;
 
 import com.exonum.binding.hash.HashCode;
 import java.util.List;
-import java.util.Optional;
 
-public interface MapProof {
+public interface CheckedMapProof {
   List<MapProofEntry> getProofList();
 
   boolean containsKey(byte[] key);
 
   boolean isValid(HashCode rootHash);
 
-  Optional<byte[]> get(byte[] key);
+  byte[] get(byte[] key);
+
+  ProofStatus getStatus();
 }
