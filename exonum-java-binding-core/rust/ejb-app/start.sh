@@ -2,10 +2,21 @@
 
 set -eu -o pipefail
 
-function realpath() {
-  python -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
-}
+# Fixes tha lack of the `realpath` tool in OS X.
+if [ ! $(which realpath) ]; then
+    function realpath() {
+        python -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
+    }
+fi
 
+# prints a section header
+function header() {
+    local title=$1
+    local rest="========================================================================"
+    echo
+    echo "===[ ${title} ]${rest:${#title}}"
+    echo
+}
 
 # Use an already set JAVA_HOME, or infer it from java.home system property.
 #
@@ -18,62 +29,42 @@ echo "JAVA_HOME=${JAVA_HOME}"
 export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
-CURRENT_DIR=$(realpath ".")
-echo "CURRENT_DIR=${CURRENT_DIR}"
+EJB_APP_DIR=$(pwd)
+echo "CURRENT_DIR=${EJB_APP_DIR}"
 
-PROJ_ROOT=$(realpath "../../..")
-echo "PROJ_ROOT=${PROJ_ROOT}"
+EJB_ROOT=$(realpath "../../..")
+echo "PROJ_ROOT=${EJB_ROOT}"
 
-echo
-echo "===[ PREPARE CLASSES ]========================================================="
-echo
+header "PREPARE CLASSES"
 
-cd $PROJ_ROOT
-mvn generate-sources
-cd $CURRENT_DIR
+cd $EJB_ROOT
+mvn compile
+cd $EJB_APP_DIR
 
-echo
-echo "===[ PREPARE PATHS ]==========================================================="
-echo
+header "PREPARE PATHS"
 
 CORE_TXT="exonum-java-binding-core/target/ejb-core-classpath.txt"
 CRYPTOCURRENCY_TXT="exonum-java-binding-cryptocurrency-demo/target/cryptocurrency-classpath.txt"
-EJB_CLASSPATH="$(cat ${PROJ_ROOT}/${CORE_TXT}):$(cat ${PROJ_ROOT}/${CRYPTOCURRENCY_TXT})"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${PROJ_ROOT}/exonum-java-binding-core/target/classes"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${PROJ_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
+EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
+EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-core/target/classes"
+EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
-EJB_LIBPATH="${PROJ_ROOT}/exonum-java-binding-core/rust/target/debug"
+EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
 
 # Clear test dir
 rm -rf testnet
 mkdir testnet
 
-echo
-echo "===[ GENERATE COMMON CONFIG ]=================================================="
-echo
-
-# Generate common config
+header "GENERATE COMMON CONFIG"
 cargo run -- generate-template testnet/common.toml
 
-echo
-echo "===[ GENERATE CONFIG ]========================================================="
-echo
-
-# Generate config
+header "GENERATE CONFIG"
 cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml --ejb-classpath $EJB_CLASSPATH --ejb-libpath $EJB_LIBPATH --peer-address 127.0.0.1:5400
 
-echo
-echo "===[ FINALIZE ]================================================================"
-echo
-
-# Finalize
+header "FINALIZE"
 cargo run -- finalize testnet/sec.toml testnet/node.toml --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' --ejb-port 6000 --public-configs testnet/pub.toml
 
-echo
-echo "===[ START TESTNET ]==========================================================="
-echo
-
-# Run
+header "START TESTNET"
 cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
