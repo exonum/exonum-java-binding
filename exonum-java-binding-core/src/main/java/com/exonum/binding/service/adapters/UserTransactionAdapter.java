@@ -27,7 +27,7 @@ public class UserTransactionAdapter {
     try {
       return transaction.isValid();
     } catch (Throwable e) {
-      logger.error(e);
+      logUserException(e);
       throw e;
     }
   }
@@ -39,7 +39,7 @@ public class UserTransactionAdapter {
         transaction.execute(view);
       }
     } catch (Throwable e) {
-      logger.error(e);
+      logUserException(e);
       throw e;
     }
   }
@@ -48,8 +48,12 @@ public class UserTransactionAdapter {
     try {
       return transaction.info();
     } catch (Throwable e) {
-      logger.error(e);
+      logUserException(e);
       throw e;
     }
+  }
+
+  private void logUserException(Throwable e) {
+    logger.error("", e);
   }
 }

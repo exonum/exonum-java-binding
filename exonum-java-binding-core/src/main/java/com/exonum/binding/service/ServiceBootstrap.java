@@ -47,8 +47,7 @@ class ServiceBootstrap {
 
       return injector.getInstance(UserServiceAdapter.class);
     } catch (Throwable t) {
-      String message = "Failed to start a service " + serviceModuleName + ":";
-      logger.fatal(message, t);
+      logger.fatal("Failed to start service {}:", serviceModuleName, t);
       throw t;
     }
   }
