@@ -2,6 +2,22 @@
 
 set -eu -o pipefail
 
+# Fixes tha lack of the `realpath` tool in OS X.
+if [ ! $(which realpath) ]; then
+    function realpath() {
+        python -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
+    }
+fi
+
+# prints a section header
+function header() {
+    local title=$1
+    local rest="========================================================================"
+    echo
+    echo "===[ ${title} ]${rest:${#title}}"
+    echo
+}
+
 # Use an already set JAVA_HOME, or infer it from java.home system property.
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
@@ -13,22 +29,42 @@ echo "JAVA_HOME=${JAVA_HOME}"
 export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
-EJB_CLASSPATH=$(cat ../../../exonum-java-binding-fakes/target/ejb-fakes-classpath.txt)
-EJB_CLASSPATH=$EJB_CLASSPATH:"/home/vitvakatu/Private/exonum-java-binding/exonum-java-binding-fakes/target/classes:/home/vitvakatu/Private/exonum-java-binding/exonum-java-binding-cryptocurrency-demo/target/classes"
-EJB_LIBPATH="/home/vitvakatu/Private/exonum-java-binding/exonum-java-binding-core/rust/target/debug"
+EJB_APP_DIR=$(pwd)
+echo "CURRENT_DIR=${EJB_APP_DIR}"
+
+EJB_ROOT=$(realpath "../../..")
+echo "PROJ_ROOT=${EJB_ROOT}"
+
+header "PREPARE CLASSES"
+
+cd $EJB_ROOT
+mvn compile
+cd $EJB_APP_DIR
+
+header "PREPARE PATHS"
+
+CORE_TXT="exonum-java-binding-core/target/ejb-core-classpath.txt"
+CRYPTOCURRENCY_TXT="exonum-java-binding-cryptocurrency-demo/target/cryptocurrency-classpath.txt"
+EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
+EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-core/target/classes"
+EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
+echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
+
+EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
+echo "EJB_LIBPATH=${EJB_LIBPATH}"
 
 # Clear test dir
 rm -rf testnet
 mkdir testnet
 
-# Generate common config
+header "GENERATE COMMON CONFIG"
 cargo run -- generate-template testnet/common.toml
 
-# Generate config
+header "GENERATE CONFIG"
 cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml --ejb-classpath $EJB_CLASSPATH --ejb-libpath $EJB_LIBPATH --peer-address 127.0.0.1:5400
 
-# Finalize
+header "FINALIZE"
 cargo run -- finalize testnet/sec.toml testnet/node.toml --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' --ejb-port 6000 --public-configs testnet/pub.toml
 
-# Run
+header "START TESTNET"
 cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
