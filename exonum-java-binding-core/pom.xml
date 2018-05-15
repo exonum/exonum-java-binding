@@ -20,7 +20,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.compiler.version>stable</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
-    <rust.appSubCrate>ejb-test</rust.appSubCrate>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <!-- Intentionally left empty, may be overridden from the command line.
          See README.md and http://errorprone.info/docs/flags for more. -->
@@ -97,8 +96,6 @@
                 <argument>test</argument>
                 <argument>--all</argument>
                 <argument>--exclude</argument>
-                <argument>${rust.appSubCrate}</argument>
-                <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
                 <argument>--color</argument>
                 <argument>always</argument>
@@ -119,8 +116,6 @@
                 <argument>--features</argument>
                 <argument>${rust.compiler.features}</argument>
                 <argument>--all</argument>
-                <argument>--exclude</argument>
-                <argument>${rust.appSubCrate}</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
                 <argument>--color</argument>
