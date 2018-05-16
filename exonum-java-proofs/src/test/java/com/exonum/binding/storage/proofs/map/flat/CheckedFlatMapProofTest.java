@@ -24,7 +24,7 @@ public class CheckedFlatMapProofTest {
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
 
   @Test
-  public void MapProofShouldBeValid() {
+  public void mapProofShouldBeValid() {
     byte[] firstKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
     byte[] secondKey = createPrefixed(bytes(0b011101), DbKey.KEY_SIZE);
     byte[] thirdKey = createPrefixed(bytes(0b1111101), DbKey.KEY_SIZE);
@@ -44,7 +44,7 @@ public class CheckedFlatMapProofTest {
   }
 
   @Test
-  public void MapProofWithOneElementShouldBeValid() {
+  public void mapProofWithOneElementShouldBeValid() {
     byte[] key = createPrefixed(bytes(0b10), DbKey.KEY_SIZE);
     DbKey valueKey = new DbKey(Type.LEAF, key, DbKey.KEY_SIZE_BITS);
     HashCode expectedRootHash = HASH_FUNCTION
@@ -63,7 +63,7 @@ public class CheckedFlatMapProofTest {
   }
 
   @Test
-  public void MapProofWithEqualEntriesOrderShouldBeInvalid() {
+  public void mapProofWithEqualEntriesOrderShouldBeInvalid() {
     byte[] firstKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
     byte[] secondKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
     List<MapProofEntry> entries =
@@ -77,7 +77,7 @@ public class CheckedFlatMapProofTest {
   }
 
   @Test
-  public void MapProofWithWrongEntriesOrderShouldBeInvalid() {
+  public void mapProofWithWrongEntriesOrderShouldBeInvalid() {
     byte[] firstKey = createPrefixed(bytes(0b011101), DbKey.KEY_SIZE);
     byte[] secondKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
     List<MapProofEntry> entries =

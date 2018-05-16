@@ -37,7 +37,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       MapProofEntry singleEntry = proofList.get(0);
       if (singleEntry instanceof MapProofEntryLeaf) {
         return new CheckedFlatMapProof(
-            ProofStatus.CORRECT, getSingletonProofListHash((MapProofEntryLeaf) singleEntry), proofList);
+            ProofStatus.CORRECT,
+            getSingletonProofListHash((MapProofEntryLeaf) singleEntry),
+            proofList);
       } else {
         return new CheckedFlatMapProof(ProofStatus.NON_TERMINAL_NODE);
       }

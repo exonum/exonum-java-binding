@@ -105,6 +105,10 @@ public class DbKey {
     }
   }
 
+  /**
+   * Given type of the node (either LEAF or BRANCH), key as a byte array and number of significant
+   * bits, returns new DbKey.
+   */
   public DbKey(DbKey.Type nodeType, byte[] keySlice, int numSignificantBits) {
     // TODO: consider extracting the checks below
     checkArgument(keySlice.length == KEY_SIZE);

@@ -46,13 +46,16 @@ public class DbKeyCommonPrefixParameterizedTest {
             new DbKey(Type.BRANCH, createPrefixed(bytes(), DbKey.KEY_SIZE), DbKey.KEY_SIZE),
             "[01] | [10] -> []"),
         parameters(
-            new DbKey(Type.LEAF, createPrefixed(bytes(0b1011), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
-            new DbKey(Type.LEAF, createPrefixed(bytes(0b1111), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
+            new DbKey(
+                Type.LEAF, createPrefixed(bytes(0b1011), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
+            new DbKey(
+                Type.LEAF, createPrefixed(bytes(0b1111), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
             new DbKey(Type.BRANCH, createPrefixed(bytes(0b11), DbKey.KEY_SIZE), DbKey.KEY_SIZE),
             "[1011] | [1111] -> [11]"),
         parameters(
             new DbKey(Type.LEAF, createPrefixed(bytes(0b00), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
-            new DbKey(Type.LEAF, createPrefixed(bytes(0b0000), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
+            new DbKey(
+                Type.LEAF, createPrefixed(bytes(0b0000), DbKey.KEY_SIZE), DbKey.KEY_SIZE_BITS),
             new DbKey(Type.BRANCH, createPrefixed(bytes(0b0), DbKey.KEY_SIZE), DbKey.KEY_SIZE),
             "[00] | [0000] -> [0]"),
         parameters(
