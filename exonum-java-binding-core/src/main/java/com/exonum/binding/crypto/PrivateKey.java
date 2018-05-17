@@ -1,7 +1,7 @@
 package com.exonum.binding.crypto;
 
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_BOX_CURVE25519XSALSA20POLY1305_SECRETKEYBYTES;
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_SECRETKEYBYTES;
 import static org.abstractj.kalium.NaCl.sodium;
 import static org.abstractj.kalium.crypto.Util.checkLength;
 import static org.abstractj.kalium.crypto.Util.slice;
@@ -17,9 +17,12 @@ public class PrivateKey implements Key {
 
   public PrivateKey(byte[] secretKey) {
     this.secretKey = secretKey;
-    checkLength(secretKey, CRYPTO_BOX_CURVE25519XSALSA20POLY1305_SECRETKEYBYTES * 2);
+    checkLength(secretKey, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
   }
 
+  /**
+   * Computes and returns a signature for the previously supplied 'message'.
+   */
   public byte[] sign(byte[] message) {
     byte[] signature = Util.prependZeros(CRYPTO_SIGN_ED25519_BYTES, message);
     LongLongByReference bufferLen = new LongLongByReference(0);

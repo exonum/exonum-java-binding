@@ -1,7 +1,7 @@
 package com.exonum.binding.crypto;
 
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_BOX_CURVE25519XSALSA20POLY1305_PUBLICKEYBYTES;
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.abstractj.kalium.NaCl.sodium;
 import static org.abstractj.kalium.crypto.Util.checkLength;
 import static org.abstractj.kalium.crypto.Util.isValid;
@@ -18,9 +18,12 @@ public class PublicKey implements Key {
 
   public PublicKey(byte[] publicKey) {
     this.publicKey = publicKey;
-    checkLength(publicKey, CRYPTO_BOX_CURVE25519XSALSA20POLY1305_PUBLICKEYBYTES);
+    checkLength(publicKey, CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
   }
 
+  /**
+   * Verifies that `signature` is a valid signature for the supplied 'message'.
+   */
   public boolean verify(byte[] message, byte[] signature) {
     checkLength(signature, CRYPTO_SIGN_ED25519_BYTES);
     byte[] sigAndMsg = merge(signature, message);
