@@ -1,6 +1,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.exonum.binding.cryptocurrency.HashUtils.hashUtf8String;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -9,7 +9,6 @@ import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -60,7 +59,7 @@ public class CreateWalletTxTest {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
 
-        HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+        HashCode nameHash = hashUtf8String(name);
 
         assertThat(wallets.get(nameHash).getName(), equalTo(name));
         assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
@@ -74,7 +73,7 @@ public class CreateWalletTxTest {
         Fork view = db.createFork()) {
       String name = "wallet";
       Long value = 100L;
-      HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+      HashCode nameHash = hashUtf8String(name);
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
