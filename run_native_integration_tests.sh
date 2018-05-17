@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Runs native integration tests (those in ejb-core/rust/integration_tests)
+# Runs native integration tests (those in ejb-core/rust/integration_tests).
+# If --skip-compile is passed, does not recompile all Java sources.
+#
 # ¡Keep it MacOS/Ubuntu compatible!
 
 # Fail immediately in case of errors and/or unset variables
@@ -17,9 +19,18 @@ export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 d
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Compile all Java modules to ensure that ejb-fakes, which is required by native ITs,
-# is up-to-date. This safety net takes about a dozen seconds. If that annoys you, please add
-# an optional parameter that disables this command.
-mvn -DskipTests compile --quiet
+# is up-to-date. This safety net takes about a dozen seconds,
+# so if the Java artefacts are definitely up-to-date, it may be skipped.
+if [ "$#" -gt 0 ]; then
+  if [ "$1" != "--skip-compile" ]; then
+    echo "Unknown option: $1"
+    exit 1
+  fi
+else
+  # Compile Java artefacts by default.
+  echo "Compiling the Java artefacts"
+  mvn -DskipTests compile --quiet
+fi
 
 cd exonum-java-binding-core/rust
 
