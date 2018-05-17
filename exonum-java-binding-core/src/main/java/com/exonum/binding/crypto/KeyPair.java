@@ -7,8 +7,6 @@ import static org.abstractj.kalium.crypto.Util.checkLength;
 import static org.abstractj.kalium.crypto.Util.isValid;
 import static org.abstractj.kalium.crypto.Util.zeros;
 
-import org.abstractj.kalium.crypto.Random;
-
 public class KeyPair {
 
   private final byte[] seed;
@@ -18,20 +16,13 @@ public class KeyPair {
   /**
    * Generates a secret key and a corresponding public key using a seed byte array.
    */
-  public KeyPair(byte[] seed) {
+  KeyPair(byte[] seed) {
     checkLength(seed, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
     this.seed = seed;
     this.privateKey = zeros(CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
     this.publicKey = zeros(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
     isValid(sodium().crypto_sign_ed25519_seed_keypair(publicKey, privateKey, seed),
         "Failed to generate a key pair");
-  }
-
-  /**
-   * Generates a secret key and a corresponding public key using a random seed.
-   */
-  public KeyPair() {
-    this(new Random().randomBytes(CRYPTO_SIGN_ED25519_SECRETKEYBYTES));
   }
 
   public PublicKey getPublicKey() {
@@ -43,6 +34,6 @@ public class KeyPair {
   }
 
   public byte[] getSeed() {
-    return seed;
+    return seed.clone();
   }
 }
