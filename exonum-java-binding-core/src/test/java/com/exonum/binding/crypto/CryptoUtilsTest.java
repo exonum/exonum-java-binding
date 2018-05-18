@@ -19,8 +19,8 @@ public class CryptoUtilsTest {
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = "myMessage".getBytes();
-    byte[] signedMessage = CryptoUtils.signMessage(message, privateKey);
-    assertTrue(CryptoUtils.verify(message, signedMessage, publicKey));
+    byte[] signature = CryptoUtils.signMessage(message, privateKey);
+    assertTrue(CryptoUtils.verify(message, signature, publicKey));
   }
 
   @Test
@@ -28,10 +28,10 @@ public class CryptoUtilsTest {
     KeyPair keyPair = CryptoUtils.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = "myMessage".getBytes();
-    byte[] invalidSignedMessage = "invalidLengthMessage".getBytes();
+    byte[] invalidSignature = "invalidLengthMessage".getBytes();
     expectedException.expect(RuntimeException.class);
     expectedException.expectMessage("Invalid size");
-    CryptoUtils.verify(message, invalidSignedMessage, publicKey);
+    CryptoUtils.verify(message, invalidSignature, publicKey);
   }
 
   @Test
@@ -39,9 +39,9 @@ public class CryptoUtilsTest {
     KeyPair keyPair = CryptoUtils.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = "myMessage".getBytes();
-    byte[] invalidSignedMessage = Bytes.createPrefixed(message, CRYPTO_SIGN_ED25519_BYTES);
+    byte[] invalidSignature = Bytes.createPrefixed(message, CRYPTO_SIGN_ED25519_BYTES);
     expectedException.expect(RuntimeException.class);
     expectedException.expectMessage("Signature was forged or corrupted");
-    CryptoUtils.verify(message, invalidSignedMessage, publicKey);
+    CryptoUtils.verify(message, invalidSignature, publicKey);
   }
 }

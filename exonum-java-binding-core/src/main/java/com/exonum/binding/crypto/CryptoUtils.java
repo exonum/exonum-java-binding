@@ -30,7 +30,7 @@ public class CryptoUtils {
   }
 
   /**
-   * Given a private key, computes and returns a signedMessage for the previously supplied
+   * Given a private key, computes and returns a signature for the previously supplied
    * 'message'.
    */
   public static byte[] signMessage(byte[] message, PrivateKey privateKey) {
@@ -45,9 +45,9 @@ public class CryptoUtils {
   /**
    * Verifies that `signature` is a valid signature for the supplied 'message'.
    */
-  public static boolean verify(byte[] message, byte[] signedMessage, PublicKey publicKey) {
-    checkLength(signedMessage, CRYPTO_SIGN_ED25519_BYTES);
-    byte[] sigAndMsg = merge(signedMessage, message);
+  public static boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
+    checkLength(signature, CRYPTO_SIGN_ED25519_BYTES);
+    byte[] sigAndMsg = merge(signature, message);
     byte[] buffer = zeros(sigAndMsg.length);
     LongLongByReference bufferLen = new LongLongByReference(0);
 
