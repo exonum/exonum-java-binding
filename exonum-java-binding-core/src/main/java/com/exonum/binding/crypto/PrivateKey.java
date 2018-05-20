@@ -8,20 +8,20 @@ import org.abstractj.kalium.keys.Key;
 
 public class PrivateKey implements Key {
 
-  private final byte[] secretKey;
+  private final byte[] privateKey;
 
-  PrivateKey(byte[] secretKey) {
-    this.secretKey = secretKey;
-    checkLength(secretKey, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
+  PrivateKey(byte[] privateKey) {
+    this.privateKey = privateKey;
+    checkLength(privateKey, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
   }
 
   @Override
   public byte[] toBytes() {
-    return secretKey.clone();
+    return privateKey.clone();
   }
 
   @Override
   public String toString() {
-    return HEX.encode(secretKey);
+    return HEX.encode(privateKey);
   }
 }
