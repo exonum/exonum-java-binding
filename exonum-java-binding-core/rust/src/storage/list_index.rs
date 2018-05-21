@@ -1,13 +1,15 @@
-use exonum::storage::{Fork, ListIndex, Snapshot};
-use exonum::storage::list_index::ListIndexIter;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jlong};
+use jni::sys::{jlong, jbyteArray, jboolean};
+
 use std::panic;
 use std::ptr;
-use super::db::{Value, View, ViewRef};
-use super::indexes_metadata::{check_read, check_write, TableType};
+
+use exonum::storage::{Snapshot, Fork, ListIndex};
+use exonum::storage::list_index::ListIndexIter;
 use utils::{self, Handle};
+use super::db::{View, ViewRef, Value};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ListIndex<T, Value>;
 

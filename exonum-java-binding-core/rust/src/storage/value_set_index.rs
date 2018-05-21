@@ -1,13 +1,15 @@
-use exonum::storage::{Fork, Snapshot, ValueSetIndex};
-use exonum::storage::value_set_index::{ValueSetIndexHashes, ValueSetIndexIter};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject};
+use jni::sys::{jbyteArray, jboolean, jobject};
+
 use std::panic;
 use std::ptr;
-use super::db::{Value, View, ViewRef};
-use super::indexes_metadata::{check_read, check_write, TableType};
+
+use exonum::storage::{Snapshot, Fork, ValueSetIndex};
+use exonum::storage::value_set_index::{ValueSetIndexIter, ValueSetIndexHashes};
 use utils::{self, Handle, PairIter};
+use super::db::{View, ViewRef, Value};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ValueSetIndex<T, Value>;
 

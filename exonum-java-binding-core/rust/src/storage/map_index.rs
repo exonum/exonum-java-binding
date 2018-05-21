@@ -1,13 +1,15 @@
-use exonum::storage::{Fork, MapIndex, Snapshot};
-use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
+
 use std::panic;
 use std::ptr;
-use super::db::{Key, Value, View, ViewRef};
-use super::indexes_metadata::{check_read, check_write, TableType};
+
+use exonum::storage::{Snapshot, Fork, MapIndex};
+use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use utils::{self, Handle, PairIter};
+use super::db::{View, ViewRef, Key, Value};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = MapIndex<T, Key, Value>;
 

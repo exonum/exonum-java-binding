@@ -1,15 +1,17 @@
-use exonum::crypto::Hash;
-use exonum::storage::{Fork, ProofListIndex, Snapshot};
-use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
-use jni::errors::Result;
 use jni::JNIEnv;
+use jni::errors::Result;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jint, jlong, jobject};
+use jni::sys::{jlong, jint, jbyteArray, jboolean, jobject};
+
 use std::panic;
 use std::ptr;
-use super::db::{Value, View, ViewRef};
-use super::indexes_metadata::{check_read, check_write, TableType};
+
+use exonum::storage::{Snapshot, Fork, ProofListIndex};
+use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
+use exonum::crypto::Hash;
 use utils::{self, Handle};
+use super::db::{View, ViewRef, Value};
+use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ProofListIndex<T, Value>;
 
