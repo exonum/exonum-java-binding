@@ -157,7 +157,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void initalize_ClosesFork() throws Exception {
+  public void initialize_ClosesFork() throws Exception {
     long forkHandle = 0x0A;
     String ignored = serviceAdapter.initialize(forkHandle);
 

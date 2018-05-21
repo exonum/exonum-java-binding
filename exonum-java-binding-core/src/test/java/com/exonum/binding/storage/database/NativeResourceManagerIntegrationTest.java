@@ -22,7 +22,7 @@ public class NativeResourceManagerIntegrationTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void nativeResourceManagerShallThrowIfUnknownHandle() throws Exception {
+  public void nativeResourceManagerShallThrowIfUnknownHandle() {
     long unknownNativeHandle = 0x110B;
 
     expectedException.expect(RuntimeException.class);

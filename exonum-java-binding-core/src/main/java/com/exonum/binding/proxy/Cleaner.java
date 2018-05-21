@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -125,7 +127,8 @@ public final class Cleaner implements AutoCloseable {
    *
    * <p>The implementation is idempotent — subsequent invocations have no effect.
    *
-   * @throws CloseFailuresException if any clean action failed
+   * @throws CloseFailuresException if any clean action failed. The exception includes all
+   *     thrown exceptions as suppressed
    */
   @Override
   public void close() throws CloseFailuresException {
@@ -137,7 +140,7 @@ public final class Cleaner implements AutoCloseable {
 
     // Currently only the number of failures is recorded. If extra context is needed,
     // the clean actions might be included as well.
-    int numFailures = 0;
+    List<Throwable> suppressedExceptions = new ArrayList<>(0);
     while (!registeredCleanActions.isEmpty()) {
       CleanAction cleanAction = registeredCleanActions.pop();
       // Try to perform the operation.
@@ -145,18 +148,20 @@ public final class Cleaner implements AutoCloseable {
         cleanAction.clean();
       } catch (Throwable t) {
         // Record the failure
-        numFailures++;
+        suppressedExceptions.add(t);
         // Log the details
         logCleanActionFailure(cleanAction, t);
-        // todo: Shall I throw Errors immediately: Throwables.throwIfInstanceOf(t, Error.class);
       }
     }
 
-    // If there has been any failures, throw an exception with a detailed error message.
-    if (numFailures != 0) {
+    // If there have been any failures, throw an exception with a detailed error message.
+    if (!suppressedExceptions.isEmpty()) {
       String message = String.format("%d exception(s) occurred when closing this context (%s), "
-          + "see the log messages above", numFailures, this);
-      throw new CloseFailuresException(message);
+          + "see the log messages above or the list of suppressed exceptions",
+          suppressedExceptions.size(), this);
+      CloseFailuresException e = new CloseFailuresException(message);
+      suppressedExceptions.forEach(e::addSuppressed);
+      throw e;
     }
   }
 
@@ -186,16 +191,14 @@ public final class Cleaner implements AutoCloseable {
   @Override
   public String toString() {
     String hash = Integer.toHexString(System.identityHashCode(this));
-    MoreObjects.ToStringHelper sh = MoreObjects.toStringHelper(this);
-    sh.add("hash", hash);
+    MoreObjects.ToStringHelper sb = MoreObjects.toStringHelper(this);
+    sb.add("hash", hash);
     if (!description.isEmpty()) {
-      sh.add("description", description);
+      sb.add("description", description);
     }
-    return sh
+    return sb
         .add("numRegisteredActions", getNumRegisteredActions())
         .add("closed", closed)
         .toString();
   }
-
-  // todo: more diagnostic info?
 }

@@ -106,7 +106,7 @@ public class CleanerTest {
   }
 
   @Test
-  public void closeOneActionLogsFailures() throws CloseFailuresException {
+  public void closeOneActionLogsFailures() {
     CleanAction action = mock(CleanAction.class);
     doThrow(RuntimeException.class).when(action).clean();
 
@@ -159,8 +159,12 @@ public class CleanerTest {
       // Verify that a1 was closed.
       verify(a1).clean();
 
-      // Check the error message
+      // Check the error message.
       assertThat(e).hasMessageStartingWith("1 exception(s) occurred when closing this context");
+      // Check suppressed exceptions.
+      Throwable[] suppressedExceptions = e.getSuppressed();
+      assertThat(suppressedExceptions).hasSize(1);
+      assertThat(suppressedExceptions[0]).isInstanceOf(RuntimeException.class);
     }
   }
 
