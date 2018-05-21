@@ -18,18 +18,18 @@ echo "JAVA_HOME=${JAVA_HOME}"
 export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
-# Compile all Java modules to ensure that ejb-fakes, which is required by native ITs,
-# is up-to-date. This safety net takes about a dozen seconds,
+# Compile all Java modules by default to ensure that ejb-fakes module, which is required
+# by native ITs, is up-to-date. This safety net takes about a dozen seconds,
 # so if the Java artefacts are definitely up-to-date, it may be skipped.
-if [ "$#" -gt 0 ]; then
+if [ "$#" -eq 0 ]; then
+  # Compile Java artefacts.
+  echo "Compiling the Java artefacts…"
+  mvn -DskipTests compile --quiet
+else
   if [ "$1" != "--skip-compile" ]; then
     echo "Unknown option: $1"
     exit 1
   fi
-else
-  # Compile Java artefacts by default.
-  echo "Compiling the Java artefacts"
-  mvn -DskipTests compile --quiet
 fi
 
 cd exonum-java-binding-core/rust
