@@ -10,6 +10,9 @@ use runtime::cmd::{GenerateNodeConfig, Finalize};
 use utils::unwrap_jni;
 use MainExecutor;
 use exonum::helpers::fabric::CommandExtension;
+use jni::JavaVM;
+
+use std::sync::Arc;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
 const START_SERVICE_SIGNATURE: &str =
@@ -26,12 +29,20 @@ pub struct JavaServiceRuntime {
 impl JavaServiceRuntime {
     /// Create new runtime from config.
     pub fn new(config: Config) -> Self {
-        let executor = Self::create_executor(config.jvm_config);
-        let service_proxy = Self::create_service(config.service_config, executor.clone());
-        Self {
-            executor,
-            service_proxy,
-        }
+        let runtime = unsafe {
+            JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
+                let java_vm = Self::create_java_vm(config.jvm_config);
+                let executor = MainExecutor::new(Arc::new(java_vm));
+                let service_proxy = Self::create_service(config.service_config, executor.clone());
+                let runtime = JavaServiceRuntime {
+                    executor,
+                    service_proxy,
+                };
+                JAVA_SERVICE_RUNTIME = Some(runtime.clone());
+            });
+            JAVA_SERVICE_RUNTIME.clone().unwrap()
+        };
+        runtime
     }
 
     /// Return internal service proxy.
@@ -39,22 +50,19 @@ impl JavaServiceRuntime {
         self.service_proxy.clone()
     }
 
-    fn create_executor(config: JvmConfig) -> MainExecutor {
-        let java_vm = {
-            let mut args_builder = jni::InitArgsBuilder::new()
-                .version(jni::JNIVersion::V8);
+    fn create_java_vm(config: JvmConfig) -> JavaVM {
+        let mut args_builder = jni::InitArgsBuilder::new()
+            .version(jni::JNIVersion::V8);
 
-            if config.debug {
-                args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
-            }
+        if config.debug {
+            args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
+        }
 
-            args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
-            args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
+        args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
+        args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
 
-            let args = args_builder.build().unwrap();
-            jni::JavaVM::new(args).unwrap()
-        };
-        MainExecutor::new(java_vm)
+        let args = args_builder.build().unwrap();
+        jni::JavaVM::new(args).unwrap()
     }
 
     fn create_service(config: ServiceConfig, executor: MainExecutor) -> ServiceProxy {
@@ -92,20 +100,17 @@ impl ServiceFactory for JavaServiceFactory {
     }
 
     fn make_service(&mut self, context: &Context) -> Box<Service> {
-        let runtime = unsafe {
-            JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                use exonum::helpers::fabric::keys;
-                let config: Config = context.get(keys::NODE_CONFIG)
-                    .unwrap()
-                    .services_configs
-                    .get("ejb")
-                    .unwrap()
-                    .clone()
-                    .try_into()
-                    .unwrap();
-                JAVA_SERVICE_RUNTIME = Some(JavaServiceRuntime::new(config));
-            });
-            JAVA_SERVICE_RUNTIME.clone().unwrap()
+        let runtime = {
+            use exonum::helpers::fabric::keys;
+            let config: Config = context.get(keys::NODE_CONFIG)
+                .unwrap()
+                .services_configs
+                .get("ejb")
+                .unwrap()
+                .clone()
+                .try_into()
+                .unwrap();
+            JavaServiceRuntime::new(config)
         };
 
         Box::new(runtime.service_proxy().clone())

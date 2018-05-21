@@ -1,4 +1,3 @@
-/*
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -10,6 +9,8 @@ use java_bindings::jni::{JavaVM, JNIEnv};
 use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
                            panic_on_exception};
 
+use std::sync::Arc;
+
 const ERROR_CLASS: &str = "java/lang/Error";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 const EXCEPTION_CLASS: &str = "java/lang/Exception";
@@ -17,8 +18,8 @@ const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 
 lazy_static! {
-    static ref VM: JavaVM = create_vm_for_tests();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
+    static ref VM: Arc<JavaVM> = create_vm_for_tests();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 #[test]
@@ -168,4 +169,3 @@ fn throw(env: &JNIEnv, e: &str) -> JniResult<()> {
 fn make_jni_error() -> JniResult<()> {
     Err(JniErrorKind::Msg("Custom test error".to_string()).into())
 }
-*/

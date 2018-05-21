@@ -3,26 +3,27 @@ use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
-pub fn create_vm_for_benchmarks() -> JavaVM {
-    create_vm(false, false)
+pub fn create_vm_for_benchmarks() -> Arc<JavaVM> {
+    Arc::new(create_vm(false, false))
 }
 
 /// Creates a configured `JavaVM` for tests.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
-pub fn create_vm_for_tests() -> JavaVM {
-    create_vm(true, false)
+pub fn create_vm_for_tests() -> Arc<JavaVM> {
+    Arc::new(create_vm(true, false))
 }
 
 /// Creates a configured `JavaVM` for tests with fake classes.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
-pub fn create_vm_for_tests_with_fake_classes() -> JavaVM {
-    create_vm(true, true)
+pub fn create_vm_for_tests_with_fake_classes() -> Arc<JavaVM> {
+    Arc::new(create_vm(true, true))
 }
 
 /// Creates a configured `JavaVM`.

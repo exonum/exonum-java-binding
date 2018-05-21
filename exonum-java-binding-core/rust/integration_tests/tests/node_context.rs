@@ -1,9 +1,10 @@
-/*
 extern crate futures;
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
+
+use std::sync::Arc;
 
 use futures::Stream;
 use futures::sync::mpsc::{self, Receiver};
@@ -22,12 +23,12 @@ use java_bindings::utils::{as_handle, get_and_clear_java_exception, get_class_na
                            unwrap_jni_verbose};
 
 lazy_static! {
-    static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 #[test]
-pub fn submit_valid_transaction() {
+fn submit_valid_transaction() {
     let jclass = JObject::null().into();
     let (mut node, app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
@@ -63,7 +64,7 @@ pub fn submit_valid_transaction() {
 }
 
 #[test]
-pub fn submit_not_valid_transaction() {
+fn submit_not_valid_transaction() {
     const INVALID_TRANSACTION_EXCEPTION: &str = "com.exonum.binding.messages.InvalidTransactionException";
 
     let jclass = JObject::null().into();
@@ -121,4 +122,3 @@ where
     let message = env.byte_array_from_slice(raw_message.as_ref())?;
     Ok(env.auto_local(message.into()))
 }
-*/
