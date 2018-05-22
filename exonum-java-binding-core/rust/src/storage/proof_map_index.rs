@@ -113,35 +113,25 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     utils::unwrap_exc_or_default(&env, res)
 }
 
-// FIXME яяя
-///// Returns Java-proof object.
-//#[no_mangle]
-//pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetProof(
-//    env: JNIEnv,
-//    _: JObject,
-//    map_handle: Handle,
-//    key: jbyteArray,
-//) -> jobject {
-//    let res = panic::catch_unwind(|| {
-//        let key = convert_to_key(&env, key)?;
-//        env.ensure_local_capacity(512)?;
-//        let proof = match *utils::cast_handle::<IndexType>(map_handle) {
-//            IndexType::SnapshotIndex(ref map) => map.get_proof(&key),
-//            IndexType::ForkIndex(ref map) => map.get_proof(&key),
-//        };
-//        match proof {
-//            MapProof::LeafRootInclusive(key, val) => {
-//                make_java_equal_value_at_root(&env, &key, &val)
-//            }
-//            MapProof::LeafRootExclusive(key, hash) => {
-//                make_java_non_equal_value_at_root(&env, &key, &hash)
-//            }
-//            MapProof::Empty => make_java_empty_proof(&env),
-//            MapProof::Branch(branch) => make_java_brach_proof(&env, &branch),
-//        }
-//    });
-//    utils::unwrap_exc_or(&env, res, ptr::null_mut())
-//}
+/// Returns Java-proof object.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetProof(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    key: jbyteArray,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        let key = convert_to_key(&env, key)?;
+        env.ensure_local_capacity(512)?;
+        let _proof = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.get_proof(key),
+            IndexType::ForkIndex(ref map) => map.get_proof(key),
+        };
+        unimplemented!("ECR-1350")
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
 
 /// Returns the pointer to the iterator over a map keys and values.
 #[no_mangle]
