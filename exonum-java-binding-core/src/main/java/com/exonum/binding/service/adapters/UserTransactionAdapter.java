@@ -3,6 +3,8 @@ package com.exonum.binding.service.adapters;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.logging.log4j.LogManager;
@@ -35,9 +37,15 @@ public class UserTransactionAdapter {
   public void execute(long forkNativeHandle) {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
-      try (Fork view = new Fork(forkNativeHandle, false)) {
+
+      try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
+        Fork view = Fork.newInstance(forkNativeHandle, false, cleaner);
         transaction.execute(view);
       }
+
+    } catch (CloseFailuresException e) {
+      logger.error(e);
+      throw new RuntimeException(e);
     } catch (Throwable e) {
       logUserException(e);
       throw e;

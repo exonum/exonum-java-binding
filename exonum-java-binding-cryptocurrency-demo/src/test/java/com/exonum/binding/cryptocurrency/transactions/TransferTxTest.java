@@ -10,6 +10,8 @@ import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -40,9 +42,10 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeTransfer() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeTransfer() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create source and target wallets with the given initial values
       String from = "wallet-1";
       String to = "wallet-2";
@@ -60,19 +63,19 @@ public class TransferTxTest {
 
       // Check that wallets have correct values
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets()) {
-        long expectedFromValue = initialValue - transferSum;
-        assertThat(wallets.get(fromWallet).getBalance(), equalTo(expectedFromValue));
-        long expectedToValue = initialValue + transferSum;
-        assertThat(wallets.get(toWallet).getBalance(), equalTo(expectedToValue));
-      }
+      ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets();
+      long expectedFromValue = initialValue - transferSum;
+      assertThat(wallets.get(fromWallet).getBalance(), equalTo(expectedFromValue));
+      long expectedToValue = initialValue + transferSum;
+      assertThat(wallets.get(toWallet).getBalance(), equalTo(expectedToValue));
     }
   }
 
   @Test
-  public void executeNoSuchFromWallet() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeNoSuchFromWallet() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create source wallet with the given initial value
       String from = "from-wallet";
       String to = "unknown-wallet";
@@ -89,16 +92,16 @@ public class TransferTxTest {
 
       // Check that balance of fromWallet is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-        assertThat(wallets.get(fromWallet).getBalance(), equalTo(initialValue));
-      }
+      MapIndex<HashCode, Wallet> wallets = schema.wallets();
+      assertThat(wallets.get(fromWallet).getBalance(), equalTo(initialValue));
     }
   }
 
   @Test
-  public void executeNoSuchToWallet() {
-    try (Database db = new MemoryDb();
-        Fork view = db.createFork()) {
+  public void executeNoSuchToWallet() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to transfer from unknown wallet
       String from = "unknown-wallet";
       String to = "to-wallet";
@@ -113,9 +116,8 @@ public class TransferTxTest {
 
       // Check that balance of toWallet is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-        assertThat(wallets.get(toWallet).getBalance(), equalTo(initialValue));
-      }
+      MapIndex<HashCode, Wallet> wallets = schema.wallets();
+      assertThat(wallets.get(toWallet).getBalance(), equalTo(initialValue));
     }
   }
 
@@ -163,8 +165,7 @@ public class TransferTxTest {
   private void createWallet(Fork view, String name, Long initialValue) {
     HashCode nameHash = hashUtf8String(name);
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
-      wallets.put(nameHash, new Wallet(name, initialValue));
-    }
+    MapIndex<HashCode, Wallet> wallets = schema.wallets();
+    wallets.put(nameHash, new Wallet(name, initialValue));
   }
 }

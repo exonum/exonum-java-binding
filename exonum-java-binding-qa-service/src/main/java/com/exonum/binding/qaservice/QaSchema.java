@@ -9,7 +9,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
-import com.google.errorprone.annotations.MustBeClosed;
 
 /**
  * A schema of the QA service.
@@ -32,7 +31,6 @@ public final class QaSchema implements Schema {
   /**
    * Returns a proof map of counter values. Must be closed.
    */
-  @MustBeClosed
   public ProofMapIndexProxy<HashCode, Long> counters() {
     String name = fullIndexName("counters");
     return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
@@ -42,7 +40,6 @@ public final class QaSchema implements Schema {
   /**
    * Returns a map of counter names. Must be closed.
    */
-  @MustBeClosed
   public MapIndex<HashCode, String> counterNames() {
     String name = fullIndexName("counterNames");
     return MapIndexProxy.newInstance(name, view, StandardSerializers.hash(),

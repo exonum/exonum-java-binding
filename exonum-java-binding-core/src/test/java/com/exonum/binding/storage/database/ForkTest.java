@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.exonum.binding.proxy.Cleaner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,9 +36,9 @@ public class ForkTest {
   @Test
   public void disposeInternal_OwningProxy() throws Exception {
     int nativeHandle = 0x0A;
-    fork = new Fork(nativeHandle, true);
-
-    fork.close();
+    try (Cleaner cleaner = new Cleaner()) {
+      fork = Fork.newInstance(nativeHandle, true, cleaner);
+    }
 
     verify(modCounter).remove(fork);
 
@@ -48,9 +49,10 @@ public class ForkTest {
   @Test
   public void disposeInternal_NotOwningProxy() throws Exception {
     int nativeHandle = 0x0A;
-    fork = new Fork(nativeHandle, false);
 
-    fork.close();
+    try (Cleaner cleaner = new Cleaner()) {
+      fork = Fork.newInstance(nativeHandle, false, cleaner);
+    }
 
     verify(modCounter).remove(fork);
 

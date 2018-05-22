@@ -3,10 +3,11 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkNoNulls;
 
+import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -18,8 +19,8 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(
-      long nativeHandle, String name, View view, CheckingSerializerDecorator<T> userSerializer) {
+  AbstractListIndexProxy(NativeHandle nativeHandle, String name, View view,
+                         CheckingSerializerDecorator<T> userSerializer) {
     super(nativeHandle, name, view);
     this.serializer = userSerializer;
   }
@@ -89,23 +90,15 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
   }
 
   @Override
-  @MustBeClosed
-  public final StorageIterator<T> iterator() {
+  public final Iterator<T> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIter(getNativeHandle()),
         this::nativeIterNext,
         this::nativeIterFree,
-        this,
+        dbView,
         modCounter,
         serializer::fromBytes);
   }
-
-  @Override
-  protected final void disposeInternal() {
-    nativeFree(getNativeHandle());
-  }
-
-  abstract void nativeFree(long nativeHandle);
 
   abstract void nativeAdd(long nativeHandle, byte[] e);
 

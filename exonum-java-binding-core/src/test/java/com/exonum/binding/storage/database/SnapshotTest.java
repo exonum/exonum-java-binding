@@ -5,6 +5,7 @@ import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
+import com.exonum.binding.proxy.Cleaner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,21 +24,22 @@ public class SnapshotTest {
   }
 
   @Test
-  public void disposeInternal_NotOwning() throws Exception {
-    Snapshot snapshot = new Snapshot(0x0A, false);
-
-    snapshot.close();
+  public void destroy_NotOwning() throws Exception {
+    try (Cleaner cleaner = new Cleaner()) {
+      Snapshot.newInstance(0x0A, false, cleaner);
+    }
 
     verifyStatic(Views.class, never());
     Views.nativeFree(anyLong());
   }
 
   @Test
-  public void disposeInternal_Owning() throws Exception {
+  public void destroy_Owning() throws Exception {
     int nativeHandle = 0x0A;
-    Snapshot snapshot = new Snapshot(nativeHandle, true);
 
-    snapshot.close();
+    try (Cleaner cleaner = new Cleaner()) {
+      Snapshot.newInstance(nativeHandle, true, cleaner);
+    }
 
     verifyStatic(Views.class);
     Views.nativeFree(nativeHandle);

@@ -50,7 +50,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     list_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, list_handle);

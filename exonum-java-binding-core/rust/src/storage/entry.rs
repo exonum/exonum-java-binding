@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     entry_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, entry_handle);
