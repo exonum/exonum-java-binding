@@ -49,7 +49,6 @@
     </plugins>
   </build>
 
-
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>

@@ -81,7 +81,7 @@ class ApiController {
           .setStatusMessage("Bad Request: transaction is not valid")
           .end();
     } catch (InternalServerError e) {
-      log.error(e);
+      log.error("Internal error occurred whilst submitting tx (id={}, tx={}):", txId, tx, e);
       rc.response().setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR).end();
     }
   }
