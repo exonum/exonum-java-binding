@@ -119,7 +119,7 @@ public class UserServiceAdapter {
     node = new NodeProxy(nodeNativeHandle);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
-    server.mountSubRouter(getName(), router);
+    server.mountSubRouter("/"+getName(), router);
   }
 
   /**
