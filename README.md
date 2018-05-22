@@ -8,7 +8,7 @@ and [Rust](https://www.rust-lang.org/).
 
 ### Install system dependencies
 Please install Rust and the system dependencies of Exonum. 
-The instructions are available [here](https://github.com/exonum/exonum/blob/v0.5.1/INSTALL.md).
+The instructions are available [here](https://exonum.com/doc/get-started/install/).
 You do _not_ need to manually fetch and compile Exonum.
 
 ### Build the project
