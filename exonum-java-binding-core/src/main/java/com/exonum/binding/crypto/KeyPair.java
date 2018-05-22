@@ -1,36 +1,23 @@
 package com.exonum.binding.crypto;
 
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_SECRETKEYBYTES;
-import static org.abstractj.kalium.NaCl.sodium;
-import static org.abstractj.kalium.crypto.Util.checkLength;
-import static org.abstractj.kalium.crypto.Util.isValid;
-import static org.abstractj.kalium.crypto.Util.zeros;
-
 public class KeyPair {
 
   private final byte[] seed;
   private final byte[] publicKey;
   private final byte[] privateKey;
 
-  /**
-   * Generates a secret key and a corresponding public key using a seed byte array.
-   */
-  KeyPair(byte[] seed) {
-    checkLength(seed, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
+  KeyPair(byte[] seed, byte[] privateKey, byte[] publicKey) {
     this.seed = seed;
-    this.privateKey = zeros(CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
-    this.publicKey = zeros(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
-    isValid(sodium().crypto_sign_ed25519_seed_keypair(publicKey, privateKey, seed),
-        "Failed to generate a key pair");
+    this.privateKey = privateKey;
+    this.publicKey = publicKey;
   }
 
   public PublicKey getPublicKey() {
-    return new PublicKey(publicKey);
+    return PublicKey.fromBytes(publicKey);
   }
 
   public PrivateKey getPrivateKey() {
-    return new PrivateKey(privateKey);
+    return PrivateKey.fromBytes(privateKey);
   }
 
   public byte[] getSeed() {

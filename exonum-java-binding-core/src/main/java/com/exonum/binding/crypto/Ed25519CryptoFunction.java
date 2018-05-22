@@ -1,6 +1,7 @@
 package com.exonum.binding.crypto;
 
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_SECRETKEYBYTES;
 import static org.abstractj.kalium.NaCl.sodium;
 import static org.abstractj.kalium.crypto.Util.checkLength;
@@ -13,27 +14,25 @@ import jnr.ffi.byref.LongLongByReference;
 import org.abstractj.kalium.crypto.Random;
 import org.abstractj.kalium.crypto.Util;
 
-public class CryptoUtils {
+public class Ed25519CryptoFunction implements CryptoFunction {
 
-  /**
-   * Generates a secret key and a corresponding public key using a seed byte array.
-   */
-  public static KeyPair generateKeyPair(byte[] seed) {
-    return new KeyPair(seed);
+  @Override
+  public KeyPair generateKeyPair(byte[] seed) {
+    checkLength(seed, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
+    byte[] privateKey = zeros(CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
+    byte[] publicKey = zeros(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
+    isValid(sodium().crypto_sign_ed25519_seed_keypair(publicKey, privateKey, seed),
+        "Failed to generate a key pair");
+    return new KeyPair(seed, privateKey, publicKey);
   }
 
-  /**
-   * Generates a secret key and a corresponding public key using a random seed.
-   */
-  public static KeyPair generateKeyPair() {
+  @Override
+  public KeyPair generateKeyPair() {
     return generateKeyPair(new Random().randomBytes(CRYPTO_SIGN_ED25519_SECRETKEYBYTES));
   }
 
-  /**
-   * Given a private key, computes and returns a signature for the previously supplied
-   * 'message'.
-   */
-  public static byte[] signMessage(byte[] message, PrivateKey privateKey) {
+  @Override
+  public byte[] signMessage(byte[] message, PrivateKey privateKey) {
     byte[] signature = Util.prependZeros(CRYPTO_SIGN_ED25519_BYTES, message);
     LongLongByReference bufferLen = new LongLongByReference(0);
     sodium()
@@ -42,10 +41,8 @@ public class CryptoUtils {
     return signature;
   }
 
-  /**
-   * Verifies that `signature` is a valid signature for the supplied 'message'.
-   */
-  public static boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
+  @Override
+  public boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
     checkLength(signature, CRYPTO_SIGN_ED25519_BYTES);
     byte[] sigAndMsg = merge(signature, message);
     byte[] buffer = zeros(sigAndMsg.length);

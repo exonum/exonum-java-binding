@@ -1,23 +1,44 @@
 package com.exonum.binding.crypto;
 
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
-import static org.abstractj.kalium.crypto.Util.checkLength;
 import static org.abstractj.kalium.encoders.Encoder.HEX;
-
-import org.abstractj.kalium.keys.Key;
 
 public class PublicKey implements Key {
 
   private final byte[] publicKey;
 
-  PublicKey(byte[] publicKey) {
+  private PublicKey(byte[] publicKey) {
     this.publicKey = publicKey;
-    checkLength(publicKey, CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
+  }
+
+  /**
+   * Creates a {@code PublicKey} from a byte array. The array is defensively copied.
+   */
+  public static PublicKey fromBytes(byte[] bytes) {
+    return fromBytesNoCopy(bytes.clone());
+  }
+
+  /**
+   * Creates a {@code PublicKey} from a byte array. The array is not copied defensively.
+   */
+  public static PublicKey fromBytesNoCopy(byte[] bytes) {
+    return new PublicKey(bytes);
+  }
+
+  /**
+   * Creates a {@code PublicKey} from a hexadecimal string.
+   */
+  public static PublicKey fromHexString(String stringKey) {
+    return new PublicKey(HEX.decode(stringKey));
   }
 
   @Override
   public byte[] toBytes() {
     return publicKey.clone();
+  }
+
+  @Override
+  public byte[] toBytesNoCopy() {
+    return publicKey;
   }
 
   @Override
