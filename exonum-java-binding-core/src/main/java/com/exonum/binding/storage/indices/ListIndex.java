@@ -12,10 +12,10 @@ import java.util.NoSuchElementException;
  * are specified to throw {@link UnsupportedOperationException} if
  * this list has been created with a read-only database view.
  *
- * <p>This interface prohibits null elements.
+ * <p>When the corresponding view goes out of scope, this list is destroyed. Subsequent use
+ * of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
- * <p>As any native proxy, the list index <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>This interface prohibits null elements.
  *
  * @param <T> the type of elements in this list
  */

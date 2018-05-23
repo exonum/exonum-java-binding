@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -10,6 +11,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
+import java.util.function.LongSupplier;
 
 /**
  * A list index proxy is a contiguous list of elements.
@@ -41,6 +43,7 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @param serializer a serializer of elements
+   * @param <E> the type of elements in this list
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
@@ -50,14 +53,43 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
     checkIndexName(name);
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle listNativeHandle = createNativeList(name, view);
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = createNativeList(view,
+        () -> nativeCreate(name, viewNativeHandle));
 
     return new ListIndexProxy<>(listNativeHandle, name, view, s);
   }
 
-  private static NativeHandle createNativeList(String name, View view) {
+  /**
+   * Creates a new list in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param listId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of list elements
+   * @param <E> the type of elements in this list
+   * @return a new list proxy
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> ListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
+                                                       View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(listId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle listNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+    NativeHandle listNativeHandle = createNativeList(view,
+        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle));
+
+    return new ListIndexProxy<>(listNativeHandle, groupName, view, s);
+  }
+
+  private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
+    NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
 
     Cleaner cleaner = view.getCleaner();
     ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy.class,
@@ -105,6 +137,9 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
+
+  private static native long nativeCreateInGroup(String groupName, byte[] listId,
+                                                 long viewNativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 

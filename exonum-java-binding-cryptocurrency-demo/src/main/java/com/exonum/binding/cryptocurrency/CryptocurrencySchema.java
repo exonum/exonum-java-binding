@@ -29,7 +29,7 @@ public final class CryptocurrencySchema implements Schema {
   }
 
   /**
-   * Returns a proof map of wallets. Must be closed.
+   * Returns a proof map of wallets.
    */
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");

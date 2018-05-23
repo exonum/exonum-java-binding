@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
 import com.exonum.binding.proxy.Cleaner;
@@ -10,6 +11,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import java.util.Iterator;
+import java.util.function.LongSupplier;
 
 /**
  * A key set is an index that contains no duplicate elements (keys).
@@ -48,6 +50,7 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
    * @param serializer a serializer of set keys
+   * @param <E> the type of keys in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @throws NullPointerException if any argument is null
@@ -57,16 +60,44 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
     checkIndexName(name);
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle setNativeHandle = createNativeSet(name, view);
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreate(name, viewNativeHandle));
 
     return new KeySetIndexProxy<>(setNativeHandle, name, view, s);
   }
 
-  private static NativeHandle createNativeSet(String name, View view) {
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+  /**
+   * Creates a new key set in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param indexId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of set keys
+   * @param <E> the type of keys in this set
+   * @return a new key set
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> KeySetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
+                                                         View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(indexId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle));
+
+    return new KeySetIndexProxy<>(setNativeHandle, groupName, view, s);
+  }
+
+  private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
     Cleaner cleaner = view.getCleaner();
+    NativeHandle setNativeHandle = new NativeHandle(nativeSetConstructor.getAsLong());
     ProxyDestructor.newRegistered(cleaner, setNativeHandle, KeySetIndexProxy.class,
         KeySetIndexProxy::nativeFree);
     return setNativeHandle;
@@ -150,6 +181,9 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
   }
 
   private static native long nativeCreate(String setName, long viewNativeHandle);
+
+  private static native long nativeCreateInGroup(String groupName, byte[] setId,
+                                                 long viewNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

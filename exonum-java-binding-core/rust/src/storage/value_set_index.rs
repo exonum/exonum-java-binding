@@ -43,6 +43,33 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns a pointer to the created `ValueSetIndex` instance in an index family (= group).
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeCreateInGroup(
+    env: JNIEnv,
+    _: JClass,
+    group_name: JString,
+    set_id: jbyteArray,
+    view_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let group_name = utils::convert_to_string(&env, group_name)?;
+        let set_id = env.convert_byte_array(set_id)?;
+        let view_ref = utils::cast_handle::<View>(view_handle).get();
+        Ok(utils::to_handle(
+            match *view_ref {
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::with_prefix(group_name, set_id, &*snapshot))
+                }
+                ViewRef::Fork(ref mut fork) => {
+                    IndexType::ForkIndex(Index::with_prefix(group_name, set_id, fork))
+                }
+            },
+        ))
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Destroys the underlying `ValueSetIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeFree(
