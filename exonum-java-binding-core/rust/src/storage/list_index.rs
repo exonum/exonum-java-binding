@@ -55,10 +55,10 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
         Ok(utils::to_handle(
             match *view_ref {
                 ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::with_prefix(group_name, list_id, &*snapshot))
+                    IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
                 }
                 ViewRef::Fork(ref mut fork) => {
-                    IndexType::ForkIndex(Index::with_prefix(group_name, list_id, fork))
+                    IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
                 }
             },
         ))

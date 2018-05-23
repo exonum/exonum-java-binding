@@ -55,10 +55,10 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
         Ok(utils::to_handle(
             match *view_ref {
                 ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::with_prefix(group_name, set_id, &*snapshot))
+                    IndexType::SnapshotIndex(Index::new_in_family(group_name, &set_id, &*snapshot))
                 }
                 ViewRef::Fork(ref mut fork) => {
-                    IndexType::ForkIndex(Index::with_prefix(group_name, set_id, fork))
+                    IndexType::ForkIndex(Index::new_in_family(group_name, &set_id, fork))
                 }
             },
         ))
