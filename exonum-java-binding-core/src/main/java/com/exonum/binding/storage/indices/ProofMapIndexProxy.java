@@ -156,10 +156,10 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
   }
 
   @Override
-  public void putAll(Map<? extends K, ? extends V> map) {
+  public void putAll(Map<? extends K, ? extends V> sourceMap) {
     notifyModified();
     long nativeHandle = getNativeHandle();
-    for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+    for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
       putInternal(nativeHandle, entry.getKey(), entry.getValue());
     }
   }

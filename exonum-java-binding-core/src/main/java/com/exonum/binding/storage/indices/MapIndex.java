@@ -43,17 +43,17 @@ public interface MapIndex<K, V> extends StorageIndex {
 
   /**
    * Puts all key-value pairs from the given map into this map. Equivalent to a sequence
-   * of individual put operations.
+   * of individual {@link #put} operations.
    *
-   * @param map a map to put into this one
+   * @param sourceMap a map to put into this one
    * @throws NullPointerException if the passed map is null or contains a null key or values
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if some property of the key or the value prevents it
    *                                  from being stored in this map
    * @throws UnsupportedOperationException if this map is read-only
    */
-  default void putAll(Map<? extends K, ? extends V> map) {
-    for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+  default void putAll(Map<? extends K, ? extends V> sourceMap) {
+    for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
       put(entry.getKey(), entry.getValue());
     }
   }
