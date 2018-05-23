@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A proof node for a singleton proof map, that contains mapping for the specified key.
  */
-public class EqualValueAtRoot implements MapProof {
+public final class EqualValueAtRoot implements MapProof {
 
   private final DbKey databaseKey;
 

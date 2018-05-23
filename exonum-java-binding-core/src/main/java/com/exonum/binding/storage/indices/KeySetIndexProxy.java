@@ -36,7 +36,7 @@ import java.util.Iterator;
  * @see ValueSetIndexProxy
  * @see View
  */
-public class KeySetIndexProxy<E> extends AbstractIndexProxy {
+public final class KeySetIndexProxy<E> extends AbstractIndexProxy {
 
   private final CheckingSerializerDecorator<E> serializer;
 
