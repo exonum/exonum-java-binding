@@ -13,50 +13,9 @@ import java.util.stream.IntStream;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class MapIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
+public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
 
   private static final String GROUP_NAME = "map_group_IT";
-
-  @Test
-  public void newInGroupUnsafe() {
-    View view = db.createFork(cleaner);
-
-    ImmutableMap<String, ImmutableMap<String, String>> entriesById =
-        ImmutableMap.<String, ImmutableMap<String, String>>builder()
-            .put("1", ImmutableMap.of())
-            .put("2", ImmutableMap.of("K1", "V1"))
-            .put("3", ImmutableMap.of("K2", "V2", "K3", "V3"))
-            .put("4", ImmutableMap.of("K3", "V3", "K2", "V2"))
-            .put("5", ImmutableMap.of("K4", "V5", "K6", "V6", "K7", "V7"))
-            .build();
-
-    // Create a map for each id
-    Map<String, MapIndex<String, String>> mapsById = new HashMap<>();
-    for (String mapId : entriesById.keySet()) {
-      byte[] id = bytes(mapId);
-      MapIndex<String, String> map = createInGroup(id, view);
-
-      mapsById.put(mapId, map);
-    }
-
-    // Put entries in each map
-    for (Map.Entry<String, MapIndex<String, String>> entry : mapsById.entrySet()) {
-      String id = entry.getKey();
-      MapIndex<String, String> map = entry.getValue();
-
-      map.putAll(entriesById.get(id));
-    }
-
-    // Check that each map contains the added entries
-    for (Map.Entry<String, MapIndex<String, String>> entry : mapsById.entrySet()) {
-      String id = entry.getKey();
-      MapIndex<String, String> map = entry.getValue();
-
-      Map<String, String> actualEntriesInMap = MapEntries.extractEntries(map);
-      Map<String, String> expectedEntries = entriesById.get(id);
-      assertThat(actualEntriesInMap).isEqualTo(expectedEntries);
-    }
-  }
 
   @Ignore("Fails until Lobster Nice is done, see the requirement #3")
   @Test
@@ -109,7 +68,19 @@ public class MapIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     }
   }
 
-  private static MapIndex<String, String> createInGroup(byte[] mapId, View view) {
+  @Override
+  ImmutableMap<String, ImmutableMap<String, String>> getTestEntriesById() {
+    return ImmutableMap.<String, ImmutableMap<String, String>>builder()
+            .put("1", ImmutableMap.of())
+            .put("2", ImmutableMap.of("K1", "V1"))
+            .put("3", ImmutableMap.of("K2", "V2", "K3", "V3"))
+            .put("4", ImmutableMap.of("K3", "V3", "K2", "V2"))
+            .put("5", ImmutableMap.of("K4", "V5", "K6", "V6", "K7", "V7"))
+            .build();
+  }
+
+  @Override
+  MapIndex<String, String> createInGroup(byte[] mapId, View view) {
     return MapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, view,
         StandardSerializers.string(), StandardSerializers.string());
   }
