@@ -159,7 +159,10 @@ mod tests {
         db
     }
 
-    fn entry<T>(view: T) -> Entry<T, i32> {
+    fn entry<T>(view: T) -> Entry<T, i32>
+    where
+        T: AsRef<Snapshot + 'static>,
+    {
         Entry::new("test", view)
     }
 
