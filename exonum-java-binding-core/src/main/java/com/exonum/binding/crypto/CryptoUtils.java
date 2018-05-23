@@ -6,12 +6,10 @@ package com.exonum.binding.crypto;
 class CryptoUtils {
 
   /**
-   * Check that {@code data} byte array has specified {@code size}.
+   * Check that {@code data} byte array has specified {@code size} and is not {@code null}.
    */
-  static void checkLength(byte[] data, int size) {
-    if (data == null || data.length != size) {
-      throw new IllegalArgumentException("Byte array has invalid size");
-    }
+  static boolean checkLength(byte[] data, int size) {
+    return data != null && data.length == size;
   }
 
   /**

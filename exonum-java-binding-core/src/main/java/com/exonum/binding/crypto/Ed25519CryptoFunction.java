@@ -23,7 +23,9 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public KeyPair generateKeyPair(byte[] seed) {
-    checkLength(seed, CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
+    if (!checkLength(seed, CRYPTO_SIGN_ED25519_SECRETKEYBYTES)) {
+      throw new IllegalArgumentException("Seed byte array is either null or has invalid size");
+    }
     byte[] privateKey = zeros(CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
     byte[] publicKey = zeros(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
     if (!checkReturnValueSuccess(
@@ -40,20 +42,18 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public byte[] signMessage(byte[] message, PrivateKey privateKey) {
-    byte[] signature = Util.prependZeros(CRYPTO_SIGN_ED25519_BYTES, message);
+    byte[] signedMessage = Util.prependZeros(CRYPTO_SIGN_ED25519_BYTES, message);
     LongLongByReference bufferLen = new LongLongByReference(0);
     sodium()
         .crypto_sign_ed25519(
-            signature, bufferLen, message, message.length, privateKey.toBytesNoCopy());
-    signature = slice(signature, 0, CRYPTO_SIGN_ED25519_BYTES);
-    return signature;
+            signedMessage, bufferLen, message, message.length, privateKey.toBytesNoCopy());
+    signedMessage = slice(signedMessage, 0, CRYPTO_SIGN_ED25519_BYTES);
+    return signedMessage;
   }
 
   @Override
   public boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
-    try {
-      checkLength(signature, CRYPTO_SIGN_ED25519_BYTES);
-    } catch (IllegalArgumentException e) {
+    if (!checkLength(signature, CRYPTO_SIGN_ED25519_BYTES)) {
       return false;
     }
     byte[] sigAndMsg = merge(signature, message);
