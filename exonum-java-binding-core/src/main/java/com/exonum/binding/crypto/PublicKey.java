@@ -2,12 +2,13 @@ package com.exonum.binding.crypto;
 
 import static org.abstractj.kalium.encoders.Encoder.HEX;
 
-public class PublicKey implements Key {
-
-  private final byte[] publicKey;
+/**
+ * Represent a public key in a digital signature system.
+ */
+public final class PublicKey extends AbstractKey {
 
   private PublicKey(byte[] publicKey) {
-    this.publicKey = publicKey;
+    super(publicKey);
   }
 
   /**
@@ -20,7 +21,7 @@ public class PublicKey implements Key {
   /**
    * Creates a {@code PublicKey} from a byte array. The array is not copied defensively.
    */
-  public static PublicKey fromBytesNoCopy(byte[] bytes) {
+  static PublicKey fromBytesNoCopy(byte[] bytes) {
     return new PublicKey(bytes);
   }
 
@@ -29,20 +30,5 @@ public class PublicKey implements Key {
    */
   public static PublicKey fromHexString(String stringKey) {
     return new PublicKey(HEX.decode(stringKey));
-  }
-
-  @Override
-  public byte[] toBytes() {
-    return publicKey.clone();
-  }
-
-  @Override
-  public byte[] toBytesNoCopy() {
-    return publicKey;
-  }
-
-  @Override
-  public String toString() {
-    return HEX.encode(publicKey);
   }
 }
