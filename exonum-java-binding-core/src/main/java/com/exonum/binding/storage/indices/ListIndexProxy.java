@@ -3,6 +3,9 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
@@ -22,8 +25,8 @@ import java.util.NoSuchElementException;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this list is destroyed. Subsequent use of the closed list
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
  * @see View
@@ -44,11 +47,27 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    */
   public static <E> ListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    return new ListIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    NativeHandle listNativeHandle = createNativeList(name, view);
+
+    return new ListIndexProxy<>(listNativeHandle, name, view, s);
   }
 
-  private ListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
+  private static NativeHandle createNativeList(String name, View view) {
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy.class,
+        ListIndexProxy::nativeFree);
+    return listNativeHandle;
+  }
+
+  private ListIndexProxy(NativeHandle nativeHandle, String name, View view,
+                         CheckingSerializerDecorator<E> serializer) {
+    super(nativeHandle, name, view, serializer);
   }
 
   /**
@@ -87,8 +106,7 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
 
-  @Override
-  native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 
   @Override
   native void nativeAdd(long nativeHandle, byte[] e);

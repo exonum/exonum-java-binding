@@ -1,6 +1,5 @@
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.proxy.NativeProxy;
 import com.exonum.binding.storage.database.View;
 
 /**
@@ -8,14 +7,10 @@ import com.exonum.binding.storage.database.View;
  *
  * <p>Also known as a collection, a table, and also as (rarely) a view for
  * a {@linkplain View database view} is inherently associated with an index.
- *
- * @implNote currently extends NativeProxy, if we decide to split proxies and user-facing code
- *     (see ECR-595), it must be removed from this interface
- *
- * @see NativeProxy
  */
 // todo: Document the various index types if this becomes public (ECR-595)
-interface StorageIndex extends NativeProxy {
+interface StorageIndex {
+
   /** Returns the name of this index. */
   String getName();
 }

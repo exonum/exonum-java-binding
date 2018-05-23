@@ -52,12 +52,11 @@ public final class IncrementCounterTx implements Transaction {
   @Override
   public void execute(Fork view) {
     QaSchema schema = new QaSchema(view);
-    try (ProofMapIndexProxy<HashCode, Long> counters = schema.counters()) {
-      // Increment the counter if there is such.
-      if (counters.containsKey(counterId)) {
-        long newValue = counters.get(counterId) + 1;
-        counters.put(counterId, newValue);
-      }
+    ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
+    // Increment the counter if there is such.
+    if (counters.containsKey(counterId)) {
+      long newValue = counters.get(counterId) + 1;
+      counters.put(counterId, newValue);
     }
   }
 

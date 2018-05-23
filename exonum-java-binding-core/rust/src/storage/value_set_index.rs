@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     set_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, set_handle);

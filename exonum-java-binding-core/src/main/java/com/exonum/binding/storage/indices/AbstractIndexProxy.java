@@ -4,6 +4,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
@@ -35,8 +36,8 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * @param view a database view from which the index has been created
    * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(long nativeHandle, String name, View view) {
-    super(nativeHandle, true, view);
+  AbstractIndexProxy(NativeHandle nativeHandle, String name, View view) {
+    super(nativeHandle);
     this.name = checkIndexName(name);
     this.dbView = checkNotNull(view);
     this.modCounter = ViewModificationCounter.getInstance();

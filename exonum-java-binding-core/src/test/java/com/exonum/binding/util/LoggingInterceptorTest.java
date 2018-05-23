@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,11 @@ public class LoggingInterceptorTest {
 
     Injector injector = Guice.createInjector(new TestModule());
     serviceAdapter = injector.getInstance(UserServiceAdapter.class);
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    appender.clear();
   }
 
   @Test

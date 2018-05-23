@@ -39,19 +39,18 @@ public final class CreateCounterTx implements Transaction {
   @Override
   public void execute(Fork view) {
     QaSchema schema = new QaSchema(view);
-    try (MapIndex<HashCode, Long> counters = schema.counters();
-         MapIndex<HashCode, String> names = schema.counterNames()) {
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> names = schema.counterNames();
 
-      HashCode counterId = Hashing.defaultHashFunction()
-          .hashString(name, UTF_8);
-      if (counters.containsKey(counterId)) {
-        return;
-      }
-      assert !names.containsKey(counterId) : "counterNames must not contain the id of " + name;
-
-      counters.put(counterId, 0L);
-      names.put(counterId, name);
+    HashCode counterId = Hashing.defaultHashFunction()
+        .hashString(name, UTF_8);
+    if (counters.containsKey(counterId)) {
+      return;
     }
+    assert !names.containsKey(counterId) : "counterNames must not contain the id of " + name;
+
+    counters.put(counterId, 0L);
+    names.put(counterId, name);
   }
 
   @Override
