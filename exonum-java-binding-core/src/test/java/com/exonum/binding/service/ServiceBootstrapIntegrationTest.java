@@ -31,7 +31,7 @@ public class ServiceBootstrapIntegrationTest {
     UserServiceAdapter service = ServiceBootstrap.startService(
         UserModule.class.getCanonicalName(), 0);
 
-    // Check the service and its dependencies work as expected
+    // Check the service and its dependencies work as expected.
     assertThat(service.getId(), equalTo(UserService.ID));
     assertThat(service.getName(), equalTo(UserService.NAME));
     BinaryMessage message = new Message.Builder()
