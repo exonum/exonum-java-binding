@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
  * An adapter of a user-facing interface {@link Service} to an interface with a native code.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
-public final class UserServiceAdapter {
+public class UserServiceAdapter {
 
   private final Service service;
 
