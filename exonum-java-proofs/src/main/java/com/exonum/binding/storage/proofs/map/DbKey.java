@@ -17,7 +17,7 @@ import java.util.BitSet;
  *   <li>The size of the common prefix in branch nodes.</li>
  * </ul>
  */
-public class DbKey {
+public final class DbKey {
 
   /**
    * Type of the node in a Merkle-Patricia tree.

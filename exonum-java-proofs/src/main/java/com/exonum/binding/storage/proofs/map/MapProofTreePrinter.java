@@ -3,7 +3,7 @@ package com.exonum.binding.storage.proofs.map;
 /**
  * A visitor of map proofs, which prints each node starting with a root node.
  */
-public class MapProofTreePrinter implements MapProofVisitor {
+public final class MapProofTreePrinter implements MapProofVisitor {
 
   private static final int INDENT = 2;
 

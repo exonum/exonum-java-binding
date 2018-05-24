@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
  *
  * @param <V> the type of values in the corresponding map
  */
-public class MapProofValidator<V> implements MapProofVisitor {
+public final class MapProofValidator<V> implements MapProofVisitor {
 
   /**
    * Various statuses of the proof: why it may not be valid.

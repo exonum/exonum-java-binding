@@ -11,7 +11,7 @@ import java.util.Optional;
  *
  * @param <E> type of the entry.
  */
-class RustIterAdapter<E> implements Iterator<E> {
+final class RustIterAdapter<E> implements Iterator<E> {
 
   private final RustIter<E> rustIter;
 

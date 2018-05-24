@@ -1,6 +1,6 @@
 package com.exonum.binding.test;
 
-public class TestParameters {
+public final class TestParameters {
 
   /**
    * A syntactic sugar to fluently convert a list of Objects to an array.
