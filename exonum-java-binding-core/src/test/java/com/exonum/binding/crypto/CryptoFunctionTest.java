@@ -38,4 +38,15 @@ public class CryptoFunctionTest {
     byte[] invalidSignature = Bytes.createPrefixed(message, CRYPTO_SIGN_ED25519_BYTES);
     assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
   }
+
+  @Test
+  public void invalidMessageVerificationTest() {
+    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    PrivateKey privateKey = keyPair.getPrivateKey();
+    PublicKey publicKey = keyPair.getPublicKey();
+    byte[] message = "myMessage".getBytes();
+    byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
+    byte[] anotherMessage = "anotherMessage".getBytes();
+    assertFalse(CRYPTO_FUNCTION.verify(anotherMessage, signature, publicKey));
+  }
 }

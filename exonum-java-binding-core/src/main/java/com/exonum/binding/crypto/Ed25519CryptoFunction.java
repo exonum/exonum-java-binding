@@ -21,9 +21,11 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   INSTANCE;
 
+  private static int CRYPTO_SIGN_ED25519_SEEDBYTES = 64;
+
   @Override
   public KeyPair generateKeyPair(byte[] seed) {
-    if (!checkLength(seed, CRYPTO_SIGN_ED25519_SECRETKEYBYTES)) {
+    if (!checkLength(seed, CRYPTO_SIGN_ED25519_SEEDBYTES)) {
       throw new IllegalArgumentException("Seed byte array is either null or has invalid size");
     }
     byte[] privateKey = zeros(CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
@@ -32,12 +34,12 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
         sodium().crypto_sign_ed25519_seed_keypair(publicKey, privateKey, seed))) {
       throw new RuntimeException("Failed to generate a key pair");
     }
-    return KeyPair.createKeyPairNoCopy(seed, privateKey, publicKey);
+    return KeyPair.createKeyPairNoCopy(privateKey, publicKey);
   }
 
   @Override
   public KeyPair generateKeyPair() {
-    return generateKeyPair(new Random().randomBytes(CRYPTO_SIGN_ED25519_SECRETKEYBYTES));
+    return generateKeyPair(new Random().randomBytes(CRYPTO_SIGN_ED25519_SEEDBYTES));
   }
 
   @Override
