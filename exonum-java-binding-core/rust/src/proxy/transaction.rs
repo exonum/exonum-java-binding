@@ -94,7 +94,7 @@ impl Transaction for TransactionProxy {
             let res = env.call_method(
                 self.transaction.as_obj(),
                 "execute",
-                "(J)V",
+                "(Lcom/exonum/binding/storage/database/Fork;)V",
                 &[JValue::from(view_handle)],
             ).and_then(JValue::v);
             Ok(check_error_on_exception(env, res))
