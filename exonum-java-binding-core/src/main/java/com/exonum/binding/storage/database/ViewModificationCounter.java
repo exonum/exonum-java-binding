@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentMap;
  *
  * <p>Forks are added lazily when they are modified.
  *
+ * <p>All method arguments are non-null by default.
+ *
  * <p>The class is thread-safe if {@link View}s <strong>are not shared</strong> among threads
  * (i.e., if each thread has its own Views, which must be the case for Views are not thread-safe).
  * Such property is useful in the integration tests.
@@ -42,8 +44,8 @@ public final class ViewModificationCounter {
    * Notifies that the fork is modified.
    *
    * <p>Each invocation increases the modification counter of the fork. Initial value is zero.
-   * @param fork a modified (or about to be modified) fork.
-   * @throws NullPointerException if fork is null.
+   *
+   * @param fork a modified (or about to be modified) fork
    */
   public void notifyModified(Fork fork) {
     Integer nextCount = getModificationCount(fork) + 1;

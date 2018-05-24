@@ -44,7 +44,6 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    *             If a view is read-only, "destructive" operations are not permitted.
    * @param serializer an entry serializer
    *
-   * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
@@ -79,7 +78,6 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    *
    * @param value a value to set. Must not be null.
    * @throws UnsupportedOperationException if the entry is read-only
-   * @throws NullPointerException if value is null
    * @throws IllegalStateException if the proxy is invalid
    */
   public void set(T value) {
