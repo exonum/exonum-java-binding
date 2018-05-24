@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
   /**
    * Creates a new ListIndexProxy.

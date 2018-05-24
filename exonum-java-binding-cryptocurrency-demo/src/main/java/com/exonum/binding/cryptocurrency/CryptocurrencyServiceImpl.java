@@ -18,7 +18,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 /** A cryptocurrency demo service. */
-public class CryptocurrencyServiceImpl extends AbstractService implements CryptocurrencyService {
+public final class CryptocurrencyServiceImpl extends AbstractService
+    implements CryptocurrencyService {
 
   @Nullable private Node node;
 

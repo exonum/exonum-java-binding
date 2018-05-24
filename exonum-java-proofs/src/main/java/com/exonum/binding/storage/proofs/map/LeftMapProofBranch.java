@@ -8,7 +8,7 @@ import com.exonum.binding.hash.HashCode;
 /**
  * A proof node for a map that might contain mapping for the requested key in the left sub tree.
  */
-public class LeftMapProofBranch extends BranchMapProofNode {
+public final class LeftMapProofBranch extends BranchMapProofNode {
 
   private final MapProofNode left;
 

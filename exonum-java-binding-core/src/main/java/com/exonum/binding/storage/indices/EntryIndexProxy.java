@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
  *
  * @see View
  */
-public class EntryIndexProxy<T> extends AbstractIndexProxy {
+public final class EntryIndexProxy<T> extends AbstractIndexProxy {
 
   private final CheckingSerializerDecorator<T> serializer;
 

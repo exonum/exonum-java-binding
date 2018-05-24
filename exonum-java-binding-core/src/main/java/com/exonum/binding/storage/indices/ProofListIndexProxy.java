@@ -34,7 +34,8 @@ import com.exonum.binding.storage.serialization.Serializer;
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
+    implements ListIndex<E> {
 
   /**
    * Creates a new ProofListIndexProxy.

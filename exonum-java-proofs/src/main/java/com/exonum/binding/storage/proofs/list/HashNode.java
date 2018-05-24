@@ -7,7 +7,7 @@ import com.exonum.binding.hash.HashCode;
 /**
  * Represents a hash of a Merkle sub-tree: a leaf node in proof trees.
  */
-public class HashNode implements ListProof {
+public final class HashNode implements ListProof {
 
   private final HashCode hash;
 

@@ -36,7 +36,7 @@ import java.util.Iterator;
  * @param <V> the type of values in this map
  * @see View
  */
-public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
   private final ProofMapKeyCheckingSerializerDecorator<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;
