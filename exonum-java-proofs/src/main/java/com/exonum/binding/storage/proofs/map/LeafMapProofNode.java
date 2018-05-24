@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A proof node for a map that contains a mapping for the requested key.
  */
-public class LeafMapProofNode implements MapProofNode {
+public final class LeafMapProofNode implements MapProofNode {
 
   private final byte[] value;
 
