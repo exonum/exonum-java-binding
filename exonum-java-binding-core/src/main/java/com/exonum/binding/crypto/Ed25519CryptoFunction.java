@@ -49,8 +49,8 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
     sodium()
         .crypto_sign_ed25519(
             signedMessage, bufferLen, message, message.length, privateKey.toBytesNoCopy());
-    signedMessage = slice(signedMessage, 0, CRYPTO_SIGN_ED25519_BYTES);
-    return signedMessage;
+    byte[] signature = slice(signedMessage, 0, CRYPTO_SIGN_ED25519_BYTES);
+    return signature;
   }
 
   @Override

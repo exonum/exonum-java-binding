@@ -14,7 +14,7 @@ public class KeyPair {
   }
 
   /**
-   * Creates a {@code KeyPair} from three byte arrays, representing {@code privateKey}
+   * Creates a {@code KeyPair} from two byte arrays, representing {@code privateKey}
    * and {@code publicKey}. All arrays are defensively copied.
    */
   public static KeyPair createKeyPair(byte[] privateKey, byte[] publicKey) {
@@ -22,7 +22,7 @@ public class KeyPair {
   }
 
   /**
-   * Creates a {@code KeyPair} from three byte arrays, representing {@code privateKey}
+   * Creates a {@code KeyPair} from two byte arrays, representing {@code privateKey}
    * and {@code publicKey}. Arrays are not copied.
    */
   static KeyPair createKeyPairNoCopy(byte[] privateKey, byte[] publicKey) {
