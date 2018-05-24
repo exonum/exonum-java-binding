@@ -13,6 +13,7 @@ impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named("EJB_DEBUG", false, "Debug mode for JVM.", None, "ejb-debug", false),
+            Argument::new_named("EJB_LOG_CONFIG_PATH", false, "Path to log4j configuration file.", None, "ejb-log-config-path", false),
             Argument::new_named("EJB_CLASSPATH", true, "Classpath for JVM.", None, "ejb-classpath", false),
             Argument::new_named("EJB_LIBPATH", true, "Libpath for JVM.", None, "ejb-libpath", false),
         ]
@@ -20,6 +21,7 @@ impl CommandExtension for GenerateNodeConfig {
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
         let debug = context.arg("EJB_DEBUG").unwrap_or_default();
+        let log_config_path = context.arg("EJB_LOG_CONFIG_PATH").unwrap_or_default();
         let class_path = context.arg("EJB_CLASSPATH")?;
         let lib_path = context.arg("EJB_LIBPATH")?;
 
@@ -27,6 +29,7 @@ impl CommandExtension for GenerateNodeConfig {
             debug,
             class_path,
             lib_path,
+            log_config_path,
         };
 
         let mut services_secret_configs = context

@@ -16,6 +16,8 @@ pub struct JvmConfig {
     pub class_path: String,
     /// Libpath.
     pub lib_path: String,
+    /// Path to `log4j` configuration file.
+    pub log_config_path: String,
 }
 
 /// Java service configuration.

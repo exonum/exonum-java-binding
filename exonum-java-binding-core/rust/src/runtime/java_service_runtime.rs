@@ -60,6 +60,7 @@ impl JavaServiceRuntime {
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
         args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
+        args_builder = args_builder.option(&format!("-Dlog4j.configurationFile={}", config.log_config_path));
 
         let args = args_builder.build().unwrap();
         jni::JavaVM::new(args).unwrap()
