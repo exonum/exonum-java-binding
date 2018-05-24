@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
  * @see KeySetIndexProxy
  * @see View
  */
-public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
+public final class ValueSetIndexProxy<E> extends AbstractIndexProxy {
 
   private final CheckingSerializerDecorator<E> serializer;
 

@@ -6,7 +6,7 @@ import com.exonum.binding.service.TransactionConverter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
-public class ServiceModule extends AbstractModule {
+public final class ServiceModule extends AbstractModule {
 
   @Override
   protected void configure() {

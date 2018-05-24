@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * A Java service bootstrap loader.
  */
-class ServiceBootstrap {
+final class ServiceBootstrap {
 
   private static final Logger logger = LogManager.getLogger(ServiceBootstrap.class);
 

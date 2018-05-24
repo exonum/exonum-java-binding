@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 // TODO(dt): when we migrate to RocksDB, extract the interface and implement it inside
 //           each collection.
-public class ViewModificationCounter {
+public final class ViewModificationCounter {
 
   static final int INITIAL_COUNT = 0;
 
