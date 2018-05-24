@@ -47,7 +47,6 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
    * @param valueSerializer a serializer of values
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
                                                        Serializer<K> keySerializer,
