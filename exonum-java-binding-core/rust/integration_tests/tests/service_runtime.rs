@@ -14,6 +14,7 @@ use exonum_testkit::{TestKit, TestKitBuilder};
 const TEST_SERVICE_MODULE_NAME: &str = "com.exonum.binding.fakes.services.service.TestServiceModule";
 
 #[test]
+#[ignore]
 fn bootstrap() {
     let service_config = ServiceConfig {
         module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
@@ -24,6 +25,7 @@ fn bootstrap() {
         debug: true,
         class_path: get_classpath(),
         lib_path: get_libpath(),
+        log_config_path: "".to_owned(),
     };
 
     let service_runtime = JavaServiceRuntime::new(Config {
