@@ -5,6 +5,9 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
@@ -25,13 +28,14 @@ import com.exonum.binding.storage.serialization.Serializer;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this list is destroyed. Subsequent use of the closed list
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
+    implements ListIndex<E> {
 
   /**
    * Creates a new ProofListIndexProxy.
@@ -47,11 +51,27 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    */
   public static <E> ProofListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    return new ProofListIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    NativeHandle listNativeHandle = createNativeList(name, view);
+
+    return new ProofListIndexProxy<>(listNativeHandle, name, view, s);
   }
 
-  private ProofListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
+  private static NativeHandle createNativeList(String name, View view) {
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ProofListIndexProxy.class,
+        ProofListIndexProxy::nativeFree);
+    return listNativeHandle;
+  }
+
+  private ProofListIndexProxy(NativeHandle nativeHandle, String name, View view,
+                              CheckingSerializerDecorator<E> serializer) {
+    super(nativeHandle, name, view, serializer);
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
@@ -97,8 +117,7 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
 
   private native byte[] nativeGetRootHash(long nativeHandle);
 
-  @Override
-  native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 
   @Override
   native void nativeAdd(long nativeHandle, byte[] e);

@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
@@ -72,9 +74,10 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void initialize() {
-    try (MemoryDb db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void initialize() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       Optional<String> initialConfiguration = service.initialize(view);
 
       // Check the configuration.
@@ -83,15 +86,15 @@ public class QaServiceImplIntegrationTest {
 
       // Check the changes made to the database.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        String counterName = "default";
-        HashCode counterId = Hashing.sha256()
-            .hashString(counterName, UTF_8);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-        assertThat(counters.get(counterId)).isEqualTo(0L);
-        assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-      }
+      String counterName = "default";
+      HashCode counterId = Hashing.sha256()
+          .hashString(counterName, UTF_8);
+
+      assertThat(counters.get(counterId)).isEqualTo(0L);
+      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
     }
   }
 
@@ -172,14 +175,15 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void getValue() {
-    try (MemoryDb db = new MemoryDb()) {
+  public void getValue() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
 
       // Create a counter with the given name
       String counterName = "bids";
-      try (Fork view = db.createFork()) {
+      try (Cleaner cleaner = new Cleaner()) {
+        Fork view = db.createFork(cleaner);
         new CreateCounterTx(counterName)
             .execute(view);
 
@@ -196,7 +200,7 @@ public class QaServiceImplIntegrationTest {
 
   @Test
   public void getValueNoSuchCounter() {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
 

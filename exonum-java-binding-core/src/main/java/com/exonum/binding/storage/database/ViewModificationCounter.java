@@ -15,9 +15,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 // TODO(dt): when we migrate to RocksDB, extract the interface and implement it inside
 //           each collection.
-// TODO(dt): when/if we implement auto-resource management, review this class as it keeps
-//           strong references to Forks
-public class ViewModificationCounter {
+public final class ViewModificationCounter {
 
   static final int INITIAL_COUNT = 0;
 

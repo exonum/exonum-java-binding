@@ -7,12 +7,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -93,27 +94,15 @@ public class EntryIndexProxyIntegrationTest
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void closeMustDetectUseAfterViewFreed() throws Exception {
-    View view = database.createSnapshot();
-    EntryIndexProxy<String> entry = create(ENTRY_NAME, view);
-
-    view.close();
-
-    expectedException.expect(IllegalStateException.class);
-    entry.close();
-  }
-
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<EntryIndexProxy<String>> entryTest) {
-    runTestWithView(viewSupplier, (ignoredView, entry) -> entryTest.accept(entry));
+    runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       BiConsumer<View, EntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         ENTRY_NAME,
         EntryIndexProxy::newInstance,
         entryTest
@@ -123,5 +112,10 @@ public class EntryIndexProxyIntegrationTest
   @Override
   EntryIndexProxy<String> create(String name, View view) {
     return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
+  Object getAnyElement(EntryIndexProxy<String> index) {
+    return index.get();
   }
 }

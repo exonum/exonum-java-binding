@@ -5,9 +5,11 @@ import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -27,6 +29,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
     ViewModificationCounter.class,
 })
 public class AbstractIndexProxyTest {
+
+  private static final String INDEX_NAME = "index_name";
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -59,7 +63,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void checkCanModifyThrowsIfSnapshotPassed() throws Exception {
+  public void notifyModifiedThrowsIfSnapshotPassed() throws Exception {
     Snapshot dbView = createSnapshot();
     proxy = new IndexProxyImpl(dbView);
 
@@ -71,7 +75,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void checkCanModifyAcceptsFork() throws Exception {
+  public void notifyModifiedAcceptsFork() throws Exception {
     Fork dbView = createFork();
     proxy = new IndexProxyImpl(dbView);
 
@@ -79,12 +83,22 @@ public class AbstractIndexProxyTest {
     verify(modCounter).notifyModified(eq(dbView));
   }
 
-  private Fork createFork() {
-    return new Fork(1L, false);
+  @Test
+  public void name() {
+    Snapshot dbView = createSnapshot();
+    proxy = new IndexProxyImpl(dbView);
+
+    assertThat(proxy.getName(), equalTo(INDEX_NAME));
   }
 
+  /** Create a mock of a fork. */
+  private Fork createFork() {
+    return mock(Fork.class);
+  }
+
+  /** Create a mock of a snapshot. */
   private Snapshot createSnapshot() {
-    return new Snapshot(2L, false);
+    return mock(Snapshot.class);
   }
 
   private static class IndexProxyImpl extends AbstractIndexProxy {
@@ -92,12 +106,7 @@ public class AbstractIndexProxyTest {
     private static final long NATIVE_HANDLE = 0x11L;
 
     IndexProxyImpl(View view) {
-      super(NATIVE_HANDLE, "index_name", view);
-    }
-
-    @Override
-    protected void disposeInternal() {
-      // no-op
+      super(new NativeHandle(NATIVE_HANDLE), INDEX_NAME, view);
     }
   }
 

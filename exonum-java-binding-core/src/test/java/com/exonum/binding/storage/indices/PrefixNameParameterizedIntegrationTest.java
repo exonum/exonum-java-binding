@@ -4,6 +4,7 @@ import static com.exonum.binding.test.TestParameters.parameters;
 import static java.util.Arrays.asList;
 import static org.junit.runners.Parameterized.Parameter;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
@@ -39,8 +40,10 @@ public class PrefixNameParameterizedIntegrationTest {
 
   @Test
   public void testIndexCtor_ThrowsIfInvalidName() throws Exception {
-    try (Database database = new MemoryDb();
-         Snapshot view = database.createSnapshot()) {
+    try (Cleaner cleaner = new Cleaner();
+         Database database = MemoryDb.newInstance()) {
+      Snapshot view = database.createSnapshot(cleaner);
+
       expectedException.expect(Exception.class);
       indexFactory.create(name, view);
     }

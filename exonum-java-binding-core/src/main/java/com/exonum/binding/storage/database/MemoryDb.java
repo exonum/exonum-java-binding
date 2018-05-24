@@ -1,35 +1,49 @@
 package com.exonum.binding.storage.database;
 
+import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
+
+import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
+import com.exonum.binding.proxy.Cleaner;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.MustBeClosed;
 
 /**
- * An in-memory database for testing purposes. Although it can create
- * both read-only snapshots and read-write forks, the changes made to database forks
- * cannot be applied to the database state, making it effectively stateless.
- *
- * <p>If you need a stateful database for tests, feel free to file a JIRA ticket.
+ * An in-memory database for testing purposes. It can create both read-only snapshots
+ * and read-write forks. The changes made to database forks can be applied to the database state.
  */
 @VisibleForTesting
-public class MemoryDb extends Database {
+public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
 
   /**
    * Creates a new empty MemoryDb.
    */
-  public MemoryDb() {
-    super(nativeCreate(), true);
+  public static MemoryDb newInstance() {
+    long nativeHandle = INVALID_NATIVE_HANDLE;
+    try {
+      nativeHandle = nativeCreate();
+      return new MemoryDb(nativeHandle);
+    } catch (Throwable t) {
+      if (nativeHandle != INVALID_NATIVE_HANDLE) {
+        nativeFree(nativeHandle);
+      }
+      throw t;
+    }
+  }
+
+  @VisibleForTesting  // Used in native resource manager tests, must not be exported.
+  MemoryDb(long nativeHandle) {
+    super(nativeHandle, true);
   }
 
   @Override
-  @MustBeClosed
-  public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(getNativeHandle()), this);
+  public Snapshot createSnapshot(Cleaner cleaner) {
+    long snapshotHandle = nativeCreateSnapshot(getNativeHandle());
+    return Snapshot.newInstance(snapshotHandle, cleaner);
   }
 
   @Override
-  @MustBeClosed
-  public Fork createFork() {
-    return new Fork(nativeCreateFork(getNativeHandle()), this);
+  public Fork createFork(Cleaner cleaner) {
+    long forkHandle = nativeCreateFork(getNativeHandle());
+    return Fork.newInstance(forkHandle, cleaner);
   }
 
   /**
@@ -54,5 +68,5 @@ public class MemoryDb extends Database {
 
   private native void nativeMerge(long dbNativeHandle, long forkNativeHandle);
 
-  private native void nativeFree(long dbNativeHandle);
+  private static native void nativeFree(long dbNativeHandle);
 }

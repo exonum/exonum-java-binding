@@ -112,19 +112,19 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
-    try (View view = node.createSnapshot()) {
-      QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        if (!counters.containsKey(counterId)) {
-          return Optional.empty();
-        }
 
-        String name = counterNames.get(counterId);
-        Long value = counters.get(counterId);
-        return Optional.of(new Counter(name, value));
+    return node.withSnapshot((view) -> {
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      if (!counters.containsKey(counterId)) {
+        return Optional.empty();
       }
-    }
+
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      String name = counterNames.get(counterId);
+      Long value = counters.get(counterId);
+      return Optional.of(new Counter(name, value));
+    });
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.
