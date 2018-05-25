@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class CryptoFunctionTest {
+public class Ed25519CryptoFunctionTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
