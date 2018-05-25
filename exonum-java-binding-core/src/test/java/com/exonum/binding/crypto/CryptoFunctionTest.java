@@ -1,5 +1,6 @@
 package com.exonum.binding.crypto;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -16,7 +17,7 @@ public class CryptoFunctionTest {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
-    byte[] message = "myMessage".getBytes();
+    byte[] message = bytes("myMessage");
     byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
     assertTrue(CRYPTO_FUNCTION.verify(message, signature, publicKey));
   }
@@ -25,8 +26,8 @@ public class CryptoFunctionTest {
   public void invalidLengthSignatureVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
-    byte[] message = "myMessage".getBytes();
-    byte[] invalidSignature = "invalidLengthMessage".getBytes();
+    byte[] message = bytes("myMessage");
+    byte[] invalidSignature = bytes("invalidLengthMessage");
     assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
   }
 
@@ -34,7 +35,7 @@ public class CryptoFunctionTest {
   public void invalidSignatureVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
-    byte[] message = "myMessage".getBytes();
+    byte[] message = bytes("myMessage");
     byte[] invalidSignature = Bytes.createPrefixed(message, CRYPTO_SIGN_ED25519_BYTES);
     assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
   }
@@ -44,9 +45,9 @@ public class CryptoFunctionTest {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
-    byte[] message = "myMessage".getBytes();
+    byte[] message = bytes("myMessage");
     byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
-    byte[] anotherMessage = "anotherMessage".getBytes();
+    byte[] anotherMessage = bytes("anotherMessage");
     assertFalse(CRYPTO_FUNCTION.verify(anotherMessage, signature, publicKey));
   }
 }
