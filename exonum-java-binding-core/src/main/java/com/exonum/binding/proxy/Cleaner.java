@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
  * <p>The context might have a description of its origin so that it can be identified
  * for a particular context.
  *
- * <p>All methods are non-null by default.
+ * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe.
  *
@@ -62,6 +62,11 @@ public final class Cleaner implements AutoCloseable {
     registeredCleanActions = new ArrayDeque<>();
     this.description = checkNotNull(description);
     closed = false;
+  }
+
+  /** Returns true if this cleaner is closed. */
+  public boolean isClosed() {
+    return closed;
   }
 
   /**

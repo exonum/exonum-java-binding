@@ -7,7 +7,7 @@ import com.exonum.binding.hash.HashCode;
 /**
  * A proof node for a map that does not contain a mapping for the requested key.
  */
-public class NonEqualValueAtRoot implements MapProof {
+public final class NonEqualValueAtRoot implements MapProof {
 
   private final DbKey databaseKey;
 

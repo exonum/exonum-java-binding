@@ -14,15 +14,18 @@ import org.apache.logging.log4j.Logger;
  * An adapter of a user-facing interface {@link Transaction} to an interface with a native code.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
-public class UserTransactionAdapter {
+public final class UserTransactionAdapter {
 
   private static final Logger logger = LogManager.getLogger(UserTransactionAdapter.class);
 
   @VisibleForTesting
   final Transaction transaction;
 
-  public UserTransactionAdapter(Transaction transaction) {
+  private final ViewFactory viewFactory;
+
+  public UserTransactionAdapter(Transaction transaction, ViewFactory viewFactory) {
     this.transaction = checkNotNull(transaction, "Transaction must not be null");
+    this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
   public boolean isValid() {
@@ -39,7 +42,7 @@ public class UserTransactionAdapter {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
       try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
-        Fork view = Fork.newInstance(forkNativeHandle, false, cleaner);
+        Fork view = viewFactory.createFork(forkNativeHandle, cleaner);
         transaction.execute(view);
       }
 

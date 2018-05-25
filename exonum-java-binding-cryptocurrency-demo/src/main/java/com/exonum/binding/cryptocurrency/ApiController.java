@@ -25,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Controller for submitting transactions. */
-class ApiController {
+final class ApiController {
 
   @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final Logger log = LogManager.getLogger(ApiController.class);

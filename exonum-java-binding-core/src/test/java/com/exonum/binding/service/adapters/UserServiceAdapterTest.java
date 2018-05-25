@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -16,8 +17,8 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.TemplateMessage;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.service.Service;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transport.Server;
 import io.vertx.ext.web.Router;
@@ -25,29 +26,32 @@ import io.vertx.ext.web.impl.RouterImpl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class UserServiceAdapterTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
+  @Mock
   private Service service;
 
+  @Mock
   private Server server;
 
-  private UserServiceAdapter serviceAdapter;
+  @Mock
+  private ViewFactory viewFactory;
 
-  @Before
-  public void setUp() throws Exception {
-    service = mock(Service.class);
-    server = mock(Server.class);
-    serviceAdapter = new UserServiceAdapter(service, server);
-  }
+  @InjectMocks
+  private UserServiceAdapter serviceAdapter;
 
   @Test
   public void convertTransaction_ThrowsIfNull() throws Exception {
@@ -102,21 +106,31 @@ public class UserServiceAdapterTest {
 
   @Test
   public void getStateHashes_EmptyList() throws Exception {
-    when(service.getStateHashes(any(Snapshot.class)))
+    long snapshotHandle = 0x0A;
+    Snapshot s = mock(Snapshot.class);
+    when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
+        .thenReturn(s);
+
+    when(service.getStateHashes(s))
         .thenReturn(emptyList());
 
-    byte[][] hashes = serviceAdapter.getStateHashes(0x0A);
+    byte[][] hashes = serviceAdapter.getStateHashes(snapshotHandle);
 
     assertThat(hashes.length, equalTo(0));
   }
 
   @Test
   public void getStateHashes_SingletonList() throws Exception {
+    long snapshotHandle = 0x0A;
+    Snapshot s = mock(Snapshot.class);
+    when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
+        .thenReturn(s);
+
     byte[] h1 = bytes("hash1");
-    when(service.getStateHashes(any(Snapshot.class)))
+    when(service.getStateHashes(s))
         .thenReturn(singletonList(HashCode.fromBytes(h1)));
 
-    byte[][] hashes = serviceAdapter.getStateHashes(0x0A);
+    byte[][] hashes = serviceAdapter.getStateHashes(snapshotHandle);
 
     assertThat(hashes.length, equalTo(1));
     assertThat(hashes[0], equalTo(h1));
@@ -124,6 +138,11 @@ public class UserServiceAdapterTest {
 
   @Test
   public void getStateHashes_MultipleHashesList() throws Exception {
+    long snapshotHandle = 0x0A;
+    Snapshot s = mock(Snapshot.class);
+    when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
+        .thenReturn(s);
+
     byte[][] hashes = {
         bytes("hash1"),
         bytes("hash2"),
@@ -133,42 +152,38 @@ public class UserServiceAdapterTest {
         .map(HashCode::fromBytes)
         .collect(Collectors.toList());
 
-    when(service.getStateHashes(any(Snapshot.class)))
+    when(service.getStateHashes(s))
         .thenReturn(hashesFromService);
 
-    byte[][] actualHashes = serviceAdapter.getStateHashes(0x0A);
+    byte[][] actualHashes = serviceAdapter.getStateHashes(snapshotHandle);
 
     assertThat(actualHashes, equalTo(hashes));
   }
 
   @Test
-  public void getStateHashes_ClosesSnapshot() throws Exception {
+  public void getStateHashes_ClosesCleaner() throws Exception {
     long snapshotHandle = 0x0A;
-    byte[][] hashes = serviceAdapter.getStateHashes(snapshotHandle);
+    byte[][] ignored = serviceAdapter.getStateHashes(snapshotHandle);
 
-    ArgumentCaptor<Snapshot> ac = ArgumentCaptor.forClass(Snapshot.class);
-    verify(service).getStateHashes(ac.capture());
+    ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
+    verify(viewFactory).createSnapshot(eq(snapshotHandle), ac.capture());
 
-    Snapshot snapshot = ac.getValue();
+    Cleaner cleaner = ac.getValue();
 
-    // Try to use a snapshot after the method has returned: it must be closed.
-    expectedException.expect(IllegalStateException.class);
-    snapshot.getViewNativeHandle();
+    assertTrue(cleaner.isClosed());
   }
 
   @Test
-  public void initialize_ClosesFork() throws Exception {
+  public void initialize_ClosesCleaner() throws Exception {
     long forkHandle = 0x0A;
     String ignored = serviceAdapter.initialize(forkHandle);
 
-    ArgumentCaptor<Fork> ac = ArgumentCaptor.forClass(Fork.class);
-    verify(service).initialize(ac.capture());
+    ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
+    verify(viewFactory).createFork(eq(forkHandle), ac.capture());
 
-    Fork fork = ac.getValue();
+    Cleaner cleaner = ac.getValue();
 
-    // Try to use the fork after the method has returned: it must be closed.
-    expectedException.expect(IllegalStateException.class);
-    fork.getViewNativeHandle();
+    assertTrue(cleaner.isClosed());
   }
 
   @Test

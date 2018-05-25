@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * An interceptor, which logs any uncaught exceptions.
  */
-public class LoggingInterceptor implements MethodInterceptor {
+public final class LoggingInterceptor implements MethodInterceptor {
 
   private static final Logger logger = LogManager.getLogger(LoggingInterceptor.class);
 

@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
  * }
  * </code></pre>
  */
-public class NodeFake implements Node {
+public final class NodeFake implements Node {
 
   private static final Logger logger = LogManager.getLogger(NodeFake.class);
 

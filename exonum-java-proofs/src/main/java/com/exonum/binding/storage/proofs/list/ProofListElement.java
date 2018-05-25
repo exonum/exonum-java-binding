@@ -6,7 +6,7 @@ import com.exonum.binding.hash.PrimitiveSink;
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
  */
-public class ProofListElement implements ListProof {
+public final class ProofListElement implements ListProof {
 
   private final byte[] element;
 
