@@ -21,8 +21,11 @@ public final class UserTransactionAdapter {
   @VisibleForTesting
   final Transaction transaction;
 
-  public UserTransactionAdapter(Transaction transaction) {
+  private final ViewFactory viewFactory;
+
+  public UserTransactionAdapter(Transaction transaction, ViewFactory viewFactory) {
     this.transaction = checkNotNull(transaction, "Transaction must not be null");
+    this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
   public boolean isValid() {
@@ -39,7 +42,7 @@ public final class UserTransactionAdapter {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
       try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
-        Fork view = Fork.newInstance(forkNativeHandle, false, cleaner);
+        Fork view = viewFactory.createFork(forkNativeHandle, cleaner);
         transaction.execute(view);
       }
 

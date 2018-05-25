@@ -25,16 +25,17 @@ import javax.annotation.Nullable;
 public class UserServiceAdapter {
 
   private final Service service;
-
   private final Server server;
+  private final ViewFactory viewFactory;
 
   @Nullable
   private NodeProxy node;
 
   @Inject
-  public UserServiceAdapter(Service service, Server server) {
+  public UserServiceAdapter(Service service, Server server, ViewFactory viewFactory) {
     this.service = checkNotNull(service, "service");
     this.server = checkNotNull(server, "server");
+    this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
   public short getId() {
@@ -68,7 +69,7 @@ public class UserServiceAdapter {
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
         message.getMessageType());  // todo: consider moving this check to the native code?
-    return new UserTransactionAdapter(transaction);
+    return new UserTransactionAdapter(transaction, viewFactory);
   }
 
   /**
@@ -85,7 +86,7 @@ public class UserServiceAdapter {
     assert snapshotHandle != 0;
 
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
-      Snapshot snapshot = Snapshot.newInstance(snapshotHandle, false, cleaner);
+      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
       List<HashCode> stateHashes = service.getStateHashes(snapshot);
       return stateHashes.stream()
           .map(HashCode::asBytes)
@@ -107,7 +108,7 @@ public class UserServiceAdapter {
   public String initialize(long forkHandle) {
     assert forkHandle != 0;
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
-      Fork fork = Fork.newInstance(forkHandle, false, cleaner);
+      Fork fork = viewFactory.createFork(forkHandle, cleaner);
       return service.initialize(fork)
           .orElse(null);
     } catch (CloseFailuresException e) {
