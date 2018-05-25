@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
  * An adapter of a user-facing interface {@link Transaction} to an interface with a native code.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
-public class UserTransactionAdapter {
+public final class UserTransactionAdapter {
 
   private static final Logger logger = LogManager.getLogger(UserTransactionAdapter.class);
 

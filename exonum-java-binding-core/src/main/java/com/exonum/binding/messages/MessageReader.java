@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
  *
  * <p>See <a href=https://exonum.com/doc/architecture/serialization/#message-serialization>the definition of the message format</a>.
  */
-public class MessageReader implements BinaryMessage {
+public final class MessageReader implements BinaryMessage {
 
   /** Assuming zero-length body. */
   static final int MIN_MESSAGE_BUFFER_SIZE = HEADER_SIZE + SIGNATURE_SIZE;

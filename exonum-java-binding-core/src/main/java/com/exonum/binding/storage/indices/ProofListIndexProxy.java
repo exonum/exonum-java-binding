@@ -34,7 +34,8 @@ import com.exonum.binding.storage.serialization.Serializer;
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
+    implements ListIndex<E> {
 
   /**
    * Creates a new ProofListIndexProxy.
@@ -46,7 +47,6 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    * @param serializer a serializer of elements
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> ProofListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {

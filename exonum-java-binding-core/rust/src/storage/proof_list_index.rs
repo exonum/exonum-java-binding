@@ -11,7 +11,6 @@ use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
 use exonum::crypto::Hash;
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = ProofListIndex<T, Value>;
 
@@ -32,14 +31,10 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    check_read(&name, TableType::ProofList, &*snapshot);
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(ref mut fork) => {
-                    check_write(&name, TableType::ProofList, fork);
-                    IndexType::ForkIndex(Index::new(name, fork))
-                }
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -156,8 +151,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.root_hash(),
-            IndexType::ForkIndex(ref list) => list.root_hash(),
+            IndexType::SnapshotIndex(ref list) => list.merkle_root(),
+            IndexType::ForkIndex(ref list) => list.merkle_root(),
         };
         utils::convert_hash(&env, &hash)
     });

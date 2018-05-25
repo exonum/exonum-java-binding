@@ -14,7 +14,7 @@ import com.google.inject.Singleton;
 /**
  * A framework module which configures the system-wide bindings.
  */
-class FrameworkModule extends AbstractModule {
+final class FrameworkModule extends AbstractModule {
 
   @Override
   protected void configure() {

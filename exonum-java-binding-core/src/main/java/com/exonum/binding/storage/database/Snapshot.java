@@ -18,7 +18,7 @@ import com.exonum.binding.proxy.ProxyDestructor;
  *
  * @see Fork
  */
-public class Snapshot extends View {
+public final class Snapshot extends View {
 
   /**
    * Creates a new owning Snapshot proxy.
