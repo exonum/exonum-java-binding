@@ -15,6 +15,9 @@ use proxy::node::NodeContext;
 use storage::View;
 use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception,
             to_handle, unwrap_jni};
+use utils::get_class_name;
+
+const SERVICE_ADAPTER: &str = "com.exonum.binding.service.adapters.UserServiceAdapter";
 
 /// A proxy for `Service`s.
 #[derive(Clone)]
@@ -38,6 +41,11 @@ impl ServiceProxy {
     /// Creates a `ServiceProxy` of the given Java service.
     pub fn from_global_ref(exec: MainExecutor, service: GlobalRef) -> Self {
         let (id, name) = unwrap_jni(exec.with_attached(|env| {
+            if cfg!(debug_assert) {
+                let class_name = get_class_name(env, service.as_obj())?;
+                assert_eq!(class_name, SERVICE_ADAPTER);
+            }
+
             let id =
                 panic_on_exception(env, env.call_method(service.as_obj(), "getId", "()S", &[]));
             let name = panic_on_exception(

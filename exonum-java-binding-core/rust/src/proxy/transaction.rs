@@ -15,6 +15,9 @@ use std::fmt;
 use {JniExecutor, MainExecutor};
 use storage::View;
 use utils::{check_error_on_exception, panic_on_exception, to_handle, unwrap_jni};
+use utils::get_class_name;
+
+const TRANSACTION_ADAPTER: &str = "com.exonum.binding.service.adapters.UserTransactionAdapter";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -36,6 +39,14 @@ impl fmt::Debug for TransactionProxy {
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
     pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawMessage) -> Self {
+        if cfg!(debug_assert) {
+            exec.with_attached(|env| {
+                let class_name = get_class_name(env, transaction.as_obj())?;
+                assert_eq!(class_name, TRANSACTION_ADAPTER);
+                Ok(())
+            })
+                .unwrap();
+        }
         TransactionProxy {
             exec,
             transaction,
@@ -94,7 +105,7 @@ impl Transaction for TransactionProxy {
             let res = env.call_method(
                 self.transaction.as_obj(),
                 "execute",
-                "(Lcom/exonum/binding/storage/database/Fork;)V",
+                "(J)V",
                 &[JValue::from(view_handle)],
             ).and_then(JValue::v);
             Ok(check_error_on_exception(env, res))
