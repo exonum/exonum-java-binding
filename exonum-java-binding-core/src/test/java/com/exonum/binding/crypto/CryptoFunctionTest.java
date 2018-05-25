@@ -3,14 +3,44 @@ package com.exonum.binding.crypto;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.test.Bytes;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class CryptoFunctionTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Test
+  public void generateKeyPairWithSeed() {
+    byte[] seed = new byte[64];
+
+    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
+    assertNotNull(keyPair);
+  }
+
+  @Test
+  public void generateKeyPairInvalidSeedSize() {
+    // Try to use a two-byte seed, must be 64 byte long
+    byte[] seed = bytes(0x01, 0x02);
+
+    expectedException.expectMessage("Seed byte array has invalid size (2), must be 64");
+    expectedException.expect(IllegalArgumentException.class);
+    CRYPTO_FUNCTION.generateKeyPair(seed);
+  }
+
+  @Test
+  public void generateKeyPairNullSeed() {
+    expectedException.expect(NullPointerException.class);
+    CRYPTO_FUNCTION.generateKeyPair(null);
+  }
 
   @Test
   public void validSignatureVerificationTest() {

@@ -6,10 +6,11 @@ package com.exonum.binding.crypto;
 class CryptoUtils {
 
   /**
-   * Check that {@code data} byte array has specified {@code size} and is not {@code null}.
+   * Check that {@code data} byte array has specified {@code size}.
+   * @throws NullPointerException if it is {@code null}
    */
-  static boolean checkLength(byte[] data, int size) {
-    return data != null && data.length == size;
+  static boolean hasLength(byte[] data, int size) {
+    return data.length == size;
   }
 
   /**
