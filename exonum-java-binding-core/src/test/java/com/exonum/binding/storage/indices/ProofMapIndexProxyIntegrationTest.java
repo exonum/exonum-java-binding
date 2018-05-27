@@ -42,6 +42,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -166,6 +168,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_EmptyMap() throws Exception {
     runTestWithView(database::createSnapshot,
         (map) -> assertThat(map, provesNoMappingFor(PK1))
@@ -173,6 +176,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_SingletonMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       HashCode key = PK1;
@@ -184,6 +188,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_SingletonMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
@@ -193,6 +198,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_FourEntryMap_LastByte_Contains1() throws Exception {
     runTestWithView(database::createFork, (map) -> {
 
@@ -214,6 +220,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_FourEntryMap_LastByte_Contains2() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       Stream<HashCode> proofKeys = Stream.of(
@@ -234,6 +241,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_FourEntryMap_FirstByte_Contains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();
@@ -258,6 +266,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_FourEntryMap_FirstAndLastByte_Contains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();  // 000…0
@@ -281,6 +290,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_MultiEntryMapContains() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
@@ -301,6 +311,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
+  @Ignore
   public void getProof_MultiEntryMapDoesNotContain() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
@@ -327,6 +338,7 @@ public class ProofMapIndexProxyIntegrationTest
   // but it's an integration test, isn't it? :-)
   //
   // Consider adding a similar test for left-leaning MPT
+  @Ignore
   public void getProof_MapContainsRightLeaningMaxHeightMpt() throws Exception {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createEntriesForRightLeaningMpt();
@@ -447,11 +459,12 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   public void constructorShallPreserveTypeInformation() {
     runTestWithView(database::createFork, (view, proofMap) -> {
+      proofMap.put(PK1, "v1");
+
       expectedException.expectMessage(
           "Attempt to access index '" + MAP_NAME
               + "' of type Map, while said index was initially created with type ProofMap");
       expectedException.expect(RuntimeException.class);
-
       // Create a regular map with the same name as the proof map above.
       MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
           StandardSerializers.hash(), StandardSerializers.string());

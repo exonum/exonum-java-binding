@@ -11,7 +11,7 @@ import com.google.common.annotations.VisibleForTesting;
  * and read-write forks. The changes made to database forks can be applied to the database state.
  */
 @VisibleForTesting
-public class MemoryDb extends AbstractCloseableNativeProxy implements Database {
+public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
 
   /**
    * Creates a new empty MemoryDb.

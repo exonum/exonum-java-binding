@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
  * <p>A branch node always has a left child, but there might not be a right child
  * (if the underlying Merkle tree is not a full binary tree).
  */
-public class ListProofBranch implements ListProof {
+public final class ListProofBranch implements ListProof {
 
   private final ListProof left;
 

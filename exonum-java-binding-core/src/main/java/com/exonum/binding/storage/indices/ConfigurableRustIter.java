@@ -13,7 +13,7 @@ import java.util.function.LongFunction;
  *
  * @param <E> type of elements returned by the iterator.
  */
-class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
+final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
   private final LongFunction<E> nextFunction;
   private final View collectionView;

@@ -21,7 +21,7 @@ import java.util.TreeMap;
  *
  * @param <E> the type of elements in the corresponding list
  */
-public class ListProofValidator<E> implements ListProofVisitor {
+public final class ListProofValidator<E> implements ListProofVisitor {
 
   private final HashCode expectedRootHash;
 
