@@ -482,11 +482,11 @@ public class MapProofValidatorTest {
   }
 
   private static DbKey leafDbKey(byte[] key) {
-    return new DbKey(Type.LEAF, key, DbKey.KEY_SIZE_BITS);
+    return DbKey.newLeafKey(key);
   }
 
   private static DbKey branchDbKey(byte[] key, int numSignificantBits) {
-    return new DbKey(Type.BRANCH, key, numSignificantBits);
+    return DbKey.newBranchKey(key, numSignificantBits);
   }
 
   @Test

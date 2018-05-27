@@ -29,16 +29,18 @@ public class CheckedFlatMapProofTest {
     byte[] secondKey = createPrefixed(bytes(0b011101), DbKey.KEY_SIZE);
     byte[] thirdKey = createPrefixed(bytes(0b1111101), DbKey.KEY_SIZE);
 
-    DbKey valueKey = new DbKey(Type.LEAF, secondKey, DbKey.KEY_SIZE_BITS);
+    DbKey valueKey = DbKey.newLeafKey(secondKey);
+    MapProofEntryLeaf leaf = createLeafMapEntry(secondKey, VALUE);
     List<MapProofEntry> entries =
         Arrays.asList(
             createBranchMapEntry(firstKey),
-            createLeafMapEntry(secondKey, VALUE),
+            leaf,
             createBranchMapEntry(thirdKey));
     UncheckedMapProof uncheckedFlatMapProof = new UncheckedFlatMapProof(entries);
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(entries, equalTo(checkedMapProof.getProofList()));
+    assertThat(entries, equalTo(uncheckedFlatMapProof.getProofList()));
+    assertThat(Collections.singletonList(leaf), equalTo(checkedMapProof.getEntries()));
     assertTrue(checkedMapProof.containsKey(valueKey.getKeySlice()));
     assertThat(VALUE, equalTo(checkedMapProof.get(valueKey.getKeySlice())));
   }
@@ -46,7 +48,7 @@ public class CheckedFlatMapProofTest {
   @Test
   public void mapProofWithOneElementShouldBeValid() {
     byte[] key = createPrefixed(bytes(0b10), DbKey.KEY_SIZE);
-    DbKey valueKey = new DbKey(Type.LEAF, key, DbKey.KEY_SIZE_BITS);
+    DbKey valueKey = DbKey.newLeafKey(key);
     HashCode expectedRootHash = HASH_FUNCTION
         .newHasher()
         .putObject(valueKey, dbKeyFunnel())
@@ -56,8 +58,8 @@ public class CheckedFlatMapProofTest {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(entries);
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertTrue(checkedMapProof.isValid(expectedRootHash));
-    assertThat(entries, equalTo(checkedMapProof.getProofList()));
+    assertThat(expectedRootHash, equalTo(checkedMapProof.getMerkleRoot()));
+    assertThat(entries, equalTo(checkedMapProof.getEntries()));
     assertTrue(checkedMapProof.containsKey(valueKey.getKeySlice()));
     assertThat(VALUE, equalTo(checkedMapProof.get(valueKey.getKeySlice())));
   }
@@ -93,14 +95,14 @@ public class CheckedFlatMapProofTest {
   private static MapProofEntryBranch createBranchMapEntry(byte[] key) {
     byte[] prefixedKey = createPrefixed(key, DbKey.KEY_SIZE);
     return new MapProofEntryBranch(
-        new DbKey(Type.BRANCH, prefixedKey, key.length),
+        DbKey.newBranchKey(prefixedKey, key.length),
         HashCode.fromBytes(key));
   }
 
   private static MapProofEntryLeaf createLeafMapEntry(byte[] key, byte[] value) {
     byte[] prefixedKey = createPrefixed(key, DbKey.KEY_SIZE);
     return new MapProofEntryLeaf(
-        new DbKey(Type.LEAF, prefixedKey, DbKey.KEY_SIZE_BITS),
+        DbKey.newLeafKey(prefixedKey),
         value,
         HASH_FUNCTION);
   }

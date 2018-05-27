@@ -36,7 +36,7 @@ public final class KeyBitSet {
   }
 
   public BitSet getKeyBits() {
-    return keyBits;
+    return (BitSet) keyBits.clone();
   }
 
   /**

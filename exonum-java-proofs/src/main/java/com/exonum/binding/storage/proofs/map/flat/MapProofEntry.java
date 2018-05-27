@@ -15,17 +15,14 @@ public abstract class MapProofEntry {
   }
 
   /**
-   * Returns a key of this node.
-   * @return DbKey of this node
+   * Returns a database key of this node.
    */
   public DbKey getDbKey() {
     return dbKey;
   }
 
   /**
-   * Returns a hash of this node, which is hash of a value in case of a leaf node and a hash, based
-   * on children hashes and keys in case of a branch node.
-   * @return HashCode of this node
+   * Returns a hash of the corresponding proof map tree node.
    */
   public abstract HashCode getHash();
 }

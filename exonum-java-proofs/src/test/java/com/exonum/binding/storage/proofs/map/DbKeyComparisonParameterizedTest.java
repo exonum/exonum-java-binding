@@ -6,7 +6,6 @@ import static com.exonum.binding.test.TestParameters.parameters;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import org.junit.Test;
@@ -16,7 +15,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class DbKeyCommonPrefixParameterizedTest {
+public class DbKeyComparisonParameterizedTest {
 
   @Parameter(0)
   public DbKey firstKey;
@@ -25,15 +24,15 @@ public class DbKeyCommonPrefixParameterizedTest {
   public DbKey secondKey;
 
   @Parameter(2)
-  public DbKey expectedResultKey;
+  public boolean expectedResult;
 
   @Parameter(3)
   public String description;
 
   @Test
   public void commonPrefixTest() {
-    DbKey actualCommonPrefixKey = firstKey.commonPrefix(secondKey);
-    assertThat(actualCommonPrefixKey.getKeySlice(), equalTo(expectedResultKey.getKeySlice()));
+    int comparisonResult = firstKey.compareTo(secondKey);
+    assertThat(comparisonResult > 0, equalTo(expectedResult));
   }
 
   @Parameters(name = "{index} = {3}")
@@ -41,25 +40,25 @@ public class DbKeyCommonPrefixParameterizedTest {
     return Arrays.asList(
         // "A | B -> C" reads "C is a common prefix of A and B"
         parameters(
-            DbKey.newBranchKey(createUserKey(0b01), DbKey.KEY_SIZE),
-            DbKey.newBranchKey(createUserKey(0b10), DbKey.KEY_SIZE),
-            DbKey.newBranchKey(createUserKey(), DbKey.KEY_SIZE),
-            "[01] | [10] -> []"),
+            DbKey.newBranchKey(createUserKey(0b1100), 4),
+            DbKey.newBranchKey(createUserKey(0b0), 1),
+            true,
+            "[1100] > [0]"),
         parameters(
-            DbKey.newLeafKey(createUserKey(0b1011)),
-            DbKey.newLeafKey(createUserKey(0b1111)),
-            DbKey.newBranchKey(createUserKey(0b11), DbKey.KEY_SIZE),
-            "[1011] | [1111] -> [11]"),
+            DbKey.newBranchKey(createUserKey(0b1100), 4),
+            DbKey.newBranchKey(createUserKey(0b001101), 6),
+            false,
+            "[1100] < [001101]"),
         parameters(
-            DbKey.newLeafKey(createUserKey(0b00)),
-            DbKey.newLeafKey(createUserKey(0b0000)),
-            DbKey.newBranchKey(createUserKey(0b0), DbKey.KEY_SIZE),
-            "[00] | [0000] -> [0]"),
+            DbKey.newBranchKey(createUserKey(0b001101), 6),
+            DbKey.newBranchKey(createUserKey(0b00110101), 8),
+            true,
+            "[001101] < [00110101]"),
         parameters(
-            DbKey.newBranchKey(createUserKey(0b0101), DbKey.KEY_SIZE),
-            DbKey.newBranchKey(createUserKey(0b11101), DbKey.KEY_SIZE),
-            DbKey.newBranchKey(createUserKey(0b00101), DbKey.KEY_SIZE),
-            "[0101] | [11101] -> [101]"));
+            DbKey.newLeafKey(createUserKey(0b101)),
+            DbKey.newLeafKey(createUserKey(0b110)),
+            true,
+            "[101] < [110]"));
   }
 
   /** Creates a 32-byte long user key with the given byte prefix. */

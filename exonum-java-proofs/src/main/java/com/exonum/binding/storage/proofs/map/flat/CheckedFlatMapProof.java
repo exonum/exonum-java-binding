@@ -4,23 +4,21 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.proofs.map.DbKey;
-import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 
 /**
- * A flat map proof, which does not include any intermediate nodes.
+ * A checked flat map proof, which does not include any intermediate nodes.
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private List<MapProofEntry> proofList;
+  private List<MapProofEntryLeaf> proofList;
 
   @Nullable
   private HashCode rootHash;
 
-  @Nullable
   private ProofStatus status;
 
   CheckedFlatMapProof(ProofStatus status) {
@@ -30,7 +28,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     this.status = status;
   }
 
-  CheckedFlatMapProof(ProofStatus status, HashCode rootHash, List<MapProofEntry> proofList) {
+  CheckedFlatMapProof(ProofStatus status, HashCode rootHash, List<MapProofEntryLeaf> proofList) {
     checkState(
         status == ProofStatus.CORRECT,
         "In case of invalid status root hash and proof list should not be passed");
@@ -40,14 +38,11 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public List<MapProofEntry> getProofList() {
+  public List<MapProofEntryLeaf> getEntries() {
     checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
     return proofList;
   }
 
-  /**
-   * Checks if a leaf entry contains a key.
-   */
   @Override
   public boolean containsKey(byte[] key) {
     checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
@@ -60,19 +55,13 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     return false;
   }
 
-  /**
-   * Checks if a hash of a proof root node equals to expected root hash.
-   */
   @Override
-  public boolean isValid(HashCode expectedRootHash) {
+  public HashCode getMerkleRoot() {
     checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
     checkState(rootHash != null, "Root hash wasn't computed");
-    return rootHash.equals(expectedRootHash);
+    return rootHash;
   }
 
-  /**
-   * Get a value, corresponding to specified key.
-   */
   @Override
   public byte[] get(byte[] key) {
     checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
@@ -85,9 +74,6 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     return null;
   }
 
-  /**
-   * Get status of this proof.
-   */
   @Override
   public ProofStatus getStatus() {
     return status;

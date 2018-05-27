@@ -28,8 +28,7 @@ public class MapProofEntryLeaf extends MapProofEntry {
   }
 
   /**
-   * Returns a hash of the value of this leaf node.
-   * @return HashCode of this node
+   * Returns a hash of the value.
    */
   @Override
   public HashCode getHash() {
