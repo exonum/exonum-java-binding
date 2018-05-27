@@ -42,7 +42,8 @@ import javax.annotation.Nullable;
  * @see KeySetIndexProxy
  * @see View
  */
-public final class ValueSetIndexProxy<E> extends AbstractIndexProxy {
+public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
+    implements Iterable<ValueSetIndexProxy.Entry<E>> {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -160,6 +161,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
+  @Override
   public Iterator<Entry<E>> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),

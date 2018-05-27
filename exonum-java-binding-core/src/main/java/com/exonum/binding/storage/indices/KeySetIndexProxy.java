@@ -36,7 +36,7 @@ import java.util.Iterator;
  * @see ValueSetIndexProxy
  * @see View
  */
-public final class KeySetIndexProxy<E> extends AbstractIndexProxy {
+public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Iterable<E> {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -122,6 +122,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 
    */
+  @Override
   public Iterator<E> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),

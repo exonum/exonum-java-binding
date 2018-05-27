@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
  *
  * @param <T> the type of elements in this list
  */
-public interface ListIndex<T> extends StorageIndex {
+public interface ListIndex<T> extends StorageIndex, Iterable<T> {
 
   /**
    * Adds a new element to the end of the list.
@@ -103,5 +103,6 @@ public interface ListIndex<T> extends StorageIndex {
    *
    * @throws IllegalStateException if this list is not valid
    */
+  @Override
   Iterator<T> iterator();
 }
