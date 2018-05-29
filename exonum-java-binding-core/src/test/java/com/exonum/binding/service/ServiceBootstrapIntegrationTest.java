@@ -45,7 +45,7 @@ public class ServiceBootstrapIntegrationTest {
 
     // Check that once startService returns, the native library is loaded. If it’s not,
     // we’ll get an UnsatisfiedLinkError.
-    try (MemoryDb database = MemoryDb.newInstance()) {
+    try (MemoryDb database = new MemoryDb()) {
       assertNotNull(database);
     }
   }
