@@ -22,7 +22,9 @@ public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable
   public void mapsInGroupWithPrefixIdsAreIndependent() {
     View view = db.createFork(cleaner);
 
-    // A string that will be sliced in an id of length [1, N-1] and user key of length [N-1, 1].
+    // A string that will be sliced into pairs of an id and a user key that result
+    // in the same database key. Lengths of index ids are in range [1, N-1],
+    // each user key has length 'N - length(id)', where N is the length of the string below.
     //
     // In the current implementation, Exonum uses the id as a prefix of a user key to make
     // a database key: database-key = prefix + user-key.
@@ -68,6 +70,17 @@ public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable
     }
   }
 
+  private static MapEntry<String, MapEntry<String, String>> idAndKeyValue(String idKeyPrototype,
+                                                                          int prefixSize) {
+    // A map id (= prefix in the current implementation)
+    String mapId = idKeyPrototype.substring(0, prefixSize);
+    String userKey = idKeyPrototype.substring(prefixSize, idKeyPrototype.length());
+    assert (mapId + userKey).equals(idKeyPrototype);
+    // Make a value that includes the unique user key.
+    String value = "value for key='" + userKey + "'";
+    return MapEntry.from(mapId, MapEntry.from(userKey, value));
+  }
+
   @Override
   ImmutableMap<String, ImmutableMap<String, String>> getTestEntriesById() {
     return ImmutableMap.<String, ImmutableMap<String, String>>builder()
@@ -83,16 +96,5 @@ public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable
   MapIndex<String, String> createInGroup(byte[] mapId, View view) {
     return MapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, view,
         StandardSerializers.string(), StandardSerializers.string());
-  }
-
-  private static MapEntry<String, MapEntry<String, String>> idAndKeyValue(String idKeyPrototype,
-                                                                          int prefixSize) {
-    // A map id (= prefix in the current implementation)
-    String mapId = idKeyPrototype.substring(0, prefixSize);
-    String userKey = idKeyPrototype.substring(prefixSize, idKeyPrototype.length());
-    assert (mapId + userKey).equals(idKeyPrototype);
-    // Make a value that includes the unique user key.
-    String value = "value for key='" + userKey + "'";
-    return MapEntry.from(mapId, MapEntry.from(userKey, value));
   }
 }

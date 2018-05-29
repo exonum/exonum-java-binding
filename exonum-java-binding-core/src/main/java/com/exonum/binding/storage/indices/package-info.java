@@ -8,7 +8,7 @@
  * <h2><a name="families">Index families</a></h2>
  * <p>An index family is a named group of indexes of the same type. Each index in the group
  * is identified by an <em>identifier</em>, an arbitrary byte string. An index in the group works
- * the same as an individual index. Indexes in a group are isolated from each other.
+ * the same as an individual index. Indexes in a family are isolated from each other.
  * It is not possible to iterate through all elements that are stored inside an index group.
  *
  * <h3><a name="families-use-cases">Uses cases</a></h3>
