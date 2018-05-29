@@ -41,8 +41,6 @@ before_install:
   - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
     # Set a toolchain as default.
   - rustup default "$RUST_VERSION"
-    # Save the path to stdlib of the default toolchain to use it in scripts.
-  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
     # Install rustfmt if it's not already.
   - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
     # Install cargo-audit if it's not already.
