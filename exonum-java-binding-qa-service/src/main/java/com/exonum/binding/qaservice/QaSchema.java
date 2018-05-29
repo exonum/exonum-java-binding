@@ -9,6 +9,8 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A schema of the QA service.
@@ -26,6 +28,11 @@ public final class QaSchema implements Schema {
 
   public QaSchema(View view) {
     this.view = checkNotNull(view);
+  }
+
+  @Override
+  public List<HashCode> getStateHashes() {
+    return Collections.singletonList(counters().getRootHash());
   }
 
   /**
