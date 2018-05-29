@@ -1,15 +1,20 @@
 language: java
 dist: trusty
 jdk: openjdk8
-sudo: required
+sudo: false
 
 addons:
   apt:
     sources:
     - sourceline: 'ppa:giskou/librocksdb'
+    - sourceline: 'ppa:chris-lea/libsodium'
     packages:
     - librocksdb
     - libsnappy-dev
+    - build-essential
+    - libsodium-dev
+    - libssl-dev
+    - pkg-config
 
 env:
   global:
@@ -28,32 +33,35 @@ cache:
     - "$HOME/.m2"
 
 before_install:
-  - sudo add-apt-repository -y ppa:chris-lea/libsodium
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq --yes build-essential libsodium-dev libssl-dev pkg-config
   - export PATH="$PATH":"$HOME/.cargo/bin"
-    # Install rustup if it's not already installed (i.e., not in CI cache)
+    # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
     # Install nightly rust version and clippy.
   - rustup toolchain install $RUST_NIGHTLY_VERSION
   - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    # Install a toolchain and set it as a default.
+    # Set a toolchain as default.
   - rustup default "$RUST_VERSION"
+    # Save the path to stdlib of the default toolchain to use it in scripts.
+  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
     # Install rustfmt if it's not already.
   - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
     # Install cargo-audit if it's not already.
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
   - cargo install --list
+    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
+  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
+
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt -- --write-mode=diff
+  - cargo fmt --all -- --write-mode=diff
   - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings
   - cargo audit
   - cd -
   - ./run_all_tests.sh
+
 notifications:
   slack:
     secure: m9GypuiO7oTg5/PoPfYvJRsx2x44q+TwBzLaDQegJZOhP6vNUrLHV06wCMund2SqVG3EwQkaVP4L0DmDLPFd/i+SXRPK0BUC+1G4HTp/VllmtkrebePqtlaXTrkJDHpxKLafaOOZd948LqsGs+PKehbKU5FJGeUcNgtsqkE/LZ4F9GgrWgQzh5qNrPK/dCS+svwiNSICJOtMp5rG84LAbCLHLMS9lII1Mo/ELsIsZ1OreHZjfcweQ/Br5vIqlH14s98y4CaZhvHy3F1KsP00HCltA4sQSokiMLh2wWlxtjY5bCP6tAUY3CP6sYDHE4WoRc2zu2RCo+D7J0N2i8y/KbuduCqXVnFv9vIc311DrkfazFV1WvJkND9h8RyNA73ZdhTCRAXGECTgxqr1HYPzk0Ox9D0jcPW/6uJOdYGfG+UwYTqbHL9bEsc6RW5hw+siyA5bcgZ+Ah8njzrc6Z+09CQnNqqfF6KbQoqUl9VipYWSomBMVA6SCaWVFXN7b/OnEkNWPj+GlPDkSEqH8cFHVJYD0AZ0V9TdwXNheyIc7Aq7E9eiR7g+OOnKPBC2sJaa04Ae+Q5nWPk3/UtZplg3lJTIqe3NgkNI5bIo0XzKA+xFpNIWbJnWko4oFwjFdfmgTuyyI76sVQNwxwfaUQfr6BtUyELrtwt4eM17BmB9Crk=
