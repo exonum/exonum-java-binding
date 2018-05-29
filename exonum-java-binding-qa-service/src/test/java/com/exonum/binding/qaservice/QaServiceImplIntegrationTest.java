@@ -24,6 +24,7 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
@@ -31,7 +32,13 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
+import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.test.appender.ListAppender;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -55,6 +62,7 @@ public class QaServiceImplIntegrationTest {
   private QaServiceImpl service;
   private Node node;
   private Vertx vertx;
+  private ListAppender logAppender;
 
 
   @Before
@@ -63,6 +71,18 @@ public class QaServiceImplIntegrationTest {
     service = new QaServiceImpl(transactionConverter);
     node = mock(Node.class);
     vertx = vertxTestContextRule.vertx();
+    logAppender = getCapturingLogAppender();
+  }
+
+  private static ListAppender getCapturingLogAppender() {
+    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    Configuration config = ctx.getConfiguration();
+    return (ListAppender) config.getAppenders().get("ListAppender");
+  }
+
+  @After
+  public void tearDown() {
+    logAppender.clear();
   }
 
   @Test
@@ -71,6 +91,26 @@ public class QaServiceImplIntegrationTest {
     Schema dataSchema = service.createDataSchema(view);
 
     assertThat(dataSchema).isInstanceOf(QaSchema.class);
+  }
+
+  @Test
+  public void getStateHashesLogsThem() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      List<HashCode> stateHashes = service.getStateHashes(view);
+      int numMerklizedCollections = 1;
+      assertThat(stateHashes).hasSize(numMerklizedCollections);
+
+      List<String> logMessages = logAppender.getMessages();
+      int expectedNumMessages = 1;
+      assertThat(logMessages).hasSize(expectedNumMessages);
+
+      assertThat(logMessages.get(0))
+          .contains("ERROR")
+          .contains(stateHashes.get(0).toString());
+    }
   }
 
   @Test
