@@ -49,8 +49,6 @@ before_install:
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
   - cargo install --list
-    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
-  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
