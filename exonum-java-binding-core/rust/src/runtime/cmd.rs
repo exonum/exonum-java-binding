@@ -12,10 +12,38 @@ pub struct GenerateNodeConfig;
 impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
         vec![
-            Argument::new_named("EJB_DEBUG", false, "Debug mode for JVM.", None, "ejb-debug", false),
-            Argument::new_named("EJB_LOG_CONFIG_PATH", false, "Path to log4j configuration file.", None, "ejb-log-config-path", false),
-            Argument::new_named("EJB_CLASSPATH", true, "Classpath for JVM.", None, "ejb-classpath", false),
-            Argument::new_named("EJB_LIBPATH", true, "Libpath for JVM.", None, "ejb-libpath", false),
+            Argument::new_named(
+                "EJB_DEBUG",
+                false,
+                "Debug mode for JVM.",
+                None,
+                "ejb-debug",
+                false
+            ),
+            Argument::new_named(
+                "EJB_LOG_CONFIG_PATH",
+                false,
+                "Path to log4j configuration file.",
+                None,
+                "ejb-log-config-path",
+                false
+            ),
+            Argument::new_named(
+                "EJB_CLASSPATH",
+                true,
+                "Classpath for JVM.",
+                None,
+                "ejb-classpath",
+                false
+            ),
+            Argument::new_named(
+                "EJB_LIBPATH",
+                true,
+                "Libpath for JVM.",
+                None,
+                "ejb-libpath",
+                false
+            ),
         ]
     }
 
@@ -39,7 +67,7 @@ impl CommandExtension for GenerateNodeConfig {
             vec![
                 (
                     "ejb_jvm_config".to_owned(),
-                    Value::try_from(jvm_config).unwrap(),
+                    Value::try_from(jvm_config).unwrap()
                 ),
             ].into_iter(),
         );
@@ -55,7 +83,14 @@ pub struct Finalize;
 impl CommandExtension for Finalize {
     fn args(&self) -> Vec<Argument> {
         vec![
-            Argument::new_named("EJB_MODULE_NAME", true, "Module name for EJB.", None, "ejb-module-name", false),
+            Argument::new_named(
+                "EJB_MODULE_NAME",
+                true,
+                "Module name for EJB.",
+                None,
+                "ejb-module-name",
+                false
+            ),
             Argument::new_named("EJB_PORT", true, "Port for EJB.", None, "ejb-port", false),
         ]
     }
@@ -64,17 +99,26 @@ impl CommandExtension for Finalize {
         let module_name = context.arg("EJB_MODULE_NAME")?;
         let port = context.arg("EJB_PORT")?;
 
-        let service_config = ServiceConfig {
-            module_name,
-            port,
+        let service_config = ServiceConfig { module_name, port };
+
+        let jvm_config: JvmConfig = context
+            .get(keys::SERVICES_SECRET_CONFIGS)
+            .unwrap()
+            .get("ejb_jvm_config")
+            .unwrap()
+            .clone()
+            .try_into()?;
+
+        let config = Config {
+            jvm_config,
+            service_config,
         };
 
-        let jvm_config: JvmConfig = context.get(keys::SERVICES_SECRET_CONFIGS).unwrap().get("ejb_jvm_config").unwrap().clone().try_into()?;
-
-        let config = Config { jvm_config, service_config };
-
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
-        node_config.services_configs.insert("ejb".to_owned(), Value::try_from(config)?);
+        node_config.services_configs.insert(
+            "ejb".to_owned(),
+            Value::try_from(config)?,
+        );
         context.set(keys::NODE_CONFIG, node_config);
         Ok(context)
     }

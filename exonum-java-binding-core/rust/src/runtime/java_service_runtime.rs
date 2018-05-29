@@ -15,8 +15,7 @@ use jni::JavaVM;
 use std::sync::Arc;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
-const START_SERVICE_SIGNATURE: &str =
-    "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
+const START_SERVICE_SIGNATURE: &str = "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
 #[allow(dead_code)]
@@ -51,8 +50,7 @@ impl JavaServiceRuntime {
     }
 
     fn create_java_vm(config: JvmConfig) -> JavaVM {
-        let mut args_builder = jni::InitArgsBuilder::new()
-            .version(jni::JNIVersion::V8);
+        let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
         if config.debug {
             args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
@@ -60,7 +58,10 @@ impl JavaServiceRuntime {
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
         args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
-        args_builder = args_builder.option(&format!("-Dlog4j.configurationFile={}", config.log_config_path));
+        args_builder = args_builder.option(&format!(
+            "-Dlog4j.configurationFile={}",
+            config.log_config_path
+        ));
 
         let args = args_builder.build().unwrap();
         jni::JavaVM::new(args).unwrap()
@@ -75,7 +76,8 @@ impl JavaServiceRuntime {
                 "startService",
                 START_SERVICE_SIGNATURE,
                 &[module_name.into(), config.port.into()],
-            )?.l()?;
+            )?
+                .l()?;
             env.new_global_ref(env.auto_local(service).as_obj())
         }));
         ServiceProxy::from_global_ref(executor, service)
@@ -103,7 +105,8 @@ impl ServiceFactory for JavaServiceFactory {
     fn make_service(&mut self, context: &Context) -> Box<Service> {
         let runtime = {
             use exonum::helpers::fabric::keys;
-            let config: Config = context.get(keys::NODE_CONFIG)
+            let config: Config = context
+                .get(keys::NODE_CONFIG)
                 .unwrap()
                 .services_configs
                 .get("ejb")

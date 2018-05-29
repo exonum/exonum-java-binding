@@ -32,8 +32,9 @@ fn bootstrap() {
         service_config,
     });
 
-    let mut testkit = TestKitBuilder::validator().with_service(service_runtime.service_proxy()).create();
+    let mut testkit = TestKitBuilder::validator()
+        .with_service(service_runtime.service_proxy())
+        .create();
 
     testkit.create_block();
 }
-

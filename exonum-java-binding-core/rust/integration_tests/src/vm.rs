@@ -55,9 +55,10 @@ pub fn get_libpath() -> String {
             "Target path not found, but there should be \
             the libjava_bindings dynamically loading library",
         );
-    library_path.to_str().expect(
-        "Failed to convert FS path into utf-8",
-    ).to_owned()
+    library_path
+        .to_str()
+        .expect("Failed to convert FS path into utf-8")
+        .to_owned()
 }
 
 fn rust_project_root_dir() -> PathBuf {
