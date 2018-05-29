@@ -1,6 +1,6 @@
 use java_bindings::{JniExecutor, JniResult};
 use java_bindings::jni::JNIEnv;
-use java_bindings::jni::objects::{AutoLocal, GlobalRef, JValue};
+use java_bindings::jni::objects::{GlobalRef, JValue};
 use java_bindings::jni::sys::jint;
 
 /// A test example of a native-to-JNI proxy
@@ -14,15 +14,11 @@ impl<E: JniExecutor> AtomicIntegerProxy<E> {
     /// Creates a new instance of `AtomicIntegerProxy`
     pub fn new(exec: E, init_value: jint) -> JniResult<Self> {
         let obj = exec.with_attached(|env: &JNIEnv| {
-            let local_ref = AutoLocal::new(
-                env,
-                env.new_object(
-                    "java/util/concurrent/atomic/AtomicInteger",
-                    "(I)V",
-                    &[JValue::from(init_value)],
-                )?,
-            );
-            env.new_global_ref(local_ref.as_obj())
+            env.new_global_ref(env.new_object(
+                "java/util/concurrent/atomic/AtomicInteger",
+                "(I)V",
+                &[JValue::from(init_value)],
+            )?)
         })?;
         Ok(AtomicIntegerProxy { exec, obj })
     }

@@ -14,7 +14,7 @@ use std::fmt;
 
 use {JniExecutor, MainExecutor};
 use storage::View;
-use utils::{check_error_on_exception, panic_on_exception, to_handle, unwrap_jni};
+use utils::{check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni};
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -67,8 +67,8 @@ impl ExonumJson for TransactionProxy {
                 &[],
             );
             Ok(check_error_on_exception(env, res).map(|json_string| {
-                let obj = unwrap_jni(json_string.l()).into();
-                String::from(unwrap_jni(env.get_string(obj)))
+                let obj = unwrap_jni(json_string.l());
+                unwrap_jni(convert_to_string(env, obj))
             }))
         }));
         Ok(serde_json::from_str(&res?)?)

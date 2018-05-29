@@ -16,7 +16,7 @@ use java_bindings::exonum::messages::RawMessage;
 use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::MemoryDB;
 use java_bindings::jni::{JavaVM, JNIEnv};
-use java_bindings::jni::objects::{AutoLocal, JObject};
+use java_bindings::jni::objects::JObject;
 use java_bindings::utils::{as_handle, get_and_clear_java_exception, get_class_name, unwrap_jni,
                            unwrap_jni_verbose};
 
@@ -44,7 +44,7 @@ fn submit_valid_transaction() {
                     jclass,
                     node_handle,
                     *java_transaction.as_obj(),
-                    *message.as_obj(),
+                    *message,
                     0,
                     raw_message.len() as i32,
                 );
@@ -80,14 +80,13 @@ fn submit_not_valid_transaction() {
                     jclass,
                     node_handle,
                     *java_transaction.as_obj(),
-                    *message.as_obj(),
+                    *message,
                     0,
                     raw_message.len() as i32,
                 );
-                let exception = get_and_clear_java_exception(&env);
-                let exception = env.auto_local(exception.into());
+                let exception = get_and_clear_java_exception(&env).into();
                 assert_eq!(
-                    get_class_name(&env, exception.as_obj())?,
+                    get_class_name(&env, exception)?,
                     INVALID_TRANSACTION_EXCEPTION
                 );
                 Ok(())
@@ -113,10 +112,11 @@ fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
     (node, app_rx)
 }
 
-fn message_from_raw<'e, R>(env: &'e JNIEnv<'e>, raw_message: R) -> JniResult<AutoLocal<'e>>
+fn message_from_raw<'e, R>(env: &'e JNIEnv<'e>, raw_message: R) -> JniResult<JObject<'e>>
 where
     R: AsRef<[u8]>,
 {
-    let message = env.byte_array_from_slice(raw_message.as_ref())?;
-    Ok(env.auto_local(message.into()))
+    env.byte_array_from_slice(raw_message.as_ref()).map(
+        JObject::from,
+    )
 }

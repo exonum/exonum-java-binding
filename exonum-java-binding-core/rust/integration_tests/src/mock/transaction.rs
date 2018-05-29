@@ -1,6 +1,6 @@
 use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
-use java_bindings::jni::objects::{AutoLocal, GlobalRef, JObject, JValue};
+use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
 
 use super::NATIVE_FACADE_CLASS;
@@ -30,9 +30,7 @@ pub fn create_throwing_mock_transaction_proxy(
                 &[JValue::from(JObject::from(exception.into_inner()))],
             )?
                 .l()?;
-            let java_tx_mock = env.new_global_ref(
-                AutoLocal::new(env, java_tx_mock).as_obj(),
-            )?;
+            let java_tx_mock = env.new_global_ref(java_tx_mock)?;
             let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
             Ok((java_tx_mock, raw))
         })
@@ -67,9 +65,7 @@ pub fn create_mock_transaction(executor: MainExecutor, valid: bool) -> (GlobalRe
                 ],
             )?
                 .l()?;
-            let java_tx_mock = env.new_global_ref(
-                AutoLocal::new(env, java_tx_mock).as_obj(),
-            )?;
+            let java_tx_mock = env.new_global_ref(java_tx_mock)?;
             let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
             Ok((java_tx_mock, raw))
         })
