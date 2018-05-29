@@ -1,7 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.Fork;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -21,7 +21,6 @@ public interface MapIndex<K, V> extends StorageIndex {
   /**
    * Returns true if this map contains a mapping for the specified key.
    *
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    */
   boolean containsKey(K key);
@@ -32,7 +31,6 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @param key a storage key
    * @param value a storage value to associate with the key
-   * @throws NullPointerException if any argument is null
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if some property of the key or the value prevents it
    *                                  from being stored in this map
@@ -47,7 +45,6 @@ public interface MapIndex<K, V> extends StorageIndex {
    * @param key a storage key
    * @return the value mapped to the specified key,
    *         or {@code null} if this map contains no mapping for the key.
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    */
   V get(K key);
@@ -57,7 +54,6 @@ public interface MapIndex<K, V> extends StorageIndex {
    * If there is no such mapping, has no effect.
    *
    * @param key a storage key
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    * @throws UnsupportedOperationException if this map is read-only
    */
@@ -73,8 +69,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  @MustBeClosed
-  StorageIterator<K> keys();
+  Iterator<K> keys();
 
   /**
    * Returns an iterator over the map values in lexicographical order of <em>keys</em>.
@@ -86,8 +81,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  @MustBeClosed
-  StorageIterator<V> values();
+  Iterator<V> values();
 
   /**
    * Returns an iterator over the map entries.
@@ -100,8 +94,7 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @throws IllegalStateException if this map is not valid
    */
-  @MustBeClosed
-  StorageIterator<MapEntry<K, V>> entries();
+  Iterator<MapEntry<K, V>> entries();
 
   /**
    * Removes all of the key-value pairs from the map.

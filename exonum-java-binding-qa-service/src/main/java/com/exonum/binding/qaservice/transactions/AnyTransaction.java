@@ -10,7 +10,7 @@ import com.exonum.binding.qaservice.QaService;
  */
 @PromoteToCore("A similar class might be universally useful if we need to serialize transaction "
     + "data into JSON in the Exonum standard format.")
-public class AnyTransaction<BodyT> {
+public final class AnyTransaction<BodyT> {
   public final short service_id;
   public final short message_id;
   public final BodyT body;

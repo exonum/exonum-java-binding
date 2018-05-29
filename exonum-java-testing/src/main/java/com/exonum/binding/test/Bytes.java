@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.charset.StandardCharsets;
 
-public class Bytes {
+public final class Bytes {
 
   /**
    * Converts a sequence of bytes into an array.

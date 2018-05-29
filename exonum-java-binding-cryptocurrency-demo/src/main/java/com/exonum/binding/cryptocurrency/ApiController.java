@@ -25,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Controller for submitting transactions. */
-class ApiController {
+final class ApiController {
 
   @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final Logger log = LogManager.getLogger(ApiController.class);
@@ -81,7 +81,7 @@ class ApiController {
           .setStatusMessage("Bad Request: transaction is not valid")
           .end();
     } catch (InternalServerError e) {
-      log.error(e);
+      log.error("Internal error occurred whilst submitting tx (id={}, tx={}):", txId, tx, e);
       rc.response().setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR).end();
     }
   }

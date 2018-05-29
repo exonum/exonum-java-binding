@@ -87,7 +87,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- todo: Remove when https://jira.bf.local/browse/ECR-521 is resolved -->
+        <!-- todo: Remove when https://jira.bf.local/browse/ECR-521 (Java 10) is resolved -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>

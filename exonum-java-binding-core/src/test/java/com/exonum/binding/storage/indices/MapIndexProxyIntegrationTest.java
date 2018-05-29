@@ -12,7 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
@@ -20,10 +21,11 @@ import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,23 +40,6 @@ public class MapIndexProxyIntegrationTest
   public ExpectedException expectedException = ExpectedException.none();
 
   private static final String MAP_NAME = "test_map";
-
-  /**
-   * This test verifies that if a client destroys native objects through their proxies
-   * in the wrong order, he will get a runtime exception before a (possible) JVM crash.
-   */
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void closeShallThrowIfViewFreedBeforeMap() throws Exception {
-    Snapshot view = database.createSnapshot();
-    MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
-
-    // Destroy a view before the map.
-    view.close();
-
-    expectedException.expect(IllegalStateException.class);
-    map.close();
-  }
 
   @Test
   public void containsKeyShouldReturnFalseIfNoSuchKey() throws Exception {
@@ -225,9 +210,9 @@ public class MapIndexProxyIntegrationTest
   @Test
   public void keysShouldReturnEmptyIterIfNoEntries() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      try (StorageIterator<String> iterator = map.keys()) {
-        assertFalse(iterator.hasNext());
-      }
+      Iterator<String> iterator = map.keys();
+
+      assertFalse(iterator.hasNext());
     });
   }
 
@@ -237,12 +222,11 @@ public class MapIndexProxyIntegrationTest
       List<MapEntry<String, String>> entries = createSortedMapEntries(3);
       putAll(map, entries);
 
-      try (StorageIterator<String> iterator = map.keys()) {
-        List<String> keysFromIter = ImmutableList.copyOf(iterator);
-        List<String> keysInMap = MapEntries.extractKeys(entries);
+      Iterator<String> iterator = map.keys();
+      List<String> keysFromIter = ImmutableList.copyOf(iterator);
+      List<String> keysInMap = MapEntries.extractKeys(entries);
 
-        assertThat(keysFromIter, equalTo(keysInMap));
-      }
+      assertThat(keysFromIter, equalTo(keysInMap));
     });
   }
 
@@ -252,13 +236,12 @@ public class MapIndexProxyIntegrationTest
       List<MapEntry<String, String>> entries = createMapEntries(3);
       putAll(map, entries);
 
-      try (StorageIterator<String> iterator = map.keys()) {
-        iterator.next();
-        map.put("new key", "new value");
+      Iterator<String> iterator = map.keys();
+      iterator.next();
+      map.put("new key", "new value");
 
-        expectedException.expect(ConcurrentModificationException.class);
-        iterator.next();
-      }
+      expectedException.expect(ConcurrentModificationException.class);
+      iterator.next();
     });
   }
 
@@ -268,12 +251,11 @@ public class MapIndexProxyIntegrationTest
       List<MapEntry<String, String>> entries = createMapEntries(3);
       putAll(map, entries);
 
-      try (StorageIterator<String> iterator = map.keys()) {
-        map.put("new key", "new value");
+      Iterator<String> iterator = map.keys();
+      map.put("new key", "new value");
 
-        expectedException.expect(ConcurrentModificationException.class);
-        iterator.next();
-      }
+      expectedException.expect(ConcurrentModificationException.class);
+      iterator.next();
     });
   }
 
@@ -283,24 +265,22 @@ public class MapIndexProxyIntegrationTest
       List<MapEntry<String, String>> entries = createMapEntries(3);
       putAll(map, entries);
 
-      try (StorageIterator<String> iterator = map.keys()) {
-        iterator.next();
-        try (MapIndexProxy<String, String> otherMap = createMap("other_map", view)) {
-          otherMap.put("new key", "new value");
-        }
+      Iterator<String> iterator = map.keys();
+      iterator.next();
 
-        expectedException.expect(ConcurrentModificationException.class);
-        iterator.next();
-      }
+      MapIndexProxy<String, String> otherMap = createMap("other_map", view);
+      otherMap.put("new key", "new value");
+
+      expectedException.expect(ConcurrentModificationException.class);
+      iterator.next();
     });
   }
 
   @Test
   public void valuesShouldReturnEmptyIterIfNoEntries() throws Exception {
     runTestWithView(database::createSnapshot, (map) -> {
-      try (StorageIterator<String> iterator = map.values()) {
-        assertFalse(iterator.hasNext());
-      }
+      Iterator<String> iterator = map.values();
+      assertFalse(iterator.hasNext());
     });
   }
 
@@ -310,12 +290,11 @@ public class MapIndexProxyIntegrationTest
       List<MapEntry<String, String>> entries = createSortedMapEntries(3);
       putAll(map, entries);
 
-      try (StorageIterator<String> iterator = map.values()) {
-        List<String> valuesFromIter = ImmutableList.copyOf(iterator);
-        List<String> valuesInMap = MapEntries.extractValues(entries);
+      Iterator<String> iterator = map.values();
+      List<String> valuesFromIter = ImmutableList.copyOf(iterator);
+      List<String> valuesInMap = MapEntries.extractValues(entries);
 
-        assertThat(valuesFromIter, equalTo(valuesInMap));
-      }
+      assertThat(valuesFromIter, equalTo(valuesInMap));
     });
   }
 
@@ -325,11 +304,10 @@ public class MapIndexProxyIntegrationTest
       List<MapEntry<String, String>> entries = createSortedMapEntries(3);
       putAll(map, entries);
 
-      try (StorageIterator<MapEntry<String, String>> iterator = map.entries()) {
-        List<MapEntry<String, String>> iterEntries = ImmutableList.copyOf(iterator);
+      Iterator<MapEntry<String, String>> iterator = map.entries();
+      List<MapEntry<String, String>> iterEntries = ImmutableList.copyOf(iterator);
 
-        assertThat(iterEntries, equalTo(entries));
-      }
+      assertThat(iterEntries, equalTo(entries));
     });
   }
 
@@ -387,22 +365,31 @@ public class MapIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<MapIndexProxy<String, String>> mapTest) {
-    runTestWithView(viewSupplier, (ignoredView, map) -> mapTest.accept(map));
+    runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
-    try (View view = viewSupplier.get();
-         MapIndexProxy<String, String> map = createMap(MAP_NAME, view)) {
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = viewFactory.apply(cleaner);
+      MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
+
       mapTest.accept(view, map);
+    } catch (CloseFailuresException e) {
+      throw new AssertionError("Unexpected exception", e);
     }
   }
 
   @Override
   MapIndexProxy<String, String> create(String name, View view) {
     return createMap(name, view);
+  }
+
+  @Override
+  Object getAnyElement(MapIndexProxy<String, String> index) {
+    return index.get(K1);
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {

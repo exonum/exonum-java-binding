@@ -1,8 +1,8 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.Fork;
-import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -12,20 +12,19 @@ import java.util.NoSuchElementException;
  * are specified to throw {@link UnsupportedOperationException} if
  * this list has been created with a read-only database view.
  *
- * <p>This interface prohibits null elements.
+ * <p>This interface prohibits null elements. All method arguments are non-null by default.
  *
  * <p>As any native proxy, the list index <em>must be closed</em> when no longer needed.
  * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <T> the type of elements in this list
  */
-public interface ListIndex<T> extends StorageIndex {
+public interface ListIndex<T> extends StorageIndex, Iterable<T> {
 
   /**
    * Adds a new element to the end of the list.
    *
    * @param e an element to append to the list
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
@@ -50,7 +49,6 @@ public interface ListIndex<T> extends StorageIndex {
    * @param index an index of the element to replace
    * @param e an element to add
    * @throws IndexOutOfBoundsException if the index is invalid
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
@@ -105,6 +103,6 @@ public interface ListIndex<T> extends StorageIndex {
    *
    * @throws IllegalStateException if this list is not valid
    */
-  @MustBeClosed
-  StorageIterator<T> iterator();
+  @Override
+  Iterator<T> iterator();
 }

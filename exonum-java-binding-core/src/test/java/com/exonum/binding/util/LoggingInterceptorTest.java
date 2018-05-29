@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
+import com.exonum.binding.service.adapters.ViewFactory;
+import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -19,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +46,11 @@ public class LoggingInterceptorTest {
     serviceAdapter = injector.getInstance(UserServiceAdapter.class);
   }
 
+  @After
+  public void tearDown() throws Exception {
+    appender.clear();
+  }
+
   @Test
   public void logInterceptedException() {
     try {
@@ -63,6 +71,7 @@ public class LoggingInterceptorTest {
       when(service.getId()).thenThrow(new OutOfMemoryError(EXCEPTION_MESSAGE));
       bind(Service.class).toInstance(service);
       bind(Server.class).toInstance(mock(Server.class));
+      bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
 
       bindInterceptor(subclassesOf(UserServiceAdapter.class), any(), new LoggingInterceptor());
 

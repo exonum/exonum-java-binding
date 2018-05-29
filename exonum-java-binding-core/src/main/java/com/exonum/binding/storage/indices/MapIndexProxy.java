@@ -2,10 +2,13 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -21,14 +24,14 @@ import com.google.errorprone.annotations.MustBeClosed;
  *
  * <p>This class is not thread-safe and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, the map <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed map is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this map is destroyed. Subsequent use of the closed map
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <K> the type of keys in this map
  * @param <V> the type of values in this map
  * @see View
  */
-public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
   private final CheckingSerializerDecorator<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;
@@ -44,17 +47,33 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
    * @param valueSerializer a serializer of values
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
-  public static <K, V> MapIndexProxy<K, V> newInstance(
-      String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    return new MapIndexProxy<>(name, view, CheckingSerializerDecorator.from(keySerializer),
-        CheckingSerializerDecorator.from(valueSerializer));
+  public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
+                                                       Serializer<K> keySerializer,
+                                                       Serializer<V> valueSerializer) {
+    checkIndexName(name);
+    CheckingSerializerDecorator<K> ks = CheckingSerializerDecorator.from(keySerializer);
+    CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
+
+    NativeHandle mapNativeHandle = createNativeMap(name, view);
+
+    return new MapIndexProxy<>(mapNativeHandle, name, view, ks, vs);
   }
 
-  private MapIndexProxy(String name, View view, CheckingSerializerDecorator<K> keySerializer,
-      CheckingSerializerDecorator<V> valueSerializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
+  private static NativeHandle createNativeMap(String name, View view) {
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle mapNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, mapNativeHandle, MapIndexProxy.class,
+        MapIndexProxy::nativeFree);
+    return mapNativeHandle;
+  }
+
+  private MapIndexProxy(NativeHandle nativeHandle, String name, View view,
+                        CheckingSerializerDecorator<K> keySerializer,
+                        CheckingSerializerDecorator<V> valueSerializer) {
+    super(nativeHandle, name, view);
     this.keySerializer = keySerializer;
     this.valueSerializer = valueSerializer;
   }
@@ -88,39 +107,36 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   }
 
   @Override
-  @MustBeClosed
-  public StorageIterator<K> keys() {
+  public Iterator<K> keys() {
     return StorageIterators.createIterator(
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
-        this,
+        dbView,
         modCounter,
         keySerializer::fromBytes
     );
   }
 
   @Override
-  @MustBeClosed
-  public StorageIterator<V> values() {
+  public Iterator<V> values() {
     return StorageIterators.createIterator(
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
         this::nativeValuesIterFree,
-        this,
+        dbView,
         modCounter,
         valueSerializer::fromBytes
     );
   }
 
   @Override
-  @MustBeClosed
-  public StorageIterator<MapEntry<K, V>> entries() {
+  public Iterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
-        this,
+        dbView,
         modCounter,
         (entry) -> MapEntry.fromInternal(entry, keySerializer, valueSerializer)
     );
@@ -136,11 +152,6 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
   public void clear() {
     notifyModified();
     nativeClear(getNativeHandle());
-  }
-
-  @Override
-  protected void disposeInternal() {
-    nativeFree(getNativeHandle());
   }
 
   private static native long nativeCreate(String name, long viewNativeHandle);
@@ -167,6 +178,6 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
 
   private native void nativeClear(long nativeHandle);
 
-  private native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 
 }

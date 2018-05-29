@@ -15,8 +15,10 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class MapEntry<K, V> {
 
+  /** Returns the key in this entry. */
   public abstract K getKey();
 
+  /** Returns the value in this entry. */
   public abstract V getValue();
 
   static <K, V> MapEntry<K, V> fromInternal(MapEntryInternal e,

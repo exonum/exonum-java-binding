@@ -2,7 +2,7 @@ package com.exonum.binding.cryptocurrency;
 
 import java.io.Serializable;
 
-public class Wallet implements Serializable {
+public final class Wallet implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

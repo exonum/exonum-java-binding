@@ -9,7 +9,6 @@ use exonum::storage::{Snapshot, Fork, KeySetIndex};
 use exonum::storage::key_set_index::KeySetIndexIter;
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Key};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = KeySetIndex<T, Key>;
 
@@ -30,14 +29,10 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    check_read(&name, TableType::KeySet, &*snapshot);
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(ref mut fork) => {
-                    check_write(&name, TableType::KeySet, fork);
-                    IndexType::ForkIndex(Index::new(name, fork))
-                }
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -48,7 +43,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     set_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, set_handle);

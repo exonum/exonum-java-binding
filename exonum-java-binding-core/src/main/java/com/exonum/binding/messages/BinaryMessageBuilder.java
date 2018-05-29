@@ -15,7 +15,7 @@ import java.util.function.IntFunction;
 /**
  * A builder of binary Exonum messages.
  */
-public class BinaryMessageBuilder {
+public final class BinaryMessageBuilder {
 
   private static final IntFunction<ByteBuffer> messageBufferAllocator = ByteBuffer::allocate;
 
