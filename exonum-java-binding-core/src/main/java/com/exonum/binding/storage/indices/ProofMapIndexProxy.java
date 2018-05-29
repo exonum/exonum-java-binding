@@ -39,7 +39,7 @@ import java.util.function.LongSupplier;
  * @param <V> the type of values in this map
  * @see View
  */
-public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
   private final ProofMapKeyCheckingSerializerDecorator<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;
@@ -57,7 +57,6 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    * @param <V> the type of values in the map
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstance(
       String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
@@ -143,7 +142,6 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    *
    * @param key a proof map key, must be 32-byte long when serialized
    * @param value a storage value to associate with the key
-   * @throws NullPointerException if any argument is null
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of the key is not 32 bytes
    * @throws UnsupportedOperationException if this map is read-only
@@ -186,7 +184,6 @@ public class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapI
    * that there is no such mapping.
    *
    * @param key a proof map key which might be mapped to some value, must be 32-byte long
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException  if this map is not valid
    * @throws IllegalArgumentException if the size of the key is not 32 bytes
    */

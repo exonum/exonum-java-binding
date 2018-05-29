@@ -44,7 +44,8 @@ import javax.annotation.Nullable;
  * @see KeySetIndexProxy
  * @see View
  */
-public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
+public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
+    implements Iterable<ValueSetIndexProxy.Entry<E>> {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -59,7 +60,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @param <E> the type of values in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> ValueSetIndexProxy<E> newInstance(String name, View view,
                                                       Serializer<E> serializer) {
@@ -121,7 +121,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * the set already contains such element.
    *
    * @param e an element to add
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -146,7 +145,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
   /**
    * Returns true if this set contains the specified element.
    *
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @see #containsByHash(HashCode)
    */
@@ -159,7 +157,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * Returns true if this set contains an element with the specified hash.
    *
    * @param elementHash a hash of an element
-   * @throws NullPointerException if the hash is null
    * @throws IllegalStateException if this set is not valid
    */
   public boolean containsByHash(HashCode elementHash) {
@@ -196,6 +193,7 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
+  @Override
   public Iterator<Entry<E>> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
@@ -267,7 +265,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * Removes the element from this set. If it's not in the set, does nothing.
    *
    * @param e an element to remove.
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -282,7 +279,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * does nothing.
    *
    * @param elementHash the hash of an element to remove.
-   * @throws NullPointerException if the hash is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */

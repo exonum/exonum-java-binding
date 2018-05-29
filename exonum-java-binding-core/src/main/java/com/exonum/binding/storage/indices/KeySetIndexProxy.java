@@ -38,7 +38,7 @@ import java.util.function.LongSupplier;
  * @see ValueSetIndexProxy
  * @see View
  */
-public class KeySetIndexProxy<E> extends AbstractIndexProxy {
+public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Iterable<E> {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -53,7 +53,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @param <E> the type of keys in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> KeySetIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
@@ -114,7 +113,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * the set already contains such element.
    *
    * @param e an element to add
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -139,7 +137,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
   /**
    * Returns true if this set contains the specified element.
    *
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    */
   public boolean contains(E e) {
@@ -156,6 +153,7 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 
    */
+  @Override
   public Iterator<E> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
@@ -170,7 +168,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * Removes the element from this set. If it's not in the set, does nothing.
    * 
    * @param e an element to remove.
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */

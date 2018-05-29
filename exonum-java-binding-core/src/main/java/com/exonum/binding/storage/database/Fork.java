@@ -13,7 +13,7 @@ import com.exonum.binding.proxy.ProxyDestructor;
  * <p>A fork allows to perform a transaction: a number of independent writes to a database,
  * which then may be <em>atomically</em> applied to the database state.
  */
-public class Fork extends View {
+public final class Fork extends View {
 
   /**
    * Creates a new owning Fork proxy.

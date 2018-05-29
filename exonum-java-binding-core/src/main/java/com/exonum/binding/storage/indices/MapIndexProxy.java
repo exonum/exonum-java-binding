@@ -34,7 +34,7 @@ import java.util.function.LongSupplier;
  * @param <V> the type of values in this map
  * @see View
  */
-public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
   private final CheckingSerializerDecorator<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;
@@ -52,7 +52,6 @@ public class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<
    * @param <V> the type of values in the map
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
                                                        Serializer<K> keySerializer,

@@ -33,7 +33,7 @@ import java.util.function.LongSupplier;
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
   /**
    * Creates a new ListIndexProxy.
@@ -46,7 +46,6 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @param <E> the type of elements in this list
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> ListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
