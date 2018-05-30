@@ -25,16 +25,13 @@ public enum WalletSerializer implements Serializer<Wallet> {
   }
 
   @Override
-  public Wallet fromBytes(final byte[] binaryWallet)
-  {
+  public Wallet fromBytes(final byte[] binaryWallet) {
     Wallet wallet = null;
     try {
       WalletProtos.Wallet copiedWalletProtos = WalletProtos.Wallet.parseFrom(binaryWallet);
       PublicKey publicKey = PublicKey.fromBytes(copiedWalletProtos.getPublicKey().toByteArray());
       wallet = new Wallet(publicKey, copiedWalletProtos.getBalance());
-    }
-    catch (InvalidProtocolBufferException e)
-    {
+    } catch (InvalidProtocolBufferException e) {
       logger.error(
           "Unable to instantiate WalletProtos.Wallet instance from provided binary data", e);
     }
