@@ -36,7 +36,10 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         jvm_args_builder = jvm_args_builder.option(&get_classpath_option());
     }
     if debug {
-        jvm_args_builder = jvm_args_builder.option("-Xcheck:jni").option("-Xdebug");
+        jvm_args_builder = jvm_args_builder
+            .option("-Xcheck:jni")
+            .option("-Xdebug")
+            .option("-Xmx1024m");
     }
 
     let jvm_args = jvm_args_builder.build().unwrap_or_else(

@@ -10,6 +10,9 @@ use JniErrorKind::{Other, ThreadDetached};
 
 /// An interface for JNI thread attachment manager.
 pub trait JniExecutor: Clone + Send + Sync {
+    /// The capacity of local frames, allocated for attached threads
+    const LOCAL_FRAME_CAPACITY: i32 = 32;
+
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM. Additionally ensures that local object references freed after call.
     /// Allocates a local frame with the default capacity.
@@ -19,7 +22,7 @@ pub trait JniExecutor: Clone + Send + Sync {
     {
         self.with_attached_impl(|jni_env| {
             let mut result = None;
-            jni_env.with_local_frame(32, || {
+            jni_env.with_local_frame(Self::LOCAL_FRAME_CAPACITY, || {
                 result = Some(f(jni_env));
                 Ok(JObject::null())
             })?;
