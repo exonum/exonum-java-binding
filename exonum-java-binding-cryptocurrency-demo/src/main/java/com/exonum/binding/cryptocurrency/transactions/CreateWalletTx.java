@@ -33,7 +33,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
    */
   public CreateWalletTx(PublicKey publicKey) {
     super(CryptocurrencyService.ID, ID);
-    checkArgument(publicKey.toBytes().length > 0, "Public key must not empty");
+    checkArgument(publicKey.toBytes().length > 0, "Public key must not be empty");
     this.publicKey = publicKey;
   }
 

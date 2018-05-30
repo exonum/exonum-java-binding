@@ -46,7 +46,7 @@ public class CreateWalletTxTest {
   public void isValidEmptyName() {
     PublicKey publicKey = PublicKey.fromBytes(new byte[0]);
 
-    expectedException.expectMessage("Public key must not empty");
+    expectedException.expectMessage("Public key must not be empty");
     expectedException.expect(IllegalArgumentException.class);
     new CreateWalletTx(publicKey);
   }
