@@ -21,16 +21,18 @@ fn local_frame_allows_overflow() {
     // Test fails if JVM doesn't allow to allocate big number of local references
     // over the requested frame capacity.
 
-    const BIG_NUMBER: i32 = 65536;
+    let requested_frame_capacity = 32;
+    let real_frame_capacity = requested_frame_capacity + 32; // 64
+    let references_per_frame = real_frame_capacity * 2; // 128
 
     EXECUTOR
         .with_attached(|env| {
             let mut strings = Vec::new();
-            for i in 1..BIG_NUMBER + 1 {
+            for i in 1..references_per_frame + 1 {
                 print!(
-                    "Try: {}; limit: {}. ",
+                    "Try: {}; real limit: {}. ",
                     i,
-                    MainExecutor::LOCAL_FRAME_CAPACITY
+                    real_frame_capacity
                 );
                 let java_string = env.new_string(format!("{}", i)).expect(
                     "Can't create new local object.",
@@ -52,23 +54,34 @@ fn local_frame_allows_overflow() {
 
 #[test]
 fn local_references_doesnt_leak() {
-    // This test should totally use 8 * 256 MiB = 2 GiB, but needs only 256 MiB at once.
-    // -Xmx sets the heap limit as 1 GiB for tests.
+    // This test should totally allocate more memory than the limit is set,
+    // but per iteration it should consume certainly less than the limit.
     // Allocated arrays filled with a random noise to avoid memory deduplication tricks.
     // The test fails if local references are leaked.
 
-    const ITER_NUM: usize = 8;
-    const ARRAY_NUM: usize = 256;
-    const ARRAY_SIZE: usize = 1024 * 1024;
+    let mib = 1024 * 1024;
+    // Total (hard) heap size limit. You'll get OOME if happen to exceed that.
+    let memory_limit: usize = MEMORY_LIMIT_MB * mib; // 128 MiB
+    let requested_frame_capacity = 32;
+    let real_frame_capacity = requested_frame_capacity + 32; // 64
+    let references_per_frame = real_frame_capacity * 2; // 128
+    let array_size = memory_limit / (2 * references_per_frame); // 1 MiB
 
-    let mut big_array = vec![0_u8; ARRAY_SIZE];
+    let iterations_to_exceed_the_limit = memory_limit
+        / ((references_per_frame - real_frame_capacity) * array_size);
+
+    // Double-check we picked the constants properly.
+    let total_allocation_size_per_frame = references_per_frame * array_size;
+    assert!(total_allocation_size_per_frame <= memory_limit / 2);
+
+    let mut big_array = vec![0_u8; array_size];
 
     EXECUTOR
         .with_attached(|_env| {
-            for n in 1..ITER_NUM + 1 {
+            for n in 1..iterations_to_exceed_the_limit + 1 {
                 EXECUTOR
                     .with_attached(|env| {
-                        for _ in 1..ARRAY_NUM + 1 {
+                        for _ in 0..references_per_frame {
                             thread_rng().fill(&mut big_array[..]);
                             let _java_obj = env.byte_array_from_slice(&big_array).expect(
                                 "Can't create new local object.",
@@ -78,9 +91,9 @@ fn local_references_doesnt_leak() {
                     })
                     .unwrap();
                 println!(
-                    "Iteration {} complete. Totally allocated: {} MiB",
+                    "Iteration {} complete. Potentially not deallocated: {} kiB",
                     n,
-                    n * ARRAY_NUM
+                    n * (references_per_frame - real_frame_capacity) * array_size / 1024
                 );
             }
             Ok(())
@@ -88,13 +101,15 @@ fn local_references_doesnt_leak() {
         .unwrap();
 }
 
+const MEMORY_LIMIT_MB: usize = 1;
+
 fn create_vm() -> JavaVM {
     let jvm_args = InitArgsBuilder::new()
         .version(JNIVersion::V8)
         .option(&get_libpath_option())
         .option("-Xcheck:jni")
         .option("-Xdebug")
-        .option("-Xmx1024m")
+        .option(&format!("-Xmx{}m", MEMORY_LIMIT_MB))
         .build()
         .unwrap_or_else(|e| panic!("{:#?}", e));
 
