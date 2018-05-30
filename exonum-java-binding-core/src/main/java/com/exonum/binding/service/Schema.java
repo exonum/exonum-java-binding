@@ -1,7 +1,6 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.hash.HashCode;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,7 +12,5 @@ public interface Schema {
    * Returns the root hashes of Merklized tables in this database schema, as of the current
    * state of the database. If there are no Merklized tables, returns an empty list.
    */
-  default List<HashCode> getStateHashes() {
-    return Collections.emptyList();
-  }
+  List<HashCode> getStateHashes();
 }

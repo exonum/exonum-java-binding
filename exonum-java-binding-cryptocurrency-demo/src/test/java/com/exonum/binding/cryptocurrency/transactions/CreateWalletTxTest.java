@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.crypto.CryptoFunction;
+import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
@@ -16,7 +17,6 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.inject.Inject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,8 +28,7 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  @Inject
-  CryptoFunction cryptoFunction;
+  private CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
 
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.crypto.CryptoFunction;
+import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -21,7 +22,6 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
@@ -31,8 +31,7 @@ public class TransferTxTest {
     LibraryLoader.load();
   }
 
-  @Inject
-  CryptoFunction cryptoFunction;
+  private CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
 
   @Test
   public void isValid() {
