@@ -19,10 +19,12 @@ import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
 
-/** A transaction that creates a new named wallet with zero balance. */
+/** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx extends BaseTx implements Transaction {
 
   private static final short ID = CryptocurrencyTransaction.CREATE_WALLET.getId();
+
+  static final long DEFAULT_BALANCE = 100L;
 
   private final PublicKey publicKey;
 
@@ -53,7 +55,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
       return;
     }
 
-    Wallet wallet = new Wallet(publicKey, 0L);
+    Wallet wallet = new Wallet(publicKey, DEFAULT_BALANCE);
 
     wallets.put(publicKey, wallet);
   }
@@ -89,12 +91,6 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {
     INSTANCE;
-
-    private static String getUtf8String(ByteBuffer buffer) {
-      byte[] s = getRemainingBytes(buffer);
-
-      return StandardSerializers.string().fromBytes(s);
-    }
 
     private static byte[] getRemainingBytes(ByteBuffer buffer) {
       int numBytes = buffer.remaining();

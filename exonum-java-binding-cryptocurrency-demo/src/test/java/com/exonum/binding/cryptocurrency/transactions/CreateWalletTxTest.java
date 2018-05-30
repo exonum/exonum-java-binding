@@ -1,5 +1,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTx.DEFAULT_BALANCE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -67,7 +68,7 @@ public class CreateWalletTxTest {
       PublicKey walletId = PublicKey.fromBytes(publicKey.toBytes());
       
       assertThat(wallets.get(walletId).getPublicKey(), equalTo(publicKey));
-      assertThat(wallets.get(walletId).getBalance(), equalTo(0L));
+      assertThat(wallets.get(walletId).getBalance(), equalTo(DEFAULT_BALANCE));
     }
   }
 
@@ -77,14 +78,13 @@ public class CreateWalletTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
-      Long value = 100L;
-      PublicKey walletId = PublicKey.fromBytes(publicKey.toBytes());
+      Long value = DEFAULT_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(walletId, new Wallet(publicKey, value));
+        wallets.put(publicKey, new Wallet(publicKey, value));
       }
 
       // Execute the transaction, that has the same name.
@@ -94,8 +94,8 @@ public class CreateWalletTxTest {
       // Check it has not changed the entries in the maps.
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(walletId).getPublicKey(), equalTo(publicKey));
-        assertThat(wallets.get(walletId).getBalance(), equalTo(value));
+        assertThat(wallets.get(publicKey).getPublicKey(), equalTo(publicKey));
+        assertThat(wallets.get(publicKey).getBalance(), equalTo(value));
       }
     }
   }

@@ -51,15 +51,15 @@ public class TransferTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create source and target wallets with the given initial values
-      long initialValue = 100;
+      long initialValue = 100L;
       PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
       createWallet(view, fromWallet, initialValue);
       PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
       createWallet(view, toWallet, initialValue);
 
       // Create and execute the transaction
-      long seed = 1;
-      long transferSum = 40;
+      long seed = 1L;
+      long transferSum = 40L;
       TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferSum);
       tx.execute(view);
 
@@ -121,7 +121,7 @@ public class TransferTxTest {
 
   @Test
   public void converterRoundtrip() {
-    long seed = 0;
+    long seed = 0L;
     PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
     PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
     long sum = 50L;
@@ -135,7 +135,7 @@ public class TransferTxTest {
 
   @Test
   public void info() {
-    long seed = Long.MAX_VALUE - 1;
+    long seed = Long.MAX_VALUE - 1L;
     PublicKey walletId = cryptoFunction.generateKeyPair().getPublicKey();
     TransferTx tx = new TransferTx(seed, walletId, walletId, 50L);
 
