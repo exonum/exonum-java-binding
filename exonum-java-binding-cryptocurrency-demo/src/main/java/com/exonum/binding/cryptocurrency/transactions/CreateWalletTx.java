@@ -15,7 +15,6 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
 
