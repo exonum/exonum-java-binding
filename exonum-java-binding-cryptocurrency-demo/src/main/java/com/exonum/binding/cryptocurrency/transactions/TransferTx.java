@@ -4,11 +4,11 @@ import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTrans
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
+import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.cryptocurrency.transactions.converters.TransactionMessageConverter;
-import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
@@ -28,15 +28,15 @@ public final class TransferTx extends BaseTx implements Transaction {
 
   private static final short ID = CryptocurrencyTransaction.TRANSFER.getId();
   private final long seed;
-  private final HashCode fromWallet;
-  private final HashCode toWallet;
+  private final PublicKey fromWallet;
+  private final PublicKey toWallet;
   private final long sum;
 
   /**
    * Creates a new transfer transaction with given seed, fromWallet and toWallet HashCode and sum of
    * the transfer.
    */
-  public TransferTx(long seed, HashCode fromWallet, HashCode toWallet, long sum) {
+  public TransferTx(long seed, PublicKey fromWallet, PublicKey toWallet, long sum) {
     super(CryptocurrencyService.ID, ID);
     this.seed = seed;
     this.fromWallet = fromWallet;
@@ -56,15 +56,15 @@ public final class TransferTx extends BaseTx implements Transaction {
   @Override
   public void execute(Fork view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets();
+    ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
       Wallet from = wallets.get(fromWallet);
       Wallet to = wallets.get(toWallet);
       if (from.getBalance() < sum) {
         return;
       }
-      wallets.put(fromWallet, new Wallet(from.getName(), from.getBalance() - sum));
-      wallets.put(toWallet, new Wallet(to.getName(), to.getBalance() + sum));
+      wallets.put(fromWallet, new Wallet(from.getPublicKey(), from.getBalance() - sum));
+      wallets.put(toWallet, new Wallet(to.getPublicKey(), to.getBalance() + sum));
     }
   }
 
@@ -115,10 +115,10 @@ public final class TransferTx extends BaseTx implements Transaction {
 
       byte[] fromHash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
       buf.get(fromHash);
-      HashCode fromWallet = HashCode.fromBytes(fromHash);
+      PublicKey fromWallet = PublicKey.fromBytes(fromHash);
       byte[] toHash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
       buf.get(toHash);
-      HashCode toWallet = HashCode.fromBytes(toHash);
+      PublicKey toWallet = PublicKey.fromBytes(toHash);
       long sum = buf.getLong();
       return new TransferTx(seed, fromWallet, toWallet, sum);
     }
@@ -129,8 +129,8 @@ public final class TransferTx extends BaseTx implements Transaction {
           ByteBuffer.allocate(BODY_SIZE)
               .order(ByteOrder.LITTLE_ENDIAN)
               .putLong(transaction.seed)
-              .put(transaction.fromWallet.asBytes())
-              .put(transaction.toWallet.asBytes())
+              .put(transaction.fromWallet.toBytes())
+              .put(transaction.toWallet.toBytes())
               .putLong(transaction.sum);
       body.rewind();
 

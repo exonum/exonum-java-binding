@@ -1,10 +1,11 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.HashUtils.hashUtf8String;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.crypto.CryptoFunction;
+import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
@@ -20,6 +21,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
@@ -29,11 +31,14 @@ public class TransferTxTest {
     LibraryLoader.load();
   }
 
+  @Inject
+  CryptoFunction cryptoFunction;
+
   @Test
   public void isValid() {
     long seed = 1L;
-    HashCode fromWallet = hashUtf8String("from");
-    HashCode toWallet = hashUtf8String("to");
+    PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
+    PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
     long sum = 50L;
 
     TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
@@ -47,23 +52,21 @@ public class TransferTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create source and target wallets with the given initial values
-      String from = "wallet-1";
-      String to = "wallet-2";
       long initialValue = 100;
-      createWallet(view, from, initialValue);
-      createWallet(view, to, initialValue);
+      PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
+      createWallet(view, fromWallet, initialValue);
+      PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
+      createWallet(view, toWallet, initialValue);
 
       // Create and execute the transaction
       long seed = 1;
-      HashCode fromWallet = hashUtf8String(from);
-      HashCode toWallet = hashUtf8String(to);
       long transferSum = 40;
       TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferSum);
       tx.execute(view);
 
       // Check that wallets have correct values
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets();
+      ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
       long expectedFromValue = initialValue - transferSum;
       assertThat(wallets.get(fromWallet).getBalance(), equalTo(expectedFromValue));
       long expectedToValue = initialValue + transferSum;
@@ -77,14 +80,12 @@ public class TransferTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create source wallet with the given initial value
-      String from = "from-wallet";
-      String to = "unknown-wallet";
       long initialValue = 50L;
-      createWallet(view, from, initialValue);
+      PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
+      createWallet(view, fromWallet, initialValue);
 
       long seed = 1L;
-      HashCode fromWallet = hashUtf8String(from);
-      HashCode toWallet = hashUtf8String(to);
+      PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
       long transferValue = 50L;
       TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferValue);
       // Execute the transaction that attempts to transfer to an unknown wallet
@@ -92,7 +93,7 @@ public class TransferTxTest {
 
       // Check that balance of fromWallet is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<HashCode, Wallet> wallets = schema.wallets();
+      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
       assertThat(wallets.get(fromWallet).getBalance(), equalTo(initialValue));
     }
   }
@@ -103,12 +104,10 @@ public class TransferTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to transfer from unknown wallet
-      String from = "unknown-wallet";
-      String to = "to-wallet";
-      HashCode fromWallet = hashUtf8String(from);
-      HashCode toWallet = hashUtf8String(to);
+      PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
+      PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
       long initialValue = 100L;
-      createWallet(view, to, initialValue);
+      createWallet(view, toWallet, initialValue);
       long transferValue = 50L;
       long seed = 1L;
       TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferValue);
@@ -116,7 +115,7 @@ public class TransferTxTest {
 
       // Check that balance of toWallet is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<HashCode, Wallet> wallets = schema.wallets();
+      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
       assertThat(wallets.get(toWallet).getBalance(), equalTo(initialValue));
     }
   }
@@ -124,10 +123,8 @@ public class TransferTxTest {
   @Test
   public void converterRoundtrip() {
     long seed = 0;
-    String from = "from-wallet";
-    String to = "to-wallet";
-    HashCode fromWallet = hashUtf8String(from);
-    HashCode toWallet = hashUtf8String(to);
+    PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
+    PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
     long sum = 50L;
 
     TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
@@ -140,9 +137,8 @@ public class TransferTxTest {
   @Test
   public void info() {
     long seed = Long.MAX_VALUE - 1;
-    String name = "new_wallet";
-    HashCode nameHash = hashUtf8String(name);
-    TransferTx tx = new TransferTx(seed, nameHash, nameHash, 50L);
+    PublicKey walletId = cryptoFunction.generateKeyPair().getPublicKey();
+    TransferTx tx = new TransferTx(seed, walletId, walletId, 50L);
 
     String info = tx.info();
 
@@ -162,10 +158,9 @@ public class TransferTxTest {
         .verify();
   }
 
-  private void createWallet(Fork view, String name, Long initialValue) {
-    HashCode nameHash = hashUtf8String(name);
+  private void createWallet(Fork view, PublicKey publicKey, Long initialValue) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    MapIndex<HashCode, Wallet> wallets = schema.wallets();
-    wallets.put(nameHash, new Wallet(name, initialValue));
+    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+    wallets.put(publicKey, new Wallet(publicKey, initialValue));
   }
 }

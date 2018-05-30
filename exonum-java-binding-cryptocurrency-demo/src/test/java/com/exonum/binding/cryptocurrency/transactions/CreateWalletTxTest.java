@@ -1,14 +1,14 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.HashUtils.hashUtf8String;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.crypto.CryptoFunction;
+import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
@@ -16,6 +16,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.inject.Inject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,31 +28,34 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
+  @Inject
+  CryptoFunction cryptoFunction;
+
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void isValidNonEmptyName() {
-    String name = "wallet";
+    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
 
-    CreateWalletTx tx = new CreateWalletTx(name);
+    CreateWalletTx tx = new CreateWalletTx(publicKey);
 
     assertTrue(tx.isValid());
   }
 
   @Test
   public void isValidEmptyName() {
-    String name = "";
+    PublicKey publicKey = PublicKey.fromBytes(new byte[0]);
 
-    expectedException.expectMessage("Name must not be blank");
+    expectedException.expectMessage("Public key must not empty");
     expectedException.expect(IllegalArgumentException.class);
-    new CreateWalletTx(name);
+    new CreateWalletTx(publicKey);
   }
 
   @Test
   public void executeCreateWalletTx() throws CloseFailuresException {
-    String name = "wallet";
+    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
 
-    CreateWalletTx tx = new CreateWalletTx(name);
+    CreateWalletTx tx = new CreateWalletTx(publicKey);
 
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -60,11 +64,11 @@ public class CreateWalletTxTest {
 
       // Check that entries have been added.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<HashCode, Wallet> wallets = schema.wallets();
-      HashCode nameHash = hashUtf8String(name);
+      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+      PublicKey walletId = PublicKey.fromBytes(publicKey.toBytes());
       
-      assertThat(wallets.get(nameHash).getName(), equalTo(name));
-      assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
+      assertThat(wallets.get(walletId).getPublicKey(), equalTo(publicKey));
+      assertThat(wallets.get(walletId).getBalance(), equalTo(0L));
     }
   }
 
@@ -73,35 +77,35 @@ public class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      String name = "wallet";
+      PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
       Long value = 100L;
-      HashCode nameHash = hashUtf8String(name);
+      PublicKey walletId = PublicKey.fromBytes(publicKey.toBytes());
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
-        MapIndex<HashCode, Wallet> wallets = schema.wallets();
-        wallets.put(nameHash, new Wallet(name, value));
+        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+        wallets.put(walletId, new Wallet(publicKey, value));
       }
 
       // Execute the transaction, that has the same name.
-      CreateWalletTx tx = new CreateWalletTx(name);
+      CreateWalletTx tx = new CreateWalletTx(publicKey);
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
       {
-        MapIndex<HashCode, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(nameHash).getName(), equalTo(name));
-        assertThat(wallets.get(nameHash).getBalance(), equalTo(value));
+        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+        assertThat(wallets.get(walletId).getPublicKey(), equalTo(publicKey));
+        assertThat(wallets.get(walletId).getBalance(), equalTo(value));
       }
     }
   }
 
   @Test
   public void info() {
-    String name = "wallet";
+    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
 
-    CreateWalletTx tx = new CreateWalletTx(name);
+    CreateWalletTx tx = new CreateWalletTx(publicKey);
 
     String info = tx.info();
 
