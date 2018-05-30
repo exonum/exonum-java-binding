@@ -1,35 +1,37 @@
 package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.storage.serialization.Serializer;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public enum WalletSerializer implements Serializer<Wallet> {
   INSTANCE;
 
+  private static final Logger logger = LogManager.getLogger(WalletSerializer.class);
+
   @Override
   public byte[] toBytes(Wallet value) {
-    try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      ObjectOutputStream os = new ObjectOutputStream(out);
-      os.writeObject(value);
-      return out.toByteArray();
-    } catch (IOException e) {
-      throw new RuntimeException("Serialization error: " + e.getMessage());
-    }
+    WalletProtos.Wallet wallet = WalletProtos.Wallet.newBuilder()
+        .setName(value.getName())
+        .setBalance(value.getBalance())
+        .build();
+    return wallet.toByteArray();
   }
 
   @Override
-  public Wallet fromBytes(byte[] serializedValue) {
+  public Wallet fromBytes(final byte[] binaryWallet)
+  {
+    Wallet wallet = null;
     try {
-      ByteArrayInputStream in = new ByteArrayInputStream(serializedValue);
-      ObjectInputStream is = new ObjectInputStream(in);
-      return (Wallet) is.readObject();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeException("Deserialization error: " + e.getMessage());
+      WalletProtos.Wallet copiedWalletProtos = WalletProtos.Wallet.parseFrom(binaryWallet);
+      wallet = new Wallet(copiedWalletProtos.getName(), copiedWalletProtos.getBalance());
     }
+    catch (InvalidProtocolBufferException e)
+    {
+      logger.error(
+          "Unable to instantiate WalletProtos.Wallet instance from provided binary data", e);
+    }
+    return wallet;
   }
 }
