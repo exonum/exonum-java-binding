@@ -19,7 +19,7 @@ pub trait JniExecutor: Clone + Send + Sync {
     {
         self.with_attached_impl(|jni_env| {
             let mut result = None;
-            jni_env.with_local_frame(0, || {
+            jni_env.with_local_frame(32, || {
                 result = Some(f(jni_env));
                 Ok(JObject::null())
             })?;
