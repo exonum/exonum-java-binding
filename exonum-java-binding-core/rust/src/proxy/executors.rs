@@ -15,14 +15,15 @@ pub trait JniExecutor: Clone + Send + Sync {
 
     /// Executes a provided closure, making sure that the current thread
     /// is attached to the JVM. Additionally ensures that local object references freed after call.
-    /// Allocates a local frame with the default capacity.
-    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    /// Allocates a local frame with the specified capacity.
+    fn with_attached_capacity<F, R>(&self, capacity: i32, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
+        assert!(capacity > 0, "capacity should be a positive integer");
         self.with_attached_impl(|jni_env| {
             let mut result = None;
-            jni_env.with_local_frame(Self::LOCAL_FRAME_CAPACITY, || {
+            jni_env.with_local_frame(capacity, || {
                 result = Some(f(jni_env));
                 Ok(JObject::null())
             })?;
@@ -30,6 +31,16 @@ pub trait JniExecutor: Clone + Send + Sync {
                 "The result should be Some or this line shouldn't be reached",
             )
         })
+    }
+
+    /// Executes a provided closure, making sure that the current thread
+    /// is attached to the JVM. Additionally ensures that local object references freed after call.
+    /// Allocates a local frame with the default capacity.
+    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
+    {
+        self.with_attached_capacity(Self::LOCAL_FRAME_CAPACITY, f)
     }
 
     /// Executes a provided closure, making sure that the current thread

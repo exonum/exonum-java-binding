@@ -26,14 +26,10 @@ fn local_frame_allows_overflow() {
     let references_per_frame = real_frame_capacity * 2; // 128
 
     EXECUTOR
-        .with_attached(|env| {
+        .with_attached_capacity(requested_frame_capacity as i32, |env| {
             let mut strings = Vec::new();
             for i in 1..references_per_frame + 1 {
-                print!(
-                    "Try: {}; real limit: {}. ",
-                    i,
-                    real_frame_capacity
-                );
+                print!("Try: {}; real limit: {}. ", i, real_frame_capacity);
                 let java_string = env.new_string(format!("{}", i)).expect(
                     "Can't create new local object.",
                 );
@@ -67,8 +63,8 @@ fn local_references_doesnt_leak() {
     let references_per_frame = real_frame_capacity * 2; // 128
     let array_size = memory_limit / (2 * references_per_frame); // 1 MiB
 
-    let iterations_to_exceed_the_limit = memory_limit
-        / ((references_per_frame - real_frame_capacity) * array_size);
+    let iterations_to_exceed_the_limit = memory_limit /
+        ((references_per_frame - real_frame_capacity) * array_size);
 
     // Double-check we picked the constants properly.
     let total_allocation_size_per_frame = references_per_frame * array_size;
@@ -77,10 +73,11 @@ fn local_references_doesnt_leak() {
     let mut big_array = vec![0_u8; array_size];
 
     EXECUTOR
+        // Attached twice to avoid detachment during test.
         .with_attached(|_env| {
             for n in 1..iterations_to_exceed_the_limit + 1 {
                 EXECUTOR
-                    .with_attached(|env| {
+                    .with_attached_capacity(requested_frame_capacity as i32, |env| {
                         for _ in 0..references_per_frame {
                             thread_rng().fill(&mut big_array[..]);
                             let _java_obj = env.byte_array_from_slice(&big_array).expect(
