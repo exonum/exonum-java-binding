@@ -23,25 +23,31 @@ fn local_frame_allows_overflow() {
 
     const BIG_NUMBER: i32 = 65536;
 
-    EXECUTOR.with_attached(|env| {
-        let mut strings = Vec::new();
-        for i in 1..BIG_NUMBER + 1 {
-            print!("Try: {}; limit: {}. ", i, MainExecutor::LOCAL_FRAME_CAPACITY);
-            let java_string = env.new_string(format!("{}", i)).expect(
-                "Can't create new local object.",
-            );
-            strings.push(java_string);
-            println!(" Ok.");
-        }
-        for (i, java_string) in strings.into_iter().enumerate() {
-            let java_string: String = env.get_string(java_string)
-                .expect("Can't get object.")
-                .into();
-            let number_string = format!("{}", i + 1);
-            assert_eq!(java_string, number_string);
-        }
-        Ok(())
-    }).unwrap();
+    EXECUTOR
+        .with_attached(|env| {
+            let mut strings = Vec::new();
+            for i in 1..BIG_NUMBER + 1 {
+                print!(
+                    "Try: {}; limit: {}. ",
+                    i,
+                    MainExecutor::LOCAL_FRAME_CAPACITY
+                );
+                let java_string = env.new_string(format!("{}", i)).expect(
+                    "Can't create new local object.",
+                );
+                strings.push(java_string);
+                println!(" Ok.");
+            }
+            for (i, java_string) in strings.into_iter().enumerate() {
+                let java_string: String = env.get_string(java_string)
+                    .expect("Can't get object.")
+                    .into();
+                let number_string = format!("{}", i + 1);
+                assert_eq!(java_string, number_string);
+            }
+            Ok(())
+        })
+        .unwrap();
 }
 
 #[test]
@@ -57,19 +63,27 @@ fn local_references_doesnt_leak() {
 
     let mut big_array = vec![0_u8; ARRAY_SIZE];
 
-    EXECUTOR.with_attached(|_env| {
-        for n in 1..ITER_NUM + 1 {
-            EXECUTOR.with_attached(|env| {
-                for _ in 1..ARRAY_NUM + 1 {
-                    thread_rng().fill(&mut big_array[..]);
-                    let _java_obj = env.byte_array_from_slice(&big_array).expect(
-                        "Can't create new local object.",
-                    );
-                }
-                Ok(())
-            }).unwrap();
-            println!("Iteration {} complete. Totally allocated: {} MiB", n, n * ARRAY_NUM);
-        };
-        Ok(())
-    }).unwrap();
+    EXECUTOR
+        .with_attached(|_env| {
+            for n in 1..ITER_NUM + 1 {
+                EXECUTOR
+                    .with_attached(|env| {
+                        for _ in 1..ARRAY_NUM + 1 {
+                            thread_rng().fill(&mut big_array[..]);
+                            let _java_obj = env.byte_array_from_slice(&big_array).expect(
+                                "Can't create new local object.",
+                            );
+                        }
+                        Ok(())
+                    })
+                    .unwrap();
+                println!(
+                    "Iteration {} complete. Totally allocated: {} MiB",
+                    n,
+                    n * ARRAY_NUM
+                );
+            }
+            Ok(())
+        })
+        .unwrap();
 }
