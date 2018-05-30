@@ -7,6 +7,8 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 /**
  * A schema of the cryptocurrency service.
@@ -24,16 +26,21 @@ public final class CryptocurrencySchema implements Schema {
     this.view = checkNotNull(view);
   }
 
-  private static String fullIndexName(String name) {
-    return NAMESPACE + "__" + name;
+  @Override
+  public List<HashCode> getStateHashes() {
+    return ImmutableList.of(wallets().getRootHash());
   }
 
   /**
-   * Returns a proof map of wallets. Must be closed.
+   * Returns a proof map of wallets.
    */
   public ProofMapIndexProxy<HashCode, Wallet> wallets() {
     String name = fullIndexName("wallets");
     return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
         WalletSerializer.INSTANCE);
+  }
+
+  private static String fullIndexName(String name) {
+    return NAMESPACE + "__" + name;
   }
 }
