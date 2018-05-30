@@ -36,10 +36,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         jvm_args_builder = jvm_args_builder.option(&get_classpath_option());
     }
     if debug {
-        jvm_args_builder = jvm_args_builder
-            .option("-Xcheck:jni")
-            .option("-Xdebug")
-            .option("-Xmx1024m");
+        jvm_args_builder = jvm_args_builder.option("-Xcheck:jni").option("-Xdebug");
     }
 
     let jvm_args = jvm_args_builder.build().unwrap_or_else(
@@ -49,7 +46,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-fn get_libpath_option() -> String {
+pub fn get_libpath_option() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()

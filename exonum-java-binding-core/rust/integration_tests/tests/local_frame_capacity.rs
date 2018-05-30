@@ -5,12 +5,12 @@ extern crate lazy_static;
 extern crate rand;
 
 use java_bindings::{JniExecutor, MainExecutor};
-use java_bindings::jni::JavaVM;
-use integration_tests::vm::create_vm_for_tests;
+use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
+use integration_tests::vm::get_libpath_option;
 use rand::prelude::*;
 
 lazy_static! {
-    static ref JVM: JavaVM = create_vm_for_tests();
+    static ref JVM: JavaVM = create_vm();
     static ref EXECUTOR: MainExecutor = MainExecutor::new(&JVM);
 }
 
@@ -86,4 +86,17 @@ fn local_references_doesnt_leak() {
             Ok(())
         })
         .unwrap();
+}
+
+fn create_vm() -> JavaVM {
+    let jvm_args = InitArgsBuilder::new()
+        .version(JNIVersion::V8)
+        .option(&get_libpath_option())
+        .option("-Xcheck:jni")
+        .option("-Xdebug")
+        .option("-Xmx1024m")
+        .build()
+        .unwrap_or_else(|e| panic!("{:#?}", e));
+
+    JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
