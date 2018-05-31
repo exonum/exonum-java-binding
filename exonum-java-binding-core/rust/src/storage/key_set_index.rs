@@ -9,7 +9,6 @@ use exonum::storage::{Snapshot, Fork, KeySetIndex};
 use exonum::storage::key_set_index::KeySetIndexIter;
 use utils::{self, Handle};
 use super::db::{View, ViewRef, Key};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = KeySetIndex<T, Key>;
 
@@ -30,16 +29,37 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    check_read(&name, TableType::KeySet, &*snapshot);
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(ref mut fork) => {
-                    check_write(&name, TableType::KeySet, fork);
-                    IndexType::ForkIndex(Index::new(name, fork))
-                }
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns a pointer to the created `KeySetIndex` object in an index family (= group).
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeCreateInGroup(
+    env: JNIEnv,
+    _: JClass,
+    group_name: JString,
+    set_id: jbyteArray,
+    view_handle: Handle,
+) -> Handle{
+    let res = panic::catch_unwind(|| {
+        let group_name = utils::convert_to_string(&env, group_name)?;
+        let set_id = env.convert_byte_array(set_id)?;
+        let view_ref = utils::cast_handle::<View>(view_handle).get();
+        Ok(utils::to_handle(match *view_ref {
+            ViewRef::Snapshot(snapshot) => {
+                IndexType::SnapshotIndex(Index::new_in_family(group_name, &set_id, &*snapshot))
+            }
+            ViewRef::Fork(ref mut fork) => {
+                IndexType::ForkIndex(Index::new_in_family(group_name, &set_id, fork))
+            }
+        }))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -48,7 +68,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     set_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, set_handle);

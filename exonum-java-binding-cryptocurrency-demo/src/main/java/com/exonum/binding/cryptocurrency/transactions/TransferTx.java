@@ -56,16 +56,15 @@ public final class TransferTx extends BaseTx implements Transaction {
   @Override
   public void execute(Fork view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    try (ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets()) {
-      if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
-        Wallet from = wallets.get(fromWallet);
-        Wallet to = wallets.get(toWallet);
-        if (from.getBalance() < sum) {
-          return;
-        }
-        wallets.put(fromWallet, new Wallet(from.getName(), from.getBalance() - sum));
-        wallets.put(toWallet, new Wallet(to.getName(), to.getBalance() + sum));
+    ProofMapIndexProxy<HashCode, Wallet> wallets = schema.wallets();
+    if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
+      Wallet from = wallets.get(fromWallet);
+      Wallet to = wallets.get(toWallet);
+      if (from.getBalance() < sum) {
+        return;
       }
+      wallets.put(fromWallet, new Wallet(from.getName(), from.getBalance() - sum));
+      wallets.put(toWallet, new Wallet(to.getName(), to.getBalance() + sum));
     }
   }
 

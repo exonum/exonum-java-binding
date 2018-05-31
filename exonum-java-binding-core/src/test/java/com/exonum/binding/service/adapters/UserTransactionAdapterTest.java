@@ -1,9 +1,11 @@
 package com.exonum.binding.service.adapters;
 
-import static org.mockito.Mockito.doNothing;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.proxy.Cleaner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,19 +24,21 @@ public class UserTransactionAdapterTest {
   @Mock
   private Transaction transaction;
 
+  @Mock
+  private ViewFactory viewFactory;
+
   @InjectMocks
   private UserTransactionAdapter transactionAdapter;
 
   @Test
-  public void execute_closesForkAfterExecution() throws Exception {
-    ArgumentCaptor<Fork> ac = ArgumentCaptor.forClass(Fork.class);
-    doNothing().when(transaction).execute(ac.capture());
-
+  public void execute_closesCleanerAfterExecution() throws Exception {
     long forkHandle = 0x0B;
     transactionAdapter.execute(forkHandle);
 
-    Fork fork = ac.getValue();
-    expectedException.expect(IllegalStateException.class);
-    fork.getViewNativeHandle();
+    ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
+    verify(viewFactory).createFork(eq(forkHandle), ac.capture());
+
+    Cleaner cleaner = ac.getValue();
+    assertTrue(cleaner.isClosed());
   }
 }

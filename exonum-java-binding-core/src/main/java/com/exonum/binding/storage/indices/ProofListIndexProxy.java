@@ -1,14 +1,19 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
+import java.util.function.LongSupplier;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -25,13 +30,14 @@ import com.exonum.binding.storage.serialization.Serializer;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this list is destroyed. Subsequent use of the closed list
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
+    implements ListIndex<E> {
 
   /**
    * Creates a new ProofListIndexProxy.
@@ -41,20 +47,68 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @param serializer a serializer of elements
+   * @param <E> the type of elements in this list
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> ProofListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    return new ProofListIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
-  }
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-  private ProofListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = createNativeList(view,
+        () -> nativeCreate(name, viewNativeHandle));
+
+    return new ProofListIndexProxy<>(listNativeHandle, name, view, s);
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
+
+  /**
+   * Creates a new list in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param listId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of list elements
+   * @param <E> the type of elements in this list
+   * @return a new list proxy
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> ProofListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
+                                                            View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(listId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeList(view,
+        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle));
+
+    return new ProofListIndexProxy<>(setNativeHandle, groupName, view, s);
+  }
+
+  private static native long nativeCreateInGroup(String groupName, byte[] listId,
+                                                 long viewNativeHandle);
+
+  private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
+    NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ProofListIndexProxy.class,
+        ProofListIndexProxy::nativeFree);
+    return listNativeHandle;
+  }
+
+  private ProofListIndexProxy(NativeHandle nativeHandle, String name, View view,
+                              CheckingSerializerDecorator<E> serializer) {
+    super(nativeHandle, name, view, serializer);
+  }
 
   /**
    * Returns a proof that an element exists at the specified index in this list.
@@ -97,8 +151,7 @@ public class ProofListIndexProxy<E> extends AbstractListIndexProxy<E> implements
 
   private native byte[] nativeGetRootHash(long nativeHandle);
 
-  @Override
-  native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 
   @Override
   native void nativeAdd(long nativeHandle, byte[] e);

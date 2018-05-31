@@ -7,6 +7,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
@@ -25,64 +26,74 @@ public class MemoryDbIntegrationTest {
 
   @Test
   public void databaseMustClosePromptly() throws Exception {
-    MemoryDb database = new MemoryDb();
+    MemoryDb database = MemoryDb.newInstance();
     database.close();  // No exceptions.
   }
 
   @Test
   public void getSnapshotShallCreateNonNullSnapshot() throws Exception {
-    try (MemoryDb database = new MemoryDb();
-         Snapshot snapshot = database.createSnapshot()) {
+    try (MemoryDb database = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot snapshot = database.createSnapshot(cleaner);
       assertNotNull(snapshot);
     }
   }
 
   @Test
   public void getForkShallCreateNonNullFork() throws Exception {
-    try (MemoryDb database = new MemoryDb();
-         Fork fork = database.createFork()) {
+    try (MemoryDb database = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork fork = database.createFork(cleaner);
       assertNotNull(fork);
     }
   }
 
   @Test
   public void merge_singleList() throws Exception {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
-      try (Fork fork = db.createFork();
-           ListIndex<String> list = newList(listName, fork)) {
-        list.add(V1);
+      // Make changes to the list in the database.
+      Fork fork = db.createFork(cleaner);
+      ListIndex<String> list1 = newList(listName, fork);
+      list1.add(V1);
 
-        db.merge(fork);
-      }
+      // Merge the patch.
+      db.merge(fork);
 
-      try (Snapshot snapshot = db.createSnapshot();
-           ListIndex<String> list = newList(listName, snapshot)) {
-        assertThat(list.size(), equalTo(1L));
-        assertThat(list.get(0), equalTo(V1));
-      }
+      // Check the changes were successfully applied.
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      ListIndex<String> list2 = newList(listName, snapshot);
+      assertThat(list2.size(), equalTo(1L));
+      assertThat(list2.get(0), equalTo(V1));
     }
   }
 
   @Test
   public void merge_twoIndices() throws Exception {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String listName = "list";
       String mapName = "map";
 
-      try (Fork fork = db.createFork();
-           ListIndex<String> list = newList(listName, fork);
-           MapIndex<String, String> map = newMap(mapName, fork)) {
+      // Make changes to the indices in the database.
+      Fork fork = db.createFork(cleaner);
+      {
+        ListIndex<String> list = newList(listName, fork);
+        MapIndex<String, String> map = newMap(mapName, fork);
         list.add(V1);
         map.put(K2, V2);
-
-        db.merge(fork);
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
-           ListIndex<String> list = newList(listName, snapshot);
-           MapIndex<String, String> map = newMap(mapName, snapshot)) {
+      // Merge the patch.
+      db.merge(fork);
+
+      // Check the changes were successfully applied.
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      {
+        ListIndex<String> list = newList(listName, snapshot);
+        MapIndex<String, String> map = newMap(mapName, snapshot);
         assertThat(list.size(), equalTo(1L));
         assertThat(list.get(0), equalTo(V1));
 
@@ -93,25 +104,28 @@ public class MemoryDbIntegrationTest {
 
   @Test
   public void merge_multipleForks() throws Exception {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
       List<String> values = TestStorageItems.values.subList(0, 3);
 
       for (String v : values) {
-        try (Fork fork = db.createFork();
-             ListIndex<String> list = newList(listName, fork)) {
-          list.add(v);
-          db.merge(fork);
-        }
+        Fork fork = db.createFork(cleaner);
+
+        ListIndex<String> list = newList(listName, fork);
+        list.add(v);
+
+        db.merge(fork);
       }
 
-      try (Snapshot snapshot = db.createSnapshot();
-           ListIndex<String> list = newList(listName, snapshot)) {
-        assertThat(list.size(), equalTo((long) values.size()));
-        for (int i = 0; i < values.size(); i++) {
-          assertThat(values.get(i), equalTo(list.get(i)));
-        }
+      // Check that all changes were successfully applied and the list in the database
+      // contains all the added values.
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      ListIndex<String> list = newList(listName, snapshot);
+      assertThat(list.size(), equalTo((long) values.size()));
+      for (int i = 0; i < values.size(); i++) {
+        assertThat(values.get(i), equalTo(list.get(i)));
       }
     }
   }

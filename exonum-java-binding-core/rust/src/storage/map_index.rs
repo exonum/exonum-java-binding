@@ -9,7 +9,6 @@ use exonum::storage::{Snapshot, Fork, MapIndex};
 use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use utils::{self, Handle, PairIter};
 use super::db::{View, ViewRef, Key, Value};
-use super::indexes_metadata::{TableType, check_read, check_write};
 
 type Index<T> = MapIndex<T, Key, Value>;
 
@@ -34,16 +33,37 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    check_read(&name, TableType::Map, &*snapshot);
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(ref mut fork) => {
-                    check_write(&name, TableType::Map, fork);
-                    IndexType::ForkIndex(Index::new(name, fork))
-                }
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::new(name, &*snapshot),
+                ),
+                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns a pointer to the created `MapIndex` instance in an index family (= group).
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nativeCreateInGroup(
+    env: JNIEnv,
+    _: JClass,
+    group_name: JString,
+    map_id: jbyteArray,
+    view_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let group_name = utils::convert_to_string(&env, group_name)?;
+        let map_id = env.convert_byte_array(map_id)?;
+        let view_ref = utils::cast_handle::<View>(view_handle).get();
+        Ok(utils::to_handle(match *view_ref {
+            ViewRef::Snapshot(snapshot) => {
+                IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
+            }
+            ViewRef::Fork(ref mut fork) => {
+                IndexType::ForkIndex(Index::new_in_family(group_name, &map_id, fork))
+            }
+        }))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -52,7 +72,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     map_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, map_handle);

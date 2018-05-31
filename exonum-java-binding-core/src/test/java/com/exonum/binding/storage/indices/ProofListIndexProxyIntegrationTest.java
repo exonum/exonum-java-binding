@@ -10,6 +10,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
@@ -17,7 +18,7 @@ import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,7 +50,7 @@ public class ProofListIndexProxyIntegrationTest {
 
   @Before
   public void setUp() throws Exception {
-    database = new MemoryDb();
+    database = MemoryDb.newInstance();
   }
 
   @After
@@ -148,15 +149,15 @@ public class ProofListIndexProxyIntegrationTest {
     });
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                Consumer<ProofListIndexProxy<String>> listTest) {
-    runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
+    runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                BiConsumer<View, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         LIST_NAME,
         ProofListIndexProxy::newInstance,
         listTest

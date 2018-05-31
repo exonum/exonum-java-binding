@@ -1,7 +1,9 @@
 package com.exonum.binding.storage.indices;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 final class MapEntries {
@@ -16,6 +18,14 @@ final class MapEntries {
     return entries.stream()
         .map(MapEntry::getValue)
         .collect(Collectors.toList());
+  }
+
+  static <K, V> Map<K, V> extractEntries(MapIndex<K, V> map) {
+    Map<K, V> result = new LinkedHashMap<>();
+    map.entries().forEachRemaining(
+        e -> result.put(e.getKey(), e.getValue())
+    );
+    return result;
   }
 
   static <K, V> void putAll(MapIndex<K, V> map,

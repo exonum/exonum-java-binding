@@ -48,17 +48,16 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
   @Override
   public void execute(Fork view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    try (MapIndex<HashCode, Wallet> wallets = schema.wallets()) {
+    MapIndex<HashCode, Wallet> wallets = schema.wallets();
 
-      HashCode walletId = Hashing.defaultHashFunction().hashString(name, UTF_8);
-      if (wallets.containsKey(walletId)) {
-        return;
-      }
-
-      Wallet wallet = new Wallet(name, 0L);
-
-      wallets.put(walletId, wallet);
+    HashCode walletId = Hashing.defaultHashFunction().hashString(name, UTF_8);
+    if (wallets.containsKey(walletId)) {
+      return;
     }
+
+    Wallet wallet = new Wallet(name, 0L);
+
+    wallets.put(walletId, wallet);
   }
 
   @Override
