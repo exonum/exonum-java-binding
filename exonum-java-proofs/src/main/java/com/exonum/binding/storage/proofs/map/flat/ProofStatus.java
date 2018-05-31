@@ -18,8 +18,8 @@ public enum ProofStatus {
 
   @Override
   public String toString() {
-    return "ProofStatus{" +
-        "description='" + description + '\'' +
-        '}';
+    return "ProofStatus{"
+        + "description='" + description + '\''
+        + '}';
   }
 }

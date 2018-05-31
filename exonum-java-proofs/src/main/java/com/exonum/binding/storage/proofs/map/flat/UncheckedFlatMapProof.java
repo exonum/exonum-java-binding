@@ -81,7 +81,17 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
-   * Check that all entries are in the right order.
+   * Check that all entries are in the valid order.
+   * The following algorithm is used:
+   * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
+   * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
+   * these indexes indicates the greater key.
+   * If there is no such bit, then lengths of these keys are compared and the key with greater
+   * length is considered a greater key.
+   * Every following key should be greater than the previous.
+   * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
+   *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
+   *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
    */
   private ProofStatus orderCheck() {
     for (int i = 1; i < proofList.size(); i++) {

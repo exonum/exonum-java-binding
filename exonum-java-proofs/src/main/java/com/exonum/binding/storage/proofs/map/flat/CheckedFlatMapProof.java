@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
+  @Nullable
   private List<MapProofEntryLeaf> proofList;
 
   @Nullable
@@ -39,13 +40,13 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   @Override
   public List<MapProofEntryLeaf> getEntries() {
-    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
+    isValid();
     return proofList;
   }
 
   @Override
   public boolean containsKey(byte[] key) {
-    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
+    isValid();
     for (MapProofEntry entry: proofList) {
       DbKey entryKey = entry.getDbKey();
       if (entry instanceof MapProofEntryLeaf && Arrays.equals(entryKey.getKeySlice(), key)) {
@@ -57,14 +58,14 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   @Override
   public HashCode getMerkleRoot() {
-    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
+    isValid();
     checkState(rootHash != null, "Root hash wasn't computed");
     return rootHash;
   }
 
   @Override
   public byte[] get(byte[] key) {
-    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
+    isValid();
     for (MapProofEntry entry: proofList) {
       DbKey entryKey = entry.getDbKey();
       if (entry instanceof MapProofEntryLeaf && Arrays.equals(entryKey.getKeySlice(), key)) {
@@ -77,5 +78,9 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   @Override
   public ProofStatus getStatus() {
     return status;
+  }
+
+  private void isValid() {
+    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
   }
 }

@@ -213,10 +213,10 @@ public class DbKey implements Comparable<DbKey> {
       return false;
     }
     DbKey dbKey = (DbKey) o;
-    return numSignificantBits == dbKey.numSignificantBits &&
-        Arrays.equals(rawDbKey, dbKey.rawDbKey) &&
-        nodeType == dbKey.nodeType &&
-        Arrays.equals(keySlice, dbKey.keySlice);
+    return numSignificantBits == dbKey.numSignificantBits
+        && Arrays.equals(rawDbKey, dbKey.rawDbKey)
+        && nodeType == dbKey.nodeType
+        && Arrays.equals(keySlice, dbKey.keySlice);
   }
 
   @Override
