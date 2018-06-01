@@ -6,13 +6,13 @@ extern crate rand;
 
 use java_bindings::jni::JavaVM;
 use java_bindings::jni::objects::JObject;
-use integration_tests::vm::{create_vm_with_heap_limit, KIB, MIB};
+use integration_tests::vm::{create_vm_for_leak_tests, KIB, MIB};
 use rand::prelude::*;
 
 const MEMORY_LIMIT_MIB: usize = 32;
 
 lazy_static! {
-    static ref JVM: JavaVM = create_vm_with_heap_limit(MEMORY_LIMIT_MIB);
+    static ref JVM: JavaVM = create_vm_for_leak_tests(MEMORY_LIMIT_MIB);
 }
 
 /// Tests that a JVM does not leak the local references that exceed the capacity of the current

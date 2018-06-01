@@ -6,10 +6,12 @@ extern crate rand;
 
 use java_bindings::{JniExecutor, MainExecutor};
 use java_bindings::jni::JavaVM;
-use integration_tests::vm::create_vm_for_tests;
+use integration_tests::vm::create_vm_for_leak_tests;
+
+const MEMORY_LIMIT_MIB: usize = 32;
 
 lazy_static! {
-    static ref JVM: JavaVM = create_vm_for_tests();
+    static ref JVM: JavaVM = create_vm_for_leak_tests(MEMORY_LIMIT_MIB);
     static ref EXECUTOR: MainExecutor = MainExecutor::new(&JVM);
 }
 

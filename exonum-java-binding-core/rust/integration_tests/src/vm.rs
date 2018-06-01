@@ -52,11 +52,10 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
 }
 
 /// Creates a configured `JavaVM` for tests with the limited size of the heap.
-pub fn create_vm_with_heap_limit(memory_limit_mib: usize) -> JavaVM {
+pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     let jvm_args = InitArgsBuilder::new()
         .version(JNIVersion::V8)
         .option(&get_libpath_option())
-        .option("-Xcheck:jni")
         .option("-Xdebug")
         .option(&format!("-Xmx{}m", memory_limit_mib))
         .build()
