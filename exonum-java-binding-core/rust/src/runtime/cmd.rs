@@ -100,7 +100,14 @@ impl CommandExtension for Finalize {
                 "ejb-module-name",
                 false
             ),
-            Argument::new_named(EJB_PORT, true, "A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.", None, "ejb-port", false),
+            Argument::new_named(
+                EJB_PORT,
+                true,
+                "A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.",
+                None,
+                "ejb-port",
+                false
+            ),
         ]
     }
 

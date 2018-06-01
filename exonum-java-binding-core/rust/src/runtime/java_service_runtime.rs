@@ -42,7 +42,9 @@ impl JavaServiceRuntime {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             });
             // Return global runtime.
-            JAVA_SERVICE_RUNTIME.clone().expect("Trying to return runtime, but it's uninitialized")
+            JAVA_SERVICE_RUNTIME.clone().expect(
+                "Trying to return runtime, but it's uninitialized",
+            )
         };
         runtime
     }
