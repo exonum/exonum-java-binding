@@ -25,7 +25,7 @@ pub struct JavaServiceRuntime {
 }
 
 impl JavaServiceRuntime {
-    /// Createsf new runtime from provided config or returns the one created earlier.
+    /// Creates new runtime from provided config or returns the one created earlier.
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
     pub fn get_or_create(config: Config) -> Self {
