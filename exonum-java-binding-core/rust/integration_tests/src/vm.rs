@@ -4,6 +4,11 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+/// Kibibyte
+pub const KIB: usize = 1024;
+/// Mebibyte
+pub const MIB: usize = KIB * KIB;
+
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
@@ -46,7 +51,21 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-pub fn get_libpath_option() -> String {
+/// Creates a configured `JavaVM` for tests with the limited size of the heap.
+pub fn create_vm_with_heap_limit(memory_limit_mib: usize) -> JavaVM {
+    let jvm_args = InitArgsBuilder::new()
+        .version(JNIVersion::V8)
+        .option(&get_libpath_option())
+        .option("-Xcheck:jni")
+        .option("-Xdebug")
+        .option(&format!("-Xmx{}m", memory_limit_mib))
+        .build()
+        .unwrap_or_else(|e| panic!("{:#?}", e));
+
+    JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
+}
+
+fn get_libpath_option() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
