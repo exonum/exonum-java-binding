@@ -1,4 +1,5 @@
 use jni::{JavaVM, JNIEnv};
+use jni::objects::JObject;
 use jni::sys::jint;
 
 use std::mem;
@@ -9,19 +10,54 @@ use JniErrorKind::{Other, ThreadDetached};
 
 /// An interface for JNI thread attachment manager.
 pub trait JniExecutor: Clone + Send + Sync {
+    /// The capacity of local frames, allocated for attached threads
+    const LOCAL_FRAME_CAPACITY: i32 = 32;
+
     /// Executes a provided closure, making sure that the current thread
-    /// is attached to the JVM.
+    /// is attached to the JVM. Additionally ensures that local object references freed after call.
+    /// Allocates a local frame with the specified capacity.
+    fn with_attached_capacity<F, R>(&self, capacity: i32, f: F) -> JniResult<R>
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
+    {
+        assert!(capacity > 0, "capacity should be a positive integer");
+        self.with_attached_impl(|jni_env| {
+            let mut result = None;
+            jni_env.with_local_frame(capacity, || {
+                result = Some(f(jni_env));
+                Ok(JObject::null())
+            })?;
+            result.expect(
+                "The result should be Some or this line shouldn't be reached",
+            )
+        })
+    }
+
+    /// Executes a provided closure, making sure that the current thread
+    /// is attached to the JVM. Additionally ensures that local object references freed after call.
+    /// Allocates a local frame with the default capacity.
     fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
+    {
+        self.with_attached_capacity(Self::LOCAL_FRAME_CAPACITY, f)
+    }
+
+    /// Executes a provided closure, making sure that the current thread
+    /// is attached to the JVM. Does not allocate local frame.
+    /// Should not be used while it is possible to use #with_attached.
+    #[doc(hidden)]
+    fn with_attached_impl<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>;
 }
 
 impl<'t, T: JniExecutor> JniExecutor for &'t T {
-    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    fn with_attached_impl<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
-        (*self).with_attached(f)
+        (*self).with_attached_impl(f)
     }
 }
 
@@ -42,7 +78,7 @@ impl DumbExecutor {
 }
 
 impl JniExecutor for DumbExecutor {
-    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    fn with_attached_impl<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
@@ -135,7 +171,7 @@ impl HackyExecutor {
 }
 
 impl JniExecutor for HackyExecutor {
-    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    fn with_attached_impl<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
@@ -158,10 +194,10 @@ impl MainExecutor {
 }
 
 impl JniExecutor for MainExecutor {
-    fn with_attached<F, R>(&self, f: F) -> JniResult<R>
+    fn with_attached_impl<F, R>(&self, f: F) -> JniResult<R>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
-        self.0.with_attached(f)
+        self.0.with_attached_impl(f)
     }
 }

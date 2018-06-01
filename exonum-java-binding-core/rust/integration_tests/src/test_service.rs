@@ -21,7 +21,7 @@ pub fn create_test_service(executor: MainExecutor) -> ServiceProxy {
             &[],
         )?
             .l()?;
-        env.new_global_ref(env.auto_local(test_service).as_obj())
+        env.new_global_ref(test_service)
     }));
     ServiceProxy::from_global_ref(executor, test_service)
 }
