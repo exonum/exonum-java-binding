@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- A simple configuration to be used in native integration tests, that use ejb-fakes.
+<!-- A simple configuration to be used along with EJB App.
      Error log entries go to stdout, which cargo prints only in case of failures. -->
 <Configuration status="WARN">
     <Appenders>

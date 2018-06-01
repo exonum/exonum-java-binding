@@ -1,18 +1,17 @@
 use exonum::blockchain::Service;
-use exonum::helpers::fabric::{Context, ServiceFactory};
+use exonum::helpers::fabric::{CommandExtension, Context, ServiceFactory};
+use jni::{self, JavaVM};
 
-use jni;
+use std::sync::{Arc, Once, ONCE_INIT};
 
-use proxy::ServiceProxy;
-use proxy::JniExecutor;
+use proxy::{JniExecutor, ServiceProxy};
 use runtime::config::{Config, JvmConfig, ServiceConfig};
 use runtime::cmd::{GenerateNodeConfig, Finalize};
 use utils::unwrap_jni;
 use MainExecutor;
-use exonum::helpers::fabric::CommandExtension;
-use jni::JavaVM;
 
-use std::sync::Arc;
+static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
+static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
 const START_SERVICE_SIGNATURE: &str = "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
@@ -26,9 +25,12 @@ pub struct JavaServiceRuntime {
 }
 
 impl JavaServiceRuntime {
-    /// Create new runtime from config.
-    pub fn new(config: Config) -> Self {
+    /// Createsf new runtime from provided config or returns the one created earlier.
+    ///
+    /// There can be only one `JavaServiceRuntime` instance at a time.
+    pub fn get_or_create(config: Config) -> Self {
         let runtime = unsafe {
+            // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
                 let java_vm = Self::create_java_vm(config.jvm_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
@@ -37,18 +39,20 @@ impl JavaServiceRuntime {
                     executor,
                     service_proxy,
                 };
-                JAVA_SERVICE_RUNTIME = Some(runtime.clone());
+                JAVA_SERVICE_RUNTIME = Some(runtime);
             });
-            JAVA_SERVICE_RUNTIME.clone().unwrap()
+            // Return global runtime.
+            JAVA_SERVICE_RUNTIME.clone().expect("Trying to return runtime, but it's uninitialized")
         };
         runtime
     }
 
-    /// Return internal service proxy.
+    /// Returns internal service proxy.
     pub fn service_proxy(&self) -> ServiceProxy {
         self.service_proxy.clone()
     }
 
+    /// Initializes JVM with provided configuration.
     fn create_java_vm(config: JvmConfig) -> JavaVM {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
@@ -67,6 +71,7 @@ impl JavaServiceRuntime {
         jni::JavaVM::new(args).unwrap()
     }
 
+    /// Creates service proxy for interaction with Java side.
     fn create_service(config: ServiceConfig, executor: MainExecutor) -> ServiceProxy {
         let service = unwrap_jni(executor.with_attached(|env| {
             let module_name = env.new_string(config.module_name).unwrap();
@@ -84,17 +89,13 @@ impl JavaServiceRuntime {
     }
 }
 
-use std::sync::{Once, ONCE_INIT};
-
-static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
-static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
-
 /// TODO
 pub struct JavaServiceFactory;
 
 impl ServiceFactory for JavaServiceFactory {
     fn command(&mut self, command: &str) -> Option<Box<CommandExtension>> {
         use exonum::helpers::fabric;
+        // Execute EJB configuration steps along with standard Exonum Core steps.
         match command {
             v if v == fabric::GenerateNodeConfig::name() => Some(Box::new(GenerateNodeConfig)),
             v if v == fabric::Finalize::name() => Some(Box::new(Finalize)),
@@ -107,14 +108,14 @@ impl ServiceFactory for JavaServiceFactory {
             use exonum::helpers::fabric::keys;
             let config: Config = context
                 .get(keys::NODE_CONFIG)
-                .unwrap()
+                .expect("Unable to read node configuration.")
                 .services_configs
-                .get("ejb")
-                .unwrap()
+                .get(super::cmd::EJB_CONFIG_NAME)
+                .expect("Unable to read EJB configuration.")
                 .clone()
                 .try_into()
-                .unwrap();
-            JavaServiceRuntime::new(config)
+                .expect("Invalid EJB configuration format.");
+            JavaServiceRuntime::get_or_create(config)
         };
 
         Box::new(runtime.service_proxy().clone())

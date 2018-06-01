@@ -7,13 +7,22 @@ use toml::Value;
 use super::{JvmConfig, ServiceConfig, Config};
 use exonum::node::NodeConfig;
 
+const EJB_DEBUG: &str = "EJB_DEBUG";
+const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
+const EJB_CLASSPATH: &str = "EJB_CLASSPATH";
+const EJB_LIBPATH: &str = "EJB_LIBPATH";
+const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
+const EJB_PORT: &str = "EJB_PORT";
+const EJB_JVM_CONFIG_NAME: &str = "ejb_jvm_config";
+pub const EJB_CONFIG_NAME: &str = "ejb";
+
 pub struct GenerateNodeConfig;
 
 impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
-                "EJB_DEBUG",
+                EJB_DEBUG,
                 false,
                 "Debug mode for JVM.",
                 None,
@@ -21,7 +30,7 @@ impl CommandExtension for GenerateNodeConfig {
                 false
             ),
             Argument::new_named(
-                "EJB_LOG_CONFIG_PATH",
+                EJB_LOG_CONFIG_PATH,
                 false,
                 "Path to log4j configuration file.",
                 None,
@@ -29,17 +38,17 @@ impl CommandExtension for GenerateNodeConfig {
                 false
             ),
             Argument::new_named(
-                "EJB_CLASSPATH",
+                EJB_CLASSPATH,
                 true,
-                "Classpath for JVM.",
+                "Java service classpath. Must include all its dependencies.",
                 None,
                 "ejb-classpath",
                 false
             ),
             Argument::new_named(
-                "EJB_LIBPATH",
+                EJB_LIBPATH,
                 true,
-                "Libpath for JVM.",
+                "Path to java-bindings shared library.",
                 None,
                 "ejb-libpath",
                 false
@@ -48,10 +57,10 @@ impl CommandExtension for GenerateNodeConfig {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let debug = context.arg("EJB_DEBUG").unwrap_or_default();
-        let log_config_path = context.arg("EJB_LOG_CONFIG_PATH").unwrap_or_default();
-        let class_path = context.arg("EJB_CLASSPATH")?;
-        let lib_path = context.arg("EJB_LIBPATH")?;
+        let debug = context.arg(EJB_DEBUG).unwrap_or_default();
+        let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
+        let class_path = context.arg(EJB_CLASSPATH)?;
+        let lib_path = context.arg(EJB_LIBPATH)?;
 
         let jvm_config = JvmConfig {
             debug,
@@ -66,7 +75,7 @@ impl CommandExtension for GenerateNodeConfig {
         services_secret_configs.extend(
             vec![
                 (
-                    "ejb_jvm_config".to_owned(),
+                    EJB_JVM_CONFIG_NAME.to_owned(),
                     Value::try_from(jvm_config).unwrap()
                 ),
             ].into_iter(),
@@ -84,27 +93,27 @@ impl CommandExtension for Finalize {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
-                "EJB_MODULE_NAME",
+                EJB_MODULE_NAME,
                 true,
-                "Module name for EJB.",
+                "A fully-qualified class name of the user service module.",
                 None,
                 "ejb-module-name",
                 false
             ),
-            Argument::new_named("EJB_PORT", true, "Port for EJB.", None, "ejb-port", false),
+            Argument::new_named(EJB_PORT, true, "A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.", None, "ejb-port", false),
         ]
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let module_name = context.arg("EJB_MODULE_NAME")?;
-        let port = context.arg("EJB_PORT")?;
+        let module_name = context.arg(EJB_MODULE_NAME)?;
+        let port = context.arg(EJB_PORT)?;
 
         let service_config = ServiceConfig { module_name, port };
 
         let jvm_config: JvmConfig = context
             .get(keys::SERVICES_SECRET_CONFIGS)
             .unwrap()
-            .get("ejb_jvm_config")
+            .get(EJB_JVM_CONFIG_NAME)
             .unwrap()
             .clone()
             .try_into()?;
@@ -116,7 +125,7 @@ impl CommandExtension for Finalize {
 
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
         node_config.services_configs.insert(
-            "ejb".to_owned(),
+            EJB_CONFIG_NAME.to_owned(),
             Value::try_from(config)?,
         );
         context.set(keys::NODE_CONFIG, node_config);
