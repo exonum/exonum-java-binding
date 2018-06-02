@@ -1,16 +1,13 @@
-use exonum::crypto::Hash;
-use exonum::storage::{Snapshot, Fork, ProofMapIndex, MapProof, StorageKey};
-use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
-                                       ProofPath, BranchProofNode, ProofNode, PROOF_MAP_KEY_SIZE};
+use exonum::storage::{Fork, ProofMapIndex, Snapshot};
+use exonum::storage::proof_map_index::{PROOF_MAP_KEY_SIZE, ProofMapIndexIter, ProofMapIndexKeys,
+                                       ProofMapIndexValues};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
-
+use JniResult;
 use std::panic;
 use std::ptr;
-
-use JniResult;
-use storage::db::{View, ViewRef, Value};
+use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle, PairIter};
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];

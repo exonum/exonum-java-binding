@@ -1,7 +1,6 @@
 package com.exonum.binding.fakes;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.exonum.binding.fakes.mocks.ThrowingTransactions;
 import com.exonum.binding.fakes.mocks.UserServiceAdapterMockBuilder;
@@ -15,7 +14,6 @@ import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
 import com.exonum.binding.util.LibraryLoader;
-import io.vertx.ext.web.Router;
 
 /**
  * Provides methods to create mocks and test fakes of Service and Transaction adapters.
@@ -26,7 +24,7 @@ import io.vertx.ext.web.Router;
 public final class NativeFacade {
 
   static {
-	LibraryLoader.load();
+    LibraryLoader.load();
   }
 
   private static final ViewFactory VIEW_FACTORY = ViewProxyFactory.getInstance();
