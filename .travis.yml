@@ -20,7 +20,7 @@ env:
   global:
     - RUST_VERSION=stable
     - RUSTFMT_VERSION=0.9.0
-    - RUST_NIGHTLY_VERSION=nightly-2018-05-26
+    - RUST_NIGHTLY_VERSION=nightly
     - RUST_CLIPPY_VERSION=0.0.205
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     - ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
@@ -51,12 +51,12 @@ before_install:
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
-  - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt --all -- --write-mode=diff
-  # FIXME reenable clippy checks after crashes with jni fixed [ECR-1538]
-  - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings || true
-  - cargo audit
-  - cd -
+#  - cd "${EJB_RUST_BUILD_DIR}"
+#  - cargo fmt --all -- --write-mode=diff
+#   FIXME reenable clippy checks after crashes with jni fixed [ECR-1538]
+#  - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings || true
+#  - cargo audit
+#  - cd -
   - ./run_all_tests.sh
 
 notifications:

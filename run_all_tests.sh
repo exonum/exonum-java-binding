@@ -15,7 +15,7 @@ set -eu -o pipefail
 # See build definitions of the modules for more.
 mvn install \
   --activate-profiles ci-build \
-  -Drust.compiler.version="stable"
+  -Drust.compiler.version="nightly"
 
 # Run native integration tests that require a JVM.
 ./run_native_integration_tests.sh --skip-compile

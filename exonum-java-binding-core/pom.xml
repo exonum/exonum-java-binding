@@ -18,14 +18,14 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rust.compiler.version>stable</rust.compiler.version>
+    <rust.compiler.version>nightly</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <!-- Intentionally left empty, may be overridden from the command line.
          See README.md and http://errorprone.info/docs/flags for more. -->
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
-    <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <build.nativeLibPath>${project.basedir}/rust/target/x86_64-unknown-linux-gnu/debug/</build.nativeLibPath>
     <auto-value.version>1.5.3</auto-value.version>
     <kalium.version>0.7.0</kalium.version>
   </properties>
@@ -69,11 +69,18 @@
             <id>build-rust-lib</id>
             <phase>compile</phase>
             <configuration>
+              <environmentVariables>
+                <RUSTFLAGS>
+                  -Z sanitizer=address
+                </RUSTFLAGS>
+              </environmentVariables>
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
                 <argument>build</argument>
                 <argument>--features</argument>
                 <argument>${rust.compiler.features}</argument>
+                <argument>--target</argument>
+                <argument>x86_64-unknown-linux-gnu</argument>
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
@@ -88,45 +95,45 @@
                todo: run on a CI server only
                Note: cannot be currently extracted in 'ci-build' profile for will produce a library
                without rm and break ITs in Java. -->
-          <execution>
-            <id>test-rust-lib-no-resource-manager</id>
-            <phase>test</phase>
-            <configuration>
-              <arguments>
-                <argument>+${rust.compiler.version}</argument>
-                <argument>test</argument>
-                <argument>--all</argument>
-                <argument>--exclude</argument>
-                <argument>${rust.itSubCrate}</argument>
-                <argument>--color</argument>
-                <argument>always</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
+          <!--<execution>-->
+            <!--<id>test-rust-lib-no-resource-manager</id>-->
+            <!--<phase>test</phase>-->
+            <!--<configuration>-->
+              <!--<arguments>-->
+                <!--<argument>+${rust.compiler.version}</argument>-->
+                <!--<argument>test</argument>-->
+                <!--<argument>&#45;&#45;all</argument>-->
+                <!--<argument>&#45;&#45;exclude</argument>-->
+                <!--<argument>${rust.itSubCrate}</argument>-->
+                <!--<argument>&#45;&#45;color</argument>-->
+                <!--<argument>always</argument>-->
+              <!--</arguments>-->
+            <!--</configuration>-->
+            <!--<goals>-->
+              <!--<goal>exec</goal>-->
+            <!--</goals>-->
+          <!--</execution>-->
 
-          <execution>
-            <id>test-rust-lib</id>
-            <phase>test</phase>
-            <configuration>
-              <arguments>
-                <argument>+${rust.compiler.version}</argument>
-                <argument>test</argument>
-                <argument>--features</argument>
-                <argument>${rust.compiler.features}</argument>
-                <argument>--all</argument>
-                <argument>--exclude</argument>
-                <argument>${rust.itSubCrate}</argument>
-                <argument>--color</argument>
-                <argument>always</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
+          <!--<execution>-->
+            <!--<id>test-rust-lib</id>-->
+            <!--<phase>test</phase>-->
+            <!--<configuration>-->
+              <!--<arguments>-->
+                <!--<argument>+${rust.compiler.version}</argument>-->
+                <!--<argument>test</argument>-->
+                <!--<argument>&#45;&#45;features</argument>-->
+                <!--<argument>${rust.compiler.features}</argument>-->
+                <!--<argument>&#45;&#45;all</argument>-->
+                <!--<argument>&#45;&#45;exclude</argument>-->
+                <!--<argument>${rust.itSubCrate}</argument>-->
+                <!--<argument>&#45;&#45;color</argument>-->
+                <!--<argument>always</argument>-->
+              <!--</arguments>-->
+            <!--</configuration>-->
+            <!--<goals>-->
+              <!--<goal>exec</goal>-->
+            <!--</goals>-->
+          <!--</execution>-->
         </executions>
       </plugin>
 

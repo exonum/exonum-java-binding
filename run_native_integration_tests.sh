@@ -35,7 +35,7 @@ fi
 cd exonum-java-binding-core/rust
 
 # Stable works well unless you want benchmarks.
-RUST_COMPILER_VERSION="stable"
+RUST_COMPILER_VERSION="nightly"
 
 cargo "+${RUST_COMPILER_VERSION}" test \
   --manifest-path integration_tests/Cargo.toml
