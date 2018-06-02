@@ -4,6 +4,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -12,6 +13,7 @@ import org.junit.rules.ExpectedException;
  * A couple of tests that verify that using an invalid handle from Java does not crash the VM,
  * but results in a descriptive RuntimeException.
  */
+@Ignore  // Ignore just in case: it might leak some memory
 public class NativeResourceManagerIntegrationTest {
 
   static {
