@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -93,23 +94,14 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextFailsIfCollectionClosed() throws Exception {
-    Snapshot view = createSnapshot();
-    AbstractIndexProxy index = createIndex(view);
+  public void nextFailsIfHandleClosed() throws Exception {
+    Fork fork = createFork();
+    NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
+    createFromIterable(nh, asList(1, 2), fork);
 
-    createFromIterable(asList(1, 2), index);
+    // Close the native handle.
+    nh.close();
 
-    index.close();
-    expectedException.expect(IllegalStateException.class);
-    iter.next();
-  }
-
-  @Test
-  public void nextFailsIfViewClosed() throws Exception {
-    Snapshot view = createSnapshot();
-    createFromIterable(asList(1, 2), view);
-
-    view.close();
     expectedException.expect(IllegalStateException.class);
     iter.next();
   }
@@ -130,60 +122,27 @@ public class ConfigurableRustIterTest {
     }
   }
 
-  @Test
-  public void closeDoesNotFailIfModifiedAfterTheLastNext() throws Exception {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
-
-    while (iter.next().isPresent()) {
-      // skip all elements
-    }
-
-    notifyModified(fork);
-
-    iter.close();  // It's OK to modify after the last element was retrieved.
+  /** Creates a mock of a fork. */
+  private Fork createFork() {
+    return mock(Fork.class);
   }
 
-  @Test
-  public void closeFailsIfViewClosedBefore() throws Exception {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
-
-    fork.close();
-    expectedException.expect(IllegalStateException.class);
-    iter.close();
+  /** Creates a mock of a snapshot. */
+  private Snapshot createSnapshot() {
+    return mock(Snapshot.class);
   }
 
-  private static Fork createFork() {
-    return new Fork(1L, false);
+  private void createFromIterable(Iterable<Integer> it, View dbView) {
+    NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
+    createFromIterable(nh, it, dbView);
   }
 
-  private static Snapshot createSnapshot() {
-    return new Snapshot(2L, false);
-  }
-
-  private void createFromIterable(Iterable<Integer> it, View parentView) {
-    AbstractIndexProxy collection = createIndex(parentView);
-    createFromIterable(it, collection);
-  }
-
-  private void createFromIterable(Iterable<Integer> it, AbstractIndexProxy index) {
+  private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it, View dbView) {
     Iterator<Integer> iterator = it.iterator();
-    iter = new ConfigurableRustIter<>(DEFAULT_NATIVE_HANDLE,
+    iter = new ConfigurableRustIter<>(nativeHandle,
         (h) -> iterator.hasNext() ? iterator.next() : null,
-        (h) -> { /* no-op dispose */ },
-        index,
+        dbView,
         modCounter);
-  }
-
-  private static AbstractIndexProxy createIndex(View view) {
-    return new AbstractIndexProxy(0x01, "test_index", view) {
-
-      @Override
-      protected void disposeInternal() {
-        // no-op
-      }
-    };
   }
 
   private void notifyModified(Fork fork) {

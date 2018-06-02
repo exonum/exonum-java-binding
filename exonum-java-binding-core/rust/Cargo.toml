@@ -18,9 +18,7 @@ invocation = ["jni/invocation"]
 exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumoxide.git", branch = "exclude-1604-ECR-846" }
 
 [dependencies]
-# ¡Please keep README.md in sync with the Exonum version,
-# so that users are directed to the correct build instructions!
-exonum = "0.6.0"
+exonum = "0.7.1"
 iron = "0.6.0"
 jni = { version = "0.10.1", git = "https://github.com/alexander-irbis/jni-rs", branch = "clone-jnienv" }
 lazy_static = "1.0.0"

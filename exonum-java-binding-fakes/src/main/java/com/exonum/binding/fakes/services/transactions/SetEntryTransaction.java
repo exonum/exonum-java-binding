@@ -46,9 +46,9 @@ public final class SetEntryTransaction implements Transaction {
   @Override
   public void execute(Fork view) {
     checkState(valid, "Cannot execute an invalid transaction");
-    try (EntryIndexProxy<String> entry = createEntry(view)) {
-      entry.set(value);
-    }
+
+    EntryIndexProxy<String> entry = createEntry(view);
+    entry.set(value);
   }
 
   @Override

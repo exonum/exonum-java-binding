@@ -1,10 +1,16 @@
+Exonum Java Binding uses third party Open Source components that are governed under their own license terms as follows:
+
 --------------------------------------------------------------------------------
-Apache License
-Applies to:
-  - Guava, (c) 2017 Google
+The following third party software components are governed under Apache 2.0 license:
+  - Guava, (c) 2018 Google
     This software includes a repackaged copy of «com.google.common.hash» package,
     as of v23.5-jre.  The copy includes only the classes, needed for SHA-256 hash function.
     The other supported hash functions and bloom-filters are removed.
+    https://github.com/google/guava
+  - Guice, (c) 2018 Google https://github.com/google/guice
+  - Vert.x Web, (c) 2018 https://vertx.io/
+  - Apache Log4j, (c) 1999-2018 The Apache Software Foundation https://logging.apache.org/log4j/2.x/
+  - Kalium, (c) 2018 http://abstractj.github.io/kalium/
 --------------------------------------------------------------------------------
 
                                  Apache License

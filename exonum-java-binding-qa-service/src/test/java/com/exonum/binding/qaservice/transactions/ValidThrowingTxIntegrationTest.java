@@ -9,6 +9,8 @@ import static org.junit.Assert.fail;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -23,9 +25,10 @@ public class ValidThrowingTxIntegrationTest {
   }
 
   @Test
-  public void executeClearsQaServiceData() {
-    try (MemoryDb db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeClearsQaServiceData() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
 
       // Initialize storage with a counter equal to 10
       String name = "counter";
@@ -42,12 +45,11 @@ public class ValidThrowingTxIntegrationTest {
       } catch (IllegalStateException expected) {
         // Check that execute cleared the maps
         QaSchema schema = new QaSchema(view);
-        try (MapIndex<HashCode, Long> counters = schema.counters();
-             MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-          HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
-          assertFalse(counters.containsKey(nameHash));
-          assertFalse(counterNames.containsKey(nameHash));
-        }
+        MapIndex<HashCode, Long> counters = schema.counters();
+        MapIndex<HashCode, String> counterNames = schema.counterNames();
+        HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+        assertFalse(counters.containsKey(nameHash));
+        assertFalse(counterNames.containsKey(nameHash));
 
         // Check the exception message
         String message = expected.getMessage();

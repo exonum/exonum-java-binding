@@ -41,11 +41,36 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns a pointer to the created `ProofListIndex` instance in an index family (= group).
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeCreateInGroup(
+    env: JNIEnv,
+    _: JClass,
+    group_name: JString,
+    list_id: jbyteArray,
+    view_handle: Handle,
+) -> Handle{
+    let res = panic::catch_unwind(|| {
+        let group_name = utils::convert_to_string(&env, group_name)?;
+        let list_id = env.convert_byte_array(list_id)?;
+        let view_ref = utils::cast_handle::<View>(view_handle).get();
+        Ok(utils::to_handle(match *view_ref {
+            ViewRef::Snapshot(snapshot) => {
+                IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
+            }
+            ViewRef::Fork(ref mut fork) => {
+                IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
+            }
+        }))
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Destroys the underlying `ProofListIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     list_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, list_handle);
@@ -151,8 +176,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.root_hash(),
-            IndexType::ForkIndex(ref list) => list.root_hash(),
+            IndexType::SnapshotIndex(ref list) => list.merkle_root(),
+            IndexType::ForkIndex(ref list) => list.merkle_root(),
         };
         utils::convert_hash(&env, &hash)
     });

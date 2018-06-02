@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
@@ -22,6 +24,7 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
@@ -29,7 +32,13 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
+import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.test.appender.ListAppender;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -53,6 +62,7 @@ public class QaServiceImplIntegrationTest {
   private QaServiceImpl service;
   private Node node;
   private Vertx vertx;
+  private ListAppender logAppender;
 
 
   @Before
@@ -61,6 +71,18 @@ public class QaServiceImplIntegrationTest {
     service = new QaServiceImpl(transactionConverter);
     node = mock(Node.class);
     vertx = vertxTestContextRule.vertx();
+    logAppender = getCapturingLogAppender();
+  }
+
+  private static ListAppender getCapturingLogAppender() {
+    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    Configuration config = ctx.getConfiguration();
+    return (ListAppender) config.getAppenders().get("ListAppender");
+  }
+
+  @After
+  public void tearDown() {
+    logAppender.clear();
   }
 
   @Test
@@ -72,9 +94,30 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void initialize() {
-    try (MemoryDb db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void getStateHashesLogsThem() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      List<HashCode> stateHashes = service.getStateHashes(view);
+      int numMerklizedCollections = 1;
+      assertThat(stateHashes).hasSize(numMerklizedCollections);
+
+      List<String> logMessages = logAppender.getMessages();
+      int expectedNumMessages = 1;
+      assertThat(logMessages).hasSize(expectedNumMessages);
+
+      assertThat(logMessages.get(0))
+          .contains("ERROR")
+          .contains(stateHashes.get(0).toString());
+    }
+  }
+
+  @Test
+  public void initialize() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       Optional<String> initialConfiguration = service.initialize(view);
 
       // Check the configuration.
@@ -83,15 +126,15 @@ public class QaServiceImplIntegrationTest {
 
       // Check the changes made to the database.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        String counterName = "default";
-        HashCode counterId = Hashing.sha256()
-            .hashString(counterName, UTF_8);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-        assertThat(counters.get(counterId)).isEqualTo(0L);
-        assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-      }
+      String counterName = "default";
+      HashCode counterId = Hashing.sha256()
+          .hashString(counterName, UTF_8);
+
+      assertThat(counters.get(counterId)).isEqualTo(0L);
+      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
     }
   }
 
@@ -172,14 +215,15 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void getValue() {
-    try (MemoryDb db = new MemoryDb()) {
+  public void getValue() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
 
       // Create a counter with the given name
       String counterName = "bids";
-      try (Fork view = db.createFork()) {
+      try (Cleaner cleaner = new Cleaner()) {
+        Fork view = db.createFork(cleaner);
         new CreateCounterTx(counterName)
             .execute(view);
 
@@ -196,7 +240,7 @@ public class QaServiceImplIntegrationTest {
 
   @Test
   public void getValueNoSuchCounter() {
-    try (MemoryDb db = new MemoryDb()) {
+    try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
 

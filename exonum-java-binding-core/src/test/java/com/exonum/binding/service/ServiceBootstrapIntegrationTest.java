@@ -2,19 +2,24 @@ package com.exonum.binding.service;
 
 import static com.exonum.binding.messages.TemplateMessage.TEMPLATE_MESSAGE;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,6 +34,7 @@ public class ServiceBootstrapIntegrationTest {
     UserServiceAdapter service = ServiceBootstrap.startService(
         UserModule.class.getCanonicalName(), 0);
 
+    // Check the service and its dependencies work as expected.
     assertThat(service.getId(), equalTo(UserService.ID));
     assertThat(service.getName(), equalTo(UserService.NAME));
     BinaryMessage message = new Message.Builder()
@@ -39,6 +45,12 @@ public class ServiceBootstrapIntegrationTest {
 
     UserTransactionAdapter transactionAdapter = service.convertTransaction(messageBytes);
     assertTrue(transactionAdapter.isValid());
+
+    // Check that once startService returns, the native library is loaded. If it’s not,
+    // we’ll get an UnsatisfiedLinkError.
+    try (MemoryDb database = MemoryDb.newInstance()) {
+      assertNotNull(database);
+    }
   }
 
   @Test
@@ -87,7 +99,13 @@ class UserService extends AbstractService {
 
   @Override
   protected Schema createDataSchema(View view) {
-    return new Schema() {};
+    return new Schema() {
+
+      @Override
+      public List<HashCode> getStateHashes() {
+        return Collections.emptyList();
+      }
+    };
   }
 
   @Override
