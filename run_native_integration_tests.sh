@@ -7,6 +7,7 @@
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
 
+RUST_VERSION="nightly"
 # Use an already set JAVA_HOME, or infer it from java.home system property.
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
@@ -15,7 +16,8 @@ JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
 echo "JAVA_HOME=${JAVA_HOME}"
 
 # Find the directory containing libjvm (the relative path has changed in Java 9)
-export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+RUST_LIB_DIR="$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib"
+export LD_LIBRARY_PATH="$(find -L ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname):${RUST_LIB_DIR}"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Compile all Java modules by default to ensure that ejb-fakes module, which is required
@@ -35,7 +37,8 @@ fi
 cd exonum-java-binding-core/rust
 
 # Stable works well unless you want benchmarks.
-RUST_COMPILER_VERSION="stable"
+RUST_COMPILER_VERSION="${RUST_VERSION}"
 
-cargo "+${RUST_COMPILER_VERSION}" test \
+RUSTFLAGS="-Z sanitizer=address" cargo "+${RUST_COMPILER_VERSION}" test \
+  --target x86_64-unknown-linux-gnu \
   --manifest-path integration_tests/Cargo.toml

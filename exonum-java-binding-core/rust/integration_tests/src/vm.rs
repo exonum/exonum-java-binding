@@ -1,5 +1,4 @@
-use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
-
+use java_bindings::jni::{InitArgsBuilder, JavaVM, JNIVersion};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -95,7 +94,7 @@ fn project_root_dir() -> PathBuf {
 
 #[cfg(debug_assertions)]
 fn target_path() -> &'static str {
-    "target/debug"
+    "target/x86_64-unknown-linux-gnu/debug/deps"
 }
 
 #[cfg(not(debug_assertions))]
