@@ -1,3 +1,4 @@
+use exonum::storage::{Snapshot, Fork, Entry};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jbyteArray, jboolean};
@@ -5,9 +6,8 @@ use jni::sys::{jbyteArray, jboolean};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, Entry};
+use storage::db::{View, ViewRef, Value};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = Entry<T, Value>;
 

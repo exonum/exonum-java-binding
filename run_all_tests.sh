@@ -13,9 +13,11 @@ set -eu -o pipefail
 #  - Checkstyle checks as errors.
 #  - Native unit & integration tests that do not require a JVM.
 # See build definitions of the modules for more.
+## SKIP because I didn't manage to get a shared asan lib for Rust.
 mvn install \
+  -DskipTests
   --activate-profiles ci-build \
-  -Drust.compiler.version="stable"
+  -Drust.compiler.version="nightly"
 
 # Run native integration tests that require a JVM.
 ./run_native_integration_tests.sh --skip-compile
