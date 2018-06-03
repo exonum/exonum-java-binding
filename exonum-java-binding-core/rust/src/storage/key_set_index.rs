@@ -1,14 +1,14 @@
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, KeySetIndex};
+use super::db::{Key, View, ViewRef};
 use exonum::storage::key_set_index::KeySetIndexIter;
+use exonum::storage::{Fork, KeySetIndex, Snapshot};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Key};
 
 type Index<T> = KeySetIndex<T, Key>;
 
@@ -29,9 +29,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
     group_name: JString,
     set_id: jbyteArray,
     view_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let set_id = env.convert_byte_array(set_id)?;
@@ -98,7 +98,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(set_handle) {
@@ -117,7 +117,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
     _: JObject,
     set_handle: Handle,
     from: jbyteArray,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let from = env.convert_byte_array(from)?;
         Ok(utils::to_handle(
@@ -197,7 +197,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray{
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = utils::cast_handle::<KeySetIndexIter<Key>>(iter_handle);
         match iter.next() {
@@ -214,6 +214,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-){
+) {
     utils::drop_handle::<KeySetIndexIter<Key>>(&env, iter_handle);
 }

@@ -1,11 +1,11 @@
 // TODO: Should be removed when Transaction proxy is implemented.
 #![allow(dead_code)]
 
-use jni::JNIEnv;
 use jni::sys::jlong;
+use jni::JNIEnv;
 
-use std::panic;
 use std::marker::PhantomData;
+use std::panic;
 
 use super::exception;
 use super::resource_manager;

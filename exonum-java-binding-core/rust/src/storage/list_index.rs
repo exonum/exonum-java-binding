@@ -1,14 +1,14 @@
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jlong, jbyteArray, jboolean};
+use jni::sys::{jboolean, jbyteArray, jlong};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, ListIndex};
+use super::db::{Value, View, ViewRef};
 use exonum::storage::list_index::ListIndexIter;
+use exonum::storage::{Fork, ListIndex, Snapshot};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = ListIndex<T, Value>;
 
@@ -29,9 +29,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
     group_name: JString,
     list_id: jbyteArray,
     view_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
