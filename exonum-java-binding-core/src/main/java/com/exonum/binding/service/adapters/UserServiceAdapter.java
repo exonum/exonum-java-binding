@@ -105,7 +105,7 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public String initialize(long forkHandle) {
+  public @Nullable String initialize(long forkHandle) {
     assert forkHandle != 0;
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);

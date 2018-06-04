@@ -1,3 +1,5 @@
+use exonum::storage::{Snapshot, Fork, MapIndex};
+use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
@@ -5,10 +7,8 @@ use jni::sys::{jboolean, jbyteArray, jobject};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, MapIndex};
-use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
+use storage::db::{View, ViewRef, Key, Value};
 use utils::{self, Handle, PairIter};
-use super::db::{View, ViewRef, Key, Value};
 
 type Index<T> = MapIndex<T, Key, Value>;
 
