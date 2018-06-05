@@ -5,6 +5,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.crypto.PublicKeySerializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -15,6 +16,7 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
@@ -25,6 +27,8 @@ public final class TransferTx extends BaseTx implements Transaction {
 
   @VisibleForTesting
   static final int BODY_SIZE = Long.BYTES * 2 + Hashing.DEFAULT_HASH_SIZE_BYTES * 2;
+
+  private static final Serializer<PublicKey> publicKeySerializer = PublicKeySerializer.INSTANCE;
 
   private static final short ID = CryptocurrencyTransaction.TRANSFER.getId();
   private final long seed;
@@ -115,10 +119,10 @@ public final class TransferTx extends BaseTx implements Transaction {
 
       byte[] fromHash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
       buf.get(fromHash);
-      PublicKey fromWallet = PublicKey.fromBytes(fromHash);
+      PublicKey fromWallet = publicKeySerializer.fromBytes(fromHash);
       byte[] toHash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
       buf.get(toHash);
-      PublicKey toWallet = PublicKey.fromBytes(toHash);
+      PublicKey toWallet = publicKeySerializer.fromBytes(toHash);
       long sum = buf.getLong();
       return new TransferTx(seed, fromWallet, toWallet, sum);
     }
@@ -129,8 +133,8 @@ public final class TransferTx extends BaseTx implements Transaction {
           ByteBuffer.allocate(BODY_SIZE)
               .order(ByteOrder.LITTLE_ENDIAN)
               .putLong(transaction.seed)
-              .put(transaction.fromWallet.toBytes())
-              .put(transaction.toWallet.toBytes())
+              .put(publicKeySerializer.toBytes(transaction.fromWallet))
+              .put(publicKeySerializer.toBytes(transaction.toWallet))
               .putLong(transaction.sum);
       body.rewind();
 

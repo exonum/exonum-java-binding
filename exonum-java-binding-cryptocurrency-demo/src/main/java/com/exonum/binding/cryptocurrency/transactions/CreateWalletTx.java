@@ -16,6 +16,7 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
 
@@ -23,6 +24,8 @@ import java.nio.ByteBuffer;
 public final class CreateWalletTx extends BaseTx implements Transaction {
 
   private static final short ID = CryptocurrencyTransaction.CREATE_WALLET.getId();
+
+  private static final Serializer<PublicKey> publicKeySerializer = PublicKeySerializer.INSTANCE;
 
   static final long DEFAULT_BALANCE = 100L;
 
@@ -102,7 +105,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     }
 
     private static ByteBuffer serialize(CreateWalletTx tx) {
-      byte[] nameBytes = PublicKeySerializer.INSTANCE.toBytes(tx.ownerPublicKey);
+      byte[] nameBytes = publicKeySerializer.toBytes(tx.ownerPublicKey);
       return ByteBuffer.wrap(nameBytes);
     }
 
@@ -110,7 +113,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     public CreateWalletTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
       ByteBuffer body = txMessage.getBody();
-      PublicKey publicKey = PublicKey.fromBytes(getRemainingBytes(body));
+      PublicKey publicKey = publicKeySerializer.fromBytes(getRemainingBytes(body));
       return new CreateWalletTx(publicKey);
     }
 
