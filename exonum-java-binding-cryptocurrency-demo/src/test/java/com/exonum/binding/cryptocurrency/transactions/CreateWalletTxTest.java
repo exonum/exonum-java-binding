@@ -17,7 +17,6 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
-import java.util.Collections;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,15 +28,14 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private PublicKey publicKey =
-      PublicKey.fromBytes(
-          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "a")).getBytes());
+  private static final PublicKey ownerKey =
+      PublicKey.fromBytes(new byte[CRYPTO_SIGN_ED25519_PUBLICKEYBYTES]);
 
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void isValidNonEmptyName() {
-    CreateWalletTx tx = new CreateWalletTx(publicKey);
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     assertTrue(tx.isValid());
   }
@@ -53,7 +51,7 @@ public class CreateWalletTxTest {
 
   @Test
   public void executeCreateWalletTx() throws CloseFailuresException {
-    CreateWalletTx tx = new CreateWalletTx(publicKey);
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -64,7 +62,7 @@ public class CreateWalletTxTest {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-      assertThat(wallets.get(publicKey).getBalance(), equalTo(DEFAULT_BALANCE));
+      assertThat(wallets.get(ownerKey).getBalance(), equalTo(DEFAULT_BALANCE));
     }
   }
 
@@ -79,24 +77,24 @@ public class CreateWalletTxTest {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(publicKey, new Wallet(value));
+        wallets.put(ownerKey, new Wallet(value));
       }
 
       // Execute the transaction, that has the same owner key.
-      CreateWalletTx tx = new CreateWalletTx(publicKey);
+      CreateWalletTx tx = new CreateWalletTx(ownerKey);
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(publicKey).getBalance(), equalTo(value));
+        assertThat(wallets.get(ownerKey).getBalance(), equalTo(value));
       }
     }
   }
 
   @Test
   public void info() {
-    CreateWalletTx tx = new CreateWalletTx(publicKey);
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     String info = tx.info();
 

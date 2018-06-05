@@ -15,6 +15,7 @@ import com.exonum.binding.cryptocurrency.transactions.TransferTx;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -26,7 +27,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import java.net.HttpURLConnection;
-import java.util.Collections;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
@@ -40,12 +40,10 @@ public class ApiControllerTest {
   private static final String HOST = "0.0.0.0";
 
   private static final PublicKey fromOwnerKey =
-      PublicKey.fromBytes(
-          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "a")).getBytes());
+      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(0), CRYPTO_SIGN_ED25519_PUBLICKEYBYTES));
 
   private static final PublicKey toOwnerKey =
-      PublicKey.fromBytes(
-          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "b")).getBytes());
+      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(1), CRYPTO_SIGN_ED25519_PUBLICKEYBYTES));
 
   @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
 
