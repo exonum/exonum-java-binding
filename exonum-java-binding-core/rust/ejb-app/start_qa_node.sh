@@ -46,8 +46,8 @@ EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-export RUST_LIB_DIR=$(rustup run stable rustc --print sysroot)/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EJB_LIBPATH:$RUST_LIB_DIR
+export RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
@@ -60,7 +60,7 @@ trap "killall ejb-app" SIGINT SIGTERM EXIT
 node_count=$1
 
 header "GENERATE COMMON CONFIG"
-ejb-app generate-template testnet/common.toml
+ejb-app generate-template --validators-count $node_count testnet/common.toml
 
 header "GENERATE CONFIG"
 for i in $(seq 0 $((node_count - 1)))

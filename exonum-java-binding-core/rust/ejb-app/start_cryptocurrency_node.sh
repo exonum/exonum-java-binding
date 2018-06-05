@@ -59,7 +59,7 @@ rm -rf testnet
 mkdir testnet
 
 header "GENERATE COMMON CONFIG"
-cargo run -- generate-template testnet/common.toml
+cargo run -- generate-template --validators-count 1 testnet/common.toml
 
 header "GENERATE CONFIG"
 cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml --ejb-classpath $EJB_CLASSPATH --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $EJB_LOG_CONFIG_PATH --ejb-debug false --peer-address 127.0.0.1:5400
