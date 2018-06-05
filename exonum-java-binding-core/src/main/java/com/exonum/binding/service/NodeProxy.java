@@ -6,16 +6,24 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
+import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.storage.database.Snapshot;
 import java.nio.ByteBuffer;
+import java.util.function.Function;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-public final class NodeProxy extends AbstractNativeProxy implements Node {
+public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
+
+  private static final Logger logger = LogManager.getLogger(NodeProxy.class);
 
   /**
    * Creates a proxy of a node. Native code owns the node,
@@ -24,7 +32,7 @@ public final class NodeProxy extends AbstractNativeProxy implements Node {
    * @param nativeHandle an implementation-specific reference to a native node
    */
   public NodeProxy(long nativeHandle) {
-    // fixme: remove this comment when https://jira.bf.local/browse/EEN-27 is resolved
+    // fixme: remove this comment when https://jira.bf.local/browse/ECR-251 is resolved
     super(nativeHandle, false);
   }
 
@@ -47,7 +55,9 @@ public final class NodeProxy extends AbstractNativeProxy implements Node {
     byte[] data = messageBuffer.array();
     int offset = messageBuffer.arrayOffset();
     int size = messageBuffer.remaining();
-    nativeSubmit(getNativeHandle(), new UserTransactionAdapter(transaction), data, offset, size);
+    nativeSubmit(getNativeHandle(),
+            new UserTransactionAdapter(transaction, ViewProxyFactory.INSTANCE),
+            data, offset, size);
   }
 
   /**
@@ -69,8 +79,16 @@ public final class NodeProxy extends AbstractNativeProxy implements Node {
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public Snapshot createSnapshot() {
-    return new Snapshot(nativeCreateSnapshot(getNativeHandle()));
+  public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
+    try (Cleaner cleaner = new Cleaner("NodeProxy#withSnapshot")) {
+      long nodeNativeHandle = getNativeHandle();
+      long snapshotNativeHandle = nativeCreateSnapshot(nodeNativeHandle);
+      Snapshot snapshot = Snapshot.newInstance(snapshotNativeHandle, cleaner);
+      return snapshotFunction.apply(snapshot);
+    } catch (CloseFailuresException e) {
+      logger.error(e);
+      throw new RuntimeException(e);
+    }
   }
 
   private native long nativeCreateSnapshot(long nativeHandle);

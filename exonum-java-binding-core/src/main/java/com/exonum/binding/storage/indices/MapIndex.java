@@ -1,7 +1,8 @@
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.Fork;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -21,7 +22,6 @@ public interface MapIndex<K, V> extends StorageIndex {
   /**
    * Returns true if this map contains a mapping for the specified key.
    *
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    */
   boolean containsKey(K key);
@@ -32,7 +32,6 @@ public interface MapIndex<K, V> extends StorageIndex {
    *
    * @param key a storage key
    * @param value a storage value to associate with the key
-   * @throws NullPointerException if any argument is null
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if some property of the key or the value prevents it
    *                                  from being stored in this map
@@ -41,13 +40,29 @@ public interface MapIndex<K, V> extends StorageIndex {
   void put(K key, V value);
 
   /**
+   * Puts all key-value pairs from the given map into this map. Equivalent to a sequence
+   * of individual {@link #put} operations.
+   *
+   * @param sourceMap a map to put into this one
+   * @throws NullPointerException if the passed map is null or contains a null key or values
+   * @throws IllegalStateException if this map is not valid
+   * @throws IllegalArgumentException if some property of the key or the value prevents it
+   *                                  from being stored in this map
+   * @throws UnsupportedOperationException if this map is read-only
+   */
+  default void putAll(Map<? extends K, ? extends V> sourceMap) {
+    for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
+      put(entry.getKey(), entry.getValue());
+    }
+  }
+
+  /**
    * Returns the value associated with the specified key,
    * or {@code null} if there is no mapping for the key.
    *
    * @param key a storage key
    * @return the value mapped to the specified key,
    *         or {@code null} if this map contains no mapping for the key.
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    */
   V get(K key);
@@ -57,7 +72,6 @@ public interface MapIndex<K, V> extends StorageIndex {
    * If there is no such mapping, has no effect.
    *
    * @param key a storage key
-   * @throws NullPointerException if the key is null
    * @throws IllegalStateException if this map is not valid
    * @throws UnsupportedOperationException if this map is read-only
    */
@@ -66,42 +80,33 @@ public interface MapIndex<K, V> extends StorageIndex {
   /**
    * Returns an iterator over the map keys in lexicographical order.
    *
-   * <p>The iterator must be explicitly closed.
-   *
    * <p>Any destructive operation on the same {@link Fork} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
    */
-  @MustBeClosed
-  StorageIterator<K> keys();
+  Iterator<K> keys();
 
   /**
    * Returns an iterator over the map values in lexicographical order of <em>keys</em>.
    *
-   * <p>The iterator must be explicitly closed.
-   *
    * <p>Any destructive operation on the same {@link Fork} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
    */
-  @MustBeClosed
-  StorageIterator<V> values();
+  Iterator<V> values();
 
   /**
    * Returns an iterator over the map entries.
    * The entries are ordered by keys in lexicographical order.
    *
-   * <p>The iterator must be explicitly closed.
-   *
    * <p>Any destructive operation on the same {@link Fork} this map uses
    * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
    */
-  @MustBeClosed
-  StorageIterator<MapEntry<K, V>> entries();
+  Iterator<MapEntry<K, V>> entries();
 
   /**
    * Removes all of the key-value pairs from the map.

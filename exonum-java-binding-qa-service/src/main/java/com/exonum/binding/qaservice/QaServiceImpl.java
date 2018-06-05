@@ -17,13 +17,17 @@ import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A simple QA service.
@@ -37,6 +41,8 @@ import javax.annotation.Nullable;
  *     of a user service.
  */
 final class QaServiceImpl extends AbstractService implements QaService {
+
+  private static final Logger logger = LogManager.getLogger(QaService.class);
 
   @VisibleForTesting
   static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
@@ -52,6 +58,15 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   protected Schema createDataSchema(View view) {
     return new QaSchema(view);
+  }
+
+  @Override
+  public List<HashCode> getStateHashes(Snapshot snapshot) {
+    List<HashCode> stateHashes = super.getStateHashes(snapshot);
+    // Log the state hashes, so that the values passed to the native part of the framework
+    // are known.
+    logger.error("state hashes: {}", stateHashes);
+    return stateHashes;
   }
 
   @Override
@@ -112,19 +127,19 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
-    try (View view = node.createSnapshot()) {
-      QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        if (!counters.containsKey(counterId)) {
-          return Optional.empty();
-        }
 
-        String name = counterNames.get(counterId);
-        Long value = counters.get(counterId);
-        return Optional.of(new Counter(name, value));
+    return node.withSnapshot((view) -> {
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      if (!counters.containsKey(counterId)) {
+        return Optional.empty();
       }
-    }
+
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      String name = counterNames.get(counterId);
+      Long value = counters.get(counterId);
+      return Optional.of(new Counter(name, value));
+    });
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.

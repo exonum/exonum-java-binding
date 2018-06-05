@@ -38,15 +38,15 @@ public final class ValidThrowingTx implements Transaction {
   @Override
   public void execute(Fork view) {
     QaSchema schema = new QaSchema(view);
-    try (MapIndex<HashCode, Long> counters = schema.counters();
-         MapIndex<HashCode, String> names = schema.counterNames()) {
-      // Attempt to clear all service indices.
-      counters.clear();
-      names.clear();
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> names = schema.counterNames();
 
-      // Throw an exception. Framework must revert the changes made above.
-      throw new IllegalStateException("#execute of this transaction always throws: " + this);
-    }
+    // Attempt to clear all service indices.
+    counters.clear();
+    names.clear();
+
+    // Throw an exception. Framework must revert the changes made above.
+    throw new IllegalStateException("#execute of this transaction always throws: " + this);
   }
 
   @Override

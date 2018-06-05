@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * A Java service bootstrap loader.
  */
-class ServiceBootstrap {
+final class ServiceBootstrap {
 
   private static final Logger logger = LogManager.getLogger(ServiceBootstrap.class);
 
@@ -54,8 +54,7 @@ class ServiceBootstrap {
       // Instantiate the user service.
       return injector.getInstance(UserServiceAdapter.class);
     } catch (Throwable t) {
-      String message = "Failed to start a service " + serviceModuleName + ":";
-      logger.fatal(message, t);
+      logger.fatal("Failed to start service {}:", serviceModuleName, t);
       throw t;
     }
   }

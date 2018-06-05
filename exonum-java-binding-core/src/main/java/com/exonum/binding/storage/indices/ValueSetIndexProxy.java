@@ -1,17 +1,22 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
+import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 
 /**
@@ -32,14 +37,15 @@ import javax.annotation.Nullable;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, the set <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed set is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this set is destroyed. Subsequent use of the closed set
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this set
  * @see KeySetIndexProxy
  * @see View
  */
-public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
+public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
+    implements Iterable<ValueSetIndexProxy.Entry<E>> {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -51,17 +57,62 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
    * @param serializer a serializer of values
+   * @param <E> the type of values in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
-  public static <E> ValueSetIndexProxy<E> newInstance(
-      String name, View view, Serializer<E> serializer) {
-    return new ValueSetIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+  public static <E> ValueSetIndexProxy<E> newInstance(String name, View view,
+                                                      Serializer<E> serializer) {
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreate(name, viewNativeHandle));
+
+    return new ValueSetIndexProxy<>(setNativeHandle, name, view, s);
   }
 
-  private ValueSetIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
+  /**
+   * Creates a new value set in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param indexId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of set values
+   * @param <E> the type of values in this set
+   * @return a new value set
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> ValueSetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
+                                                           View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(indexId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle));
+
+    return new ValueSetIndexProxy<>(setNativeHandle, groupName, view, s);
+  }
+
+  private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
+    NativeHandle setNativeHandle = new NativeHandle(nativeSetConstructor.getAsLong());
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, setNativeHandle, ValueSetIndexProxy.class,
+        ValueSetIndexProxy::nativeFree);
+    return setNativeHandle;
+  }
+
+  private ValueSetIndexProxy(NativeHandle nativeHandle, String name, View view,
+                             CheckingSerializerDecorator<E> serializer) {
+    super(nativeHandle, name, view);
     this.serializer = serializer;
   }
 
@@ -70,7 +121,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * the set already contains such element.
    *
    * @param e an element to add
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -95,7 +145,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
   /**
    * Returns true if this set contains the specified element.
    *
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @see #containsByHash(HashCode)
    */
@@ -108,7 +157,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * Returns true if this set contains an element with the specified hash.
    *
    * @param elementHash a hash of an element
-   * @throws NullPointerException if the hash is null
    * @throws IllegalStateException if this set is not valid
    */
   public boolean containsByHash(HashCode elementHash) {
@@ -125,13 +173,12 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
    */
-  @MustBeClosed
-  public StorageIterator<HashCode> hashes() {
+  public Iterator<HashCode> hashes() {
     return StorageIterators.createIterator(
         nativeCreateHashIterator(getNativeHandle()),
         this::nativeHashIteratorNext,
         this::nativeHashIteratorFree,
-        this,
+        dbView,
         modCounter,
         HashCode::fromBytes);
   }
@@ -146,13 +193,13 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
    */
-  @MustBeClosed
-  public StorageIterator<Entry<E>> iterator() {
+  @Override
+  public Iterator<Entry<E>> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        this,
+        dbView,
         modCounter,
         (e) -> Entry.fromInternal(e, serializer));
   }
@@ -218,7 +265,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * Removes the element from this set. If it's not in the set, does nothing.
    *
    * @param e an element to remove.
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -233,7 +279,6 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
    * does nothing.
    *
    * @param elementHash the hash of an element to remove.
-   * @throws NullPointerException if the hash is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -242,12 +287,10 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
     nativeRemoveByHash(getNativeHandle(), elementHash.asBytes());
   }
 
-  @Override
-  protected void disposeInternal() {
-    nativeFree(getNativeHandle());
-  }
-
   private static native long nativeCreate(String setName, long viewNativeHandle);
+
+  private static native long nativeCreateInGroup(String familyName, byte[] setId,
+                                                 long viewNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 
@@ -268,5 +311,5 @@ public class ValueSetIndexProxy<E> extends AbstractIndexProxy {
 
   private native void nativeRemoveByHash(long nativeHandle, byte[] elementHash);
 
-  private native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 }

@@ -4,6 +4,7 @@ import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Snapshot;
+import java.util.function.Function;
 
 /**
  * An Exonum node context. Allows to add transactions to Exonum network
@@ -28,15 +29,13 @@ public interface Node {
       throws InvalidTransactionException, InternalServerError;
 
   /**
-   * Creates a new snapshot of the current database state.
+   * Performs a given function with a snapshot of the current database state.
    *
-   * <p>The caller is responsible to <strong>close</strong> the snapshot
-   * to destroy the corresponding native objects.
-   *
-   * @return a snapshot of the database state
-   * @see Snapshot
+   * @param snapshotFunction a function to execute
+   * @param <ResultT> a type the function returns
+   * @return the result of applying the given function to the database state
    */
-  Snapshot createSnapshot();
+  <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction);
 
   /**
    * Returns the public key of this node.

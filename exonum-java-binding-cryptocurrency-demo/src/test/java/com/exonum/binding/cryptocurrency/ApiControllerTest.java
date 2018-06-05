@@ -1,6 +1,6 @@
 package com.exonum.binding.cryptocurrency;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.exonum.binding.cryptocurrency.HashUtils.hashUtf8String;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -10,9 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionConverter;
 import com.exonum.binding.cryptocurrency.transactions.TransferTx;
-import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
@@ -83,8 +81,8 @@ public class ApiControllerTest {
             CryptocurrencyTransaction.TRANSFER,
                 new TransferTx(
                     0L,
-                    Hashing.defaultHashFunction().hashString("from", UTF_8),
-                    Hashing.defaultHashFunction().hashString("to", UTF_8),
+                    hashUtf8String("from"),
+                    hashUtf8String("to"),
                     40L));
 
     int port = httpServer.actualPort();

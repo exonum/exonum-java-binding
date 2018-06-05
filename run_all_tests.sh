@@ -19,5 +19,5 @@ mvn install \
   --activate-profiles ci-build \
   -Drust.compiler.version="stable"
 
-# Run native integration tests that require a JVM
-./run_native_integration_tests.sh
+# Run native integration tests that require a JVM.
+./run_native_integration_tests.sh --skip-compile

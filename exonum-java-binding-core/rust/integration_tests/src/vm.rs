@@ -5,6 +5,11 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+/// Kibibyte
+pub const KIB: usize = 1024;
+/// Mebibyte
+pub const MIB: usize = KIB * KIB;
+
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
@@ -43,6 +48,19 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     let jvm_args = jvm_args_builder.build().unwrap_or_else(
         |e| panic!("{:#?}", e),
     );
+
+    JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
+}
+
+/// Creates a configured `JavaVM` for tests with the limited size of the heap.
+pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
+    let jvm_args = InitArgsBuilder::new()
+        .version(JNIVersion::V8)
+        .option(&get_libpath_option())
+        .option("-Xdebug")
+        .option(&format!("-Xmx{}m", memory_limit_mib))
+        .build()
+        .unwrap_or_else(|e| panic!("{:#?}", e));
 
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }

@@ -65,9 +65,8 @@ final class PutValueTransaction extends AbstractTransaction {
   @Override
   public void execute(Fork view) {
     TestSchema schema = schemaFactory.from(view);
-    try (ProofMapIndexProxy<HashCode, String> map = schema.testMap()) {
-      map.put(getKey(), value);
-    }
+    ProofMapIndexProxy<HashCode, String> map = schema.testMap();
+    map.put(getKey(), value);
   }
 
   private HashCode getKey() {

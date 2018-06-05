@@ -43,10 +43,9 @@ public final class TestService extends AbstractService {
   @Override
   public Optional<String> initialize(Fork fork) {
     TestSchema schema = createDataSchema(fork);
-    try (ProofMapIndexProxy<HashCode, String> testMap = schema.testMap()) {
-      testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
-      return Optional.of(INITIAL_CONFIGURATION);
-    }
+    ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
+    testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
+    return Optional.of(INITIAL_CONFIGURATION);
   }
 
   @Override

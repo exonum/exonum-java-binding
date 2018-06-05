@@ -6,6 +6,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
@@ -23,16 +25,17 @@ import javax.annotation.Nullable;
 public class UserServiceAdapter {
 
   private final Service service;
-
   private final Server server;
+  private final ViewFactory viewFactory;
 
   @Nullable
   private NodeProxy node;
 
   @Inject
-  public UserServiceAdapter(Service service, Server server) {
+  public UserServiceAdapter(Service service, Server server, ViewFactory viewFactory) {
     this.service = checkNotNull(service, "service");
     this.server = checkNotNull(server, "server");
+    this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
   public short getId() {
@@ -66,7 +69,7 @@ public class UserServiceAdapter {
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
         message.getMessageType());  // todo: consider moving this check to the native code?
-    return new UserTransactionAdapter(transaction);
+    return new UserTransactionAdapter(transaction, viewFactory);
   }
 
   /**
@@ -80,20 +83,16 @@ public class UserServiceAdapter {
    */
   // todo: if the native code is better of with a flattened array, change the signature
   public byte[][] getStateHashes(long snapshotHandle) {
-    // fixme: Although this code and #initialize below close the snapshot proxy,
-    // making it impossible to create new indices, a user may still have live references
-    // to the indices created during the method execution (e.g., a ProofMapIndex).
-    // Isn't it problematic (= actually, unsafe) if a user tries to use an index
-    // when the corresponding snapshot is already destroyed?
-    // Maybe we shall finally introduce an implicit graph of 'child' native proxies and
-    // check that the children of a proxy are 'live' each time a native object is used
-    // (e.g., ANP#getNativeHandle)?
     assert snapshotHandle != 0;
-    try (Snapshot snapshot = new Snapshot(snapshotHandle, false)) {
+
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
+      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
       List<HashCode> stateHashes = service.getStateHashes(snapshot);
       return stateHashes.stream()
           .map(HashCode::asBytes)
           .toArray(byte[][]::new);
+    } catch (CloseFailuresException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -108,9 +107,12 @@ public class UserServiceAdapter {
    */
   public @Nullable String initialize(long forkHandle) {
     assert forkHandle != 0;
-    try (Fork fork = new Fork(forkHandle, false)) {
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
+      Fork fork = viewFactory.createFork(forkHandle, cleaner);
       return service.initialize(fork)
           .orElse(null);
+    } catch (CloseFailuresException e) {
+      throw new RuntimeException(e);
     }
   }
 

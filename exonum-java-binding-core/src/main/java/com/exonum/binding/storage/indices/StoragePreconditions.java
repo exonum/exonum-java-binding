@@ -25,6 +25,19 @@ final class StoragePreconditions {
   }
 
   /**
+   * Checks that the passed byte array is a valid identifier in a collection group.
+   * @param indexId an index identifier within a group
+   * @return an unmodified index id if it is valid
+   * @throws NullPointerException if the indexId is null
+   * @throws IllegalArgumentException if the indexId has zero length
+   */
+  @CanIgnoreReturnValue
+  static byte[] checkIdInGroup(byte[] indexId) {
+    checkArgument(indexId.length > 0, "index identifier must not be empty");
+    return indexId;
+  }
+
+  /**
    * Checks that a key is valid.
    *
    * @param key a storage key.
