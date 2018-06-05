@@ -3,6 +3,7 @@ package com.exonum.binding.cryptocurrency;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.crypto.PublicKeySerializer;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;

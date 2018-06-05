@@ -3,11 +3,12 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 
 import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.crypto.PublicKeySerializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
-import com.exonum.binding.cryptocurrency.PublicKeySerializer;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.cryptocurrency.transactions.converters.TransactionMessageConverter;
 import com.exonum.binding.messages.BinaryMessage;
@@ -25,15 +26,17 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
   static final long DEFAULT_BALANCE = 100L;
 
-  private final PublicKey publicKey;
+  private final PublicKey ownerPublicKey;
 
   /**
    * Creates a new wallet creation transaction with given name.
    */
-  public CreateWalletTx(PublicKey publicKey) {
+  public CreateWalletTx(PublicKey ownerPublicKey) {
     super(CryptocurrencyService.ID, ID);
-    checkArgument(publicKey.toBytes().length > 0, "Public key must not be empty");
-    this.publicKey = publicKey;
+    checkArgument(
+        ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
+        "Public key must have correct size");
+    this.ownerPublicKey = ownerPublicKey;
   }
 
   static TransactionMessageConverter<CreateWalletTx> converter() {
@@ -42,7 +45,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
   @Override
   public boolean isValid() {
-    return publicKey.toBytes().length > 0;
+    return true;
   }
 
   @Override
@@ -50,13 +53,13 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-    if (wallets.containsKey(publicKey)) {
+    if (wallets.containsKey(ownerPublicKey)) {
       return;
     }
 
-    Wallet wallet = new Wallet(publicKey, DEFAULT_BALANCE);
+    Wallet wallet = new Wallet(DEFAULT_BALANCE);
 
-    wallets.put(publicKey, wallet);
+    wallets.put(ownerPublicKey, wallet);
   }
 
   @Override
@@ -80,12 +83,12 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     CreateWalletTx that = (CreateWalletTx) o;
     return service_id == that.service_id
         && message_id == that.message_id
-        && Objects.equal(publicKey, that.publicKey);
+        && Objects.equal(ownerPublicKey, that.ownerPublicKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(service_id, message_id, publicKey);
+    return Objects.hashCode(service_id, message_id, ownerPublicKey);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {
@@ -99,7 +102,7 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     }
 
     private static ByteBuffer serialize(CreateWalletTx tx) {
-      byte[] nameBytes = PublicKeySerializer.INSTANCE.toBytes(tx.publicKey);
+      byte[] nameBytes = PublicKeySerializer.INSTANCE.toBytes(tx.ownerPublicKey);
       return ByteBuffer.wrap(nameBytes);
     }
 

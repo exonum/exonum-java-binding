@@ -1,6 +1,5 @@
-package com.exonum.binding.cryptocurrency;
+package com.exonum.binding.crypto;
 
-import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.storage.serialization.Serializer;
 
 public enum PublicKeySerializer implements Serializer<PublicKey> {

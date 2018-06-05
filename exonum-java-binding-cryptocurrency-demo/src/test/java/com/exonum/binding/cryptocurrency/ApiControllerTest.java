@@ -1,5 +1,6 @@
 package com.exonum.binding.cryptocurrency;
 
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -7,8 +8,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.crypto.CryptoFunction;
-import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
@@ -27,6 +26,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.WebClient;
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
@@ -39,9 +39,15 @@ public class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
-  @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
+  private static final PublicKey fromOwnerKey =
+      PublicKey.fromBytes(
+          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "a")).getBytes());
 
-  private CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
+  private static final PublicKey toOwnerKey =
+      PublicKey.fromBytes(
+          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "b")).getBytes());
+
+  @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
 
   CryptocurrencyService service;
 
@@ -82,12 +88,12 @@ public class ApiControllerTest {
     Map<CryptocurrencyTransaction, Transaction> transactionTemplates =
         ImmutableMap.of(
             CryptocurrencyTransaction.CREATE_WALLET,
-                new CreateWalletTx(cryptoFunction.generateKeyPair().getPublicKey()),
+                new CreateWalletTx(fromOwnerKey),
             CryptocurrencyTransaction.TRANSFER,
                 new TransferTx(
                     0L,
-                    cryptoFunction.generateKeyPair().getPublicKey(),
-                    cryptoFunction.generateKeyPair().getPublicKey(),
+                    fromOwnerKey,
+                    toOwnerKey,
                     40L));
 
     int port = httpServer.actualPort();
@@ -134,7 +140,7 @@ public class ApiControllerTest {
   @Test
   public void serverErrorOnError(TestContext context) throws Exception {
     int port = httpServer.actualPort();
-    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
+    PublicKey publicKey = fromOwnerKey;
     Transaction tx = new CreateWalletTx(publicKey);
     String txMessageJson = tx.info();
 

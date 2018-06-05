@@ -1,11 +1,10 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.crypto.CryptoFunction;
-import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -22,6 +21,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import java.util.Collections;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
@@ -31,13 +31,17 @@ public class TransferTxTest {
     LibraryLoader.load();
   }
 
-  private CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
+  private PublicKey fromWallet =
+      PublicKey.fromBytes(
+          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "a")).getBytes());
+
+  private PublicKey toWallet =
+      PublicKey.fromBytes(
+          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "b")).getBytes());
 
   @Test
   public void isValid() {
     long seed = 1L;
-    PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
-    PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
     long sum = 50L;
 
     TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
@@ -52,9 +56,7 @@ public class TransferTxTest {
       Fork view = db.createFork(cleaner);
       // Create source and target wallets with the given initial values
       long initialValue = 100L;
-      PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
       createWallet(view, fromWallet, initialValue);
-      PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
       createWallet(view, toWallet, initialValue);
 
       // Create and execute the transaction
@@ -80,11 +82,9 @@ public class TransferTxTest {
       Fork view = db.createFork(cleaner);
       // Create source wallet with the given initial value
       long initialValue = 50L;
-      PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
       createWallet(view, fromWallet, initialValue);
 
       long seed = 1L;
-      PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
       long transferValue = 50L;
       TransferTx tx = new TransferTx(seed, fromWallet, toWallet, transferValue);
       // Execute the transaction that attempts to transfer to an unknown wallet
@@ -103,8 +103,6 @@ public class TransferTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to transfer from unknown wallet
-      PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
-      PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
       long initialValue = 100L;
       createWallet(view, toWallet, initialValue);
       long transferValue = 50L;
@@ -122,8 +120,6 @@ public class TransferTxTest {
   @Test
   public void converterRoundtrip() {
     long seed = 0L;
-    PublicKey fromWallet = cryptoFunction.generateKeyPair().getPublicKey();
-    PublicKey toWallet = cryptoFunction.generateKeyPair().getPublicKey();
     long sum = 50L;
 
     TransferTx tx = new TransferTx(seed, fromWallet, toWallet, sum);
@@ -136,8 +132,7 @@ public class TransferTxTest {
   @Test
   public void info() {
     long seed = Long.MAX_VALUE - 1L;
-    PublicKey walletId = cryptoFunction.generateKeyPair().getPublicKey();
-    TransferTx tx = new TransferTx(seed, walletId, walletId, 50L);
+    TransferTx tx = new TransferTx(seed, fromWallet, toWallet, 50L);
 
     String info = tx.info();
 
@@ -160,6 +155,6 @@ public class TransferTxTest {
   private void createWallet(Fork view, PublicKey publicKey, Long initialValue) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-    wallets.put(publicKey, new Wallet(publicKey, initialValue));
+    wallets.put(publicKey, new Wallet(initialValue));
   }
 }

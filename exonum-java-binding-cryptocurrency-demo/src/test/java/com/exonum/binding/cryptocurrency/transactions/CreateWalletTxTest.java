@@ -1,12 +1,11 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTx.DEFAULT_BALANCE;
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.crypto.CryptoFunction;
-import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
@@ -18,6 +17,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
+import java.util.Collections;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,14 +29,14 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
+  private PublicKey publicKey =
+      PublicKey.fromBytes(
+          String.join("", Collections.nCopies(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES, "a")).getBytes());
 
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void isValidNonEmptyName() {
-    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
-
     CreateWalletTx tx = new CreateWalletTx(publicKey);
 
     assertTrue(tx.isValid());
@@ -44,17 +44,15 @@ public class CreateWalletTxTest {
 
   @Test
   public void isValidEmptyName() {
-    PublicKey publicKey = PublicKey.fromBytes(new byte[0]);
+    PublicKey publicKey = PublicKey.fromBytes(new byte[1]);
 
-    expectedException.expectMessage("Public key must not be empty");
+    expectedException.expectMessage("Public key must have correct size");
     expectedException.expect(IllegalArgumentException.class);
     new CreateWalletTx(publicKey);
   }
 
   @Test
   public void executeCreateWalletTx() throws CloseFailuresException {
-    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
-
     CreateWalletTx tx = new CreateWalletTx(publicKey);
 
     try (Database db = MemoryDb.newInstance();
@@ -65,10 +63,8 @@ public class CreateWalletTxTest {
       // Check that entries have been added.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      PublicKey walletId = PublicKey.fromBytes(publicKey.toBytes());
-      
-      assertThat(wallets.get(walletId).getPublicKey(), equalTo(publicKey));
-      assertThat(wallets.get(walletId).getBalance(), equalTo(DEFAULT_BALANCE));
+
+      assertThat(wallets.get(publicKey).getBalance(), equalTo(DEFAULT_BALANCE));
     }
   }
 
@@ -77,24 +73,22 @@ public class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
       Long value = DEFAULT_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(publicKey, new Wallet(publicKey, value));
+        wallets.put(publicKey, new Wallet(value));
       }
 
-      // Execute the transaction, that has the same name.
+      // Execute the transaction, that has the same owner key.
       CreateWalletTx tx = new CreateWalletTx(publicKey);
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(publicKey).getPublicKey(), equalTo(publicKey));
         assertThat(wallets.get(publicKey).getBalance(), equalTo(value));
       }
     }
@@ -102,8 +96,6 @@ public class CreateWalletTxTest {
 
   @Test
   public void info() {
-    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
-
     CreateWalletTx tx = new CreateWalletTx(publicKey);
 
     String info = tx.info();

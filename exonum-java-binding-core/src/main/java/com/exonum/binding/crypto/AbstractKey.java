@@ -1,5 +1,6 @@
 package com.exonum.binding.crypto;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.abstractj.kalium.encoders.Encoder.HEX;
 
 import com.google.common.base.Objects;
@@ -13,6 +14,7 @@ public abstract class AbstractKey {
   private final byte[] rawKey;
 
   AbstractKey(byte[] rawKey) {
+    checkArgument(rawKey.length > 0, "Key must not be empty");
     this.rawKey = rawKey;
   }
 
@@ -30,21 +32,28 @@ public abstract class AbstractKey {
     return rawKey;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    AbstractKey that = (AbstractKey) o;
-    return Arrays.equals(rawKey, that.rawKey);
+  /**
+   * Returns the length of this key.
+   */
+  public int size() {
+    return rawKey.length;
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hashCode((Object) rawKey);
+  public final boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o instanceof AbstractKey) {
+      AbstractKey that = (AbstractKey) o;
+      return Arrays.equals(rawKey, that.rawKey);
+    }
+    return false;
+  }
+
+  @Override
+  public final int hashCode() {
+    return Arrays.hashCode(rawKey);
   }
 
   @Override
