@@ -4,10 +4,5 @@ option java_package = "com.exonum.binding.cryptocurrency";
 option java_outer_classname = "WalletProtos";
 
 message Wallet {
-    PublicKey publicKey = 1;
     int64 balance = 2;
-}
-
-message PublicKey {
-    bytes rawKey = 1;
 }
