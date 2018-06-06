@@ -106,10 +106,11 @@ impl Service for ServiceProxy {
             // [https://jira.bf.local/browse/ECR-944]
             Ok(match check_error_on_exception(env, res) {
                 Ok(java_transaction) => {
-                    let java_transaction = env.auto_local(java_transaction.l()?);
-                    let java_transaction = env.new_global_ref(java_transaction.as_obj())?;
-                    let java_transaction_proxy =
-                        TransactionProxy::from_global_ref(self.exec.clone(), java_transaction, raw);
+                    let java_transaction_proxy = TransactionProxy::from_global_ref(
+                        self.exec.clone(),
+                        env.new_global_ref(java_transaction.l()?)?,
+                        raw,
+                    );
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
                 Err(error_message) => Err(MessageError::Basic(error_message.into())),

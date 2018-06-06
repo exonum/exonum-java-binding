@@ -28,7 +28,7 @@ impl ServiceMockBuilder {
                 format!("()L{};", SERVICE_MOCK_BUILDER_CLASS),
                 &[],
             )?;
-            env.new_global_ref(env.auto_local(value.l()?).as_obj())
+            env.new_global_ref(value.l()?)
         }));
         ServiceMockBuilder { exec, builder }
             .id(SERVICE_DEFAULT_ID)
@@ -161,10 +161,7 @@ impl ServiceMockBuilder {
                 format!("()L{};", SERVICE_ADAPTER_CLASS),
                 &[],
             )?;
-            Ok((
-                self.exec,
-                env.new_global_ref(env.auto_local(value.l()?).as_obj())?,
-            ))
+            Ok((self.exec, env.new_global_ref(value.l()?)?))
         }));
         ServiceProxy::from_global_ref(executor, service)
     }
