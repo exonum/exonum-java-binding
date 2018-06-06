@@ -10,6 +10,7 @@ import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
+import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
@@ -101,6 +102,15 @@ public class CreateWalletTxTest {
     BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
     assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
     assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
+  }
+
+  @Test
+  public void converterRoundtrip() {
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
+    BinaryMessage message = CreateWalletTx.converter().toMessage(tx);
+    CreateWalletTx txFromMessage = CreateWalletTx.converter().fromMessage(message);
+
+    assertThat(txFromMessage, equalTo(tx));
   }
 
   @Test

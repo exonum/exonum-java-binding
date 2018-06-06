@@ -1,7 +1,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.crypto.PublicKey;
@@ -10,23 +9,19 @@ import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.cryptocurrency.transactions.converters.TransactionMessageConverter;
-import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /** A transaction that transfers cryptocurrency between two wallets. */
 public final class TransferTx extends BaseTx implements Transaction {
-
-  @VisibleForTesting
-  static final int BODY_SIZE = Long.BYTES * 2 + Hashing.DEFAULT_HASH_SIZE_BYTES * 2;
 
   private static final Serializer<PublicKey> publicKeySerializer = PublicKeySerializer.INSTANCE;
 
@@ -110,35 +105,49 @@ public final class TransferTx extends BaseTx implements Transaction {
     @Override
     public TransferTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
-      checkMessageSize(txMessage, BODY_SIZE);
 
-      ByteBuffer buf = txMessage.getBody().order(ByteOrder.LITTLE_ENDIAN);
-      assert buf.remaining() == BODY_SIZE;
+      ByteBuffer buffer = txMessage.getBody();
+      int numBytes = buffer.remaining();
+      byte[] body = new byte[numBytes];
+      buffer.get(body);
 
-      long seed = buf.getLong();
-
-      byte[] fromHash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
-      buf.get(fromHash);
-      PublicKey fromWallet = publicKeySerializer.fromBytes(fromHash);
-      byte[] toHash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
-      buf.get(toHash);
-      PublicKey toWallet = publicKeySerializer.fromBytes(toHash);
-      long sum = buf.getLong();
-      return new TransferTx(seed, fromWallet, toWallet, sum);
+      TransferTx transferTx;
+      try {
+        TransferTxProtos.TransferTx copiedTransferTxProtos =
+            TransferTxProtos.TransferTx.parseFrom(body);
+        long seed = copiedTransferTxProtos.getSeed();
+        PublicKey fromWallet =
+            PublicKey.fromBytes((copiedTransferTxProtos.getFromWallet().getRawKey().toByteArray()));
+        PublicKey toWallet =
+            PublicKey.fromBytes((copiedTransferTxProtos.getToWallet().getRawKey().toByteArray()));
+        long sum = copiedTransferTxProtos.getSum();
+        transferTx = new TransferTx(seed, fromWallet, toWallet, sum);
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalArgumentException(
+            "Unable to instantiate TransferTxProtos.TransferTx instance from provided binary data",
+            e);
+      }
+      return transferTx;
     }
 
     @Override
     public BinaryMessage toMessage(TransferTx transaction) {
-      ByteBuffer body =
-          ByteBuffer.allocate(BODY_SIZE)
-              .order(ByteOrder.LITTLE_ENDIAN)
-              .putLong(transaction.seed)
-              .put(publicKeySerializer.toBytes(transaction.fromWallet))
-              .put(publicKeySerializer.toBytes(transaction.toWallet))
-              .putLong(transaction.sum);
-      body.rewind();
+      PublicKeyProtos.PublicKey fromWallet = PublicKeyProtos.PublicKey.newBuilder()
+          .setRawKey(ByteString.copyFrom(publicKeySerializer.toBytes(transaction.fromWallet)))
+          .build();
+      PublicKeyProtos.PublicKey toWallet = PublicKeyProtos.PublicKey.newBuilder()
+          .setRawKey(ByteString.copyFrom(publicKeySerializer.toBytes(transaction.toWallet)))
+          .build();
+      TransferTxProtos.TransferTx transferTx = TransferTxProtos.TransferTx.newBuilder()
+          .setSeed(transaction.seed)
+          .setFromWallet(fromWallet)
+          .setToWallet(toWallet)
+          .setSum(transaction.sum)
+          .build();
 
-      return newCryptocurrencyTransactionBuilder(ID).setBody(body).buildRaw();
+      ByteBuffer buffer = ByteBuffer.wrap(transferTx.toByteArray());
+
+      return newCryptocurrencyTransactionBuilder(ID).setBody(buffer).buildRaw();
     }
   }
 }

@@ -18,6 +18,8 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.base.Objects;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
 
 /** A transaction that creates a new named wallet with default balance. */
@@ -97,31 +99,44 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {
     INSTANCE;
 
-    private static byte[] getRemainingBytes(ByteBuffer buffer) {
-      int numBytes = buffer.remaining();
-      byte[] dst = new byte[numBytes];
-      buffer.get(dst);
-      return dst;
-    }
-
-    private static ByteBuffer serialize(CreateWalletTx tx) {
-      byte[] nameBytes = publicKeySerializer.toBytes(tx.ownerPublicKey);
-      return ByteBuffer.wrap(nameBytes);
-    }
-
     @Override
     public CreateWalletTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
-      ByteBuffer body = txMessage.getBody();
-      PublicKey publicKey = publicKeySerializer.fromBytes(getRemainingBytes(body));
-      return new CreateWalletTx(publicKey);
+
+      ByteBuffer buffer = txMessage.getBody();
+      int numBytes = buffer.remaining();
+      byte[] body = new byte[numBytes];
+      buffer.get(body);
+
+      CreateWalletTx createWalletTx;
+      try {
+        CreateWalletTxProtos.CreateWalletTx copiedCreateWalletTxProtos =
+            CreateWalletTxProtos.CreateWalletTx.parseFrom(body);
+        PublicKey ownerPublicKey =
+            PublicKey.fromBytes(
+                (copiedCreateWalletTxProtos.getOwnerPublicKey().getRawKey().toByteArray()));
+        createWalletTx = new CreateWalletTx(ownerPublicKey);
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalArgumentException(
+            "Unable to instantiate CreateWalletTxProtos.CreateWalletTx instance from provided"
+                + " binary data", e);
+      }
+      return createWalletTx;
     }
 
     @Override
     public BinaryMessage toMessage(CreateWalletTx transaction) {
-      return newCryptocurrencyTransactionBuilder(ID)
-          .setBody(serialize(transaction))
-          .buildRaw();
+      PublicKeyProtos.PublicKey ownerPublicKey = PublicKeyProtos.PublicKey.newBuilder()
+          .setRawKey(ByteString.copyFrom(publicKeySerializer.toBytes(transaction.ownerPublicKey)))
+          .build();
+      CreateWalletTxProtos.CreateWalletTx createWalletTx =
+          CreateWalletTxProtos.CreateWalletTx.newBuilder()
+              .setOwnerPublicKey(ownerPublicKey)
+              .build();
+
+      ByteBuffer buffer = ByteBuffer.wrap(createWalletTx.toByteArray());
+
+      return newCryptocurrencyTransactionBuilder(ID).setBody(buffer).buildRaw();
     }
   }
 }

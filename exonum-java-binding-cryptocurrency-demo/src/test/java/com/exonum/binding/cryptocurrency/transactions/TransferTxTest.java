@@ -121,7 +121,7 @@ public class TransferTxTest {
     long sum = 50L;
 
     TransferTx tx = new TransferTx(seed, fromOwnerKey, toOwnerKey, sum);
-    BinaryMessage message = tx.getMessage();
+    BinaryMessage message = TransferTx.converter().toMessage(tx);
     TransferTx txFromMessage = TransferTx.converter().fromMessage(message);
 
     assertThat(txFromMessage, equalTo(tx));
