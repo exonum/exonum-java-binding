@@ -9,6 +9,8 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.service.adapters.UserTransactionAdapter;
+import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.storage.database.Snapshot;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
@@ -53,7 +55,9 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
     byte[] data = messageBuffer.array();
     int offset = messageBuffer.arrayOffset();
     int size = messageBuffer.remaining();
-    nativeSubmit(getNativeHandle(), transaction, data, offset, size);
+    nativeSubmit(getNativeHandle(),
+            new UserTransactionAdapter(transaction, ViewProxyFactory.INSTANCE),
+            data, offset, size);
   }
 
   /**
@@ -65,7 +69,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param offset an offset from which the message starts
    * @param size a size of the message in bytes
    */
-  private static native void nativeSubmit(long nodeHandle, Transaction transaction,
+  private static native void nativeSubmit(long nodeHandle, UserTransactionAdapter transaction,
                                           byte[] message, int offset, int size)
       throws InvalidTransactionException, InternalServerError;
 

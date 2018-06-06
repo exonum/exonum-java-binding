@@ -55,7 +55,7 @@ public final class UserServiceAdapterMockBuilder {
 
   public void initialGlobalConfig(String initialGlobalConfig) {
     when(service.initialize(anyLong()))
-        .thenReturn(checkNotNull(initialGlobalConfig));
+        .thenReturn(initialGlobalConfig);
   }
 
   public void initialGlobalConfigThrowing(Class<? extends Throwable> exceptionType) {

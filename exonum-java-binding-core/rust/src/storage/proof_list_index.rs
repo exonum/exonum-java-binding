@@ -1,3 +1,6 @@
+use exonum::crypto::Hash;
+use exonum::storage::{Snapshot, Fork, ProofListIndex};
+use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
 use jni::JNIEnv;
 use jni::errors::Result;
 use jni::objects::{JClass, JObject, JString};
@@ -6,11 +9,8 @@ use jni::sys::{jlong, jint, jbyteArray, jboolean, jobject};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, ProofListIndex};
-use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
-use exonum::crypto::Hash;
+use storage::db::{View, ViewRef, Value};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = ProofListIndex<T, Value>;
 

@@ -1,16 +1,17 @@
 use jni::JNIEnv;
-use jni::errors::Error as JniError;
 
 use std::any::Any;
 use std::thread;
 use std::result;
 use std::error::Error;
 
-type Result<T> = thread::Result<result::Result<T, JniError>>;
+use JniError;
+
+type ExceptionResult<T> = thread::Result<result::Result<T, JniError>>;
 
 // Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 // at the Java side. So this function should be used only for the `panic::catch_unwind` result.
-pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
+pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> T {
     match res {
         Ok(val) => {
             match val {
@@ -34,7 +35,7 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
 }
 
 // Same as `unwrap_exc_or` but returns default value.
-pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: Result<T>) -> T {
+pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) -> T {
     unwrap_exc_or(env, res, T::default())
 }
 
@@ -61,7 +62,7 @@ fn throw(env: &JNIEnv, description: &str) {
 }
 
 // Tries to get meaningful description from panic-error.
-fn any_to_string(any: &Box<Any + Send>) -> String {
+pub fn any_to_string(any: &Box<Any + Send>) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
         s.to_string()
     } else if let Some(s) = any.downcast_ref::<String>() {

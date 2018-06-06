@@ -1,4 +1,4 @@
-// TODO: Should be removed when Transaction proxy is implemented.
+// TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
 #![allow(dead_code)]
 
 use jni::JNIEnv;
@@ -7,8 +7,7 @@ use jni::sys::jlong;
 use std::panic;
 use std::marker::PhantomData;
 
-use super::exception;
-use super::resource_manager;
+use utils::{exception, resource_manager};
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;

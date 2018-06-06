@@ -50,7 +50,7 @@
         <version>1.6.0</version>
         <!-- A configuration shared across multiple executions -->
         <configuration>
-          <executable>cargo</executable>
+          <executable>${project.basedir}/rust/cargo.sh</executable>
           <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>
@@ -169,6 +169,24 @@
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Generates a runtime classpath file of ejb-core.
+           Bound to the default phase (generate-sources). -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <outputFile>${project.build.directory}/ejb-core-classpath.txt</outputFile>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-classpath-file</id>
+            <goals>
+              <goal>build-classpath</goal>
             </goals>
           </execution>
         </executions>
