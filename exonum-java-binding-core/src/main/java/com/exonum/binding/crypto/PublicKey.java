@@ -2,8 +2,6 @@ package com.exonum.binding.crypto;
 
 import static org.abstractj.kalium.encoders.Encoder.HEX;
 
-import java.util.Arrays;
-
 /**
  * Represent a public key in a digital signature system.
  */

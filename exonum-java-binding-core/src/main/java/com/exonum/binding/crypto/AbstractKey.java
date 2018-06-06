@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.abstractj.kalium.encoders.Encoder.HEX;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Represent either a private or public key in a digital signature system.
