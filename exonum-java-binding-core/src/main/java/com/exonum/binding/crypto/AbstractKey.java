@@ -3,7 +3,6 @@ package com.exonum.binding.crypto;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.abstractj.kalium.encoders.Encoder.HEX;
 
-import com.google.common.base.Objects;
 import java.util.Arrays;
 
 /**
