@@ -42,7 +42,6 @@ EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${QA_SERVICE_TXT
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-core/target/classes"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-qa-service/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
-EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
@@ -59,6 +58,16 @@ trap "killall ejb-app" SIGINT SIGTERM EXIT
 # Configure and run nodes
 node_count=$1
 
+header "PREPARE LOG CONFIGS"
+rm -rf logs
+mkdir logs
+for i in $(seq 0 $((node_count -1)))
+do
+    new_log_name="$EJB_APP_DIR/testnet/log4j_$i.xml"
+    log_file_name="$EJB_APP_DIR/logs/log_$i"
+    sed "s@FILENAME@$log_file_name@g" "$EJB_APP_DIR/log4j_template.xml" > "$new_log_name"
+done
+
 header "GENERATE COMMON CONFIG"
 ejb-app generate-template --validators-count $node_count testnet/common.toml
 
@@ -66,8 +75,9 @@ header "GENERATE CONFIG"
 for i in $(seq 0 $((node_count - 1)))
 do
     peer_port=$((5400 + i))
+    log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
     ejb-app generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml --ejb-classpath $EJB_CLASSPATH \
-        --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $EJB_LOG_CONFIG_PATH --ejb-debug true --peer-address 127.0.0.1:$peer_port
+        --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $log_config_path --ejb-debug true --peer-address 127.0.0.1:$peer_port
 done
 
 header "FINALIZE"
