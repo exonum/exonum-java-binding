@@ -85,7 +85,7 @@ impl JavaServiceRuntime {
                 &[module_name.into(), config.port.into()],
             )?
                 .l()?;
-            env.new_global_ref(env.auto_local(service).as_obj())
+            env.new_global_ref(service)
         }));
         ServiceProxy::from_global_ref(executor, service)
     }
