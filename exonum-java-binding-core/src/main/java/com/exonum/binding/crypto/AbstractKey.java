@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.abstractj.kalium.encoders.Encoder.HEX;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represent either a private or public key in a digital signature system.
@@ -39,15 +40,19 @@ public abstract class AbstractKey {
   }
 
   @Override
-  public final boolean equals(Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
     if (o instanceof AbstractKey) {
       AbstractKey that = (AbstractKey) o;
-      return Arrays.equals(rawKey, that.rawKey);
+      return that.canEqual(this) && Arrays.equals(rawKey, that.rawKey);
     }
     return false;
+  }
+
+  public boolean canEqual(Object other) {
+    return (other instanceof AbstractKey);
   }
 
   @Override

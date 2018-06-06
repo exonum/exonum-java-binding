@@ -1,6 +1,5 @@
 package com.exonum.binding.cryptocurrency;
 
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -15,7 +14,6 @@ import com.exonum.binding.cryptocurrency.transactions.TransferTx;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -39,11 +37,9 @@ public class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
-  private static final PublicKey fromOwnerKey =
-      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(0), CRYPTO_SIGN_ED25519_PUBLICKEYBYTES));
+  private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
 
-  private static final PublicKey toOwnerKey =
-      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(1), CRYPTO_SIGN_ED25519_PUBLICKEYBYTES));
+  private static final PublicKey toKey = PredefinedOwnerKeys.secondOwnerKey;
 
   @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
 
@@ -86,12 +82,12 @@ public class ApiControllerTest {
     Map<CryptocurrencyTransaction, Transaction> transactionTemplates =
         ImmutableMap.of(
             CryptocurrencyTransaction.CREATE_WALLET,
-                new CreateWalletTx(fromOwnerKey),
+                new CreateWalletTx(fromKey),
             CryptocurrencyTransaction.TRANSFER,
                 new TransferTx(
                     0L,
-                    fromOwnerKey,
-                    toOwnerKey,
+                    fromKey,
+                    toKey,
                     40L));
 
     int port = httpServer.actualPort();
@@ -138,7 +134,7 @@ public class ApiControllerTest {
   @Test
   public void serverErrorOnError(TestContext context) throws Exception {
     int port = httpServer.actualPort();
-    PublicKey publicKey = fromOwnerKey;
+    PublicKey publicKey = fromKey;
     Transaction tx = new CreateWalletTx(publicKey);
     String txMessageJson = tx.info();
 

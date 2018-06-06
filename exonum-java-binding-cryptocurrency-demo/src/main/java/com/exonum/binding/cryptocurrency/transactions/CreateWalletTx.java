@@ -103,22 +103,19 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     public CreateWalletTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
 
-      ByteBuffer buffer = txMessage.getBody();
-      int numBytes = buffer.remaining();
-      byte[] body = new byte[numBytes];
-      buffer.get(body);
-
       CreateWalletTx createWalletTx;
       try {
-        CreateWalletTxProtos.CreateWalletTx copiedCreateWalletTxProtos =
-            CreateWalletTxProtos.CreateWalletTx.parseFrom(body);
+        ByteBuffer messageBody = txMessage.getBody();
+        TxMessagesProtos.CreateWalletTx copiedTxMessagesProtos =
+            TxMessagesProtos.CreateWalletTx.parseFrom(messageBody);
+
         PublicKey ownerPublicKey =
             PublicKey.fromBytes(
-                (copiedCreateWalletTxProtos.getOwnerPublicKey().getRawKey().toByteArray()));
+                (copiedTxMessagesProtos.getOwnerPublicKey().getRawKey().toByteArray()));
         createWalletTx = new CreateWalletTx(ownerPublicKey);
       } catch (InvalidProtocolBufferException e) {
         throw new IllegalArgumentException(
-            "Unable to instantiate CreateWalletTxProtos.CreateWalletTx instance from provided"
+            "Unable to instantiate TxMessagesProtos.CreateWalletTx instance from provided"
                 + " binary data", e);
       }
       return createWalletTx;
@@ -129,8 +126,8 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
       PublicKeyProtos.PublicKey ownerPublicKey = PublicKeyProtos.PublicKey.newBuilder()
           .setRawKey(ByteString.copyFrom(publicKeySerializer.toBytes(transaction.ownerPublicKey)))
           .build();
-      CreateWalletTxProtos.CreateWalletTx createWalletTx =
-          CreateWalletTxProtos.CreateWalletTx.newBuilder()
+      TxMessagesProtos.CreateWalletTx createWalletTx =
+          TxMessagesProtos.CreateWalletTx.newBuilder()
               .setOwnerPublicKey(ownerPublicKey)
               .build();
 

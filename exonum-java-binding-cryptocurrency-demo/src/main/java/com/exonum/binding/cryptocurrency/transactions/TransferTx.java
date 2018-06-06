@@ -106,25 +106,22 @@ public final class TransferTx extends BaseTx implements Transaction {
     public TransferTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
 
-      ByteBuffer buffer = txMessage.getBody();
-      int numBytes = buffer.remaining();
-      byte[] body = new byte[numBytes];
-      buffer.get(body);
-
       TransferTx transferTx;
       try {
-        TransferTxProtos.TransferTx copiedTransferTxProtos =
-            TransferTxProtos.TransferTx.parseFrom(body);
-        long seed = copiedTransferTxProtos.getSeed();
+        ByteBuffer messageBody = txMessage.getBody();
+        TxMessagesProtos.TransferTx copiedTxMessagesProtos =
+            TxMessagesProtos.TransferTx.parseFrom(messageBody);
+
+        long seed = copiedTxMessagesProtos.getSeed();
         PublicKey fromWallet =
-            PublicKey.fromBytes((copiedTransferTxProtos.getFromWallet().getRawKey().toByteArray()));
+            PublicKey.fromBytes((copiedTxMessagesProtos.getFromWallet().getRawKey().toByteArray()));
         PublicKey toWallet =
-            PublicKey.fromBytes((copiedTransferTxProtos.getToWallet().getRawKey().toByteArray()));
-        long sum = copiedTransferTxProtos.getSum();
+            PublicKey.fromBytes((copiedTxMessagesProtos.getToWallet().getRawKey().toByteArray()));
+        long sum = copiedTxMessagesProtos.getSum();
         transferTx = new TransferTx(seed, fromWallet, toWallet, sum);
       } catch (InvalidProtocolBufferException e) {
         throw new IllegalArgumentException(
-            "Unable to instantiate TransferTxProtos.TransferTx instance from provided binary data",
+            "Unable to instantiate TxMessagesProtos.TransferTx instance from provided binary data",
             e);
       }
       return transferTx;
@@ -138,7 +135,7 @@ public final class TransferTx extends BaseTx implements Transaction {
       PublicKeyProtos.PublicKey toWallet = PublicKeyProtos.PublicKey.newBuilder()
           .setRawKey(ByteString.copyFrom(publicKeySerializer.toBytes(transaction.toWallet)))
           .build();
-      TransferTxProtos.TransferTx transferTx = TransferTxProtos.TransferTx.newBuilder()
+      TxMessagesProtos.TransferTx transferTx = TxMessagesProtos.TransferTx.newBuilder()
           .setSeed(transaction.seed)
           .setFromWallet(fromWallet)
           .setToWallet(toWallet)

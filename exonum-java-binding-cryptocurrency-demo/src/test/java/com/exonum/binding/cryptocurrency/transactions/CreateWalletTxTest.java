@@ -1,7 +1,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTx.DEFAULT_BALANCE;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -9,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
+import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
@@ -29,20 +29,19 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey ownerKey =
-      PublicKey.fromBytes(new byte[CRYPTO_SIGN_ED25519_PUBLICKEYBYTES]);
+  private static final PublicKey ownerKey = PredefinedOwnerKeys.firstOwnerKey;
 
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void isValidNonEmptyName() {
+  public void walletIsValidWithCorrectOwnerKey() {
     CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     assertTrue(tx.isValid());
   }
 
   @Test
-  public void isValidEmptyName() {
+  public void constructorRejectsInvalidSizedKey() {
     PublicKey publicKey = PublicKey.fromBytes(new byte[1]);
 
     expectedException.expectMessage("Public key must have correct size");

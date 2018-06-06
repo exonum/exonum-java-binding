@@ -31,4 +31,21 @@ public final class PrivateKey extends AbstractKey {
   public static PrivateKey fromHexString(String stringKey) {
     return new PrivateKey(HEX.decode(stringKey));
   }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o instanceof PrivateKey) {
+      PrivateKey that = (PrivateKey) o;
+      return that.canEqual(this) && super.equals(that);
+    }
+    return false;
+  }
+
+  @Override
+  public final boolean canEqual(Object other) {
+    return (other instanceof PrivateKey);
+  }
 }
