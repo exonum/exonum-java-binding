@@ -1,6 +1,6 @@
 package com.exonum.binding.messages;
 
-import static com.exonum.binding.messages.Message.BODY_LENGTH_OFFSET;
+import static com.exonum.binding.messages.Message.PAYLOAD_LENGTH_OFFSET;
 import static com.exonum.binding.messages.Message.BODY_OFFSET;
 import static com.exonum.binding.messages.Message.MESSAGE_TYPE_OFFSET;
 import static com.exonum.binding.messages.Message.NET_ID_OFFSET;
@@ -62,7 +62,7 @@ public final class BinaryMessageBuilder {
         .put(VERSION_OFFSET, message.getVersion())
         .putShort(SERVICE_ID_OFFSET, message.getServiceId())
         .putShort(MESSAGE_TYPE_OFFSET, message.getMessageType())
-        .putInt(BODY_LENGTH_OFFSET, message.getBody().remaining());
+        .putInt(PAYLOAD_LENGTH_OFFSET, message.size());
   }
 
   private void putBody(ByteBuffer buffer) {
