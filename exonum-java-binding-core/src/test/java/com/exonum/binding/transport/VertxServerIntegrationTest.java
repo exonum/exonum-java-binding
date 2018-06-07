@@ -95,8 +95,11 @@ public class VertxServerIntegrationTest {
   public void start() throws Exception {
     Vertx wcVertx = null;
     try {
+      // Start a server
       int port = 8080;
       server.start(port);
+
+      // Define a request handler
       Router r = server.createRouter();
       String body = "/s1/foo handler";
       r.get("/foo").handler((rc) -> {
@@ -104,18 +107,24 @@ public class VertxServerIntegrationTest {
       });
       server.mountSubRouter("/s1", r);
 
+      // Create a web client
       wcVertx = Vertx.vertx();
       WebClient client = WebClient.create(wcVertx);
-      // fixme: Async API converted to blocking looks ugly as fuck
-      CompletableFuture<AsyncResult<HttpResponse<Buffer>>> f = new CompletableFuture<>();
+
+      // A future to receive the response to a request below.
+      CompletableFuture<AsyncResult<HttpResponse<Buffer>>> futureResponse =
+          new CompletableFuture<>();
+
+      // Send an asynchronous GET request, that will put the response into the future.
       client.get(port, "localhost", "/s1/foo")
-          .send(f::complete);
+          .send(futureResponse::complete);
 
       int timeout = 3;
-      AsyncResult<HttpResponse<Buffer>> ar = f.get(timeout, TimeUnit.SECONDS);
+      AsyncResult<HttpResponse<Buffer>> ar = futureResponse.get(timeout, TimeUnit.SECONDS);
       assertTrue("Did not receive response in " + timeout + " seconds",
-          f.isDone());
+          futureResponse.isDone());
       if (ar.succeeded()) {
+        // Check the result
         HttpResponse<Buffer> response = ar.result();
 
         assertThat(response.statusCode(), equalTo(200));
