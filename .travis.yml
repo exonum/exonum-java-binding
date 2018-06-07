@@ -6,10 +6,8 @@ sudo: false
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:giskou/librocksdb'
     - sourceline: 'ppa:chris-lea/libsodium'
     packages:
-    - librocksdb
     - libsnappy-dev
     - build-essential
     - libsodium-dev
@@ -23,7 +21,6 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2018-05-26
     - RUST_CLIPPY_VERSION=0.0.205
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
-    - ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
     - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
 
 cache:
