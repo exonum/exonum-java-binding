@@ -84,7 +84,7 @@ public final class MessageReader implements BinaryMessage {
   }
 
   private int bodySize() {
-    return message.getInt(BODY_LENGTH_OFFSET);
+    return message.getInt(PAYLOAD_LENGTH_OFFSET) - HEADER_SIZE - SIGNATURE_SIZE;
   }
 
   /**
