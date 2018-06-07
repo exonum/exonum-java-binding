@@ -4,7 +4,7 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.storage.proofs.map.DbKey;
 
 /**
- * A flat map proof entry, which stands for a node in the corresponding map tree.
+ * An entry in a flat map proof corresponding to a node in the map tree.
  */
 public abstract class MapProofEntry {
 

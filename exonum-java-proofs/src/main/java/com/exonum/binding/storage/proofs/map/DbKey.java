@@ -126,22 +126,24 @@ public final class DbKey implements Comparable<DbKey> {
   }
 
   /**
-   * Given key as a byte array and number if significant bits, returns new branch DbKey.
+   * Creates a new branch database key.
+   * @param keySlice key as a byte array, must be 32-byte long
+   * @param numSignificantBits the number of significant bits in the key (= the prefix size)
+   * @throws IllegalArgumentException if key has invalid length or contains set bits
+   *     after the prefix; if numSignificantBits is not in range [0, 255]
    */
   public static DbKey newBranchKey(byte[] keySlice, int numSignificantBits) {
     checkArgument(keySlice.length == KEY_SIZE);
-    checkArgument(0 <= numSignificantBits && numSignificantBits <= KEY_SIZE_BITS);
+    checkArgument(0 <= numSignificantBits && numSignificantBits < KEY_SIZE_BITS);
     checkBranchKeySlice(keySlice, numSignificantBits);
     return new DbKey(Type.BRANCH, keySlice, numSignificantBits);
   }
 
   private static void checkBranchKeySlice(byte[] keySlice, int numSignificantBits) {
-    if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
-      BitSet keyBits = BitSet.valueOf(keySlice);
-      checkArgument(keyBits.length() <= numSignificantBits,
-          "Branch key slice contains set bits after its numSignificantBits (%s): "
-              + "length=%s, keyBits=%s", numSignificantBits, keyBits.length(), keyBits);
-    }
+    BitSet keyBits = BitSet.valueOf(keySlice);
+    checkArgument(keyBits.length() <= numSignificantBits,
+        "Branch key slice contains set bits after its numSignificantBits (%s): "
+            + "length=%s, keyBits=%s", numSignificantBits, keyBits.length(), keyBits);
   }
 
   /**
@@ -191,13 +193,15 @@ public final class DbKey implements Comparable<DbKey> {
     int minPrefixSize = Math.min(this.numSignificantBits, other.numSignificantBits);
     int commonPrefixSize;
 
-    // firstSetBitIndex equals -1 when either both keys are equal or one is a prefix of another
+    // firstSetBitIndex equals -1 when either both keys are equal or one is a prefix of another with
+    // trailing zeros in their prefixes
     if (firstSetBitIndex == -1) {
-      return new DbKey(
-          Type.BRANCH, this.keySlice, Math.min(this.numSignificantBits, other.numSignificantBits));
-    } else {
-      commonPrefixSize = Math.min(firstSetBitIndex, minPrefixSize);
+      commonPrefixSize = Math.min(this.numSignificantBits, other.numSignificantBits);
+      byte[] resultingByteArray =
+          this.keyBits().getKeyBits().get(0, commonPrefixSize).toByteArray();
+      return new DbKey(Type.BRANCH, resultingByteArray, commonPrefixSize);
     }
+    commonPrefixSize = Math.min(firstSetBitIndex, minPrefixSize);
     byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, firstSetBitIndex).toByteArray();
     byte[] newArray = new byte[DbKey.KEY_SIZE];
     System.arraycopy(resultingByteArray, 0, newArray, 0, resultingByteArray.length);
@@ -213,10 +217,13 @@ public final class DbKey implements Comparable<DbKey> {
       return false;
     }
     DbKey dbKey = (DbKey) o;
-    return numSignificantBits == dbKey.numSignificantBits
-        && Arrays.equals(rawDbKey, dbKey.rawDbKey)
-        && nodeType == dbKey.nodeType
-        && Arrays.equals(keySlice, dbKey.keySlice);
+    boolean fullRawKeysEqual = Arrays.equals(rawDbKey, dbKey.rawDbKey);
+    if (fullRawKeysEqual) {
+      assert numSignificantBits == dbKey.numSignificantBits
+          && Arrays.equals(keySlice, dbKey.keySlice)
+          && nodeType == dbKey.nodeType;
+    }
+    return fullRawKeysEqual;
   }
 
   @Override
@@ -224,6 +231,14 @@ public final class DbKey implements Comparable<DbKey> {
     return Objects.hashCode(rawDbKey, nodeType, keySlice, numSignificantBits);
   }
 
+  /**
+   * The following algorithm is used for comparison:
+   * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
+   * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
+   * these indexes indicates the greater key.
+   * If there is no such bit, then lengths of these keys are compared and the key with greater
+   * length is considered a greater key.
+   */
   @Override
   public int compareTo(DbKey other) {
     if (other.equals(this)) {

@@ -3,9 +3,9 @@ package com.exonum.binding.storage.proofs.map.flat;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.proofs.map.DbKey;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -15,41 +15,39 @@ import javax.annotation.Nullable;
 public class CheckedFlatMapProof implements CheckedMapProof {
 
   @Nullable
-  private List<MapProofEntryLeaf> proofList;
+  private List<CheckedMapProofEntry> entryList;
 
   @Nullable
   private HashCode rootHash;
 
   private ProofStatus status;
 
-  CheckedFlatMapProof(ProofStatus status) {
-    checkState(
-        status != ProofStatus.CORRECT,
-        "In case of valid status root hash and proof list should be passed");
-    this.status = status;
-  }
-
-  CheckedFlatMapProof(ProofStatus status, HashCode rootHash, List<MapProofEntryLeaf> proofList) {
-    checkState(
-        status == ProofStatus.CORRECT,
-        "In case of invalid status root hash and proof list should not be passed");
+  private CheckedFlatMapProof(
+      ProofStatus status, HashCode rootHash, List<CheckedMapProofEntry> entryList) {
     this.status = status;
     this.rootHash = rootHash;
-    this.proofList = new ArrayList<>(proofList);
+    this.entryList = new ArrayList<>(entryList);
+  }
+
+  static CheckedFlatMapProof correct(HashCode rootHash, List<CheckedMapProofEntry> proofList) {
+    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, proofList);
+  }
+
+  static CheckedFlatMapProof invalid(ProofStatus status) {
+    return new CheckedFlatMapProof(status, HashCode.fromInt(1), Collections.emptyList());
   }
 
   @Override
-  public List<MapProofEntryLeaf> getEntries() {
-    isValid();
-    return proofList;
+  public List<CheckedMapProofEntry> getEntries() {
+    checkValid();
+    return entryList;
   }
 
   @Override
   public boolean containsKey(byte[] key) {
-    isValid();
-    for (MapProofEntry entry: proofList) {
-      DbKey entryKey = entry.getDbKey();
-      if (entry instanceof MapProofEntryLeaf && Arrays.equals(entryKey.getKeySlice(), key)) {
+    checkValid();
+    for (CheckedMapProofEntry entry: entryList) {
+      if (Arrays.equals(entry.getKey(), key)) {
         return true;
       }
     }
@@ -58,18 +56,16 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   @Override
   public HashCode getMerkleRoot() {
-    isValid();
-    checkState(rootHash != null, "Root hash wasn't computed");
+    checkValid();
     return rootHash;
   }
 
   @Override
   public byte[] get(byte[] key) {
-    isValid();
-    for (MapProofEntry entry: proofList) {
-      DbKey entryKey = entry.getDbKey();
-      if (entry instanceof MapProofEntryLeaf && Arrays.equals(entryKey.getKeySlice(), key)) {
-        return ((MapProofEntryLeaf) entry).getValue();
+    checkValid();
+    for (CheckedMapProofEntry entry: entryList) {
+      if (Arrays.equals(entry.getKey(), key)) {
+        return entry.getValue();
       }
     }
     return null;
@@ -80,7 +76,12 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     return status;
   }
 
-  private void isValid() {
+  @Override
+  public boolean compareWithRootHash(HashCode expectedRootHash) {
+    return status == ProofStatus.CORRECT && rootHash.equals(expectedRootHash);
+  }
+
+  private void checkValid() {
     checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
   }
 }

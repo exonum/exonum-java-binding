@@ -12,7 +12,6 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
-import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,7 @@ public class CheckedFlatMapProofTest {
     byte[] thirdKey = createPrefixed(bytes(0b1111101), DbKey.KEY_SIZE);
 
     DbKey valueKey = DbKey.newLeafKey(secondKey);
-    MapProofEntryLeaf leaf = createLeafMapEntry(secondKey, VALUE);
+    MapProofEntryLeaf leaf = createLeafMapEntry(valueKey.getKeySlice(), VALUE);
     List<MapProofEntry> entries =
         Arrays.asList(
             createBranchMapEntry(firstKey),
@@ -40,7 +39,9 @@ public class CheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(entries, equalTo(uncheckedFlatMapProof.getProofList()));
-    assertThat(Collections.singletonList(leaf), equalTo(checkedMapProof.getEntries()));
+
+    CheckedMapProofEntry checkedEntry = new CheckedMapProofEntry(valueKey.getKeySlice(), VALUE);
+    assertThat(Collections.singletonList(checkedEntry), equalTo(checkedMapProof.getEntries()));
     assertTrue(checkedMapProof.containsKey(valueKey.getKeySlice()));
     assertThat(VALUE, equalTo(checkedMapProof.get(valueKey.getKeySlice())));
   }
@@ -54,12 +55,15 @@ public class CheckedFlatMapProofTest {
         .putObject(valueKey, dbKeyFunnel())
         .putObject(HASH_FUNCTION.hashBytes(VALUE), hashCodeFunnel())
         .hash();
-    List<MapProofEntry> entries = Collections.singletonList(createLeafMapEntry(key, VALUE));
-    UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries);
+    List<MapProofEntry> entries =
+        Collections.singletonList(createLeafMapEntry(valueKey.getKeySlice(), VALUE));
+    UncheckedMapProof uncheckedFlatMapProof = new UncheckedFlatMapProof(entries);
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+
     assertThat(expectedRootHash, equalTo(checkedMapProof.getMerkleRoot()));
-    assertThat(entries, equalTo(checkedMapProof.getEntries()));
+
+    CheckedMapProofEntry checkedEntry = new CheckedMapProofEntry(valueKey.getKeySlice(), VALUE);
+    assertThat(Collections.singletonList(checkedEntry), equalTo(checkedMapProof.getEntries()));
     assertTrue(checkedMapProof.containsKey(valueKey.getKeySlice()));
     assertThat(VALUE, equalTo(checkedMapProof.get(valueKey.getKeySlice())));
   }
