@@ -95,11 +95,11 @@ public class VertxServerIntegrationTest {
   public void start() throws Exception {
     Vertx wcVertx = null;
     try {
-      // Start a server
+      // Start a server.
       int port = 8080;
       server.start(port);
 
-      // Define a request handler
+      // Define a request handler.
       Router r = server.createRouter();
       String body = "/s1/foo handler";
       r.get("/foo").handler((rc) -> {
@@ -107,7 +107,7 @@ public class VertxServerIntegrationTest {
       });
       server.mountSubRouter("/s1", r);
 
-      // Create a web client
+      // Create a web client.
       wcVertx = Vertx.vertx();
       WebClient client = WebClient.create(wcVertx);
 
@@ -124,7 +124,7 @@ public class VertxServerIntegrationTest {
       assertTrue("Did not receive response in " + timeout + " seconds",
           futureResponse.isDone());
       if (ar.succeeded()) {
-        // Check the result
+        // Check the result.
         HttpResponse<Buffer> response = ar.result();
 
         assertThat(response.statusCode(), equalTo(200));
