@@ -93,7 +93,7 @@ header "START TESTNET"
 for i in $(seq 0 $((node_count - 1)))
 do
 	port=$((3000 + i))
-	private_port=$((port + node_count))
+	private_port=$((port + 100))
 	ejb-app run -c testnet/node_$i.toml -d testnet/db/$i --public-api-address 0.0.0.0:${port} \
 	    --private-api-address 0.0.0.0:${private_port} &
 	echo "new node with ports: $port (public) and $private_port (private)"
