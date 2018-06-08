@@ -19,10 +19,10 @@
   <properties>
     <exonum-core.version>1.0-SNAPSHOT</exonum-core.version>
     <exonum-java-proofs.version>1.0-SNAPSHOT</exonum-java-proofs.version>
-    <guice.version>4.1.0</guice.version>
-    <log4j.version>2.10.0</log4j.version>
-    <guava.version>24.0-jre</guava.version>
-    <vertx.version>3.5.1</vertx.version>
+    <guice.version>4.2.0</guice.version>
+    <log4j.version>2.11.0</log4j.version>
+    <guava.version>25.1-jre</guava.version>
+    <vertx.version>3.5.2</vertx.version>
   </properties>
 
   <dependencyManagement>
