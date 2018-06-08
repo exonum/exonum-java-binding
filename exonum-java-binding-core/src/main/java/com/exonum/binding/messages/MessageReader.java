@@ -30,11 +30,13 @@ public final class MessageReader implements BinaryMessage {
 
     int bufferSize = buffer.limit();
     checkArgument(MIN_MESSAGE_BUFFER_SIZE <= bufferSize, 
-        "The buffer size (%s) is less than the minimal possible (%s)",
+        "The buffer size (%s) is less than the minimal possible message size (%s)",
         bufferSize, MIN_MESSAGE_BUFFER_SIZE);
-    int expectedSize = Message.messageSize(reader.bodySize());
+    // Check the 'payload_length' field of the message matches the actual buffer size.
+    int expectedSize = reader.size();
     checkArgument(bufferSize == expectedSize,
-        "The size of the buffer (%s) does not match expected (%s)", bufferSize, expectedSize);
+        "The size of the buffer (%s) does not match the expected size "
+            + "specified in the message header (%s)", bufferSize, expectedSize);
     return reader;
   }
 
@@ -84,7 +86,7 @@ public final class MessageReader implements BinaryMessage {
   }
 
   private int bodySize() {
-    return message.getInt(PAYLOAD_LENGTH_OFFSET) - HEADER_SIZE - SIGNATURE_SIZE;
+    return size() - HEADER_SIZE - SIGNATURE_SIZE;
   }
 
   /**
@@ -101,7 +103,7 @@ public final class MessageReader implements BinaryMessage {
 
   @Override
   public int size() {
-    return message.limit();
+    return message.getInt(PAYLOAD_LENGTH_OFFSET);
   }
 
   /**
