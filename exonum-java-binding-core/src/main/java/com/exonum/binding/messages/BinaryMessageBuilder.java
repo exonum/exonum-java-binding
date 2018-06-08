@@ -1,9 +1,9 @@
 package com.exonum.binding.messages;
 
-import static com.exonum.binding.messages.Message.PAYLOAD_LENGTH_OFFSET;
 import static com.exonum.binding.messages.Message.BODY_OFFSET;
 import static com.exonum.binding.messages.Message.MESSAGE_TYPE_OFFSET;
 import static com.exonum.binding.messages.Message.NET_ID_OFFSET;
+import static com.exonum.binding.messages.Message.PAYLOAD_LENGTH_OFFSET;
 import static com.exonum.binding.messages.Message.SERVICE_ID_OFFSET;
 import static com.exonum.binding.messages.Message.VERSION_OFFSET;
 import static com.google.common.base.Preconditions.checkNotNull;
