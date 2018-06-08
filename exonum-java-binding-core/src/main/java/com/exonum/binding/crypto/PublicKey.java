@@ -31,21 +31,4 @@ public final class PublicKey extends AbstractKey {
   public static PublicKey fromHexString(String stringKey) {
     return new PublicKey(HEX.decode(stringKey));
   }
-
-  @Override
-  public final boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o instanceof PublicKey) {
-      PublicKey that = (PublicKey) o;
-      return that.canEqual(this) && super.equals(that);
-    }
-    return false;
-  }
-
-  @Override
-  public final boolean canEqual(Object other) {
-    return (other instanceof PublicKey);
-  }
 }

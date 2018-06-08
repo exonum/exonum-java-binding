@@ -108,16 +108,15 @@ public final class TransferTx extends BaseTx implements Transaction {
 
       TransferTx transferTx;
       try {
-        ByteBuffer messageBody = txMessage.getBody();
-        TxMessagesProtos.TransferTx copiedTxMessagesProtos =
-            TxMessagesProtos.TransferTx.parseFrom(messageBody);
+        TxMessagesProtos.TransferTx messageBody =
+            TxMessagesProtos.TransferTx.parseFrom(txMessage.getBody());
 
-        long seed = copiedTxMessagesProtos.getSeed();
+        long seed = messageBody.getSeed();
         PublicKey fromWallet =
-            PublicKey.fromBytes((copiedTxMessagesProtos.getFromWallet().getRawKey().toByteArray()));
+            PublicKey.fromBytes((messageBody.getFromWallet().getRawKey().toByteArray()));
         PublicKey toWallet =
-            PublicKey.fromBytes((copiedTxMessagesProtos.getToWallet().getRawKey().toByteArray()));
-        long sum = copiedTxMessagesProtos.getSum();
+            PublicKey.fromBytes((messageBody.getToWallet().getRawKey().toByteArray()));
+        long sum = messageBody.getSum();
         transferTx = new TransferTx(seed, fromWallet, toWallet, sum);
       } catch (InvalidProtocolBufferException e) {
         throw new IllegalArgumentException(

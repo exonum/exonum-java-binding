@@ -105,13 +105,11 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
       CreateWalletTx createWalletTx;
       try {
-        ByteBuffer messageBody = txMessage.getBody();
-        TxMessagesProtos.CreateWalletTx copiedTxMessagesProtos =
-            TxMessagesProtos.CreateWalletTx.parseFrom(messageBody);
+        TxMessagesProtos.CreateWalletTx messageBody =
+            TxMessagesProtos.CreateWalletTx.parseFrom(txMessage.getBody());
 
         PublicKey ownerPublicKey =
-            PublicKey.fromBytes(
-                (copiedTxMessagesProtos.getOwnerPublicKey().getRawKey().toByteArray()));
+            PublicKey.fromBytes((messageBody.getOwnerPublicKey().getRawKey().toByteArray()));
         createWalletTx = new CreateWalletTx(ownerPublicKey);
       } catch (InvalidProtocolBufferException e) {
         throw new IllegalArgumentException(

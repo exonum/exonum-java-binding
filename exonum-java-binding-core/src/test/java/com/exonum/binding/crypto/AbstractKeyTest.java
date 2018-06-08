@@ -7,15 +7,15 @@ public class AbstractKeyTest {
 
   @Test
   public void verifyEqualsPublicKey() {
-    EqualsVerifier.forClass(AbstractKey.class)
-        .withRedefinedSubclass(PublicKey.class)
+    EqualsVerifier.forClass(PublicKey.class)
+        .usingGetClass()
         .verify();
   }
 
   @Test
   public void verifyEqualsPrivateKey() {
-    EqualsVerifier.forClass(AbstractKey.class)
-        .withRedefinedSubclass(PrivateKey.class)
+    EqualsVerifier.forClass(PrivateKey.class)
+        .usingGetClass()
         .verify();
   }
 }

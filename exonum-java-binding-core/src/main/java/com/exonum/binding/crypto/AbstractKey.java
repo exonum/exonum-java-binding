@@ -39,19 +39,18 @@ public abstract class AbstractKey {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public final boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (o instanceof AbstractKey) {
+    if (o == null) {
+      return false;
+    }
+    if (this.getClass() == o.getClass()) {
       AbstractKey that = (AbstractKey) o;
-      return that.canEqual(this) && Arrays.equals(rawKey, that.rawKey);
+      return Arrays.equals(rawKey, that.rawKey);
     }
     return false;
-  }
-
-  public boolean canEqual(Object other) {
-    return (other instanceof AbstractKey);
   }
 
   @Override

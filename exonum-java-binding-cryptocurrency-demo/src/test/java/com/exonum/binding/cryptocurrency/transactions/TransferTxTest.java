@@ -49,10 +49,10 @@ public class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      // Create source and target wallets with the given initial values
-      long initialValue = 100L;
-      createWallet(view, fromKey, initialValue);
-      createWallet(view, toKey, initialValue);
+      // Create source and target wallets with the given initial balances
+      long initialBalance = 100L;
+      createWallet(view, fromKey, initialBalance);
+      createWallet(view, toKey, initialBalance);
 
       // Create and execute the transaction
       long seed = 1L;
@@ -60,12 +60,12 @@ public class TransferTxTest {
       TransferTx tx = new TransferTx(seed, fromKey, toKey, transferSum);
       tx.execute(view);
 
-      // Check that wallets have correct values
+      // Check that wallets have correct balances
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-      long expectedFromValue = initialValue - transferSum;
+      long expectedFromValue = initialBalance - transferSum;
       assertThat(wallets.get(fromKey).getBalance(), equalTo(expectedFromValue));
-      long expectedToValue = initialValue + transferSum;
+      long expectedToValue = initialBalance + transferSum;
       assertThat(wallets.get(toKey).getBalance(), equalTo(expectedToValue));
     }
   }
@@ -76,8 +76,8 @@ public class TransferTxTest {
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
-      long initialValue = 100L;
-      createWallet(view, fromKey, initialValue);
+      long initialBalance = 100L;
+      createWallet(view, fromKey, initialBalance);
 
       // Create and execute the transaction
       long seed = 1L;
@@ -85,10 +85,10 @@ public class TransferTxTest {
       TransferTx tx = new TransferTx(seed, fromKey, fromKey, transferSum);
       tx.execute(view);
 
-      // Check that wallets have correct values
+      // Check that the balance of the wallet remains the same
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialValue));
+      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -97,9 +97,9 @@ public class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      // Create source wallet with the given initial value
-      long initialValue = 50L;
-      createWallet(view, fromKey, initialValue);
+      // Create source wallet with the given initial balance
+      long initialBalance = 50L;
+      createWallet(view, fromKey, initialBalance);
 
       long seed = 1L;
       long transferValue = 50L;
@@ -110,7 +110,7 @@ public class TransferTxTest {
       // Check that balance of fromKey is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialValue));
+      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -120,8 +120,8 @@ public class TransferTxTest {
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to transfer from unknown wallet
-      long initialValue = 100L;
-      createWallet(view, toKey, initialValue);
+      long initialBalance = 100L;
+      createWallet(view, toKey, initialBalance);
       long transferValue = 50L;
       long seed = 1L;
       TransferTx tx = new TransferTx(seed, fromKey, toKey, transferValue);
@@ -130,7 +130,7 @@ public class TransferTxTest {
       // Check that balance of toKey is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(toKey).getBalance(), equalTo(initialValue));
+      assertThat(wallets.get(toKey).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -169,9 +169,9 @@ public class TransferTxTest {
         .verify();
   }
 
-  private void createWallet(Fork view, PublicKey publicKey, Long initialValue) {
+  private void createWallet(Fork view, PublicKey publicKey, Long initialBalance) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-    wallets.put(publicKey, new Wallet(initialValue));
+    wallets.put(publicKey, new Wallet(initialBalance));
   }
 }

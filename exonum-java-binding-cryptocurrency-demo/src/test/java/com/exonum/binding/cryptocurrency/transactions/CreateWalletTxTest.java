@@ -71,13 +71,13 @@ public class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      Long value = DEFAULT_BALANCE;
+      Long balance = DEFAULT_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(ownerKey, new Wallet(value));
+        wallets.put(ownerKey, new Wallet(balance));
       }
 
       // Execute the transaction, that has the same owner key.
@@ -87,7 +87,7 @@ public class CreateWalletTxTest {
       // Check it has not changed the entries in the maps.
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(ownerKey).getBalance(), equalTo(value));
+        assertThat(wallets.get(ownerKey).getBalance(), equalTo(balance));
       }
     }
   }
