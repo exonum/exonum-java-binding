@@ -7,6 +7,9 @@ import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesT
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
+import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.storage.indices.TestStorageItems.V3;
+import static com.exonum.binding.storage.indices.TestStorageItems.V4;
 import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
@@ -29,6 +32,7 @@ import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,8 +82,10 @@ public class ProofMapIndexProxyIntegrationTest
       .map(HashCode::fromBytes)
       .collect(Collectors.toList());
 
-  private static final HashCode PK1 = PROOF_KEYS.get(0);
-  private static final HashCode PK2 = PROOF_KEYS.get(1);
+  static final HashCode PK1 = PROOF_KEYS.get(0);
+  static final HashCode PK2 = PROOF_KEYS.get(1);
+  static final HashCode PK3 = PROOF_KEYS.get(2);
+
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
   private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromBytes(
@@ -138,6 +145,50 @@ public class ProofMapIndexProxyIntegrationTest
       map.put(INVALID_PROOF_KEY, V1);
     });
   }
+
+  @Test
+  public void putAllInEmptyMap() {
+    runTestWithView(database::createFork, (map) -> {
+      ImmutableMap<HashCode, String> source = ImmutableMap.of(
+          PK1, V1,
+          PK2, V2
+      );
+
+      map.putAll(source);
+
+      // Check that the map contains all items
+      for (Map.Entry<HashCode, String> entry : source.entrySet()) {
+        HashCode key = entry.getKey();
+        assertTrue(map.containsKey(key));
+        assertThat(map.get(key), equalTo(entry.getValue()));
+      }
+    });
+  }
+
+  @Test
+  public void putAllOverwritingEntries() {
+    runTestWithView(database::createFork, (map) -> {
+      map.putAll(ImmutableMap.of(
+          PK1, V1,
+          PK2, V2
+      ));
+
+      ImmutableMap<HashCode, String> replacements = ImmutableMap.of(
+          PK1, V3,
+          PK2, V4
+      );
+
+      map.putAll(replacements);
+
+      // Check that the map contains the recently put entries
+      for (Map.Entry<HashCode, String> entry : replacements.entrySet()) {
+        HashCode key = entry.getKey();
+        assertTrue(map.containsKey(key));
+        assertThat(map.get(key), equalTo(entry.getValue()));
+      }
+    });
+  }
+
 
   @Test
   public void get() throws Exception {

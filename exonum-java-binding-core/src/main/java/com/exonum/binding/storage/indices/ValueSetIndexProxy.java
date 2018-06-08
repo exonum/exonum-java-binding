@@ -1,5 +1,6 @@
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -15,6 +16,7 @@ import com.exonum.binding.storage.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Iterator;
+import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 
 /**
@@ -55,6 +57,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
    * @param serializer a serializer of values
+   * @param <E> the type of values in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    */
@@ -63,14 +66,43 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     checkIndexName(name);
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle setNativeHandle = createNativeSet(name, view);
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreate(name, viewNativeHandle));
 
     return new ValueSetIndexProxy<>(setNativeHandle, name, view, s);
   }
 
-  private static NativeHandle createNativeSet(String name, View view) {
+  /**
+   * Creates a new value set in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param indexId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of set values
+   * @param <E> the type of values in this set
+   * @return a new value set
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> ValueSetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
+                                                           View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(indexId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle));
+
+    return new ValueSetIndexProxy<>(setNativeHandle, groupName, view, s);
+  }
+
+  private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
+    NativeHandle setNativeHandle = new NativeHandle(nativeSetConstructor.getAsLong());
 
     Cleaner cleaner = view.getCleaner();
     ProxyDestructor.newRegistered(cleaner, setNativeHandle, ValueSetIndexProxy.class,
@@ -256,6 +288,9 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   }
 
   private static native long nativeCreate(String setName, long viewNativeHandle);
+
+  private static native long nativeCreateInGroup(String familyName, byte[] setId,
+                                                 long viewNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

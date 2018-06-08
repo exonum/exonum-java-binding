@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 })
 public @interface AutoGenerationCandidate {
   /**
-   * Why or how can an element be auto-generated?
+   * Why or how an element can be auto-generated.
    */
   String reason() default  "";
 }

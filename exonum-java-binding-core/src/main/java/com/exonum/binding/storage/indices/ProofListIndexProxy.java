@@ -1,6 +1,7 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
@@ -12,6 +13,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.proofs.list.ListProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
+import java.util.function.LongSupplier;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -45,6 +47,7 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @param serializer a serializer of elements
+   * @param <E> the type of elements in this list
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    */
@@ -53,14 +56,48 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
     checkIndexName(name);
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle listNativeHandle = createNativeList(name, view);
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = createNativeList(view,
+        () -> nativeCreate(name, viewNativeHandle));
 
     return new ProofListIndexProxy<>(listNativeHandle, name, view, s);
   }
 
-  private static NativeHandle createNativeList(String name, View view) {
+  private static native long nativeCreate(String listName, long viewNativeHandle);
+
+  /**
+   * Creates a new list in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param listId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of list elements
+   * @param <E> the type of elements in this list
+   * @return a new list proxy
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> ProofListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
+                                                            View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(listId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle listNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+    NativeHandle setNativeHandle = createNativeList(view,
+        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle));
+
+    return new ProofListIndexProxy<>(setNativeHandle, groupName, view, s);
+  }
+
+  private static native long nativeCreateInGroup(String groupName, byte[] listId,
+                                                 long viewNativeHandle);
+
+  private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
+    NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
 
     Cleaner cleaner = view.getCleaner();
     ProxyDestructor.newRegistered(cleaner, listNativeHandle, ProofListIndexProxy.class,
@@ -72,8 +109,6 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
                               CheckingSerializerDecorator<E> serializer) {
     super(nativeHandle, name, view, serializer);
   }
-
-  private static native long nativeCreate(String listName, long viewNativeHandle);
 
   /**
    * Returns a proof that an element exists at the specified index in this list.

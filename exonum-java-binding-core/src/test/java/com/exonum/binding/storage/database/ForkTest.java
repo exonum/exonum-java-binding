@@ -9,6 +9,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.exonum.binding.proxy.Cleaner;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -19,6 +20,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
     Views.class,
     ViewModificationCounter.class,
 })
+@Ignore  // Won't run on Java 10 till Powermock is updated [ECR-1614]
 public class ForkTest {
 
   private Fork fork;

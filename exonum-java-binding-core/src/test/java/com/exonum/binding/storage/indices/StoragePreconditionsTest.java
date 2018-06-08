@@ -36,6 +36,26 @@ public class StoragePreconditionsTest {
   }
 
   @Test
+  public void checkIdInGroup() {
+    byte[] validId = bytes("id1");
+
+    assertThat(StoragePreconditions.checkIdInGroup(validId), sameInstance(validId));
+  }
+
+  @Test
+  public void checkIdInGroupNull() {
+    expected.expect(NullPointerException.class);
+    StoragePreconditions.checkIdInGroup(null);
+  }
+
+  @Test
+  public void checkIdInGroupEmpty() {
+    byte[] emptyId = new byte[0];
+    expected.expect(IllegalArgumentException.class);
+    StoragePreconditions.checkIdInGroup(emptyId);
+  }
+
+  @Test
   public void checkStorageKeyAcceptsEmpty() throws Exception {
     byte[] key = new byte[]{};
 

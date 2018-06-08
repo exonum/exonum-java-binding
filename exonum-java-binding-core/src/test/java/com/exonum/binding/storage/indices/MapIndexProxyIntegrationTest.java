@@ -5,6 +5,8 @@ import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.storage.indices.TestStorageItems.V3;
+import static com.exonum.binding.storage.indices.TestStorageItems.V4;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -17,12 +19,14 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -103,6 +107,52 @@ public class MapIndexProxyIntegrationTest
       String storedValue = map.get(key);
 
       assertThat(storedValue, equalTo(V2));
+    });
+  }
+
+  @Test
+  public void putAllInEmptyMap() {
+    runTestWithView(database::createFork, (map) -> {
+      ImmutableMap<String, String> source = ImmutableMap.of(
+          "k1", V1,
+          "k2", V2,
+          "k3", V3
+      );
+
+      map.putAll(source);
+
+      // Check that the map contains all items
+      for (Map.Entry<String, String> entry : source.entrySet()) {
+        String key = entry.getKey();
+        assertTrue(map.containsKey(key));
+        assertThat(map.get(key), equalTo(entry.getValue()));
+      }
+    });
+  }
+
+  @Test
+  public void putAllOverwritesExistingMappings() {
+    runTestWithView(database::createFork, (map) -> {
+      // Initialize the map with some entries.
+      map.putAll(ImmutableMap.of(
+          K1, V1,
+          K2, V2
+      ));
+
+
+      ImmutableMap<String, String> replacementEntries = ImmutableMap.of(
+          K1, V3,
+          K2, V4
+      );
+
+      map.putAll(replacementEntries);
+
+      // Check that the map contains new items, not the initial.
+      for (Map.Entry<String, String> entry : replacementEntries.entrySet()) {
+        String key = entry.getKey();
+        assertTrue(map.containsKey(key));
+        assertThat(map.get(key), equalTo(entry.getValue()));
+      }
     });
   }
 
