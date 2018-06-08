@@ -1,6 +1,5 @@
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.cryptocurrency.HashUtils.hashUtf8String;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -8,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
 import com.exonum.binding.cryptocurrency.transactions.TransferTx;
@@ -36,6 +36,10 @@ import org.junit.runner.RunWith;
 public class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
+
+  private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
+
+  private static final PublicKey toKey = PredefinedOwnerKeys.secondOwnerKey;
 
   @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
 
@@ -77,12 +81,13 @@ public class ApiControllerTest {
   public void handlesAllKnownTransactions(TestContext context) {
     Map<CryptocurrencyTransaction, Transaction> transactionTemplates =
         ImmutableMap.of(
-            CryptocurrencyTransaction.CREATE_WALLET, new CreateWalletTx("wallet_name"),
+            CryptocurrencyTransaction.CREATE_WALLET,
+                new CreateWalletTx(fromKey),
             CryptocurrencyTransaction.TRANSFER,
                 new TransferTx(
                     0L,
-                    hashUtf8String("from"),
-                    hashUtf8String("to"),
+                    fromKey,
+                    toKey,
                     40L));
 
     int port = httpServer.actualPort();
@@ -129,7 +134,8 @@ public class ApiControllerTest {
   @Test
   public void serverErrorOnError(TestContext context) throws Exception {
     int port = httpServer.actualPort();
-    Transaction tx = new CreateWalletTx("new-wallet");
+    PublicKey publicKey = fromKey;
+    Transaction tx = new CreateWalletTx(publicKey);
     String txMessageJson = tx.info();
 
     doThrow(InternalServerError.class).when(service).submitTransaction(any(Transaction.class));

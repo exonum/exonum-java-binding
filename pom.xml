@@ -29,6 +29,7 @@
     <mockito-core.version>2.18.3</mockito-core.version>
     <guava.version>25.1-jre</guava.version>
     <vertx.version>3.5.2</vertx.version>
+    <equalsverifier.version>2.4.6</equalsverifier.version>
   </properties>
 
   <build>
@@ -200,6 +201,13 @@
         <groupId>org.hamcrest</groupId>
         <artifactId>java-hamcrest</artifactId>
         <version>${hamcrest.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>nl.jqno.equalsverifier</groupId>
+        <artifactId>equalsverifier</artifactId>
+        <version>${equalsverifier.version}</version>
         <scope>test</scope>
       </dependency>
 
