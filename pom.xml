@@ -125,6 +125,14 @@
            <artifactId>versions-maven-plugin</artifactId>
            <version>2.5</version>
          </plugin>
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-javadoc-plugin</artifactId>
+           <version>3.0.1</version>
+           <configuration>
+             <doclint>none</doclint>
+           </configuration>
+         </plugin>
        </plugins>
      </pluginManagement>
 
@@ -169,6 +177,32 @@
       <properties>
         <checkstyle.severity>error</checkstyle.severity>
       </properties>
+    </profile>
+
+    <!-- A profile for Javadoc generation. -->
+    <profile>
+      <id>javadoc-gen</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <packagesheader>Exonum Java Binding</packagesheader>
+              <groups>
+                <group>
+                  <title>EJB Core</title>
+                  <packages>com.exonum.binding.annotations*:com.exonum.binding.crypto*:com.exonum.binding.messages*:com.exonum.binding.proxy*:com.exonum.binding.service*:com.exonum.binding.storage*:com.exonum.binding.transport*:com.exonum.binding.util*</packages>
+                </group>
+                <group>
+                  <title>EJB Proofs</title>
+                  <packages>com.exonum.binding.hash*:com.exonum.binding.storage.proofs*:com.exonum.binding.storage.serialization*</packages>
+                </group>
+              </groups>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
