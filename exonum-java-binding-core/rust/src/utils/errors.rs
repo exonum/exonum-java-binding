@@ -97,11 +97,14 @@ pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
 
 fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JniError) -> String {
     assert!(!exception.is_null(), "No exception thrown.");
-    format!(
-        "Java exception: {}; {:?}\n{}{:#?}",
-        unwrap_jni_verbose(env, get_class_name(env, exception)),
-        unwrap_jni_verbose(env, get_exception_message(env, exception)),
-        unwrap_jni_verbose(env, get_exception_stack_trace(env, exception)),
-        jni_error.backtrace(),
-    )
+    let res = (|| {
+        Ok(format!(
+            "Java exception: {}; {:?}\nMessage: {:?}\nStack trace:\n {:#?}",
+            get_class_name(env, exception)?,
+            get_exception_message(env, exception)?,
+            get_exception_stack_trace(env, exception)?,
+            jni_error.backtrace(),
+        ))
+    })();
+    unwrap_jni_verbose(env, res)
 }
