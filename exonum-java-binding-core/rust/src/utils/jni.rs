@@ -14,6 +14,8 @@ pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
 }
 
 /// Returns the message from the exception if it is not null.
+///
+/// `exception` should extend `java.lang.Throwable` and be not null
 pub fn get_exception_message(env: &JNIEnv, exception: JObject) -> JniResult<Option<String>> {
     assert!(!exception.is_null(), "Invalid exception argument");
     let message = env.call_method(
@@ -30,6 +32,8 @@ pub fn get_exception_message(env: &JNIEnv, exception: JObject) -> JniResult<Opti
 }
 
 /// Returns a string with a formatted stack trace, if available.
+///
+/// `exception` should extend `java.lang.Throwable` and be not null
 pub fn get_exception_stack_trace(env: &JNIEnv, exception: JObject) -> JniResult<Option<String>> {
     assert!(!exception.is_null(), "Invalid exception argument");
     let frames = env.call_method(
