@@ -84,3 +84,8 @@ The style guide of the project: https://google.github.io/styleguide/javaguide.ht
 [Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project 
 during `validate` phase (i.e., _before_ compilation). You can run code style checks explicitly 
 via `mvn checkstyle:check`.
+
+## LICENSE
+
+Exonum Java Binding is licensed under the Apache License (Version 2.0).
+See [LICENSE] for details.
