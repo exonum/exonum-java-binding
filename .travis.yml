@@ -5,12 +5,8 @@ sudo: false
 
 addons:
   apt:
-    sources:
-    - sourceline: 'ppa:chris-lea/libsodium'
     packages:
-    - libsnappy-dev
     - build-essential
-    - libsodium-dev
     - libssl-dev
     - pkg-config
 
@@ -21,7 +17,6 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2018-05-26
     - RUST_CLIPPY_VERSION=0.0.205
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
-    - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
 
 cache:
   directories:
@@ -48,6 +43,10 @@ before_install:
   - cargo install --list
     # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
   - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
+    # force building instead of using from apt.
+  - export SODIUM_BUILD=1
+  - export ROCKSDB_BUILD=1
+  - export SNAPPY_BUILD=1
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
@@ -59,6 +58,11 @@ script:
   - cargo audit
   - cd -
   - ./run_all_tests.sh
+  # Clean the excess artifacts from the cache.
+  - rm exonum-java-binding-core/rust/target/debug/deps/java_bindings-*
+  - rm exonum-java-binding-core/rust/target/debug/deps/libjava_bindings.so
+  - rm exonum-java-binding-core/rust/target/debug/java_bindings-*
+  - rm exonum-java-binding-core/rust/target/debug/libjava_bindings.so
 
 notifications:
   slack:
