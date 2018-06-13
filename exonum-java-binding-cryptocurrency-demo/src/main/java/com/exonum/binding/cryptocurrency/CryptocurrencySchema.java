@@ -2,11 +2,12 @@ package com.exonum.binding.cryptocurrency;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.crypto.PublicKeySerializer;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public final class CryptocurrencySchema implements Schema {
   /**
    * Returns a proof map of wallets.
    */
-  public ProofMapIndexProxy<HashCode, Wallet> wallets() {
+  public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstance(name, view, PublicKeySerializer.INSTANCE,
         WalletSerializer.INSTANCE);
   }
 
