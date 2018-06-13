@@ -18,6 +18,7 @@ fn bootstrap() {
     let jvm_config = JvmConfig {
         debug: true,
         class_path: get_fakes_classpath(),
+        service_class_path: "".to_string(),
         lib_path: get_libpath(),
         log_config_path: "".to_owned(),
     };

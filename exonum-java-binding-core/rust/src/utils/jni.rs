@@ -4,6 +4,24 @@ use jni::objects::JObject;
 use JniResult;
 use utils::convert_to_string;
 
+#[cfg(windows)]
+pub const PATH_SEPARATOR: &str = ";";
+#[cfg(not(windows))]
+pub const PATH_SEPARATOR: &str = ":";
+
+/// Returns a joined with target rules path
+///
+/// Removes duplicated entries.
+pub fn join_path(parts: &[&str]) -> String {
+    let mut parts: Vec<&str> = parts
+        .iter()
+        .flat_map(|s| s.split(PATH_SEPARATOR))
+        .filter(|s| !s.is_empty())
+        .collect();
+    parts.dedup_by(|a, b| a == b);
+    parts.join(PATH_SEPARATOR)
+}
+
 /// Returns a class name of an object as a `String`.
 pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
     let class_object = env.call_method(object, "getClass", "()Ljava/lang/Class;", &[])?

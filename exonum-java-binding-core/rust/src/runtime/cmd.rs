@@ -10,6 +10,7 @@ use exonum::node::NodeConfig;
 const EJB_DEBUG: &str = "EJB_DEBUG";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_CLASSPATH: &str = "EJB_CLASSPATH";
+const EJB_SERVICE_CLASSPATH: &str = "EJB_SERVICE_CLASSPATH";
 const EJB_LIBPATH: &str = "EJB_LIBPATH";
 const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
 const EJB_PORT: &str = "EJB_PORT";
@@ -40,9 +41,17 @@ impl CommandExtension for GenerateNodeConfig {
             Argument::new_named(
                 EJB_CLASSPATH,
                 true,
-                "Java service classpath. Must include all its dependencies.",
+                "Java bindings framework classpath. Must include all its dependencies.",
                 None,
                 "ejb-classpath",
+                false
+            ),
+            Argument::new_named(
+                EJB_SERVICE_CLASSPATH,
+                true,
+                "Java service classpath. Must include all its dependencies.",
+                None,
+                "ejb-service-classpath",
                 false
             ),
             Argument::new_named(
@@ -60,11 +69,13 @@ impl CommandExtension for GenerateNodeConfig {
         let debug = context.arg(EJB_DEBUG).unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;
+        let service_class_path = context.arg(EJB_SERVICE_CLASSPATH)?;
         let lib_path = context.arg(EJB_LIBPATH)?;
 
         let jvm_config = JvmConfig {
             debug,
             class_path,
+            service_class_path,
             lib_path,
             log_config_path,
         };
