@@ -1,5 +1,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
+import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.hash.HashCode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,6 +20,7 @@ public final class CryptocurrencyTransactionGson {
   private static final Gson GSON =
       new GsonBuilder()
           .registerTypeHierarchyAdapter(HashCode.class, new HashCodeSerializer())
+          .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
           .setLongSerializationPolicy(LongSerializationPolicy.STRING)
           .create();
 
@@ -39,6 +41,21 @@ public final class CryptocurrencyTransactionGson {
     public HashCode deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
       return HashCode.fromString(json.getAsString());
+    }
+  }
+
+  private static class PublicKeyJsonSerializer
+      implements JsonSerializer<PublicKey>, JsonDeserializer<PublicKey> {
+
+    @Override
+    public JsonElement serialize(PublicKey src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src.toString());
+    }
+
+    @Override
+    public PublicKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        throws JsonParseException {
+      return PublicKey.fromHexString(json.getAsString());
     }
   }
 }
