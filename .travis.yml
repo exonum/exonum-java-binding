@@ -21,7 +21,6 @@ env:
 cache:
   directories:
     - "$HOME/.cargo"
-    - "${EJB_RUST_BUILD_DIR}/target"
     - "$HOME/.m2"
 
 before_install:
@@ -58,11 +57,6 @@ script:
   - cargo audit
   - cd -
   - ./run_all_tests.sh
-  # Clean the excess artifacts from the cache.
-  - rm exonum-java-binding-core/rust/target/debug/deps/java_bindings-*
-  - rm exonum-java-binding-core/rust/target/debug/deps/libjava_bindings.so
-  - rm exonum-java-binding-core/rust/target/debug/java_bindings-*
-  - rm exonum-java-binding-core/rust/target/debug/libjava_bindings.so
 
 notifications:
   slack:
