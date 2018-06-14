@@ -1,6 +1,8 @@
 use jni::JNIEnv;
 use jni::objects::JObject;
 
+use std::collections::BTreeSet;
+
 use JniResult;
 use utils::convert_to_string;
 
@@ -9,16 +11,16 @@ pub const PATH_SEPARATOR: &str = ";";
 #[cfg(not(windows))]
 pub const PATH_SEPARATOR: &str = ":";
 
-/// Returns a joined with target rules path
-///
-/// Removes duplicated entries.
-pub fn join_path(parts: &[&str]) -> String {
-    let mut parts: Vec<&str> = parts
+/// Joins several classpaths into a single classpath, using the default path separator.
+/// Preserves the relative order of class path entries.
+/// Removes duplicate entries.
+pub fn join_paths(parts: &[&str]) -> String {
+    let mut met = BTreeSet::new();
+    let parts: Vec<&str> = parts
         .iter()
         .flat_map(|s| s.split(PATH_SEPARATOR))
-        .filter(|s| !s.is_empty())
+        .filter(|s| !s.is_empty() && met.insert(*s))
         .collect();
-    parts.dedup_by(|a, b| a == b);
     parts.join(PATH_SEPARATOR)
 }
 
@@ -77,4 +79,38 @@ pub fn get_exception_stack_trace(_env: &JNIEnv, exception: JObject) -> JniResult
     //}
     //Ok(stack.join(""))
     Ok(String::new())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const FOO: &str = "foo";
+    const BAR: &str = "bar";
+    const BAZ: &str = "baz";
+
+    #[cfg(windows)]
+    const FOO_BAR: &str = "foo;bar";
+    #[cfg(windows)]
+    const FOO_BAZ: &str = "foo;baz";
+    #[cfg(windows)]
+    const FOO_BAR_BAZ: &str = "foo;bar;baz";
+
+    #[cfg(not(windows))]
+    const FOO_BAR: &str = "foo:bar";
+    #[cfg(not(windows))]
+    const FOO_BAZ: &str = "foo:baz";
+    #[cfg(not(windows))]
+    const FOO_BAR_BAZ: &str = "foo:bar:baz";
+
+    #[test]
+    fn join_paths_preserves_order() {
+        let result = join_paths(&[FOO, BAR, BAZ]);
+        assert_eq!(result, FOO_BAR_BAZ);
+    }
+
+    #[test]
+    fn join_paths_deduplicate_entries() {
+        let result = join_paths(&[FOO_BAR, FOO_BAZ]);
+        assert_eq!(result, FOO_BAR_BAZ);
+    }
 }

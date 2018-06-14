@@ -12,9 +12,9 @@ pub struct Config {
 pub struct JvmConfig {
     /// Whether to create JVM with `Xdebug` option or not.
     pub debug: bool,
-    /// Java bindings framework classpath. Must include all its dependencies.
-    pub class_path: String,
-    /// Java service classpath. Must include all its dependencies.
+    /// Java bindings framework system classpath.
+    pub system_class_path: String,
+    /// Java service classpath.
     pub service_class_path: String,
     /// Path to java-bindings shared library.
     ///
