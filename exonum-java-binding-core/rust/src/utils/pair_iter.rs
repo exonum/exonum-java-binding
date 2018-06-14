@@ -1,6 +1,6 @@
-use jni::JNIEnv;
-use jni::objects::{GlobalRef, JMethodID};
 use jni::errors::Result;
+use jni::objects::{GlobalRef, JMethodID};
+use jni::JNIEnv;
 
 use std::mem;
 

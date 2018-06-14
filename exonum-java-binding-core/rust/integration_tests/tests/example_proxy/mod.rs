@@ -1,10 +1,10 @@
 use java_bindings::Executor;
-use jni::*;
 use jni::errors::Result;
 use jni::objects::AutoLocal;
 use jni::objects::GlobalRef;
 use jni::objects::JValue;
 use jni::sys::jint;
+use jni::*;
 
 /// A temporary example of a native-to-JNI proxy
 #[derive(Clone)]
@@ -38,9 +38,8 @@ where
 
     /// Gets a current value from java object
     pub fn get(&mut self) -> Result<jint> {
-        self.exec.with_attached(|env| {
-            env.call_method(self.obj.as_obj(), "get", "()I", &[])?.i()
-        })
+        self.exec
+            .with_attached(|env| env.call_method(self.obj.as_obj(), "get", "()I", &[])?.i())
     }
 
     /// Increments a value of java object and then gets it

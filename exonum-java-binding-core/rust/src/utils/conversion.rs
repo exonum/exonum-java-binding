@@ -1,7 +1,7 @@
-use jni::JNIEnv;
-use jni::sys::jbyteArray;
 use jni::errors::Result;
 use jni::objects::JString;
+use jni::sys::jbyteArray;
+use jni::JNIEnv;
 
 use exonum::crypto::Hash;
 
@@ -9,9 +9,7 @@ use exonum::crypto::Hash;
 pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> Result<Hash> {
     // TODO: Optimize copying and allocations.
     let bytes = env.convert_byte_array(array)?;
-    Ok(Hash::from_slice(&bytes).expect(
-        "Unable to create `Hash` from the slice",
-    ))
+    Ok(Hash::from_slice(&bytes).expect("Unable to create `Hash` from the slice"))
 }
 
 // Converts `Hash` to Java byte array.

@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use jni::*;
-use jni::JNIEnv;
 use jni::errors::Result;
+use jni::JNIEnv;
+use jni::*;
 
 /// An interface for JNI thread attachment manager.
 pub trait Executor: Clone {

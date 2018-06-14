@@ -1,13 +1,13 @@
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jbyteArray, jboolean};
+use jni::sys::{jboolean, jbyteArray};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, Entry};
+use super::db::{Value, View, ViewRef};
+use exonum::storage::{Entry, Fork, Snapshot};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = Entry<T, Value>;
 
@@ -28,9 +28,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))

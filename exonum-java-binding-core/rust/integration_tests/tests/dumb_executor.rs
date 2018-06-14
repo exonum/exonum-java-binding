@@ -7,8 +7,8 @@ mod example_proxy;
 mod util;
 
 use java_bindings::DumbExecutor;
-use jni::JavaVM;
 use jni::sys::jint;
+use jni::JavaVM;
 
 use std::sync::{Arc, Barrier};
 use std::thread::spawn;
