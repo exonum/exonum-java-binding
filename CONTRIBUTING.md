@@ -76,7 +76,8 @@ which can be loaded with `LibraryLoader.load()`.
 
 IntelliJ IDEA infers the JVM arguments from the `pom.xml` and runs ITs just fine.
 If you use another IDE, configure it to pass `-Djava.library.path` system property 
-to the JVM running tests, see the failsafe plugin configuration.
+to the JVM when running tests. For more details, see the failsafe plugin 
+[configuration](exonum-java-binding-core/pom.xml).
 
 #### Rust
 Most Rust integration tests require a path to `libjvm.so` in `LD_LIBRARY_PATH` to run.
