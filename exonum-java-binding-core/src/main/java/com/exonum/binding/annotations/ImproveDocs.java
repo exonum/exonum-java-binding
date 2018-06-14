@@ -36,12 +36,12 @@ import java.lang.annotation.Target;
 })
 public @interface ImproveDocs {
   /**
-   * @return whom this item is assigned to.
+   * Whom this item is assigned to.
    */
   String assignee();
 
   /**
-   * @return a description of why this annotation was added.
+   * A description of why this annotation was added.
    */
   String reason() default "";
 }

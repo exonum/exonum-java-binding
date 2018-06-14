@@ -14,17 +14,14 @@ crate-type = ["dylib"]
 resource-manager = []
 invocation = ["jni/invocation"]
 
-[patch.crates-io]
-exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumoxide.git", branch = "exclude-1604-ECR-846" }
-
 [dependencies]
-exonum = "0.7.1"
+exonum = "0.8.0"
 iron = "0.6.0"
 failure = "0.1.1"
 toml = "0.4.6"
 jni = { version = "0.10.1", git = "https://github.com/alexander-irbis/jni-rs", branch = "clone-jnienv", features = ["invocation"] }
-lazy_static = "1.0.0"
+lazy_static = "1.0.1"
 log = "0.4.1"
 serde = "1.0"
 serde_derive = "1.0"
-serde_json = "1.0.2"
+serde_json = "1.0.19"

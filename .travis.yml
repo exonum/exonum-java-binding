@@ -1,6 +1,8 @@
 language: java
 dist: trusty
-jdk: openjdk8
+jdk:
+  - openjdk8
+  - openjdk10
 sudo: false
 
 addons:
@@ -62,6 +64,8 @@ script:
   - cargo audit
   - cd -
   - ./run_all_tests.sh
+  # Check silently for updates of dependencies
+  - mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3
 
 notifications:
   slack:
