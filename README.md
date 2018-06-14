@@ -6,7 +6,8 @@ Exonum Java Binding is a framework for building blockchain applications in Java,
 
   - [What is Exonum?](https://exonum.com/doc/get-started/what-is-exonum/)
   - [User guide](https://exonum.com/doc/) <!-- TODO: Add a proper link to the user guide-->
-  - [Contributing guide](CONTRIBUTING.md)
+  - [Contribution guide](CONTRIBUTING.md)
+  - [Code of conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 
 ## License
-TODO:
+This project is licensed under the Apache License, Version 2.0.
