@@ -15,7 +15,10 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [patch.crates-io]
-exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumoxide.git", branch = "exclude-1604-ECR-846" }
+# FIXME Remove with exonum 0.8+.
+exonum_rocksdb = { git = "https://github.com/alexander-irbis/exonum_rocksdb.git", branch = "fix-build" }
+# FIXME Remove with exonum 0.8+.
+exonum_sodiumoxide = { git = "https://github.com/alexander-irbis/exonum_sodiumoxide.git", branch = "fix-build-old" }
 
 [dependencies]
 # ¡Please keep README.md in sync with the Exonum version,
