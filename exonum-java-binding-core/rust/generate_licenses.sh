@@ -3,5 +3,5 @@
 
 cargo license -h || cargo install cargo-license
 
-cargo license -da | sed 's@registry+https://github.com/rust-lang/crates.io-index, @@g' | sed 's/\x1b\[[0-9;]*m//g' > NATIVE_LICENSES
+cargo license -da | sed 's@registry+https://github.com/rust-lang/crates.io-index, @@g' | sed 's/\x1b\[[0-9;]*m//g' > target/LICENSES-THIRD-PARTY-NATIVE
 
