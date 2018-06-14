@@ -1,18 +1,18 @@
-# Exonum Java Binding Contributing Guide
+# Exonum Java Binding Contribution Guide
 
 Exonum Java Binding is open to any contributions, whether 
 it is a feedback on existing features, a request for a new one, a bug report
 or a pull request. This document describes how to work with this project: 
-  * how to [build](#how-to-build) it,
-  * how to [test](#tests) it,
-  * the [code style guidelines](#the-code-style),
-  * how to [submit an issue](#Submitting-issues),
+  * how to [build](#how-to-build) it
+  * how to [test](#tests) it
+  * the [code style guidelines](#the-code-style)
+  * how to [submit an issue](#Submitting-issues)
   * how to [submit a PR](#Submitting-pull-requests).
 
-## How to build
-### System dependencies
+## How to Build
+### System Dependencies
 You need to install the following dependencies:
-  * Linux or macOS — Windows support is coming soon. <!-- todo: Link roadmap? -->
+  * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
   * [JDK 1.8+](http://jdk.java.net/10/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * The latest stable [Rust](https://www.rust-lang.org/).
@@ -26,7 +26,7 @@ $ mvn install
 ```
 
 ## Modules
-The project is split into a couple of modules. Here are the main:
+The project is split into several modules. Here are the main ones:
   * [`core`](exonum-java-binding-core) contains the APIs to define and implement an 
   [Exonum service](https://exonum.com/doc/get-started/design-overview/#modularity-and-services).
   * [`core-native`](exonum-java-binding-core/rust) contains the glue code between Java and Rust.
@@ -39,7 +39,7 @@ The project is split into a couple of modules. Here are the main:
   <!-- TODO: a link to a getting started guide/generating a project -->
 
 ## Tests
-### Categories of tests
+### Categories of Tests
 There are several categories of tests:
   * Unit tests in Java and Rust modules.
   * Integration tests in Java, some of which require a native library.
@@ -49,7 +49,7 @@ There are several categories of tests:
   * System tests — these are currently performed internally 
     and use a [QA-service](exonum-java-binding-qa-service).
 
-### Running tests
+### Running Tests
 <!-- TODO: Shall we explain what `mvn install` runs, and what `run_all_tests`? -->
 To run the unit and integration tests, invoke this script:
 ```$sh
@@ -61,13 +61,13 @@ Integration tests in Rust may be run separately with this script:
 $ ./run_native_integration_tests.sh
 ```
 
-### Writing tests
+### Writing Tests
 #### Java
 Use JUnit + [Mockito](https://github.com/mockito/mockito) or hand-written fakes.
 Currently there is no project-wide default for an assertion library: 
 Hamcrest and AssertJ are used in various modules.
 
-##### Integration tests in core
+##### Integration Tests in core
 The integration tests in `core` are bound to `verify` phase of the Maven build. 
 The name of IT classes must end with `IntegrationTest`. 
 If your test verifies the behaviour of a class with native methods, 
@@ -82,7 +82,7 @@ to the JVM running tests, see the failsafe plugin configuration.
 Most Rust integration tests require a path to `libjvm.so` in `LD_LIBRARY_PATH` to run.
 It’s more convenient to use the script: `./run_native_integration_tests.sh`.
 
-## The code style
+## The Code Style
 ### Java
 Java code must follow the [Google code style](https://google.github.io/styleguide/javaguide.html).
 [Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project 
@@ -103,13 +103,13 @@ $ cd exonum-java-binding-core/rust
 $ cargo fmt --all -- --write-mode=diff
 ```
 
-## Submitting issues
+## Submitting Issues
 Use Github Issues to submit an issue, whether it is a question, some feedback, a bug or a feature request:
 https://github.com/exonum/exonum-java-binding/issues/new
 
-The JIRA we use internally is not publicly available yet.
+JIRA is for internal use so far and is not publicly available yet.
 
-## Submitting pull requests
+## Submitting Pull Requests
 Before starting to work on a PR, please submit an issue describing the intended changes.
 Chances are — we are already working on something similar. If not — we can then offer some
 help with the requirements, design, implementation or documentation.
