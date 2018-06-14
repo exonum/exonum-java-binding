@@ -13,7 +13,7 @@ public interface Message {
   int VERSION_OFFSET = 1;
   int MESSAGE_TYPE_OFFSET = 2;
   int SERVICE_ID_OFFSET = 4;
-  int BODY_LENGTH_OFFSET = 6;
+  int PAYLOAD_LENGTH_OFFSET = 6;
   int HEADER_SIZE = 10;
   int BODY_OFFSET = HEADER_SIZE;
   int SIGNATURE_SIZE = 64;

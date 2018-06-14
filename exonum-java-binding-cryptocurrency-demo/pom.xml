@@ -19,12 +19,23 @@
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
-    <gson.version>2.8.2</gson.version>
-    <equalsverifier.version>2.4.4</equalsverifier.version>
+    <gson.version>2.8.5</gson.version>
+    <protobuf.version>3.5.1</protobuf.version>
     <exonum-bom.version>1.0.0</exonum-bom.version>
+    <exonum-java-testing.version>1.0-SNAPSHOT</exonum-java-testing.version>
   </properties>
 
   <build>
+    <extensions>
+      <!-- Use an extension that sets the OS classifier, required to locate
+           the correct protoc executable -->
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.6.0</version>
+      </extension>
+    </extensions>
+
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -45,6 +56,24 @@
             ${java.vm.assertionFlag}
           </argLine>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.5.1</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -94,6 +123,19 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-testing</artifactId>
+      <version>${exonum-java-testing.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
@@ -114,7 +156,6 @@
     <dependency>
       <groupId>nl.jqno.equalsverifier</groupId>
       <artifactId>equalsverifier</artifactId>
-      <version>${equalsverifier.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

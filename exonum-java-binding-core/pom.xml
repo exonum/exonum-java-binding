@@ -26,8 +26,8 @@
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
-    <auto-value.version>1.5.3</auto-value.version>
-    <kalium.version>0.7.0</kalium.version>
+    <auto-value.version>1.6</auto-value.version>
+    <kalium.version>0.8.0</kalium.version>
   </properties>
 
   <build>
@@ -153,7 +153,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.20</version>
         <configuration>
           <includes>
             <include>**/*IntegrationTest.java</include>
@@ -269,6 +268,12 @@
 
     <dependency>
       <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value-annotations</artifactId>
+      <version>${auto-value.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
       <artifactId>auto-value</artifactId>
       <version>${auto-value.version}</version>
       <scope>provided</scope>
@@ -331,6 +336,12 @@
       <groupId>org.abstractj.kalium</groupId>
       <artifactId>kalium</artifactId>
       <version>${kalium.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>nl.jqno.equalsverifier</groupId>
+      <artifactId>equalsverifier</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
