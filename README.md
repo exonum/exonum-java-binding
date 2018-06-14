@@ -12,4 +12,5 @@ Exonum Java Binding is a framework for building blockchain applications in Java,
   - [Code of conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 
 ## License
-This project is licensed under the Apache License, Version 2.0.
+This project is licensed under the Apache License, Version 2.0. 
+See [LICENSE](LICENSE) for details.
