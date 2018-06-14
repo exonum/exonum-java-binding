@@ -4,6 +4,8 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
+use std::sync::Arc;
+
 use futures::Stream;
 use futures::sync::mpsc::{self, Receiver};
 use integration_tests::mock::transaction::create_mock_transaction;
@@ -21,8 +23,8 @@ use java_bindings::utils::{as_handle, get_and_clear_java_exception, get_class_na
                            unwrap_jni_verbose};
 
 lazy_static! {
-    static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 #[test]

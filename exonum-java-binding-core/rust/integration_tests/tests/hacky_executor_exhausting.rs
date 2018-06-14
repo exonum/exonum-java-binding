@@ -8,9 +8,10 @@ use java_bindings::{JniExecutor, HackyExecutor};
 use java_bindings::jni::JavaVM;
 
 use std::thread::spawn;
+use std::sync::Arc;
 
 lazy_static! {
-    pub static ref VM: JavaVM = create_vm_for_tests();
+    pub static ref VM: Arc<JavaVM> = create_vm_for_tests();
 }
 
 #[test]
@@ -18,7 +19,7 @@ lazy_static! {
 fn exhausted_thread_limit() {
     const THREAD_NUM: usize = 4;
 
-    let executor = HackyExecutor::new(&VM, THREAD_NUM - 1);
+    let executor = HackyExecutor::new(VM.clone(), THREAD_NUM - 1);
     for _ in 0..THREAD_NUM - 1 {
         let executor = executor.clone();
         let jh = spawn(move || executor.with_attached(|_| Ok(())).unwrap());

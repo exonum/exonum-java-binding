@@ -9,11 +9,13 @@ use java_bindings::jni::JavaVM;
 use integration_tests::vm::{create_vm_for_leak_tests, KIB, MIB};
 use rand::prelude::*;
 
+use std::sync::Arc;
+
 const MEMORY_LIMIT_MIB: usize = 32;
 
 lazy_static! {
-    static ref JVM: JavaVM = create_vm_for_leak_tests(MEMORY_LIMIT_MIB);
-    static ref EXECUTOR: MainExecutor = MainExecutor::new(&JVM);
+    static ref JVM: Arc<JavaVM> = Arc::new(create_vm_for_leak_tests(MEMORY_LIMIT_MIB));
+    static ref EXECUTOR: MainExecutor = MainExecutor::new(JVM.clone());
 }
 
 /// Tests that an implementation of the Executor does not leak the local references

@@ -3,6 +3,7 @@ use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 /// Kibibyte
 pub const KIB: usize = 1024;
@@ -12,22 +13,22 @@ pub const MIB: usize = KIB * KIB;
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
-pub fn create_vm_for_benchmarks() -> JavaVM {
-    create_vm(false, false)
+pub fn create_vm_for_benchmarks() -> Arc<JavaVM> {
+    Arc::new(create_vm(false, false))
 }
 
 /// Creates a configured `JavaVM` for tests.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
-pub fn create_vm_for_tests() -> JavaVM {
-    create_vm(true, false)
+pub fn create_vm_for_tests() -> Arc<JavaVM> {
+    Arc::new(create_vm(true, false))
 }
 
 /// Creates a configured `JavaVM` for tests with fake classes.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
-pub fn create_vm_for_tests_with_fake_classes() -> JavaVM {
-    create_vm(true, true)
+pub fn create_vm_for_tests_with_fake_classes() -> Arc<JavaVM> {
+    Arc::new(create_vm(true, true))
 }
 
 /// Creates a configured `JavaVM`.
@@ -38,7 +39,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     );
 
     if with_fakes {
-        jvm_args_builder = jvm_args_builder.option(&get_classpath_option());
+        jvm_args_builder = jvm_args_builder.option(&get_fakes_classpath_option());
     }
     if debug {
         jvm_args_builder = jvm_args_builder.option("-Xcheck:jni").option("-Xdebug");
@@ -64,7 +65,34 @@ pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
+fn get_fakes_classpath_option() -> String {
+    format!("-Djava.class.path={}", get_fakes_classpath())
+}
+
+pub fn get_fakes_classpath() -> String {
+    let classpath_txt_path =
+        project_root_dir().join("exonum-java-binding-fakes/target/ejb-fakes-classpath.txt");
+
+    let mut class_path = String::new();
+    File::open(classpath_txt_path)
+        .expect("Can't open classpath.txt")
+        .read_to_string(&mut class_path)
+        .expect("Failed to read classpath.txt");
+
+    let fakes_path = project_root_dir().join("exonum-java-binding-fakes/target/classes/");
+    let fakes_classes = fakes_path.to_str().expect(
+        "Failed to convert FS path into utf-8",
+    );
+
+    // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
+    format!("{}:{}", class_path, fakes_classes)
+}
+
 fn get_libpath_option() -> String {
+    format!("-Djava.library.path={}", get_libpath())
+}
+
+pub fn get_libpath() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
@@ -72,11 +100,10 @@ fn get_libpath_option() -> String {
             "Target path not found, but there should be \
             the libjava_bindings dynamically loading library",
         );
-    let library_path = library_path.to_str().expect(
-        "Failed to convert FS path into utf-8",
-    );
-
-    format!("-Djava.library.path={}", library_path)
+    library_path
+        .to_str()
+        .expect("Failed to convert FS path into utf-8")
+        .to_owned()
 }
 
 fn rust_project_root_dir() -> PathBuf {
@@ -101,23 +128,4 @@ fn target_path() -> &'static str {
 #[cfg(not(debug_assertions))]
 fn target_path() -> &'static str {
     "target/release"
-}
-
-fn get_classpath_option() -> String {
-    let classpath_txt_path =
-        project_root_dir().join("exonum-java-binding-fakes/target/ejb-fakes-classpath.txt");
-
-    let mut class_path = String::new();
-    File::open(classpath_txt_path)
-        .expect("Can't open classpath.txt")
-        .read_to_string(&mut class_path)
-        .expect("Failed to read classpath.txt");
-
-    let fakes_path = project_root_dir().join("exonum-java-binding-fakes/target/classes/");
-    let fakes_classes = fakes_path.to_str().expect(
-        "Failed to convert FS path into utf-8",
-    );
-
-    // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
-    format!("-Djava.class.path={}:{}", class_path, fakes_classes)
 }

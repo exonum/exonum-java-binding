@@ -2,6 +2,7 @@ package com.exonum.binding.service;
 
 import static com.exonum.binding.messages.TemplateMessage.TEMPLATE_MESSAGE;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -11,6 +12,7 @@ import com.exonum.binding.messages.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -29,6 +31,7 @@ public class ServiceBootstrapIntegrationTest {
     UserServiceAdapter service = ServiceBootstrap.startService(
         UserModule.class.getCanonicalName(), 0);
 
+    // Check the service and its dependencies work as expected.
     assertThat(service.getId(), equalTo(UserService.ID));
     assertThat(service.getName(), equalTo(UserService.NAME));
     BinaryMessage message = new Message.Builder()
@@ -39,6 +42,12 @@ public class ServiceBootstrapIntegrationTest {
 
     UserTransactionAdapter transactionAdapter = service.convertTransaction(messageBytes);
     assertTrue(transactionAdapter.isValid());
+
+    // Check that once startService returns, the native library is loaded. If it’s not,
+    // we’ll get an UnsatisfiedLinkError.
+    try (MemoryDb database = new MemoryDb()) {
+      assertNotNull(database);
+    }
   }
 
   @Test

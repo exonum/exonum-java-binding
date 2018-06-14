@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -30,9 +31,11 @@ class ServiceBootstrap {
   @SuppressWarnings({"unused", "SameParameterValue"})  // Native API
   static UserServiceAdapter startService(String serviceModuleName, int serverPort) {
     try {
+      // Create the injector.
       Injector injector = Guice.createInjector(new FrameworkModule(),
           createUserModule(serviceModuleName));
 
+      // Start the HTTP server providing transport of requests.
       Server server = injector.getInstance(Server.class);
       Runtime.getRuntime().addShutdownHook(
           new Thread(() -> {
@@ -45,6 +48,10 @@ class ServiceBootstrap {
       );
       server.start(serverPort);
 
+      // Load the native libraries.
+      LibraryLoader.load();
+
+      // Instantiate the user service.
       return injector.getInstance(UserServiceAdapter.class);
     } catch (Throwable t) {
       String message = "Failed to start a service " + serviceModuleName + ":";

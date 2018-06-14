@@ -13,12 +13,14 @@ use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB, Snapshot};
 use java_bindings::jni::JavaVM;
 
+use std::sync::Arc;
+
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 lazy_static! {
-    static ref VM: JavaVM = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(&VM);
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 #[test]

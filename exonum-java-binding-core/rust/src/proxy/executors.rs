@@ -67,12 +67,12 @@ impl<'t, T: JniExecutor> JniExecutor for &'t T {
 #[derive(Clone)]
 pub struct DumbExecutor {
     /// The main JVM interface, which allows to attach threads.
-    vm: &'static JavaVM,
+    vm: Arc<JavaVM>,
 }
 
 impl DumbExecutor {
     /// Creates a `DumbExecutor`
-    pub fn new(vm: &'static JavaVM) -> Self {
+    pub fn new(vm: Arc<JavaVM>) -> Self {
         DumbExecutor { vm }
     }
 }
@@ -106,7 +106,7 @@ impl JniExecutor for DumbExecutor {
 #[derive(Clone)]
 pub struct HackyExecutor {
     /// The main JVM interface, which allows to attach threads.
-    vm: &'static JavaVM,
+    vm: Arc<JavaVM>,
     attach_limit: usize,
     num_attached_threads: Arc<Mutex<usize>>,
 }
@@ -116,7 +116,7 @@ impl HackyExecutor {
 
     /// Creates `HackyExecutor`.
     #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
-    pub fn new(vm: &'static JavaVM, attach_limit: usize) -> Self {
+    pub fn new(vm: Arc<JavaVM>, attach_limit: usize) -> Self {
         let num_attached_threads = Arc::new(Mutex::new(0));
         HackyExecutor {
             vm,
@@ -188,7 +188,7 @@ pub struct MainExecutor(DumbExecutor);
 
 impl MainExecutor {
     /// Creates a `MainExecutor`
-    pub fn new(vm: &'static JavaVM) -> Self {
+    pub fn new(vm: Arc<JavaVM>) -> Self {
         MainExecutor(DumbExecutor::new(vm))
     }
 }

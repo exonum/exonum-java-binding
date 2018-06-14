@@ -9,9 +9,11 @@ use integration_tests::vm::create_vm_for_tests;
 use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
 
+use std::sync::Arc;
+
 lazy_static! {
-    pub static ref VM: JavaVM = create_vm_for_tests();
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor::new(&VM);
+    pub static ref VM: Arc<JavaVM> = create_vm_for_tests();
+    pub static ref EXECUTOR: DumbExecutor = DumbExecutor::new(VM.clone());
 }
 
 #[test]
