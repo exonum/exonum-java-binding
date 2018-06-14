@@ -7,7 +7,7 @@
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
 
   <artifactId>exonum-java-binding-bom</artifactId>
@@ -17,8 +17,8 @@
   <name>Exonum Java Binding: Bill of Materials</name>
 
   <properties>
-    <exonum-core.version>1.0-SNAPSHOT</exonum-core.version>
-    <exonum-java-proofs.version>1.0-SNAPSHOT</exonum-java-proofs.version>
+    <exonum-core.version>0.1.0</exonum-core.version>
+    <exonum-java-proofs.version>0.1.0</exonum-java-proofs.version>
     <guice.version>4.2.0</guice.version>
     <log4j.version>2.11.0</log4j.version>
     <guava.version>25.1-jre</guava.version>

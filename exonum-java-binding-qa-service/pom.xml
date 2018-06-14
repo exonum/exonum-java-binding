@@ -5,13 +5,13 @@
     <parent>
         <artifactId>exonum-java-binding-parent</artifactId>
         <groupId>com.exonum.binding</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
     <artifactId>exonum-java-binding-qa-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>Exonum Java Binding: QA Java service</name>
     <description>A simple Exonum Java service for QA purposes.</description>
 
@@ -43,6 +43,13 @@
                         -Djava.library.path=${ejb-core.nativeLibPath}
                         ${java.vm.assertionFlag}
                     </argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
