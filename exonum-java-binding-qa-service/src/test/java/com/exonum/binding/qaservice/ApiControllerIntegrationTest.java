@@ -343,7 +343,7 @@ public class ApiControllerIntegrationTest {
         ar -> context.verify(v -> {
           assertThat(ar.statusCode()).isEqualTo(HTTP_CREATED);
           assertThat(ar.getHeader("Location"))
-              .isEqualTo("/api/system/v1/transactions/" + expectedTxHash);
+              .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash);
           assertThat(ar.bodyAsString())
               .isEqualTo(expectedTxHash.toString());
         })

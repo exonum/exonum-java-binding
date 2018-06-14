@@ -177,7 +177,7 @@ final class ApiController {
   }
 
   private String transactionLocationPath(HashCode txHash) {
-    return "/api/system/v1/transactions/" + txHash;
+    return "/api/explorer/v1/transactions/" + txHash;
   }
 
   private void failureHandler(RoutingContext rc) {
