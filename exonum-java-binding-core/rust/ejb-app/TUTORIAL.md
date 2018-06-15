@@ -13,6 +13,8 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 
 ### Step 2. Configuring environment
 
+`EJB_ROOT` used in examples of this section corresponds to the Java Binding root directory.
+
 #### LD_LIBRARY_PATH
 
 `LD_LIBRARY_PATH` is used to locate native libraries used by Java Binding.
@@ -31,7 +33,7 @@ export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 d
 Classpath is used to locate Java classes of your service and internal ones of Java Binding.
 Take classpaths for every Java library you use.
 
-Classpath of EJB core is written into `exonum-java-binding-core/target/ejb-core-classpath.txt` file.
+Classpath of EJB core is written into `$EJB_ROOT/exonum-java-binding-core/target/ejb-core-classpath.txt` file.
 For your own service libary, you can use the following plugin in your `pom.xml` file:
 
 ```xml
@@ -54,14 +56,14 @@ For your own service libary, you can use the following plugin in your `pom.xml` 
 
 This plugin will generate classpath for your service and save it into `service-classpath.txt` file in `target` directory.
 
-Do not forget to add `exonum-java-binding-core/target/classes` directory to your classpath collection as well.
+Do not forget to add `$EJB_ROOT/exonum-java-binding-core/target/classes` directory to your classpath collection as well.
 Keep it separately, as we will use separate parameter for it while configuring Exonum node.
 
 #### LIBPATH
 
 Libpath is a path to native libraries used by Java Binding (for example, Java Binding needs Exonum native libraries).
 
-Take `exonum-java-binding-core/rust/target/debug` as your `LIBPATH`.
+Take `$EJB_ROOT/exonum-java-binding-core/rust/target/debug` as your `LIBPATH`.
 
 You should also add your `LIBPATH` to your `LD_LIBRARY_PATH`.
 
