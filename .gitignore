@@ -17,6 +17,7 @@ out/
 # Rust stuff
 **/Cargo.lock
 **/*.rs.bk
+.cargo/
 
 # Maven target
 target/

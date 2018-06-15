@@ -1,3 +1,20 @@
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use exonum::crypto::Hash;
+use exonum::storage::{Snapshot, Fork, ProofListIndex};
+use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
 use jni::JNIEnv;
 use jni::errors::Result;
 use jni::objects::{JClass, JObject, JString};
@@ -6,11 +23,8 @@ use jni::sys::{jlong, jint, jbyteArray, jboolean, jobject};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, ProofListIndex};
-use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
-use exonum::crypto::Hash;
+use storage::db::{View, ViewRef, Value};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = ProofListIndex<T, Value>;
 

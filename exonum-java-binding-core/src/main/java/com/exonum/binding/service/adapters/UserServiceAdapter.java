@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.service.adapters;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -105,7 +121,7 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public String initialize(long forkHandle) {
+  public @Nullable String initialize(long forkHandle) {
     assert forkHandle != 0;
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
@@ -118,10 +134,10 @@ public class UserServiceAdapter {
 
   public void mountPublicApiHandler(long nodeNativeHandle) {
     checkState(node == null, "There is a node already: are you calling this method twice?");
-    node = new NodeProxy(nodeNativeHandle);
+    node = new NodeProxy(nodeNativeHandle, viewFactory);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
-    server.mountSubRouter(getName(), router);
+    server.mountSubRouter("/" + getName(), router);
   }
 
   /**

@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.messages;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -13,7 +29,7 @@ public interface Message {
   int VERSION_OFFSET = 1;
   int MESSAGE_TYPE_OFFSET = 2;
   int SERVICE_ID_OFFSET = 4;
-  int BODY_LENGTH_OFFSET = 6;
+  int PAYLOAD_LENGTH_OFFSET = 6;
   int HEADER_SIZE = 10;
   int BODY_OFFSET = HEADER_SIZE;
   int SIGNATURE_SIZE = 64;
