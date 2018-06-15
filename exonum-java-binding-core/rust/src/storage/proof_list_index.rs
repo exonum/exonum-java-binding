@@ -151,8 +151,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 ) -> jbyteArray{
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.root_hash(),
-            IndexType::ForkIndex(ref list) => list.root_hash(),
+            IndexType::SnapshotIndex(ref list) => list.merkle_root(),
+            IndexType::ForkIndex(ref list) => list.merkle_root(),
         };
         utils::convert_hash(&env, &hash)
     });
