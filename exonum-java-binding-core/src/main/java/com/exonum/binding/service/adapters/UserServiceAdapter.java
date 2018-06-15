@@ -134,7 +134,7 @@ public class UserServiceAdapter {
 
   public void mountPublicApiHandler(long nodeNativeHandle) {
     checkState(node == null, "There is a node already: are you calling this method twice?");
-    node = new NodeProxy(nodeNativeHandle);
+    node = new NodeProxy(nodeNativeHandle, viewFactory);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
     server.mountSubRouter("/" + getName(), router);

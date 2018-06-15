@@ -23,10 +23,10 @@ import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
-import com.exonum.binding.proxy.AbstractNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
+import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.storage.database.Snapshot;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
@@ -40,16 +40,19 @@ import org.apache.logging.log4j.Logger;
 public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
 
   private static final Logger logger = LogManager.getLogger(NodeProxy.class);
+  private final ViewFactory viewFactory;
 
   /**
    * Creates a proxy of a node. Native code owns the node,
    * and, therefore, shall destroy the object.
    *
    * @param nativeHandle an implementation-specific reference to a native node
+   * @param viewFactory a factory to instantiate native database views
    */
-  public NodeProxy(long nativeHandle) {
+  public NodeProxy(long nativeHandle, ViewFactory viewFactory) {
     // fixme: remove this comment when https://jira.bf.local/browse/ECR-251 is resolved
     super(nativeHandle, false);
+    this.viewFactory = viewFactory;
   }
 
   /**
@@ -71,7 +74,10 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
     byte[] data = messageBuffer.array();
     int offset = messageBuffer.arrayOffset();
     int size = messageBuffer.remaining();
-    nativeSubmit(getNativeHandle(), new UserTransactionAdapter(transaction), data, offset, size);
+
+    UserTransactionAdapter txAdapter = new UserTransactionAdapter(transaction, viewFactory);
+
+    nativeSubmit(getNativeHandle(), txAdapter, data, offset, size);
   }
 
   /**
