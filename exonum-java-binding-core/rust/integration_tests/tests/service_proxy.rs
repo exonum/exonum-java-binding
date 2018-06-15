@@ -8,17 +8,16 @@ use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
 use integration_tests::test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY,
                                       INITIAL_ENTRY_VALUE};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::MainExecutor;
 use java_bindings::exonum::blockchain::Service;
 use java_bindings::exonum::crypto::hash;
 use java_bindings::exonum::encoding::Error as MessageError;
 use java_bindings::exonum::messages::RawTransaction;
 use java_bindings::exonum::storage::{Database, MemoryDB};
 use java_bindings::jni::JavaVM;
+use java_bindings::MainExecutor;
 use java_bindings::serde_json::Value;
 use java_bindings::utils::any_to_string;
-
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::Arc;
 
 lazy_static! {
@@ -26,7 +25,7 @@ lazy_static! {
     pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
-const EXCEPTION_CLASS: &str = "java/lang/Exception";
+const EXCEPTION_CLASS: &str = "java/lang/RuntimeException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 const TEST_CONFIG_JSON: &str = r#""test config""#;
@@ -110,7 +109,7 @@ fn tx_from_raw_should_return_err_if_java_exception_occurred() {
         "This transaction should be de-serialized with an error!",
     );
     if let MessageError::Basic(ref s) = err {
-        assert!(s.starts_with("Java exception: java.lang.Exception"));
+        assert!(s.starts_with("Java exception: java.lang.RuntimeException"));
     } else {
         panic!("Unexpected error message {:#?}", err);
     }
@@ -162,7 +161,7 @@ fn initialize_config_parse_error() {
 }
 
 #[test]
-#[should_panic(expected = "Java exception: java.lang.Exception")]
+#[should_panic(expected = "Java exception: java.lang.RuntimeException")]
 fn initialize_should_panic_if_java_exception_occurred() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
