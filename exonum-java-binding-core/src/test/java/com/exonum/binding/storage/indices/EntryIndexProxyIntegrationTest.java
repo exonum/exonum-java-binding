@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -7,12 +23,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -93,27 +110,15 @@ public class EntryIndexProxyIntegrationTest
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void closeMustDetectUseAfterViewFreed() throws Exception {
-    View view = database.createSnapshot();
-    EntryIndexProxy<String> entry = create(ENTRY_NAME, view);
-
-    view.close();
-
-    expectedException.expect(IllegalStateException.class);
-    entry.close();
-  }
-
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<EntryIndexProxy<String>> entryTest) {
-    runTestWithView(viewSupplier, (ignoredView, entry) -> entryTest.accept(entry));
+    runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       BiConsumer<View, EntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         ENTRY_NAME,
         EntryIndexProxy::newInstance,
         entryTest
@@ -123,5 +128,10 @@ public class EntryIndexProxyIntegrationTest
   @Override
   EntryIndexProxy<String> create(String name, View view) {
     return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
+  Object getAnyElement(EntryIndexProxy<String> index) {
+    return index.get();
   }
 }

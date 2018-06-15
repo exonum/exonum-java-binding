@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
@@ -10,6 +26,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
@@ -105,34 +123,35 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeNewCounter() {
+  public void executeNewCounter() throws CloseFailuresException {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
 
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Execute the transaction
       tx.execute(view);
 
       // Check it has added entries in both maps.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-        HashCode nameHash = Hashing.defaultHashFunction()
-            .hashString(name, UTF_8);
+      HashCode nameHash = Hashing.defaultHashFunction()
+          .hashString(name, UTF_8);
 
-        assertThat(counters.get(nameHash), equalTo(0L));
-        assertThat(counterNames.get(nameHash), equalTo(name));
-      }
+      assertThat(counters.get(nameHash), equalTo(0L));
+      assertThat(counterNames.get(nameHash), equalTo(name));
     }
   }
 
   @Test
-  public void executeAlreadyExistingCounter() {
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeAlreadyExistingCounter() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       String name = "counter";
       Long value = 100500L;
       HashCode nameHash = Hashing.defaultHashFunction()
@@ -147,11 +166,11 @@ public class CreateCounterTxIntegrationTest {
 
       // Check it has not changed the entries in the maps.
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        assertThat(counters.get(nameHash), equalTo(value));
-        assertThat(counterNames.get(nameHash), equalTo(name));
-      }
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      assertThat(counterNames.get(nameHash), equalTo(name));
+
+      MapIndex<HashCode, Long> counters = schema.counters();
+      assertThat(counters.get(nameHash), equalTo(value));
     }
   }
 
@@ -191,10 +210,9 @@ public class CreateCounterTxIntegrationTest {
   static void createCounter(Fork view, String name, Long initialValue) {
     HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
     QaSchema schema = new QaSchema(view);
-    try (MapIndex<HashCode, Long> counters = schema.counters();
-         MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-      counters.put(nameHash, initialValue);
-      counterNames.put(nameHash, name);
-    }
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> counterNames = schema.counterNames();
+    counters.put(nameHash, initialValue);
+    counterNames.put(nameHash, name);
   }
 }

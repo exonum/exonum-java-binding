@@ -1,3 +1,17 @@
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use exonum::storage::{Snapshot, Fork, MapIndex};
 use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
 use jni::JNIEnv;
@@ -43,11 +57,36 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns a pointer to the created `MapIndex` instance in an index family (= group).
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nativeCreateInGroup(
+    env: JNIEnv,
+    _: JClass,
+    group_name: JString,
+    map_id: jbyteArray,
+    view_handle: Handle,
+) -> Handle {
+    let res = panic::catch_unwind(|| {
+        let group_name = utils::convert_to_string(&env, group_name)?;
+        let map_id = env.convert_byte_array(map_id)?;
+        let view_ref = utils::cast_handle::<View>(view_handle).get();
+        Ok(utils::to_handle(match *view_ref {
+            ViewRef::Snapshot(snapshot) => {
+                IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
+            }
+            ViewRef::Fork(ref mut fork) => {
+                IndexType::ForkIndex(Index::new_in_family(group_name, &map_id, fork))
+            }
+        }))
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Destroys the underlying `MapIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     map_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, map_handle);

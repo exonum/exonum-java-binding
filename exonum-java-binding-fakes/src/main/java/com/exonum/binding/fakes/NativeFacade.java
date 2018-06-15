@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.fakes;
 
 import static org.mockito.Mockito.mock;
@@ -11,6 +27,8 @@ import com.exonum.binding.fakes.services.transactions.SetEntryTransaction;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
+import com.exonum.binding.service.adapters.ViewFactory;
+import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.ext.web.Router;
@@ -27,6 +45,8 @@ public final class NativeFacade {
     LibraryLoader.load();
   }
 
+  private static final ViewFactory VIEW_FACTORY = ViewProxyFactory.getInstance();
+
   /**
    * Creates a UserTransactionAdapter of a transaction that puts a given value into the storage.
    *
@@ -39,7 +59,7 @@ public final class NativeFacade {
                                                          String value,
                                                          String info) {
     SetEntryTransaction userTransaction = new SetEntryTransaction(valid, value, info);
-    return new UserTransactionAdapter(userTransaction);
+    return new UserTransactionAdapter(userTransaction, VIEW_FACTORY);
   }
 
   /**
@@ -52,14 +72,14 @@ public final class NativeFacade {
   public static UserTransactionAdapter createThrowingTransaction(
       Class<? extends Throwable> exceptionType) {
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
-    return new UserTransactionAdapter(transaction);
+    return new UserTransactionAdapter(transaction, VIEW_FACTORY);
   }
 
   /**
    * Creates a builder of UserServiceAdapter mocks. Use it to configure custom behaviour
    * of a system-under-test, including illegal behaviour.
    *
-   * @see UserServiceAdapterMockBuilder#stateHashesThrowing(Throwable)
+   * @see UserServiceAdapterMockBuilder#stateHashesThrowing(Class)
    * @see #createTestService()
    */
   public static UserServiceAdapterMockBuilder createServiceFakeBuilder() {
@@ -82,7 +102,7 @@ public final class NativeFacade {
   public static UserServiceAdapter createTestService() {
     Server server = createServerMock();
     TestService service = new TestService(TestSchema::new);
-    return new UserServiceAdapter(service, server);
+    return new UserServiceAdapter(service, server, VIEW_FACTORY);
   }
 
   private static Server createServerMock() {

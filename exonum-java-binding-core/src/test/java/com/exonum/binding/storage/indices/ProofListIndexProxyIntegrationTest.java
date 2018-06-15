@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
@@ -10,6 +26,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
@@ -17,7 +34,7 @@ import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,7 +66,7 @@ public class ProofListIndexProxyIntegrationTest {
 
   @Before
   public void setUp() throws Exception {
-    database = new MemoryDb();
+    database = MemoryDb.newInstance();
   }
 
   @After
@@ -148,15 +165,15 @@ public class ProofListIndexProxyIntegrationTest {
     });
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                Consumer<ProofListIndexProxy<String>> listTest) {
-    runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
+    runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                BiConsumer<View, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         LIST_NAME,
         ProofListIndexProxy::newInstance,
         listTest

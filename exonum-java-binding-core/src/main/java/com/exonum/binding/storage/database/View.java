@@ -1,11 +1,24 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.database;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-
-import com.exonum.binding.annotations.ImproveDocs;
 import com.exonum.binding.proxy.AbstractNativeProxy;
-import javax.annotation.Nullable;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
 
 /**
  * Represents a view of a database.
@@ -16,29 +29,22 @@ import javax.annotation.Nullable;
  *   <li>A fork, which is a <em>read-write</em> view.</li>
  * </ul>
  *
- * <p>As any native proxy, a view must be closed.
- *
  * @see Snapshot
  * @see Fork
  */
-@ImproveDocs(
-    assignee = "dt",
-    reason = "if all views become non-managed, consider changing the last paragraph."
-)
 public abstract class View extends AbstractNativeProxy {
+
+  private final Cleaner cleaner;
 
   /**
    * Create a new view proxy.
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
+   * @param cleaner a cleaner of resources
    */
-  View(long nativeHandle, boolean dispose) {
-    super(nativeHandle, dispose);
-  }
-
-  View(long nativeHandle, boolean dispose, @Nullable MemoryDb db) {
-    super(nativeHandle, dispose, (db == null) ? emptySet() : singleton(db));
+  View(NativeHandle nativeHandle, Cleaner cleaner) {
+    super(nativeHandle);
+    this.cleaner = cleaner;
   }
 
   /**
@@ -48,5 +54,12 @@ public abstract class View extends AbstractNativeProxy {
    */
   public long getViewNativeHandle() {
     return super.getNativeHandle();
+  }
+
+  /**
+   * Returns the cleaner of this view.
+   */
+  public Cleaner getCleaner() {
+    return cleaner;
   }
 }

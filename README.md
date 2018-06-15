@@ -3,12 +3,12 @@
 [![Build Status](https://www.travis-ci.com/exonum/exonum-java-binding.svg?token=2dVYazsUZFvBqHW82g4U&branch=master)](https://www.travis-ci.com/exonum/exonum-java-binding)
 
 ## How to build
-You need JDK 8, [Maven 3](https://maven.apache.org/download.cgi) 
-and [Rust](https://www.rust-lang.org/).
+You need JDK 8+, [Maven 3.5](https://maven.apache.org/download.cgi) 
+and the latest stable [Rust](https://www.rust-lang.org/).
 
 ### Install system dependencies
 Please install Rust and the system dependencies of Exonum. 
-The instructions are available [here](https://github.com/exonum/exonum/blob/v0.6/INSTALL.md).
+The instructions are available [here](https://exonum.com/doc/get-started/install/).
 You do _not_ need to manually fetch and compile Exonum.
 
 ### Build the project
@@ -84,3 +84,8 @@ The style guide of the project: https://google.github.io/styleguide/javaguide.ht
 [Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project 
 during `validate` phase (i.e., _before_ compilation). You can run code style checks explicitly 
 via `mvn checkstyle:check`.
+
+## LICENSE
+
+Exonum Java Binding is licensed under the Apache License (Version 2.0).
+See [LICENSE] for details.

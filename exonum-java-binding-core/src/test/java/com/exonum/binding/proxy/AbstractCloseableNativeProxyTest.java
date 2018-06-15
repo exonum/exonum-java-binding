@@ -1,6 +1,22 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.AbstractNativeProxy.INVALID_NATIVE_HANDLE;
+import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -22,7 +38,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class AbstractNativeProxyTest {
+public class AbstractCloseableNativeProxyTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -180,7 +196,7 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_DirectlyMultiReferenced0() throws Exception {
     long nativeHandle = 1L;
-    List<AbstractNativeProxy> referenced = asList(makeProxy(20L),
+    List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
         makeProxy(22L)
     );
@@ -202,7 +218,7 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_DirectMultiReferenced1() throws Exception {
     long nativeHandle = 1L;
-    List<AbstractNativeProxy> referenced = asList(makeProxy(20L),
+    List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
         makeProxy(22L)
     );
@@ -224,7 +240,7 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_DirectMultiReferenced2() throws Exception {
     long nativeHandle = 1L;
-    List<AbstractNativeProxy> referenced = asList(makeProxy(20L),
+    List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
         makeProxy(22L)
     );
@@ -246,7 +262,7 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_DirectMultiReferencedAll() throws Exception {
     long nativeHandle = 1L;
-    List<AbstractNativeProxy> referenced = asList(makeProxy(20L),
+    List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
         makeProxy(22L)
     );
@@ -257,7 +273,7 @@ public class AbstractNativeProxyTest {
 
     assertThat(proxy.getNativeHandle(), equalTo(nativeHandle));
 
-    referenced.forEach(NativeProxy::close);
+    referenced.forEach(CloseableNativeProxy::close);
 
     assertThat(proxy, hasInvalidReferences(referenced));
 
@@ -269,8 +285,8 @@ public class AbstractNativeProxyTest {
   public void getNativeHandle_DiamondReferenced() throws Exception {
     long nativeHandle = 1L;
 
-    AbstractNativeProxy referenced3 = makeProxy(30L);
-    List<AbstractNativeProxy> referenced2 = asList(
+    AbstractCloseableNativeProxy referenced3 = makeProxy(30L);
+    List<AbstractCloseableNativeProxy> referenced2 = asList(
         new NativeProxyFake(20L, true, referenced3),
         new NativeProxyFake(21L, true, referenced3)
     );
@@ -292,8 +308,8 @@ public class AbstractNativeProxyTest {
   public void getNativeHandle_ChainReferenced() throws Exception {
     long nativeHandle = 1L;
 
-    AbstractNativeProxy referenced4 = makeProxy(40L);
-    Collection<AbstractNativeProxy> referenced = singleton(
+    AbstractCloseableNativeProxy referenced4 = makeProxy(40L);
+    Collection<AbstractCloseableNativeProxy> referenced = singleton(
         new NativeProxyFake(20L, true,
             singleton(new NativeProxyFake(30L, true,
                 singleton(referenced4)))));
@@ -313,10 +329,10 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_ChainReferencedAllInvalid() throws Exception {
     // o->x->x->x
-    List<AbstractNativeProxy> transitivelyReferenced = new ArrayList<>();
+    List<AbstractCloseableNativeProxy> transitivelyReferenced = new ArrayList<>();
     NativeProxyFake proxy = null;
     for (int i = 0; i < 3; i++) {
-      Collection<AbstractNativeProxy> refProxy = (proxy == null)
+      Collection<AbstractCloseableNativeProxy> refProxy = (proxy == null)
           ? emptySet()
           : singleton(proxy);
       proxy = new NativeProxyFake((i + 1) * 10L, true, refProxy);
@@ -330,7 +346,7 @@ public class AbstractNativeProxyTest {
 
     // Shall destroy them in reverse order of their creation.
     for (int i = transitivelyReferenced.size() - 1; i >= 0; i--) {
-      AbstractNativeProxy p = transitivelyReferenced.get(i);
+      AbstractCloseableNativeProxy p = transitivelyReferenced.get(i);
       p.close();
     }
 
@@ -343,7 +359,7 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_InDirectMultiReferenced1() throws Exception {
     long nativeHandle = 1L;
-    List<AbstractNativeProxy> referenced3 = asList(makeProxy(30L),
+    List<AbstractCloseableNativeProxy> referenced3 = asList(makeProxy(30L),
         makeProxy(31L),
         makeProxy(32L)
     );
@@ -366,7 +382,7 @@ public class AbstractNativeProxyTest {
   @Test
   public void getNativeHandle_MultipleReferences() throws Exception {
     long nativeHandle = 1L;
-    AbstractNativeProxy referenced2 = makeProxy(21L);
+    AbstractCloseableNativeProxy referenced2 = makeProxy(21L);
     //  /¯o
     // o   \
     //  \___x
@@ -384,17 +400,18 @@ public class AbstractNativeProxyTest {
     proxy.getNativeHandle();
   }
 
-  private Matcher<AbstractNativeProxy> hasInvalidReferences(AbstractNativeProxy... expected) {
+  private Matcher<AbstractCloseableNativeProxy> hasInvalidReferences(
+      AbstractCloseableNativeProxy... expected) {
     return hasInvalidReferences(Arrays.asList(expected));
   }
 
-  private Matcher<AbstractNativeProxy> hasInvalidReferences(
-      Collection<AbstractNativeProxy> expected) {
-    return new TypeSafeMatcher<AbstractNativeProxy>() {
+  private Matcher<AbstractCloseableNativeProxy> hasInvalidReferences(
+      Collection<AbstractCloseableNativeProxy> expected) {
+    return new TypeSafeMatcher<AbstractCloseableNativeProxy>() {
 
       @Override
-      protected boolean matchesSafely(AbstractNativeProxy item) {
-        Set<AbstractNativeProxy> invalidReferences = item.getInvalidReferences();
+      protected boolean matchesSafely(AbstractCloseableNativeProxy item) {
+        Set<AbstractCloseableNativeProxy> invalidReferences = item.getInvalidReferences();
         return invalidReferences.size() == expected.size()
             && invalidReferences.containsAll(expected);
       }
@@ -406,7 +423,7 @@ public class AbstractNativeProxyTest {
       }
 
       @Override
-      protected void describeMismatchSafely(AbstractNativeProxy item,
+      protected void describeMismatchSafely(AbstractCloseableNativeProxy item,
                                             Description mismatchDescription) {
         mismatchDescription.appendText("was a proxy with invalid references: ")
             .appendValue(item.getInvalidReferences());
@@ -421,7 +438,7 @@ public class AbstractNativeProxyTest {
     return new NativeProxyFake(nativeHandle, true);
   }
 
-  private static class NativeProxyFake extends AbstractNativeProxy {
+  private static class NativeProxyFake extends AbstractCloseableNativeProxy {
 
     int timesDisposed;
 
@@ -432,12 +449,12 @@ public class AbstractNativeProxyTest {
     }
 
     NativeProxyFake(long nativeHandle, boolean dispose,
-                    AbstractNativeProxy referenced) {
+                    AbstractCloseableNativeProxy referenced) {
       this(nativeHandle, dispose, singleton(referenced));
     }
 
     NativeProxyFake(long nativeHandle, boolean dispose,
-                    Collection<AbstractNativeProxy> referenced) {
+                    Collection<AbstractCloseableNativeProxy> referenced) {
       super(nativeHandle, dispose, referenced);
       this.nativeHandle = nativeHandle;
       timesDisposed = 0;

@@ -5,14 +5,17 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
 
   <artifactId>exonum-java-binding-core</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Core</name>
+  <description>
+    A library that contains the APIs to define and implement an Exonum service.
+  </description>
 
   <properties>
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
@@ -26,7 +29,8 @@
     <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
     <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
-    <auto-value.version>1.5.3</auto-value.version>
+    <auto-value.version>1.6</auto-value.version>
+    <kalium.version>0.8.0</kalium.version>
   </properties>
 
   <build>
@@ -152,7 +156,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.20</version>
         <configuration>
           <includes>
             <include>**/*IntegrationTest.java</include>
@@ -254,7 +257,7 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-proofs</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>0.1.0</version>
     </dependency>
 
     <dependency>
@@ -282,6 +285,12 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>${guice.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value-annotations</artifactId>
+      <version>${auto-value.version}</version>
     </dependency>
 
     <dependency>
@@ -327,7 +336,32 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>0.1.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
+      <version>${guava.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.abstractj.kalium</groupId>
+      <artifactId>kalium</artifactId>
+      <version>${kalium.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>nl.jqno.equalsverifier</groupId>
+      <artifactId>equalsverifier</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

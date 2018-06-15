@@ -1,3 +1,17 @@
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use exonum::storage::{Snapshot, Fork, ListIndex};
 use exonum::storage::list_index::ListIndexIter;
 use jni::JNIEnv;
@@ -39,11 +53,36 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
     utils::unwrap_exc_or_default(&env, res)
 }
 
+/// Returns a pointer to the created `ListIndex` instance in an index family (= group).
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeCreateInGroup(
+    env: JNIEnv,
+    _: JClass,
+    group_name: JString,
+    list_id: jbyteArray,
+    view_handle: Handle,
+) -> Handle{
+    let res = panic::catch_unwind(|| {
+        let group_name = utils::convert_to_string(&env, group_name)?;
+        let list_id = env.convert_byte_array(list_id)?;
+        let view_ref = utils::cast_handle::<View>(view_handle).get();
+        Ok(utils::to_handle(match *view_ref {
+            ViewRef::Snapshot(snapshot) => {
+                IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
+            }
+            ViewRef::Fork(ref mut fork) => {
+                IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
+            }
+        }))
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Destroys the underlying `ListIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     list_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, list_handle);

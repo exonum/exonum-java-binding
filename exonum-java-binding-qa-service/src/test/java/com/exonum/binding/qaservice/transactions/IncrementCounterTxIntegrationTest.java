@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
@@ -12,6 +28,8 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Database;
@@ -85,9 +103,11 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeIncrementsCounter() {
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeIncrementsCounter() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
+
       // Add a new counter with the given name and initial value
       String name = "counter";
       long initialValue = 0;
@@ -101,17 +121,17 @@ public class IncrementCounterTxIntegrationTest {
 
       // Check the counter has an incremented value
       QaSchema schema = new QaSchema(view);
-      try (ProofMapIndexProxy<HashCode, Long> counters = schema.counters()) {
-        long expectedValue = initialValue + 1;
-        assertThat(counters.get(nameHash), equalTo(expectedValue));
-      }
+      ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
+      long expectedValue = initialValue + 1;
+      assertThat(counters.get(nameHash), equalTo(expectedValue));
     }
   }
 
   @Test
-  public void executeNoSuchCounter() {
-    try (Database db = new MemoryDb();
-         Fork view = db.createFork()) {
+  public void executeNoSuchCounter() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to update an unknown counter
       long seed = 0L;
       String name = "unknown-counter";
@@ -121,11 +141,10 @@ public class IncrementCounterTxIntegrationTest {
 
       // Check there isn’t such a counter after tx execution
       QaSchema schema = new QaSchema(view);
-      try (MapIndex<HashCode, Long> counters = schema.counters();
-           MapIndex<HashCode, String> counterNames = schema.counterNames()) {
-        assertFalse(counters.containsKey(nameHash));
-        assertFalse(counterNames.containsKey(nameHash));
-      }
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      assertFalse(counters.containsKey(nameHash));
+      assertFalse(counterNames.containsKey(nameHash));
     }
   }
 

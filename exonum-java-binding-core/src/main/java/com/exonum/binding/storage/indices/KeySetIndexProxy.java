@@ -1,12 +1,33 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.errorprone.annotations.MustBeClosed;
+import java.util.Iterator;
+import java.util.function.LongSupplier;
 
 /**
  * A key set is an index that contains no duplicate elements (keys).
@@ -26,14 +47,14 @@ import com.google.errorprone.annotations.MustBeClosed;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, the set <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed set is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this set is destroyed. Subsequent use of the closed set
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this set
  * @see ValueSetIndexProxy
  * @see View
  */
-public class KeySetIndexProxy<E> extends AbstractIndexProxy {
+public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Iterable<E> {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -45,17 +66,61 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @param view a database view. Must be valid. If a view is read-only,
    *             "destructive" operations are not permitted.
    * @param serializer a serializer of set keys
+   * @param <E> the type of keys in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> KeySetIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    return new KeySetIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreate(name, viewNativeHandle));
+
+    return new KeySetIndexProxy<>(setNativeHandle, name, view, s);
   }
 
-  private KeySetIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
+  /**
+   * Creates a new key set in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param indexId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of set keys
+   * @param <E> the type of keys in this set
+   * @return a new key set
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> KeySetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
+                                                         View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(indexId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle setNativeHandle = createNativeSet(view,
+        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle));
+
+    return new KeySetIndexProxy<>(setNativeHandle, groupName, view, s);
+  }
+
+  private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
+    Cleaner cleaner = view.getCleaner();
+    NativeHandle setNativeHandle = new NativeHandle(nativeSetConstructor.getAsLong());
+    ProxyDestructor.newRegistered(cleaner, setNativeHandle, KeySetIndexProxy.class,
+        KeySetIndexProxy::nativeFree);
+    return setNativeHandle;
+  }
+
+  private KeySetIndexProxy(NativeHandle nativeHandle, String name, View view,
+                           CheckingSerializerDecorator<E> serializer) {
+    super(nativeHandle, name, view);
     this.serializer = serializer;
   }
 
@@ -64,7 +129,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * the set already contains such element.
    *
    * @param e an element to add
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -89,7 +153,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
   /**
    * Returns true if this set contains the specified element.
    *
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    */
   public boolean contains(E e) {
@@ -106,13 +169,13 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 
    */
-  @MustBeClosed
-  public StorageIterator<E> iterator() {
+  @Override
+  public Iterator<E> iterator() {
     return StorageIterators.createIterator(
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        this,
+        dbView,
         modCounter,
         serializer::fromBytes);
   }
@@ -121,7 +184,6 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
    * Removes the element from this set. If it's not in the set, does nothing.
    * 
    * @param e an element to remove.
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
    */
@@ -131,12 +193,10 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
     nativeRemove(getNativeHandle(), dbElement);
   }
 
-  @Override
-  protected void disposeInternal() {
-    nativeFree(getNativeHandle());
-  }
-
   private static native long nativeCreate(String setName, long viewNativeHandle);
+
+  private static native long nativeCreateInGroup(String groupName, byte[] setId,
+                                                 long viewNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 
@@ -152,5 +212,5 @@ public class KeySetIndexProxy<E> extends AbstractIndexProxy {
 
   private native void nativeRemove(long nativeHandle, byte[] e);
 
-  private native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 }

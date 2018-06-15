@@ -1,3 +1,17 @@
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use exonum::storage::{Snapshot, Fork, Entry};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
@@ -42,7 +56,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeFree(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     entry_handle: Handle,
 ) {
     utils::drop_handle::<IndexType>(&env, entry_handle);

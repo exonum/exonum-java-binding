@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
@@ -39,19 +55,18 @@ public final class CreateCounterTx implements Transaction {
   @Override
   public void execute(Fork view) {
     QaSchema schema = new QaSchema(view);
-    try (MapIndex<HashCode, Long> counters = schema.counters();
-         MapIndex<HashCode, String> names = schema.counterNames()) {
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> names = schema.counterNames();
 
-      HashCode counterId = Hashing.defaultHashFunction()
-          .hashString(name, UTF_8);
-      if (counters.containsKey(counterId)) {
-        return;
-      }
-      assert !names.containsKey(counterId) : "counterNames must not contain the id of " + name;
-
-      counters.put(counterId, 0L);
-      names.put(counterId, name);
+    HashCode counterId = Hashing.defaultHashFunction()
+        .hashString(name, UTF_8);
+    if (counters.containsKey(counterId)) {
+      return;
     }
+    assert !names.containsKey(counterId) : "counterNames must not contain the id of " + name;
+
+    counters.put(counterId, 0L);
+    names.put(counterId, name);
   }
 
   @Override

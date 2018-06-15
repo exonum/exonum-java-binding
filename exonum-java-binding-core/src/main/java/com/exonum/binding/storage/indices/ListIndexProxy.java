@@ -1,12 +1,33 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
+import java.util.function.LongSupplier;
 
 /**
  * A list index proxy is a contiguous list of elements.
@@ -22,13 +43,13 @@ import java.util.NoSuchElementException;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, this list <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this list is destroyed. Subsequent use of the closed list
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
  * @see View
  */
-public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
+public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
   /**
    * Creates a new ListIndexProxy.
@@ -38,17 +59,62 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
    * @param view a database view. Must be valid.
    *             If a view is read-only, "destructive" operations are not permitted.
    * @param serializer a serializer of elements
+   * @param <E> the type of elements in this list
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
-   * @throws NullPointerException if any argument is null
    */
   public static <E> ListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    return new ListIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = createNativeList(view,
+        () -> nativeCreate(name, viewNativeHandle));
+
+    return new ListIndexProxy<>(listNativeHandle, name, view, s);
   }
 
-  private ListIndexProxy(String name, View view, CheckingSerializerDecorator<E> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view, serializer);
+  /**
+   * Creates a new list in a <a href="package-summary.html#families">collection group</a>
+   * with the given name.
+   *
+   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * @param groupName a name of the collection group
+   * @param listId an identifier of this collection in the group, see the caveats
+   * @param view a database view
+   * @param serializer a serializer of list elements
+   * @param <E> the type of elements in this list
+   * @return a new list proxy
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name or index id is empty
+   */
+  public static <E> ListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
+                                                       View view, Serializer<E> serializer) {
+    checkIndexName(groupName);
+    checkIdInGroup(listId);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle listNativeHandle = createNativeList(view,
+        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle));
+
+    return new ListIndexProxy<>(listNativeHandle, groupName, view, s);
+  }
+
+  private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
+    NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy.class,
+        ListIndexProxy::nativeFree);
+    return listNativeHandle;
+  }
+
+  private ListIndexProxy(NativeHandle nativeHandle, String name, View view,
+                         CheckingSerializerDecorator<E> serializer) {
+    super(nativeHandle, name, view, serializer);
   }
 
   /**
@@ -87,8 +153,10 @@ public class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements List
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
 
-  @Override
-  native void nativeFree(long nativeHandle);
+  private static native long nativeCreateInGroup(String groupName, byte[] listId,
+                                                 long viewNativeHandle);
+
+  private static native void nativeFree(long nativeHandle);
 
   @Override
   native void nativeAdd(long nativeHandle, byte[] e);

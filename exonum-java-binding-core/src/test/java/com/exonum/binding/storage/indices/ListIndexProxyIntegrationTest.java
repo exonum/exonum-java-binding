@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -6,6 +22,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
@@ -13,7 +30,7 @@ import com.exonum.binding.util.LibraryLoader;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,7 +54,7 @@ public class ListIndexProxyIntegrationTest {
 
   @Before
   public void setUp() throws Exception {
-    database = new MemoryDb();
+    database = MemoryDb.newInstance();
   }
 
   @After
@@ -147,15 +164,15 @@ public class ListIndexProxyIntegrationTest {
     runTestWithView(database::createSnapshot, (l) -> l.truncate(0L));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Function<Cleaner, View> viewFactory,
                                Consumer<ListIndexProxy<String>> listTest) {
-    runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
+    runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Function<Cleaner, View> viewFactory,
                                BiConsumer<View, ListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         LIST_NAME,
         ListIndexProxy::newInstance,
         listTest

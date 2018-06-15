@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>exonum-java-binding-parent</artifactId>
+    <groupId>com.exonum.binding</groupId>
+    <version>0.1.0</version>
+  </parent>
+
+  <artifactId>exonum-java-binding-bom</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>Exonum Java Binding: Bill of Materials</name>
+
+  <properties>
+    <exonum-core.version>0.1.0</exonum-core.version>
+    <exonum-java-proofs.version>0.1.0</exonum-java-proofs.version>
+    <guice.version>4.2.0</guice.version>
+    <log4j.version>2.11.0</log4j.version>
+    <guava.version>25.1-jre</guava.version>
+    <vertx.version>3.5.2</vertx.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Exonum Java Binding artefacts. -->
+      <dependency>
+        <groupId>com.exonum.binding</groupId>
+        <artifactId>exonum-java-binding-core</artifactId>
+        <version>${exonum-core.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.exonum.binding</groupId>
+        <artifactId>exonum-java-proofs</artifactId>
+        <version>${exonum-java-proofs.version}</version>
+      </dependency>
+      
+      <!-- Exported third-party artefacts the services depend upon. -->
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-web-client</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-unit</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-web</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${guice.version}</version>
+        <classifier>no_aop</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${log4j.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+</project>

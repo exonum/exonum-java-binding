@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.service;
 
 import static com.exonum.binding.messages.TemplateMessage.TEMPLATE_MESSAGE;
@@ -6,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
@@ -17,6 +34,8 @@ import com.exonum.binding.storage.database.View;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -45,7 +64,7 @@ public class ServiceBootstrapIntegrationTest {
 
     // Check that once startService returns, the native library is loaded. If it’s not,
     // we’ll get an UnsatisfiedLinkError.
-    try (MemoryDb database = new MemoryDb()) {
+    try (MemoryDb database = MemoryDb.newInstance()) {
       assertNotNull(database);
     }
   }
@@ -96,7 +115,13 @@ class UserService extends AbstractService {
 
   @Override
   protected Schema createDataSchema(View view) {
-    return new Schema() {};
+    return new Schema() {
+
+      @Override
+      public List<HashCode> getStateHashes() {
+        return Collections.emptyList();
+      }
+    };
   }
 
   @Override

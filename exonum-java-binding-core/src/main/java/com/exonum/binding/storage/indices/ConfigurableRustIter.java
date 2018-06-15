@@ -1,11 +1,27 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
+import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.database.ViewModificationCounter;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
-import java.util.function.LongConsumer;
 import java.util.function.LongFunction;
 
 /**
@@ -13,10 +29,9 @@ import java.util.function.LongFunction;
  *
  * @param <E> type of elements returned by the iterator.
  */
-class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
+final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
   private final LongFunction<E> nextFunction;
-  private final LongConsumer disposeOperation;
   private final View collectionView;
   private final ViewModificationCounter modificationCounter;
   private final Integer initialModCount;
@@ -26,19 +41,16 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
    *
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
-   * @param disposeOperation an operation to call to destroy the corresponding native iterator
-   * @param collection a collection over which to iterate
+   * @param collectionView a database view of the collection over which to iterate
    * @param modificationCounter a view modification counter
    */
-  ConfigurableRustIter(long nativeHandle,
+  ConfigurableRustIter(NativeHandle nativeHandle,
                        LongFunction<E> nextFunction,
-                       LongConsumer disposeOperation,
-                       AbstractIndexProxy collection,
+                       View collectionView,
                        ViewModificationCounter modificationCounter) {
-    super(nativeHandle, true, collection);
+    super(nativeHandle);
     this.nextFunction = nextFunction;
-    this.disposeOperation = disposeOperation;
-    this.collectionView = collection.dbView;
+    this.collectionView = collectionView;
     this.modificationCounter = modificationCounter;
     this.initialModCount = modificationCounter.getModificationCount(collectionView);
   }
@@ -54,10 +66,5 @@ class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E>
       throw new ConcurrentModificationException("Fork was modified during iteration: "
           + collectionView);
     }
-  }
-
-  @Override
-  protected void disposeInternal() {
-    disposeOperation.accept(getNativeHandle());
   }
 }

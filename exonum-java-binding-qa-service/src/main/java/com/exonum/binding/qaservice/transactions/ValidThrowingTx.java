@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
@@ -38,15 +54,15 @@ public final class ValidThrowingTx implements Transaction {
   @Override
   public void execute(Fork view) {
     QaSchema schema = new QaSchema(view);
-    try (MapIndex<HashCode, Long> counters = schema.counters();
-         MapIndex<HashCode, String> names = schema.counterNames()) {
-      // Attempt to clear all service indices.
-      counters.clear();
-      names.clear();
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> names = schema.counterNames();
 
-      // Throw an exception. Framework must revert the changes made above.
-      throw new IllegalStateException("#execute of this transaction always throws: " + this);
-    }
+    // Attempt to clear all service indices.
+    counters.clear();
+    names.clear();
+
+    // Throw an exception. Framework must revert the changes made above.
+    throw new IllegalStateException("#execute of this transaction always throws: " + this);
   }
 
   @Override

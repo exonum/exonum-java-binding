@@ -1,9 +1,25 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.messages;
 
-import static com.exonum.binding.messages.Message.BODY_LENGTH_OFFSET;
 import static com.exonum.binding.messages.Message.BODY_OFFSET;
 import static com.exonum.binding.messages.Message.MESSAGE_TYPE_OFFSET;
 import static com.exonum.binding.messages.Message.NET_ID_OFFSET;
+import static com.exonum.binding.messages.Message.PAYLOAD_LENGTH_OFFSET;
 import static com.exonum.binding.messages.Message.SERVICE_ID_OFFSET;
 import static com.exonum.binding.messages.Message.VERSION_OFFSET;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -15,7 +31,7 @@ import java.util.function.IntFunction;
 /**
  * A builder of binary Exonum messages.
  */
-public class BinaryMessageBuilder {
+public final class BinaryMessageBuilder {
 
   private static final IntFunction<ByteBuffer> messageBufferAllocator = ByteBuffer::allocate;
 
@@ -62,7 +78,7 @@ public class BinaryMessageBuilder {
         .put(VERSION_OFFSET, message.getVersion())
         .putShort(SERVICE_ID_OFFSET, message.getServiceId())
         .putShort(MESSAGE_TYPE_OFFSET, message.getMessageType())
-        .putInt(BODY_LENGTH_OFFSET, message.getBody().remaining());
+        .putInt(PAYLOAD_LENGTH_OFFSET, message.size());
   }
 
   private void putBody(ByteBuffer buffer) {

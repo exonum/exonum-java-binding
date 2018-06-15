@@ -1,8 +1,24 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.storage.database.Fork;
-import com.google.errorprone.annotations.MustBeClosed;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -12,20 +28,19 @@ import java.util.NoSuchElementException;
  * are specified to throw {@link UnsupportedOperationException} if
  * this list has been created with a read-only database view.
  *
- * <p>This interface prohibits null elements.
+ * <p>When the corresponding view goes out of scope, this list is destroyed. Subsequent use
+ * of the closed list is prohibited and will result in {@link IllegalStateException}.
  *
- * <p>As any native proxy, the list index <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>This interface prohibits null elements. All method arguments are non-null by default.
  *
  * @param <T> the type of elements in this list
  */
-public interface ListIndex<T> extends StorageIndex {
+public interface ListIndex<T> extends StorageIndex, Iterable<T> {
 
   /**
    * Adds a new element to the end of the list.
    *
    * @param e an element to append to the list
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
@@ -50,7 +65,6 @@ public interface ListIndex<T> extends StorageIndex {
    * @param index an index of the element to replace
    * @param e an element to add
    * @throws IndexOutOfBoundsException if the index is invalid
-   * @throws NullPointerException if the element is null
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
@@ -105,6 +119,6 @@ public interface ListIndex<T> extends StorageIndex {
    *
    * @throws IllegalStateException if this list is not valid
    */
-  @MustBeClosed
-  StorageIterator<T> iterator();
+  @Override
+  Iterator<T> iterator();
 }

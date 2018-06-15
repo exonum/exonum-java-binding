@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -10,6 +26,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -17,11 +35,12 @@ import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedInde
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -190,19 +209,21 @@ public class ListIndexParameterizedIntegrationTest
     });
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void setWithSnapshot() throws Exception {
     // Initialize the list.
-    try (Fork fork = database.createFork();
-         ListIndex<String> list = createList(fork)) {
-      list.add(V1);
+    try (Cleaner cleaner = new Cleaner()) {
+      Fork fork = database.createFork(cleaner);
+      ListIndex<String> list1 = createList(fork);
+      list1.add(V1);
       database.merge(fork);
-    }
 
-    // Expect the read-only list to throw an exception.
-    try (Snapshot snapshot = database.createSnapshot();
-         ListIndex<String> list = createList(snapshot)) {
-      list.set(0, V2);
+      Snapshot snapshot = database.createSnapshot(cleaner);
+      ListIndex<String> list2 = createList(snapshot);
+
+      // Expect the read-only list to throw an exception in a modifying operation.
+      expectedException.expect(UnsupportedOperationException.class);
+      list2.set(0, V2);
     }
   }
 
@@ -299,41 +320,38 @@ public class ListIndexParameterizedIntegrationTest
 
       l.addAll(elements);
 
-      try (StorageIterator<String> iterator = l.iterator()) {
-        List<String> iterElements = ImmutableList.copyOf(iterator);
+      Iterator<String> iterator = l.iterator();
+      List<String> iterElements = ImmutableList.copyOf(iterator);
 
-        assertThat(iterElements, equalTo(elements));
-      }
+      assertThat(iterElements, equalTo(elements));
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
-    ListIndex list = createList(view);
-
-    view.close();  // a list must be closed before the corresponding view.
-    expectedException.expect(IllegalStateException.class);
-    list.close();
-  }
-
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Function<Cleaner, View> viewFactory,
                                Consumer<ListIndex<String>> listTest) {
-    runTestWithView(viewSupplier, (ignoredView, list) -> listTest.accept(list));
+    runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private void runTestWithView(Supplier<View> viewSupplier,
+  private void runTestWithView(Function<Cleaner, View> viewFactory,
                                BiConsumer<View, ListIndex<String>> listTest) {
-    try (View view = viewSupplier.get();
-         ListIndex<String> list = createList(view)) {
+    try (Cleaner cleaner = new Cleaner()) {
+      View view = viewFactory.apply(cleaner);
+      ListIndex<String> list = createList(view);
+
       listTest.accept(view, list);
+    } catch (CloseFailuresException e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Override
   AbstractListIndexProxy<String> create(String name, View view) {
     return (AbstractListIndexProxy<String>) listFactory.create(name, view);
+  }
+
+  @Override
+  Object getAnyElement(AbstractListIndexProxy<String> index) {
+    return index.get(0L);
   }
 
   private ListIndex<String> createList(View view) {

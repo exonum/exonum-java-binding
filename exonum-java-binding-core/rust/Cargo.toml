@@ -15,8 +15,6 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-# ¡Please keep README.md in sync with the Exonum version,
-# so that users are directed to the correct build instructions!
 exonum = "0.8.1"
 iron = "0.6.0"
 failure = "0.1.1"

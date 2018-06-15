@@ -1,7 +1,26 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
@@ -21,15 +40,14 @@ import java.util.NoSuchElementException;
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>As any native proxy, the entry <em>must be closed</em> when no longer needed.
- * Subsequent use of the closed entry is prohibited
- * and will result in {@link IllegalStateException}.
+ * <p>When the view goes out of scope, this entry is destroyed. Subsequent use of the closed entry
+ * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <T> the type of an element in this entry
  *
  * @see View
  */
-public class EntryIndexProxy<T> extends AbstractIndexProxy {
+public final class EntryIndexProxy<T> extends AbstractIndexProxy {
 
   private final CheckingSerializerDecorator<T> serializer;
 
@@ -42,17 +60,32 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    *             If a view is read-only, "destructive" operations are not permitted.
    * @param serializer an entry serializer
    *
-   * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
   public static <E> EntryIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    return new EntryIndexProxy<>(name, view, CheckingSerializerDecorator.from(serializer));
+    checkIndexName(name);
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    NativeHandle entryNativeHandle = createNativeEntry(name, view);
+
+    return new EntryIndexProxy<>(entryNativeHandle, name, view, s);
   }
 
-  private EntryIndexProxy(String name, View view, CheckingSerializerDecorator<T> serializer) {
-    super(nativeCreate(checkIndexName(name), view.getViewNativeHandle()), name, view);
+  private static NativeHandle createNativeEntry(String name, View view) {
+    long viewNativeHandle = view.getViewNativeHandle();
+    NativeHandle entryNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+
+    Cleaner cleaner = view.getCleaner();
+    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, EntryIndexProxy.class,
+        EntryIndexProxy::nativeFree);
+    return entryNativeHandle;
+  }
+
+  private EntryIndexProxy(NativeHandle nativeHandle, String name, View view,
+                          CheckingSerializerDecorator<T> serializer) {
+    super(nativeHandle, name, view);
     this.serializer = serializer;
   }
 
@@ -61,7 +94,6 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
    *
    * @param value a value to set. Must not be null.
    * @throws UnsupportedOperationException if the entry is read-only
-   * @throws NullPointerException if value is null
    * @throws IllegalStateException if the proxy is invalid
    */
   public void set(T value) {
@@ -110,11 +142,6 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
     nativeRemove(getNativeHandle());
   }
 
-  @Override
-  protected void disposeInternal() {
-    nativeFree(getNativeHandle());
-  }
-
   private static native long nativeCreate(String name, long viewNativeHandle);
 
   private native void nativeSet(long nativeHandle, byte[] value);
@@ -128,5 +155,5 @@ public class EntryIndexProxy<T> extends AbstractIndexProxy {
 
   private native void nativeRemove(long nativeHandle);
 
-  private native void nativeFree(long nativeHandle);
+  private static native void nativeFree(long nativeHandle);
 }

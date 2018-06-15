@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
@@ -7,13 +23,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -93,13 +111,12 @@ public class KeySetIndexProxyIntegrationTest
 
       elements.forEach(set::add);
 
-      try (StorageIterator<String> iterator = set.iterator()) {
-        List<String> iterElements = ImmutableList.copyOf(iterator);
+      Iterator<String> iterator = set.iterator();
+      List<String> iterElements = ImmutableList.copyOf(iterator);
 
-        // Check that iterator includes all the elements added
-        // and that they appear in lexicographical order (the order of TestStorageItems.keys).
-        assertThat(iterElements, equalTo(elements));
-      }
+      // Check that iterator includes all the elements added
+      // and that they appear in lexicographical order (the order of TestStorageItems.keys).
+      assertThat(iterElements, equalTo(elements));
     });
   }
 
@@ -134,40 +151,29 @@ public class KeySetIndexProxyIntegrationTest
     });
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  public void disposeShallDetectIncorrectlyClosedEvilViews() throws Exception {
-    View view = database.createSnapshot();
-    KeySetIndexProxy<String> set = create(KEY_SET_NAME, view);
-
-    view.close();  // a set must be closed before the corresponding view.
-    expectedException.expect(IllegalStateException.class);
-    set.close();
-  }
-
   /**
    * Creates a view, a key set index and runs a test against the view and the set.
    * Automatically closes the view and the set.
    *
-   * @param viewSupplier a function creating a database view
+   * @param viewFactory a function creating a database view
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<KeySetIndexProxy<String>> keySetTest) {
-    runTestWithView(viewSupplier, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
+    runTestWithView(viewFactory, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
 
   /**
    * Creates a view, a key set index and runs a test against the view and the set.
    * Automatically closes the view and the set.
    *
-   * @param viewSupplier a function creating a database view
+   * @param viewFactory a function creating a database view
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Supplier<View> viewSupplier,
+  private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       BiConsumer<View, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
-        viewSupplier,
+        viewFactory,
         KEY_SET_NAME,
         KeySetIndexProxy::newInstance,
         keySetTest
@@ -177,5 +183,10 @@ public class KeySetIndexProxyIntegrationTest
   @Override
   KeySetIndexProxy<String> create(String name, View view) {
     return KeySetIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
+  Object getAnyElement(KeySetIndexProxy<String> index) {
+    return index.contains("k1");
   }
 }
