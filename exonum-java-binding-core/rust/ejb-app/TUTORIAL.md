@@ -82,7 +82,7 @@ $ ejb-app finalize testnet/sec.toml testnet/node.toml \
     --public-configs testnet/pub.toml
 ```
 
-### Step 4. Run Configured Node
+### Step 3. Run Configured Node
 
 ```$sh
 $ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
