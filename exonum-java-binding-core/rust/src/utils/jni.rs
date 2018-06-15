@@ -13,14 +13,7 @@ pub const PATH_SEPARATOR: &str = ":";
 
 /// Joins several classpaths into a single classpath, using the default path separator.
 /// Preserves the relative order of class path entries.
-/// Removes duplicate entries.
 pub fn join_paths(parts: &[&str]) -> String {
-    let mut met = BTreeSet::new();
-    let parts: Vec<&str> = parts
-        .iter()
-        .flat_map(|s| s.split(PATH_SEPARATOR))
-        .filter(|s| !s.is_empty() && met.insert(*s))
-        .collect();
     parts.join(PATH_SEPARATOR)
 }
 
@@ -105,12 +98,6 @@ mod tests {
     #[test]
     fn join_paths_preserves_order() {
         let result = join_paths(&[FOO, BAR, BAZ]);
-        assert_eq!(result, FOO_BAR_BAZ);
-    }
-
-    #[test]
-    fn join_paths_deduplicate_entries() {
-        let result = join_paths(&[FOO_BAR, FOO_BAZ]);
         assert_eq!(result, FOO_BAR_BAZ);
     }
 }
