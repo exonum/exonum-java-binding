@@ -4,6 +4,7 @@ Below are the features we intend to work on:
 
 * Better documentation — improved user guide and tutorials.
 * More example projects to hack with.
+* Pre-built packaged Exonum App.
 * Full support of Exonum proofs, including block proofs 
   for [blockchain clients](https://exonum.com/doc/architecture/clients/).
 * Rich APIs to access the [framework state](https://exonum.com/doc/architecture/storage/#system-tables).
