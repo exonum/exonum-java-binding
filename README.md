@@ -15,8 +15,7 @@ For more information see the relevant documentation on the tool:
   - [How to run a Java service](https://exonum.com/doc/get-started/java-binding#How-to-Run-a-Service)
   - [Roadmap](ROADMAP.md)
   - [Contribution guide](CONTRIBUTING.md)
-  - [Code of conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)  
-  <!-- TODO: Add a link to installation instructions in the user guide -->
+  - [Code of conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 
 
 ## License
