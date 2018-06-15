@@ -9,6 +9,7 @@ powered by Exonum.
 The project is at alpha stage. Currently you can define a stateful Exonum Service 
 in Java, configure a network of nodes and run the service in it.
 
+For more information see the relevant documentation on the tool:
   - [What is Exonum?](https://exonum.com/doc/get-started/what-is-exonum/)
   - [User guide](https://exonum.com/doc/get-started/java-binding)
   - [How to run a Java service](https://exonum.com/doc/get-started/java-binding#How-to-Run-a-Service)

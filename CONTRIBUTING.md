@@ -43,7 +43,7 @@ The project is split into several modules. Here are the main ones:
 There are several categories of tests:
   * Unit tests in Java and Rust modules.
   * Integration tests in Java, some of which require a native library.
-  * Integration tests in Rust that require a JVM and `ejb-core` 
+  * Integration tests in Rust that require a JVM together with `ejb-core` 
     and `ejb-fakes` artefacts. Reside 
     in [`core-native`](exonum-java-binding-core/rust/integration_tests).
   * System tests — these are currently performed internally 
@@ -67,7 +67,7 @@ Use JUnit + [Mockito](https://github.com/mockito/mockito) or hand-written fakes.
 Currently there is no project-wide default for an assertion library: 
 Hamcrest and AssertJ are used in various modules.
 
-##### Integration Tests in core
+##### Integration Tests in Core
 The integration tests in `core` are bound to `verify` phase of the Maven build. 
 The name of IT classes must end with `IntegrationTest`. 
 If your test verifies the behaviour of a class with native methods, 

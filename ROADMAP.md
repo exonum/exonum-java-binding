@@ -13,9 +13,10 @@ Below are the features we intend to work on:
   [time oracle](https://exonum.com/doc/advanced/time/)
   and [anchoring service](https://exonum.com/doc/get-started/design-overview/#anchoring-service).
 * An SDK to ease integration with the blockchain application, including 
-  support for creating and signing transaction messages and proof verification.
+  support for creating and signing transaction messages and verification of proofs.
 * Support for multiple Java services in a system.
-* UX improvements: new transaction messages, better serialization support, boilerplate reduction.
+* UX improvements: new transaction messages, better serialization support, 
+  boilerplate code reduction.
 
 Feedback on this roadmap, the features you’d like to see is welcome&nbsp;—
 [open](https://github.com/exonum/exonum-java-binding/issues/new)
