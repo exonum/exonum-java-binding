@@ -23,6 +23,7 @@ import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -41,6 +42,7 @@ public final class TestService extends AbstractService {
 
   private final SchemaFactory<TestSchema> schemaFactory;
 
+  @Inject
   public TestService(SchemaFactory<TestSchema> schemaFactory) {
     super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, schemaFactory));
     this.schemaFactory = schemaFactory;

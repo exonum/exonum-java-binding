@@ -5,9 +5,14 @@ authors = ["Exonum Team <exonum@bitfury.com>"]
 publish = false
 workspace = ".."
 
+[lib]
+crate-type = ["dylib"]
+
 [features]
 
 [dependencies]
-java_bindings = { path = ".." }
-jni = { version = "0.9.0", features = ["invocation"] }
-lazy_static = "1.0.0"
+futures = "0.1.14"
+java_bindings = { path = "..", features = ["invocation"] }
+exonum-testkit = "0.8.0"
+lazy_static = "1.0.1"
+rand = "0.5"

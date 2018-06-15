@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,7 +121,7 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public String initialize(long forkHandle) {
+  public @Nullable String initialize(long forkHandle) {
     assert forkHandle != 0;
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
@@ -134,7 +134,7 @@ public class UserServiceAdapter {
 
   public void mountPublicApiHandler(long nodeNativeHandle) {
     checkState(node == null, "There is a node already: are you calling this method twice?");
-    node = new NodeProxy(nodeNativeHandle);
+    node = new NodeProxy(nodeNativeHandle, viewFactory);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
     server.mountSubRouter("/" + getName(), router);

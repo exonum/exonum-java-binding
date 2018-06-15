@@ -12,53 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use java_bindings::Executor;
-use jni::*;
-use jni::errors::Result;
-use jni::objects::AutoLocal;
-use jni::objects::GlobalRef;
-use jni::objects::JValue;
-use jni::sys::jint;
+use java_bindings::{JniExecutor, JniResult};
+use java_bindings::jni::JNIEnv;
+use java_bindings::jni::objects::{GlobalRef, JValue};
+use java_bindings::jni::sys::jint;
 
-/// A temporary example of a native-to-JNI proxy
+/// A test example of a native-to-JNI proxy
 #[derive(Clone)]
-pub struct AtomicIntegerProxy<E>
-where
-    E: Executor,
-{
+pub struct AtomicIntegerProxy<E: JniExecutor> {
     exec: E,
     obj: GlobalRef,
 }
 
-impl<E> AtomicIntegerProxy<E>
-where
-    E: Executor,
-{
+impl<E: JniExecutor> AtomicIntegerProxy<E> {
     /// Creates a new instance of `AtomicIntegerProxy`
-    pub fn new(exec: E, init_value: jint) -> Result<Self> {
+    pub fn new(exec: E, init_value: jint) -> JniResult<Self> {
         let obj = exec.with_attached(|env: &JNIEnv| {
-            let local_ref = AutoLocal::new(
-                env,
-                env.new_object(
-                    "java/util/concurrent/atomic/AtomicInteger",
-                    "(I)V",
-                    &[JValue::from(init_value)],
-                )?,
-            );
-            env.new_global_ref(local_ref.as_obj())
+            env.new_global_ref(env.new_object(
+                "java/util/concurrent/atomic/AtomicInteger",
+                "(I)V",
+                &[JValue::from(init_value)],
+            )?)
         })?;
         Ok(AtomicIntegerProxy { exec, obj })
     }
 
     /// Gets a current value from java object
-    pub fn get(&mut self) -> Result<jint> {
+    pub fn get(&mut self) -> JniResult<jint> {
         self.exec.with_attached(|env| {
             env.call_method(self.obj.as_obj(), "get", "()I", &[])?.i()
         })
     }
 
     /// Increments a value of java object and then gets it
-    pub fn increment_and_get(&mut self) -> Result<jint> {
+    pub fn increment_and_get(&mut self) -> JniResult<jint> {
         self.exec.with_attached(|env| {
             env.call_method(self.obj.as_obj(), "incrementAndGet", "()I", &[])?
                 .i()
@@ -66,7 +53,7 @@ where
     }
 
     /// Adds some value to the value of java object and then gets a resulting value
-    pub fn add_and_get(&mut self, delta: jint) -> Result<jint> {
+    pub fn add_and_get(&mut self, delta: jint) -> JniResult<jint> {
         let delta = JValue::from(delta);
         self.exec.with_attached(|env| {
             env.call_method(self.obj.as_obj(), "addAndGet", "(I)I", &[delta])?

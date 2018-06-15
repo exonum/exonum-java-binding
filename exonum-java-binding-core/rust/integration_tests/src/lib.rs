@@ -11,3 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+extern crate java_bindings;
+#[macro_use]
+extern crate lazy_static;
+
+pub mod example_proxy;
+pub mod executor;
+pub mod test_service;
+pub mod mock;
+pub mod vm;

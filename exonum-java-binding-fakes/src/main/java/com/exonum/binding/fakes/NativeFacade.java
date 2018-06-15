@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.exonum.binding.fakes;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.exonum.binding.fakes.mocks.ThrowingTransactions;
 import com.exonum.binding.fakes.mocks.UserServiceAdapterMockBuilder;
@@ -30,7 +29,7 @@ import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
-import io.vertx.ext.web.Router;
+import com.exonum.binding.util.LibraryLoader;
 
 /**
  * Provides methods to create mocks and test fakes of Service and Transaction adapters.
@@ -39,6 +38,10 @@ import io.vertx.ext.web.Router;
  */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Used in native code
 public final class NativeFacade {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private static final ViewFactory VIEW_FACTORY = ViewProxyFactory.getInstance();
 
@@ -101,10 +104,7 @@ public final class NativeFacade {
   }
 
   private static Server createServerMock() {
-    Server server = mock(Server.class);
-    Router router = mock(Router.class);
-    when(server.createRouter()).thenReturn(router);
-    return server;
+    return mock(Server.class);
   }
 
   private NativeFacade() {}

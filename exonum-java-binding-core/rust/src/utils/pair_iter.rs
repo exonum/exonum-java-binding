@@ -14,9 +14,10 @@
 
 use jni::JNIEnv;
 use jni::objects::{GlobalRef, JMethodID};
-use jni::errors::Result;
 
 use std::mem;
+
+use JniResult;
 
 pub struct PairIter<InnerIter: Iterator> {
     pub iter: InnerIter,
@@ -25,7 +26,7 @@ pub struct PairIter<InnerIter: Iterator> {
 }
 
 impl<InnerIter: Iterator> PairIter<InnerIter> {
-    pub fn new(env: &JNIEnv, iter: InnerIter, class_name: &str) -> Result<Self> {
+    pub fn new(env: &JNIEnv, iter: InnerIter, class_name: &str) -> JniResult<Self> {
         let class = env.find_class(class_name)?;
         let element_class = env.new_global_ref(class.into())?;
         let signature = "([B[B)V";

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,7 +71,7 @@ public final class UserServiceAdapterMockBuilder {
 
   public void initialGlobalConfig(String initialGlobalConfig) {
     when(service.initialize(anyLong()))
-        .thenReturn(checkNotNull(initialGlobalConfig));
+        .thenReturn(initialGlobalConfig);
   }
 
   public void initialGlobalConfigThrowing(Class<? extends Throwable> exceptionType) {

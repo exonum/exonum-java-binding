@@ -1,0 +1,7 @@
+[package]
+name = "ejb-test"
+version = "0.1.0"
+authors = ["Exonum team <exonum@bitfury.com>"]
+
+[dependencies]
+java_bindings = { path = "..", features = ["invocation"] }

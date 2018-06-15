@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use exonum::storage::{Fork, Snapshot};
 use jni::JNIEnv;
 use jni::objects::JClass;
-use exonum::storage::{Fork, Snapshot};
 
 use utils::{self, Handle};
 

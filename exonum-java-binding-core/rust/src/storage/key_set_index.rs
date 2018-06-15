@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use exonum::storage::{Snapshot, Fork, KeySetIndex};
+use exonum::storage::key_set_index::KeySetIndexIter;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray};
@@ -19,10 +21,8 @@ use jni::sys::{jboolean, jbyteArray};
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, KeySetIndex};
-use exonum::storage::key_set_index::KeySetIndexIter;
+use storage::db::{View, ViewRef, Key};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Key};
 
 type Index<T> = KeySetIndex<T, Key>;
 

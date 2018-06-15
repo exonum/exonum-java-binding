@@ -83,6 +83,26 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+
+
+      <!-- Generates a runtime classpath file of ejb-cryptocurrency.
+           Bound to the default phase (generate-sources).
+           FIXME: a service may be packaged in a fat jar probably? -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <outputFile>${project.build.directory}/cryptocurrency-classpath.txt</outputFile>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-classpath-file</id>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
