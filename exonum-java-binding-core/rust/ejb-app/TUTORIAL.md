@@ -28,35 +28,15 @@ JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
 export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 ```
 
-#### CLASSPATHS
+#### CLASSPATH
+Classpath is used to locate Java classes of your service and its dependencies, including 
+the Exonum Java Binding.
 
-Classpath is used to locate Java classes of your service and internal ones of Java Binding.
-Take classpaths for every Java library you use.
-
-Classpath of EJB core is written into `$EJB_ROOT/exonum-java-binding-core/target/ejb-core-classpath.txt` file.
-For your own service libary, you can use the following plugin in your `pom.xml` file:
-
-```xml
-<plugin>
-    <artifactId>maven-dependency-plugin</artifactId>
-    <configuration>
-      <outputFile>${project.build.directory}/service-classpath.txt</outputFile>
-      <includeScope>runtime</includeScope>
-    </configuration>
-    <executions>
-      <execution>
-        <id>generate-classpath-file</id>
-        <goals>
-          <goal>build-classpath</goal>
-        </goals>
-      </execution>
-    </executions>
-</plugin>
-```
-
-This plugin will generate classpath for your service and save it into `service-classpath.txt` file in `target` directory.
-
-Do not forget to add `$EJB_ROOT/exonum-java-binding-core/target/classes` directory to your classpaths collection as well.
+You may package your service in an Uber JAR using 
+the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
+and pass a path to the service artefact during application configuration as `--ejb-classpath`
+parameter. Alternatively, you may assemble a classpath that includes the service and all of 
+its dependencies and pass it instead.
 
 #### LIBPATH
 
@@ -78,8 +58,8 @@ $ ejb-app generate-template testnet/common.toml
 
 #### Generate Node Private and Public Configs
 
-- `--ejb-classpath` for your classpaths.
-- `--ejb-libpath` for path to Java bindings native libraries.
+- `--ejb-classpath` for a classpath of your service.
+- `--ejb-libpath` for a path to Java bindings native libraries.
 
 ```$sh
 $ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
