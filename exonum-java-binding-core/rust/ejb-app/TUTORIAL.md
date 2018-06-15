@@ -18,14 +18,16 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 #### LD_LIBRARY_PATH
 
 `LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
-First of all, you need to provide a path to JVM-related libraries.
+You need to provide a path to the JVM library (`libjvm.so`) and to the Rust standard library.
 
-Modify `LD_LIBRARY_PATH` environmental variable so that it contains path to `libjvm.so` file.
 You can use the following script for this purpose:
 
 ```bash
 JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
-export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+LIBJVM_DIR="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
+
+export LD_LIBRARY_PATH="$RUST_LIB_DIR:$LIBJVM_DIR"
 ```
 
 #### CLASSPATH
@@ -45,6 +47,7 @@ Libpath is a path to native libraries used by Java Binding (for example, Java Bi
 Take `$EJB_ROOT/exonum-java-binding-core/rust/target/debug` as your `LIBPATH`.
 
 You should also add your `LIBPATH` to your `LD_LIBRARY_PATH`.
+
 
 ### Step 2. Generate Node Configuration
 
