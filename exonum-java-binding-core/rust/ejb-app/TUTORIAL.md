@@ -16,9 +16,9 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 #### LD_LIBRARY_PATH
 
 `LD_LIBRARY_PATH` is used to locate native libraries used by Java Binding.
-First fo all, you need to provide a path to JVM-related libraries.
+First of all, you need to provide a path to JVM-related libraries.
 
-Modify LD_LIBRARY_PATH environmental variable so that it contains path to `libjvm.so` file.
+Modify `LD_LIBRARY_PATH` environmental variable so that it contains path to `libjvm.so` file.
 You can use the following script for this purpose:
 
 ```bash
