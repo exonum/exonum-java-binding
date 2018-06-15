@@ -25,13 +25,6 @@ Run
 $ mvn install
 ```
 
-#### Building Java Binding App
-Run
-```$sh
-$ cd exonum-java-binding-core/rust/ejb-app
-$ cargo install --debug --force
-```
-
 ## Modules
 The project is split into several modules. Here are the main ones:
   * [`core`](exonum-java-binding-core) contains the APIs to define and implement an 
