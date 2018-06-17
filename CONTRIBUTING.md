@@ -6,8 +6,8 @@ or a pull request. This document describes how to work with this project:
   * how to [build](#how-to-build) it
   * how to [test](#tests) it
   * the [code style guidelines](#the-code-style)
-  * how to [submit an issue](#Submitting-issues)
-  * how to [submit a PR](#Submitting-pull-requests).
+  * how to [submit an issue](#submitting-issues)
+  * how to [submit a PR](#submitting-pull-requests).
 
 ## How to Build
 ### System Dependencies
