@@ -76,15 +76,6 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-
-
       <!-- Generates a runtime classpath file of ejb-cryptocurrency.
            Bound to the default phase (generate-sources).
            FIXME: a service may be packaged in a fat jar probably? -->
