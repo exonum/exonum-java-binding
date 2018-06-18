@@ -29,7 +29,7 @@ impl JavaServiceRuntime {
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
     pub fn get_or_create(config: Config) -> Self {
-        let runtime = unsafe {
+        unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
                 let java_vm = Self::create_java_vm(config.jvm_config);
@@ -45,8 +45,7 @@ impl JavaServiceRuntime {
             JAVA_SERVICE_RUNTIME.clone().expect(
                 "Trying to return runtime, but it's uninitialized",
             )
-        };
-        runtime
+        }
     }
 
     /// Returns internal service proxy.
