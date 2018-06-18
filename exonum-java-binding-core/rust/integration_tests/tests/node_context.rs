@@ -33,7 +33,7 @@ fn submit_valid_transaction() {
     let (mut node, app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
     let node_handle = node_handle_guard.get();
-    let (java_transaction, _raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
+    let (java_transaction, _raw_message) = create_mock_transaction(&EXECUTOR, true);
     let marker_raw = RawMessage::from_vec(vec![1, 2, 3]);
     let raw_message = marker_raw.clone();
     unwrap_jni(EXECUTOR.with_attached(move |env: &JNIEnv| {
@@ -71,7 +71,7 @@ fn submit_not_valid_transaction() {
     let (mut node, _app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
     let node_handle = node_handle_guard.get();
-    let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), false);
+    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, false);
     unwrap_jni(EXECUTOR.with_attached(|env: &JNIEnv| {
         Ok(unwrap_jni_verbose(
             &env,
