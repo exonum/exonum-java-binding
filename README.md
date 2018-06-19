@@ -1,86 +1,23 @@
 # Exonum Java Binding
 
-[![Build Status](https://www.travis-ci.com/exonum/exonum-java-binding.svg?token=2dVYazsUZFvBqHW82g4U&branch=master)](https://www.travis-ci.com/exonum/exonum-java-binding)
+[![Build Status](https://www.travis-ci.org/exonum/exonum-java-binding.svg?branch=master)](https://www.travis-ci.org/exonum/exonum-java-binding)
+[![Join the chat on https://gitter.im/exonum/exonum-java-binding](https://img.shields.io/gitter/room/exonum/exonum-java-binding.svg?label=Chat)](https://gitter.im/exonum/exonum-java-binding)
 
-## How to build
-You need JDK 8, [Maven 3](https://maven.apache.org/download.cgi) 
-and [Rust](https://www.rust-lang.org/).
+Exonum Java Binding is a framework for building blockchain applications in Java,
+powered by Exonum.
 
-### Install system dependencies
-Please install Rust and the system dependencies of Exonum. 
-The instructions are available [here](https://exonum.com/doc/get-started/install/).
-You do _not_ need to manually fetch and compile Exonum.
+The project is at alpha stage. Currently you can define a stateful Exonum Service
+in Java, configure a network of nodes and run the service in it.
 
-### Build the project
-To build the project, run
-```$sh
-$ mvn install
-```
-The native library will be in `exonum-java-binding-core/rust/target/debug/`, 
-a jar archive&mdash;in `exonum-java-binding-core/target/`.
- 
-## Developer guide
-### How to run all tests
-To run _all_ tests, including CI-only and slow Java tests, native integration tests 
-depending on the JVM, invoke this script:
-```$sh
-$ ./run_all_tests.sh
-```
+For more information see the relevant documentation on the tool:
+  - [What is Exonum?](https://exonum.com/doc/get-started/what-is-exonum/)
+  - [User guide](https://exonum.com/doc/get-started/java-binding)
+  - [How to run a Java service](https://exonum.com/doc/get-started/java-binding#How-to-Run-a-Service)
+  - [Roadmap](ROADMAP.md)
+  - [Contribution guide](CONTRIBUTING.md)
+  - [Code of conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 
-### Working with Error Prone
-We use [Error Prone](https://github.com/google/error-prone/) to catch common programming errors 
-at compile time.
 
-#### How to pass a flag to Error Prone
-Override `java.compiler.errorprone.flag` property:
-```$sh
-$ mvn -Djava.compiler.errorprone.flag=-XepAllDisabledChecksAsWarnings compile
-```
-Some useful flags:
- * `-XepAllErrorsAsWarnings`
- * `-XepAllDisabledChecksAsWarnings`
- * `-XepDisableAllChecks`
-
-For a complete list of flags, go to http://errorprone.info/docs/flags 
-
-#### How to enable a particular Error Prone check
-Use `java.compiler.errorprone.flag` property:
-```$sh
-$ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR compile
-```
-In this example, Error Prone will fail the build if any method 
-does not have `@Override` annotation.
-
-For a complete list of checks, go to http://errorprone.info/bugpatterns
-
-#### How to fix bugs found by Error Prone
-Run `compile` goal in `fixerrors` profile, 
-which produces a patch with suggested fixes `error-prone.patch`.
-
-##### Produce a patch fixing any errors
-```$sh
-$ mvn compile -P fixerrors
-```
-
-##### Produce a patch fixing particular warnings/errors
-```$sh
-$ mvn -Djava.compiler.errorprone.patchChecks=MissingOverride,ClassNewInstance \
-        compile -P fixerrors
-```
-
-##### Enable a certain check and produce a patch
-```$sh
-$ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR \
-        -Djava.compiler.errorprone.patchChecks=MissingOverride \
-        compile -P fixerrors
-```
-
-### Code style checks
-#### Java
-The style guide of the project: https://google.github.io/styleguide/javaguide.html 
-
-**TODO:** Create a separate repo with a customized version of the code style document.
- 
-[Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project 
-during `validate` phase (i.e., _before_ compilation). You can run code style checks explicitly 
-via `mvn checkstyle:check`.
+## License
+This project is licensed under the Apache License, Version 2.0.
+See [LICENSE](LICENSE) for details.

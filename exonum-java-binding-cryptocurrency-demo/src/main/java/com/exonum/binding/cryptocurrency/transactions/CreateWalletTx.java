@@ -1,39 +1,63 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 
+import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.crypto.PublicKeySerializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.cryptocurrency.transactions.converters.TransactionMessageConverter;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.base.Objects;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
 
-/** A transaction that creates a new named wallet with zero balance. */
+/** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx extends BaseTx implements Transaction {
 
   private static final short ID = CryptocurrencyTransaction.CREATE_WALLET.getId();
 
-  private final String name;
+  private static final Serializer<PublicKey> publicKeySerializer = PublicKeySerializer.INSTANCE;
+
+  static final long DEFAULT_BALANCE = 100L;
+
+  private final PublicKey ownerPublicKey;
 
   /**
    * Creates a new wallet creation transaction with given name.
    */
-  public CreateWalletTx(String name) {
+  public CreateWalletTx(PublicKey ownerPublicKey) {
     super(CryptocurrencyService.ID, ID);
-    checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
-    this.name = name;
+    checkArgument(
+        ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
+        "Public key must have correct size");
+    this.ownerPublicKey = ownerPublicKey;
   }
 
   static TransactionMessageConverter<CreateWalletTx> converter() {
@@ -42,22 +66,21 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
 
   @Override
   public boolean isValid() {
-    return !name.trim().isEmpty();
+    return true;
   }
 
   @Override
   public void execute(Fork view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    MapIndex<HashCode, Wallet> wallets = schema.wallets();
+    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-    HashCode walletId = Hashing.defaultHashFunction().hashString(name, UTF_8);
-    if (wallets.containsKey(walletId)) {
+    if (wallets.containsKey(ownerPublicKey)) {
       return;
     }
 
-    Wallet wallet = new Wallet(name, 0L);
+    Wallet wallet = new Wallet(DEFAULT_BALANCE);
 
-    wallets.put(walletId, wallet);
+    wallets.put(ownerPublicKey, wallet);
   }
 
   @Override
@@ -81,48 +104,50 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     CreateWalletTx that = (CreateWalletTx) o;
     return service_id == that.service_id
         && message_id == that.message_id
-        && Objects.equal(name, that.name);
+        && Objects.equal(ownerPublicKey, that.ownerPublicKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(service_id, message_id, name);
+    return Objects.hashCode(service_id, message_id, ownerPublicKey);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {
     INSTANCE;
 
-    private static String getUtf8String(ByteBuffer buffer) {
-      byte[] s = getRemainingBytes(buffer);
-
-      return StandardSerializers.string().fromBytes(s);
-    }
-
-    private static byte[] getRemainingBytes(ByteBuffer buffer) {
-      int numBytes = buffer.remaining();
-      byte[] dst = new byte[numBytes];
-      buffer.get(dst);
-      return dst;
-    }
-
-    private static ByteBuffer serialize(CreateWalletTx tx) {
-      byte[] nameBytes = StandardSerializers.string().toBytes(tx.name);
-      return ByteBuffer.wrap(nameBytes);
-    }
-
     @Override
     public CreateWalletTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
-      ByteBuffer body = txMessage.getBody();
-      String name = getUtf8String(body);
-      return new CreateWalletTx(name);
+
+      CreateWalletTx createWalletTx;
+      try {
+        TxMessagesProtos.CreateWalletTx messageBody =
+            TxMessagesProtos.CreateWalletTx.parseFrom(txMessage.getBody());
+
+        PublicKey ownerPublicKey =
+            PublicKey.fromBytes((messageBody.getOwnerPublicKey().getRawKey().toByteArray()));
+        createWalletTx = new CreateWalletTx(ownerPublicKey);
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalArgumentException(
+            "Unable to instantiate TxMessagesProtos.CreateWalletTx instance from provided"
+                + " binary data", e);
+      }
+      return createWalletTx;
     }
 
     @Override
     public BinaryMessage toMessage(CreateWalletTx transaction) {
-      return newCryptocurrencyTransactionBuilder(ID)
-          .setBody(serialize(transaction))
-          .buildRaw();
+      PublicKeyProtos.PublicKey ownerPublicKey = PublicKeyProtos.PublicKey.newBuilder()
+          .setRawKey(ByteString.copyFrom(publicKeySerializer.toBytes(transaction.ownerPublicKey)))
+          .build();
+      TxMessagesProtos.CreateWalletTx createWalletTx =
+          TxMessagesProtos.CreateWalletTx.newBuilder()
+              .setOwnerPublicKey(ownerPublicKey)
+              .build();
+
+      ByteBuffer buffer = ByteBuffer.wrap(createWalletTx.toByteArray());
+
+      return newCryptocurrencyTransactionBuilder(ID).setBody(buffer).buildRaw();
     }
   }
 }

@@ -1,14 +1,32 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.HashUtils.hashUtf8String;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTx.DEFAULT_BALANCE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
+import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
@@ -27,31 +45,29 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
+  private static final PublicKey ownerKey = PredefinedOwnerKeys.firstOwnerKey;
+
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void isValidNonEmptyName() {
-    String name = "wallet";
-
-    CreateWalletTx tx = new CreateWalletTx(name);
+  public void walletIsValidWithCorrectOwnerKey() {
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     assertTrue(tx.isValid());
   }
 
   @Test
-  public void isValidEmptyName() {
-    String name = "";
+  public void constructorRejectsInvalidSizedKey() {
+    PublicKey publicKey = PublicKey.fromBytes(new byte[1]);
 
-    expectedException.expectMessage("Name must not be blank");
+    expectedException.expectMessage("Public key must have correct size");
     expectedException.expect(IllegalArgumentException.class);
-    new CreateWalletTx(name);
+    new CreateWalletTx(publicKey);
   }
 
   @Test
   public void executeCreateWalletTx() throws CloseFailuresException {
-    String name = "wallet";
-
-    CreateWalletTx tx = new CreateWalletTx(name);
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -60,11 +76,9 @@ public class CreateWalletTxTest {
 
       // Check that entries have been added.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<HashCode, Wallet> wallets = schema.wallets();
-      HashCode nameHash = hashUtf8String(name);
-      
-      assertThat(wallets.get(nameHash).getName(), equalTo(name));
-      assertThat(wallets.get(nameHash).getBalance(), equalTo(0L));
+      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+
+      assertThat(wallets.get(ownerKey).getBalance(), equalTo(DEFAULT_BALANCE));
     }
   }
 
@@ -73,41 +87,45 @@ public class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      String name = "wallet";
-      Long value = 100L;
-      HashCode nameHash = hashUtf8String(name);
+      Long balance = DEFAULT_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
-        MapIndex<HashCode, Wallet> wallets = schema.wallets();
-        wallets.put(nameHash, new Wallet(name, value));
+        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+        wallets.put(ownerKey, new Wallet(balance));
       }
 
-      // Execute the transaction, that has the same name.
-      CreateWalletTx tx = new CreateWalletTx(name);
+      // Execute the transaction, that has the same owner key.
+      CreateWalletTx tx = new CreateWalletTx(ownerKey);
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
       {
-        MapIndex<HashCode, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(nameHash).getName(), equalTo(name));
-        assertThat(wallets.get(nameHash).getBalance(), equalTo(value));
+        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+        assertThat(wallets.get(ownerKey).getBalance(), equalTo(balance));
       }
     }
   }
 
   @Test
   public void info() {
-    String name = "wallet";
-
-    CreateWalletTx tx = new CreateWalletTx(name);
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
 
     String info = tx.info();
 
     BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
     assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
     assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
+  }
+
+  @Test
+  public void converterRoundtrip() {
+    CreateWalletTx tx = new CreateWalletTx(ownerKey);
+    BinaryMessage message = CreateWalletTx.converter().toMessage(tx);
+    CreateWalletTx txFromMessage = CreateWalletTx.converter().fromMessage(message);
+
+    assertThat(txFromMessage, equalTo(tx));
   }
 
   @Test
