@@ -35,12 +35,6 @@ echo "CURRENT_DIR=${EJB_APP_DIR}"
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
 
-header "PREPARE CLASSES"
-
-cd $EJB_ROOT
-mvn compile
-cd $EJB_APP_DIR
-
 header "PREPARE PATHS"
 
 CORE_TXT="exonum-java-binding-core/target/ejb-core-classpath.txt"
@@ -53,19 +47,24 @@ EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
+RUST_LIB_DIR=$(rustup run stable rustc --print sysroot)/lib
+echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
+
+LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$LD_LIBRARY_PATH"
+echo "Final LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
 rm -rf testnet
 mkdir testnet
 
 header "GENERATE COMMON CONFIG"
-cargo run -- generate-template --validators-count 1 testnet/common.toml
+ejb-app generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
-cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml --ejb-classpath $EJB_CLASSPATH --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $EJB_LOG_CONFIG_PATH --ejb-debug false --peer-address 127.0.0.1:5400
+ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml --ejb-classpath $EJB_CLASSPATH --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $EJB_LOG_CONFIG_PATH --ejb-debug false --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-cargo run -- finalize testnet/sec.toml testnet/node.toml --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' --ejb-port 6000 --public-configs testnet/pub.toml
+ejb-app finalize testnet/sec.toml testnet/node.toml --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' --ejb-port 6000 --public-configs testnet/pub.toml
 
 header "START TESTNET"
-cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
