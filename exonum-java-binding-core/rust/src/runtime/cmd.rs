@@ -119,9 +119,9 @@ impl CommandExtension for Finalize {
 
         let jvm_config: JvmConfig = context
             .get(keys::SERVICES_SECRET_CONFIGS)
-            .unwrap()
+            .expect("Can't get services secret configs")
             .get(EJB_JVM_CONFIG_NAME)
-            .unwrap()
+            .expect("Can't get JVM config")
             .clone()
             .try_into()?;
 
