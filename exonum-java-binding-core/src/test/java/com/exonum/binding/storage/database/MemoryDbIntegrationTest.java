@@ -41,7 +41,7 @@ public class MemoryDbIntegrationTest {
   }
 
   @Test
-  public void databaseMustClosePromptly() throws Exception {
+  public void databaseMustClosePromptly() {
     MemoryDb database = MemoryDb.newInstance();
     database.close();  // No exceptions.
   }

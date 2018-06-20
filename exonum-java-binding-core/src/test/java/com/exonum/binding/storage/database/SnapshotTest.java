@@ -37,7 +37,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class SnapshotTest {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     mockStatic(Views.class);
   }
 
