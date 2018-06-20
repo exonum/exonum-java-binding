@@ -120,8 +120,7 @@ public class ApiControllerTest {
           .thenReturn(sourceTx.hash());
 
       // Send a request to submitTransaction
-      webClient
-          .post(port, HOST, ApiController.SUBMIT_TRANSACTION_PATH)
+      post(ApiController.SUBMIT_TRANSACTION_PATH)
           .sendJsonObject(
               new JsonObject(sourceTxMessage),
               context.asyncAssertSuccess(
@@ -187,18 +186,22 @@ public class ApiControllerTest {
   }
 
   @Test
-  public void submitCreateCounter_InternalServerError(TestContext context) {
+  public void submitTransactionWhenInternalServerErrorIsThrown(TestContext context) {
     Throwable error = wrappingChecked(InternalServerError.class);
-    when(service.getValue(eq(fromKey)))
-        .thenThrow(error);
 
-    String getWalletUri = getWalletUri(fromKey);
-    get(getWalletUri)
-        .send(context.asyncAssertSuccess(ar -> {
-          context.verify(v -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
-          });
-        }));
+    Transaction transaction = new CreateWalletTx(fromKey);
+    when(service.submitTransaction(eq(transaction)))
+        .thenThrow(error);
+    String sourceTxMessage = transaction.info();
+
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendJsonObject(
+            new JsonObject(sourceTxMessage),
+            context.asyncAssertSuccess(ar -> {
+              context.verify(v -> {
+                assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+              });
+            }));
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
@@ -228,5 +231,9 @@ public class ApiControllerTest {
 
   private HttpRequest<Buffer> get(String requestPath) {
     return webClient.get(port, HOST, requestPath);
+  }
+
+  private HttpRequest<Buffer> post(String requestPath) {
+    return webClient.post(port, HOST, requestPath);
   }
 }

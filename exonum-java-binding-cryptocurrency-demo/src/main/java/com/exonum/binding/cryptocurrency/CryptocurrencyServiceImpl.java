@@ -62,18 +62,18 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Override
   @SuppressWarnings("ConstantConditions")
-  public Optional<Wallet> getValue(PublicKey walletId) {
+  public Optional<Wallet> getValue(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      if (!wallets.containsKey(walletId)) {
+      if (!wallets.containsKey(ownerKey)) {
         return Optional.empty();
       }
 
-      Wallet value = wallets.get(walletId);
-      return Optional.of(new Wallet(value.getBalance()));
+      Wallet value = wallets.get(ownerKey);
+      return Optional.of(value);
     });
   }
 

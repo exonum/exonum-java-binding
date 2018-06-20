@@ -23,7 +23,6 @@
     <protobuf.version>3.5.1</protobuf.version>
     <exonum-bom.version>1.0.0</exonum-bom.version>
     <exonum-java-testing.version>1.0-SNAPSHOT</exonum-java-testing.version>
-    <assertj-core.version>3.10.0</assertj-core.version>
   </properties>
 
   <build>
@@ -163,7 +162,6 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>${assertj-core.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
