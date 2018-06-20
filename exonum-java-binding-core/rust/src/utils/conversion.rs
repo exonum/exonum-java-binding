@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::crypto::Hash;
+use exonum::crypto::{Hash, HASH_SIZE};
 use jni::JNIEnv;
-use jni::sys::jbyteArray;
+use jni::sys::{jbyte, jbyteArray, jint};
 use jni::objects::JString;
 
 use JniResult;
 
 // Converts Java byte array to `Hash`. Panics if array has the wrong length.
 pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> JniResult<Hash> {
-    // TODO: Optimize copying and allocations.
-    let bytes = env.convert_byte_array(array)?;
-    Ok(Hash::from_slice(&bytes).expect(
-        "Unable to create `Hash` from the slice",
-    ))
+    let array_length = env.get_array_length(array)?;
+    assert_eq!(HASH_SIZE as jint, array_length);
+
+    let mut bytes = [0 as jbyte; HASH_SIZE];
+    env.get_byte_array_region(array, 0, &mut bytes[..])?;
+    Ok(Hash::from(unsafe { ::std::mem::transmute(bytes) }))
 }
 
 // Converts `Hash` to Java byte array.

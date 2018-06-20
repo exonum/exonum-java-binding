@@ -17,7 +17,7 @@ use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, Pro
                                        PROOF_MAP_KEY_SIZE};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject};
+use jni::sys::{jboolean, jbyte, jbyteArray, jint, jobject};
 
 use std::panic;
 use std::ptr;
@@ -442,11 +442,10 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 }
 
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
-    // TODO: Optimize copying and allocations.
-    let bytes = env.convert_byte_array(array)?;
-    assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
+    let array_length = env.get_array_length(array)?;
+    assert_eq!(PROOF_MAP_KEY_SIZE as jint, array_length);
 
-    let mut key = Key::default();
-    key.copy_from_slice(&bytes);
-    Ok(key)
+    let mut key = [0 as jbyte; PROOF_MAP_KEY_SIZE];
+    env.get_byte_array_region(array, 0, &mut key[..])?;
+    Ok(unsafe { ::std::mem::transmute(key) })
 }
