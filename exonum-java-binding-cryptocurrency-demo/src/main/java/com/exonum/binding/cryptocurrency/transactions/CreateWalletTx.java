@@ -33,10 +33,10 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.common.base.Objects;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx extends BaseTx implements Transaction {
@@ -104,12 +104,12 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     CreateWalletTx that = (CreateWalletTx) o;
     return service_id == that.service_id
         && message_id == that.message_id
-        && Objects.equal(ownerPublicKey, that.ownerPublicKey);
+        && Objects.equals(ownerPublicKey, that.ownerPublicKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(service_id, message_id, ownerPublicKey);
+    return Objects.hash(service_id, message_id, ownerPublicKey);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {

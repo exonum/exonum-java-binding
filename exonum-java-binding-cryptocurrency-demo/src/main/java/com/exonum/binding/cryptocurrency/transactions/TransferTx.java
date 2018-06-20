@@ -31,10 +31,10 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.common.base.Objects;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /** A transaction that transfers cryptocurrency between two wallets. */
 public final class TransferTx extends BaseTx implements Transaction {
@@ -106,13 +106,13 @@ public final class TransferTx extends BaseTx implements Transaction {
         && message_id == that.message_id
         && seed == that.seed
         && sum == that.sum
-        && Objects.equal(fromWallet, that.fromWallet)
-        && Objects.equal(toWallet, that.toWallet);
+        && Objects.equals(fromWallet, that.fromWallet)
+        && Objects.equals(toWallet, that.toWallet);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(service_id, message_id, seed, fromWallet, toWallet, sum);
+    return Objects.hash(service_id, message_id, seed, fromWallet, toWallet, sum);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<TransferTx> {

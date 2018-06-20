@@ -30,8 +30,8 @@ import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.StandardSerializers;
-import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * A transaction creating a new named counter.
@@ -88,7 +88,7 @@ public final class CreateCounterTx implements Transaction {
       return false;
     }
     CreateCounterTx that = (CreateCounterTx) o;
-    return Objects.equal(name, that.name);
+    return Objects.equals(name, that.name);
   }
 
   @Override
