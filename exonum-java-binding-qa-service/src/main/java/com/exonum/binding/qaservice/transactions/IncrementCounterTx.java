@@ -30,9 +30,9 @@ import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
 /**
  * A transaction incrementing the given counter. Always valid, does nothing if the counter
@@ -96,12 +96,12 @@ public final class IncrementCounterTx implements Transaction {
     }
     IncrementCounterTx that = (IncrementCounterTx) o;
     return seed == that.seed
-        && Objects.equal(counterId, that.counterId);
+        && Objects.equals(counterId, that.counterId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(seed, counterId);
+    return Objects.hash(seed, counterId);
   }
 
   static TransactionMessageConverter<IncrementCounterTx> converter() {
