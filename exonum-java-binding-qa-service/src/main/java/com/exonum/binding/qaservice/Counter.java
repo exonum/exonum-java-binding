@@ -18,7 +18,8 @@ package com.exonum.binding.qaservice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
+
 
 final class Counter {
 
@@ -40,11 +41,11 @@ final class Counter {
     }
     Counter counter = (Counter) o;
     return value == counter.value
-        && Objects.equal(name, counter.name);
+        && Objects.equals(name, counter.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(name, value);
+    return Objects.hash(name, value);
   }
 }
