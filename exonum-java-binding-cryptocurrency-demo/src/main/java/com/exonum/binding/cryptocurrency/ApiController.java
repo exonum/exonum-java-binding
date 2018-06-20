@@ -97,7 +97,9 @@ final class ApiController {
     Transaction tx = maybeTx.get();
 
     HashCode txHash = service.submitTransaction(tx);
-    rc.response().end(String.valueOf(txHash));
+    rc.response()
+        .putHeader("Content-Type", "text/plain")
+        .end(String.valueOf(txHash));
   }
 
   private void getWallet(RoutingContext rc) {
