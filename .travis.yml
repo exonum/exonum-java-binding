@@ -58,7 +58,7 @@ script:
   # Next 2 lines are a workaround to prevent clippy check dependencies.
   - cargo +${RUST_NIGHTLY_VERSION} check
   - cargo +${RUST_NIGHTLY_VERSION} clean -p java_bindings
-  - cargo +${RUST_NIGHTLY_VERSION} clippy -- -D warnings
+  - cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
   - cargo audit
   - cd -
   - ./run_all_tests.sh

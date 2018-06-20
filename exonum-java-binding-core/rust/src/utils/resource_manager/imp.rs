@@ -61,7 +61,8 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
             .expect("Unable to obtain write-lock")
             .insert(handle, HandleInfo::new(TypeId::of::<T>(), ownership))
             .is_none(),
-        "Trying to add the same handle for the second time: {:X}, handle"
+        "Trying to add the same handle for the second time: {:X}",
+        handle
     )
 }
 
@@ -98,17 +99,14 @@ fn check_handle_impl<T: 'static>(handle: Handle, ownership: Option<HandleOwnersh
                 handle
             );
 
-            match ownership {
-                Some(val) => {
-                    assert_eq!(
-                        val,
-                        info.ownership,
-                        "Error: '{:X}' handle should be {:?}",
-                        handle,
-                        info.ownership
-                    );
-                }
-                None => (),
+            if let Some(val) = ownership {
+                assert_eq!(
+                    val,
+                    info.ownership,
+                    "Error: '{:X}' handle should be {:?}",
+                    handle,
+                    info.ownership
+                );
             }
         }
         None => panic!("Invalid handle value: '{:X}'", handle),
