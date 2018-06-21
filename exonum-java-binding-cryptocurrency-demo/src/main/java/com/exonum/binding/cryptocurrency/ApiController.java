@@ -90,7 +90,9 @@ final class ApiController {
     try {
       // Submit an executable transaction to the network
       HashCode txHash = service.submitTransaction(tx);
-      rc.response().end(String.valueOf(txHash));
+      rc.response()
+          .putHeader("Content-Type", "text/plain")
+          .end(String.valueOf(txHash));
     } catch (InvalidTransactionException e) {
       rc.response()
           .setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
