@@ -43,7 +43,7 @@ public class EntryIndexProxyIntegrationTest
   private static final String ENTRY_NAME = "test_entry";
 
   @Test
-  public void setValue() throws Exception {
+  public void setValue() {
     runTestWithView(database::createFork, (e) -> {
       e.set(V1);
 
@@ -53,7 +53,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void setOverwritesPreviousValue() throws Exception {
+  public void setOverwritesPreviousValue() {
     runTestWithView(database::createFork, (e) -> {
       e.set(V1);
       e.set(V2);
@@ -64,7 +64,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void setFailsWithSnapshot() throws Exception {
+  public void setFailsWithSnapshot() {
     runTestWithView(database::createSnapshot, (e) -> {
       expectedException.expect(UnsupportedOperationException.class);
       e.set(V1);
@@ -72,12 +72,12 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void isNotInitiallyPresent() throws Exception {
+  public void isNotInitiallyPresent() {
     runTestWithView(database::createSnapshot, (e) -> assertFalse(e.isPresent()));
   }
 
   @Test
-  public void getFailsIfNotPresent() throws Exception {
+  public void getFailsIfNotPresent() {
     runTestWithView(database::createSnapshot, (e) -> {
       expectedException.expect(NoSuchElementException.class);
       e.get();
@@ -85,7 +85,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeIfNoValue() throws Exception {
+  public void removeIfNoValue() {
     runTestWithView(database::createFork, (e) -> {
       assertFalse(e.isPresent());
       e.remove();
@@ -94,7 +94,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeValue() throws Exception {
+  public void removeValue() {
     runTestWithView(database::createFork, (e) -> {
       e.set(V1);
       e.remove();
@@ -103,7 +103,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsWithSnapshot() throws Exception {
+  public void removeFailsWithSnapshot() {
     runTestWithView(database::createSnapshot, (e) -> {
       expectedException.expect(UnsupportedOperationException.class);
       e.remove();

@@ -46,12 +46,12 @@ public class TreePathToByteArrayParameterizedTest {
   private TreePath path;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     path = new TreePath(BitSet.valueOf(pathBytes), pathLength);
   }
 
   @Test
-  public void toByteArray() throws Exception {
+  public void toByteArray() {
     assertThat(path.toByteArray(), equalTo(pathBytes));
   }
 
