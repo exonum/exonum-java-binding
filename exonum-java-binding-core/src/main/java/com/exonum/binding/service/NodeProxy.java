@@ -50,7 +50,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param viewFactory a factory to instantiate native database views
    */
   public NodeProxy(long nativeHandle, ViewFactory viewFactory) {
-    // fixme: remove this comment when https://jira.bf.local/browse/ECR-251 is resolved
     super(nativeHandle, false);
     this.viewFactory = viewFactory;
   }
@@ -127,6 +126,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
 
   @Override
   protected void disposeInternal() {
-    // no-op: this class is not responsible to destroy the corresponding native object
+    // TODO: It is responsible to destroy the corresponding native object [ECR-1910].
   }
 }

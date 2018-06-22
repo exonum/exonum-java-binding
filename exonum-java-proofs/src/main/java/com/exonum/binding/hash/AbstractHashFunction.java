@@ -37,8 +37,6 @@ import java.nio.charset.Charset;
 
 /** 
  * Skeleton implementation of {@link HashFunction} in terms of {@link #newHasher()}.
- * 
- * TODO(lowasser): make public 
  */
 abstract class AbstractHashFunction implements HashFunction {
   @Override
