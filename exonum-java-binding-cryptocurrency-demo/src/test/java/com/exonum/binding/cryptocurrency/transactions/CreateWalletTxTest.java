@@ -60,7 +60,7 @@ public class CreateWalletTxTest {
   public void constructorRejectsInvalidSizedKey() {
     PublicKey publicKey = PublicKey.fromBytes(new byte[1]);
 
-    expectedException.expectMessage("Public key must have correct size");
+    expectedException.expectMessage("Public key has invalid size (1), must be 32 bytes long.");
     expectedException.expect(IllegalArgumentException.class);
     new CreateWalletTx(publicKey);
   }
