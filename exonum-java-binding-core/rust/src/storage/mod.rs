@@ -21,6 +21,7 @@ mod key_set_index;
 mod value_set_index;
 mod proof_list_index;
 mod proof_map_index;
+mod sparse_list_index;
 
 pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
 pub(crate) use self::db::View;
@@ -32,3 +33,4 @@ pub use self::key_set_index::*;
 pub use self::value_set_index::*;
 pub use self::proof_list_index::*;
 pub use self::proof_map_index::*;
+pub use self::sparse_list_index::*;
