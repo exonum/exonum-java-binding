@@ -1,11 +1,11 @@
 // TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
 #![allow(dead_code)]
 
-use jni::JNIEnv;
 use jni::sys::jlong;
+use jni::JNIEnv;
 
-use std::panic;
 use std::marker::PhantomData;
+use std::panic;
 
 use utils::{exception, resource_manager};
 

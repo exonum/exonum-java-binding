@@ -1,11 +1,11 @@
-use java_bindings::{JniExecutor, MainExecutor, ServiceProxy};
 use java_bindings::exonum::crypto::Hash;
-use java_bindings::exonum::storage::Snapshot;
 use java_bindings::exonum::storage::proof_map_index::ProofMapIndex;
+use java_bindings::exonum::storage::Snapshot;
 use java_bindings::utils::unwrap_jni;
+use java_bindings::{JniExecutor, MainExecutor, ServiceProxy};
 
-use mock::NATIVE_FACADE_CLASS;
 use mock::service::SERVICE_ADAPTER_CLASS;
+use mock::NATIVE_FACADE_CLASS;
 
 pub const INITIAL_ENTRY_KEY: &str = "initial key";
 pub const INITIAL_ENTRY_VALUE: &str = "initial value";

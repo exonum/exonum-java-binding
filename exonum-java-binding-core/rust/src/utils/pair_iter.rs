@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use jni::JNIEnv;
 use jni::objects::{GlobalRef, JMethodID};
+use jni::JNIEnv;
 
 use std::mem;
 
