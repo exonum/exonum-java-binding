@@ -14,10 +14,10 @@ use java_bindings::exonum::encoding::Error as MessageError;
 use java_bindings::exonum::messages::RawTransaction;
 use java_bindings::exonum::storage::{Database, MemoryDB};
 use java_bindings::jni::JavaVM;
-use java_bindings::MainExecutor;
 use java_bindings::serde_json::Value;
 use java_bindings::utils::any_to_string;
-use std::panic::{AssertUnwindSafe, catch_unwind};
+use java_bindings::MainExecutor;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 
 lazy_static! {
@@ -80,9 +80,9 @@ fn tx_from_raw() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction(java_transaction)
         .build();
-    let executable_transaction = service.tx_from_raw(raw_message).expect(
-        "Failed to convert transaction",
-    );
+    let executable_transaction = service
+        .tx_from_raw(raw_message)
+        .expect("Failed to convert transaction");
     assert_eq!(
         executable_transaction.serialize_field().unwrap(),
         *INFO_VALUE
@@ -105,9 +105,9 @@ fn tx_from_raw_should_return_err_if_java_exception_occurred() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
         .build();
-    let err = service.tx_from_raw(raw).expect_err(
-        "This transaction should be de-serialized with an error!",
-    );
+    let err = service
+        .tx_from_raw(raw)
+        .expect_err("This transaction should be de-serialized with an error!");
     if let MessageError::Basic(ref s) = err {
         assert!(s.starts_with("Java exception: java.lang.RuntimeException"));
     } else {
@@ -180,17 +180,16 @@ fn service_can_modify_db_on_initialize() {
     {
         let mut fork = db.fork();
         service.initialize(&mut fork);
-        db.merge(fork.into_patch()).expect(
-            "Failed to merge changes",
-        );
+        db.merge(fork.into_patch())
+            .expect("Failed to merge changes");
     }
     // Check that the Java service implementation has successfully written the initial value
     // into the storage.
     let snapshot = db.snapshot();
     let test_map = create_test_map(&*snapshot, service.service_name());
     let key = hash(INITIAL_ENTRY_KEY.as_ref());
-    let value = test_map.get(&key).expect(
-        "Failed to find the entry created in the test service",
-    );
+    let value = test_map
+        .get(&key)
+        .expect("Failed to find the entry created in the test service");
     assert_eq!(INITIAL_ENTRY_VALUE, value);
 }

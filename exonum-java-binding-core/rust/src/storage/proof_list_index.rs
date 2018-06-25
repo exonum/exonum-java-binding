@@ -13,17 +13,17 @@
 // limitations under the License.
 
 use exonum::crypto::Hash;
-use exonum::storage::{Snapshot, Fork, ProofListIndex};
-use exonum::storage::proof_list_index::{ProofListIndexIter, ListProof};
-use jni::JNIEnv;
+use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
+use exonum::storage::{Fork, ProofListIndex, Snapshot};
 use jni::errors::Result;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jlong, jint, jbyteArray, jboolean, jobject};
+use jni::sys::{jboolean, jbyteArray, jint, jlong, jobject};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use storage::db::{View, ViewRef, Value};
+use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle};
 
 type Index<T> = ProofListIndex<T, Value>;
@@ -45,9 +45,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
@@ -63,7 +63,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     group_name: JString,
     list_id: jbyteArray,
     view_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
@@ -187,7 +187,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
-) -> jbyteArray{
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.merkle_root(),
@@ -205,7 +205,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     _: JObject,
     list_handle: Handle,
     index: jlong,
-) -> jobject{
+) -> jobject {
     let res = panic::catch_unwind(|| {
         let proof = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
@@ -224,7 +224,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
     from: jlong,
     to: jlong,
-) -> jobject{
+) -> jobject {
     let res = panic::catch_unwind(|| {
         let proof = match *utils::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64, to as u64),
@@ -241,7 +241,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(list_handle) {
@@ -260,7 +260,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     _: JObject,
     list_handle: Handle,
     index_from: jlong,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(list_handle) {
@@ -340,7 +340,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray{
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = utils::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
         match iter.next() {
@@ -357,7 +357,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-){
+) {
     utils::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
 }
 
@@ -370,10 +370,9 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
         }
         ListProof::Left(ref left, ref hash) => {
             let left = make_java_proof(env, left.as_ref())?;
-            let right = hash.map_or(
-                Ok((ptr::null_mut() as jobject).into()),
-                |hash| make_java_hash_node(env, &hash),
-            )?;
+            let right = hash.map_or(Ok((ptr::null_mut() as jobject).into()), |hash| {
+                make_java_hash_node(env, &hash)
+            })?;
             make_java_proof_branch(env, left, right)
         }
         ListProof::Right(ref hash, ref right) => {
@@ -406,7 +405,7 @@ fn make_java_proof_branch<'a>(
     env.new_object(
         "com/exonum/binding/storage/proofs/list/ListProofBranch",
         "(Lcom/exonum/binding/storage/proofs/list/ListProof;\
-          Lcom/exonum/binding/storage/proofs/list/ListProof;)V",
+         Lcom/exonum/binding/storage/proofs/list/ListProof;)V",
         &[left.as_obj().into(), right.as_obj().into()],
     )
 }

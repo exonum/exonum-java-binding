@@ -10,11 +10,11 @@ use serde_json::value::Value;
 
 use std::fmt;
 
-use {JniExecutor, MainExecutor, TransactionProxy};
 use proxy::node::NodeContext;
 use storage::View;
 use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception,
             to_handle, unwrap_jni};
+use {JniExecutor, MainExecutor, TransactionProxy};
 
 /// A proxy for `Service`s.
 #[derive(Clone)]
@@ -138,17 +138,14 @@ impl Service for ServiceProxy {
         }));
         match json_config {
             None => Value::Null,
-            Some(json_config) => {
-                serde_json::from_str(&json_config)
-                    .map_err(|e| {
-                        panic!(
-                            "JSON deserialization error: {:?}; json string: {:?}",
-                            e,
-                            json_config
-                        )
-                    })
-                    .unwrap()
-            }
+            Some(json_config) => serde_json::from_str(&json_config)
+                .map_err(|e| {
+                    panic!(
+                        "JSON deserialization error: {:?}; json string: {:?}",
+                        e, json_config
+                    )
+                })
+                .unwrap(),
         }
     }
 
