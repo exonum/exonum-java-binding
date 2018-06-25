@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
@@ -17,10 +33,10 @@ import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.serialization.Serializer;
-import com.google.common.base.Objects;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx extends BaseTx implements Transaction {
@@ -38,9 +54,9 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
    */
   public CreateWalletTx(PublicKey ownerPublicKey) {
     super(CryptocurrencyService.ID, ID);
-    checkArgument(
-        ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
-        "Public key must have correct size");
+    checkArgument(ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
+        "Public key has invalid size (%s), must be %s bytes long.", ownerPublicKey.size(),
+        CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
     this.ownerPublicKey = ownerPublicKey;
   }
 
@@ -88,12 +104,12 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
     CreateWalletTx that = (CreateWalletTx) o;
     return service_id == that.service_id
         && message_id == that.message_id
-        && Objects.equal(ownerPublicKey, that.ownerPublicKey);
+        && Objects.equals(ownerPublicKey, that.ownerPublicKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(service_id, message_id, ownerPublicKey);
+    return Objects.hash(service_id, message_id, ownerPublicKey);
   }
 
   private enum TransactionConverter implements TransactionMessageConverter<CreateWalletTx> {

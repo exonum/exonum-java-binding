@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
@@ -29,7 +45,7 @@ public class KeySetIndexProxyIntegrationTest
   private static final String KEY_SET_NAME = "test_key_set";
 
   @Test
-  public void addSingleElement() throws Exception {
+  public void addSingleElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
       assertTrue(set.contains(K1));
@@ -37,7 +53,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void addMultipleElements() throws Exception {
+  public void addMultipleElements() {
     runTestWithView(database::createFork, (set) -> {
       List<String> keys = TestStorageItems.keys.subList(0, 3);
       keys.forEach(set::add);
@@ -48,7 +64,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void addFailsIfSnapshot() throws Exception {
+  public void addFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.add(K1);
@@ -56,12 +72,12 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearEmptyHasNoEffect() throws Exception {
+  public void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, KeySetIndexProxy::clear);
   }
 
   @Test
-  public void clearNonEmptyRemovesAllElements() throws Exception {
+  public void clearNonEmptyRemovesAllElements() {
     runTestWithView(database::createFork, (set) -> {
       List<String> keys = TestStorageItems.keys.subList(0, 3);
 
@@ -76,7 +92,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearFailsIfSnapshot() throws Exception {
+  public void clearFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.clear();
@@ -84,12 +100,12 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainElementsWhenEmpty() throws Exception {
+  public void doesNotContainElementsWhenEmpty() {
     runTestWithView(database::createSnapshot, (set) -> assertFalse(set.contains(K1)));
   }
 
   @Test
-  public void testIterator() throws Exception {
+  public void testIterator() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.keys;
 
@@ -105,7 +121,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removesAddedElement() throws Exception {
+  public void removesAddedElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
 
@@ -116,7 +132,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeNotPresentElementDoesNothing() throws Exception {
+  public void removeNotPresentElementDoesNothing() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
 
@@ -128,7 +144,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsIfSnapshot() throws Exception {
+  public void removeFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.remove(K1);

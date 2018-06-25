@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.test.Bytes.bytes;
@@ -17,19 +33,19 @@ public class StoragePreconditionsTest {
   public ExpectedException expected = ExpectedException.none();
 
   @Test
-  public void checkIndexNameAcceptsNonEmpty() throws Exception {
+  public void checkIndexNameAcceptsNonEmpty() {
     String name = "table1";
 
     assertThat(name, sameInstance(StoragePreconditions.checkIndexName(name)));
   }
 
   @Test(expected = NullPointerException.class)
-  public void checkIndexNameDoesNotAcceptNull() throws Exception {
+  public void checkIndexNameDoesNotAcceptNull() {
     StoragePreconditions.checkIndexName(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void checkIndexNameDoesNotAcceptEmpty() throws Exception {
+  public void checkIndexNameDoesNotAcceptEmpty() {
     String name = "";
 
     StoragePreconditions.checkIndexName(name);
@@ -56,47 +72,47 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkStorageKeyAcceptsEmpty() throws Exception {
+  public void checkStorageKeyAcceptsEmpty() {
     byte[] key = new byte[]{};
 
     assertThat(key, sameInstance(StoragePreconditions.checkStorageKey(key)));
   }
 
   @Test
-  public void checkStorageKeyAcceptsNonEmpty() throws Exception {
+  public void checkStorageKeyAcceptsNonEmpty() {
     byte[] key = bytes('k');
 
     assertThat(key, sameInstance(StoragePreconditions.checkStorageKey(key)));
   }
 
   @Test(expected = NullPointerException.class)
-  public void checkStorageKeyDoesNotAcceptNull() throws Exception {
+  public void checkStorageKeyDoesNotAcceptNull() {
     StoragePreconditions.checkStorageKey(null);
   }
 
   @Test
-  public void checkProofKeyAccepts32ByteZeroKey() throws Exception {
+  public void checkProofKeyAccepts32ByteZeroKey() {
     byte[] key = new byte[32];
 
     assertThat(key, sameInstance(StoragePreconditions.checkProofKey(key)));
   }
 
   @Test
-  public void checkProofKeyAccepts32ByteNonZeroKey() throws Exception {
+  public void checkProofKeyAccepts32ByteNonZeroKey() {
     byte[] key = bytes("0123456789abcdef0123456789abcdef");
 
     assertThat(key, sameInstance(StoragePreconditions.checkProofKey(key)));
   }
 
   @Test
-  public void checkProofKeyDoesNotAcceptNull() throws Exception {
+  public void checkProofKeyDoesNotAcceptNull() {
     expected.expect(NullPointerException.class);
     expected.expectMessage("Proof map key is null");
     StoragePreconditions.checkProofKey(null);
   }
 
   @Test
-  public void checkProofKeyDoesNotAcceptSmallerKeys() throws Exception {
+  public void checkProofKeyDoesNotAcceptSmallerKeys() {
     byte[] key = new byte[1];
 
     expected.expect(IllegalArgumentException.class);
@@ -105,7 +121,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkProofKeyDoesNotAcceptBiggerKeys() throws Exception {
+  public void checkProofKeyDoesNotAcceptBiggerKeys() {
     byte[] key = new byte[64];
 
     expected.expect(IllegalArgumentException.class);
@@ -114,21 +130,21 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkStorageValueAcceptsEmpty() throws Exception {
+  public void checkStorageValueAcceptsEmpty() {
     byte[] value = new byte[]{};
 
     assertThat(value, sameInstance(StoragePreconditions.checkStorageValue(value)));
   }
 
   @Test
-  public void checkStorageValueAcceptsNonEmpty() throws Exception {
+  public void checkStorageValueAcceptsNonEmpty() {
     byte[] value = bytes('v');
 
     assertThat(value, sameInstance(StoragePreconditions.checkStorageValue(value)));
   }
 
   @Test(expected = NullPointerException.class)
-  public void checkStorageValueDoesNotAcceptNull() throws Exception {
+  public void checkStorageValueDoesNotAcceptNull() {
     StoragePreconditions.checkStorageKey(null);
   }
 
@@ -140,7 +156,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndexNegative() throws Exception {
+  public void checkElementIndexNegative() {
     expected.expect(IndexOutOfBoundsException.class);
     expected.expectMessage("Index must be in range [0, 2), but: -1");
 
@@ -148,7 +164,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndexEqualToSize() throws Exception {
+  public void checkElementIndexEqualToSize() {
     expected.expect(IndexOutOfBoundsException.class);
     expected.expectMessage("Index must be in range [0, 2), but: 2");
 
@@ -156,7 +172,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndexGreaterThanSize() throws Exception {
+  public void checkElementIndexGreaterThanSize() {
     expected.expect(IndexOutOfBoundsException.class);
     expected.expectMessage("Index must be in range [0, 2), but: 3");
 
@@ -164,7 +180,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndexMaxLong() throws Exception {
+  public void checkElementIndexMaxLong() {
     expected.expect(IndexOutOfBoundsException.class);
     expected.expectMessage("Index must be in range [0, 2), but:");
 
@@ -172,7 +188,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndex0MinValid() throws Exception {
+  public void checkElementIndex0MinValid() {
     long index = 0;
     long size = 3;
 
@@ -180,7 +196,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndex1() throws Exception {
+  public void checkElementIndex1() {
     long index = 1;
     long size = 3;
 
@@ -188,7 +204,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkElementIndex2MaxValid() throws Exception {
+  public void checkElementIndex2MaxValid() {
     long index = 2;
     long size = 3;
 
@@ -196,7 +212,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkPositionIndexSize0_Valid() throws Exception {
+  public void checkPositionIndexSize0_Valid() {
     long index = 0;
     long size = 0;
 
@@ -204,7 +220,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkPositionIndexSize0_NotValid() throws Exception {
+  public void checkPositionIndexSize0_NotValid() {
     long index = 1;
     long size = 0;
 
@@ -214,7 +230,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkPositionIndexSize0_NotValidNegative() throws Exception {
+  public void checkPositionIndexSize0_NotValidNegative() {
     long index = -1;
     long size = 0;
 
@@ -224,7 +240,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkPositionIndexSize3_AllValid() throws Exception {
+  public void checkPositionIndexSize3_AllValid() {
     long size = 3;
     long[] validIndices = {0, 1, 2, 3};
 
@@ -234,7 +250,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkPositionIndexSize3_NotValid() throws Exception {
+  public void checkPositionIndexSize3_NotValid() {
     long index = 4;
     long size = 3;
 
@@ -244,7 +260,7 @@ public class StoragePreconditionsTest {
   }
 
   @Test
-  public void checkPositionIndex_NegativeSize() throws Exception {
+  public void checkPositionIndex_NegativeSize() {
     long index = 0;
     long size = -1;
 

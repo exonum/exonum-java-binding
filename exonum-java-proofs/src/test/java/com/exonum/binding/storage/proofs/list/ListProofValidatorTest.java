@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.proofs.list;
 
 import static com.google.common.collect.ImmutableMap.of;
@@ -43,7 +59,7 @@ public class ListProofValidatorTest {
   private ListProofValidator<String> validator;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     hasher = mock(Hasher.class);
     when(hasher.putObject(any(), any())).thenReturn(hasher);
     // Return the root hash by default. Individual tests might override that behaviour.
@@ -57,19 +73,19 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void constructorRejectsZeroSize() throws Exception {
+  public void constructorRejectsZeroSize() {
     expectedException.expect(IllegalArgumentException.class);
     validator = createListProofValidator(0);
   }
 
   @Test
-  public void constructorRejectsNegativeSize() throws Exception {
+  public void constructorRejectsNegativeSize() {
     expectedException.expect(IllegalArgumentException.class);
     validator = createListProofValidator(-1);
   }
 
   @Test
-  public void visit_SingletonListProof() throws Exception {
+  public void visit_SingletonListProof() {
     ListProof root = leafOf(V1);
     when(hashFunction.hashObject(eq(root), any(Funnel.class)))
         .thenReturn(ROOT_HASH);
@@ -83,7 +99,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_FullProof2elements() throws Exception {
+  public void visit_FullProof2elements() {
     ProofListElement left = leafOf(V1);
     when(hashFunction.hashBytes(bytesOf(V1))).thenReturn(H1);
 
@@ -108,7 +124,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_FullProof4elements() throws Exception {
+  public void visit_FullProof4elements() {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             leafOf(V1),
@@ -136,7 +152,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_FullProof2elementsHashMismatch() throws Exception {
+  public void visit_FullProof2elementsHashMismatch() {
     ProofListElement left = leafOf(V1);
     ProofListElement right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
@@ -156,7 +172,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_IllegalProofOfSingletonTree() throws Exception {
+  public void visit_IllegalProofOfSingletonTree() {
     int listSize = 1;
 
     ProofListElement left = leafOf(V1);
@@ -172,7 +188,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_ProofLeftValue() throws Exception {
+  public void visit_ProofLeftValue() {
     int listSize = 2;
 
     ListProof left = leafOf(V1);
@@ -190,7 +206,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_ProofRightValue() throws Exception {
+  public void visit_ProofRightValue() {
     int listSize = 2;
 
     ListProof left = new HashNode(H1);
@@ -208,7 +224,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_InvalidBranchHashesAsChildren() throws Exception {
+  public void visit_InvalidBranchHashesAsChildren() {
     int listSize = 2;
 
     ListProof left = new HashNode(H1);
@@ -225,7 +241,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_InvalidBranchLeftHashNoRight() throws Exception {
+  public void visit_InvalidBranchLeftHashNoRight() {
     int listSize = 2;
 
     ListProof left = new HashNode(H1);
@@ -242,7 +258,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_UnbalancedInTheRightSubTree() throws Exception {
+  public void visit_UnbalancedInTheRightSubTree() {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(leafOf(V1),
             new HashNode(H2)),
@@ -261,7 +277,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_UnbalancedInTheLeftSubTree() throws Exception {
+  public void visit_UnbalancedInTheLeftSubTree() {
     ListProofBranch root = new ListProofBranch(
         leafOf(V1), // <-- A value at the wrong depth.
         new ListProofBranch(leafOf(V2),
@@ -280,7 +296,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_UnbalancedLeafNodeTooDeep() throws Exception {
+  public void visit_UnbalancedLeafNodeTooDeep() {
     int depth = 4;
     ListProof root = generateLeftLeaningProofTree(depth);
 

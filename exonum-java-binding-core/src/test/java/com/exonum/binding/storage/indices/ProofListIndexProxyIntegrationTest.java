@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
@@ -49,24 +65,24 @@ public class ProofListIndexProxyIntegrationTest {
   private static final String LIST_NAME = "test_proof_list";
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     database = MemoryDb.newInstance();
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     database.close();
   }
 
   @Test
-  public void getRootHashEmptyList() throws Exception {
+  public void getRootHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
       assertThat(list.getRootHash(), equalTo(EMPTY_LIST_ROOT_HASH));
     });
   }
 
   @Test
-  public void getRootHashSingletonList() throws Exception {
+  public void getRootHashSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -77,7 +93,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getProofFailsIfEmptyList() throws Exception {
+  public void getProofFailsIfEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
       expectedException.expect(IndexOutOfBoundsException.class);
       list.getProof(0);
@@ -85,7 +101,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getProofSingletonList() throws Exception {
+  public void getProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -94,7 +110,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofSingletonList() throws Exception {
+  public void getRangeProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -103,7 +119,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getProofMultipleItemList() throws Exception {
+  public void getProofMultipleItemList() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
 
@@ -116,7 +132,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofMultipleItemList_FullRange() throws Exception {
+  public void getRangeProofMultipleItemList_FullRange() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -126,7 +142,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofMultipleItemList_1stHalf() throws Exception {
+  public void getRangeProofMultipleItemList_1stHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -138,7 +154,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofMultipleItemList_2ndHalf() throws Exception {
+  public void getRangeProofMultipleItemList_2ndHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);

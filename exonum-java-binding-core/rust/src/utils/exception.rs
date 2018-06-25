@@ -1,16 +1,31 @@
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use jni::JNIEnv;
-use jni::errors::Error as JniError;
 
 use std::any::Any;
-use std::thread;
-use std::result;
 use std::error::Error;
+use std::result;
+use std::thread;
 
-type Result<T> = thread::Result<result::Result<T, JniError>>;
+use JniError;
+
+type ExceptionResult<T> = thread::Result<result::Result<T, JniError>>;
 
 // Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 // at the Java side. So this function should be used only for the `panic::catch_unwind` result.
-pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
+pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> T {
     match res {
         Ok(val) => {
             match val {
@@ -34,7 +49,7 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
 }
 
 // Same as `unwrap_exc_or` but returns default value.
-pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: Result<T>) -> T {
+pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) -> T {
     unwrap_exc_or(env, res, T::default())
 }
 
@@ -61,7 +76,7 @@ fn throw(env: &JNIEnv, description: &str) {
 }
 
 // Tries to get meaningful description from panic-error.
-fn any_to_string(any: &Box<Any + Send>) -> String {
+pub fn any_to_string(any: &Box<Any + Send>) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
         s.to_string()
     } else if let Some(s) = any.downcast_ref::<String>() {
@@ -75,9 +90,9 @@ fn any_to_string(any: &Box<Any + Send>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::panic;
-    use std::error::Error;
     use super::*;
+    use std::error::Error;
+    use std::panic;
 
     #[test]
     fn str_any() {
