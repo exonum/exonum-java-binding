@@ -27,7 +27,7 @@ import org.junit.Test;
 public class BinaryMessageTest {
 
   @Test
-  public void hash() throws Exception {
+  public void hash() {
     BinaryMessage message = new Message.Builder()
         .setNetworkId((byte) 0x01)
         .setVersion((byte) 0x02)

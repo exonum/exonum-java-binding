@@ -44,7 +44,7 @@ public class ForkTest {
   private ViewModificationCounter modCounter;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     mockStatic(Views.class);
     mockStatic(ViewModificationCounter.class);
     modCounter = mock(ViewModificationCounter.class);

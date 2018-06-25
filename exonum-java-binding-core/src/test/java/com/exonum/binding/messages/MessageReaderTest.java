@@ -42,7 +42,7 @@ public class MessageReaderTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void wrapThrowsIfTooSmall() throws Exception {
+  public void wrapThrowsIfTooSmall() {
     ByteBuffer buf = allocateBuffer(2);
 
     expectedException.expectMessage("The buffer size (2) is less than the minimal possible "
@@ -52,7 +52,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapThrowsIfTooSmall2() throws Exception {
+  public void wrapThrowsIfTooSmall2() {
     ByteBuffer buf = allocateBuffer(MIN_MESSAGE_BUFFER_SIZE - 1);
 
     expectedException.expectMessage("The buffer size (73) is less than the minimal possible "
@@ -62,7 +62,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapThrowsIfTooSmallWithSetMessageSize() throws Exception {
+  public void wrapThrowsIfTooSmallWithSetMessageSize() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE - 1);
 
     expectedException.expectMessage("The buffer size (73) is less than the minimal possible "
@@ -72,7 +72,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapsMinimalMessage() throws Exception {
+  public void wrapsMinimalMessage() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE);
 
     MessageReader m = MessageReader.wrap(buf);
@@ -81,7 +81,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapsWhenLimitNotEqualCapacity() throws Exception {
+  public void wrapsWhenLimitNotEqualCapacity() {
     ByteBuffer buf = allocateBuffer(2 * MIN_MESSAGE_BUFFER_SIZE)
         .putInt(PAYLOAD_LENGTH_OFFSET, MIN_MESSAGE_BUFFER_SIZE);
     buf.limit(MIN_MESSAGE_BUFFER_SIZE);
@@ -92,7 +92,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapThrowsIfMessageSizeFieldGreaterThanActual() throws Exception {
+  public void wrapThrowsIfMessageSizeFieldGreaterThanActual() {
     int bufferSize = MIN_MESSAGE_BUFFER_SIZE;
     ByteBuffer buf = allocateBuffer(bufferSize);
     int messageSize = 2048;
@@ -106,7 +106,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapThrowsIfMessageSizeFieldLessThanActual() throws Exception {
+  public void wrapThrowsIfMessageSizeFieldLessThanActual() {
     int bufferSize = 2 * MIN_MESSAGE_BUFFER_SIZE;
     ByteBuffer buf = allocateBuffer(bufferSize);
     int messageSize = bufferSize - 1;
@@ -120,7 +120,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getNetworkId() throws Exception {
+  public void getNetworkId() {
     byte netId = 0x01;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .put(NET_ID_OFFSET, netId);
@@ -131,7 +131,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getVersion() throws Exception {
+  public void getVersion() {
     byte version = 0x02;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .put(VERSION_OFFSET, version);
@@ -142,7 +142,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getServiceId() throws Exception {
+  public void getServiceId() {
     short serviceId = 0x0BCD;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .putShort(SERVICE_ID_OFFSET, serviceId);
@@ -153,7 +153,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getMessageType() throws Exception {
+  public void getMessageType() {
     short messageType = 0x0BCD;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .putShort(MESSAGE_TYPE_OFFSET, messageType);
@@ -164,7 +164,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getBody_Empty() throws Exception {
+  public void getBody_Empty() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE);
     boolean directBuffer = buf.isDirect();
 
@@ -176,7 +176,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getBody_4Bytes() throws Exception {
+  public void getBody_4Bytes() {
     int bodySize = Integer.BYTES;
     int bodyValue = 0x12345678;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE + bodySize)
@@ -191,7 +191,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getSignature() throws Exception {
+  public void getSignature() {
     byte[] signature = createPrefixed(bytes("Signature bytes"), SIGNATURE_SIZE);
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE);
     buf.position(MIN_MESSAGE_BUFFER_SIZE - SIGNATURE_SIZE);
@@ -204,7 +204,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getMessage() throws Exception {
+  public void getMessage() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .put(NET_ID_OFFSET, (byte) 0x02)
         .put(VERSION_OFFSET, (byte) 0x01)
@@ -217,7 +217,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void size() throws Exception {
+  public void size() {
     int bufferSize = MIN_MESSAGE_BUFFER_SIZE;
     ByteBuffer buf = allocateMessageBuffer(bufferSize);
 

@@ -172,6 +172,7 @@ final class ApiController {
   private void replyTxSubmitted(RoutingContext rc, HashCode transactionHash) {
     rc.response()
         .setStatusCode(HTTP_CREATED)
+        .putHeader("Content-Type", "text/plain")
         .putHeader("Location", transactionLocationPath(transactionHash))
         .end(String.valueOf(transactionHash));
   }

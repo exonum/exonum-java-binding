@@ -70,13 +70,13 @@ public class UserServiceAdapterTest {
   private UserServiceAdapter serviceAdapter;
 
   @Test
-  public void convertTransaction_ThrowsIfNull() throws Exception {
+  public void convertTransaction_ThrowsIfNull() {
     expectedException.expect(NullPointerException.class);
     serviceAdapter.convertTransaction(null);
   }
 
   @Test
-  public void convertTransaction() throws Exception {
+  public void convertTransaction() {
     short serviceId = (short) 0xA103;
     Transaction expectedTransaction = mock(Transaction.class);
     when(service.getId()).thenReturn(serviceId);
@@ -93,7 +93,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void convertTransaction_InvalidServiceImplReturningNull() throws Exception {
+  public void convertTransaction_InvalidServiceImplReturningNull() {
     short serviceId = (short) 0xA103;
     when(service.getId()).thenReturn(serviceId);
     when(service.convertToTransaction(any(BinaryMessage.class)))
@@ -121,7 +121,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_EmptyList() throws Exception {
+  public void getStateHashes_EmptyList() {
     long snapshotHandle = 0x0A;
     Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
@@ -136,7 +136,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_SingletonList() throws Exception {
+  public void getStateHashes_SingletonList() {
     long snapshotHandle = 0x0A;
     Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
@@ -153,7 +153,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_MultipleHashesList() throws Exception {
+  public void getStateHashes_MultipleHashesList() {
     long snapshotHandle = 0x0A;
     Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
@@ -177,7 +177,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_ClosesCleaner() throws Exception {
+  public void getStateHashes_ClosesCleaner() {
     long snapshotHandle = 0x0A;
     byte[][] ignored = serviceAdapter.getStateHashes(snapshotHandle);
 
@@ -190,7 +190,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void initialize_ClosesCleaner() throws Exception {
+  public void initialize_ClosesCleaner() {
     long forkHandle = 0x0A;
     String ignored = serviceAdapter.initialize(forkHandle);
 
@@ -203,7 +203,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void mountPublicApiHandler() throws Exception {
+  public void mountPublicApiHandler() {
     Router router = mock(RouterImpl.class);
     when(server.createRouter())
         .thenReturn(router);
@@ -217,7 +217,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void mountPublicApiHandler_FailsOnSubsequentCalls() throws Exception {
+  public void mountPublicApiHandler_FailsOnSubsequentCalls() {
     serviceAdapter.mountPublicApiHandler(0x0A);
 
     expectedException.expect(IllegalStateException.class);
