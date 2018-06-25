@@ -90,7 +90,6 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <classifier>no_aop</classifier>
             <scope>provided</scope>
         </dependency>
 
