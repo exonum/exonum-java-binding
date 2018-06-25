@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Runs cargo commands with a prepared environment.
-# Every native test requires loading libjvm.{dylib|so} because of using `invocation` feature of jni-rs.
-# This script includes path to libjvm to LD_LIBRARY_PATH and should be used instead of regular cargo executable while
-# working with bindings.
+# Every native test requires loading libjvm.dylib because of using `invocation` feature of jni-rs.
+# This script includes a path to libjvm.dylib into LD_LIBRARY_PATH and should be used instead of a regular cargo
+# executable while working with EJB on Mac.
 #
-# ¡Keep it MacOS/Ubuntu compatible!
+# ¡Keep it MacOS compatible!
 
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail

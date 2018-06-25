@@ -31,6 +31,7 @@
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
+    <rust.cargo.executable>cargo</rust.cargo.executable>
   </properties>
 
   <build>
@@ -53,7 +54,7 @@
         <version>1.6.0</version>
         <!-- A configuration shared across multiple executions -->
         <configuration>
-          <executable>${project.basedir}/rust/cargo.sh</executable>
+          <executable>${rust.cargo.executable}</executable>
           <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>
@@ -250,6 +251,17 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>osx</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <rust.cargo.executable>${project.basedir}/rust/cargo-mac.sh</rust.cargo.executable>
+      </properties>
     </profile>
   </profiles>
 
