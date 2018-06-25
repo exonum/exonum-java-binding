@@ -18,7 +18,6 @@ import com.exonum.binding.cryptocurrency.transactions.TransferTx;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.Transaction;
 import com.google.common.collect.ImmutableMap;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
@@ -144,7 +143,7 @@ public class ApiControllerTest {
   public void getWallet(TestContext context) {
     long balance = 200L;
     Wallet wallet = new Wallet(balance);
-    when(service.getValue(eq(fromKey)))
+    when(service.getWallet(eq(fromKey)))
         .thenReturn(Optional.of(wallet));
 
     String getWalletUri = getWalletUri(fromKey);
@@ -162,7 +161,7 @@ public class ApiControllerTest {
 
   @Test
   public void getNonexistentWallet(TestContext context) {
-    when(service.getValue(fromKey))
+    when(service.getWallet(fromKey))
         .thenReturn(Optional.empty());
 
     String getWalletUri = getWalletUri(fromKey);

@@ -106,7 +106,7 @@ final class ApiController {
     PublicKey walletId =
         getRequiredParameter(rc.request(), WALLET_ID_PARAM, PublicKey::fromHexString);
 
-    Optional<Wallet> wallet = service.getValue(walletId);
+    Optional<Wallet> wallet = service.getWallet(walletId);
 
     if (wallet.isPresent()) {
       Gson gson = CryptocurrencyTransactionGson.instance();

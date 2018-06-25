@@ -11,5 +11,5 @@ public interface CryptocurrencyService {
 
   HashCode submitTransaction(Transaction tx);
 
-  Optional<Wallet> getValue(PublicKey ownerKey);
+  Optional<Wallet> getWallet(PublicKey ownerKey);
 }

@@ -62,7 +62,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Override
   @SuppressWarnings("ConstantConditions")
-  public Optional<Wallet> getValue(PublicKey ownerKey) {
+  public Optional<Wallet> getWallet(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
@@ -72,8 +72,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
         return Optional.empty();
       }
 
-      Wallet value = wallets.get(ownerKey);
-      return Optional.of(value);
+      return Optional.ofNullable(wallets.get(ownerKey));
     });
   }
 
