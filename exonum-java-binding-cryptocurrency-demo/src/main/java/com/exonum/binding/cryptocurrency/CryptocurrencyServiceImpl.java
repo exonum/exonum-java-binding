@@ -68,9 +68,6 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     return node.withSnapshot((view) -> {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      if (!wallets.containsKey(ownerKey)) {
-        return Optional.empty();
-      }
 
       return Optional.ofNullable(wallets.get(ownerKey));
     });
