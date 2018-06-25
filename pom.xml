@@ -188,11 +188,6 @@
                   <version>[1.8,)</version>
                   <message>Java 8 is the minimum supported version.</message>
                 </requireJavaVersion>
-                <requireOS>
-                  <family>!windows</family>
-                  <message>Java Binding cannot be built on Windows at the moment.
-                           You are welcome to hack on ECR-446 and ECR-587!</message>
-                </requireOS>
               </rules>
             </configuration>
           </execution>
