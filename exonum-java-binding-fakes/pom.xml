@@ -19,6 +19,7 @@
 
     <properties>
         <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
+        <skipTests>${project.skipJavaITs}</skipTests>
     </properties>
 
     <build>

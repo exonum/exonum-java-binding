@@ -32,6 +32,7 @@
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
+    <skipITs>${project.skipJavaITs}</skipITs>
   </properties>
 
   <build>

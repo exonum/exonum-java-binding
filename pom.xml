@@ -68,8 +68,7 @@
     <guava.version>25.1-jre</guava.version>
     <vertx.version>3.5.2</vertx.version>
     <equalsverifier.version>2.4.6</equalsverifier.version>
-    <!-- skip all tests (unit and ITs) until the loading bug is fixed (ECR-942) -->
-    <skipTests>true</skipTests>
+    <project.skipJavaITs>false</project.skipJavaITs>
   </properties>
 
   <build>
@@ -276,6 +275,21 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!-- Skip integration tests requiring the native library on Linux until the loading bug
+         is fixed (ECR-942). -->
+    <profile>
+      <id>skip-ITs-on-linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <name>linux</name>
+        </os>
+      </activation>
+      <properties>
+        <project.skipJavaITs>true</project.skipJavaITs>
+      </properties>
     </profile>
   </profiles>
 
