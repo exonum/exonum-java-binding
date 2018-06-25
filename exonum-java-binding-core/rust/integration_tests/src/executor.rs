@@ -1,7 +1,7 @@
-use java_bindings::{JniExecutor, JniErrorKind};
-use java_bindings::jni::JavaVM;
-use java_bindings::jni::sys::jint;
 use example_proxy::AtomicIntegerProxy;
+use java_bindings::jni::sys::jint;
+use java_bindings::jni::JavaVM;
+use java_bindings::{JniErrorKind, JniExecutor};
 
 use std::sync::{Arc, Barrier};
 use std::thread::spawn;
