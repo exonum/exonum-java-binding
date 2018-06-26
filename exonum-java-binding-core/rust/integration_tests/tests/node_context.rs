@@ -17,10 +17,13 @@ use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::MemoryDB;
 use java_bindings::jni::objects::JObject;
 use java_bindings::jni::{JNIEnv, JavaVM};
-use java_bindings::utils::{as_handle, get_and_clear_java_exception, get_class_name, unwrap_jni,
-                           unwrap_jni_verbose};
-use java_bindings::{Java_com_exonum_binding_service_NodeProxy_nativeSubmit, JniExecutor,
-                    JniResult, MainExecutor, NodeContext};
+use java_bindings::utils::{
+    as_handle, get_and_clear_java_exception, get_class_name, unwrap_jni, unwrap_jni_verbose,
+};
+use java_bindings::{
+    Java_com_exonum_binding_service_NodeProxy_nativeSubmit, JniExecutor, JniResult, MainExecutor,
+    NodeContext,
+};
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();

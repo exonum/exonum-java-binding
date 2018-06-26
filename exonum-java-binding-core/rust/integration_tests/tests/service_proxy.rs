@@ -5,8 +5,9 @@ extern crate lazy_static;
 
 use integration_tests::mock::service::ServiceMockBuilder;
 use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
-use integration_tests::test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY,
-                                      INITIAL_ENTRY_VALUE};
+use integration_tests::test_service::{
+    create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
+};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::exonum::blockchain::Service;
 use java_bindings::exonum::crypto::hash;

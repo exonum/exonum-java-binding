@@ -5,8 +5,9 @@ extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
 use java_bindings::jni::{JNIEnv, JavaVM};
-use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
-                           panic_on_exception};
+use java_bindings::utils::{
+    check_error_on_exception, get_and_clear_java_exception, get_class_name, panic_on_exception,
+};
 use java_bindings::{JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
 use std::sync::Arc;
