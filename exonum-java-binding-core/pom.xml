@@ -252,10 +252,10 @@
         </plugins>
       </build>
     </profile>
-    <!-- A profile for compatibility fixes on MacOS:
-            - Reevaluates the necessary LD_LIBRARY_PATH variable before run cargo:
-              MacOS clears LD_LIBRARY_PATH in a new shell,
-              while mvn command is a shell script and normally it creates new subshells.
+    <!-- A profile to build the native library on Mac. It is used instead of 
+         direct cargo invocation to set LD_LIBRARY_PATH correctly and pass it
+         to cargo process. Such workaround is needed because LD_LIBRARY_PATH
+         set in the parent shell is inaccessible to the cargo process if SIP is enabled.
      -->
     <profile>
       <id>compat-macos</id>
