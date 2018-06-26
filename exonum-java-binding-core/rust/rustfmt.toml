@@ -1,3 +1,0 @@
- # Accept lines longer than the configured limit, as mangled names of Java native methods
- # may be quite long.
- error_on_line_overflow=false

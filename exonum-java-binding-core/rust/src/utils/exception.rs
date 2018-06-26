@@ -15,9 +15,9 @@
 use jni::JNIEnv;
 
 use std::any::Any;
-use std::thread;
-use std::result;
 use std::error::Error;
+use std::result;
+use std::thread;
 
 use JniError;
 
@@ -90,9 +90,9 @@ pub fn any_to_string(any: &Box<Any + Send>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::panic;
-    use std::error::Error;
     use super::*;
+    use std::error::Error;
+    use std::panic;
 
     #[test]
     fn str_any() {

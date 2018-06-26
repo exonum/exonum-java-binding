@@ -53,31 +53,31 @@ public class ListIndexProxyIntegrationTest {
   private static final String LIST_NAME = "test_list";
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     database = MemoryDb.newInstance();
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     database.close();
   }
 
   @Test(expected = NoSuchElementException.class)
-  public void removeLastEmptyList() throws Exception {
+  public void removeLastEmptyList() {
     runTestWithView(database::createFork, (l) -> {
       String ignored = l.removeLast();
     });
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void removeLastWithSnapshot() throws Exception {
+  public void removeLastWithSnapshot() {
     runTestWithView(database::createSnapshot, (l) -> {
       String ignored = l.removeLast();
     });
   }
 
   @Test
-  public void removeLastSingleElementList() throws Exception {
+  public void removeLastSingleElementList() {
     runTestWithView(database::createFork, (l) -> {
       String addedElement = V1;
       l.add(addedElement);
@@ -89,7 +89,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void removeLastTwoElementList() throws Exception {
+  public void removeLastTwoElementList() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -102,7 +102,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateNonEmptyToZero() throws Exception {
+  public void truncateNonEmptyToZero() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.truncate(0);
@@ -113,7 +113,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToSameSize() throws Exception {
+  public void truncateToSameSize() {
     runTestWithView(database::createFork, (l) -> {
       long newSize = 1;
       l.add(V1);
@@ -124,7 +124,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToSmallerSize() throws Exception {
+  public void truncateToSmallerSize() {
     runTestWithView(database::createFork, (l) -> {
       long newSize = 1;
       l.add(V1);
@@ -136,7 +136,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToGreaterSizeHasNoEffect() throws Exception {
+  public void truncateToGreaterSizeHasNoEffect() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -149,7 +149,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToNegativeSizeThrows() throws Exception {
+  public void truncateToNegativeSizeThrows() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
 
@@ -160,7 +160,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void truncateWithSnapshot() throws Exception {
+  public void truncateWithSnapshot() {
     runTestWithView(database::createSnapshot, (l) -> l.truncate(0L));
   }
 

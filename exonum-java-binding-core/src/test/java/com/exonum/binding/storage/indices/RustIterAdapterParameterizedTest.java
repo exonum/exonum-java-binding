@@ -40,7 +40,7 @@ public class RustIterAdapterParameterizedTest {
   RustIterAdapter<Integer> iterAdapter;
 
   @Test
-  public void iteratorMustIncludeAllTheItemsFromTheList() throws Exception {
+  public void iteratorMustIncludeAllTheItemsFromTheList() {
     // Create an adapter under test, converting a list to rustIter.
     iterAdapter = new RustIterAdapter<>(
         rustIterMockFromIterable(underlyingList));

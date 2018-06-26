@@ -46,14 +46,14 @@ public class AbstractCloseableNativeProxyTest {
   NativeProxyFake proxy;
 
   @Test
-  public void closeShallCallDispose() throws Exception {
+  public void closeShallCallDispose() {
     proxy = new NativeProxyFake(1L, true);
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(1));
   }
 
   @Test
-  public void closeShallCallDisposeOnce() throws Exception {
+  public void closeShallCallDisposeOnce() {
     proxy = new NativeProxyFake(1L, true);
     proxy.close();
     proxy.close();
@@ -61,21 +61,21 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void closeShallNotDisposeInvalidHandle() throws Exception {
+  public void closeShallNotDisposeInvalidHandle() {
     proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(0));
   }
 
   @Test
-  public void closeShallNotDisposeNotOwningHandle() throws Exception {
+  public void closeShallNotDisposeNotOwningHandle() {
     proxy = new NativeProxyFake(1L, false);
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(0));
   }
 
   @Test
-  public void closeShallThrowIfReferencedObjectInvalid() throws Exception {
+  public void closeShallThrowIfReferencedObjectInvalid() {
     NativeProxyFake reference = makeProxy(2L);
     proxy = new NativeProxyFake(1L, true, reference);
 
@@ -86,33 +86,33 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void shallBeValidOnceCreated() throws Exception {
+  public void shallBeValidOnceCreated() {
     proxy = new NativeProxyFake(1L, true);
     assertTrue(proxy.isValidHandle());
   }
 
   @Test
-  public void shallNotBeValidOnceClosed() throws Exception {
+  public void shallNotBeValidOnceClosed() {
     proxy = new NativeProxyFake(1L, true);
     proxy.close();
     assertFalse(proxy.isValidHandle());
   }
 
   @Test
-  public void notOwningShallNotBeValidOnceClosed() throws Exception {
+  public void notOwningShallNotBeValidOnceClosed() {
     proxy = new NativeProxyFake(1L, false);
     proxy.close();
     assertFalse(proxy.isValidHandle());
   }
 
   @Test
-  public void shallNotBeValidIfInvalidHandle() throws Exception {
+  public void shallNotBeValidIfInvalidHandle() {
     proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
     assertFalse(proxy.isValidHandle());
   }
 
   @Test
-  public void getNativeHandle() throws Exception {
+  public void getNativeHandle() {
     long expectedNativeHandle = 0x1FL;
 
     proxy = new NativeProxyFake(expectedNativeHandle, true);
@@ -121,7 +121,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_ShallFailIfProxyIsClosed() throws Exception {
+  public void getNativeHandle_ShallFailIfProxyIsClosed() {
     long nativeHandle = 0x1FL;
 
     proxy = new NativeProxyFake(nativeHandle, true);
@@ -132,7 +132,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_ShallFailIfInvalid() throws Exception {
+  public void getNativeHandle_ShallFailIfInvalid() {
     long invalidHandle = 0x0L;
 
     proxy = new NativeProxyFake(invalidHandle, true);
@@ -142,7 +142,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DirectlyReferencedInvalid1() throws Exception {
+  public void getNativeHandle_DirectlyReferencedInvalid1() {
     long nativeHandle = 1L;
     NativeProxyFake referenced = makeProxy(20L);
     // o--x
@@ -159,7 +159,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DirectlyReferencedInvalid2() throws Exception {
+  public void getNativeHandle_DirectlyReferencedInvalid2() {
     long nativeHandle = 1L;
     NativeProxyFake referenced = new NativeProxyFake(20L, true, makeProxy(30L));
     // o--x--o
@@ -176,7 +176,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_IndirectlyReferencedInvalid1() throws Exception {
+  public void getNativeHandle_IndirectlyReferencedInvalid1() {
     long nativeHandle = 1L;
     NativeProxyFake referenced = makeProxy(30L);
     // o--o--x
@@ -194,7 +194,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DirectlyMultiReferenced0() throws Exception {
+  public void getNativeHandle_DirectlyMultiReferenced0() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -216,7 +216,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DirectMultiReferenced1() throws Exception {
+  public void getNativeHandle_DirectMultiReferenced1() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -238,7 +238,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DirectMultiReferenced2() throws Exception {
+  public void getNativeHandle_DirectMultiReferenced2() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -260,7 +260,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DirectMultiReferencedAll() throws Exception {
+  public void getNativeHandle_DirectMultiReferencedAll() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -282,7 +282,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_DiamondReferenced() throws Exception {
+  public void getNativeHandle_DiamondReferenced() {
     long nativeHandle = 1L;
 
     AbstractCloseableNativeProxy referenced3 = makeProxy(30L);
@@ -305,7 +305,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_ChainReferenced() throws Exception {
+  public void getNativeHandle_ChainReferenced() {
     long nativeHandle = 1L;
 
     AbstractCloseableNativeProxy referenced4 = makeProxy(40L);
@@ -327,7 +327,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_ChainReferencedAllInvalid() throws Exception {
+  public void getNativeHandle_ChainReferencedAllInvalid() {
     // o->x->x->x
     List<AbstractCloseableNativeProxy> transitivelyReferenced = new ArrayList<>();
     NativeProxyFake proxy = null;
@@ -357,7 +357,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_InDirectMultiReferenced1() throws Exception {
+  public void getNativeHandle_InDirectMultiReferenced1() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced3 = asList(makeProxy(30L),
         makeProxy(31L),
@@ -380,7 +380,7 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_MultipleReferences() throws Exception {
+  public void getNativeHandle_MultipleReferences() {
     long nativeHandle = 1L;
     AbstractCloseableNativeProxy referenced2 = makeProxy(21L);
     //  /¯o

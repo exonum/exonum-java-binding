@@ -30,7 +30,7 @@ import org.junit.Test;
 public class BinaryMessageBuilderTest {
 
   @Test
-  public void buildFromMessage() throws Exception {
+  public void buildFromMessage() {
     int bodySize = Long.BYTES;
     Message message = createMessage(bodySize);
 
@@ -46,7 +46,7 @@ public class BinaryMessageBuilderTest {
   }
 
   @Test
-  public void buildFromBinaryMessage() throws Exception {
+  public void buildFromBinaryMessage() {
     int bodySize = Long.BYTES;
     Message srcMessage = createMessage(bodySize);
 

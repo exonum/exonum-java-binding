@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Snapshot, Fork, Entry};
-use jni::JNIEnv;
+use exonum::storage::{Entry, Fork, Snapshot};
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jbyteArray, jboolean};
+use jni::sys::{jboolean, jbyteArray};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use storage::db::{View, ViewRef, Value};
+use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle};
 
 type Index<T> = Entry<T, Value>;
@@ -42,9 +42,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))

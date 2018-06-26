@@ -36,13 +36,13 @@ public class DbKeyTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void throwsIfNull() throws Exception {
+  public void throwsIfNull() {
     expectedException.expect(NullPointerException.class);
     DbKey.fromBytes(null);
   }
 
   @Test
-  public void throwsIfInvalidNodeTypeCode() throws Exception {
+  public void throwsIfInvalidNodeTypeCode() {
     byte[] rawDbKey = createDbKey(2, bytes("a"), 8);
 
     expectedException.expect(IllegalArgumentException.class);
@@ -50,7 +50,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfLeafHasInvalidSize() throws Exception {
+  public void throwsIfLeafHasInvalidSize() {
     int invalidNumBits = 10;
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes("a"), invalidNumBits);
 
@@ -59,7 +59,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart0Bits() throws Exception {
+  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart0Bits() {
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
       int numSignificantBits = 0;
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x01), numSignificantBits);
@@ -70,7 +70,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart1Bit() throws Exception {
+  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart1Bit() {
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
       int numSignificantBits = 1;
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x03), numSignificantBits);
@@ -81,7 +81,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart7Bit() throws Exception {
+  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart7Bit() {
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
       int numSignificantBits = 7;
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x80), numSignificantBits);
@@ -92,7 +92,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart8Bit() throws Exception {
+  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart8Bit() {
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
       int numSignificantBits = 8;
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
@@ -103,7 +103,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart12Bit() throws Exception {
+  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart12Bit() {
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
       int numSignificantBits = 12;
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x1F), numSignificantBits);
@@ -114,7 +114,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart16Bit() throws Exception {
+  public void throwsIfBranchKeySliceHasBitsAfterSignificantPart16Bit() {
     if (MapProofValidator.PERFORM_TREE_CORRECTNESS_CHECKS) {
       int numSignificantBits = 16;
       byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0xFF, 0x01), numSignificantBits);
@@ -125,7 +125,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNodeType_BranchNode() throws Exception {
+  public void getNodeType_BranchNode() {
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes("a"), 8);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
@@ -133,7 +133,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNodeType_LeafNode() throws Exception {
+  public void getNodeType_LeafNode() {
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes("a"), 0);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
@@ -141,7 +141,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getKeySlice_RootBranch() throws Exception {
+  public void getKeySlice_RootBranch() {
     byte[] keyPrefix = bytes();
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, keyPrefix.length * Byte.SIZE);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -150,7 +150,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getKeySlice_IntermediateBranch() throws Exception {
+  public void getKeySlice_IntermediateBranch() {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, keyPrefix.length * Byte.SIZE);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -159,7 +159,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getKeySlice_Leaf() throws Exception {
+  public void getKeySlice_Leaf() {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.LEAF.code, keyPrefix, 0);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -168,7 +168,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNumSignificantBits_RootBranch() throws Exception {
+  public void getNumSignificantBits_RootBranch() {
     int numSignificantBits = 0;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(), numSignificantBits);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -177,7 +177,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNumSignificantBits_IntermediateBranch() throws Exception {
+  public void getNumSignificantBits_IntermediateBranch() {
     int numSignificantBits = 16;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes("ab"), numSignificantBits);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -186,7 +186,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNumSignificantBits_IntermediateBranch9Bits() throws Exception {
+  public void getNumSignificantBits_IntermediateBranch9Bits() {
     int numSignificantBits = 9;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -195,7 +195,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNumSignificantBits_IntermediateBranch12Bits() throws Exception {
+  public void getNumSignificantBits_IntermediateBranch12Bits() {
     int numSignificantBits = 12;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x0F), numSignificantBits);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -204,7 +204,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNumSignificantBits_IntermediateBranch15Bits() throws Exception {
+  public void getNumSignificantBits_IntermediateBranch15Bits() {
     int numSignificantBits = 15;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x7F), numSignificantBits);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -213,7 +213,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void getNumSignificantBits_Leaf() throws Exception {
+  public void getNumSignificantBits_Leaf() {
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes(0xFF), 0);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
@@ -265,7 +265,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void testKeyBits_Leaf() throws Exception {
+  public void testKeyBits_Leaf() {
     byte[] keyPrefix = bytes("abc");
     byte[] rawDbKey = createDbKey(Type.LEAF.code, keyPrefix, 0);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
@@ -277,7 +277,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void testKeyBits_RootBranch() throws Exception {
+  public void testKeyBits_RootBranch() {
     byte[] keyPrefix = bytes();
     int numSignificantBits = 0;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, numSignificantBits);
@@ -290,7 +290,7 @@ public class DbKeyTest {
   }
 
   @Test
-  public void testKeyBits_IntermediateBranch() throws Exception {
+  public void testKeyBits_IntermediateBranch() {
     byte[] keyPrefix = bytes("abc");
     int numSignificantBits = keyPrefix.length * Byte.SIZE;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, keyPrefix, numSignificantBits);
