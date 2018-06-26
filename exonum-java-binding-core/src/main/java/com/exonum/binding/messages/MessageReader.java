@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.messages;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -30,11 +46,13 @@ public final class MessageReader implements BinaryMessage {
 
     int bufferSize = buffer.limit();
     checkArgument(MIN_MESSAGE_BUFFER_SIZE <= bufferSize, 
-        "The buffer size (%s) is less than the minimal possible (%s)",
+        "The buffer size (%s) is less than the minimal possible message size (%s)",
         bufferSize, MIN_MESSAGE_BUFFER_SIZE);
-    int expectedSize = Message.messageSize(reader.bodySize());
+    // Check the 'payload_length' field of the message matches the actual buffer size.
+    int expectedSize = reader.size();
     checkArgument(bufferSize == expectedSize,
-        "The size of the buffer (%s) does not match expected (%s)", bufferSize, expectedSize);
+        "The size of the buffer (%s) does not match the expected size "
+            + "specified in the message header (%s)", bufferSize, expectedSize);
     return reader;
   }
 
@@ -84,7 +102,7 @@ public final class MessageReader implements BinaryMessage {
   }
 
   private int bodySize() {
-    return message.getInt(BODY_LENGTH_OFFSET);
+    return size() - HEADER_SIZE - SIGNATURE_SIZE;
   }
 
   /**
@@ -101,7 +119,7 @@ public final class MessageReader implements BinaryMessage {
 
   @Override
   public int size() {
-    return message.limit();
+    return message.getInt(PAYLOAD_LENGTH_OFFSET);
   }
 
   /**

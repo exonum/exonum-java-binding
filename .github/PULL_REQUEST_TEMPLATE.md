@@ -9,8 +9,8 @@ See: https://jira.bf.local/browse/XYZ
 ### Definition of Done
 
 - [ ] There are no TODOs left in the code
-- [ ] Change is covered by automated tests
-- [ ] The [coding guidelines](https://google.github.io/styleguide/javaguide.html) are followed
+- [ ] Change is covered by automated [tests](../CONTRIBUTING.md#tests)
+- [ ] The [coding guidelines](../CONTRIBUTING.md#the-code-style) are followed
 - [ ] Public API has Javadoc
 - [ ] Method preconditions are checked and documented in the Javadoc of the method
-- [ ] The [continuous integration build](https://www.travis-ci.com/exonum/exonum-java-binding) passes
+- [ ] The [continuous integration build](https://www.travis-ci.org/exonum/exonum-java-binding) passes

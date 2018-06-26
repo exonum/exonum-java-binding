@@ -7,6 +7,7 @@
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
 
+# todo: All Java tests (Unit & ITs) are skipped until lib loading is fixed [https://jira.bf.local/browse/ECR-942].
 # Run unit and integration tests in ci-build profile. This profile includes:
 #  - Java unit & integration tests, including ci-only & slow non-critical tests,
 #    which are excluded in the default profile.
@@ -14,6 +15,7 @@ set -eu -o pipefail
 #  - Native unit & integration tests that do not require a JVM.
 # See build definitions of the modules for more.
 mvn install \
+  -DskipTests \
   --activate-profiles ci-build \
   -Drust.compiler.version="stable"
 

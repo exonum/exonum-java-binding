@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -41,13 +57,13 @@ public class AbstractIndexProxyTest {
   private AbstractIndexProxy proxy;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     mockStatic(ViewModificationCounter.class);
     when(ViewModificationCounter.getInstance()).thenReturn(modCounter);
   }
 
   @Test
-  public void testConstructor() throws Exception {
+  public void testConstructor() {
     View view = createFork();
     proxy = new IndexProxyImpl(view);
 
@@ -55,7 +71,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void constructorFailsIfNullView() throws Exception {
+  public void constructorFailsIfNullView() {
     View dbView = null;
 
     expectedException.expect(NullPointerException.class);
@@ -63,7 +79,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void notifyModifiedThrowsIfSnapshotPassed() throws Exception {
+  public void notifyModifiedThrowsIfSnapshotPassed() {
     Snapshot dbView = createSnapshot();
     proxy = new IndexProxyImpl(dbView);
 
@@ -75,7 +91,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void notifyModifiedAcceptsFork() throws Exception {
+  public void notifyModifiedAcceptsFork() {
     Fork dbView = createFork();
     proxy = new IndexProxyImpl(dbView);
 

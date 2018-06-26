@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.database;
 
 import static com.exonum.binding.storage.database.ViewModificationCounter.INITIAL_COUNT;
@@ -16,12 +32,12 @@ public class ViewModificationCounterTest {
   ViewModificationCounter listener;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     listener = new ViewModificationCounter();
   }
 
   @Test
-  public void modCountShallChangeSinceNotification() throws Exception {
+  public void modCountShallChangeSinceNotification() {
     Fork fork = mock(Fork.class);
     Integer prevModCount = listener.getModificationCount(fork);
     listener.notifyModified(fork);
@@ -31,13 +47,13 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void snapshotShallNotBeModified() throws Exception {
+  public void snapshotShallNotBeModified() {
     Snapshot s = mock(Snapshot.class);
     assertFalse(listener.isModifiedSince(s, INITIAL_COUNT));
   }
 
   @Test
-  public void forkShallNotBeModifiedIfNoNotifications() throws Exception {
+  public void forkShallNotBeModifiedIfNoNotifications() {
     Fork fork = mock(Fork.class);
     Integer modCount = listener.getModificationCount(fork);
 
@@ -45,7 +61,7 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void forkShallBeModifiedIfNotifiedExplicitGetModCount() throws Exception {
+  public void forkShallBeModifiedIfNotifiedExplicitGetModCount() {
     Fork fork = mock(Fork.class);
     Integer modCount = listener.getModificationCount(fork);
 
@@ -54,7 +70,7 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void forkShallBeModifiedIfNotifiedImplicitGetModCount() throws Exception {
+  public void forkShallBeModifiedIfNotifiedImplicitGetModCount() {
     Fork fork = mock(Fork.class);
     listener.notifyModified(fork);
 
@@ -62,7 +78,7 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void forkShallNotBeModifiedIfNoNotificationsAfterModCount() throws Exception {
+  public void forkShallNotBeModifiedIfNoNotificationsAfterModCount() {
     Fork fork = mock(Fork.class);
     listener.notifyModified(fork);
 
@@ -71,7 +87,7 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void forkShallBeModifiedIfNotifiedMultipleTimes() throws Exception {
+  public void forkShallBeModifiedIfNotifiedMultipleTimes() {
     Fork fork = mock(Fork.class);
     int numModifications = 5;
     for (int i = INITIAL_COUNT; i < numModifications; i++) {
@@ -81,7 +97,7 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void forkModificationShallNotAffectOtherFork() throws Exception {
+  public void forkModificationShallNotAffectOtherFork() {
     Fork modifiedFork = mock(Fork.class);
     int modifiedModCount = listener.getModificationCount(modifiedFork);
 
@@ -95,13 +111,13 @@ public class ViewModificationCounterTest {
   }
 
   @Test
-  public void getModCountNewSnapshot() throws Exception {
+  public void getModCountNewSnapshot() {
     Snapshot s = mock(Snapshot.class);
     assertThat(listener.getModificationCount(s), equalTo(INITIAL_COUNT));
   }
 
   @Test
-  public void getModCountNewFork() throws Exception {
+  public void getModCountNewFork() {
     Fork fork = mock(Fork.class);
     assertThat(listener.getModificationCount(fork), equalTo(INITIAL_COUNT));
   }

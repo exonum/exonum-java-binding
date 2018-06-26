@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
@@ -92,7 +108,7 @@ public class ProofMapIndexProxyIntegrationTest
       new byte[DEFAULT_HASH_SIZE_BYTES]);
 
   @Test
-  public void containsKey() throws Exception {
+  public void containsKey() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
       assertTrue(map.containsKey(PK1));
@@ -100,7 +116,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainAbsentKey() throws Exception {
+  public void doesNotContainAbsentKey() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
       assertFalse(map.containsKey(PK2));
@@ -108,14 +124,14 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void emptyMapDoesNotContainAbsentKey() throws Exception {
+  public void emptyMapDoesNotContainAbsentKey() {
     runTestWithView(database::createSnapshot, (map) -> {
       assertFalse(map.containsKey(PK2));
     });
   }
 
   @Test
-  public void containsThrowsIfNullKey() throws Exception {
+  public void containsThrowsIfNullKey() {
     runTestWithView(database::createSnapshot, (map) -> {
       expectedException.expect(NullPointerException.class);
       map.containsKey(null);
@@ -123,7 +139,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void containsThrowsIfInvalidKey() throws Exception {
+  public void containsThrowsIfInvalidKey() {
     runTestWithView(database::createSnapshot, (map) -> {
       expectedException.expect(IllegalArgumentException.class);
       map.containsKey(INVALID_PROOF_KEY);
@@ -131,7 +147,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void putFailsIfSnapshot() throws Exception {
+  public void putFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
       expectedException.expect(UnsupportedOperationException.class);
       map.put(PK1, V1);
@@ -139,7 +155,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void putFailsIfInvalidKey() throws Exception {
+  public void putFailsIfInvalidKey() {
     runTestWithView(database::createFork, (map) -> {
       expectedException.expect(IllegalArgumentException.class);
       map.put(INVALID_PROOF_KEY, V1);
@@ -191,7 +207,7 @@ public class ProofMapIndexProxyIntegrationTest
 
 
   @Test
-  public void get() throws Exception {
+  public void get() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
@@ -200,14 +216,14 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getRootHash_EmptyMap() throws Exception {
+  public void getRootHash_EmptyMap() {
     runTestWithView(database::createSnapshot, (map) -> {
       assertThat(map.getRootHash(), equalTo(EMPTY_MAP_ROOT_HASH));
     });
   }
 
   @Test
-  public void getRootHash_NonEmptyMap() throws Exception {
+  public void getRootHash_NonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
@@ -220,7 +236,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_EmptyMap() throws Exception {
+  public void getProof_EmptyMap() {
     runTestWithView(database::createSnapshot,
         (map) -> assertThat(map, provesNoMappingFor(PK1))
     );
@@ -228,7 +244,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_SingletonMapContains() throws Exception {
+  public void getProof_SingletonMapContains() {
     runTestWithView(database::createFork, (map) -> {
       HashCode key = PK1;
       String value = V1;
@@ -240,7 +256,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_SingletonMapDoesNotContain() throws Exception {
+  public void getProof_SingletonMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
@@ -250,7 +266,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_FourEntryMap_LastByte_Contains1() throws Exception {
+  public void getProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
 
       Stream<HashCode> proofKeys = Stream.of(
@@ -272,7 +288,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_FourEntryMap_LastByte_Contains2() throws Exception {
+  public void getProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
       Stream<HashCode> proofKeys = Stream.of(
           (byte) 0b00,
@@ -293,7 +309,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_FourEntryMap_FirstByte_Contains() throws Exception {
+  public void getProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();
       byte[] key2 = createRawProofKey();
@@ -318,7 +334,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_FourEntryMap_FirstAndLastByte_Contains() throws Exception {
+  public void getProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();  // 000…0
       byte[] key2 = createRawProofKey();  // 100…0
@@ -342,7 +358,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_MultiEntryMapContains() throws Exception {
+  public void getProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
       putAll(map, entries);
@@ -363,7 +379,7 @@ public class ProofMapIndexProxyIntegrationTest
 
   @Test
   @Ignore
-  public void getProof_MultiEntryMapDoesNotContain() throws Exception {
+  public void getProof_MultiEntryMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
       putAll(map, entries);
@@ -390,7 +406,7 @@ public class ProofMapIndexProxyIntegrationTest
   //
   // Consider adding a similar test for left-leaning MPT
   @Ignore
-  public void getProof_MapContainsRightLeaningMaxHeightMpt() throws Exception {
+  public void getProof_MapContainsRightLeaningMaxHeightMpt() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createEntriesForRightLeaningMpt();
       putAll(map, entries);
@@ -402,7 +418,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void remove() throws Exception {
+  public void remove() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
       map.remove(PK1);
@@ -413,7 +429,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsIfSnapshot() throws Exception {
+  public void removeFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
       expectedException.expect(UnsupportedOperationException.class);
       map.remove(PK1);
@@ -421,7 +437,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsIfInvalidKey() throws Exception {
+  public void removeFailsIfInvalidKey() {
     runTestWithView(database::createFork, (map) -> {
       expectedException.expect(IllegalArgumentException.class);
       map.remove(INVALID_PROOF_KEY);
@@ -429,7 +445,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void keysTest() throws Exception {
+  public void keysTest() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
 
@@ -445,7 +461,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void valuesTest() throws Exception {
+  public void valuesTest() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
 
@@ -461,7 +477,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void entriesTest() throws Exception {
+  public void entriesTest() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
 
@@ -475,12 +491,12 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearEmptyHasNoEffect() throws Exception {
+  public void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, ProofMapIndexProxy::clear);
   }
 
   @Test
-  public void clearNonEmptyRemovesAllValues() throws Exception {
+  public void clearNonEmptyRemovesAllValues() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
 
@@ -495,7 +511,7 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearFailsIfSnapshot() throws Exception {
+  public void clearFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
       expectedException.expect(UnsupportedOperationException.class);
       map.clear();

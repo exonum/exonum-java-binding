@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -51,7 +67,7 @@ public class ListIndexParameterizedIntegrationTest
   private static final String LIST_NAME = "test_list";
 
   @Test
-  public void addSingleElementToEmptyList() throws Exception {
+  public void addSingleElementToEmptyList() {
     runTestWithView(database::createFork, (l) -> {
       String addedElement = V1;
       l.add(addedElement);
@@ -62,12 +78,12 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void addFailsWithSnapshot() throws Exception {
+  public void addFailsWithSnapshot() {
     runTestWithView(database::createSnapshot, (l) -> l.add(V1));
   }
 
   @Test
-  public void addAllEmptyCollection() throws Exception {
+  public void addAllEmptyCollection() {
     runTestWithView(database::createFork, (l) -> {
       l.addAll(Collections.emptyList());
 
@@ -76,7 +92,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllEmptyCollectionNonEmptyIndex() throws Exception {
+  public void addAllEmptyCollectionNonEmptyIndex() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       long initialSize = l.size();
@@ -88,7 +104,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllNonEmptyCollection() throws Exception {
+  public void addAllNonEmptyCollection() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(V1, V2);
       l.addAll(addedElements);
@@ -104,7 +120,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllNonEmptyCollectionNonEmptyIndex() throws Exception {
+  public void addAllNonEmptyCollectionNonEmptyIndex() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       int initialSize = Math.toIntExact(l.size());
@@ -123,7 +139,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllCollectionWithFirstNull() throws Exception {
+  public void addAllCollectionWithFirstNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(null, V2);
       try {
@@ -136,7 +152,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllCollectionWithSecondNull() throws Exception {
+  public void addAllCollectionWithSecondNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(V1, null);
       try {
@@ -149,7 +165,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllNullCollection() throws Exception {
+  public void addAllNullCollection() {
     runTestWithView(database::createFork, (l) -> {
       expectedException.expect(NullPointerException.class);
       l.addAll(null);
@@ -157,7 +173,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void setReplaceFirstSingleElement() throws Exception {
+  public void setReplaceFirstSingleElement() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       String replacingElement = "r1";
@@ -169,7 +185,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void setReplaceSecondLastElement() throws Exception {
+  public void setReplaceSecondLastElement() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -183,7 +199,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void setReplaceAbsentElement() throws Exception {
+  public void setReplaceAbsentElement() {
     runTestWithView(database::createFork, (l) -> {
       long invalidIndex = 0;
       String replacingElement = "r2";
@@ -212,14 +228,14 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test(expected = NoSuchElementException.class)
-  public void getLastEmptyList() throws Exception {
+  public void getLastEmptyList() {
     runTestWithView(database::createFork, (l) -> {
       String ignored = l.getLast();
     });
   }
 
   @Test
-  public void getLastSingleElementList() throws Exception {
+  public void getLastSingleElementList() {
     runTestWithView(database::createFork, (l) -> {
       String addedElement = V1;
       l.add(addedElement);
@@ -230,7 +246,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void getLastTwoElementList() throws Exception {
+  public void getLastTwoElementList() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -241,7 +257,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void clearEmptyHasNoEffect() throws Exception {
+  public void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, (l) -> {
       l.clear();
 
@@ -251,7 +267,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void clearNonEmptyRemovesAll() throws Exception {
+  public void clearNonEmptyRemovesAll() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -263,19 +279,19 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void clearWithSnapshot() throws Exception {
+  public void clearWithSnapshot() {
     runTestWithView(database::createSnapshot, ListIndex::clear);
   }
 
   @Test
-  public void isEmptyWhenNew() throws Exception {
+  public void isEmptyWhenNew() {
     runTestWithView(database::createSnapshot, (l) -> {
       assertTrue(l.isEmpty());
     });
   }
 
   @Test
-  public void notEmptyAfterAdd() throws Exception {
+  public void notEmptyAfterAdd() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       assertFalse(l.isEmpty());
@@ -283,14 +299,14 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void zeroSizeWhenNew() throws Exception {
+  public void zeroSizeWhenNew() {
     runTestWithView(database::createSnapshot, (l) -> {
       assertThat(l.size(), equalTo(0L));
     });
   }
 
   @Test
-  public void oneSizeAfterAdd() throws Exception {
+  public void oneSizeAfterAdd() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       assertThat(l.size(), equalTo(1L));
@@ -298,7 +314,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void testIterator() throws Exception {
+  public void testIterator() {
     runTestWithView(database::createFork, (l) -> {
       List<String> elements = TestStorageItems.values;
 

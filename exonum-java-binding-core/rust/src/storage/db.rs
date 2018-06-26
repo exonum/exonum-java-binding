@@ -1,12 +1,25 @@
-use jni::JNIEnv;
-use jni::objects::JClass;
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use exonum::storage::{Fork, Snapshot};
+use jni::objects::JClass;
+use jni::JNIEnv;
 
 use utils::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
-
 
 /// A `View` is a wrapper for `Snapshot` or `Fork`, which makes it possible to distinguish them
 /// on the rust side, and transfer them as a raw pointer to the java side.
@@ -102,7 +115,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
 ) {
     utils::drop_handle::<View>(&env, view_handle);
 }
-
 
 #[cfg(test)]
 mod tests {

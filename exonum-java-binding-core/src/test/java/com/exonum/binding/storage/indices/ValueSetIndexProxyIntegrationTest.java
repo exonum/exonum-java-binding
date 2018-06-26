@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -34,7 +50,7 @@ public class ValueSetIndexProxyIntegrationTest
   private static final String VALUE_SET_NAME = "test_value_set";
 
   @Test
-  public void addSingleElement() throws Exception {
+  public void addSingleElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
       assertTrue(set.contains(V1));
@@ -42,7 +58,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void addFailsIfSnapshot() throws Exception {
+  public void addFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.add(V1);
@@ -50,12 +66,12 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearEmptyHasNoEffect() throws Exception {
+  public void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, ValueSetIndexProxy::clear);
   }
 
   @Test
-  public void clearNonEmptyRemovesAllElements() throws Exception {
+  public void clearNonEmptyRemovesAllElements() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values.subList(0, 3);
 
@@ -70,7 +86,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearFailsIfSnapshot() throws Exception {
+  public void clearFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.clear();
@@ -78,12 +94,12 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainElementsWhenEmpty() throws Exception {
+  public void doesNotContainElementsWhenEmpty() {
     runTestWithView(database::createSnapshot, (set) -> assertFalse(set.contains(V2)));
   }
 
   @Test
-  public void doesNotContainAbsentElement() throws Exception {
+  public void doesNotContainAbsentElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -92,7 +108,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainElementsByHashWhenEmpty() throws Exception {
+  public void doesNotContainElementsByHashWhenEmpty() {
     runTestWithView(database::createSnapshot, (set) -> {
       HashCode valueHash = getHashOf(V2);
       assertFalse(set.containsByHash(valueHash));
@@ -100,7 +116,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void containsByHash() throws Exception {
+  public void containsByHash() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -110,7 +126,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainAbsentElementsByHash() throws Exception {
+  public void doesNotContainAbsentElementsByHash() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -120,7 +136,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void testHashesIter() throws Exception {
+  public void testHashesIter() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values;
 
@@ -137,7 +153,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void testIterator() throws Exception {
+  public void testIterator() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values;
 
@@ -166,7 +182,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removesAddedElement() throws Exception {
+  public void removesAddedElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -177,7 +193,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeAbsentElementDoesNothing() throws Exception {
+  public void removeAbsentElementDoesNothing() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -189,7 +205,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsIfSnapshot() throws Exception {
+  public void removeFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.remove(V1);
@@ -197,7 +213,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removesAddedElementByHash() throws Exception {
+  public void removesAddedElementByHash() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -211,7 +227,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeAbsentElementByHashDoesNothing() throws Exception {
+  public void removeAbsentElementByHashDoesNothing() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -225,7 +241,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeByHashFailsIfSnapshot() throws Exception {
+  public void removeByHashFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       expectedException.expect(UnsupportedOperationException.class);
       set.removeByHash(getHashOf(V1));

@@ -1,13 +1,27 @@
-use jni::JNIEnv;
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use exonum::storage::{Entry, Fork, Snapshot};
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jbyteArray, jboolean};
+use jni::sys::{jboolean, jbyteArray};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use exonum::storage::{Snapshot, Fork, Entry};
+use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle};
-use super::db::{View, ViewRef, Value};
 
 type Index<T> = Entry<T, Value>;
 
@@ -28,9 +42,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
