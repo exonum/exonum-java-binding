@@ -25,9 +25,9 @@
 
 pub extern crate exonum;
 extern crate failure;
-extern crate toml;
 pub extern crate iron;
 pub extern crate jni;
+extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate serde;
@@ -42,13 +42,13 @@ extern crate lazy_static;
 mod error;
 mod init;
 mod proxy;
+mod runtime;
 mod storage;
 #[doc(hidden)]
 pub mod utils;
-mod runtime;
 
 pub use error::*;
 pub use init::*;
 pub use proxy::*;
-pub use storage::*;
 pub use runtime::*;
+pub use storage::*;

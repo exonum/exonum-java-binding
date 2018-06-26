@@ -35,14 +35,14 @@ public class ProofListElementTest {
   private ProofListElement node;
 
   @Test
-  public void getElement() throws Exception {
+  public void getElement() {
     node = new ProofListElement(E1);
 
     assertThat(node.getElement(), equalTo(E1));
   }
 
   @Test
-  public void funnel() throws Exception {
+  public void funnel() {
     node = new ProofListElement(E1);
 
     Funnel<ProofListElement> funnel = ProofListElement.funnel();

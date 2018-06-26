@@ -1,10 +1,10 @@
-use jni::JNIEnv;
 use jni::objects::JObject;
+use jni::JNIEnv;
 
 use std::cell::Cell;
 
-use {JniError, JniErrorKind, JniResult};
 use utils::{get_class_name, get_exception_message, get_exception_stack_trace};
+use {JniError, JniErrorKind, JniResult};
 
 const CLASS_JL_ERROR: &str = "java/lang/Error";
 

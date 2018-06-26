@@ -31,38 +31,38 @@ public class TreePathTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void emptyPath() throws Exception {
+  public void emptyPath() {
     TreePath path = new TreePath();
     assertThat(path, equalTo(new TreePath(new BitSet(), 0, Integer.MAX_VALUE)));
     assertThat(path.getLength(), equalTo(0));
   }
 
   @Test
-  public void ctorFailsIfNegativeLength1() throws Exception {
+  public void ctorFailsIfNegativeLength1() {
     expectedException.expect(IllegalArgumentException.class);
     new TreePath(new BitSet(), -1, 1);
   }
 
   @Test
-  public void ctorFailsIfNegativeLengthAndMaxLength() throws Exception {
+  public void ctorFailsIfNegativeLengthAndMaxLength() {
     expectedException.expect(IllegalArgumentException.class);
     new TreePath(new BitSet(), -1, -2);
   }
 
   @Test
-  public void ctorFailsIfInvalidLength() throws Exception {
+  public void ctorFailsIfInvalidLength() {
     expectedException.expect(IllegalArgumentException.class);
     new TreePath(new BitSet(), 2, 1);
   }
 
   @Test
-  public void ctorFailsIfInvalidLengthOfBitSet() throws Exception {
+  public void ctorFailsIfInvalidLengthOfBitSet() {
     expectedException.expect(IllegalArgumentException.class);
     new TreePath(BitSet.valueOf(bytes(0x02)), 1);
   }
 
   @Test
-  public void goLeft() throws Exception {
+  public void goLeft() {
     TreePath path = new TreePath();
     path.goLeft();
 
@@ -71,7 +71,7 @@ public class TreePathTest {
   }
 
   @Test
-  public void goRight() throws Exception {
+  public void goRight() {
     TreePath path = new TreePath();
     path.goRight();
 
@@ -80,7 +80,7 @@ public class TreePathTest {
   }
 
   @Test
-  public void goLeftThrowsIfMaxLength0IsExceeded() throws Exception {
+  public void goLeftThrowsIfMaxLength0IsExceeded() {
     TreePath path = new TreePath(0);
 
     expectedException.expect(IllegalStateException.class);
@@ -88,7 +88,7 @@ public class TreePathTest {
   }
 
   @Test
-  public void goLeftThrowsIfMaxLength1IsExceeded() throws Exception {
+  public void goLeftThrowsIfMaxLength1IsExceeded() {
     TreePath path = new TreePath(1);
     path.goLeft();
 
@@ -97,7 +97,7 @@ public class TreePathTest {
   }
 
   @Test
-  public void goRightThrowsIfMaxLength0IsExceeded() throws Exception {
+  public void goRightThrowsIfMaxLength0IsExceeded() {
     TreePath path = new TreePath(0);
 
     expectedException.expect(IllegalStateException.class);
@@ -105,7 +105,7 @@ public class TreePathTest {
   }
 
   @Test
-  public void goRightThrowsIfMaxLength1IsExceeded() throws Exception {
+  public void goRightThrowsIfMaxLength1IsExceeded() {
     TreePath path = new TreePath(1);
     path.goRight();
 

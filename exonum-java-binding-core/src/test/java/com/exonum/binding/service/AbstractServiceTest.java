@@ -32,25 +32,25 @@ public class AbstractServiceTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void constructorDiscardsEmptyName() throws Exception {
+  public void constructorDiscardsEmptyName() {
     expectedException.expect(IllegalArgumentException.class);
     new ServiceUnderTest((short) 1, "", mock(TransactionConverter.class));
   }
 
   @Test
-  public void constructorDiscardsNullName() throws Exception {
+  public void constructorDiscardsNullName() {
     expectedException.expect(NullPointerException.class);
     new ServiceUnderTest((short) 1, null, mock(TransactionConverter.class));
   }
 
   @Test
-  public void constructorDiscardsNullConverter() throws Exception {
+  public void constructorDiscardsNullConverter() {
     expectedException.expect(NullPointerException.class);
     new ServiceUnderTest((short) 1, "service#1", null);
   }
 
   @Test
-  public void getStateHashes_EmptySchema() throws Exception {
+  public void getStateHashes_EmptySchema() {
     Service service = new ServiceUnderTest((short) 1, "s1", mock(TransactionConverter.class));
     assertTrue(service.getStateHashes(mock(Snapshot.class)).isEmpty());
   }

@@ -57,13 +57,13 @@ public class AbstractIndexProxyTest {
   private AbstractIndexProxy proxy;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     mockStatic(ViewModificationCounter.class);
     when(ViewModificationCounter.getInstance()).thenReturn(modCounter);
   }
 
   @Test
-  public void testConstructor() throws Exception {
+  public void testConstructor() {
     View view = createFork();
     proxy = new IndexProxyImpl(view);
 
@@ -71,7 +71,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void constructorFailsIfNullView() throws Exception {
+  public void constructorFailsIfNullView() {
     View dbView = null;
 
     expectedException.expect(NullPointerException.class);
@@ -79,7 +79,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void notifyModifiedThrowsIfSnapshotPassed() throws Exception {
+  public void notifyModifiedThrowsIfSnapshotPassed() {
     Snapshot dbView = createSnapshot();
     proxy = new IndexProxyImpl(dbView);
 
@@ -91,7 +91,7 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void notifyModifiedAcceptsFork() throws Exception {
+  public void notifyModifiedAcceptsFork() {
     Fork dbView = createFork();
     proxy = new IndexProxyImpl(dbView);
 

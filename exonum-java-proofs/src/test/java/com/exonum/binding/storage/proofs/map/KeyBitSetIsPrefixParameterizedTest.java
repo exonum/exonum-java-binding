@@ -57,23 +57,23 @@ public class KeyBitSetIsPrefixParameterizedTest {
   private KeyBitSet other;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     path = new KeyBitSet(pathBytes, pathLength);
     other = new KeyBitSet(otherPathBytes, otherPathLength);
   }
 
   @Test
-  public void isPrefixOfOther() throws Exception {
+  public void isPrefixOfOther() {
     assertThat(path.isPrefixOf(other), equalTo(prefixOf));
   }
 
   @Test
-  public void isPrefixOfSelf() throws Exception {
+  public void isPrefixOfSelf() {
     assertTrue(path.isPrefixOf(path));
   }
 
   @Test
-  public void isPrefixOfClone() throws Exception {
+  public void isPrefixOfClone() {
     KeyBitSet clone = new KeyBitSet(pathBytes, pathLength);
     assertTrue(path.isPrefixOf(clone));
   }

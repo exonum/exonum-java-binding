@@ -63,7 +63,7 @@ public class LoggingInterceptorTest {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     appender.clear();
   }
 

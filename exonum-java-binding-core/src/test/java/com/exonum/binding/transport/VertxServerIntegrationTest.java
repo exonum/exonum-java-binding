@@ -46,7 +46,7 @@ public class VertxServerIntegrationTest {
   private VertxServer server;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     server = new VertxServer();
   }
 
