@@ -4,11 +4,11 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::{JniExecutor, HackyExecutor};
 use java_bindings::jni::JavaVM;
+use java_bindings::{HackyExecutor, JniExecutor};
 
-use std::thread::spawn;
 use std::sync::Arc;
+use std::thread::spawn;
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_tests();

@@ -34,9 +34,9 @@ pub fn create_vm_for_tests_with_fake_classes() -> Arc<JavaVM> {
 /// Creates a configured `JavaVM`.
 /// _JavaVM should be created only *once*._
 fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
-    let mut jvm_args_builder = InitArgsBuilder::new().version(JNIVersion::V8).option(
-        &get_libpath_option(),
-    );
+    let mut jvm_args_builder = InitArgsBuilder::new()
+        .version(JNIVersion::V8)
+        .option(&get_libpath_option());
 
     if with_fakes {
         jvm_args_builder = jvm_args_builder.option(&get_fakes_classpath_option());
@@ -45,9 +45,9 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         jvm_args_builder = jvm_args_builder.option("-Xcheck:jni").option("-Xdebug");
     }
 
-    let jvm_args = jvm_args_builder.build().unwrap_or_else(
-        |e| panic!("{:#?}", e),
-    );
+    let jvm_args = jvm_args_builder
+        .build()
+        .unwrap_or_else(|e| panic!("{:#?}", e));
 
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
@@ -80,9 +80,9 @@ pub fn get_fakes_classpath() -> String {
         .expect("Failed to read classpath.txt");
 
     let fakes_path = project_root_dir().join("exonum-java-binding-fakes/target/classes/");
-    let fakes_classes = fakes_path.to_str().expect(
-        "Failed to convert FS path into utf-8",
-    );
+    let fakes_classes = fakes_path
+        .to_str()
+        .expect("Failed to convert FS path into utf-8");
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
     format!("{}:{}", class_path, fakes_classes)
@@ -98,7 +98,7 @@ pub fn get_libpath() -> String {
         .canonicalize()
         .expect(
             "Target path not found, but there should be \
-            the libjava_bindings dynamically loading library",
+             the libjava_bindings dynamically loading library",
         );
     library_path
         .to_str()

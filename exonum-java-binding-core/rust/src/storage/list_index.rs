@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Snapshot, Fork, ListIndex};
 use exonum::storage::list_index::ListIndexIter;
-use jni::JNIEnv;
+use exonum::storage::{Fork, ListIndex, Snapshot};
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jlong, jbyteArray, jboolean};
+use jni::sys::{jboolean, jbyteArray, jlong};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use storage::db::{View, ViewRef, Value};
+use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle};
 
 type Index<T> = ListIndex<T, Value>;
@@ -43,9 +43,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
@@ -61,7 +61,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
     group_name: JString,
     list_id: jbyteArray,
     view_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;

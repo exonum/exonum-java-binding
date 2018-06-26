@@ -32,19 +32,19 @@ public class HashingTest {
   private static final HashCode ZERO_HASH_CODE = HashCode.fromString(ZERO_HASH_HEX);
 
   @Test
-  public void getHashOfEmptyArray() throws Exception {
+  public void getHashOfEmptyArray() {
     HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(bytes()), equalTo(ZERO_HASH_CODE));
   }
 
   @Test
-  public void getHashOfEmptyByteBuffer() throws Exception {
+  public void getHashOfEmptyByteBuffer() {
     HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(ByteBuffer.allocate(0)), equalTo(ZERO_HASH_CODE));
   }
 
   @Test
-  public void toStringAllHexNumbersLower() throws Exception {
+  public void toStringAllHexNumbersLower() {
     for (byte b = 0; b <= 0xF; b++) {
       String expected = "0" + UnsignedBytes.toString(b, 16);
       assertThat(Hashing.toHexString(bytes(b)), equalTo(expected));
@@ -52,7 +52,7 @@ public class HashingTest {
   }
 
   @Test
-  public void toStringAllHexNumbersUpper() throws Exception {
+  public void toStringAllHexNumbersUpper() {
     for (int i = 1; i <= 0xF; i++) {
       byte b = (byte) (i << 4);
       String expected = UnsignedBytes.toString(b, 16);

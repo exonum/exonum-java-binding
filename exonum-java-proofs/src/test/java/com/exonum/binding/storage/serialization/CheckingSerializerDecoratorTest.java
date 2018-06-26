@@ -39,7 +39,7 @@ public class CheckingSerializerDecoratorTest {
   CheckingSerializerDecorator decorator;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     delegateMock = mock(Serializer.class);
     decorator = CheckingSerializerDecorator.from(delegateMock);
   }

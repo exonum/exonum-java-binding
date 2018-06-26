@@ -1,8 +1,8 @@
-use jni::JNIEnv;
 use jni::objects::JObject;
+use jni::JNIEnv;
 
-use JniResult;
 use utils::convert_to_string;
+use JniResult;
 
 /// Returns a class name of an object as a `String`.
 pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
