@@ -21,6 +21,7 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <rust.cargo.executable>cargo</rust.cargo.executable>
     <rust.compiler.version>stable</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
@@ -31,7 +32,6 @@
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
-    <rust.cargo.executable>cargo</rust.cargo.executable>
   </properties>
 
   <build>
@@ -252,8 +252,13 @@
         </plugins>
       </build>
     </profile>
+    <!-- A profile for compatibility fixes on MacOS:
+            - Reevaluates the necessary LD_LIBRARY_PATH variable before run cargo:
+              MacOS clears LD_LIBRARY_PATH in a new shell,
+              while mvn command is a shell script and normally it creates new subshells.
+     -->
     <profile>
-      <id>osx</id>
+      <id>compat-macos</id>
       <activation>
         <os>
           <family>mac</family>
