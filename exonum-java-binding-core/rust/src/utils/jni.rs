@@ -18,12 +18,7 @@ pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
 /// `exception` should extend `java.lang.Throwable` and be not null
 pub fn get_exception_message(env: &JNIEnv, exception: JObject) -> JniResult<Option<String>> {
     assert!(!exception.is_null(), "Invalid exception argument");
-    let message = env.call_method(
-        exception,
-        "getMessage",
-        "()Ljava/lang/String;",
-        &[],
-    )?;
+    let message = env.call_method(exception, "getMessage", "()Ljava/lang/String;", &[])?;
     let message = message.l()?;
     if message.is_null() {
         return Ok(None);
@@ -51,12 +46,7 @@ pub fn get_exception_stack_trace(env: &JNIEnv, exception: JObject) -> JniResult<
     let mut stack: Vec<String> = Vec::with_capacity(frames_len as usize);
     for i in 0..frames_len {
         let frame = env.get_object_array_element(frames, i)?;
-        let frame_string = env.call_method(
-            frame,
-            "toString",
-            "()Ljava/lang/String;",
-            &[],
-        )?;
+        let frame_string = env.call_method(frame, "toString", "()Ljava/lang/String;", &[])?;
         let frame_string = format!("    at {}\n", convert_to_string(env, frame_string.l()?)?);
         stack.push(frame_string);
     }
