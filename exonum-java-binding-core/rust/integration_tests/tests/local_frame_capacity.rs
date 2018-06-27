@@ -4,9 +4,9 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate rand;
 
-use java_bindings::{JniExecutor, MainExecutor};
-use java_bindings::jni::JavaVM;
 use integration_tests::vm::create_vm_for_leak_tests;
+use java_bindings::jni::JavaVM;
+use java_bindings::{JniExecutor, MainExecutor};
 
 use std::sync::Arc;
 
@@ -33,9 +33,8 @@ fn local_frame_allows_overflow() {
             let mut java_strings = Vec::new();
             for i in 0..references_per_frame {
                 print!("Try: {}; limit: {}. ", i + 1, local_frame_capacity);
-                let java_string = env.new_string(expected_string_at(i)).expect(
-                    "Can't create new local object.",
-                );
+                let java_string = env.new_string(expected_string_at(i))
+                    .expect("Can't create new local object.");
                 java_strings.push(java_string);
                 println!(" Ok.");
             }

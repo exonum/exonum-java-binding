@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use jni::{JavaVM, JNIEnv};
 use jni::objects::JObject;
 use jni::sys::jint;
+use jni::{JNIEnv, JavaVM};
 
 use std::mem;
 use std::sync::{Arc, Mutex};
 
-use {JniError, JniResult};
 use JniErrorKind::{Other, ThreadDetached};
+use {JniError, JniResult};
 
 /// An interface for JNI thread attachment manager.
 pub trait JniExecutor: Clone + Send + Sync {
@@ -41,9 +41,7 @@ pub trait JniExecutor: Clone + Send + Sync {
                 result = Some(f(jni_env));
                 Ok(JObject::null())
             })?;
-            result.expect(
-                "The result should be Some or this line shouldn't be reached",
-            )
+            result.expect("The result should be Some or this line shouldn't be reached")
         })
     }
 
@@ -140,9 +138,9 @@ impl HackyExecutor {
     }
 
     fn attach_current_thread(&self) -> JniResult<JNIEnv> {
-        let mut num_attached_threads = self.num_attached_threads.lock().expect(
-            "Failed to acquire the mutex on the attached threads number",
-        );
+        let mut num_attached_threads = self.num_attached_threads
+            .lock()
+            .expect("Failed to acquire the mutex on the attached threads number");
         if *num_attached_threads == self.attach_limit {
             Err(Other(Self::LIMIT_EXHAUSTED))?;
         }
@@ -160,26 +158,24 @@ impl HackyExecutor {
     fn get_env(&self) -> JniResult<JNIEnv> {
         match self.vm.get_env() {
             Ok(jni_env) => Ok(jni_env),
-            Err(jni_err) => {
-                match jni_err.0 {
-                    ThreadDetached => {
-                        let jni_env_result = self.attach_current_thread();
-                        match jni_env_result {
-                            Err(JniError(ThreadDetached, ..)) => {
-                                panic!("Thread should be attached");
-                            }
-                            Err(JniError(Other(Self::LIMIT_EXHAUSTED), ..)) => {
-                                panic!(
-                                    "The limit on thread attachment is exhausted (limit is {})",
-                                    self.attach_limit
-                                );
-                            }
-                            _ => jni_env_result,
+            Err(jni_err) => match jni_err.0 {
+                ThreadDetached => {
+                    let jni_env_result = self.attach_current_thread();
+                    match jni_env_result {
+                        Err(JniError(ThreadDetached, ..)) => {
+                            panic!("Thread should be attached");
                         }
+                        Err(JniError(Other(Self::LIMIT_EXHAUSTED), ..)) => {
+                            panic!(
+                                "The limit on thread attachment is exhausted (limit is {})",
+                                self.attach_limit
+                            );
+                        }
+                        _ => jni_env_result,
                     }
-                    _ => Err(jni_err),
                 }
-            }
+                _ => Err(jni_err),
+            },
         }
     }
 }

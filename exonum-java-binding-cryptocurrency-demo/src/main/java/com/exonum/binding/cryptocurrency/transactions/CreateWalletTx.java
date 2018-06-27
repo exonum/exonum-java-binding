@@ -54,9 +54,9 @@ public final class CreateWalletTx extends BaseTx implements Transaction {
    */
   public CreateWalletTx(PublicKey ownerPublicKey) {
     super(CryptocurrencyService.ID, ID);
-    checkArgument(
-        ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
-        "Public key must have correct size");
+    checkArgument(ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
+        "Public key has invalid size (%s), must be %s bytes long.", ownerPublicKey.size(),
+        CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
     this.ownerPublicKey = ownerPublicKey;
   }
 
