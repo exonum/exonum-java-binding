@@ -32,7 +32,7 @@ public class RustIterAdapterTest {
   RustIterAdapter<Integer> adapter;
 
   @Test
-  public void nextThrowsIfNoNextItem0() throws Exception {
+  public void nextThrowsIfNoNextItem0() {
     adapter = new RustIterAdapter<>(
         new RustIterTestFake(emptyList()));
 
@@ -41,7 +41,7 @@ public class RustIterAdapterTest {
   }
 
   @Test
-  public void nextThrowsIfNoNextItem1() throws Exception {
+  public void nextThrowsIfNoNextItem1() {
     adapter = new RustIterAdapter<>(
         new RustIterTestFake(singletonList(1)));
 

@@ -54,14 +54,14 @@ public class ConfigurableRustIterTest {
   private ConfigurableRustIter<Integer> iter;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     modCounter = mock(ViewModificationCounter.class);
     when(modCounter.getModificationCount(any(View.class)))
         .thenReturn(INITIAL_MOD_COUNT);
   }
 
   @Test
-  public void nextGoesThroughAllElements() throws Exception {
+  public void nextGoesThroughAllElements() {
     Fork fork = createFork();
     List<Integer> underlyingList = asList(1, 2, 3);
     createFromIterable(underlyingList, fork);
@@ -72,7 +72,7 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextIsNotAffectedByUnrelatedModifications() throws Exception {
+  public void nextIsNotAffectedByUnrelatedModifications() {
     Snapshot view = createSnapshot();
     List<Integer> underlyingList = asList(1, 2);
     createFromIterable(underlyingList, view);
@@ -86,7 +86,7 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextFailsIfModifiedBeforeFirstNext() throws Exception {
+  public void nextFailsIfModifiedBeforeFirstNext() {
     Fork fork = createFork();
     createFromIterable(emptyList(), fork);
 
@@ -97,7 +97,7 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextFailsIfModifiedAfterFirstNext() throws Exception {
+  public void nextFailsIfModifiedAfterFirstNext() {
     Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
@@ -110,7 +110,7 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextFailsIfHandleClosed() throws Exception {
+  public void nextFailsIfHandleClosed() {
     Fork fork = createFork();
     NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
     createFromIterable(nh, asList(1, 2), fork);
@@ -123,7 +123,7 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void viewModificationResultsInTerminalState() throws Exception {
+  public void viewModificationResultsInTerminalState() {
     Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
     try {

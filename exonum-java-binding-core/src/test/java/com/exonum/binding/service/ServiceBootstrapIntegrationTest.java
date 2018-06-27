@@ -46,7 +46,7 @@ public class ServiceBootstrapIntegrationTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void startService() throws Exception {
+  public void startService() {
     UserServiceAdapter service = ServiceBootstrap.startService(
         UserModule.class.getCanonicalName(), 0);
 

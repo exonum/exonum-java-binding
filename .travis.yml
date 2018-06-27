@@ -15,7 +15,6 @@ addons:
 env:
   global:
     - RUST_VERSION=stable
-    - RUSTFMT_VERSION=0.9.0
     - RUST_NIGHTLY_VERSION=nightly-2018-06-18
     - RUST_CLIPPY_VERSION=0.0.208
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
@@ -36,8 +35,9 @@ before_install:
   - rustup default "$RUST_VERSION"
     # Save the path to stdlib of the default toolchain to use it in scripts.
   - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
-    # Install rustfmt if it's not already.
-  - rustfmt -V | grep "$RUSTFMT_VERSION" || cargo install rustfmt --vers "$RUSTFMT_VERSION" --force
+    # Install rustfmt.
+  - rustup component add rustfmt-preview
+  - rustfmt -V
     # Install cargo-audit if it's not already.
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
