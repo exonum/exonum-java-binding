@@ -1,11 +1,11 @@
-use exonum::helpers::fabric::CommandExtension;
-use exonum::helpers::fabric::Argument;
-use exonum::helpers::fabric::Context;
-use failure;
+use super::{Config, JvmConfig, ServiceConfig};
 use exonum::helpers::fabric::keys;
-use toml::Value;
-use super::{JvmConfig, ServiceConfig, Config};
+use exonum::helpers::fabric::Argument;
+use exonum::helpers::fabric::CommandExtension;
+use exonum::helpers::fabric::Context;
 use exonum::node::NodeConfig;
+use failure;
+use toml::Value;
 
 const EJB_DEBUG: &str = "EJB_DEBUG";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
@@ -27,7 +27,7 @@ impl CommandExtension for GenerateNodeConfig {
                 "Debug mode for JVM.",
                 None,
                 "ejb-debug",
-                false
+                false,
             ),
             Argument::new_named(
                 EJB_LOG_CONFIG_PATH,
@@ -35,7 +35,7 @@ impl CommandExtension for GenerateNodeConfig {
                 "Path to log4j configuration file.",
                 None,
                 "ejb-log-config-path",
-                false
+                false,
             ),
             Argument::new_named(
                 EJB_CLASSPATH,
@@ -43,7 +43,7 @@ impl CommandExtension for GenerateNodeConfig {
                 "Java service classpath. Must include all its dependencies.",
                 None,
                 "ejb-classpath",
-                false
+                false,
             ),
             Argument::new_named(
                 EJB_LIBPATH,
@@ -51,7 +51,7 @@ impl CommandExtension for GenerateNodeConfig {
                 "Path to java-bindings shared library.",
                 None,
                 "ejb-libpath",
-                false
+                false,
             ),
         ]
     }
@@ -73,12 +73,10 @@ impl CommandExtension for GenerateNodeConfig {
             .get(keys::SERVICES_SECRET_CONFIGS)
             .unwrap_or_default();
         services_secret_configs.extend(
-            vec![
-                (
-                    EJB_JVM_CONFIG_NAME.to_owned(),
-                    Value::try_from(jvm_config).unwrap()
-                ),
-            ].into_iter(),
+            vec![(
+                EJB_JVM_CONFIG_NAME.to_owned(),
+                Value::try_from(jvm_config).unwrap(),
+            )].into_iter(),
         );
 
         context.set(keys::SERVICES_SECRET_CONFIGS, services_secret_configs);
@@ -131,10 +129,9 @@ impl CommandExtension for Finalize {
         };
 
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
-        node_config.services_configs.insert(
-            EJB_CONFIG_NAME.to_owned(),
-            Value::try_from(config)?,
-        );
+        node_config
+            .services_configs
+            .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(config)?);
         context.set(keys::NODE_CONFIG, node_config);
         Ok(context)
     }

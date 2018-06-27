@@ -17,11 +17,13 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::executor::{check_detached, check_nested_attach, test_single_thread,
-                                  test_serialized_threads, test_concurrent_threads};
+use integration_tests::executor::{
+    check_detached, check_nested_attach, test_concurrent_threads, test_serialized_threads,
+    test_single_thread,
+};
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
+use java_bindings::DumbExecutor;
 
 use std::sync::Arc;
 

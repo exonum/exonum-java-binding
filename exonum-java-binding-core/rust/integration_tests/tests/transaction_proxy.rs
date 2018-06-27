@@ -3,15 +3,16 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::mock::transaction::{create_mock_transaction_proxy,
-                                           create_throwing_mock_transaction_proxy, ENTRY_NAME,
-                                           ENTRY_VALUE, INFO_VALUE};
+use integration_tests::mock::transaction::{
+    create_mock_transaction_proxy, create_throwing_mock_transaction_proxy, ENTRY_NAME, ENTRY_VALUE,
+    INFO_VALUE,
+};
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::MainExecutor;
 use java_bindings::exonum::blockchain::{Transaction, TransactionError};
 use java_bindings::exonum::encoding::serialize::json::ExonumJson;
 use java_bindings::exonum::storage::{Database, Entry, MemoryDB, Snapshot};
 use java_bindings::jni::JavaVM;
+use java_bindings::MainExecutor;
 
 use std::sync::Arc;
 
@@ -64,9 +65,8 @@ fn execute_valid_transaction() {
                     err.description().unwrap_or_default()
                 )
             });
-        db.merge(fork.into_patch()).expect(
-            "Failed to merge transaction",
-        );
+        db.merge(fork.into_patch())
+            .expect("Failed to merge transaction");
     }
     // Check the transaction has successfully written the expected value into the entry index.
     let snapshot = db.snapshot();
@@ -93,9 +93,11 @@ fn execute_should_return_err_if_java_exception_occurred() {
         .execute(&mut fork)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
-    assert!(err.description().unwrap().starts_with(
-        "Java exception: java.lang.ArithmeticException",
-    ));
+    assert!(
+        err.description()
+            .unwrap()
+            .starts_with("Java exception: java.lang.ArithmeticException",)
+    );
 }
 
 #[test]
@@ -115,12 +117,13 @@ fn json_serialize_should_panic_if_java_error_occurred() {
 fn json_serialize_should_return_err_if_java_exception_occurred() {
     let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
-    let err = invalid_tx.serialize_field().expect_err(
-        "This transaction should be serialized with an error!",
+    let err = invalid_tx
+        .serialize_field()
+        .expect_err("This transaction should be serialized with an error!");
+    assert!(
+        err.description()
+            .starts_with("Java exception: java.lang.ArithmeticException",)
     );
-    assert!(err.description().starts_with(
-        "Java exception: java.lang.ArithmeticException",
-    ));
 }
 
 fn create_entry<V>(view: V) -> Entry<V, String>

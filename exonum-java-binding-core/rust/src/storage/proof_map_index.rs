@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Snapshot, Fork, ProofMapIndex};
-use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
-                                       PROOF_MAP_KEY_SIZE};
-use jni::JNIEnv;
+use exonum::storage::proof_map_index::{
+    ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
+};
+use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
+use jni::JNIEnv;
 
 use std::panic;
 use std::ptr;
 
-use JniResult;
-use storage::db::{View, ViewRef, Value};
+use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle, PairIter};
+use JniResult;
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
@@ -50,9 +51,9 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
         let name = utils::convert_to_string(&env, name)?;
         Ok(utils::to_handle(
             match *utils::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::new(name, &*snapshot),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                }
                 ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
@@ -68,7 +69,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     group_name: JString,
     map_id: jbyteArray,
     view_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let map_id = env.convert_byte_array(map_id)?;
@@ -101,7 +102,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> jbyteArray{
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let hash = match *utils::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.merkle_root(),
@@ -141,7 +142,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     _: JObject,
     map_handle: Handle,
     key: jbyteArray,
-) -> jboolean{
+) -> jboolean {
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         Ok(match *utils::cast_handle::<IndexType>(map_handle) {
@@ -178,7 +179,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let iter = match *utils::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.iter(),
@@ -196,7 +197,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(map_handle) {
@@ -214,7 +215,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         Ok(utils::to_handle(
             match *utils::cast_handle::<IndexType>(map_handle) {
@@ -233,7 +234,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     _: JObject,
     map_handle: Handle,
     key: jbyteArray,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         let iter = match *utils::cast_handle::<IndexType>(map_handle) {
@@ -273,7 +274,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     _: JClass,
     map_handle: Handle,
     key: jbyteArray,
-) -> Handle{
+) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         Ok(utils::to_handle(
@@ -355,21 +356,19 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jobject{
+) -> jobject {
     let res = panic::catch_unwind(|| {
         let iterWrapper = utils::cast_handle::<Iter>(iter_handle);
         match iterWrapper.iter.next() {
             Some(val) => {
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
-                Ok(
-                    env.new_object_by_id(
-                        &iterWrapper.element_class,
-                        iterWrapper.constructor_id,
-                        &[key.into(), value.into()],
-                    )?
-                        .into_inner(),
-                )
+                Ok(env.new_object_by_id(
+                    &iterWrapper.element_class,
+                    iterWrapper.constructor_id,
+                    &[key.into(), value.into()],
+                )?
+                    .into_inner())
             }
             None => Ok(ptr::null_mut()),
         }
@@ -383,7 +382,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-){
+) {
     utils::drop_handle::<Iter>(&env, iter_handle);
 }
 
@@ -393,7 +392,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray{
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = utils::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
         match iter.next() {
@@ -410,7 +409,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-){
+) {
     utils::drop_handle::<ProofMapIndexKeys<Key>>(&env, iter_handle);
 }
 
@@ -420,7 +419,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-) -> jbyteArray{
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = utils::cast_handle::<ProofMapIndexValues<Value>>(iter_handle);
         match iter.next() {
@@ -437,7 +436,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
-){
+) {
     utils::drop_handle::<ProofMapIndexValues<Value>>(&env, iter_handle);
 }
 

@@ -5,8 +5,8 @@ use jni::{self, JavaVM};
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
+use runtime::cmd::{Finalize, GenerateNodeConfig};
 use runtime::config::{Config, JvmConfig, ServiceConfig};
-use runtime::cmd::{GenerateNodeConfig, Finalize};
 use utils::unwrap_jni;
 use MainExecutor;
 
@@ -14,7 +14,8 @@ static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
-const START_SERVICE_SIGNATURE: &str = "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
+const START_SERVICE_SIGNATURE: &str =
+    "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
 #[allow(dead_code)]
@@ -42,9 +43,9 @@ impl JavaServiceRuntime {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             });
             // Return global runtime.
-            JAVA_SERVICE_RUNTIME.clone().expect(
-                "Trying to return runtime, but it's uninitialized",
-            )
+            JAVA_SERVICE_RUNTIME
+                .clone()
+                .expect("Trying to return runtime, but it's uninitialized")
         }
     }
 

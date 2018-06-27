@@ -1,20 +1,22 @@
 use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction};
-use exonum::encoding::Offset;
 use exonum::encoding::serialize::json::ExonumJson;
 use exonum::encoding::serialize::WriteBufferWrapper;
+use exonum::encoding::Offset;
 use exonum::messages::{Message, RawMessage};
 use exonum::storage::Fork;
-use jni::JNIEnv;
 use jni::objects::{GlobalRef, JValue};
+use jni::JNIEnv;
 use serde_json;
 use serde_json::value::Value;
 
 use std::error::Error;
 use std::fmt;
 
-use {JniExecutor, MainExecutor};
 use storage::View;
-use utils::{check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni};
+use utils::{
+    check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni,
+};
+use {JniExecutor, MainExecutor};
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -99,9 +101,7 @@ impl Transaction for TransactionProxy {
             ).and_then(JValue::v);
             Ok(check_error_on_exception(env, res))
         });
-        unwrap_jni(res).map_err(|err: String| {
-            ExecutionError::with_description(ERROR_CODE, err)
-        })
+        unwrap_jni(res).map_err(|err: String| ExecutionError::with_description(ERROR_CODE, err))
     }
 }
 
