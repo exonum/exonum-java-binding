@@ -95,7 +95,7 @@ public final class EqualsTester {
   private final List<List<Object>> equalityGroups = Lists.newArrayList();
   private final RelationshipTester.ItemReporter itemReporter;
 
-  /** Constructs an empty EqualsTester instance */
+  /** Constructs an empty EqualsTester instance. */
   public EqualsTester() {
     this(new RelationshipTester.ItemReporter());
   }
@@ -114,7 +114,7 @@ public final class EqualsTester {
     return this;
   }
 
-  /** Run tests on equals method, throwing a failure on an invalid test */
+  /** Run tests on equals method, throwing a failure on an invalid test. */
   public EqualsTester testEquals() {
     RelationshipTester<Object> delegate =
         new RelationshipTester<>(
