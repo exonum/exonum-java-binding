@@ -1,8 +1,6 @@
 use jni::objects::JObject;
 use jni::JNIEnv;
 
-use std::collections::BTreeSet;
-
 use utils::convert_to_string;
 use JniResult;
 
@@ -82,16 +80,7 @@ mod tests {
     const BAZ: &str = "baz";
 
     #[cfg(windows)]
-    const FOO_BAR: &str = "foo;bar";
-    #[cfg(windows)]
-    const FOO_BAZ: &str = "foo;baz";
-    #[cfg(windows)]
     const FOO_BAR_BAZ: &str = "foo;bar;baz";
-
-    #[cfg(not(windows))]
-    const FOO_BAR: &str = "foo:bar";
-    #[cfg(not(windows))]
-    const FOO_BAZ: &str = "foo:baz";
     #[cfg(not(windows))]
     const FOO_BAR_BAZ: &str = "foo:bar:baz";
 
