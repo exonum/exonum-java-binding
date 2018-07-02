@@ -55,7 +55,8 @@ fn submit_valid_transaction() {
             assert!(exception.is_null());
             Ok(())
         };
-        Ok(unwrap_jni_verbose(&env, submit()))
+        unwrap_jni_verbose(&env, submit());
+        Ok(())
     }));
     let sent_message = app_rx.wait().next().unwrap().unwrap();
     match sent_message {
@@ -93,7 +94,8 @@ fn submit_not_valid_transaction() {
             );
             Ok(())
         };
-        Ok(unwrap_jni_verbose(&env, submit()))
+        unwrap_jni_verbose(&env, submit());
+        Ok(())
     }));
 }
 
