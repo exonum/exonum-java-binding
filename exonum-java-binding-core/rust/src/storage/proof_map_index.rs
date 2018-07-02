@@ -441,7 +441,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 }
 
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
-    // TODO: Optimize copying and allocations.
     let bytes = env.convert_byte_array(array)?;
     assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
 
