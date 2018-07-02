@@ -15,8 +15,8 @@ addons:
 env:
   global:
     - RUST_VERSION=stable
-    - RUST_NIGHTLY_VERSION=nightly-2018-06-18
-    - RUST_CLIPPY_VERSION=0.0.208
+    - RUST_NIGHTLY_VERSION=nightly-2018-06-29
+    - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
 
 cache:
