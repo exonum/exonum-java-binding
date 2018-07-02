@@ -300,7 +300,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_na
     utils::unwrap_exc_or_default(&env, res)
 }
 
-// TODO: Probably this functions should belong to some other class instead of IndexList.
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_storage_indices_ListIndexProxy_nativeIterNext(

@@ -47,7 +47,7 @@ public class UserTransactionAdapterTest {
   private UserTransactionAdapter transactionAdapter;
 
   @Test
-  public void execute_closesCleanerAfterExecution() throws Exception {
+  public void execute_closesCleanerAfterExecution() {
     long forkHandle = 0x0B;
     transactionAdapter.execute(forkHandle);
 

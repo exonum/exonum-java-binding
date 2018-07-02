@@ -41,12 +41,12 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   MemoryDb database;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     database = MemoryDb.newInstance();
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     if (database != null) {
       database.close();
     }
