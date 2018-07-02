@@ -55,7 +55,7 @@ script:
   - cd "${EJB_RUST_BUILD_DIR}"
   - cargo fmt --all -- --write-mode=diff
   # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
-  # Next 2 lines are a workaround to prevent clippy check dependencies.
+  # Next 2 lines are a workaround to prevent clippy checking dependencies.
   - cargo +${RUST_NIGHTLY_VERSION} check
   - cargo +${RUST_NIGHTLY_VERSION} clean -p java_bindings
   - cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
