@@ -62,21 +62,6 @@
           </div>
         </div>
         <div class="col-md-6">
-          <div class="card mt-5">
-            <div class="card-header">Add funds</div>
-            <div class="card-body">
-              <form @submit.prevent="addFunds">
-                <div class="form-group">
-                  <label class="d-block">Select amount to be added:</label>
-                  <div v-for="variant in variants" :key="variant.id" class="form-check form-check-inline">
-                    <input :id="variant.id" :value="variant.amount" :checked="amountToAdd == variant.amount" v-model="amountToAdd" class="form-check-input" type="radio">
-                    <label :for="variant.id" class="form-check-label">${{ variant.amount }}</label>
-                  </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Add funds</button>
-              </form>
-            </div>
-          </div>
 
           <div class="card mt-5">
             <div class="card-header">Transfer funds</div>
@@ -123,16 +108,10 @@
       return {
         name: '',
         balance: 0,
-        amountToAdd: 10,
         receiver: '',
         amountToTransfer: '',
         isSpinnerVisible: false,
-        transactions: [],
-        variants: [
-          { id: 'ten', amount: 10 },
-          { id: 'fifty', amount: 50 },
-          { id: 'hundred', amount: 100 }
-        ]
+        transactions: []
       }
     },
     computed: Object.assign({
@@ -158,23 +137,6 @@
           this.balance = data.wallet.balance
           this.transactions = data.transactions
           this.isSpinnerVisible = false
-        } catch (error) {
-          this.isSpinnerVisible = false
-          this.$notify('error', error.toString())
-        }
-      },
-
-      async addFunds() {
-        this.isSpinnerVisible = true
-
-        const seed = this.$blockchain.generateSeed()
-
-        try {
-          const data = await this.$blockchain.addFunds(this.keyPair, this.amountToAdd, seed)
-          this.balance = data.wallet.balance
-          this.transactions = data.transactions
-          this.isSpinnerVisible = false
-          this.$notify('success', 'Add funds transaction has been written into the blockchain')
         } catch (error) {
           this.isSpinnerVisible = false
           this.$notify('error', error.toString())

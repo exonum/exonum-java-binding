@@ -11,6 +11,17 @@
                   <label class="control-label">Name:</label>
                   <input v-model="name" type="text" class="form-control" placeholder="Enter name" maxlength="260" required>
                 </div>
+
+                <div class="form-group">
+                  <label>Balance:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">$</div>
+                    </div>
+                    <input v-model="balance" type="number" class="form-control" placeholder="Enter balance" min="0" required>
+                  </div>
+                </div>
+
                 <button type="submit" class="btn btn-lg btn-block btn-primary">Register</button>
               </form>
             </tab>
@@ -56,6 +67,7 @@
     data() {
       return {
         name: '',
+        balance: 0,
         secretKey: '',
         keyPair: {},
         isModalVisible: false,
@@ -85,15 +97,20 @@
           return this.$notify('error', 'The name is a required field')
         }
 
+        console.log(this.balance)
+       
+       
         this.isSpinnerVisible = true
         this.keyPair = this.$blockchain.generateKeyPair()
 
         try {
-          await this.$blockchain.createWallet(this.keyPair, this.name)
+          await this.$blockchain.createWallet(this.keyPair, this.name, this.balance)
           this.name = ''
+          this.balance = 0
           this.isSpinnerVisible = false
           this.isModalVisible = true
         } catch (error) {
+          console.log('1');
           this.isSpinnerVisible = false
           this.$notify('error', error.toString())
         }

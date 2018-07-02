@@ -38,7 +38,8 @@ const CreateTransaction = {
   message_id: TX_WALLET_ID,
   fields: [
     { name: 'pub_key', type: Exonum.PublicKey },
-    { name: 'name', type: Exonum.String }
+    { name: 'name', type: Exonum.String },
+    { name: 'balance', type: Exonum.Uint64 }
   ]
 }
 const TableKey = Exonum.newType({
@@ -64,6 +65,7 @@ const TransactionMetaData = Exonum.newType({
 })
 
 function getTransaction(id) {
+  console.log('1-id', id)
   switch (id) {
     case TX_TRANSFER_ID:
       return Exonum.newMessage(TransferTransaction)
@@ -213,15 +215,18 @@ module.exports = {
         return Exonum.randomUint64()
       },
 
-      createWallet(keyPair, name) {
+      createWallet(keyPair, name, balance) {
+        
         const TxCreateWallet = getTransaction(TX_WALLET_ID)
 
         const data = {
           pub_key: keyPair.publicKey,
-          name: name
+          name: name, 
+          balance: balance
         }
 
         const signature = TxCreateWallet.sign(keyPair.secretKey, data)
+        console.log(signature);
         TxCreateWallet.signature = signature
         const hash = TxCreateWallet.hash(data)
 
@@ -229,25 +234,6 @@ module.exports = {
           .then(() => { 
             return { data: { tx_hash : hash } }
           })
-      },
-
-      addFunds(keyPair, amountToAdd, seed) {
-        const TxIssue = getTransaction(TX_ISSUE_ID)
-
-        const data = {
-          pub_key: keyPair.publicKey,
-          amount: amountToAdd.toString(),
-          seed: seed
-        }
-
-        const signature = TxIssue.sign(keyPair.secretKey, data)
-        TxIssue.signature = signature
-        const hash = TxIssue.hash(data)
-
-        return TxIssue.send(TX_URL, '/api/explorer/v1/transactions/', data, signature)
-          .then(() => waitForAcceptance(keyPair.publicKey, hash)
-        )
-        
       },
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
