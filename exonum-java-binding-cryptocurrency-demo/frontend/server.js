@@ -7,6 +7,7 @@ var app = express();
 // Get app params
 var argv = require('yargs-parser')(process.argv.slice(2));
 var port = argv.port;
+var explorerRoot = argv.explorerRoot;
 var apiRoot = argv.apiRoot;
 
 if (typeof port === 'undefined') {
@@ -17,7 +18,12 @@ if (typeof apiRoot === 'undefined') {
   throw new Error('--api-root parameter is not set.');
 }
 
+if (typeof explorerRoot === 'undefined') {
+  throw new Error('--explorer-root parameter is not set.');
+}
+
 app.set('apiRoot', apiRoot);
+app.set('explorerRoot', explorerRoot);
 
 // Configure parsers
 app.use(bodyParser.json());
