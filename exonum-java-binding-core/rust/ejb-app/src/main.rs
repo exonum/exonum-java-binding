@@ -1,13 +1,12 @@
-extern crate java_bindings;
 extern crate exonum_configuration;
+extern crate java_bindings;
 
-use java_bindings::exonum::helpers::fabric;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
+use java_bindings::exonum::helpers::fabric;
 
 fn main() {
-    let builder =
-        fabric::NodeBuilder::new()
-            .with_service(Box::new(java_bindings::JavaServiceFactory))
-            .with_service(Box::new(ConfigurationServiceFactory));
+    let builder = fabric::NodeBuilder::new()
+        .with_service(Box::new(java_bindings::JavaServiceFactory))
+        .with_service(Box::new(ConfigurationServiceFactory));
     builder.run()
 }
