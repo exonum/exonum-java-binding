@@ -3,21 +3,24 @@ use exonum::crypto::PublicKey;
 use exonum::messages::RawMessage;
 use exonum::node::{ApiSender, TransactionSend};
 use exonum::storage::Snapshot;
-use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
+use jni::JNIEnv;
 
 use std::error::Error;
 use std::{io, panic, ptr};
 
-use JniResult;
 use proxy::{MainExecutor, TransactionProxy};
 use storage::View;
-use utils::{cast_handle, drop_handle, Handle, to_handle, unwrap_exc_or_default, unwrap_exc_or,
-            unwrap_jni_verbose};
+use utils::{
+    cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose,
+    Handle,
+};
+use JniResult;
 
 const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerError";
-const INVALID_TRANSACTION_EXCEPTION: &str = "com/exonum/binding/messages/InvalidTransactionException";
+const INVALID_TRANSACTION_EXCEPTION: &str =
+    "com/exonum/binding/messages/InvalidTransactionException";
 const VERIFY_ERROR_MESSAGE: &str = "Unable to verify transaction";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
@@ -101,8 +104,8 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
                 let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
                 if let Err(err) = node.submit(Box::new(transaction)) {
                     let class;
-                    if err.kind() == io::ErrorKind::Other &&
-                        err.description() == VERIFY_ERROR_MESSAGE
+                    if err.kind() == io::ErrorKind::Other
+                        && err.description() == VERIFY_ERROR_MESSAGE
                     {
                         class = INVALID_TRANSACTION_EXCEPTION;
                     } else {

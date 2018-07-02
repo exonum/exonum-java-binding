@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use exonum::storage::{Database, MemoryDB};
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
+use jni::JNIEnv;
 
 use std::panic;
 
@@ -83,9 +83,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeM
             ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
             ViewRef::Fork(ref fork) => fork,
         };
-        db.merge(fork.patch().clone()).expect(
-            "Unable to merge fork",
-        );
+        db.merge(fork.patch().clone())
+            .expect("Unable to merge fork");
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)

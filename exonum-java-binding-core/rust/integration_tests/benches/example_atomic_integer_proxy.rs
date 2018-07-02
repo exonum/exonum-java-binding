@@ -22,12 +22,11 @@ extern crate test;
 
 use integration_tests::example_proxy::AtomicIntegerProxy;
 use integration_tests::vm::create_vm_for_benchmarks;
-use java_bindings::DumbExecutor;
 use java_bindings::jni::JavaVM;
+use java_bindings::DumbExecutor;
 
 use std::sync::Arc;
 use test::{black_box, Bencher};
-
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_benchmarks());
@@ -36,9 +35,7 @@ lazy_static! {
 
 #[bench]
 pub fn create_drop(b: &mut Bencher) {
-    b.iter(move || {
-        black_box(AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap())
-    });
+    b.iter(move || black_box(AtomicIntegerProxy::new(EXECUTOR.clone(), 0).unwrap()));
 }
 
 #[bench]

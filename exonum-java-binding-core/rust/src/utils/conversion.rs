@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use exonum::crypto::{Hash, HASH_SIZE};
-use jni::JNIEnv;
-use jni::sys::{jbyte, jbyteArray, jint};
 use jni::objects::JString;
+use jni::sys::{jbyte, jbyteArray, jint};
+use jni::JNIEnv;
 
 use std::mem;
 

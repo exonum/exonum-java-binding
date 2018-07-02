@@ -4,9 +4,9 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate rand;
 
-use java_bindings::jni::JavaVM;
-use java_bindings::jni::objects::JObject;
 use integration_tests::vm::{create_vm_for_leak_tests, KIB, MIB};
+use java_bindings::jni::objects::JObject;
+use java_bindings::jni::JavaVM;
 use rand::prelude::*;
 
 const MEMORY_LIMIT_MIB: usize = 32;
@@ -33,8 +33,8 @@ fn jvm_must_not_leak_local_references_exceeding_frame_capacity() {
     let references_per_frame = local_frame_capacity * 2; // 64
     let array_size = 256 * KIB;
 
-    let exceeding_arrays_size_per_frame = array_size *
-        (references_per_frame - local_frame_capacity);
+    let exceeding_arrays_size_per_frame =
+        array_size * (references_per_frame - local_frame_capacity);
     let iterations_to_exceed_the_limit = 1 + (memory_limit / exceeding_arrays_size_per_frame);
 
     // Double-check we picked the constants properly.
@@ -52,9 +52,8 @@ fn jvm_must_not_leak_local_references_exceeding_frame_capacity() {
             // Create and leak 'references_per_frame' Java arrays.
             for _ in 0..references_per_frame {
                 thread_rng().fill(&mut array[..]);
-                let _java_obj = env.byte_array_from_slice(&array).expect(
-                    "Can't create new local object.",
-                );
+                let _java_obj = env.byte_array_from_slice(&array)
+                    .expect("Can't create new local object.");
             }
             Ok(JObject::null())
         }).unwrap();

@@ -6,21 +6,24 @@ extern crate lazy_static;
 
 use std::sync::Arc;
 
-use futures::Stream;
 use futures::sync::mpsc::{self, Receiver};
+use futures::Stream;
 use integration_tests::mock::transaction::create_mock_transaction;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::{JniExecutor, JniResult, MainExecutor, NodeContext,
-                    Java_com_exonum_binding_service_NodeProxy_nativeSubmit};
 use java_bindings::exonum::blockchain::Blockchain;
 use java_bindings::exonum::crypto::gen_keypair;
 use java_bindings::exonum::messages::RawMessage;
 use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::MemoryDB;
-use java_bindings::jni::{JavaVM, JNIEnv};
 use java_bindings::jni::objects::JObject;
-use java_bindings::utils::{as_handle, get_and_clear_java_exception, get_class_name, unwrap_jni,
-                           unwrap_jni_verbose};
+use java_bindings::jni::{JNIEnv, JavaVM};
+use java_bindings::utils::{
+    as_handle, get_and_clear_java_exception, get_class_name, unwrap_jni, unwrap_jni_verbose,
+};
+use java_bindings::{
+    Java_com_exonum_binding_service_NodeProxy_nativeSubmit, JniExecutor, JniResult, MainExecutor,
+    NodeContext,
+};
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
@@ -65,7 +68,8 @@ fn submit_valid_transaction() {
 
 #[test]
 fn submit_not_valid_transaction() {
-    const INVALID_TRANSACTION_EXCEPTION: &str = "com.exonum.binding.messages.InvalidTransactionException";
+    const INVALID_TRANSACTION_EXCEPTION: &str =
+        "com.exonum.binding.messages.InvalidTransactionException";
 
     let jclass = JObject::null().into();
     let (mut node, _app_rx) = create_node();
@@ -118,7 +122,6 @@ fn message_from_raw<'e, R>(env: &'e JNIEnv<'e>, raw_message: R) -> JniResult<JOb
 where
     R: AsRef<[u8]>,
 {
-    env.byte_array_from_slice(raw_message.as_ref()).map(
-        JObject::from,
-    )
+    env.byte_array_from_slice(raw_message.as_ref())
+        .map(JObject::from)
 }

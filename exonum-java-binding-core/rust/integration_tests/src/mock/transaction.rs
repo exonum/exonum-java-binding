@@ -1,11 +1,12 @@
-use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
+use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 
 use super::NATIVE_FACADE_CLASS;
 
-pub const TRANSACTION_ADAPTER_CLASS: &str = "com/exonum/binding/service/adapters/UserTransactionAdapter";
+pub const TRANSACTION_ADAPTER_CLASS: &str =
+    "com/exonum/binding/service/adapters/UserTransactionAdapter";
 
 pub const ENTRY_NAME: &str = "test_entry";
 pub const ENTRY_VALUE: &str = "test_value";
