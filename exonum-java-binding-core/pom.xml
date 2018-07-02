@@ -24,10 +24,6 @@
     <rust.compiler.version>stable</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
-    <!-- Intentionally left empty, may be overridden from the command line.
-         See README.md and http://errorprone.info/docs/flags for more. -->
-    <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
-    <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
@@ -41,7 +37,6 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <compilerArgs>
-            <arg>${java.compiler.errorprone.flag}</arg>
             <arg>-h</arg>
             <arg>${project.build.headersDirectory}</arg>
           </compilerArgs>
@@ -232,26 +227,6 @@
   </build>
 
   <profiles>
-    <profile>
-      <!-- Use this profile to produce a patch with suggested fixes,
-           e.g. `mvn compile -P fixerrors`. See README.md for more.
-        -->
-      <id>fixerrors</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <compilerArgs combine.children="append">
-                <compilerArg>-XepPatchLocation:${basedir}</compilerArg>
-                <compilerArg>-XepPatchChecks:${java.compiler.errorprone.patchChecksFlag}</compilerArg>
-              </compilerArgs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <!-- A build profile for a build performed on a CI server:
             - Fails if the code has style issues
             - Runs FindBugs during verify phase
