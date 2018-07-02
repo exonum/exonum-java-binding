@@ -17,6 +17,8 @@ use jni::JNIEnv;
 use jni::sys::{jbyte, jbyteArray, jint};
 use jni::objects::JString;
 
+use std::mem;
+
 use JniResult;
 
 // Converts Java byte array to `Hash`. Panics if array has the wrong length.
@@ -26,7 +28,7 @@ pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> JniResult<Hash> {
 
     let mut bytes = [0 as jbyte; HASH_SIZE];
     env.get_byte_array_region(array, 0, &mut bytes[..])?;
-    Ok(Hash::from(unsafe { ::std::mem::transmute(bytes) }))
+    Ok(Hash::from(unsafe { mem::transmute(bytes) }))
 }
 
 // Converts `Hash` to Java byte array.

@@ -19,6 +19,7 @@ use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyte, jbyteArray, jint, jobject};
 
+use std::mem;
 use std::panic;
 use std::ptr;
 
@@ -447,5 +448,5 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
 
     let mut key = [0 as jbyte; PROOF_MAP_KEY_SIZE];
     env.get_byte_array_region(array, 0, &mut key[..])?;
-    Ok(unsafe { ::std::mem::transmute(key) })
+    Ok(unsafe { mem::transmute(key) })
 }
