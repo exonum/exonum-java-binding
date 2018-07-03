@@ -1,9 +1,11 @@
+extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
 extern crate java_bindings;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
+use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use java_bindings::exonum::helpers::config::ConfigFile;
 use java_bindings::exonum::helpers::fabric;
@@ -22,6 +24,8 @@ fn main() {
     for service in &services.services {
         if service == "configuration" {
             builder = builder.with_service(Box::new(ConfigurationServiceFactory));
+        } else if service == "btc-anchoring" {
+            builder = builder.with_service(Box::new(BtcAnchoringServiceFactory));
         } else {
             panic!("Found unknown service name {}", service);
         }
