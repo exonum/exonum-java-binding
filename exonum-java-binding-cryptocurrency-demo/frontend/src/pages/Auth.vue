@@ -7,10 +7,6 @@
           <tabs>
             <tab :is-active="true" title="Register">
               <form @submit.prevent="register">
-                <div class="form-group">
-                  <label class="control-label">Name:</label>
-                  <input v-model="name" type="text" class="form-control" placeholder="Enter name" maxlength="260" required>
-                </div>
 
                 <div class="form-group">
                   <label>Balance:</label>
@@ -66,7 +62,6 @@
     },
     data() {
       return {
-        name: '',
         balance: 0,
         secretKey: '',
         keyPair: {},
@@ -93,19 +88,12 @@
       },
 
       async register() {
-        if (!this.name) {
-          return this.$notify('error', 'The name is a required field')
-        }
-
-        console.log(this.balance)
-       
-       
+      
         this.isSpinnerVisible = true
         this.keyPair = this.$blockchain.generateKeyPair()
 
         try {
-          await this.$blockchain.createWallet(this.keyPair, this.name, this.balance)
-          this.name = ''
+          await this.$blockchain.createWallet(this.keyPair, this.balance)
           this.balance = 0
           this.isSpinnerVisible = false
           this.isModalVisible = true

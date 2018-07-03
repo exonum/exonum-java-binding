@@ -1,5 +1,23 @@
 import * as Exonum from 'exonum-client'
 import axios from 'axios'
+import * as Protobuf from 'protobufjs/light'
+
+var Root  = Protobuf.Root,
+    Type  = Protobuf.Type,
+    Field = Protobuf.Field;
+
+
+let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("ownerPublicKey", 1, "bytes"));
+CreateTransactionProtobuf.add(new Field("initialBalance", 2, "int64"))
+
+let TransferTransactionProtobuf = new Type("TransferTransaction").add(new Field("seed", 1, "int64"));
+TransferTransactionProtobuf.add(new Field("fromWallet", 2, "bytes"))
+TransferTransactionProtobuf.add(new Field("toWallet", 3, "bytes"))
+TransferTransactionProtobuf.add(new Field("amount", 4, "int64"))
+
+var root = new Root();
+root.define("CreateTransactionProtobuf").add(CreateTransactionProtobuf);
+root.define("TransferTransactionProtobuf").add(TransferTransactionProtobuf);
 
 const TX_URL = '/api/services/cryptocurrency/v1/wallets/transaction'
 const PER_PAGE = 10
@@ -11,13 +29,23 @@ const TX_TRANSFER_ID = 0
 const TX_ISSUE_ID = 1
 const TX_WALLET_ID = 2
 
+const MessageHead = Exonum.newType({
+  fields: [
+    { name: 'network_id', type: Exonum.Uint8 },
+    { name: 'protocol_version', type: Exonum.Uint8 },
+    { name: 'message_id', type: Exonum.Uint16 },
+    { name: 'service_id', type: Exonum.Uint16 },
+    { name: 'payload', type: Exonum.Uint32 }
+  ]
+})
+
 const TransferTransaction = {
   protocol_version: PROTOCOL_VERSION,
   service_id: SERVICE_ID,
   message_id: TX_TRANSFER_ID,
   fields: [
-    { name: 'from', type: Exonum.PublicKey },
-    { name: 'to', type: Exonum.PublicKey },
+    { name: 'fromWallet', type: Exonum.PublicKey },
+    { name: 'toWallet', type: Exonum.PublicKey },
     { name: 'amount', type: Exonum.Uint64 },
     { name: 'seed', type: Exonum.Uint64 }
   ]
@@ -32,13 +60,13 @@ const IssueTransaction = {
     { name: 'seed', type: Exonum.Uint64 }
   ]
 }
+
 const CreateTransaction = {
   protocol_version: PROTOCOL_VERSION,
   service_id: SERVICE_ID,
   message_id: TX_WALLET_ID,
   fields: [
-    { name: 'pub_key', type: Exonum.PublicKey },
-    { name: 'name', type: Exonum.String },
+    { name: 'ownerPublicKey', type: Exonum.PublicKey },
     { name: 'balance', type: Exonum.Uint64 }
   ]
 }
@@ -215,44 +243,70 @@ module.exports = {
         return Exonum.randomUint64()
       },
 
-      createWallet(keyPair, name, balance) {
-        
-        const TxCreateWallet = getTransaction(TX_WALLET_ID)
+      createWallet(keyPair, balance) {
+
+        let buffer = MessageHead.serialize({
+          network_id: 0,
+          protocol_version: PROTOCOL_VERSION,
+          message_id: TX_WALLET_ID,
+          service_id: SERVICE_ID,
+          payload: 0 // placeholder, real value will be inserted later
+        })
 
         const data = {
-          pub_key: keyPair.publicKey,
-          name: name, 
-          balance: balance
+          ownerPublicKey: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
+          initialBalance: balance
         }
 
-        const signature = TxCreateWallet.sign(keyPair.secretKey, data)
-        console.log(signature);
-        TxCreateWallet.signature = signature
-        const hash = TxCreateWallet.hash(data)
+        const body = CreateTransactionProtobuf.encode(data).finish();
 
-        return TxCreateWallet.send(TX_URL, '/api/explorer/v1/transactions/', data, signature)
-          .then(() => { 
-            return { data: { tx_hash : hash } }
-          })
+        body.forEach(element => {
+          buffer.push(element)
+        });
+
+        const signature = Exonum.sign(keyPair.secretKey, buffer)
+
+        return axios.post(TX_URL, {
+         protocol_version: PROTOCOL_VERSION,
+         service_id: SERVICE_ID,
+         message_id: TX_WALLET_ID,
+         signature: signature,
+         body: data
+        })
       },
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
-        const TxTransfer = getTransaction(TX_TRANSFER_ID)
+        
+        let buffer = MessageHead.serialize({
+          network_id: 0,
+          protocol_version: PROTOCOL_VERSION,
+          message_id: TX_TRANSFER_ID,
+          service_id: SERVICE_ID,
+          payload: 0 // placeholder, real value will be inserted later
+        })
 
         const data = {
-          from: keyPair.publicKey,
-          to: receiver,
-          amount: amountToTransfer,
-          seed: seed
+          seed: seed,
+          fromWallet: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
+          toWallet:  Exonum.hexadecimalToUint8Array(receiver),
+          amount: amountToTransfer
         }
 
-        const signature = TxTransfer.sign(keyPair.secretKey, data)
-        TxTransfer.signature = signature
-        const hash = TxTransfer.hash(data)
+        const body = CreateTransactionProtobuf.encode(data).finish();
 
-        return TxTransfer.send(TX_URL, '/api/explorer/v1/transactions/', data, signature)
-          .then(() => waitForAcceptance(keyPair.publicKey, hash)
-        )
+        body.forEach(element => {
+          buffer.push(element)
+        });
+
+        const signature = Exonum.sign(keyPair.secretKey, buffer)
+
+        return axios.post(TX_URL, {
+          protocol_version: PROTOCOL_VERSION,
+          service_id: SERVICE_ID,
+          message_id: TX_TRANSFER_ID,
+          signature: signature,
+          body: data
+        }).then(response => waitForAcceptance(keyPair.publicKey, response.data.tx_hash))
       },
 
       getWallet: getWallet,

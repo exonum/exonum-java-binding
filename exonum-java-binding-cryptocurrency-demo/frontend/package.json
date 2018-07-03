@@ -26,6 +26,7 @@
     "noty": "^3.2.0-beta",
     "numeral": "^2.0.6",
     "popper.js": "^1.14.3",
+    "protobufjs": "^6.8.6",
     "vue": "^2.5.16",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
