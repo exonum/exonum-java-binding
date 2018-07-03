@@ -12,8 +12,10 @@ use std::{io, panic, ptr};
 
 use proxy::{MainExecutor, TransactionProxy};
 use storage::View;
-use utils::{cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default,
-            unwrap_jni_verbose, Handle};
+use utils::{
+    cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose,
+    Handle,
+};
 use JniResult;
 
 const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerError";

@@ -12,8 +12,10 @@ use std::fmt;
 
 use proxy::node::NodeContext;
 use storage::View;
-use utils::{check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception,
-            to_handle, unwrap_jni};
+use utils::{
+    check_error_on_exception, convert_to_hash, convert_to_string, panic_on_exception, to_handle,
+    unwrap_jni,
+};
 use {JniExecutor, MainExecutor, TransactionProxy};
 
 /// A proxy for `Service`s.
