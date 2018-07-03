@@ -56,21 +56,21 @@ public final class Bytes {
   }
 
   /**
-   * Converts a hex representation of bytes into a byte array.
-   * @param hex a string containing a hex string with lower-case letters
-   * @return a byte array corresponding to this string
-   */
-  public static byte[] fromHex(String hex) {
-    return HEX_ENCODING.decode(hex);
-  }
-
-  /**
    * Converts a string to a sequence of bytes using UTF-8 charset.
    * @param s a string to convert.
    * @return a string as bytes in UTF-8.
    */
   public static byte[] bytes(String s) {
     return s.getBytes(StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Converts a hex representation of bytes into a byte array.
+   * @param hex a string containing a hex string with lower-case letters
+   * @return a byte array corresponding to this string
+   */
+  public static byte[] fromHex(String hex) {
+    return HEX_ENCODING.decode(hex);
   }
 
   /**
