@@ -11,6 +11,8 @@ use java_bindings::exonum::helpers::config::ConfigFile;
 use java_bindings::exonum::helpers::fabric;
 
 const PATH_TO_SERVICES_TO_ENABLE: &str = "ejb_app_services.toml";
+const CONFIGURATION_SERVICE: &str = "configuration";
+const BTC_ANCHORING_SERVICE: &str = "btc-anchoring";
 
 #[derive(Serialize, Deserialize)]
 struct ServicesToEnable {
@@ -22,9 +24,9 @@ fn main() {
     let mut builder =
         fabric::NodeBuilder::new().with_service(Box::new(java_bindings::JavaServiceFactory));
     for service in &services.services {
-        if service == "configuration" {
+        if service == CONFIGURATION_SERVICE {
             builder = builder.with_service(Box::new(ConfigurationServiceFactory));
-        } else if service == "btc-anchoring" {
+        } else if service == BTC_ANCHORING_SERVICE {
             builder = builder.with_service(Box::new(BtcAnchoringServiceFactory));
         } else {
             panic!("Found unknown service name {}", service);
