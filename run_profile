@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Environment for building and running tests with dynamically loading libraries.
+#
+# ¡Keep it MacOS/Ubuntu compatible!
+
+# Use the Java that Maven uses.
+#
+# Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
+# hence this a bit complex thing.
+export JAVA_HOME="$(mvn --version | grep 'Java home' | sed 's/.*: //')"
+echo "JAVA_HOME=${JAVA_HOME}"
+
+# Find the directory containing libjvm (the relative path has changed in Java 9).
+JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
+
+# Modify path where an executable look for libjvm.
+export RUSTFLAGS="${RUSTFLAGS:-} -C link-args=-Wl,-rpath,${JAVA_LIB_DIR}"
+echo "RUSTFLAGS=${RUSTFLAGS}"
