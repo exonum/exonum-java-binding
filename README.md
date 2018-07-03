@@ -1,6 +1,7 @@
 # Exonum Java Binding
 
 [![Build Status](https://www.travis-ci.org/exonum/exonum-java-binding.svg?branch=master)](https://www.travis-ci.org/exonum/exonum-java-binding)
+[![Coverage Status](https://coveralls.io/repos/github/exonum/exonum-java-binding/badge.svg?branch=master)](https://coveralls.io/github/exonum/exonum-java-binding?branch=master)
 [![Join the chat on https://gitter.im/exonum/exonum-java-binding](https://img.shields.io/gitter/room/exonum/exonum-java-binding.svg?label=Chat)](https://gitter.im/exonum/exonum-java-binding)
 
 Exonum Java Binding is a framework for building blockchain applications in Java, 
