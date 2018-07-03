@@ -27,7 +27,7 @@ public abstract class AbstractTransaction implements Transaction {
   /**
    * A binary Exonum message, representing this transaction.
    */
-  protected final BinaryMessage message;
+  protected final transient BinaryMessage message;
 
   protected AbstractTransaction(BinaryMessage message) {
     this.message = checkNotNull(message);

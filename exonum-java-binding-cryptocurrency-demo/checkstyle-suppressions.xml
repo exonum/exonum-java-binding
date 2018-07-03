@@ -5,5 +5,5 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <suppress files="BaseTx" checks="MemberName|ParameterName"/>
+    <suppress files="TransactionJsonMessage" checks="MemberName|ParameterName"/>
 </suppressions>
