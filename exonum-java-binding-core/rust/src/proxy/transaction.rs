@@ -13,7 +13,9 @@ use std::error::Error;
 use std::fmt;
 
 use storage::View;
-use utils::{check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni};
+use utils::{
+    check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni,
+};
 use {JniExecutor, MainExecutor};
 
 /// A proxy for `Transaction`s.

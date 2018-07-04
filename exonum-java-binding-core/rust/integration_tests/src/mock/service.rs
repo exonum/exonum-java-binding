@@ -66,6 +66,7 @@ impl ServiceMockBuilder {
         self
     }
 
+    #[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
     pub fn convert_transaction(self, transaction: GlobalRef) -> Self {
         unwrap_jni(self.exec.with_attached(|env| {
             env.call_method(
