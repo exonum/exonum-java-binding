@@ -26,7 +26,7 @@ impl CommandExtension for GenerateNodeConfig {
                 false,
                 "Additional parameters for JVM.",
                 None,
-                "ejb-jvm-arg",
+                "ejb-jvm-args",
                 true,
             ),
             Argument::new_named(
