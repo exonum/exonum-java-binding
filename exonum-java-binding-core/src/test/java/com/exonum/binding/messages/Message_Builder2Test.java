@@ -16,7 +16,6 @@
 
 package com.exonum.binding.messages;
 
-import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
@@ -27,23 +26,13 @@ public class Message_Builder2Test {
 
   @Test
   public void valueEquals() {
-    equalsVerifier(Message_Builder2.Value.class)
+    EqualsVerifier.forClass(Message_Builder2.Value.class)
         .verify();
   }
 
   @Test
   public void partialEquals() {
-    equalsVerifier(Message_Builder2.Partial.class)
+    EqualsVerifier.forClass(Message_Builder2.Partial.class)
         .verify();
-  }
-
-  private static <T> EqualsVerifier<T> equalsVerifier(Class<T> classUnderTest) {
-    // It is required to provide prefab values for ByteBuffer until
-    // support for this class is added to the library:
-    // https://github.com/jqno/equalsverifier/issues/198
-    return EqualsVerifier.forClass(classUnderTest)
-        .withPrefabValues(ByteBuffer.class,
-            ByteBuffer.wrap(new byte[] {0}),
-            ByteBuffer.wrap(new byte[] {1}));
   }
 }

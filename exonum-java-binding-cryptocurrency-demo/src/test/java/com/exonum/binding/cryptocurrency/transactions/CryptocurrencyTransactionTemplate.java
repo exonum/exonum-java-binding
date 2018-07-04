@@ -33,7 +33,6 @@ final class CryptocurrencyTransactionTemplate {
           .setServiceId(CryptocurrencyService.ID)
           .setMessageType(INVALID_MESSAGE_TYPE)
           .setBody(allocateReadOnly(0))
-          .setSignature(new byte[Message.SIGNATURE_SIZE])
           .build();
 
   /**
