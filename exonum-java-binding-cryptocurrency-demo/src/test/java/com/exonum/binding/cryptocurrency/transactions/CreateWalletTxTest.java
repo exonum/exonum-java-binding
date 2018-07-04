@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,10 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTx.DEFAULT_BALANCE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
@@ -27,6 +27,7 @@ import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.messages.Message;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
@@ -34,6 +35,8 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.protobuf.ByteString;
+import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,13 +48,35 @@ public class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey ownerKey = PredefinedOwnerKeys.firstOwnerKey;
+  private static final long DEFAULT_BALANCE = 100L;
+
+  private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.firstOwnerKey;
 
   @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void walletIsValidWithCorrectOwnerKey() {
-    CreateWalletTx tx = new CreateWalletTx(ownerKey);
+  public void fromMessage() {
+    long initialBalance = 100L;
+    BinaryMessage m = new Message.Builder()
+        .setServiceId(CryptocurrencyService.ID)
+        .setMessageType(CreateWalletTx.ID)
+        .setBody(ByteBuffer.wrap(TxMessagesProtos.CreateWalletTx.newBuilder()
+            .setOwnerPublicKey(ByteString.copyFrom(OWNER_KEY.toBytes()))
+            .setInitialBalance(initialBalance)
+            .build()
+            .toByteArray()))
+        .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+        .buildRaw();
+
+
+    CreateWalletTx tx = CreateWalletTx.fromMessage(m);
+
+    assertThat(tx, equalTo(withMockMessage(OWNER_KEY, initialBalance)));
+  }
+
+  @Test
+  public void isValid() {
+    CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     assertTrue(tx.isValid());
   }
@@ -62,12 +87,21 @@ public class CreateWalletTxTest {
 
     expectedException.expectMessage("Public key has invalid size (1), must be 32 bytes long.");
     expectedException.expect(IllegalArgumentException.class);
-    new CreateWalletTx(publicKey);
+    withMockMessage(publicKey, DEFAULT_BALANCE);
+  }
+
+  @Test
+  public void constructorRejectsNegativeBalance() {
+    long initialBalance = -1L;
+
+    expectedException.expectMessage("The initial balance (-1) must not be negative.");
+    expectedException.expect(IllegalArgumentException.class);
+    withMockMessage(OWNER_KEY, initialBalance);
   }
 
   @Test
   public void executeCreateWalletTx() throws CloseFailuresException {
-    CreateWalletTx tx = new CreateWalletTx(ownerKey);
+    CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -78,7 +112,8 @@ public class CreateWalletTxTest {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-      assertThat(wallets.get(ownerKey).getBalance(), equalTo(DEFAULT_BALANCE));
+      assertTrue(wallets.containsKey(OWNER_KEY));
+      assertThat(wallets.get(OWNER_KEY).getBalance(), equalTo(DEFAULT_BALANCE));
     }
   }
 
@@ -87,45 +122,40 @@ public class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      Long balance = DEFAULT_BALANCE;
+      Long initialBalance = DEFAULT_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(ownerKey, new Wallet(balance));
+        wallets.put(OWNER_KEY, new Wallet(initialBalance));
       }
 
       // Execute the transaction, that has the same owner key.
-      CreateWalletTx tx = new CreateWalletTx(ownerKey);
+      // Use twice the initial balance to detect invalid updates.
+      long newBalance = 2 * initialBalance;
+      CreateWalletTx tx = withMockMessage(OWNER_KEY, newBalance);
       tx.execute(view);
 
       // Check it has not changed the entries in the maps.
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        assertThat(wallets.get(ownerKey).getBalance(), equalTo(balance));
+        assertTrue(wallets.containsKey(OWNER_KEY));
+        assertThat(wallets.get(OWNER_KEY).getBalance(), equalTo(initialBalance));
       }
     }
   }
 
   @Test
   public void info() {
-    CreateWalletTx tx = new CreateWalletTx(ownerKey);
+    CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     String info = tx.info();
 
-    BaseTx txParams = CryptocurrencyTransactionGson.instance().fromJson(info, BaseTx.class);
-    assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
-    assertThat(txParams.getMessageId(), equalTo(CryptocurrencyTransaction.CREATE_WALLET.getId()));
-  }
+    CreateWalletTx txParams = CryptocurrencyTransactionGson.instance()
+        .fromJson(info, CreateWalletTx.class);
 
-  @Test
-  public void converterRoundtrip() {
-    CreateWalletTx tx = new CreateWalletTx(ownerKey);
-    BinaryMessage message = CreateWalletTx.converter().toMessage(tx);
-    CreateWalletTx txFromMessage = CreateWalletTx.converter().fromMessage(message);
-
-    assertThat(txFromMessage, equalTo(tx));
+    assertThat(txParams, equalTo(tx));
   }
 
   @Test
@@ -133,5 +163,11 @@ public class CreateWalletTxTest {
     EqualsVerifier
         .forClass(CreateWalletTx.class)
         .verify();
+  }
+
+  private static CreateWalletTx withMockMessage(PublicKey ownerKey, long initialBalance) {
+    // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
+    // and put it here, replacing `mock(BinaryMessage.class)`.
+    return new CreateWalletTx(mock(BinaryMessage.class), ownerKey, initialBalance);
   }
 }

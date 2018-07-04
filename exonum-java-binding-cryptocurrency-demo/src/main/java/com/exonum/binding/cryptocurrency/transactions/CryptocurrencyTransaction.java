@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import com.exonum.binding.messages.Transaction;
 import com.google.common.primitives.Shorts;
 
 public enum CryptocurrencyTransaction {
-  CREATE_WALLET(1, CreateWalletTx.class),
-  TRANSFER(2, TransferTx.class);
+  CREATE_WALLET(CreateWalletTx.ID, CreateWalletTx.class),
+  TRANSFER(TransferTx.ID, TransferTx.class);
 
   private final short id;
   private final Class<? extends Transaction> transactionClass;

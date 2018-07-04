@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package com.exonum.binding.cryptocurrency;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
@@ -60,7 +61,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public void createPublicApiHandlers(Node node, Router router) {
     this.node = node;
 
-    ApiController controller = new ApiController(this);
+    ApiController controller = new ApiController(this, new JsonBinaryMessageConverter());
     controller.mountApi(router);
   }
 
@@ -71,7 +72,9 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     try {
       node.submitTransaction(tx);
       return tx.hash();
-    } catch (InvalidTransactionException | InternalServerError e) {
+    } catch (InvalidTransactionException e) {
+      throw new IllegalArgumentException(e);
+    } catch (InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }
   }

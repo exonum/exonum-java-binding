@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,13 +27,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
-import com.exonum.binding.cryptocurrency.transactions.TransferTx;
+import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
+import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.Transaction;
-import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
@@ -46,9 +45,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
@@ -63,11 +60,11 @@ public class ApiControllerTest {
 
   private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
 
-  private static final PublicKey toKey = PredefinedOwnerKeys.secondOwnerKey;
-
   @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
 
   CryptocurrencyService service;
+
+  JsonBinaryMessageConverter jsonBinaryMessageConverter;
 
   ApiController controller;
 
@@ -82,7 +79,8 @@ public class ApiControllerTest {
   @Before
   public void setup(TestContext context) {
     service = mock(CryptocurrencyService.class);
-    controller = new ApiController(service);
+    jsonBinaryMessageConverter = mock(JsonBinaryMessageConverter.class);
+    controller = new ApiController(service, jsonBinaryMessageConverter);
 
     vertx = rule.vertx();
 
@@ -112,47 +110,62 @@ public class ApiControllerTest {
   }
 
   @Test
-  public void handlesAllKnownTransactions(TestContext context) {
-    Map<CryptocurrencyTransaction, Transaction> transactionTemplates =
-        ImmutableMap.of(
-            CryptocurrencyTransaction.CREATE_WALLET,
-                new CreateWalletTx(fromKey),
-            CryptocurrencyTransaction.TRANSFER,
-                new TransferTx(
-                    0L,
-                    fromKey,
-                    toKey,
-                    40L));
+  public void submitValidTransaction(TestContext context) {
+    String messageJson = "{\"service_id\":42}";
+    String messageHash = "1234";
+    BinaryMessage message = mock(BinaryMessage.class);
+    Transaction transaction = mock(Transaction.class);
 
-    for (Map.Entry<CryptocurrencyTransaction, Transaction> entry :
-        transactionTemplates.entrySet()) {
-      Transaction sourceTx = entry.getValue();
-      String expectedResponse = String.valueOf(sourceTx.hash());
+    when(jsonBinaryMessageConverter.toMessage(messageJson))
+        .thenReturn(message);
+    when(service.convertToTransaction(message))
+        .thenReturn(transaction);
+    when(service.submitTransaction(transaction))
+        .thenReturn(HashCode.fromString(messageHash));
 
-      String sourceTxMessage = sourceTx.info();
+    String expectedResponse = messageHash;
+    // Send a request to submitTransaction
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendJsonObject(
+            new JsonObject(messageJson),
+            context.asyncAssertSuccess(
+                r -> {
+                  // Check the response status
+                  int statusCode = r.statusCode();
+                  context.assertEquals(HTTP_OK, statusCode);
 
-      when(service.submitTransaction(eq(sourceTx)))
-          .thenReturn(sourceTx.hash());
+                  // Check the response body
+                  String response = r.bodyAsString();
+                  context.assertEquals(expectedResponse, response);
 
-      // Send a request to submitTransaction
-      post(ApiController.SUBMIT_TRANSACTION_PATH)
-          .sendJsonObject(
-              new JsonObject(sourceTxMessage),
-              context.asyncAssertSuccess(
-                  r -> {
+                  // Verify that a proper transaction was submitted to the network
+                  verify(service).submitTransaction(transaction);
+                }));
+  }
 
-                    // Check the response status
-                    int statusCode = r.statusCode();
-                    context.assertEquals(statusCode, HttpURLConnection.HTTP_OK);
+  @Test
+  public void submitTransactionWhenInternalServerErrorIsThrown(TestContext context) {
+    String messageJson = "{\"service_id\":42}";
+    BinaryMessage message = mock(BinaryMessage.class);
+    Transaction transaction = mock(Transaction.class);
+    Throwable error = wrappingChecked(InternalServerError.class);
 
-                    // Check the response body
-                    String response = r.bodyAsString();
-                    context.assertEquals(response, expectedResponse);
+    when(jsonBinaryMessageConverter.toMessage(messageJson))
+        .thenReturn(message);
+    when(service.convertToTransaction(message))
+        .thenReturn(transaction);
+    when(service.submitTransaction(transaction))
+        .thenThrow(error);
 
-                    // Verify that a proper transaction was submitted to the network
-                    verify(service).submitTransaction(eq(sourceTx));
-                  }));
-    }
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendJsonObject(
+            new JsonObject(messageJson),
+            context.asyncAssertSuccess(ar -> {
+              context.verify(v -> {
+                assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+                verify(service).submitTransaction(transaction);
+              });
+            }));
   }
 
   @Test
@@ -198,25 +211,6 @@ public class ApiControllerTest {
           assertThat(ar.bodyAsString())
               .startsWith("Failed to convert parameter (walletId):");
         })));
-  }
-
-  @Test
-  public void submitTransactionWhenInternalServerErrorIsThrown(TestContext context) {
-    Throwable error = wrappingChecked(InternalServerError.class);
-
-    Transaction transaction = new CreateWalletTx(fromKey);
-    when(service.submitTransaction(eq(transaction)))
-        .thenThrow(error);
-    String sourceTxMessage = transaction.info();
-
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
-        .sendJsonObject(
-            new JsonObject(sourceTxMessage),
-            context.asyncAssertSuccess(ar -> {
-              context.verify(v -> {
-                assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
-              });
-            }));
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
