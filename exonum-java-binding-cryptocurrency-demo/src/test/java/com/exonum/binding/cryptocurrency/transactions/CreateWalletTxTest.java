@@ -65,7 +65,7 @@ public class CreateWalletTxTest {
             .setInitialBalance(initialBalance)
             .build()
             .toByteArray()))
-        .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+        .setSignature(new byte[Message.SIGNATURE_SIZE])
         .buildRaw();
 
 

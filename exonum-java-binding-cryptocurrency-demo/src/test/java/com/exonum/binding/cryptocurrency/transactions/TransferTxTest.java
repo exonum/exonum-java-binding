@@ -69,7 +69,7 @@ public class TransferTxTest {
             .setSum(amount)
             .build()
             .toByteArray()))
-        .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+        .setSignature(new byte[Message.SIGNATURE_SIZE])
         .buildRaw();
 
     TransferTx tx = TransferTx.fromMessage(m);

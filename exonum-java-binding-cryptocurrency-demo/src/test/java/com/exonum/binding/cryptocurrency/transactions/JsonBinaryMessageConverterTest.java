@@ -25,7 +25,6 @@ import com.google.common.io.BaseEncoding;
 import com.google.gson.JsonParseException;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -61,7 +60,7 @@ public class JsonBinaryMessageConverterTest {
     assertThat(message.getServiceId()).isEqualTo((short) 42);
     assertThat(message.getMessageType()).isEqualTo((short) 1);
     assertThat(message.getSignature()).inHexadecimal()
-        .isEqualTo(ByteBuffer.wrap(SIGNATURE));
+        .isEqualTo(SIGNATURE);
 
     TxMessagesProtos.CreateWalletTx txData = TxMessagesProtos.CreateWalletTx.parseFrom(
         message.getBody());
@@ -93,7 +92,7 @@ public class JsonBinaryMessageConverterTest {
     assertThat(message.getServiceId()).isEqualTo((short) 42);
     assertThat(message.getMessageType()).isEqualTo((short) 2);
     assertThat(message.getSignature()).inHexadecimal()
-        .isEqualTo(ByteBuffer.wrap(SIGNATURE));
+        .isEqualTo(SIGNATURE);
 
     TxMessagesProtos.TransferTx txData = TxMessagesProtos.TransferTx.parseFrom(
         message.getBody());

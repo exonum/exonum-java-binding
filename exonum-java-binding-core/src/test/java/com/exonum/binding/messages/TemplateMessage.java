@@ -32,7 +32,7 @@ public class TemplateMessage {
       .setServiceId((short) 0)
       .setMessageType((short) 1)
       .setBody(allocateBuffer(2))
-      .setSignature(allocateBuffer(SIGNATURE_SIZE))
+      .setSignature(new byte[SIGNATURE_SIZE])
       .buildPartial();
 
   private TemplateMessage() {}
