@@ -22,6 +22,8 @@ if (typeof explorerRoot === 'undefined') {
   throw new Error('--explorer-root parameter is not set.');
 }
 
+console.log(apiRoot, explorerRoot);
+
 app.set('apiRoot', apiRoot);
 app.set('explorerRoot', explorerRoot);
 
