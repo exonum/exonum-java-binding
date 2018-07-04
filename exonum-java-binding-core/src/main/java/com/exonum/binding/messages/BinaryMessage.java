@@ -38,22 +38,32 @@ public interface BinaryMessage extends Message {
     return MessageReader.wrap(buf);
   }
 
-  // todo: fromBuffer/wrap(ByteBuffer)?
+  /**
+   * Returns a message without signature, i.e., without the last 64 bytes of the binary message.
+   */
+  default byte[] getMessageNoSignature() {
+    ByteBuffer signedMessage = getSignedMessage();
+    int fullSize = signedMessage.remaining();
+    int messageSize = fullSize - Message.SIGNATURE_SIZE;
+    byte[] message = new byte[messageSize];
+    signedMessage.get(message);
+    return message;
+  }
 
   /**
-   * Returns the whole binary message.
+   * Returns the whole binary message. It includes a message header, body and signature.
    */
   // todo: consider renaming, for this class *is* a message.
   //   - ¿Message#getBuffer
   //   - ¿Message#getMessageBuffer
   //   - ¿Message#getMessagePacket
-  ByteBuffer getMessage();
+  ByteBuffer getSignedMessage();
 
   /**
    * Returns the SHA-256 hash of this message.
    */
   default HashCode hash() {
     HashFunction hashFunction = Hashing.defaultHashFunction();
-    return hashFunction.hashBytes(getMessage());
+    return hashFunction.hashBytes(getSignedMessage());
   }
 }

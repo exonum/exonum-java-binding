@@ -22,9 +22,25 @@ import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.test.Bytes;
 import org.junit.Test;
 
 public class BinaryMessageTest {
+
+  @Test
+  public void getMessageNoSignature() {
+    BinaryMessage message = new Message.Builder()
+        .setNetworkId((byte) 0x01)
+        .setVersion((byte) 0x02)
+        .setServiceId((short) 0xA103)
+        .setMessageType((short) 0xB204)
+        .setBody(allocateBuffer(2))
+        .setSignature(new byte[64])
+        .buildRaw();
+
+    byte[] expectedNoSignature = Bytes.fromHex("010204b203a14c0000000000");
+    assertThat(message.getMessageNoSignature(), equalTo(expectedNoSignature));
+  }
 
   @Test
   public void hash() {
@@ -34,7 +50,7 @@ public class BinaryMessageTest {
         .setServiceId((short) 0xA103)
         .setMessageType((short) 0xB204)
         .setBody(allocateBuffer(2))
-        .setSignature(allocateBuffer(64))
+        .setSignature(new byte[64])
         .buildRaw();
 
     HashCode hash = message.hash();

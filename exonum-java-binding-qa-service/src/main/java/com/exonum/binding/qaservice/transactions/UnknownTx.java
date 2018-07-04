@@ -53,7 +53,7 @@ public final class UnknownTx extends AbstractTransaction {
         .setNetworkId((byte) 0)
         .setVersion((byte) 0)
         .setBody(ByteBuffer.allocate(Long.BYTES))
-        .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+        .setSignature(new byte[Message.SIGNATURE_SIZE])
         .buildRaw();
   }
 }

@@ -18,6 +18,7 @@ package com.exonum.binding.messages;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.crypto.CryptoFunctions;
 import java.nio.ByteBuffer;
 
 /**
@@ -80,8 +81,10 @@ public interface Message {
    *
    * <p>The signature is <strong>not</strong> guaranteed to be valid and must be verified against
    * the signer’s public key.
+   *
+   * @see CryptoFunctions#ed25519()
    */
-  ByteBuffer getSignature();
+  byte[] getSignature();
 
   /**
    * Returns the signature offset in this message.
@@ -116,10 +119,10 @@ public interface Message {
     }
 
     @Override
-    public Builder setSignature(ByteBuffer signature) {
-      int signatureSize = signature.remaining();
+    public Builder setSignature(byte[] signature) {
+      int signatureSize = signature.length;
       checkArgument(signatureSize == SIGNATURE_SIZE, "Invalid signature size (%s)", signatureSize);
-      return super.setSignature(signature.duplicate());
+      return super.setSignature(signature);
     }
 
     public BinaryMessage buildRaw() {

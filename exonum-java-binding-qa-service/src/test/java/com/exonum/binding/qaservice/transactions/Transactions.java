@@ -29,7 +29,7 @@ final class Transactions {
       .setServiceId(QaService.ID)
       .setMessageType(Short.MAX_VALUE)
       .setBody(ByteBuffer.allocate(0))
-      .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+      .setSignature(new byte[Message.SIGNATURE_SIZE])
       .buildPartial();
 
   private Transactions() {

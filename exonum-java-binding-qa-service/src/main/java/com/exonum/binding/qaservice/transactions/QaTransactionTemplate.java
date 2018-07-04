@@ -29,7 +29,7 @@ class QaTransactionTemplate {
       .setServiceId(QaService.ID)
       .setMessageType(UnknownTx.ID)
       .setBody(allocateReadOnly(0))
-      .setSignature(allocateReadOnly(Message.SIGNATURE_SIZE))
+      .setSignature(new byte[Message.SIGNATURE_SIZE])
       .build();
 
   /**
