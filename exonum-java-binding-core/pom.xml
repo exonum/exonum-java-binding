@@ -203,25 +203,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <skip>false</skip>
-        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <configuration>
-          <skipSource>false</skipSource>
-        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>false</skip>
-        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -300,6 +291,7 @@
       <scope>provided</scope>
     </dependency>
 
+    <!--It is needed for Javadoc generation with JDK 9-->
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
