@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::proof_map_index::{ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
-                                       PROOF_MAP_KEY_SIZE};
+use exonum::storage::proof_map_index::{
+    ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
+};
 use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jobject};
@@ -440,7 +441,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 }
 
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
-    // TODO: Optimize copying and allocations.
     let bytes = env.convert_byte_array(array)?;
     assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
 
