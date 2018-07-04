@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency;
+package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.service.Service;
-import java.util.Optional;
 
-public interface CryptocurrencyService extends Service {
-  short ID = 42;
-  String NAME = "cryptocurrency-demo-service";
+class TransferTxData {
+  final long seed;
+  final PublicKey senderId;
+  final PublicKey recipientId;
+  final long amount;
 
-  HashCode submitTransaction(Transaction tx);
-
-  Optional<Wallet> getWallet(PublicKey ownerKey);
+  TransferTxData(long seed, PublicKey senderId, PublicKey recipientId, long amount) {
+    this.seed = seed;
+    this.senderId = senderId;
+    this.recipientId = recipientId;
+    this.amount = amount;
+  }
 }

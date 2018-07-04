@@ -18,10 +18,14 @@ package com.exonum.binding.test;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.charset.StandardCharsets;
 
 public final class Bytes {
+
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16()
+      .lowerCase();
 
   /**
    * Converts a sequence of bytes into an array.
@@ -58,6 +62,15 @@ public final class Bytes {
    */
   public static byte[] bytes(String s) {
     return s.getBytes(StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Converts a hex representation of bytes into a byte array.
+   * @param hex a string containing a hex string with lower-case letters
+   * @return a byte array corresponding to this string
+   */
+  public static byte[] fromHex(String hex) {
+    return HEX_ENCODING.decode(hex);
   }
 
   /**

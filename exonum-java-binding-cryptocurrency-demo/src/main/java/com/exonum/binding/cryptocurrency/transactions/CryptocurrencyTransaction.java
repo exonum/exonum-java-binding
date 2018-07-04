@@ -20,8 +20,8 @@ import com.exonum.binding.messages.Transaction;
 import com.google.common.primitives.Shorts;
 
 public enum CryptocurrencyTransaction {
-  CREATE_WALLET(1, CreateWalletTx.class),
-  TRANSFER(2, TransferTx.class);
+  CREATE_WALLET(CreateWalletTx.ID, CreateWalletTx.class),
+  TRANSFER(TransferTx.ID, TransferTx.class);
 
   private final short id;
   private final Class<? extends Transaction> transactionClass;
