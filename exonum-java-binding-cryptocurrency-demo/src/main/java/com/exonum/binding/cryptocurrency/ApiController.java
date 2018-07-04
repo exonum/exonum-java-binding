@@ -22,7 +22,6 @@ import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
 import com.exonum.binding.hash.HashCode;
@@ -40,12 +39,8 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,12 +52,6 @@ final class ApiController {
   @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final String WALLET_ID_PARAM = "walletId";
   private static final String GET_WALLET_PATH = "/wallet/:" + WALLET_ID_PARAM;
-
-  private static final Map<Short, Type> TX_MESSAGE_TYPES =
-      Arrays.stream(CryptocurrencyTransaction.values())
-          .collect(
-              Collectors.toMap(
-                  CryptocurrencyTransaction::getId, CryptocurrencyTransaction::transactionClass));
 
   private final CryptocurrencyService service;
   private final JsonBinaryMessageConverter jsonBinaryMessageConverter;

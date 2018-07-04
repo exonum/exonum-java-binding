@@ -38,7 +38,7 @@ public class JsonBinaryMessageConverterTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private JsonBinaryMessageConverter converter = new JsonBinaryMessageConverter();
+  private final JsonBinaryMessageConverter converter = new JsonBinaryMessageConverter();
 
   @Test
   public void convertCreateWalletMessage() throws InvalidProtocolBufferException {
