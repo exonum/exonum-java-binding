@@ -10,7 +10,7 @@ pub struct Config {
 /// JVM configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JvmConfig {
-    /// Additional parameters for the JVM.
+    /// Additional parameters for JVM.
     ///
     /// Passed directly to JVM while initializing EJB runtime.
     /// Parameters must not have dash at the beginning.
@@ -46,7 +46,7 @@ pub enum UserParameterError {
     ForbiddenParameter,
 }
 
-/// Checks if parameter is not in list of forbidden parameters and adds a dash to the beginning.
+/// Checks if parameter is not in list of forbidden parameters and adds a dash at the beginning.
 pub(crate) fn validate_and_convert(user_parameter: &str) -> Result<String, UserParameterError> {
     check_not_forbidden(user_parameter)?;
     // adding dash at the beginning
