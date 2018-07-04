@@ -16,11 +16,15 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.crypto.KeyPair;
+import com.exonum.binding.crypto.PrivateKey;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
@@ -59,36 +63,64 @@ public class TransferTxTest {
   public void fromMessage() {
     long seed = 1;
     long amount = 50L;
-    BinaryMessage m = new Message.Builder()
-        .setServiceId(CryptocurrencyService.ID)
-        .setMessageType(TransferTx.ID)
-        .setBody(ByteBuffer.wrap(TxMessagesProtos.TransferTx.newBuilder()
-            .setSeed(seed)
-            .setFromWallet(fromPublicKey(fromKey))
-            .setToWallet(fromPublicKey(toKey))
-            .setSum(amount)
-            .build()
-            .toByteArray()))
-        .setSignature(new byte[Message.SIGNATURE_SIZE])
-        .buildRaw();
+    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);;
 
     TransferTx tx = TransferTx.fromMessage(m);
 
     assertThat(tx, equalTo(withMockMessage(seed, fromKey, toKey, amount)));
   }
 
-  private static ByteString fromPublicKey(PublicKey k) {
-    return ByteString.copyFrom(k.toBytes());
+  @Test
+  public void isValidSigned() {
+    long seed = 1;
+    long amount = 50L;
+    KeyPair senderKeyPair = CRYPTO_FUNCTION.generateKeyPair();
+
+    BinaryMessage m = createSignedMessage(seed, senderKeyPair.getPublicKey(),
+        senderKeyPair.getPrivateKey(), toKey, amount);
+
+    TransferTx tx = TransferTx.fromMessage(m);
+
+    assertTrue(tx.isValid());
   }
 
   @Test
-  public void isValid() {
-    long seed = 1L;
-    long sum = 50L;
+  public void isValidWrongSignature() {
+    long seed = 1;
+    long amount = 50L;
 
-    TransferTx tx = withMockMessage(seed, fromKey, toKey, sum);
+    // A message that is not signed does not have a proper cryptographic signature.
+    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);
 
-    assertTrue(tx.isValid());
+    TransferTx tx = TransferTx.fromMessage(m);
+
+    assertFalse(tx.isValid());
+  }
+
+  private static BinaryMessage createSignedMessage(long seed, PublicKey senderId,
+                                                   PrivateKey senderSecret,
+                                                   PublicKey recipientId, long amount) {
+    BinaryMessage packetUnsigned = createUnsignedMessage(seed, senderId, recipientId, amount);
+    return packetUnsigned.sign(CRYPTO_FUNCTION, senderSecret);
+  }
+
+  private static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
+                                                     PublicKey recipientId, long amount) {
+    return new Message.Builder()
+          .setServiceId(CryptocurrencyService.ID)
+          .setMessageType(TransferTx.ID)
+          .setBody(ByteBuffer.wrap(TxMessagesProtos.TransferTx.newBuilder()
+              .setSeed(seed)
+              .setFromWallet(fromPublicKey(senderId))
+              .setToWallet(fromPublicKey(recipientId))
+              .setSum(amount)
+              .build()
+              .toByteArray()))
+          .buildRaw();
+  }
+
+  private static ByteString fromPublicKey(PublicKey k) {
+    return ByteString.copyFrom(k.toBytes());
   }
 
   @Test

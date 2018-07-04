@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.crypto.PublicKey;
@@ -78,7 +79,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public boolean isValid() {
-    return true;
+    return getMessage().verify(CRYPTO_FUNCTION, fromWallet);
   }
 
   @Override
