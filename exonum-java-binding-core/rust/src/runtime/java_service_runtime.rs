@@ -6,7 +6,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig};
-use runtime::config::{Config, JvmConfig, ServiceConfig};
+use runtime::config::{self, Config, JvmConfig, ServiceConfig};
 use utils::unwrap_jni;
 use MainExecutor;
 
@@ -58,8 +58,9 @@ impl JavaServiceRuntime {
     fn create_java_vm(config: JvmConfig) -> JavaVM {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
-        if config.debug {
-            args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
+        for param in &config.user_parameters {
+            let option = config::validate_and_convert(param).unwrap();
+            args_builder = args_builder.option(&option);
         }
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));

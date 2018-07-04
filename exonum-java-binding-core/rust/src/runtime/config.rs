@@ -10,8 +10,12 @@ pub struct Config {
 /// JVM configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JvmConfig {
-    /// Whether to create JVM with `Xdebug` option or not.
-    pub debug: bool,
+    /// Additional parameters for the JVM.
+    ///
+    /// Passed directly to JVM while initializing EJB runtime.
+    /// Parameters must not have dash at the beginning.
+    /// Some parameters are forbidden for setting up by user.
+    pub user_parameters: Vec<String>,
     /// Java service classpath. Must include all its dependencies.
     ///
     /// Includes java_bindings internal dependencies as well as user service dependencies.
@@ -33,4 +37,32 @@ pub struct ServiceConfig {
     pub module_name: String,
     /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
     pub port: i32,
+}
+
+/// Error returned while validating user-specified additional parameters for JVM.
+#[derive(Debug, Clone, Copy)]
+pub enum UserParameterError {
+    /// Trying to specify a parameter that is set by EJB internally.
+    ForbiddenParameter,
+}
+
+/// Checks if parameter is not in list of forbidden parameters and adds a dash to the beginning.
+pub(crate) fn validate_and_convert(user_parameter: &str) -> Result<String, UserParameterError> {
+    check_not_forbidden(user_parameter)?;
+    // adding dash at the beginning
+    let mut user_parameter = user_parameter.to_owned();
+    user_parameter.insert(0, '-');
+
+    Ok(user_parameter)
+}
+
+fn check_not_forbidden(user_parameter: &str) -> Result<(), UserParameterError> {
+    if user_parameter.contains("Djava.class.path")
+        || user_parameter.contains("Djava.library.path")
+        || user_parameter.contains("log4j.configurationFile")
+    {
+        Err(UserParameterError::ForbiddenParameter)
+    } else {
+        Ok(())
+    }
 }
