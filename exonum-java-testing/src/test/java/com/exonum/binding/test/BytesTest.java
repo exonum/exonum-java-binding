@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency;
+package com.exonum.binding.test;
 
-import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.service.Service;
-import java.util.Optional;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
-public interface CryptocurrencyService extends Service {
-  short ID = 42;
-  String NAME = "cryptocurrency-demo-service";
+import com.google.common.primitives.UnsignedBytes;
+import org.junit.Test;
 
-  HashCode submitTransaction(Transaction tx);
+public class BytesTest {
 
-  Optional<Wallet> getWallet(PublicKey ownerKey);
+  @Test
+  public void fromHex() {
+    assertThat(Bytes.fromHex("abcd01"), equalTo(new byte[] {UnsignedBytes.checkedCast(0xAB),
+        UnsignedBytes.checkedCast(0xCD), 0x01}));
+  }
 }

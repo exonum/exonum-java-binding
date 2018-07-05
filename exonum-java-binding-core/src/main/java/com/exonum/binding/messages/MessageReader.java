@@ -112,9 +112,11 @@ public final class MessageReader implements BinaryMessage {
    * and is read-only.
    */
   @Override
-  public ByteBuffer getSignature() {
+  public byte[] getSignature() {
     message.position(signatureOffset());
-    return message.slice();
+    byte[] signature = new byte[Message.SIGNATURE_SIZE];
+    message.get(signature);
+    return signature;
   }
 
   @Override
@@ -129,7 +131,7 @@ public final class MessageReader implements BinaryMessage {
    * and is read-only.
    */
   @Override
-  public ByteBuffer getMessage() {
+  public ByteBuffer getSignedMessage() {
     message.position(0);
     return message.duplicate();
   }

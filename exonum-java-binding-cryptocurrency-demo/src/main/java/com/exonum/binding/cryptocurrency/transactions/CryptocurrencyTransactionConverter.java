@@ -33,8 +33,8 @@ public final class CryptocurrencyTransactionConverter implements TransactionConv
   private static final ImmutableMap<Short, Function<BinaryMessage, Transaction>>
       TRANSACTION_FACTORIES =
           ImmutableMap.of(
-              CREATE_WALLET.getId(), CreateWalletTx.converter()::fromMessage,
-              TRANSFER.getId(), TransferTx.converter()::fromMessage);
+              CREATE_WALLET.getId(), CreateWalletTx::fromMessage,
+              TRANSFER.getId(), TransferTx::fromMessage);
 
   @Override
   public Transaction toTransaction(BinaryMessage message) {

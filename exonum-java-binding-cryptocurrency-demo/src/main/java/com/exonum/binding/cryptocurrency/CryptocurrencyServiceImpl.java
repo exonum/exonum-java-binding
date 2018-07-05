@@ -18,7 +18,10 @@ package com.exonum.binding.cryptocurrency;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.crypto.CryptoFunction;
+import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
@@ -38,6 +41,9 @@ import javax.annotation.Nullable;
 /** A cryptocurrency demo service. */
 public final class CryptocurrencyServiceImpl extends AbstractService
     implements CryptocurrencyService {
+
+  /** A cryptographic function for signing transaction messages of this service. */
+  public static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   @Nullable private Node node;
 
@@ -60,7 +66,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public void createPublicApiHandlers(Node node, Router router) {
     this.node = node;
 
-    ApiController controller = new ApiController(this);
+    ApiController controller = new ApiController(this, new JsonBinaryMessageConverter());
     controller.mountApi(router);
   }
 
@@ -71,7 +77,9 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     try {
       node.submitTransaction(tx);
       return tx.hash();
-    } catch (InvalidTransactionException | InternalServerError e) {
+    } catch (InvalidTransactionException e) {
+      throw new IllegalArgumentException(e);
+    } catch (InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }
   }
