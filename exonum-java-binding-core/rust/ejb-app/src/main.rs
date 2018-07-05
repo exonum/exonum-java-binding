@@ -5,9 +5,9 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-mod service_factories;
+mod node_builder;
 
 fn main() {
-    let builder = service_factories::create_node_builder();
+    let builder = node_builder::create();
     builder.run()
 }

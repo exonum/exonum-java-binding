@@ -1,8 +1,8 @@
 use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
-use java_bindings::JavaServiceFactory;
 use java_bindings::exonum::helpers::config::ConfigFile;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
+use java_bindings::JavaServiceFactory;
 use std::collections::{HashMap, HashSet};
 
 const PATH_TO_SERVICES_TO_ENABLE: &str = "ejb_app_services.toml";
@@ -32,7 +32,7 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     service_factories
 }
 
-pub fn create_node_builder() -> fabric::NodeBuilder {
+fn services_to_enable() -> HashSet<String> {
     let ServicesToEnable { mut services } =
         ConfigFile::load(PATH_TO_SERVICES_TO_ENABLE).unwrap_or(ServicesToEnable {
             services: {
@@ -42,10 +42,15 @@ pub fn create_node_builder() -> fabric::NodeBuilder {
             },
         });
 
-    let mut service_factories = service_factories();
-
     // Add EJB_SERVICE if it's missing
     services.insert(EJB_SERVICE.to_owned());
+
+    services
+}
+
+pub fn create() -> fabric::NodeBuilder {
+    let services = services_to_enable();
+    let mut service_factories = service_factories();
 
     let mut builder = fabric::NodeBuilder::new();
     for service_name in &services {
