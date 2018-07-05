@@ -89,8 +89,8 @@ public class CreateCounterTxIntegrationTest {
         .setBody(serialize(name))
         .buildRaw();
 
-    // todo: remove extra #getMessage when MessageReader has equals: ECR-992
-    assertThat(tx.getMessage().getMessage(), equalTo(expectedMessage.getMessage()));
+    // todo: remove extra #getSignedMessage when MessageReader has equals: ECR-992
+    assertThat(tx.getMessage().getSignedMessage(), equalTo(expectedMessage.getSignedMessage()));
   }
 
   @Test

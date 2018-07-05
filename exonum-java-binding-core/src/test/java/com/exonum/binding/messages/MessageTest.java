@@ -20,7 +20,6 @@ import static com.exonum.binding.messages.ByteBufferAllocator.allocateBuffer;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import java.nio.ByteBuffer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -92,7 +91,7 @@ public class MessageTest {
     Message.Builder builder = new Message.Builder();
 
     int signatureSize = 63;
-    ByteBuffer signature = allocateBuffer(signatureSize);
+    byte[] signature = new byte[signatureSize];
 
     expectedException.expect(IllegalArgumentException.class);
     builder.setSignature(signature);
@@ -103,7 +102,7 @@ public class MessageTest {
     Message.Builder builder = new Message.Builder();
 
     int signatureSize = 65;
-    ByteBuffer signature = allocateBuffer(signatureSize);
+    byte[] signature = new byte[signatureSize];
 
     expectedException.expect(IllegalArgumentException.class);
     builder.setSignature(signature);

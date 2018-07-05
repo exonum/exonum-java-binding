@@ -16,8 +16,6 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction.CREATE_WALLET;
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction.TRANSFER;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
@@ -33,8 +31,8 @@ public final class CryptocurrencyTransactionConverter implements TransactionConv
   private static final ImmutableMap<Short, Function<BinaryMessage, Transaction>>
       TRANSACTION_FACTORIES =
           ImmutableMap.of(
-              CREATE_WALLET.getId(), CreateWalletTx::fromMessage,
-              TRANSFER.getId(), TransferTx::fromMessage);
+              CreateWalletTx.ID, CreateWalletTx::fromMessage,
+              TransferTx.ID, TransferTx::fromMessage);
 
   @Override
   public Transaction toTransaction(BinaryMessage message) {

@@ -18,10 +18,29 @@ package com.exonum.binding.messages;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.crypto.CryptoFunctions;
 import java.nio.ByteBuffer;
 
 /**
  * An Exonum network message.
+ *
+ * <p>The message hierarchy does not work well with the target use-cases,
+ * e.g., you cannot do much without a BinaryMessage, including signing,
+ * see ECR-745 for details. However, improvements are delayed so that
+ * they are made to the new message format that is going to be integrated soon
+ * in the core framework. Until then, use something like that to sign a message:
+ * <pre>
+ * {@code
+ *
+ * BinaryMessage signedMessage = new Message.Builder()
+ *   // (0) Set all required fields, setting signature is not required.
+ *   //…
+ *   // (1) Create an unsigned message.
+ *   .buildRaw()
+ *   // (2) Sign it using BinaryMessage#sign.
+ *   .sign(CryptoFunctions.ed25519(), authorSecretKey);
+ * }
+ * </pre>
  */
 // @FreeBuilder()
 public interface Message {
@@ -80,8 +99,10 @@ public interface Message {
    *
    * <p>The signature is <strong>not</strong> guaranteed to be valid and must be verified against
    * the signer’s public key.
+   *
+   * @see CryptoFunctions#ed25519()
    */
-  ByteBuffer getSignature();
+  byte[] getSignature();
 
   /**
    * Returns the signature offset in this message.
@@ -106,6 +127,8 @@ public interface Message {
       // Set defaults. Currently the only valid values of network and protocol version are 0.
       setNetworkId(DEFAULT_NETWORK_ID);
       setVersion(DEFAULT_PROTOCOL_VERSION);
+      // Set an empty signature so that the clients do not *have* to.
+      setSignature(new byte[SIGNATURE_SIZE]);
     }
 
     @Override
@@ -116,10 +139,10 @@ public interface Message {
     }
 
     @Override
-    public Builder setSignature(ByteBuffer signature) {
-      int signatureSize = signature.remaining();
+    public Builder setSignature(byte[] signature) {
+      int signatureSize = signature.length;
       checkArgument(signatureSize == SIGNATURE_SIZE, "Invalid signature size (%s)", signatureSize);
-      return super.setSignature(signature.duplicate());
+      return super.setSignature(signature);
     }
 
     public BinaryMessage buildRaw() {

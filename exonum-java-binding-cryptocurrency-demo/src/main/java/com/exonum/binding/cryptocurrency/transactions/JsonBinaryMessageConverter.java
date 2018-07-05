@@ -101,7 +101,7 @@ public final class JsonBinaryMessageConverter {
         .setServiceId(message.getServiceId())
         .setVersion(message.getProtocolVersion())
         .setBody(ByteBuffer.wrap(binaryBody))
-        .setSignature(ByteBuffer.wrap(decodeHex(message.getSignature())))
+        .setSignature(decodeHex(message.getSignature()))
         .buildRaw();
   }
 

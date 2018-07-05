@@ -40,6 +40,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
 public class UserServiceAdapter {
 
+  private static final String API_ROOT_PATH = "/api";
+
   private final Service service;
   private final Server server;
   private final ViewFactory viewFactory;
@@ -137,7 +139,12 @@ public class UserServiceAdapter {
     node = new NodeProxy(nodeNativeHandle, viewFactory);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
-    server.mountSubRouter("/" + getName(), router);
+    server.mountSubRouter(serviceApiPath(), router);
+  }
+
+  private String serviceApiPath() {
+    String serviceName = getName();
+    return API_ROOT_PATH + "/" + serviceName;
   }
 
   /**

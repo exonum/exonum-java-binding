@@ -16,14 +16,17 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
+import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.crypto.KeyPair;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.messages.BinaryMessage;
@@ -57,17 +60,7 @@ public class CreateWalletTxTest {
   @Test
   public void fromMessage() {
     long initialBalance = 100L;
-    BinaryMessage m = new Message.Builder()
-        .setServiceId(CryptocurrencyService.ID)
-        .setMessageType(CreateWalletTx.ID)
-        .setBody(ByteBuffer.wrap(TxMessagesProtos.CreateWalletTx.newBuilder()
-            .setOwnerPublicKey(ByteString.copyFrom(OWNER_KEY.toBytes()))
-            .setInitialBalance(initialBalance)
-            .build()
-            .toByteArray()))
-        .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
-        .buildRaw();
-
+    BinaryMessage m = createUnsignedMessage(OWNER_KEY, initialBalance);
 
     CreateWalletTx tx = CreateWalletTx.fromMessage(m);
 
@@ -75,10 +68,38 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void isValid() {
-    CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
+  public void isValidSigned() {
+    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    BinaryMessage m = createSignedMessage(keyPair);
+
+    CreateWalletTx tx = CreateWalletTx.fromMessage(m);
 
     assertTrue(tx.isValid());
+  }
+
+  @Test
+  public void isValidUnsigned() {
+    BinaryMessage m = createUnsignedMessage(OWNER_KEY, DEFAULT_BALANCE);
+    CreateWalletTx tx = CreateWalletTx.fromMessage(m);
+
+    assertFalse(tx.isValid());
+  }
+
+  private BinaryMessage createSignedMessage(KeyPair ownerKeyPair) {
+    BinaryMessage unsignedMessage = createUnsignedMessage(ownerKeyPair.getPublicKey(),
+        DEFAULT_BALANCE);
+    return unsignedMessage.sign(CRYPTO_FUNCTION, ownerKeyPair.getPrivateKey());
+  }
+
+  private BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
+    return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
+        .setBody(ByteBuffer.wrap(TxMessagesProtos.CreateWalletTx.newBuilder()
+            .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
+            .setInitialBalance(initialBalance)
+            .build()
+            .toByteArray()))
+        .setSignature(new byte[Message.SIGNATURE_SIZE])
+        .buildRaw();
   }
 
   @Test
