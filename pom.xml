@@ -173,6 +173,7 @@
            <version>3.0.1</version>
            <configuration>
              <doclint>none</doclint>
+             <detectOfflineLinks>false</detectOfflineLinks>
            </configuration>
            <executions>
              <execution>
