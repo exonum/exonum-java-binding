@@ -5,6 +5,9 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
+#[cfg(test)]
+extern crate tempfile;
+
 mod node_builder;
 
 fn main() {
