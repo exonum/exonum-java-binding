@@ -144,7 +144,10 @@
           <excludes>
             <exclude>**/*IntegrationTest.java</exclude>
           </excludes>
-          <argLine>${java.vm.assertionFlag}</argLine>
+          <argLine>
+            ${argLine}
+            ${java.vm.assertionFlag}
+          </argLine>
         </configuration>
       </plugin>
 

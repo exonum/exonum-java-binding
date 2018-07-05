@@ -45,6 +45,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>
+            ${argLine}
             ${java.vm.assertionFlag}
           </argLine>
         </configuration>
