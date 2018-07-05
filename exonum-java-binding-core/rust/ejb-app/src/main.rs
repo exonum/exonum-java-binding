@@ -22,7 +22,7 @@ struct ServicesToEnable {
     services: HashSet<String>,
 }
 
-fn service_factories() -> HashMap<String, Box<ServiceFactory + 'static>> {
+fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     let mut service_factories = HashMap::new();
     service_factories.insert(
         CONFIGURATION_SERVICE.to_owned(),
