@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Prepare environment variables for building and running tests.
+# This requires executables and libraries to be able to find libjvm and Rust stdlib.
+#
+# ¡Keep it MacOS/Ubuntu compatible!
+#
+# This profile contains:
+# - JAVA_HOME - path to currently selected JDK.
+#   jni-rs with enabled the invocation feature fails to build without JAVA_HOME.
+# - JAVA_LIB_DIR - path to libjvm.
+# - RUST_LIB_DIR - path to Rust stdlib.
+# - RUST_VERSION - Rust version for building tests.
+# - RUSTFLAGS - Rust build options augmented with JAVA_LIB_DIR and RUST_LIB_DIR.
+#   That adds paths into search paths where native code at runtime will look for
+#   dynamically loadable libraries.
+#   On Linux it is RUNPATH, so LD_LIBRARY_PATH is examined before.
+#   On MacOS it extends @rpath, so LD_LIBRARY_PATH works as usually.
+#   This affects all executables (application, tests, libjava_bindings).
+#   It worth nothing that recent releases of MacOS with enabled by default SIP
+#   clear LD_LIBRARY_PATH when new shell started.
+#   Such behavior greatly affects Maven and all that it runs.
+#   Setting rpath is a good way to fix this flaw in tests.
+#   On Linux, it is not important whether to prefer RUNPATH or LD_LIBRARY_PATH.
+
+
+# Use the Java that Maven uses.
+#
+# Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
+# hence this a bit complex thing.
+export JAVA_HOME="$(mvn --version | grep 'Java home' | sed 's/.*: //')"
+echo "JAVA_HOME=${JAVA_HOME}"
+
+# Find the directory containing libjvm (the relative path has changed in Java 9).
+export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
+
+# Version of Rust used to build tests.
+export RUST_VERSION="stable"
+echo "RUST_VERSION: ${RUST_VERSION}"
+
+# Find the directory containing Rust libstd.
+export RUST_LIB_DIR=$(rustup run ${RUST_VERSION} rustc --print sysroot)/lib
+echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
+
+# Path to the found libjvm for the application and tests.
+export RUSTFLAGS="${RUSTFLAGS:-} -C link-args=-Wl,-rpath,${JAVA_LIB_DIR}"
+# Path to the current rust libstd for java tests.
+export RUSTFLAGS="${RUSTFLAGS:-} -C link-args=-Wl,-rpath,${RUST_LIB_DIR}"
+echo "RUSTFLAGS=${RUSTFLAGS}"
