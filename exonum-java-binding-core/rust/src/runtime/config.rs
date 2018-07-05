@@ -1,3 +1,5 @@
+use std::fmt;
+
 /// JavaServiceRuntime configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -40,14 +42,18 @@ pub struct ServiceConfig {
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.
-#[derive(Debug, Clone, Copy)]
-pub enum UserParameterError {
-    /// Trying to specify a parameter that is set by EJB internally.
-    ForbiddenParameter,
+/// Trying to specify a parameter that is set by EJB internally.
+pub struct ForbiddenParameterError(String);
+
+impl fmt::Debug for ForbiddenParameterError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "Trying to specify JVM parameter [{}] that is set by EJB internally. \
+            Use EJB parameters instead.", self.0)
+    }
 }
 
 /// Checks if parameter is not in list of forbidden parameters and adds a dash at the beginning.
-pub(crate) fn validate_and_convert(user_parameter: &str) -> Result<String, UserParameterError> {
+pub(crate) fn validate_and_convert(user_parameter: &str) -> Result<String, ForbiddenParameterError> {
     check_not_forbidden(user_parameter)?;
     // adding dash at the beginning
     let mut user_parameter = user_parameter.to_owned();
@@ -56,12 +62,12 @@ pub(crate) fn validate_and_convert(user_parameter: &str) -> Result<String, UserP
     Ok(user_parameter)
 }
 
-fn check_not_forbidden(user_parameter: &str) -> Result<(), UserParameterError> {
+fn check_not_forbidden(user_parameter: &str) -> Result<(), ForbiddenParameterError> {
     if user_parameter.contains("Djava.class.path")
         || user_parameter.contains("Djava.library.path")
         || user_parameter.contains("log4j.configurationFile")
     {
-        Err(UserParameterError::ForbiddenParameter)
+        Err(ForbiddenParameterError(user_parameter.to_string()))
     } else {
         Ok(())
     }
