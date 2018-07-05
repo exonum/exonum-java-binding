@@ -200,7 +200,7 @@ public class MessageReaderTest {
 
     MessageReader m = MessageReader.wrap(buf);
 
-    assertThat(m.getSignature(), equalTo(ByteBuffer.wrap(signature)));
+    assertThat(m.getSignature(), equalTo(signature));
   }
 
   @Test
@@ -212,7 +212,7 @@ public class MessageReaderTest {
 
     MessageReader m = MessageReader.wrap(buf);
 
-    ByteBuffer binaryMessage = m.getMessage();
+    ByteBuffer binaryMessage = m.getSignedMessage();
     assertThat(binaryMessage, equalTo(buf));
   }
 

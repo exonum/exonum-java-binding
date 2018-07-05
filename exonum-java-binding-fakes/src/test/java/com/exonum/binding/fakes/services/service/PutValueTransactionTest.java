@@ -41,7 +41,7 @@ public class PutValueTransactionTest {
       .setMessageType(PutValueTransaction.ID)
       .setVersion((byte) 1)
       .setBody(encode("any value"))
-      .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+      .setSignature(new byte[Message.SIGNATURE_SIZE])
       .buildPartial();
 
   @Test(expected = IllegalArgumentException.class)
