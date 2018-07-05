@@ -47,13 +47,19 @@ pub struct ForbiddenParameterError(String);
 
 impl fmt::Debug for ForbiddenParameterError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "Trying to specify JVM parameter [{}] that is set by EJB internally. \
-            Use EJB parameters instead.", self.0)
+        write!(
+            f,
+            "Trying to specify JVM parameter [{}] that is set by EJB internally. \
+             Use EJB parameters instead.",
+            self.0
+        )
     }
 }
 
 /// Checks if parameter is not in list of forbidden parameters and adds a dash at the beginning.
-pub(crate) fn validate_and_convert(user_parameter: &str) -> Result<String, ForbiddenParameterError> {
+pub(crate) fn validate_and_convert(
+    user_parameter: &str,
+) -> Result<String, ForbiddenParameterError> {
     check_not_forbidden(user_parameter)?;
     // adding dash at the beginning
     let mut user_parameter = user_parameter.to_owned();

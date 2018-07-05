@@ -57,7 +57,9 @@ impl CommandExtension for GenerateNodeConfig {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = context.arg_multiple(EJB_USER_PARAMETERS).unwrap_or_default();
+        let user_parameters = context
+            .arg_multiple(EJB_USER_PARAMETERS)
+            .unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;
         let lib_path = context.arg(EJB_LIBPATH)?;

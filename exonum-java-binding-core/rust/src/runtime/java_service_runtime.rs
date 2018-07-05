@@ -2,8 +2,8 @@ use exonum::blockchain::Service;
 use exonum::helpers::fabric::{CommandExtension, Context, ServiceFactory};
 use jni::{self, JavaVM};
 
-use std::sync::{Arc, Once, ONCE_INIT};
 use std::env;
+use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig};
@@ -103,17 +103,19 @@ impl JavaServiceRuntime {
 /// Panics if `_JAVA_OPTIONS` environmental variable is set.
 fn panic_if_java_options() {
     if env::var("_JAVA_OPTIONS").is_ok() {
-        panic!("\
-        _JAVA_OPTIONS environmental variable is set. \
-        Due to the fact that it will overwrite any JVM setting, \
-        including ones set by EJB internally, this variable is \
-        forbidden for EJB applications.\n\
-        It is recommend to use `--ejb-jvm-args` command-line \
-        parameter for setting custom JVM parameters.");
+        panic!(
+            "_JAVA_OPTIONS environmental variable is set. \
+             Due to the fact that it will overwrite any JVM setting, \
+             including ones set by EJB internally, this variable is \
+             forbidden for EJB applications.\n\
+             It is recommend to use `--ejb-jvm-args` command-line \
+             parameter for setting custom JVM parameters."
+        );
     }
 }
 
-/// TODO
+/// Factory for particular Java service.
+/// Initializes EJB runtime and creates `ServiceProxy`.
 pub struct JavaServiceFactory;
 
 impl ServiceFactory for JavaServiceFactory {
