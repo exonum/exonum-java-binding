@@ -64,7 +64,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   public void submitTransaction(Transaction transaction)
       throws InvalidTransactionException, InternalServerError {
     BinaryMessage message = transaction.getMessage();
-    ByteBuffer messageBuffer = message.getMessage();
+    ByteBuffer messageBuffer = message.getSignedMessage();
 
     // Currently this method and the native code support only array-backed ByteBuffers.
     checkArgument(messageBuffer.hasArray(),

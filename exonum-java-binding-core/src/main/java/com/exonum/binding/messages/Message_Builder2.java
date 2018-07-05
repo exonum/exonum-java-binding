@@ -19,7 +19,9 @@ package com.exonum.binding.messages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.io.BaseEncoding;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
 import javax.annotation.Generated;
@@ -28,7 +30,7 @@ import javax.annotation.Generated;
  * Auto-generated superclass of {@link Message.Builder}, derived from the API of {@link Message}.
  *
  * <p>This code is mostly auto-generated with FreeBuilder.
- * It's checked in and modified because ByteBuffers are mutable objects and need to
+ * It's checked in and modified because ByteBuffers and byte arrays are mutable objects and need to
  * be copied (see {@link Value#getBody()} & {@link Value#getSignature}).
  */
 @Generated("org.inferred.freebuilder.processor.CodeGenerator")
@@ -40,6 +42,8 @@ abstract class Message_Builder2 {
   }
 
   private static final Joiner COMMA_JOINER = Joiner.on(", ").skipNulls();
+
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   private enum Property {
     NETWORK_ID("networkId"),
@@ -67,7 +71,7 @@ abstract class Message_Builder2 {
   private short serviceId;
   private short messageType;
   private ByteBuffer body;
-  private ByteBuffer signature;
+  private byte[] signature;
   private final EnumSet<Message_Builder2.Property> _unsetProperties =
       EnumSet.allOf(Message_Builder2.Property.class);
 
@@ -188,8 +192,8 @@ abstract class Message_Builder2 {
    * @return this {@code Builder} object
    * @throws NullPointerException if {@code signature} is null
    */
-  public Message.Builder setSignature(ByteBuffer signature) {
-    this.signature = Preconditions.checkNotNull(signature);
+  public Message.Builder setSignature(byte[] signature) {
+    this.signature = signature.clone();
     _unsetProperties.remove(Message_Builder2.Property.SIGNATURE);
     return (Message.Builder) this;
   }
@@ -199,7 +203,7 @@ abstract class Message_Builder2 {
    *
    * @throws IllegalStateException if the field has not been set
    */
-  public ByteBuffer getSignature() {
+  public byte[] getSignature() {
     Preconditions.checkState(
         !_unsetProperties.contains(Message_Builder2.Property.SIGNATURE), "signature not set");
     return signature;
@@ -229,7 +233,7 @@ abstract class Message_Builder2 {
       setBody(value.getBody());
     }
     if (_defaults._unsetProperties.contains(Message_Builder2.Property.SIGNATURE)
-        || !Objects.equals(value.getSignature(), _defaults.getSignature())) {
+        || !Arrays.equals(value.getSignature(), _defaults.getSignature())) {
       setSignature(value.getSignature());
     }
     return (Message.Builder) this;
@@ -270,7 +274,7 @@ abstract class Message_Builder2 {
     }
     if (!base._unsetProperties.contains(Message_Builder2.Property.SIGNATURE)
         && (_defaults._unsetProperties.contains(Message_Builder2.Property.SIGNATURE)
-        || !Objects.equals(template.getSignature(), _defaults.getSignature()))) {
+        || !Arrays.equals(template.getSignature(), _defaults.getSignature()))) {
       setSignature(template.getSignature());
     }
     return (Message.Builder) this;
@@ -314,13 +318,15 @@ abstract class Message_Builder2 {
     return new Message_Builder2.Partial(this);
   }
 
-  private static final class Value implements Message {
+
+  @VisibleForTesting
+  static final class Value implements Message {
     private final byte networkId;
     private final byte version;
     private final short serviceId;
     private final short messageType;
     private final ByteBuffer body;
-    private final ByteBuffer signature;
+    private final byte[] signature;
 
     private Value(Message_Builder2 builder) {
       this.networkId = builder.networkId;
@@ -357,8 +363,8 @@ abstract class Message_Builder2 {
     }
 
     @Override
-    public ByteBuffer getSignature() {
-      return signature.duplicate();
+    public byte[] getSignature() {
+      return signature.clone();
     }
 
     @Override
@@ -372,12 +378,13 @@ abstract class Message_Builder2 {
           && Objects.equals(serviceId, other.serviceId)
           && Objects.equals(messageType, other.messageType)
           && Objects.equals(body, other.body)
-          && Objects.equals(signature, other.signature);
+          && Arrays.equals(signature, other.signature);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(networkId, version, serviceId, messageType, body, signature);
+      int signatureHash = Arrays.hashCode(signature);
+      return Objects.hash(networkId, version, serviceId, messageType, body, signatureHash);
     }
 
     @Override
@@ -399,18 +406,19 @@ abstract class Message_Builder2 {
           + body
           + ", "
           + "signature="
-          + signature
+          + HEX_ENCODING.encode(signature)
           + "}";
     }
   }
 
-  private static final class Partial implements Message {
+  @VisibleForTesting
+  static final class Partial implements Message {
     private final byte networkId;
     private final byte version;
     private final short serviceId;
     private final short messageType;
     private final ByteBuffer body;
-    private final ByteBuffer signature;
+    private final byte[] signature;
     private final EnumSet<Message_Builder2.Property> _unsetProperties;
 
     Partial(Message_Builder2 builder) {
@@ -464,11 +472,11 @@ abstract class Message_Builder2 {
     }
 
     @Override
-    public ByteBuffer getSignature() {
+    public byte[] getSignature() {
       if (_unsetProperties.contains(Message_Builder2.Property.SIGNATURE)) {
         throw new UnsupportedOperationException("signature not set");
       }
-      return signature.duplicate();
+      return signature.clone();
     }
 
     @Override
@@ -482,14 +490,15 @@ abstract class Message_Builder2 {
           && Objects.equals(serviceId, other.serviceId)
           && Objects.equals(messageType, other.messageType)
           && Objects.equals(body, other.body)
-          && Objects.equals(signature, other.signature)
+          && Arrays.equals(signature, other.signature)
           && Objects.equals(_unsetProperties, other._unsetProperties);
     }
 
     @Override
     public int hashCode() {
+      int signatureHash = Arrays.hashCode(signature);
       return Objects.hash(
-          networkId, version, serviceId, messageType, body, signature, _unsetProperties);
+          networkId, version, serviceId, messageType, body, signatureHash, _unsetProperties);
     }
 
     @Override
@@ -510,7 +519,7 @@ abstract class Message_Builder2 {
               : null),
           (!_unsetProperties.contains(Message_Builder2.Property.BODY) ? "body=" + body : null),
           (!_unsetProperties.contains(Message_Builder2.Property.SIGNATURE)
-              ? "signature=" + signature
+              ? "signature=" + HEX_ENCODING.encode(signature)
               : null))
           + "}";
     }
