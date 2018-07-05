@@ -84,7 +84,7 @@ public class UserServiceAdapterTest {
         .thenReturn(expectedTransaction);
 
     byte[] message = getServiceMessage(serviceId)
-        .getMessage()
+        .getSignedMessage()
         .array();
 
     UserTransactionAdapter transactionAdapter = serviceAdapter.convertTransaction(message);
@@ -101,7 +101,7 @@ public class UserServiceAdapterTest {
         .thenReturn(null);
 
     byte[] message = getServiceMessage(serviceId)
-        .getMessage()
+        .getSignedMessage()
         .array();
 
     expectedException.expectMessage("Invalid service implementation: "
