@@ -63,7 +63,7 @@ public class TransferTxTest {
   public void fromMessage() {
     long seed = 1;
     long amount = 50L;
-    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);;
+    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);
 
     TransferTx tx = TransferTx.fromMessage(m);
 
