@@ -19,15 +19,15 @@ var root = new Root();
 root.define("CreateTransactionProtobuf").add(CreateTransactionProtobuf);
 root.define("TransferTransactionProtobuf").add(TransferTransactionProtobuf);
 
-const TX_URL = '/api/services/cryptocurrency/v1/wallets/transaction'
+const TX_URL = '/api/cryptocurrency-demo-service/submit-transaction'// '/api/services/cryptocurrency/v1/wallets/transaction'
 const PER_PAGE = 10
 const ATTEMPTS = 10
 const ATTEMPT_TIMEOUT = 500
 const PROTOCOL_VERSION = 0
-const SERVICE_ID = 128
-const TX_TRANSFER_ID = 0
+const SERVICE_ID = 42
+const TX_TRANSFER_ID = 2
 const TX_ISSUE_ID = 1
-const TX_WALLET_ID = 2
+const TX_WALLET_ID = 1
 
 const MessageHead = Exonum.newType({
   fields: [

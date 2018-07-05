@@ -1,10 +1,10 @@
-consensus_public_key = "b1638809bb451f99786c98e208f65dba17587c3ba43770e69280bf49aec43f0d"
-consensus_secret_key = "645878353fbdd2ec5971721ae1907a09660fea701400aec90f80c4e7a84319f4b1638809bb451f99786c98e208f65dba17587c3ba43770e69280bf49aec43f0d"
+consensus_public_key = "cbc9ffef062abe970087273f14bfdadbc5d5c5b51cb2fb8a386d960d43e4ed4b"
+consensus_secret_key = "df9652ecd6d5fe9539671c92a7b53b7925b89bd3fbf3ba82b81424c837d0fa4bcbc9ffef062abe970087273f14bfdadbc5d5c5b51cb2fb8a386d960d43e4ed4b"
 external_address = "127.0.0.1:5400"
 listen_address = "0.0.0.0:5400"
 peers = ["127.0.0.1:5400"]
-service_public_key = "b14395a7b13be51383d5da318938db01ae9fad01534d1ebede62790d46979bbc"
-service_secret_key = "0749f7460cb5c546976105f0f8e96d7c03b0b19164679338e3adcd6e82ed5f05b14395a7b13be51383d5da318938db01ae9fad01534d1ebede62790d46979bbc"
+service_public_key = "271b105d5df23b0a1a9f005dd796d4624169fc0e19dd4c24385eef25bf33be5e"
+service_secret_key = "7b24495d88ec1f72a83f7afb4e1aa60cf7844320f2e97c4a94c118aa23c66310271b105d5df23b0a1a9f005dd796d4624169fc0e19dd4c24385eef25bf33be5e"
 
 [api]
 enable_blockchain_explorer = true
@@ -13,8 +13,8 @@ state_update_timeout = 10000
 [database]
 create_if_missing = true
 [[genesis.validator_keys]]
-consensus_key = "b1638809bb451f99786c98e208f65dba17587c3ba43770e69280bf49aec43f0d"
-service_key = "b14395a7b13be51383d5da318938db01ae9fad01534d1ebede62790d46979bbc"
+consensus_key = "cbc9ffef062abe970087273f14bfdadbc5d5c5b51cb2fb8a386d960d43e4ed4b"
+service_key = "271b105d5df23b0a1a9f005dd796d4624169fc0e19dd4c24385eef25bf33be5e"
 
 [genesis.consensus]
 max_message_len = 1048576
