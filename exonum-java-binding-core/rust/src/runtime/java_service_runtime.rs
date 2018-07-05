@@ -3,6 +3,7 @@ use exonum::helpers::fabric::{CommandExtension, Context, ServiceFactory};
 use jni::{self, JavaVM};
 
 use std::sync::{Arc, Once, ONCE_INIT};
+use std::env;
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig};
@@ -55,7 +56,14 @@ impl JavaServiceRuntime {
     }
 
     /// Initializes JVM with provided configuration.
+    ///
+    /// # Panics
+    ///
+    /// - If user specified invalid additional JVM parameters.
+    /// - If `_JAVA_OPTIONS` environmental variable is set.
     fn create_java_vm(config: JvmConfig) -> JavaVM {
+        panic_if_java_options();
+
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
         for param in &config.user_parameters {
@@ -89,6 +97,19 @@ impl JavaServiceRuntime {
             env.new_global_ref(service)
         }));
         ServiceProxy::from_global_ref(executor, service)
+    }
+}
+
+/// Panics if `_JAVA_OPTIONS` environmental variable is set.
+fn panic_if_java_options() {
+    if env::var("_JAVA_OPTIONS").is_ok() {
+        panic!("\
+        _JAVA_OPTIONS environmental variable is set. \
+        Due to the fact that it will overwrite any JVM setting, \
+        including ones set by EJB internally, this variable is \
+        forbidden for EJB applications.\n\
+        It is recommend to use `--ejb-jvm-args` command-line \
+        parameter for setting custom JVM parameters.");
     }
 }
 
