@@ -134,7 +134,6 @@ function waitForAcceptance(publicKey, hash) {
 
   return (function makeAttempt() {
     return  axios.get(`/api/explorer/v1/transactions/${hash}`).then(response =>  {
-      console.log(response, response.data.type, response.data.type !== 'committed')
       if (response.data.type !== 'committed') {
         if (--attempt > 0) {
           return new Promise(resolve => {
