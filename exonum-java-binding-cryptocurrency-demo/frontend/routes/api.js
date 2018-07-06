@@ -4,10 +4,7 @@ const router = express.Router();
 
 router.get('/*', function (req, res, next) {
   const query = req.params[0];
-
-console.log(query, query.indexOf("explorer"))
   if (~query.indexOf("cryptocurrency-demo-service")) {
-    console.log(req.app.get('apiRoot'))
     request.get({
       url: req.app.get('apiRoot') + '/api/' + query,
       qs: req.query
@@ -22,7 +19,6 @@ console.log(query, query.indexOf("explorer"))
       }
     });
   } else {
-    console.log(req.app.get('explorerRoot'))
     request.get({
       url: req.app.get('explorerRoot') + '/api/' + query,
       qs: req.query
@@ -44,10 +40,7 @@ console.log(query, query.indexOf("explorer"))
 
 router.post('/*', function (req, res, next) {
   const query = req.params[0];
-
-console.log(query , query.indexOf("cryptocurrency-demo-service"))
   if (~query.indexOf("cryptocurrency-demo-service")) {
-    console.log(req.app.get('apiRoot'))
     request.post({
         url: req.app.get('apiRoot') + '/api/' + query,
         json: req.body
@@ -59,7 +52,6 @@ console.log(query , query.indexOf("cryptocurrency-demo-service"))
         res.json(body);
       });
   } else {
-    console.log(req.app.get('explorerRoot'))
     request.post({
         url: req.app.get('explorerRoot') + '/api/' + query,
         json: req.body

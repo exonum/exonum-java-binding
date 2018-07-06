@@ -81,14 +81,12 @@
           publicKey: this.secretKey.substr(64),
           secretKey: this.secretKey
         })
-
         this.$nextTick(function() {
           this.$router.push({ name: 'user' })
         })
       },
 
       async register() {
-      
         this.isSpinnerVisible = true
         this.keyPair = this.$blockchain.generateKeyPair()
 
@@ -98,7 +96,6 @@
           this.isSpinnerVisible = false
           this.isModalVisible = true
         } catch (error) {
-          console.log('1');
           this.isSpinnerVisible = false
           this.$notify('error', error.toString())
         }
@@ -110,9 +107,7 @@
 
       proceed() {
         this.isModalVisible = false
-
         this.$store.commit('login', this.keyPair)
-
         this.$nextTick(function() {
           this.$router.push({ name: 'user' })
         })

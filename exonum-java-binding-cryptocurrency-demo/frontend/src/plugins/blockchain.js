@@ -4,10 +4,9 @@ import * as Protobuf from 'protobufjs/light'
 import bigInt from 'big-integer'
 import nacl from 'tweetnacl'
 
-var Root  = Protobuf.Root,
+const Root  = Protobuf.Root,
     Type  = Protobuf.Type,
     Field = Protobuf.Field;
-
 
 let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("ownerPublicKey", 1, "bytes"));
 CreateTransactionProtobuf.add(new Field("initialBalance", 2, "int64"))
@@ -21,14 +20,14 @@ var root = new Root();
 root.define("CreateTransactionProtobuf").add(CreateTransactionProtobuf);
 root.define("TransferTransactionProtobuf").add(TransferTransactionProtobuf);
 
-const TX_URL = '/api/cryptocurrency-demo-service/submit-transaction'// '/api/services/cryptocurrency/v1/wallets/transaction'
-const PER_PAGE = 10
+const TX_URL = '/api/cryptocurrency-demo-service/submit-transaction'
 const ATTEMPTS = 10
 const ATTEMPT_TIMEOUT = 500
 const PROTOCOL_VERSION = 0
 const SERVICE_ID = 42
 const TX_TRANSFER_ID = 2
 const TX_WALLET_ID = 1
+const SIGNATURE_LENGTH = 64
 
 const MessageHead = Exonum.newType({
   fields: [
@@ -50,11 +49,8 @@ function getWallet(publicKey) {
     return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
       .then(response => response.data)
       .then(data => {
-        const wallet = data
-
         return {
-          //block: data.block_proof.block,
-          wallet: wallet,
+          wallet: data,
           transactions: []
         } 
       })
@@ -81,6 +77,16 @@ function waitForAcceptance(publicKey, hash) {
   })()
 }
 
+function createHeader(messageId) {
+  return MessageHead.serialize({
+    network_id: 0,
+    protocol_version: PROTOCOL_VERSION,
+    message_id: messageId,
+    service_id: SERVICE_ID,
+    payload: 0 // placeholder, real value will be inserted later
+  })
+}
+
 module.exports = {
   install(Vue) {
     Vue.prototype.$blockchain = {
@@ -91,18 +97,11 @@ module.exports = {
       generateSeed() {
         const buffer = nacl.randomBytes(7)
         return bigInt.fromArray(Array.from(buffer), 256).toString()
-      },
-      
+      },  
 
       createWallet(keyPair, balance) {
 
-        let buffer = MessageHead.serialize({
-          network_id: 0,
-          protocol_version: PROTOCOL_VERSION,
-          message_id: TX_WALLET_ID,
-          service_id: SERVICE_ID,
-          payload: 0 // placeholder, real value will be inserted later
-        })
+        let buffer = createHeader(TX_WALLET_ID)
 
         let data = {
           ownerPublicKey: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
@@ -111,13 +110,16 @@ module.exports = {
 
         const body = CreateTransactionProtobuf.encode(data).finish();
 
+        // calculate payload and insert it into buffer
+        Exonum.Uint32.serialize(body.length + SIGNATURE_LENGTH, buffer, 6)
+
         body.forEach(element => {
           buffer.push(element)
         });
 
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
-        data.ownerPublicKey = Exonum.uint8ArrayToHexadecimal(data.ownerPublicKey)
+        data.ownerPublicKey = keyPair.publicKey
 
         return axios.post(TX_URL, {
          protocol_version: PROTOCOL_VERSION,
@@ -130,13 +132,7 @@ module.exports = {
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
         
-        let buffer = MessageHead.serialize({
-          network_id: 0,
-          protocol_version: PROTOCOL_VERSION,
-          message_id: TX_TRANSFER_ID,
-          service_id: SERVICE_ID,
-          payload: 0 // placeholder, real value will be inserted later
-        })
+        let buffer = createHeader(TX_TRANSFER_ID)
 
         const data = {
           seed: seed,
@@ -147,14 +143,17 @@ module.exports = {
 
         const body = CreateTransactionProtobuf.encode(data).finish();
 
+        // calculate payload and insert it into buffer
+        Exonum.Uint32.serialize(body.length + SIGNATURE_LENGTH, buffer, 6)
+
         body.forEach(element => {
           buffer.push(element)
         });
 
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
-        data.senderId = Exonum.uint8ArrayToHexadecimal(data.senderId)
-        data.recipientId = Exonum.uint8ArrayToHexadecimal(data.recipientId)
+        data.senderId = keyPair.publicKey
+        data.recipientId = receiver
 
         return axios.post(TX_URL, {
           protocol_version: PROTOCOL_VERSION,

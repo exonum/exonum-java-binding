@@ -12,7 +12,6 @@ Vue.use(Blockchain)
 
 mock.onGet('/api/services/configuration/v1/configs/actual').reply(200, actual)
 
-
 mock.onPost('/api/cryptocurrency-demo-service/submit-transaction', {
   protocol_version: 0,
   service_id: 42,
