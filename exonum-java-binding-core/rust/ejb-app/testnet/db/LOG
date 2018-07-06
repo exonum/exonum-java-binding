@@ -877,3 +877,140 @@
 2018/07/05-11:37:57.816296 7fff9c077380                Options.force_consistency_checks: 0
 2018/07/05-11:37:57.816297 7fff9c077380                Options.report_bg_io_stats: 0
 2018/07/05-11:37:57.816322 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.consensus_messages_cache] (ID 8)
+2018/07/05-11:37:57.822572 7fff9c077380 [rocksdb/db/column_family.cc:415] --------------- Options for column family [core.precommits]:
+2018/07/05-11:37:57.822582 7fff9c077380               Options.comparator: leveldb.BytewiseComparator
+2018/07/05-11:37:57.822584 7fff9c077380           Options.merge_operator: None
+2018/07/05-11:37:57.822586 7fff9c077380        Options.compaction_filter: None
+2018/07/05-11:37:57.822587 7fff9c077380        Options.compaction_filter_factory: None
+2018/07/05-11:37:57.822588 7fff9c077380         Options.memtable_factory: SkipListFactory
+2018/07/05-11:37:57.822590 7fff9c077380            Options.table_factory: BlockBasedTable
+2018/07/05-11:37:57.822606 7fff9c077380            table_factory options:   flush_block_policy_factory: FlushBlockBySizePolicyFactory (0x10501e9d8)
+  cache_index_and_filter_blocks: 0
+  cache_index_and_filter_blocks_with_high_priority: 0
+  pin_l0_filter_and_index_blocks_in_cache: 0
+  index_type: 0
+  hash_index_allow_collision: 1
+  checksum: 1
+  no_block_cache: 0
+  block_cache: 0x1087152d8
+  block_cache_name: LRUCache
+  block_cache_options:
+    capacity : 8388608
+    num_shard_bits : 4
+    strict_capacity_limit : 0
+    high_pri_pool_ratio: 0.000
+  block_cache_compressed: 0x0
+  persistent_cache: 0x0
+  block_size: 4096
+  block_size_deviation: 10
+  block_restart_interval: 16
+  index_block_restart_interval: 1
+  filter_policy: nullptr
+  whole_key_filtering: 1
+  format_version: 2
+2018/07/05-11:37:57.822608 7fff9c077380        Options.write_buffer_size: 67108864
+2018/07/05-11:37:57.822610 7fff9c077380  Options.max_write_buffer_number: 2
+2018/07/05-11:37:57.822611 7fff9c077380          Options.compression: Snappy
+2018/07/05-11:37:57.822612 7fff9c077380                  Options.bottommost_compression: Disabled
+2018/07/05-11:37:57.822613 7fff9c077380       Options.prefix_extractor: nullptr
+2018/07/05-11:37:57.822614 7fff9c077380   Options.memtable_insert_with_hint_prefix_extractor: nullptr
+2018/07/05-11:37:57.822615 7fff9c077380             Options.num_levels: 7
+2018/07/05-11:37:57.822617 7fff9c077380        Options.min_write_buffer_number_to_merge: 1
+2018/07/05-11:37:57.822618 7fff9c077380     Options.max_write_buffer_number_to_maintain: 0
+2018/07/05-11:37:57.822619 7fff9c077380            Options.compression_opts.window_bits: -14
+2018/07/05-11:37:57.822621 7fff9c077380                  Options.compression_opts.level: -1
+2018/07/05-11:37:57.822622 7fff9c077380               Options.compression_opts.strategy: 0
+2018/07/05-11:37:57.822623 7fff9c077380         Options.compression_opts.max_dict_bytes: 0
+2018/07/05-11:37:57.822624 7fff9c077380      Options.level0_file_num_compaction_trigger: 4
+2018/07/05-11:37:57.822626 7fff9c077380          Options.level0_slowdown_writes_trigger: 20
+2018/07/05-11:37:57.822627 7fff9c077380              Options.level0_stop_writes_trigger: 36
+2018/07/05-11:37:57.822628 7fff9c077380                   Options.target_file_size_base: 67108864
+2018/07/05-11:37:57.822630 7fff9c077380             Options.target_file_size_multiplier: 1
+2018/07/05-11:37:57.822631 7fff9c077380                Options.max_bytes_for_level_base: 268435456
+2018/07/05-11:37:57.822632 7fff9c077380 Options.level_compaction_dynamic_level_bytes: 0
+2018/07/05-11:37:57.822634 7fff9c077380          Options.max_bytes_for_level_multiplier: 10.000000
+2018/07/05-11:37:57.822637 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[0]: 1
+2018/07/05-11:37:57.822638 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[1]: 1
+2018/07/05-11:37:57.822640 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[2]: 1
+2018/07/05-11:37:57.822641 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[3]: 1
+2018/07/05-11:37:57.822642 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[4]: 1
+2018/07/05-11:37:57.822643 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[5]: 1
+2018/07/05-11:37:57.822645 7fff9c077380 Options.max_bytes_for_level_multiplier_addtl[6]: 1
+2018/07/05-11:37:57.822646 7fff9c077380       Options.max_sequential_skip_in_iterations: 8
+2018/07/05-11:37:57.822647 7fff9c077380                    Options.max_compaction_bytes: 1677721600
+2018/07/05-11:37:57.822648 7fff9c077380                        Options.arena_block_size: 8388608
+2018/07/05-11:37:57.822649 7fff9c077380   Options.soft_pending_compaction_bytes_limit: 68719476736
+2018/07/05-11:37:57.822650 7fff9c077380   Options.hard_pending_compaction_bytes_limit: 274877906944
+2018/07/05-11:37:57.822651 7fff9c077380       Options.rate_limit_delay_max_milliseconds: 100
+2018/07/05-11:37:57.822653 7fff9c077380                Options.disable_auto_compactions: 0
+2018/07/05-11:37:57.822654 7fff9c077380                        Options.compaction_style: kCompactionStyleLevel
+2018/07/05-11:37:57.822655 7fff9c077380                          Options.compaction_pri: kByCompensatedSize
+2018/07/05-11:37:57.822657 7fff9c077380 Options.compaction_options_universal.size_ratio: 1
+2018/07/05-11:37:57.822658 7fff9c077380 Options.compaction_options_universal.min_merge_width: 2
+2018/07/05-11:37:57.822659 7fff9c077380 Options.compaction_options_universal.max_merge_width: 4294967295
+2018/07/05-11:37:57.822660 7fff9c077380 Options.compaction_options_universal.max_size_amplification_percent: 200
+2018/07/05-11:37:57.822662 7fff9c077380 Options.compaction_options_universal.compression_size_percent: -1
+2018/07/05-11:37:57.822663 7fff9c077380 Options.compaction_options_universal.stop_style: kCompactionStopStyleTotalSize
+2018/07/05-11:37:57.822665 7fff9c077380 Options.compaction_options_fifo.max_table_files_size: 1073741824
+2018/07/05-11:37:57.822666 7fff9c077380 Options.compaction_options_fifo.allow_compaction: 0
+2018/07/05-11:37:57.822667 7fff9c077380 Options.compaction_options_fifo.ttl: 0
+2018/07/05-11:37:57.822669 7fff9c077380                   Options.table_properties_collectors: 
+2018/07/05-11:37:57.822670 7fff9c077380                   Options.inplace_update_support: 0
+2018/07/05-11:37:57.822671 7fff9c077380                 Options.inplace_update_num_locks: 10000
+2018/07/05-11:37:57.822672 7fff9c077380               Options.memtable_prefix_bloom_size_ratio: 0.000000
+2018/07/05-11:37:57.822674 7fff9c077380   Options.memtable_huge_page_size: 0
+2018/07/05-11:37:57.822675 7fff9c077380                           Options.bloom_locality: 0
+2018/07/05-11:37:57.822676 7fff9c077380                    Options.max_successive_merges: 0
+2018/07/05-11:37:57.822677 7fff9c077380                Options.optimize_filters_for_hits: 0
+2018/07/05-11:37:57.822679 7fff9c077380                Options.paranoid_file_checks: 0
+2018/07/05-11:37:57.822680 7fff9c077380                Options.force_consistency_checks: 0
+2018/07/05-11:37:57.822681 7fff9c077380                Options.report_bg_io_stats: 0
+2018/07/05-11:37:57.822702 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.precommits] (ID 9)
+2018/07/05-14:28:18.746842 7fff9c077380 [rocksdb/db/column_family.cc:418] 	(skipping printing options)
+2018/07/05-14:28:18.747002 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.transactions_pool] (ID 10)
+2018/07/05-14:28:18.754488 7fff9c077380 [rocksdb/db/column_family.cc:418] 	(skipping printing options)
+2018/07/05-14:28:18.754560 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.transactions] (ID 11)
+2018/07/05-14:28:18.810228 7fff9c077380 [rocksdb/db/column_family.cc:418] 	(skipping printing options)
+2018/07/05-14:28:18.810259 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [cryptocurrency_demo_service__wallets] (ID 12)
+2018/07/05-14:28:18.813916 7fff9c077380 [rocksdb/db/column_family.cc:418] 	(skipping printing options)
+2018/07/05-14:28:18.813945 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.block_transactions] (ID 13)
+2018/07/05-14:28:18.817798 7fff9c077380 [rocksdb/db/column_family.cc:418] 	(skipping printing options)
+2018/07/05-14:28:18.817837 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.transaction_results] (ID 14)
+2018/07/05-14:28:18.822401 7fff9c077380 [rocksdb/db/column_family.cc:418] 	(skipping printing options)
+2018/07/05-14:28:18.822438 7fff9c077380 [rocksdb/db/db_impl.cc:1246] Created column family [core.transactions_locations] (ID 15)
+2018/07/05-15:36:03.593657 7fff9c077380 [rocksdb/db/db_impl_write.cc:1120] [core.state_hash_aggregator] New memtable created with log file: #37. Immutable memtables: 0.
+2018/07/05-15:36:03.598076 700012d6c000 [rocksdb/db/db_impl_compaction_flush.cc:52] [JOB 2] Syncing log #3
+2018/07/05-15:36:03.598666 700012d6c000 (Original Log Time 2018/07/05-15:36:03.598042) [rocksdb/db/db_impl_compaction_flush.cc:1218] Calling FlushMemTableToOutputFile with column family [core.state_hash_aggregator], flush slots available 1, compaction slots available 1, flush slots scheduled 1, compaction slots scheduled 0
+2018/07/05-15:36:03.598675 700012d6c000 [rocksdb/db/flush_job.cc:266] [core.state_hash_aggregator] [JOB 2] Flushing memtable with next log file: 37
+2018/07/05-15:36:03.599339 700012d6c000 EVENT_LOG_v1 {"time_micros": 1530794163598719, "job": 2, "event": "flush_started", "num_memtables": 1, "num_entries": 474957, "num_deletes": 0, "memory_usage": 65015016}
+2018/07/05-15:36:03.599350 700012d6c000 [rocksdb/db/flush_job.cc:295] [core.state_hash_aggregator] [JOB 2] Level-0 flush table #38: started
+2018/07/05-15:36:04.207972 700012d6c000 EVENT_LOG_v1 {"time_micros": 1530794164207955, "cf_name": "core.state_hash_aggregator", "job": 2, "event": "table_file_creation", "file_number": 38, "file_size": 1459, "table_properties": {"data_size": 542, "index_size": 28, "filter_size": 0, "raw_key_size": 378, "raw_average_key_size": 42, "raw_value_size": 688, "raw_average_value_size": 76, "num_data_blocks": 1, "num_entries": 9, "filter_policy_name": "", "kDeletedKeys": "0", "kMergeOperands": "0"}}
+2018/07/05-15:36:04.208021 700012d6c000 [rocksdb/db/flush_job.cc:329] [core.state_hash_aggregator] [JOB 2] Level-0 flush table #38: 1459 bytes OK
+2018/07/05-15:36:04.211572 700012d6c000 (Original Log Time 2018/07/05-15:36:04.208039) [rocksdb/db/memtable_list.cc:374] [core.state_hash_aggregator] Level-0 commit table #38 started
+2018/07/05-15:36:04.211578 700012d6c000 (Original Log Time 2018/07/05-15:36:04.209363) [rocksdb/db/memtable_list.cc:397] [core.state_hash_aggregator] Level-0 commit table #38: memtable #1 done
+2018/07/05-15:36:04.211580 700012d6c000 (Original Log Time 2018/07/05-15:36:04.209393) EVENT_LOG_v1 {"time_micros": 1530794164209368, "job": 2, "event": "flush_finished", "lsm_state": [1, 0, 0, 0, 0, 0, 0], "immutable_memtables": 0}
+2018/07/05-15:36:04.211581 700012d6c000 (Original Log Time 2018/07/05-15:36:04.209436) [rocksdb/db/db_impl_compaction_flush.cc:142] [core.state_hash_aggregator] Level summary: base level 1 max bytes base 268435456 files[1 0 0 0 0 0 0] max score 0.25
+2018/07/05-16:24:59.475034 7fff9c077380 [rocksdb/db/db_impl_write.cc:1120] [core.consensus_messages_cache] New memtable created with log file: #39. Immutable memtables: 0.
+2018/07/05-16:24:59.476017 700012d6c000 [rocksdb/db/db_impl_compaction_flush.cc:52] [JOB 3] Syncing log #37
+2018/07/05-16:24:59.476496 700012d6c000 (Original Log Time 2018/07/05-16:24:59.476005) [rocksdb/db/db_impl_compaction_flush.cc:1218] Calling FlushMemTableToOutputFile with column family [core.consensus_messages_cache], flush slots available 1, compaction slots available 1, flush slots scheduled 1, compaction slots scheduled 0
+2018/07/05-16:24:59.476525 700012d6c000 [rocksdb/db/flush_job.cc:266] [core.consensus_messages_cache] [JOB 3] Flushing memtable with next log file: 39
+2018/07/05-16:24:59.476748 700012d6c000 EVENT_LOG_v1 {"time_micros": 1530797099476656, "job": 3, "event": "flush_started", "num_memtables": 1, "num_entries": 870692, "num_deletes": 334880, "memory_usage": 65014032}
+2018/07/05-16:24:59.476764 700012d6c000 [rocksdb/db/flush_job.cc:295] [core.consensus_messages_cache] [JOB 3] Level-0 flush table #40: started
+2018/07/05-16:25:00.097835 700012d6c000 EVENT_LOG_v1 {"time_micros": 1530797100097823, "cf_name": "core.consensus_messages_cache", "job": 3, "event": "table_file_creation", "file_number": 40, "file_size": 1291, "table_properties": {"data_size": 372, "index_size": 28, "filter_size": 0, "raw_key_size": 112, "raw_average_key_size": 14, "raw_value_size": 260, "raw_average_value_size": 32, "num_data_blocks": 1, "num_entries": 8, "filter_policy_name": "", "kDeletedKeys": "5", "kMergeOperands": "0"}}
+2018/07/05-16:25:00.097865 700012d6c000 [rocksdb/db/flush_job.cc:329] [core.consensus_messages_cache] [JOB 3] Level-0 flush table #40: 1291 bytes OK
+2018/07/05-16:25:00.098814 700012d6c000 (Original Log Time 2018/07/05-16:25:00.097883) [rocksdb/db/memtable_list.cc:374] [core.consensus_messages_cache] Level-0 commit table #40 started
+2018/07/05-16:25:00.098818 700012d6c000 (Original Log Time 2018/07/05-16:25:00.098679) [rocksdb/db/memtable_list.cc:397] [core.consensus_messages_cache] Level-0 commit table #40: memtable #1 done
+2018/07/05-16:25:00.098819 700012d6c000 (Original Log Time 2018/07/05-16:25:00.098701) EVENT_LOG_v1 {"time_micros": 1530797100098686, "job": 3, "event": "flush_finished", "lsm_state": [1, 0, 0, 0, 0, 0, 0], "immutable_memtables": 0}
+2018/07/05-16:25:00.098821 700012d6c000 (Original Log Time 2018/07/05-16:25:00.098738) [rocksdb/db/db_impl_compaction_flush.cc:142] [core.consensus_messages_cache] Level summary: base level 1 max bytes base 268435456 files[1 0 0 0 0 0 0] max score 0.25
+2018/07/06-10:48:06.726655 7fff9c077380 [rocksdb/db/db_impl_write.cc:1120] [core.state_hash_aggregator] New memtable created with log file: #41. Immutable memtables: 0.
+2018/07/06-10:48:06.728892 700012d6c000 [rocksdb/db/db_impl_compaction_flush.cc:52] [JOB 4] Syncing log #39
+2018/07/06-10:48:06.729230 700012d6c000 (Original Log Time 2018/07/06-10:48:06.728877) [rocksdb/db/db_impl_compaction_flush.cc:1218] Calling FlushMemTableToOutputFile with column family [core.state_hash_aggregator], flush slots available 1, compaction slots available 1, flush slots scheduled 1, compaction slots scheduled 0
+2018/07/06-10:48:06.729247 700012d6c000 [rocksdb/db/flush_job.cc:266] [core.state_hash_aggregator] [JOB 4] Flushing memtable with next log file: 41
+2018/07/06-10:48:06.729331 700012d6c000 EVENT_LOG_v1 {"time_micros": 1530863286729281, "job": 4, "event": "flush_started", "num_memtables": 1, "num_entries": 474957, "num_deletes": 0, "memory_usage": 65014016}
+2018/07/06-10:48:06.729339 700012d6c000 [rocksdb/db/flush_job.cc:295] [core.state_hash_aggregator] [JOB 4] Level-0 flush table #42: started
+2018/07/06-10:48:07.444705 700012d6c000 EVENT_LOG_v1 {"time_micros": 1530863287444687, "cf_name": "core.state_hash_aggregator", "job": 4, "event": "table_file_creation", "file_number": 42, "file_size": 1459, "table_properties": {"data_size": 542, "index_size": 28, "filter_size": 0, "raw_key_size": 378, "raw_average_key_size": 42, "raw_value_size": 688, "raw_average_value_size": 76, "num_data_blocks": 1, "num_entries": 9, "filter_policy_name": "", "kDeletedKeys": "0", "kMergeOperands": "0"}}
+2018/07/06-10:48:07.444749 700012d6c000 [rocksdb/db/flush_job.cc:329] [core.state_hash_aggregator] [JOB 4] Level-0 flush table #42: 1459 bytes OK
+2018/07/06-10:48:07.445857 700012d6c000 (Original Log Time 2018/07/06-10:48:07.444761) [rocksdb/db/memtable_list.cc:374] [core.state_hash_aggregator] Level-0 commit table #42 started
+2018/07/06-10:48:07.445860 700012d6c000 (Original Log Time 2018/07/06-10:48:07.445664) [rocksdb/db/memtable_list.cc:397] [core.state_hash_aggregator] Level-0 commit table #42: memtable #1 done
+2018/07/06-10:48:07.445862 700012d6c000 (Original Log Time 2018/07/06-10:48:07.445682) EVENT_LOG_v1 {"time_micros": 1530863287445671, "job": 4, "event": "flush_finished", "lsm_state": [2, 0, 0, 0, 0, 0, 0], "immutable_memtables": 0}
+2018/07/06-10:48:07.445864 700012d6c000 (Original Log Time 2018/07/06-10:48:07.445702) [rocksdb/db/db_impl_compaction_flush.cc:142] [core.state_hash_aggregator] Level summary: base level 1 max bytes base 268435456 files[2 0 0 0 0 0 0] max score 0.50

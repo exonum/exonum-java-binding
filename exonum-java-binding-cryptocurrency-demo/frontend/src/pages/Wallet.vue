@@ -30,36 +30,6 @@
               </li>
             </ul>
           </div>
-
-          <div class="card mt-5">
-            <div class="card-header">Transactions</div>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item font-weight-bold">
-                <div class="row">
-                  <div class="col-sm-12">Description</div>
-                </div>
-              </li>
-              <!-- eslint-disable-next-line vue/require-v-for-key -->
-              <li v-for="transaction in reverseTransactions" class="list-group-item">
-                <div class="row">
-                  <div class="col-sm-12">
-                    <router-link :to="{ name: 'transaction', params: { hash: transaction.hash } }">
-                      <span v-if="transaction.message_id === 2">Wallet created</span>
-                      <span v-else-if="transaction.message_id === 1">
-                        <strong v-numeral="transaction.body.amount"/> funds added
-                      </span>
-                      <span v-else-if="transaction.message_id === 0 && transaction.body.from === keyPair.publicKey">
-                        <strong v-numeral="transaction.body.amount"/> funds sent
-                      </span>
-                      <span v-else-if="transaction.message_id === 0 && transaction.body.to === keyPair.publicKey">
-                        <strong v-numeral="transaction.body.amount"/> funds received
-                      </span>
-                    </router-link>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
         </div>
         <div class="col-md-6">
 
@@ -133,7 +103,6 @@
 
         try {
           const data = await this.$blockchain.getWallet(this.keyPair.publicKey)
-          this.name = data.wallet.name
           this.balance = data.wallet.balance
           this.transactions = data.transactions
           this.isSpinnerVisible = false
@@ -157,7 +126,8 @@
         const seed = this.$blockchain.generateSeed()
 
         try {
-          const data = await this.$blockchain.transfer(this.keyPair, this.receiver, this.amountToTransfer, seed)
+          await this.$blockchain.transfer(this.keyPair, this.receiver, this.amountToTransfer, seed)
+          const data = await this.$blockchain.getWallet(this.keyPair.publicKey)
           this.balance = data.wallet.balance
           this.transactions = data.transactions
           this.isSpinnerVisible = false
