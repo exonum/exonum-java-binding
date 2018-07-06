@@ -1,8 +1,8 @@
 use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
-use java_bindings::exonum::helpers::config::ConfigFile;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
 use java_bindings::JavaServiceFactory;
+use toml;
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -36,13 +36,19 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
 
 #[doc(hidden)]
 pub fn services_to_enable<P: AsRef<Path>>(path: P) -> HashSet<String> {
-    let ServicesToEnable { mut services } = ConfigFile::load(path).unwrap_or(ServicesToEnable {
-        services: {
-            let mut services = HashSet::new();
-            services.insert(CONFIGURATION_SERVICE.to_owned());
-            services
-        },
-    });
+    use std::fs::File;
+    use std::io::Read;
+    let mut services = if let Ok(mut file) = File::open(path) {
+        let mut toml = String::new();
+        file.read_to_string(&mut toml).unwrap();
+        let ServicesToEnable { services } =
+            toml::from_str(&toml).expect("Invalid list of services to enable");
+        services
+    } else {
+        let mut services = HashSet::new();
+        services.insert(CONFIGURATION_SERVICE.to_owned());
+        services
+    };
 
     // Add EJB_SERVICE if it's missing
     services.insert(EJB_SERVICE.to_owned());
@@ -107,6 +113,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "Invalid list of services to enable")]
     fn broken_config() {
         let cfg = create_config("broken.toml", "not_list = 1");
         let services_to_enable = services_to_enable(cfg);
