@@ -110,12 +110,12 @@ module.exports = {
 
         const body = CreateTransactionProtobuf.encode(data).finish();
 
-        // calculate payload and insert it into buffer
-        Exonum.Uint32.serialize(body.length + SIGNATURE_LENGTH, buffer, 6)
-
         body.forEach(element => {
           buffer.push(element)
         });
+
+        // calculate payload and insert it into buffer
+        Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, 6)
 
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
@@ -143,12 +143,12 @@ module.exports = {
 
         const body = CreateTransactionProtobuf.encode(data).finish();
 
-        // calculate payload and insert it into buffer
-        Exonum.Uint32.serialize(body.length + SIGNATURE_LENGTH, buffer, 6)
-
         body.forEach(element => {
           buffer.push(element)
         });
+
+        // calculate payload and insert it into buffer
+        Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, 6)
 
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
