@@ -28,7 +28,6 @@ const ATTEMPT_TIMEOUT = 500
 const PROTOCOL_VERSION = 0
 const SERVICE_ID = 42
 const TX_TRANSFER_ID = 2
-const TX_ISSUE_ID = 1
 const TX_WALLET_ID = 1
 
 const MessageHead = Exonum.newType({
@@ -40,73 +39,6 @@ const MessageHead = Exonum.newType({
     { name: 'payload', type: Exonum.Uint32 }
   ]
 })
-
-const TransferTransaction = {
-  protocol_version: PROTOCOL_VERSION,
-  service_id: SERVICE_ID,
-  message_id: TX_TRANSFER_ID,
-  fields: [
-    { name: 'senderId', type: Exonum.PublicKey },
-    { name: 'recipientId', type: Exonum.PublicKey },
-    { name: 'amount', type: Exonum.Uint64 },
-    { name: 'seed', type: Exonum.Uint64 }
-  ]
-}
-const IssueTransaction = {
-  protocol_version: PROTOCOL_VERSION,
-  service_id: SERVICE_ID,
-  message_id: TX_ISSUE_ID,
-  fields: [
-    { name: 'pub_key', type: Exonum.PublicKey },
-    { name: 'amount', type: Exonum.Uint64 },
-    { name: 'seed', type: Exonum.Uint64 }
-  ]
-}
-
-const CreateTransaction = {
-  protocol_version: PROTOCOL_VERSION,
-  service_id: SERVICE_ID,
-  message_id: TX_WALLET_ID,
-  fields: [
-    { name: 'ownerPublicKey', type: Exonum.PublicKey },
-    { name: 'balance', type: Exonum.Uint64 }
-  ]
-}
-const TableKey = Exonum.newType({
-  fields: [
-    { name: 'service_id', type: Exonum.Uint16 },
-    { name: 'table_index', type: Exonum.Uint16 }
-  ]
-})
-const Wallet = Exonum.newType({
-  fields: [
-    { name: 'pub_key', type: Exonum.PublicKey },
-    { name: 'name', type: Exonum.String },
-    { name: 'balance', type: Exonum.Uint64 },
-    { name: 'history_len', type: Exonum.Uint64 },
-    { name: 'history_hash', type: Exonum.Hash }
-  ]
-})
-const TransactionMetaData = Exonum.newType({
-  fields: [
-    { name: 'tx_hash', type: Exonum.Hash },
-    { name: 'execution_status', type: Exonum.Bool }
-  ]
-})
-
-
-function getOwner(transaction) {
-  switch (transaction.message_id) {
-    case TX_TRANSFER_ID:
-      return transaction.body.from
-    case TX_ISSUE_ID:
-      return transaction.body.pub_key
-    case TX_WALLET_ID:
-      return transaction.body.pub_key
-    default:
-      throw new Error('Unknown transaction ID has been passed')
-  }
-}
 
 function getWallet(publicKey) {
   return axios.get('/api/services/configuration/v1/configs/actual').then(response => {
@@ -123,7 +55,7 @@ function getWallet(publicKey) {
         return {
           //block: data.block_proof.block,
           wallet: wallet,
-          transactions: [] // transactions
+          transactions: []
         } 
       })
   })
@@ -133,7 +65,7 @@ function waitForAcceptance(publicKey, hash) {
   let attempt = ATTEMPTS
 
   return (function makeAttempt() {
-    return  axios.get(`/api/explorer/v1/transactions/${hash}`).then(response =>  {
+    return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response =>  {
       if (response.data.type !== 'committed') {
         if (--attempt > 0) {
           return new Promise(resolve => {
