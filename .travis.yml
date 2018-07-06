@@ -19,6 +19,13 @@ env:
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
 
+matrix:
+  allow_failures:
+    # See ECR-1734
+    - openjdk10
+  # Report the result of JDK 8 build as it is ready.
+  fast_finish: true
+
 cache:
   directories:
     - "$HOME/.cargo"
