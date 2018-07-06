@@ -5,6 +5,8 @@ use java_bindings::JavaServiceFactory;
 use toml;
 
 use std::collections::{HashMap, HashSet};
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 
 const PATH_TO_SERVICES_TO_ENABLE: &str = "ejb_app_services.toml";
@@ -36,8 +38,7 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
 
 #[doc(hidden)]
 pub fn services_to_enable<P: AsRef<Path>>(path: P) -> HashSet<String> {
-    use std::fs::File;
-    use std::io::Read;
+    // Return default list if config file not found.
     let mut services = if let Ok(mut file) = File::open(path) {
         let mut toml = String::new();
         file.read_to_string(&mut toml).unwrap();
