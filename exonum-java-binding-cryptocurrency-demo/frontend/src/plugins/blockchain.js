@@ -28,6 +28,7 @@ const SERVICE_ID = 42
 const TX_TRANSFER_ID = 2
 const TX_WALLET_ID = 1
 const SIGNATURE_LENGTH = 64
+const PAYLOD_SIZE_OFFSET = 6
 
 const MessageHead = Exonum.newType({
   fields: [
@@ -115,7 +116,7 @@ module.exports = {
         });
 
         // calculate payload and insert it into buffer
-        Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, 6)
+        Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, PAYLOD_SIZE_OFFSET)
 
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
@@ -148,7 +149,7 @@ module.exports = {
         });
 
         // calculate payload and insert it into buffer
-        Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, 6)
+        Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, PAYLOD_SIZE_OFFSET)
 
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
