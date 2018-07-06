@@ -53,7 +53,7 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt --all -- --write-mode=diff
+  - cargo fmt --all -- --write-mode=check
   # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
   # Next 2 lines are a workaround to prevent clippy checking dependencies.
   - cargo +${RUST_NIGHTLY_VERSION} check
