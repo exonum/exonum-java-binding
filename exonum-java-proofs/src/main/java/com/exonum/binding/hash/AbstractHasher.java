@@ -133,4 +133,12 @@ abstract class AbstractHasher implements Hasher {
     funnel.funnel(instance, this);
     return this;
   }
+
+  @Override
+  @Deprecated
+  public int hashCode() {
+    // Override Hasher#hashCode so that compiler does not issue
+    // deprecation warnings.
+    return super.hashCode();
+  }
 }
