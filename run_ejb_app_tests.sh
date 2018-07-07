@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Runs EJB App tests (ejb-core/rust/ejb-app).
-# If --skip-compile is passed, does not recompile all Java sources.
 #
 # ¡Keep it MacOS/Ubuntu compatible!
 
