@@ -59,6 +59,7 @@ public class ListProofValidatorTest {
   private ListProofValidator<String> validator;
 
   @Before
+  @SuppressWarnings("unchecked")
   public void setUp() {
     hasher = mock(Hasher.class);
     when(hasher.putObject(any(), any())).thenReturn(hasher);
@@ -85,6 +86,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void visit_SingletonListProof() {
     ListProof root = leafOf(V1);
     when(hashFunction.hashObject(eq(root), any(Funnel.class)))
