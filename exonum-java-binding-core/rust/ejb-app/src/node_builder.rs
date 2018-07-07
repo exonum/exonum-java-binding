@@ -117,7 +117,7 @@ mod tests {
     #[should_panic(expected = "Invalid list of services to enable")]
     fn broken_config() {
         let cfg = create_config("broken.toml", "not_list = 1");
-        let services_to_enable = services_to_enable(cfg);
+        let _services_to_enable = services_to_enable(cfg);
     }
 
     #[test]
