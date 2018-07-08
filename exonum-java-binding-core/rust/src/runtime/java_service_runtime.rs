@@ -2,7 +2,6 @@ use exonum::blockchain::Service;
 use exonum::helpers::fabric::{CommandExtension, Context, ServiceFactory};
 use jni::{self, JavaVM};
 
-use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
@@ -107,6 +106,7 @@ fn panic_if_java_options() {}
 /// Panics if `_JAVA_OPTIONS` environmental variable is set.
 #[cfg(not(test))]
 fn panic_if_java_options() {
+    use std::env;
     if env::var("_JAVA_OPTIONS").is_ok() {
         panic!(
             "_JAVA_OPTIONS environmental variable is set. \
