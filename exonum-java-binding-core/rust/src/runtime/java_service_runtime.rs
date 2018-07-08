@@ -100,7 +100,12 @@ impl JavaServiceRuntime {
     }
 }
 
+/// Ignore `_JAVA_OPTIONS` for tests.
+#[cfg(test)]
+fn panic_if_java_options() {}
+
 /// Panics if `_JAVA_OPTIONS` environmental variable is set.
+#[cfg(not(test))]
 fn panic_if_java_options() {
     if env::var("_JAVA_OPTIONS").is_ok() {
         panic!(
