@@ -31,7 +31,7 @@ export JAVA_HOME="$(mvn --version | grep 'Java home' | sed 's/.*: //')"
 echo "JAVA_HOME=${JAVA_HOME}"
 
 # Find the directory containing libjvm (the relative path has changed in Java 9).
-export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to build tests.
