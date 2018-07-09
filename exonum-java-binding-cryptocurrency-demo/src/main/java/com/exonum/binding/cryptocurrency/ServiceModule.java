@@ -22,6 +22,7 @@ import com.exonum.binding.service.TransactionConverter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
+@SuppressWarnings("unused") // Instantiated through reflection by Guice.
 public final class ServiceModule extends AbstractModule {
 
   @Override

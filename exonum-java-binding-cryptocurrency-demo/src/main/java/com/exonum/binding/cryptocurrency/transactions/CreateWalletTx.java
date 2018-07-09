@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
@@ -78,7 +79,7 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
 
   @Override
   public boolean isValid() {
-    return true;
+    return getMessage().verify(CRYPTO_FUNCTION, ownerPublicKey);
   }
 
   @Override
