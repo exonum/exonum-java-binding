@@ -21,3 +21,4 @@ mvn install \
 
 # Run native integration tests that require a JVM.
 ./run_native_integration_tests.sh --skip-compile
+./run_ejb_app_tests.sh --skip-compile
