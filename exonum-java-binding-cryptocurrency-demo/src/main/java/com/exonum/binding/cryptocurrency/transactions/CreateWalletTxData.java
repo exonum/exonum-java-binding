@@ -16,26 +16,14 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.messages.Transaction;
-import com.google.common.primitives.Shorts;
+import com.exonum.binding.crypto.PublicKey;
 
-public enum CryptocurrencyTransaction {
-  CREATE_WALLET(1, CreateWalletTx.class),
-  TRANSFER(2, TransferTx.class);
+class CreateWalletTxData {
+  final PublicKey ownerPublicKey;
+  final long initialBalance;
 
-  private final short id;
-  private final Class<? extends Transaction> transactionClass;
-
-  CryptocurrencyTransaction(int id, Class<? extends Transaction> transactionClass) {
-    this.id = Shorts.checkedCast(id);
-    this.transactionClass = transactionClass;
-  }
-
-  public short getId() {
-    return id;
-  }
-
-  public Class<? extends Transaction> transactionClass() {
-    return transactionClass;
+  CreateWalletTxData(PublicKey ownerPublicKey, long initialBalance) {
+    this.ownerPublicKey = ownerPublicKey;
+    this.initialBalance = initialBalance;
   }
 }

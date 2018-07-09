@@ -64,9 +64,7 @@ public class BinaryMessageBuilderTest {
     }
     body.flip();
 
-    ByteBuffer signature = allocateBuffer(SIGNATURE_SIZE)
-        .put(createPrefixed(bytes("Signature"), SIGNATURE_SIZE));
-    signature.flip();
+    byte[] signature = createPrefixed(bytes("Signature"), SIGNATURE_SIZE);
 
     return new Message.Builder()
         .setNetworkId((byte) 0xA1)

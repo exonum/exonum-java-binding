@@ -57,7 +57,7 @@ public class ServiceBootstrapIntegrationTest {
         .mergeFrom(TEMPLATE_MESSAGE)
         .setServiceId(service.getId())
         .buildRaw();
-    byte[] messageBytes = message.getMessage().array();
+    byte[] messageBytes = message.getSignedMessage().array();
 
     UserTransactionAdapter transactionAdapter = service.convertTransaction(messageBytes);
     assertTrue(transactionAdapter.isValid());

@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.messages;
 
-/** Base transaction with common fields, used by all transaction types. */
-public class BaseTx {
-  protected final short service_id;
-  protected final short message_id;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 
-  public BaseTx(short service_id, short message_id) {
-    this.service_id = service_id;
-    this.message_id = message_id;
+/**
+ * A test of our patches to the auto-generated message builder.
+ */
+public class Message_Builder2Test {
+
+  @Test
+  public void valueEquals() {
+    EqualsVerifier.forClass(Message_Builder2.Value.class)
+        .verify();
   }
 
-  public short getServiceId() {
-    return service_id;
-  }
-
-  public short getMessageId() {
-    return message_id;
+  @Test
+  public void partialEquals() {
+    EqualsVerifier.forClass(Message_Builder2.Partial.class)
+        .verify();
   }
 }

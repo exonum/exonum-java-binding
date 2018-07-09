@@ -22,12 +22,12 @@ function header() {
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
 # hence this a bit complex thing.
-JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
+JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}/"
 echo "JAVA_HOME=${JAVA_HOME}"
 
 # Find the directory containing libjvm (the relative path has changed in Java 9)
-export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+JVM_LIB_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+echo "JVM_LIB_PATH=${JVM_LIB_PATH}"
 
 EJB_APP_DIR=$(pwd)
 echo "CURRENT_DIR=${EJB_APP_DIR}"
@@ -50,7 +50,7 @@ echo "EJB_LIBPATH=${EJB_LIBPATH}"
 RUST_LIB_DIR=$(rustup run stable rustc --print sysroot)/lib
 echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
 
-LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$JVM_LIB_PATH"
 echo "Final LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir

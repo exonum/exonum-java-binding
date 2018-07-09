@@ -61,7 +61,7 @@ public class QaTransactionConverterTest {
         .setServiceId((short) (QaService.ID + 1))
         .setMessageType(QaTransaction.INCREMENT_COUNTER.id())
         .setBody(ByteBuffer.allocate(0))
-        .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+        .setSignature(new byte[Message.SIGNATURE_SIZE])
         .buildRaw();
 
     expectedException.expectMessage(matchesPattern(
