@@ -17,6 +17,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
+import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -27,12 +28,10 @@ import com.exonum.binding.crypto.KeyPair;
 import com.exonum.binding.crypto.PrivateKey;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -106,9 +105,7 @@ public class TransferTxTest {
 
   private static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
                                                      PublicKey recipientId, long amount) {
-    return new Message.Builder()
-          .setServiceId(CryptocurrencyService.ID)
-          .setMessageType(TransferTx.ID)
+    return newCryptocurrencyTransactionBuilder(TransferTx.ID)
           .setBody(ByteBuffer.wrap(TxMessagesProtos.TransferTx.newBuilder()
               .setSeed(seed)
               .setFromWallet(fromPublicKey(senderId))

@@ -17,6 +17,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
+import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -26,7 +27,6 @@ import static org.mockito.Mockito.mock;
 import com.exonum.binding.crypto.KeyPair;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.messages.BinaryMessage;
@@ -92,9 +92,7 @@ public class CreateWalletTxTest {
   }
 
   private BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
-    return new Message.Builder()
-        .setServiceId(CryptocurrencyService.ID)
-        .setMessageType(CreateWalletTx.ID)
+    return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
         .setBody(ByteBuffer.wrap(TxMessagesProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
             .setInitialBalance(initialBalance)
