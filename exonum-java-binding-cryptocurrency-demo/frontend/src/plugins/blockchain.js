@@ -4,9 +4,9 @@ import * as Protobuf from 'protobufjs/light'
 import bigInt from 'big-integer'
 import nacl from 'tweetnacl'
 
-const Root = Protobuf.Root,
-    Type = Protobuf.Type,
-    Field = Protobuf.Field;
+const Root = Protobuf.Root
+const Type = Protobuf.Type
+const Field = Protobuf.Field
 
 //  schema for creating thansaction with protobuf
 let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("ownerPublicKey", 1, "bytes"))
@@ -45,16 +45,14 @@ const MessageHead = Exonum.newType({
 })
 
 function getWallet(publicKey) {
-  return axios.get('/api/services/configuration/v1/configs/actual').then(response => {
-    return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
-      .then(response => response.data)
-      .then(data => {
-        return {
-          wallet: data,
-          transactions: []
-        } 
-      })
-  })
+  return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
+    .then(response => response.data)
+    .then(data => {
+      return {
+        wallet: data,
+        transactions: []
+      }
+    })
 }
 
 function waitForAcceptance(publicKey, hash) {
