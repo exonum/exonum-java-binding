@@ -12,7 +12,7 @@ extern crate tempfile;
 mod node_builder;
 
 fn main() {
-    /// Panic if `_JAVA_OPTIONS` environmental variable is set.
+    // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
 
     let builder = node_builder::create();
