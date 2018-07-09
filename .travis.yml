@@ -14,7 +14,7 @@ addons:
 
 env:
   global:
-    - RUST_VERSION=stable
+    - RUST_VERSION=1.26.2
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
@@ -31,13 +31,16 @@ before_install:
     # Install nightly rust version and clippy.
   - rustup toolchain install $RUST_NIGHTLY_VERSION
   - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    # Set a toolchain as default.
-  - rustup default "$RUST_VERSION"
     # Save the path to stdlib of the default toolchain to use it in scripts.
   - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
     # Install rustfmt.
+    # Use stable Rust for rustfmt.
+    # TODO: use stable rust everywhere when ECR-1839 fixed.
+  - rustup toolchain install stable
+  - rustup default stable
   - rustup component add rustfmt-preview
   - rustfmt -V
+  - rustup default "$RUST_VERSION"
     # Install cargo-audit if it's not already.
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
@@ -53,7 +56,7 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt --all -- --write-mode=check
+  - cargo +stable fmt --all -- --write-mode=check
   # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
   # Next 2 lines are a workaround to prevent clippy checking dependencies.
   - cargo +${RUST_NIGHTLY_VERSION} check
