@@ -8,8 +8,6 @@
         </File>
     </Appenders>
     <Loggers>
-        <!-- Use DEBUG level by default, since Cargo prints the stdout output only
-             in case of failures, when you might enjoy extra logs. -->
         <Root level="debug">
             <AppenderRef ref="File"/>
         </Root>

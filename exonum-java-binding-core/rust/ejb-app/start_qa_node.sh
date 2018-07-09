@@ -63,9 +63,9 @@ rm -rf logs
 mkdir logs
 for i in $(seq 0 $((node_count -1)))
 do
-    new_log_name="$EJB_APP_DIR/testnet/log4j_$i.xml"
-    log_file_name="$EJB_APP_DIR/logs/log_$i"
-    sed "s@FILENAME@$log_file_name@g" "$EJB_APP_DIR/log4j_template.xml" > "$new_log_name"
+    log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
+    log_file_path="$EJB_APP_DIR/logs/log_$i.txt"
+    sed "s@FILENAME@$log_file_path@g" "$EJB_APP_DIR/log4j_template.xml" > "$log_config_path"
 done
 
 header "GENERATE COMMON CONFIG"
@@ -76,16 +76,22 @@ for i in $(seq 0 $((node_count - 1)))
 do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
-    cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml --ejb-classpath $EJB_CLASSPATH \
-        --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $log_config_path --ejb-debug true --peer-address 127.0.0.1:$peer_port
+    cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
+     --ejb-classpath $EJB_CLASSPATH \
+     --ejb-libpath $EJB_LIBPATH \
+     --ejb-log-config-path $log_config_path \
+     --ejb-debug true \
+     --peer-address 127.0.0.1:$peer_port
 done
 
 header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
     ejb_port=$((6000 + i))
-    cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule' \
-        --ejb-port $ejb_port --public-configs testnet/pub_*.toml
+    cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
+     --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule' \
+     --ejb-port $ejb_port \
+     --public-configs testnet/pub_*.toml
 done
 
 header "START TESTNET"
@@ -94,8 +100,12 @@ for i in $(seq 0 $((node_count - 1)))
 do
 	port=$((3000 + i))
 	private_port=$((port + 100))
-	cargo run -- run -c testnet/node_$i.toml -d testnet/db/$i --public-api-address 0.0.0.0:${port} \
-	    --private-api-address 0.0.0.0:${private_port} &
+	cargo run -- run \
+	 -c testnet/node_$i.toml \
+	 -d testnet/db/$i \
+	 --public-api-address 0.0.0.0:${port} \
+	 --private-api-address 0.0.0.0:${private_port} &
+
 	echo "new node with ports: $port (public) and $private_port (private)"
 done
 
