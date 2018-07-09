@@ -4,18 +4,21 @@ import * as Protobuf from 'protobufjs/light'
 import bigInt from 'big-integer'
 import nacl from 'tweetnacl'
 
-const Root  = Protobuf.Root,
-    Type  = Protobuf.Type,
+const Root = Protobuf.Root,
+    Type = Protobuf.Type,
     Field = Protobuf.Field;
 
-let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("ownerPublicKey", 1, "bytes"));
+//  schema for creating thansaction with protobuf
+let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("ownerPublicKey", 1, "bytes"))
 CreateTransactionProtobuf.add(new Field("initialBalance", 2, "int64"))
 
-let TransferTransactionProtobuf = new Type("TransferTransaction").add(new Field("seed", 1, "u-int64"));
+// creating schema for transfer thansaction with protobuf
+let TransferTransactionProtobuf = new Type("TransferTransaction").add(new Field("seed", 1, "u-int64"))
 TransferTransactionProtobuf.add(new Field("senderId", 2, "bytes"))
 TransferTransactionProtobuf.add(new Field("recipientId", 3, "bytes"))
 TransferTransactionProtobuf.add(new Field("amount", 4, "int64"))
 
+// add types to protobuf root
 var root = new Root();
 root.define("CreateTransactionProtobuf").add(CreateTransactionProtobuf);
 root.define("TransferTransactionProtobuf").add(TransferTransactionProtobuf);
@@ -43,11 +46,6 @@ const MessageHead = Exonum.newType({
 
 function getWallet(publicKey) {
   return axios.get('/api/services/configuration/v1/configs/actual').then(response => {
-    // actual list of public keys of validators
-    const validators = response.data.config.validator_keys.map(validator => {
-      return validator.consensus_key
-    })
-    
     return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
       .then(response => response.data)
       .then(data => {
@@ -63,6 +61,7 @@ function waitForAcceptance(publicKey, hash) {
   let attempt = ATTEMPTS
 
   return (function makeAttempt() {
+    // find transaction in a explorer
     return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response =>  {
       if (response.data.type !== 'committed') {
         if (--attempt > 0) {
@@ -103,6 +102,7 @@ module.exports = {
 
       createWallet(keyPair, balance) {
 
+        // serialize and append message header
         let buffer = createHeader(TX_WALLET_ID)
 
         let data = {
@@ -110,6 +110,7 @@ module.exports = {
           initialBalance: balance
         }
 
+        // serialize and append message body
         const body = CreateTransactionProtobuf.encode(data).finish();
 
         body.forEach(element => {
@@ -119,6 +120,7 @@ module.exports = {
         // calculate payload and insert it into buffer
         Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, PAYLOD_SIZE_OFFSET)
 
+        // append signature
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
         data.ownerPublicKey = keyPair.publicKey
@@ -134,6 +136,7 @@ module.exports = {
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
         
+        // serialize and append message header
         let buffer = createHeader(TX_TRANSFER_ID)
 
         const data = {
@@ -152,6 +155,7 @@ module.exports = {
         // calculate payload and insert it into buffer
         Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, PAYLOD_SIZE_OFFSET)
 
+        // append signature
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
         data.senderId = keyPair.publicKey
