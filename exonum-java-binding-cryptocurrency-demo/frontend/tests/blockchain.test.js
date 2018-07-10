@@ -28,18 +28,15 @@ mock.onGet('/api/explorer/v1/transactions/362c7ad9827776b07e160b4dc857f46a5c9181
   'type': 'committed'
 })
 
-mock.onPost('/api/cryptocurrency-demo-service/submit-transaction', {
-  protocol_version: 0,
+mock.onPost('/api/cryptocurrency-demo-service/submit-transaction', { protocol_version: 0,
   service_id: 42,
   message_id: 2,
-  signature: '088ae36319fceb2bf9a6378c1a540261af6b1c634274579637ba140c008e6308d3a427854d19b4c2036daef8a066175c926662ca00248b1526214da3e9bd860f',
-  body: {
-    seed: '21093588264774074',
-    senderId: '9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13',
-    recipientId: '7c3cd965f8084b5730f0f95da1f3b5baf7554c044078d986e249d78c4ee00a98',
-    amount: '25'
-  }
-}).replyOnce(200, '1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127')
+  signature: '74b1d84de332385a975cfb19c03dd156ede8ba28f94386942a9ea2ea55430b3b77ecd53f50d8797c841348dd24025aa4c9db025449efc57a838c762f709d780a',
+  body:
+   { seed: '21093588264774074',
+     senderId: '9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13',
+     recipientId: '7c3cd965f8084b5730f0f95da1f3b5baf7554c044078d986e249d78c4ee00a98',
+     amount: '25' } }).replyOnce(200, '1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127')
 
 mock.onGet('/api/explorer/v1/transactions/1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
   'type': 'in-pool'
