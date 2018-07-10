@@ -134,6 +134,10 @@ public class ApiControllerTest {
                   int statusCode = r.statusCode();
                   context.assertEquals(HTTP_OK, statusCode);
 
+                  // Check the payload type
+                  String contentType = r.getHeader("Content-Type");
+                  context.assertEquals("text/plain", contentType);
+
                   // Check the response body
                   String response = r.bodyAsString();
                   context.assertEquals(expectedResponse, response);
