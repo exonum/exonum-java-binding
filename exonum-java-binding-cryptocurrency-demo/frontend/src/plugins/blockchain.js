@@ -3,6 +3,7 @@ import axios from 'axios'
 import * as Protobuf from 'protobufjs/light'
 import bigInt from 'big-integer'
 import nacl from 'tweetnacl'
+import { SIGABRT } from 'constants';
 
 const Root = Protobuf.Root
 const Type = Protobuf.Type
@@ -122,7 +123,6 @@ module.exports = {
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
         data.ownerPublicKey = keyPair.publicKey
-
         return axios.post(TX_URL, {
          protocol_version: PROTOCOL_VERSION,
          service_id: SERVICE_ID,
@@ -158,7 +158,6 @@ module.exports = {
 
         data.senderId = keyPair.publicKey
         data.recipientId = receiver
-
         return axios.post(TX_URL, {
           protocol_version: PROTOCOL_VERSION,
           service_id: SERVICE_ID,
