@@ -94,8 +94,7 @@ module.exports = {
       },
 
       generateSeed() {
-        const buffer = nacl.randomBytes(7)
-        return bigInt.fromArray(Array.from(buffer), 256).toString()
+        return bigInt.randBetween(0, 2147483647).valueOf()
       },  
 
       createWallet(keyPair, balance) {
@@ -122,6 +121,7 @@ module.exports = {
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
         data.ownerPublicKey = keyPair.publicKey
+
         return axios.post(TX_URL, {
          protocol_version: PROTOCOL_VERSION,
          service_id: SERVICE_ID,
