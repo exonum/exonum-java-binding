@@ -30,11 +30,11 @@ public class CheckedFlatMapProofTest {
 
     DbKey valueKey = DbKey.newLeafKey(secondKey);
     MapProofEntryLeaf leaf = createLeafMapEntry(valueKey.getKeySlice(), VALUE);
-    List<MapProofEntry> entries =
-        Arrays.asList(
-            createBranchMapEntry(firstKey),
-            leaf,
-            createBranchMapEntry(thirdKey));
+    List<MapProofEntry> entries = Arrays.asList(
+        createBranchMapEntry(firstKey),
+        leaf,
+        createBranchMapEntry(thirdKey)
+    );
     UncheckedMapProof uncheckedFlatMapProof = new UncheckedFlatMapProof(entries);
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
@@ -72,10 +72,10 @@ public class CheckedFlatMapProofTest {
   public void mapProofWithEqualEntriesOrderShouldBeInvalid() {
     byte[] firstKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
     byte[] secondKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
-    List<MapProofEntry> entries =
-        Arrays.asList(
-            createBranchMapEntry(firstKey),
-            createBranchMapEntry(secondKey));
+    List<MapProofEntry> entries = Arrays.asList(
+        createBranchMapEntry(firstKey),
+        createBranchMapEntry(secondKey)
+    );
     UncheckedMapProof uncheckedFlatMapProof = new UncheckedFlatMapProof(entries);
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
@@ -86,14 +86,24 @@ public class CheckedFlatMapProofTest {
   public void mapProofWithWrongEntriesOrderShouldBeInvalid() {
     byte[] firstKey = createPrefixed(bytes(0b011101), DbKey.KEY_SIZE);
     byte[] secondKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
-    List<MapProofEntry> entries =
-        Arrays.asList(
-            createBranchMapEntry(firstKey),
-            createLeafMapEntry(secondKey, VALUE));
+    List<MapProofEntry> entries = Arrays.asList(
+        createBranchMapEntry(firstKey),
+        createLeafMapEntry(secondKey, VALUE)
+    );
     UncheckedMapProof uncheckedFlatMapProof = new UncheckedFlatMapProof(entries);
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_ORDER));
+  }
+
+  @Test
+  public void mapProofWithoutEntriesShouldBeValid() {
+    List entries = Collections.EMPTY_LIST;
+
+    UncheckedMapProof uncheckedFlatMapProof = new UncheckedFlatMapProof(entries);
+
+    CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));
   }
 
   private static MapProofEntryBranch createBranchMapEntry(byte[] key) {

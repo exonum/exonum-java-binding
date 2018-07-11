@@ -7,8 +7,11 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +27,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   UncheckedFlatMapProof(List<MapProofEntry> proofList) {
     this.proofList = proofList;
+  }
+
+  @SuppressWarnings("unused") // Native API
+  static UncheckedFlatMapProof fromUnsorted(MapProofEntry[] proofList) {
+    List<MapProofEntry> mapProofEntries = Arrays.asList(proofList);
+    mapProofEntries.sort(Comparator.comparing(MapProofEntry::getDbKey));
+    return new UncheckedFlatMapProof(mapProofEntries);
   }
 
   @Override

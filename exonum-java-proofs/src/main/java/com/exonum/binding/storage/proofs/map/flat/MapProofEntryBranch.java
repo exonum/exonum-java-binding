@@ -13,10 +13,20 @@ public class MapProofEntryBranch extends MapProofEntry {
 
   private final HashCode hash;
 
-  MapProofEntryBranch(DbKey dbKey, HashCode hash) {
+  /**
+   * Creates a new entry in a flat map proof corresponding to a branch node.
+   * @param dbKey a 34-byte database key of the corresponding branch node
+   * @param branchNodeHash a hash of the corresponding branch node
+   */
+  @SuppressWarnings("unused") // Native API
+  MapProofEntryBranch(byte[] dbKey, byte[] branchNodeHash) {
+    this(DbKey.fromBytes(dbKey), HashCode.fromBytes(branchNodeHash));
+  }
+
+  MapProofEntryBranch(DbKey dbKey, HashCode branchNodeHash) {
     super(dbKey);
     checkArgument(dbKey.getNodeType() == Type.BRANCH, "dbKey should be of type BRANCH", dbKey);
-    this.hash = hash;
+    this.hash = branchNodeHash;
   }
 
   /**

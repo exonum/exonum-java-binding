@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
+import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 
@@ -15,6 +16,16 @@ public class MapProofEntryLeaf extends MapProofEntry {
   private final byte[] value;
 
   private final HashFunction hashFunction;
+
+  /**
+   * Creates a new entry in a flat map proof corresponding to a leaf node.
+   * @param dbKey a 34-byte database key
+   * @param value a value mapped to the key
+   */
+  @SuppressWarnings("unused") // Native API
+  MapProofEntryLeaf(byte[] dbKey, byte[] value) {
+    this(DbKey.fromBytes(dbKey), value, Hashing.sha256());
+  }
 
   MapProofEntryLeaf(DbKey dbKey, byte[] value, HashFunction hashFunction) {
     super(dbKey);
