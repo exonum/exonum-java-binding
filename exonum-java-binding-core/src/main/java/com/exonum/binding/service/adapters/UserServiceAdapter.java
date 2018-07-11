@@ -106,7 +106,7 @@ public class UserServiceAdapter {
       List<HashCode> stateHashes = service.getStateHashes(snapshot);
       return stateHashes.stream()
           .map(HashCode::asBytes)
-          .toArray(size -> new byte[size][]);
+          .toArray(byte[][]::new);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
     }
