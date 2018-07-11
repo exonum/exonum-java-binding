@@ -1,6 +1,6 @@
 # Exonum Java Binding
 
-[![Build Status](https://www.travis-ci.org/exonum/exonum-java-binding.svg?branch=master)](https://www.travis-ci.org/exonum/exonum-java-binding)
+[![Build Status](https://img.shields.io/travis/exonum/exonum-java-binding/master.svg)](https://www.travis-ci.org/exonum/exonum-java-binding)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.exonum.binding/exonum-java-binding-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.exonum.binding/exonum-java-binding-core/)
 [![Join the chat on https://gitter.im/exonum/exonum-java-binding](https://img.shields.io/gitter/room/exonum/exonum-java-binding.svg?label=Chat)](https://gitter.im/exonum/exonum-java-binding)
 
