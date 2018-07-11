@@ -17,6 +17,8 @@
         <junit.version>4.12</junit.version>
         <mockito-core.version>2.18.3</mockito-core.version>
         <exonum-bom.version>1.0.0</exonum-bom.version>
+        <!--This property is set by jacoco and used in the surefire config further down-->
+        <argLine></argLine>
     </properties>
 
     <dependencyManagement>

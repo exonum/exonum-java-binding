@@ -81,7 +81,7 @@
             </goals>
           </execution>
 
-          <!-- Runs rust native tests withour resource manager.
+          <!-- Runs rust native tests without resource manager.
 
                todo: run on a CI server only
                Note: cannot be currently extracted in 'ci-build' profile for will produce a library

@@ -16,8 +16,7 @@ set -eu -o pipefail
 #  - Checkstyle checks as errors.
 #  - Native unit & integration tests that do not require a JVM.
 # See build definitions of the modules for more.
-mvn clover:setup \
-  install \
+mvn install \
   -DskipTests \
   --activate-profiles ci-build \
   -Drust.compiler.version="stable"
@@ -26,4 +25,4 @@ mvn clover:setup \
 ./run_native_integration_tests.sh --skip-compile
 
 # Generate a coverage report
-mvn clover:aggregate clover:clover
+mvn jacoco:report coveralls:report
