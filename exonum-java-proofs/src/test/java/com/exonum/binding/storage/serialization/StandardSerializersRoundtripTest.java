@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.hash.HashCode;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.List;
 import org.junit.Test;
@@ -12,7 +13,7 @@ public class StandardSerializersRoundtripTest {
 
   @Test
   public void roundtripLongTest() {
-    List<Long> valuesToTest = Lists.newArrayList(
+    List<Long> valuesToTest = ImmutableList.of(
         Long.MIN_VALUE,
         0L,
         Long.MAX_VALUE
@@ -22,7 +23,7 @@ public class StandardSerializersRoundtripTest {
 
   @Test
   public void roundtripStringTest() {
-    List<String> valuesToTest = Lists.newArrayList(
+    List<String> valuesToTest = ImmutableList.of(
         "",
         "a",
         "δ", // A two-byte character
@@ -36,7 +37,7 @@ public class StandardSerializersRoundtripTest {
 
   @Test
   public void roundtripHashCodeTest() {
-    List<HashCode> valuesToTest = Lists.newArrayList(
+    List<HashCode> valuesToTest = ImmutableList.of(
         HashCode.fromInt(0x89abcdef),
         HashCode.fromInt(0x13579bdf),
         HashCode.fromInt(0x0000abcd),
