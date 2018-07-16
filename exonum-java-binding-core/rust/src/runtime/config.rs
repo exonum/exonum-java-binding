@@ -70,9 +70,9 @@ pub(crate) fn validate_and_convert(
 }
 
 fn check_not_forbidden(user_parameter: &str) -> Result<(), ForbiddenParameterError> {
-    if user_parameter.contains("Djava.class.path")
-        || user_parameter.contains("Djava.library.path")
-        || user_parameter.contains("Dlog4j.configurationFile")
+    if user_parameter.starts_with("Djava.class.path")
+        || user_parameter.starts_with("Djava.library.path")
+        || user_parameter.starts_with("Dlog4j.configurationFile")
     {
         Err(ForbiddenParameterError(user_parameter.to_string()))
     } else {
@@ -85,12 +85,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn not_forbidden() {
+    fn not_forbidden_debug() {
         let validation_result = validate_and_convert("Xdebug");
         assert_eq!(validation_result, Ok("-Xdebug".to_string()));
 
-        let validation_result = validate_and_convert("Duser.parameter");
-        assert_eq!(validation_result, Ok("-Duser.parameter".to_string()));
+    }
+
+    #[test]
+    fn not_forbidden_user_parameter() {
+        let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
+        assert_eq!(validation_result, Ok("-Duser.parameter=Djava.library.path".to_string()));
     }
 
     #[test]

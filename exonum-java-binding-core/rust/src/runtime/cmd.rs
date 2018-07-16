@@ -7,7 +7,7 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
-const EJB_USER_PARAMETERS: &str = "EJB_USER_PARAMETERS";
+const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_CLASSPATH: &str = "EJB_CLASSPATH";
 const EJB_LIBPATH: &str = "EJB_LIBPATH";
@@ -22,9 +22,10 @@ impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
-                EJB_USER_PARAMETERS,
+                EJB_JVM_ARGUMENTS,
                 false,
-                "Additional parameters for JVM.",
+                "Additional parameters for JVM. Must not have a leading dash. \
+                For example, `Xmx2G` or `Xdebug`",
                 None,
                 "ejb-jvm-args",
                 true,
@@ -58,7 +59,7 @@ impl CommandExtension for GenerateNodeConfig {
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
         let user_parameters = context
-            .arg_multiple(EJB_USER_PARAMETERS)
+            .arg_multiple(EJB_JVM_ARGUMENTS)
             .unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;

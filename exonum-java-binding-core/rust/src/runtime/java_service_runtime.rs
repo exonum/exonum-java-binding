@@ -101,11 +101,11 @@ impl JavaServiceRuntime {
 pub fn panic_if_java_options() {
     if env::var("_JAVA_OPTIONS").is_ok() {
         panic!(
-            "_JAVA_OPTIONS environmental variable is set. \
-             Due to the fact that it will overwrite any JVM setting, \
+            "_JAVA_OPTIONS environment variable is set. \
+             Due to the fact that it will overwrite any JVM settings, \
              including ones set by EJB internally, this variable is \
              forbidden for EJB applications.\n\
-             It is recommend to use `--ejb-jvm-args` command-line \
+             It is recommended to use `--ejb-jvm-args` command-line \
              parameter for setting custom JVM parameters."
         );
     }
