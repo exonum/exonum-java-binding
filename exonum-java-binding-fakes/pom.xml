@@ -5,13 +5,13 @@
     <parent>
         <artifactId>exonum-java-binding-parent</artifactId>
         <groupId>com.exonum.binding</groupId>
-        <version>0.1.2</version>
+        <version>0.1.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>exonum-java-binding-fakes</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <name>Exonum Java Binding: Fakes</name>
@@ -81,7 +81,7 @@
         <dependency>
             <groupId>com.exonum.binding</groupId>
             <artifactId>exonum-java-binding-core</artifactId>
-            <version>0.1.2</version>
+            <version>0.1.1</version>
         </dependency>
 
         <dependency>
