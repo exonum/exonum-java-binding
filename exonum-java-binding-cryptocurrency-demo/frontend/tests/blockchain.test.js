@@ -4,7 +4,7 @@ import MockAdapter from 'axios-mock-adapter'
 import * as Exonum from 'exonum-client'
 import * as Blockchain from '../src/plugins/blockchain.js'
 const mock = new MockAdapter(axios)
-const bigIntRegex = /[0-9]+/i;
+const MAX_VALUE = 2147483647;
 const hexRegex = /[0-9A-Fa-f]+/i;
 
 Vue.use(Blockchain)
@@ -63,7 +63,7 @@ describe('Interaction with blockchain', () => {
   it('should generate new random seed', () => {
     const seed = Vue.prototype.$blockchain.generateSeed()
 
-    expect(seed).toMatch(bigIntRegex)
+    expect(seed).toBeLessThan(MAX_VALUE)
   })
 
   it('should create new wallet', async () => {
