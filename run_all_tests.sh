@@ -18,7 +18,7 @@ set -eu -o pipefail
 mvn install \
   -DskipTests \
   --activate-profiles ci-build \
-  -Drust.compiler.version="1.26.2"
+  -Drust.compiler.version="${RUST_VERSION:-1.26.2}"
 
 # Run native integration tests that require a JVM.
 ./run_native_integration_tests.sh --skip-compile

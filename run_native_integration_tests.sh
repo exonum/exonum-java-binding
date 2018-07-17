@@ -36,6 +36,6 @@ cd exonum-java-binding-core/rust
 
 ## Stable works well unless you want benchmarks.
 # TODO: stable does not work well until ECR-1839 is resolved
-RUST_COMPILER_VERSION="1.26.2"
+RUST_COMPILER_VERSION="${RUST_VERSION:-1.26.2}"
 
 cargo "+${RUST_COMPILER_VERSION}" test
