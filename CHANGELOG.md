@@ -7,6 +7,7 @@ The project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 
 ### Breaking changes
 
+- `Message#getSignature` returns a byte array. (#339)
 - Prepended `/api` before the path to the REST API endpoints of a service. (#340)
 
 ### New features
@@ -22,6 +23,10 @@ The project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
   ```
 
   Configuration service is enabled by default. (#338, #313)
+ 
+- Added operations to get a message with and without signature 
+  (`BinaryMessage#getMessageNoSignature` and `BinaryMessage#getSignedMessage` respectively).
+  (#339)
 
 - Added methods to sign transaction messages and verify their signatures. (#341)
 
