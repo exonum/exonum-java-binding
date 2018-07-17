@@ -1,15 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-The project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Breaking changes
-
-- Prepended `/api` before the path to the REST API endpoints of a service. (#340)
-
-### New features
+### Added
 
 - Standard services may be enabled using specific `ejb_app_services.toml` file.
   It supports only `configuration` and `btc-anchoring` services at the moment.
@@ -23,8 +21,14 @@ The project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 
   Configuration service is enabled by default. (#338, #313)
 
-- Added methods to sign transaction messages and verify their signatures. (#341)
+- Methods to sign transaction messages and verify their signatures. (#341)
+
+### Changed
+
+- Prepended `/api` before the path to the REST API endpoints of a service. (#340)
 
 ## 0.1 - 2018-06-16
 
 The first release of Exonum Java Binding.
+
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.1...HEAD
