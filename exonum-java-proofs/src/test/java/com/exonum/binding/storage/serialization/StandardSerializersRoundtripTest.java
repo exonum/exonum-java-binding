@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 
 import com.exonum.binding.hash.HashCode;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import java.util.List;
 import org.junit.Test;
 
