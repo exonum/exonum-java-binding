@@ -20,12 +20,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   ```
 
   Configuration service is enabled by default. (#338, #313)
+ 
+- Added operations to get a message with and without signature 
+  (`BinaryMessage#getMessageNoSignature` and `BinaryMessage#getSignedMessage` respectively).
+  (#339)
 
 - Methods to sign transaction messages and verify their signatures. (#341)
+
+- Enable passing extra arguments to the JVM from the command line.
+  Use `--ejb-jvm-args` flag to specify an additional argument, e.g., 
+  `--ejb-jvm-args=Xmx2g`. (#342)
 
 ### Changed
 
 - Prepended `/api` before the path to the REST API endpoints of a service. (#340)
+
+- `Message#getSignature` returns a byte array. (#339)
+
 
 ## 0.1 - 2018-06-16
 
