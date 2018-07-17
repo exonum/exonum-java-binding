@@ -46,11 +46,19 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <outputFile>${project.build.directory}/qa-service-classpath.txt</outputFile>
+                    <includeScope>runtime</includeScope>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-classpath-file</id>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

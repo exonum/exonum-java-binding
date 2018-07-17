@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -112,9 +112,11 @@ public final class MessageReader implements BinaryMessage {
    * and is read-only.
    */
   @Override
-  public ByteBuffer getSignature() {
+  public byte[] getSignature() {
     message.position(signatureOffset());
-    return message.slice();
+    byte[] signature = new byte[Message.SIGNATURE_SIZE];
+    message.get(signature);
+    return signature;
   }
 
   @Override
@@ -129,7 +131,7 @@ public final class MessageReader implements BinaryMessage {
    * and is read-only.
    */
   @Override
-  public ByteBuffer getMessage() {
+  public ByteBuffer getSignedMessage() {
     message.position(0);
     return message.duplicate();
   }

@@ -2,11 +2,12 @@ use exonum::blockchain::Service;
 use exonum::helpers::fabric::{CommandExtension, Context, ServiceFactory};
 use jni::{self, JavaVM};
 
+use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig};
-use runtime::config::{Config, JvmConfig, ServiceConfig};
+use runtime::config::{self, Config, JvmConfig, ServiceConfig};
 use utils::{join_paths, unwrap_jni};
 use MainExecutor;
 
@@ -30,7 +31,7 @@ impl JavaServiceRuntime {
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
     pub fn get_or_create(config: Config) -> Self {
-        let runtime = unsafe {
+        unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
                 let java_vm = Self::create_java_vm(config.jvm_config);
@@ -46,8 +47,7 @@ impl JavaServiceRuntime {
             JAVA_SERVICE_RUNTIME
                 .clone()
                 .expect("Trying to return runtime, but it's uninitialized")
-        };
-        runtime
+        }
     }
 
     /// Returns internal service proxy.
@@ -56,11 +56,16 @@ impl JavaServiceRuntime {
     }
 
     /// Initializes JVM with provided configuration.
+    ///
+    /// # Panics
+    ///
+    /// - If user specified invalid additional JVM parameters.
     fn create_java_vm(config: JvmConfig) -> JavaVM {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
-        if config.debug {
-            args_builder = args_builder.option("-Xcheck:jni").option("-Xdebug");
+        for param in &config.user_parameters {
+            let option = config::validate_and_convert(param).unwrap();
+            args_builder = args_builder.option(&option);
         }
 
         let class_path = join_paths(&[&config.system_class_path, &config.service_class_path]);
@@ -94,7 +99,22 @@ impl JavaServiceRuntime {
     }
 }
 
-/// TODO
+/// Panics if `_JAVA_OPTIONS` environmental variable is set.
+pub fn panic_if_java_options() {
+    if env::var("_JAVA_OPTIONS").is_ok() {
+        panic!(
+            "_JAVA_OPTIONS environment variable is set. \
+             Due to the fact that it will overwrite any JVM settings, \
+             including ones set by EJB internally, this variable is \
+             forbidden for EJB applications.\n\
+             It is recommended to use `--ejb-jvm-args` command-line \
+             parameter for setting custom JVM parameters."
+        );
+    }
+}
+
+/// Factory for particular Java service.
+/// Initializes EJB runtime and creates `ServiceProxy`.
 pub struct JavaServiceFactory;
 
 impl ServiceFactory for JavaServiceFactory {

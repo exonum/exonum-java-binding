@@ -67,7 +67,7 @@
     <mockito-core.version>2.18.3</mockito-core.version>
     <guava.version>25.1-jre</guava.version>
     <vertx.version>3.5.2</vertx.version>
-    <equalsverifier.version>2.4.6</equalsverifier.version>
+    <equalsverifier.version>2.4.8</equalsverifier.version>
     <!-- skip all tests (unit and ITs) until the loading bug is fixed (ECR-942) -->
     <skipTests>true</skipTests>
   </properties>
@@ -166,6 +166,53 @@
            <artifactId>versions-maven-plugin</artifactId>
            <version>2.5</version>
          </plugin>
+
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-javadoc-plugin</artifactId>
+           <version>3.0.1</version>
+           <configuration>
+             <doclint>none</doclint>
+             <detectOfflineLinks>false</detectOfflineLinks>
+           </configuration>
+           <executions>
+             <execution>
+               <id>attach-javadocs</id>
+               <goals>
+                 <goal>jar</goal>
+               </goals>
+             </execution>
+           </executions>
+         </plugin>
+
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-source-plugin</artifactId>
+           <version>3.0.1</version>
+           <executions>
+             <execution>
+               <id>attach-sources</id>
+               <goals>
+                 <goal>jar-no-fork</goal>
+               </goals>
+             </execution>
+           </executions>
+         </plugin>
+
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-deploy-plugin</artifactId>
+           <version>2.8.2</version>
+           <executions>
+             <execution>
+               <id>default-deploy</id>
+               <phase>deploy</phase>
+               <goals>
+                 <goal>deploy</goal>
+               </goals>
+             </execution>
+           </executions>
+         </plugin>
        </plugins>
      </pluginManagement>
 
@@ -195,54 +242,6 @@
                 </requireOS>
               </rules>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
-        <configuration>
-          <doclint>none</doclint>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <executions>
-          <execution>
-            <id>default-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -276,6 +275,13 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <!--It is needed for correct gpg signing with gpg 2.1-->
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
               </execution>
             </executions>
           </plugin>

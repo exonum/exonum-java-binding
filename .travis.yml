@@ -15,8 +15,8 @@ addons:
 env:
   global:
     - RUST_VERSION=stable
-    - RUST_NIGHTLY_VERSION=nightly-2018-05-26
-    - RUST_CLIPPY_VERSION=0.0.205
+    - RUST_NIGHTLY_VERSION=nightly-2018-06-29
+    - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
 
 cache:
@@ -53,9 +53,12 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt --all -- --write-mode=diff
-  # FIXME reenable clippy checks after crashes with jni fixed [ECR-1538]
-  - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings || true
+  - cargo fmt --all -- --write-mode=check
+  # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
+  # Next 2 lines are a workaround to prevent clippy checking dependencies.
+  - cargo +${RUST_NIGHTLY_VERSION} check
+  - cargo +${RUST_NIGHTLY_VERSION} clean -p java_bindings
+  - cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
   - cargo audit
   - cd -
   - ./run_all_tests.sh

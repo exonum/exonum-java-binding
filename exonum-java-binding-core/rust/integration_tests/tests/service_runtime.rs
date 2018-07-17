@@ -17,7 +17,7 @@ fn bootstrap() {
     };
 
     let jvm_config = JvmConfig {
-        debug: true,
+        user_parameters: Vec::new(),
         system_class_path: get_fakes_classpath(),
         service_class_path: "".to_string(),
         lib_path: get_libpath(),

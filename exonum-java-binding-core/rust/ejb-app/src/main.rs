@@ -1,12 +1,20 @@
+extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
 extern crate java_bindings;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate toml;
 
-use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
-use java_bindings::exonum::helpers::fabric;
+#[cfg(test)]
+extern crate tempfile;
+
+mod node_builder;
 
 fn main() {
-    let builder = fabric::NodeBuilder::new()
-        .with_service(Box::new(java_bindings::JavaServiceFactory))
-        .with_service(Box::new(ConfigurationServiceFactory));
+    // Panic if `_JAVA_OPTIONS` environmental variable is set.
+    java_bindings::panic_if_java_options();
+
+    let builder = node_builder::create();
     builder.run()
 }

@@ -27,6 +27,7 @@
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
+    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
   </properties>
 
   <build>
@@ -35,7 +36,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <compilerArgs>
+          <!-- Make it possible to add arguments in the parent configuration.
+               Default is "merge" which will discard any <arg> child elements in the parent. -->
+          <compilerArgs combine.children="append">
             <arg>-h</arg>
             <arg>${project.build.headersDirectory}</arg>
           </compilerArgs>
@@ -198,6 +201,21 @@
           <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 
@@ -272,6 +290,14 @@
       <groupId>com.google.auto.value</groupId>
       <artifactId>auto-value</artifactId>
       <version>${auto-value.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--It is needed for Javadoc generation with JDK 9-->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>${javax-annotation-api.version}</version>
       <scope>provided</scope>
     </dependency>
 

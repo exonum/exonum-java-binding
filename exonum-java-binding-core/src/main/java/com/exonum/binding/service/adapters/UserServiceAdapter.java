@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,8 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
 public class UserServiceAdapter {
+
+  private static final String API_ROOT_PATH = "/api";
 
   private final Service service;
   private final Server server;
@@ -137,7 +139,12 @@ public class UserServiceAdapter {
     node = new NodeProxy(nodeNativeHandle, viewFactory);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
-    server.mountSubRouter("/" + getName(), router);
+    server.mountSubRouter(serviceApiPath(), router);
+  }
+
+  private String serviceApiPath() {
+    String serviceName = getName();
+    return API_ROOT_PATH + "/" + serviceName;
   }
 
   /**
