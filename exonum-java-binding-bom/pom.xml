@@ -7,11 +7,11 @@
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
   </parent>
 
   <artifactId>exonum-java-binding-bom</artifactId>
-  <version>1.0.0</version>
+  <version>0.1.1</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding: Bill of Materials</name>
