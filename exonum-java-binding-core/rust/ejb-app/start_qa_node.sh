@@ -80,7 +80,6 @@ do
      --ejb-classpath $EJB_CLASSPATH \
      --ejb-libpath $EJB_LIBPATH \
      --ejb-log-config-path $log_config_path \
-     --ejb-jvm-args Xdebug \
      --peer-address 127.0.0.1:$peer_port
 done
 
