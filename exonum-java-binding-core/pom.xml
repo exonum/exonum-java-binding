@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.2</version>
   </parent>
 
   <artifactId>exonum-java-binding-core</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.2</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Core</name>
@@ -203,6 +203,16 @@
           <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 
@@ -257,7 +267,7 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-proofs</artifactId>
-      <version>0.1.0</version>
+      <version>0.1.2</version>
     </dependency>
 
     <dependency>
@@ -336,7 +346,7 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
-      <version>0.1.0</version>
+      <version>0.1.2</version>
       <scope>test</scope>
     </dependency>
 

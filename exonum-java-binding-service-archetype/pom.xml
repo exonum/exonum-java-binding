@@ -5,7 +5,7 @@
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
-    <version>0.1.0</version>
+    <version>0.1.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

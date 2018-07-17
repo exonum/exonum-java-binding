@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.binding</groupId>
   <artifactId>exonum-java-binding-parent</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.2</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding Parent</name>
@@ -24,6 +24,32 @@
     <name>Exonum</name>
     <url>https://exonum.com/</url>
   </organization>
+
+  <developers>
+    <developer>
+      <id>dmitry-timofeev</id>
+      <name>Dmitry Timofeev</name>
+      <url>https://github.com/dmitry-timofeev</url>
+    </developer>
+
+    <developer>
+      <id>alexander-irbis</id>
+      <name>Alexander Semichenkov</name>
+      <url>https://github.com/alexander-irbis</url>
+    </developer>
+
+    <developer>
+      <id>MakarovS</id>
+      <name>Sergei Makarov</name>
+      <url>https://github.com/MakarovS</url>
+    </developer>
+
+    <developer>
+      <id>vitvakatu</id>
+      <name>Ilya Bogdanov</name>
+      <url>https://github.com/vitvakatu</url>
+    </developer>
+  </developers>
 
   <scm>
     <connection>scm:git:https://github.com/exonum/exonum-java-binding.git</connection>
@@ -166,6 +192,38 @@
            <artifactId>versions-maven-plugin</artifactId>
            <version>2.5</version>
          </plugin>
+
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-javadoc-plugin</artifactId>
+           <version>3.0.1</version>
+           <configuration>
+             <doclint>none</doclint>
+             <detectOfflineLinks>false</detectOfflineLinks>
+           </configuration>
+           <executions>
+             <execution>
+               <id>attach-javadocs</id>
+               <goals>
+                 <goal>jar</goal>
+               </goals>
+             </execution>
+           </executions>
+         </plugin>
+
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-source-plugin</artifactId>
+           <version>3.0.1</version>
+           <executions>
+             <execution>
+               <id>attach-sources</id>
+               <goals>
+                 <goal>jar-no-fork</goal>
+               </goals>
+             </execution>
+           </executions>
+         </plugin>
        </plugins>
      </pluginManagement>
 
@@ -195,39 +253,6 @@
                 </requireOS>
               </rules>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
-        <configuration>
-          <doclint>none</doclint>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -276,6 +301,13 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <!--It is needed for correct gpg signing with gpg 2.1-->
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
               </execution>
             </executions>
           </plugin>
