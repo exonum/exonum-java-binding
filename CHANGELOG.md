@@ -37,7 +37,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `Message#getSignature` returns a byte array. (#339)
 
-
 ## 0.1 - 2018-06-16
 
 The first release of Exonum Java Binding.
