@@ -17,7 +17,7 @@ fn bootstrap() {
     };
 
     let jvm_config = JvmConfig {
-        debug: true,
+        user_parameters: Vec::new(),
         class_path: get_fakes_classpath(),
         lib_path: get_libpath(),
         log_config_path: "".to_owned(),
