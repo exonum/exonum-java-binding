@@ -37,8 +37,7 @@ before_install:
     # Use stable Rust for rustfmt.
     # TODO: use stable rust everywhere when ECR-1839 fixed.
   - rustup toolchain install stable
-  - rustup default stable
-  - rustup component add rustfmt-preview
+  - rustup component add rustfmt-preview --toolchain stable
   - rustfmt -V
   - rustup default "$RUST_VERSION"
     # Install cargo-audit if it's not already.
