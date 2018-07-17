@@ -25,7 +25,7 @@ impl CommandExtension for GenerateNodeConfig {
                 EJB_JVM_ARGUMENTS,
                 false,
                 "Additional parameters for JVM. Must not have a leading dash. \
-                For example, `Xmx2G` or `Xdebug`",
+                 For example, `Xmx2G` or `Xdebug`",
                 None,
                 "ejb-jvm-args",
                 true,
@@ -58,9 +58,7 @@ impl CommandExtension for GenerateNodeConfig {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = context
-            .arg_multiple(EJB_JVM_ARGUMENTS)
-            .unwrap_or_default();
+        let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;
         let lib_path = context.arg(EJB_LIBPATH)?;

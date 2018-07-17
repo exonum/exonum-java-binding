@@ -88,13 +88,15 @@ mod tests {
     fn not_forbidden_debug() {
         let validation_result = validate_and_convert("Xdebug");
         assert_eq!(validation_result, Ok("-Xdebug".to_string()));
-
     }
 
     #[test]
     fn not_forbidden_user_parameter() {
         let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
-        assert_eq!(validation_result, Ok("-Duser.parameter=Djava.library.path".to_string()));
+        assert_eq!(
+            validation_result,
+            Ok("-Duser.parameter=Djava.library.path".to_string())
+        );
     }
 
     #[test]
