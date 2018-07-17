@@ -25,6 +25,10 @@ The project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
 
 - Added methods to sign transaction messages and verify their signatures. (#341)
 
+- Enable passing extra arguments to the JVM from the command line.
+  Use `--ejb-jvm-args` flag to specify an additional argument, e.g., 
+  `--ejb-jvm-args=Xmx2g`. (#342)
+
 ## 0.1 - 2018-06-16
 
 The first release of Exonum Java Binding.
