@@ -38,5 +38,4 @@ cd exonum-java-binding-core/rust
 # TODO: stable does not work well until ECR-1839 is resolved
 RUST_COMPILER_VERSION="1.26.2"
 
-cargo "+${RUST_COMPILER_VERSION}" test \
-  --manifest-path integration_tests/Cargo.toml
+cargo "+${RUST_COMPILER_VERSION}" test
