@@ -30,7 +30,7 @@ import org.junit.Test;
 
 public class ProofListElementTest {
 
-  private static byte[] E1 = bytes("element 1");
+  private static final byte[] E1 = bytes("element 1");
 
   private ProofListElement node;
 
