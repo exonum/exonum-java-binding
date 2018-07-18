@@ -7,7 +7,7 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
-const EJB_DEBUG: &str = "EJB_DEBUG";
+const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_CLASSPATH: &str = "EJB_CLASSPATH";
 const EJB_LIBPATH: &str = "EJB_LIBPATH";
@@ -22,12 +22,13 @@ impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
-                EJB_DEBUG,
+                EJB_JVM_ARGUMENTS,
                 false,
-                "Debug mode for JVM.",
+                "Additional parameters for JVM. Must not have a leading dash. \
+                 For example, `Xmx2G` or `Xdebug`",
                 None,
-                "ejb-debug",
-                false,
+                "ejb-jvm-args",
+                true,
             ),
             Argument::new_named(
                 EJB_LOG_CONFIG_PATH,
@@ -57,13 +58,13 @@ impl CommandExtension for GenerateNodeConfig {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let debug = context.arg(EJB_DEBUG).unwrap_or_default();
+        let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;
         let lib_path = context.arg(EJB_LIBPATH)?;
 
         let jvm_config = JvmConfig {
-            debug,
+            user_parameters,
             class_path,
             lib_path,
             log_config_path,

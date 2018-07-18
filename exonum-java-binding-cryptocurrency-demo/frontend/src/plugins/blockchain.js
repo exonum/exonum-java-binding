@@ -13,7 +13,7 @@ let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("own
 CreateTransactionProtobuf.add(new Field("initialBalance", 2, "int64"))
 
 // creating schema for transfer thansaction with protobuf
-let TransferTransactionProtobuf = new Type("TransferTransaction").add(new Field("seed", 1, "u-int64"))
+let TransferTransactionProtobuf = new Type("TransferTransaction").add(new Field("seed", 1, "int64"))
 TransferTransactionProtobuf.add(new Field("senderId", 2, "bytes"))
 TransferTransactionProtobuf.add(new Field("recipientId", 3, "bytes"))
 TransferTransactionProtobuf.add(new Field("amount", 4, "int64"))
@@ -33,6 +33,7 @@ const TX_WALLET_ID = 1
 const SIGNATURE_LENGTH = 64
 const PAYLOD_SIZE_OFFSET = 6
 const PER_PAGE = 10
+const MAX_VALUE = 2147483647
 
 const MessageHead = Exonum.newType({
   fields: [
@@ -94,8 +95,7 @@ module.exports = {
       },
 
       generateSeed() {
-        const buffer = nacl.randomBytes(7)
-        return bigInt.fromArray(Array.from(buffer), 256).toString()
+        return bigInt.randBetween(0, MAX_VALUE).valueOf()
       },  
 
       createWallet(keyPair, balance) {
@@ -144,7 +144,7 @@ module.exports = {
           amount: amountToTransfer
         }
 
-        const body = CreateTransactionProtobuf.encode(data).finish();
+        const body = TransferTransactionProtobuf.encode(data).finish();
 
         body.forEach(element => {
           buffer.push(element)
@@ -158,7 +158,6 @@ module.exports = {
 
         data.senderId = keyPair.publicKey
         data.recipientId = receiver
-
         return axios.post(TX_URL, {
           protocol_version: PROTOCOL_VERSION,
           service_id: SERVICE_ID,
@@ -180,7 +179,8 @@ module.exports = {
       },
 
       getTransaction(hash) {
-        return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => response.data)
+        return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => {
+          return response.data })
       }
     }
   }
