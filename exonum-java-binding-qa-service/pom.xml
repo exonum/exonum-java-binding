@@ -60,6 +60,15 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Skip the deployment of internal module as it is inherited from parent pom -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
