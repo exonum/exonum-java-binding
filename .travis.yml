@@ -14,7 +14,7 @@ addons:
 
 env:
   global:
-    - RUST_VERSION=1.26.2
+    - RUST_COMPILER_VERSION=1.26.2
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
@@ -27,7 +27,7 @@ cache:
 before_install:
   - export PATH="$PATH":"$HOME/.cargo/bin"
     # Install rustup if it's not already installed (i.e., not in CI cache).
-  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
+  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
     # Install nightly rust version and clippy.
   - rustup toolchain install $RUST_NIGHTLY_VERSION
   - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
@@ -39,7 +39,7 @@ before_install:
   - rustup toolchain install stable
   - rustup component add rustfmt-preview --toolchain stable
   - rustup run stable rustfmt -V
-  - rustup default "$RUST_VERSION"
+  - rustup default "$RUST_COMPILER_VERSION"
     # Install cargo-audit if it's not already.
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
