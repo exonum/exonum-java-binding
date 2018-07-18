@@ -11,11 +11,12 @@
 # - RUST_LIB_DIR - path to Rust stdlib.
 # - RUST_COMPILER_VERSION - Rust version for building tests.
 # - RUSTFLAGS - Rust build options augmented with JAVA_LIB_DIR and RUST_LIB_DIR.
-#   That adds paths into search paths where native code at runtime will look for
-#   dynamically loadable libraries.
+#   That adds paths into the linker search paths where native code at runtime
+#   will look for dynamically loadable libraries.
 #   On Linux it is RUNPATH, so LD_LIBRARY_PATH is examined before.
-#   On MacOS it extends @rpath, so LD_LIBRARY_PATH works as usually.
-#   This affects all executables (application, tests, libjava_bindings).
+#   On MacOS it appends load commands to the end of the list, leaving @rpath/libNAME.dylib
+#   entries at the begin unchanged, so LD_LIBRARY_PATH also takes precedence.
+#   This affects all executables and dynamic libraries (application, tests, libjava_bindings).
 #   It is worth mentioning that recent releases of MacOS with enabled by default SIP
 #   clear LD_LIBRARY_PATH when new shell started.
 #   Such behavior greatly affects Maven and all that it runs.
