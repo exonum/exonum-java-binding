@@ -134,6 +134,7 @@ abstract class AbstractHasher implements Hasher {
     return this;
   }
 
+  @SuppressWarnings("EmptyMethod")
   @Override
   @Deprecated
   public int hashCode() {
