@@ -8,7 +8,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig};
 use runtime::config::{self, Config, JvmConfig, ServiceConfig};
-use utils::unwrap_jni;
+use utils::{join_paths, unwrap_jni};
 use MainExecutor;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
@@ -68,7 +68,9 @@ impl JavaServiceRuntime {
             args_builder = args_builder.option(&option);
         }
 
-        args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
+        let class_path = join_paths(&[&config.system_class_path, &config.service_class_path]);
+
+        args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
         args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
         args_builder = args_builder.option(&format!(
             "-Dlog4j.configurationFile={}",

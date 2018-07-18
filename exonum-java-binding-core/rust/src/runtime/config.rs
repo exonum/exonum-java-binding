@@ -18,10 +18,10 @@ pub struct JvmConfig {
     /// Parameters must not have dash at the beginning.
     /// Some parameters are forbidden for setting up by user.
     pub user_parameters: Vec<String>,
-    /// Java service classpath. Must include all its dependencies.
-    ///
-    /// Includes java_bindings internal dependencies as well as user service dependencies.
-    pub class_path: String,
+    /// Java bindings framework system classpath.
+    pub system_class_path: String,
+    /// Java service classpath.
+    pub service_class_path: String,
     /// Path to java-bindings shared library.
     ///
     /// Should be path to exonum-java-binding-core/rust/target/{debug, release}
