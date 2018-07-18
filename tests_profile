@@ -9,7 +9,7 @@
 #   jni-rs with enabled the invocation feature fails to build without JAVA_HOME.
 # - JAVA_LIB_DIR - path to libjvm.
 # - RUST_LIB_DIR - path to Rust stdlib.
-# - RUST_VERSION - Rust version for building tests.
+# - RUST_COMPILER_VERSION - Rust version for building tests.
 # - RUSTFLAGS - Rust build options augmented with JAVA_LIB_DIR and RUST_LIB_DIR.
 #   That adds paths into search paths where native code at runtime will look for
 #   dynamically loadable libraries.
@@ -35,11 +35,11 @@ export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dir
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to build tests.
-export RUST_VERSION="stable"
-echo "RUST_VERSION: ${RUST_VERSION}"
+export RUST_COMPILER_VERSION="stable"
+echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 
 # Find the directory containing Rust libstd.
-export RUST_LIB_DIR=$(rustup run ${RUST_VERSION} rustc --print sysroot)/lib
+export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
 # Linking options with additional paths for the application and tests.

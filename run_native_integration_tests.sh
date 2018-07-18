@@ -26,5 +26,5 @@ fi
 
 cd exonum-java-binding-core/rust
 
-cargo "+${RUST_VERSION}" test \
+cargo "+${RUST_COMPILER_VERSION}" test \
   --manifest-path integration_tests/Cargo.toml

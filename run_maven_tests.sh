@@ -17,4 +17,4 @@ source tests_profile
 mvn install \
   -DskipTests \
   --activate-profiles ci-build \
-  -Drust.compiler.version="${RUST_VERSION}"
+  -Drust.compiler.version="${RUST_COMPILER_VERSION}"
