@@ -7,12 +7,12 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.0</version>
   </parent>
 
   <name>Exonum Java Binding: Testing Utils</name>
   <artifactId>exonum-java-testing</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.0</version>
   <packaging>jar</packaging>
 
   <build>
