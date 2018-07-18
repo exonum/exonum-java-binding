@@ -25,7 +25,7 @@ You can use the following script for this purpose:
 ```bash
 JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
 LIBJVM_DIR="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
+RUST_LIB_DIR="$(rustup run 1.26.2 rustc --print sysroot)/lib"
 
 export LD_LIBRARY_PATH="$RUST_LIB_DIR:$LIBJVM_DIR"
 ```
