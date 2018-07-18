@@ -5,24 +5,25 @@
 # ¡Keep it MacOS/Ubuntu compatible!
 #
 # This profile contains:
-# - JAVA_HOME - path to currently selected JDK.
-#   jni-rs with enabled the invocation feature fails to build without JAVA_HOME.
+# - JAVA_HOME - path to currently selected JDK, required to build jni-rs
+#   with the invocation feature.
 # - JAVA_LIB_DIR - path to libjvm.
 # - RUST_LIB_DIR - path to Rust stdlib.
 # - RUST_COMPILER_VERSION - Rust version for building tests.
 # - RUSTFLAGS - Rust build options augmented with JAVA_LIB_DIR and RUST_LIB_DIR.
-#   That adds paths into the linker search paths where native code at runtime
-#   will look for dynamically loadable libraries.
-#   On Linux it is RUNPATH, so LD_LIBRARY_PATH is examined before.
-#   On MacOS it appends load commands to the end of the list, leaving @rpath/libNAME.dylib
-#   entries at the begin unchanged, so LD_LIBRARY_PATH also takes precedence.
-#   This affects all executables and dynamic libraries (application, tests, libjava_bindings).
+#   The linker will add paths to the libjvm and the Rust standard library
+#   to the runtime search paths. If you need to override the libjvm, set LD_LIBRARY_PATH
+#   to specify the path to it.
+#
+#   Cargo will set RUNPATH on Linux. On MacOS it appends load commands to the end
+#   of the list (¿which list), leaving @rpath/libNAME.dylib entries at the beginning unchanged.
+#   RUSTFLAGS affects all executables and dynamic libraries (application, tests, libjava_bindings).
+#
 #   It is worth mentioning that recent releases of MacOS with enabled by default SIP
 #   clear LD_LIBRARY_PATH when new shell started.
 #   Such behavior greatly affects Maven and all that it runs.
 #   Setting rpath is a good way to fix this flaw in tests.
 #   On Linux, it is not important whether to prefer RUNPATH or LD_LIBRARY_PATH.
-
 
 # Use the Java that Maven uses.
 #
@@ -49,7 +50,7 @@ echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 # This may override previous `-C link-args` if it appears in RUSTFLAGS before.
 RUSTFLAGS="${RUSTFLAGS:-}"
 if [[ $RUSTFLAGS = *"-C link-args="* ]]; then
-    echo "Error: the '-C link-args' RUSTFLAGS option will be overriden. Merge is not yet supported."
+    echo "Error: the '-C link-args' RUSTFLAGS option will be overridden. Merge is not yet supported."
     exit 1
 fi
 export RUSTFLAGS="${RUSTFLAGS} -C link-args=-Wl,-rpath,${RUST_LIB_DIR},-rpath,${JAVA_LIB_DIR}"
