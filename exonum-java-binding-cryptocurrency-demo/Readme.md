@@ -36,6 +36,8 @@ $ brew install libsodium
 
 $ cd exonum-java-binding-core/rust/ejb-app/
 
+$ cargo install --debug
+
 $ ./start_cryptocurrency_node.sh
 ```
 
