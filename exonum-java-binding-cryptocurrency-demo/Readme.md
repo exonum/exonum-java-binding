@@ -32,7 +32,7 @@ Build the project:
 ```sh
 $ mvn install
 
-$ cargo install
+$ brew install libsodium
 
 $ cd exonum-java-binding-core/rust/ejb-app/
 
