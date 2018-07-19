@@ -23,6 +23,7 @@ Be sure you installed necessary packages:
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
+- The [system dependencies](https://exonum.com/doc/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
 - [Rust compiler](https://rustup.rs/)
 
 #### Install and run
@@ -31,8 +32,6 @@ Build the project:
 
 ```sh
 $ mvn install
-
-$ brew install libsodium
 
 $ cd exonum-java-binding-core/rust/ejb-app/
 
