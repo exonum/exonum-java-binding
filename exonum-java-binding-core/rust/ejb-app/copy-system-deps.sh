@@ -11,11 +11,11 @@ DEPENDENCIES_LINE="$(cat ${EJB_ROOT}/${CORE_TXT})"
 DEPENDENCIES=$(echo $DEPENDENCIES_LINE | tr ":" "\n")
 
 rm -rf lib
-mkdir -p lib/classes
+mkdir -p lib/java
 
 for DEPENDENCY in $DEPENDENCIES
 do
-    cp "$DEPENDENCY" "$EJB_APP_DIR/lib/classes"
+    cp "$DEPENDENCY" "$EJB_APP_DIR/lib/java"
 done
 
-cp "${EJB_ROOT}/exonum-java-binding-core/target/exonum-java-binding-core-0.1.0.jar" "$EJB_APP_DIR/lib/classes"
+cp "${EJB_ROOT}/exonum-java-binding-core/target/exonum-java-binding-core-0.1.0.jar" "$EJB_APP_DIR/lib/java"
