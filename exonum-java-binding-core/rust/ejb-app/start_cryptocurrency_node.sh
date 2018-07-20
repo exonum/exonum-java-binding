@@ -18,6 +18,8 @@ function header() {
     echo
 }
 
+function join { local IFS="$1"; shift; echo "$*"; }
+
 # Use an already set JAVA_HOME, or infer it from java.home system property.
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
@@ -37,12 +39,14 @@ echo "PROJ_ROOT=${EJB_ROOT}"
 
 header "PREPARE PATHS"
 
-CORE_TXT="exonum-java-binding-core/target/ejb-core-classpath.txt"
 CRYPTOCURRENCY_TXT="exonum-java-binding-cryptocurrency-demo/target/cryptocurrency-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-core/target/classes"
+EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
+
+EJB_SYSTEM_CLASSES="$(ls -d $EJB_APP_DIR/lib/classes/*)"
+EJB_SYSTEM_CLASSPATH="$(join : ${EJB_SYSTEM_CLASSES[@]})"
+echo "EJB_SYSTEM_CLASSPATH=${EJB_SYSTEM_CLASSPATH}"
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
@@ -62,7 +66,8 @@ ejb-app generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
 ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
- --ejb-classpath $EJB_CLASSPATH \
+ --ejb-service-classpath $EJB_CLASSPATH \
+ --ejb-classpath $EJB_SYSTEM_CLASSPATH \
  --ejb-libpath $EJB_LIBPATH \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
  --peer-address 127.0.0.1:5400
