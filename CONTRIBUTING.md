@@ -21,13 +21,17 @@ You need to install the following dependencies:
   You do _not_ need to manually fetch and compile Exonum.
 
 ### Building
-Run
+Set required environment variables, once in a shell you use to build the project:
+```$sh
+$ source tests_profile
+```
+Then run:
 ```$sh
 $ mvn install
 ```
 
 #### Building Java Binding App
-Run
+Run:
 ```$sh
 $ cd exonum-java-binding-core/rust/ejb-app
 $ cargo install --debug --force
