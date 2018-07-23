@@ -90,9 +90,9 @@
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
-    <mockito-core.version>2.18.3</mockito-core.version>
+    <mockito-core.version>2.19.1</mockito-core.version>
     <guava.version>25.1-jre</guava.version>
-    <vertx.version>3.5.2</vertx.version>
+    <vertx.version>3.5.3</vertx.version>
     <equalsverifier.version>2.4.8</equalsverifier.version>
     <!-- skip all tests (unit and ITs) until the loading bug is fixed (ECR-942) -->
     <skipTests>true</skipTests>
@@ -194,7 +194,7 @@
          <plugin>
            <groupId>com.github.spotbugs</groupId>
            <artifactId>spotbugs-maven-plugin</artifactId>
-           <version>3.1.5</version>
+           <version>3.1.6</version>
          </plugin>
 
          <plugin>
