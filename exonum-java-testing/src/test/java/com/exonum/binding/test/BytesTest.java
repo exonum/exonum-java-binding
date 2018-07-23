@@ -16,6 +16,7 @@
 
 package com.exonum.binding.test;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -28,5 +29,22 @@ public class BytesTest {
   public void fromHex() {
     assertThat(Bytes.fromHex("abcd01"), equalTo(new byte[] {UnsignedBytes.checkedCast(0xAB),
         UnsignedBytes.checkedCast(0xCD), 0x01}));
+  }
+
+  @Test
+  public void toHexStringAllHexNumbersLower() {
+    for (byte b = 0; b <= 0xF; b++) {
+      String expected = "0" + UnsignedBytes.toString(b, 16);
+      assertThat(Bytes.toHexString(bytes(b)), equalTo(expected));
+    }
+  }
+
+  @Test
+  public void toHexStringAllHexNumbersUpper() {
+    for (int i = 1; i <= 0xF; i++) {
+      byte b = (byte) (i << 4);
+      String expected = UnsignedBytes.toString(b, 16);
+      assertThat(Bytes.toHexString(bytes(b)), equalTo(expected));
+    }
   }
 }
