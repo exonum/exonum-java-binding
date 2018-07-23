@@ -9,16 +9,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 -
 
-## 0.1 - 2018-06-16
-
-The first release of Exonum Java Binding.
-
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.1...HEAD
-
-## 0.1.2 - 2018-07-19
-
-Parent module and BOM module were released as they are required dependencies to define a Java service.
-
 ## 0.2 - 2018-07-23
 
 ### Added
@@ -50,3 +40,15 @@ Parent module and BOM module were released as they are required dependencies to 
 - Prepended `/api` before the path to the REST API endpoints of a service. (#340)
 
 - `Message#getSignature` returns a byte array. (#339)
+
+## 0.1.2 - 2018-07-19
+
+Parent module and BOM module were released as they are required dependencies to define a Java service.
+
+## 0.1 - 2018-06-16
+
+The first release of Exonum Java Binding.
+
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.2...HEAD
+[0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2
+[0.1.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1...v0.1.2
