@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Stops the build if only markdown files were updated.
-# TRAVIS_COMMIT_RANGE env variable must be set.
+# If TRAVIS_COMMIT_RANGE env variable is not set, does nothing.
 
-# Fail immediately in case of errors and/or unset variables
-set -eu -o pipefail
-
-if ! git diff --name-only "${TRAVIS_COMMIT_RANGE}" | grep -qvE '(.md$)'
+if [ -z "${TRAVIS_COMMIT_RANGE+x}" ];
 then
-  echo "Only docs were updated, not running the CI."
+  echo "TRAVIS_COMMIT_RANGE is not set."
+elif ! git diff --name-only "${TRAVIS_COMMIT_RANGE}" | grep -qvE '(.md$)'
+then
+  echo "Only docs were updated, not running the CI: commit_range=${TRAVIS_COMMIT_RANGE}"
   exit
 fi
