@@ -96,15 +96,5 @@ public final class Hashing {
         new MessageDigestHashFunction("SHA-512", "Hashing.sha512()");
   }
 
-  /**
-   * Returns the array as a hexadecimal String, or «null» if it's null.
-   */
-  public static String toHexString(byte[] bytes) {
-    if (bytes == null) {
-      return "null";
-    }
-    return HashCode.fromBytesNoCopy(bytes).toString();
-  }
-
   private Hashing() {}
 }
