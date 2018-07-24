@@ -71,7 +71,6 @@ impl JavaServiceRuntime {
         let class_path = join_paths(&[&config.system_class_path, &config.service_class_path]);
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
-        args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
         args_builder = args_builder.option(&format!(
             "-Dlog4j.configurationFile={}",
             config.log_config_path

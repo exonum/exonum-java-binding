@@ -63,7 +63,6 @@ ejb-app generate-template --validators-count=1 testnet/common.toml
 header "GENERATE CONFIG"
 ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
  --ejb-service-classpath $EJB_CLASSPATH \
- --ejb-libpath $EJB_LIBPATH \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
  --peer-address 127.0.0.1:5400
 

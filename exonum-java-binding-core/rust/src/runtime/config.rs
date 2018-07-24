@@ -22,10 +22,6 @@ pub struct JvmConfig {
     pub system_class_path: String,
     /// Java service classpath.
     pub service_class_path: String,
-    /// Path to java-bindings shared library.
-    ///
-    /// Should be path to exonum-java-binding-core/rust/target/{debug, release}
-    pub lib_path: String,
     /// Path to `log4j` configuration file.
     pub log_config_path: String,
 }
@@ -71,7 +67,6 @@ pub(crate) fn validate_and_convert(
 
 fn check_not_forbidden(user_parameter: &str) -> Result<(), ForbiddenParameterError> {
     if user_parameter.starts_with("Djava.class.path")
-        || user_parameter.starts_with("Djava.library.path")
         || user_parameter.starts_with("Dlog4j.configurationFile")
     {
         Err(ForbiddenParameterError(user_parameter.to_string()))
@@ -92,17 +87,11 @@ mod tests {
 
     #[test]
     fn not_forbidden_user_parameter() {
-        let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
+        let validation_result = validate_and_convert("Duser.parameter=Djava.class.path");
         assert_eq!(
             validation_result,
-            Ok("-Duser.parameter=Djava.library.path".to_string())
+            Ok("-Duser.parameter=Djava.class.path".to_string())
         );
-    }
-
-    #[test]
-    #[should_panic(expected = "Trying to specify JVM parameter")]
-    fn library_path() {
-        validate_and_convert("Djava.library.path=.").unwrap();
     }
 
     #[test]

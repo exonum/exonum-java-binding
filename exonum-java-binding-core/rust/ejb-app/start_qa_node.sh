@@ -77,8 +77,7 @@ do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
     ejb-app generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
-     --ejb-classpath $EJB_CLASSPATH \
-     --ejb-libpath $EJB_LIBPATH \
+     --ejb-service-classpath $EJB_CLASSPATH \
      --ejb-log-config-path $log_config_path \
      --peer-address 127.0.0.1:$peer_port
 done

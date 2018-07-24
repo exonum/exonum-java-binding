@@ -13,7 +13,6 @@ use std::{env, fs};
 const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_SERVICE_CLASSPATH: &str = "EJB_SERVICE_CLASSPATH";
-const EJB_LIBPATH: &str = "EJB_LIBPATH";
 const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
 const EJB_PORT: &str = "EJB_PORT";
 const EJB_JVM_CONFIG_NAME: &str = "ejb_jvm_config";
@@ -49,14 +48,6 @@ impl CommandExtension for GenerateNodeConfig {
                 "ejb-service-classpath",
                 false,
             ),
-            Argument::new_named(
-                EJB_LIBPATH,
-                true,
-                "Path to java-bindings shared library.",
-                None,
-                "ejb-libpath",
-                false,
-            ),
         ]
     }
 
@@ -64,13 +55,11 @@ impl CommandExtension for GenerateNodeConfig {
         let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let service_class_path = context.arg(EJB_SERVICE_CLASSPATH)?;
-        let lib_path = context.arg(EJB_LIBPATH)?;
 
         let jvm_config = JvmConfig {
             user_parameters,
             system_class_path: get_system_classpath(),
             service_class_path,
-            lib_path,
             log_config_path,
         };
 
