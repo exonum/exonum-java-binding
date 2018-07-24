@@ -7,6 +7,8 @@
 Exonum Java Binding is a framework for building blockchain applications in Java, 
 powered by Exonum.
 
+<!-- Test our build -->
+
 The project is at alpha stage. Currently you can define a stateful Exonum Service 
 in Java, configure a network of nodes and run the service in it.
 
