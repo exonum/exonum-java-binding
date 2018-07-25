@@ -6,8 +6,8 @@ use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, GenerateNodeConfig};
-use runtime::config::{self, Config, JvmConfig, ServiceConfig};
+use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
+use runtime::config::{self, Config, PrivateConfig};
 use utils::{join_paths, unwrap_jni};
 use MainExecutor;
 
@@ -34,9 +34,9 @@ impl JavaServiceRuntime {
         unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(config.jvm_config);
+                let java_vm = Self::create_java_vm(&config.private_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
-                let service_proxy = Self::create_service(config.service_config, executor.clone());
+                let service_proxy = Self::create_service(&config.public_config.module_name, config.private_config.port, executor.clone());
                 let runtime = JavaServiceRuntime {
                     executor,
                     service_proxy,
@@ -60,7 +60,7 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(config: JvmConfig) -> JavaVM {
+    fn create_java_vm(config: &PrivateConfig) -> JavaVM {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
         for param in &config.user_parameters {
@@ -81,15 +81,15 @@ impl JavaServiceRuntime {
     }
 
     /// Creates service proxy for interaction with Java side.
-    fn create_service(config: ServiceConfig, executor: MainExecutor) -> ServiceProxy {
+    fn create_service(module_name: &str, port: i32, executor: MainExecutor) -> ServiceProxy {
         let service = unwrap_jni(executor.with_attached(|env| {
-            let module_name = env.new_string(config.module_name).unwrap();
+            let module_name = env.new_string(module_name).unwrap();
             let module_name: jni::objects::JObject = *module_name;
             let service = env.call_static_method(
                 SERVICE_BOOTSTRAP_PATH,
                 "startService",
                 START_SERVICE_SIGNATURE,
-                &[module_name.into(), config.port.into()],
+                &[module_name.into(), port.into()],
             )?
                 .l()?;
             env.new_global_ref(service)
@@ -123,6 +123,7 @@ impl ServiceFactory for JavaServiceFactory {
         match command {
             v if v == fabric::GenerateNodeConfig::name() => Some(Box::new(GenerateNodeConfig)),
             v if v == fabric::Finalize::name() => Some(Box::new(Finalize)),
+            v if v == fabric::Run::name() => Some(Box::new(Run)),
             _ => None,
         }
     }

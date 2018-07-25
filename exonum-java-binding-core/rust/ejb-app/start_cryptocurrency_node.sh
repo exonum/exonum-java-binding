@@ -62,15 +62,16 @@ ejb-app generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
 ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
- --ejb-service-classpath $EJB_CLASSPATH \
- --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
+ --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
 ejb-app finalize testnet/sec.toml testnet/node.toml \
- --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' \
- --ejb-port 6000 \
+ --ejb-service-classpath $EJB_CLASSPATH \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"
-ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+ejb-app run -d testnet/db -c testnet/node.toml \
+ --public-api-address 127.0.0.1:3000 \
+ --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
+ --ejb-port 6000
