@@ -46,7 +46,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class LoggingInterceptorTest {
 
-  private static String EXCEPTION_MESSAGE = "Some exception";
+  private static final String EXCEPTION_MESSAGE = "Some exception";
 
   private ListAppender appender;
 

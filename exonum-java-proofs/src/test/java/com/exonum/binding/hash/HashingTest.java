@@ -35,7 +35,6 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
 import junit.framework.TestCase;
 
@@ -60,21 +59,6 @@ public class HashingTest extends TestCase {
   public void testGetHashOfEmptyByteBuffer() {
     HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(ByteBuffer.allocate(0)), equalTo(ZERO_HASH_CODE));
-  }
-
-  public void testToStringAllHexNumbersLower() {
-    for (byte b = 0; b <= 0xF; b++) {
-      String expected = "0" + UnsignedBytes.toString(b, 16);
-      assertThat(Hashing.toHexString(bytes(b)), equalTo(expected));
-    }
-  }
-
-  public void testToStringAllHexNumbersUpper() {
-    for (int i = 1; i <= 0xF; i++) {
-      byte b = (byte) (i << 4);
-      String expected = UnsignedBytes.toString(b, 16);
-      assertThat(Hashing.toHexString(bytes(b)), equalTo(expected));
-    }
   }
 
   public void testSha256() {

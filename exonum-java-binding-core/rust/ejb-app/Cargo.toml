@@ -1,6 +1,6 @@
 [package]
 name = "ejb-app"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Exonum team <exonum@bitfury.com>"]
 
 [dependencies]
