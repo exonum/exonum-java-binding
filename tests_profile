@@ -46,11 +46,14 @@ export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
 # Linking options with additional paths for the application and tests.
-# This may override previous `-C link-args` if it appears in RUSTFLAGS before.
-RUSTFLAGS="${RUSTFLAGS:-}"
-if [[ $RUSTFLAGS = *"-C link-args="* ]]; then
-    echo "Error: the '-C link-args' RUSTFLAGS option will be overriden. Merge is not yet supported."
-    exit 1
+# Note: `-C link-args` can be used only once, `-C link-arg` is a better way.
+# Currently we doesn't support stacking of RUSTFLAGS with a user environment RUSTFLAGS,
+# since this profile may be reused many times during a user session and because of this
+# RUSTFLAGS can accumulate old and irrelevant options values.
+if [[ "${RUSTFLAGS:-}" != "" ]]; then
+    echo "Warning: the RUSTFLAGS variable will be overriden. Merge is not yet supported."
 fi
-export RUSTFLAGS="${RUSTFLAGS} -C link-args=-Wl,-rpath,${RUST_LIB_DIR},-rpath,${JAVA_LIB_DIR}"
+RUSTFLAGS=""
+export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,${RUST_LIB_DIR}"
+export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,${JAVA_LIB_DIR}"
 echo "RUSTFLAGS=${RUSTFLAGS}"
