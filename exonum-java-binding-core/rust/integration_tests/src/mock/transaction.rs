@@ -1,11 +1,12 @@
-use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
+use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 
 use super::NATIVE_FACADE_CLASS;
 
-pub const TRANSACTION_ADAPTER_CLASS: &str = "com/exonum/binding/service/adapters/UserTransactionAdapter";
+pub const TRANSACTION_ADAPTER_CLASS: &str =
+    "com/exonum/binding/service/adapters/UserTransactionAdapter";
 
 pub const ENTRY_NAME: &str = "test_entry";
 pub const ENTRY_VALUE: &str = "test_value";
@@ -41,12 +42,12 @@ pub fn create_throwing_mock_transaction_proxy(
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
 pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> TransactionProxy {
-    let (java_tx_mock, raw) = create_mock_transaction(executor.clone(), valid);
+    let (java_tx_mock, raw) = create_mock_transaction(&executor, valid);
     TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction(executor: MainExecutor, valid: bool) -> (GlobalRef, RawMessage) {
+pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalRef, RawMessage) {
     executor
         .with_attached(|env| {
             let value = env.new_string(ENTRY_VALUE)?;

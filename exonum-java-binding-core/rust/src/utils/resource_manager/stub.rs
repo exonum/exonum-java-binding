@@ -13,7 +13,6 @@
 // limitations under the License.
 
 /// See actual implementation (`imp.rs`) for the documentation.
-
 use utils::Handle;
 
 pub fn add_handle<T: 'static>(_: Handle) {}

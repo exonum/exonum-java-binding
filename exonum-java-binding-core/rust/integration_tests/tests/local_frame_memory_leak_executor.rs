@@ -4,9 +4,9 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate rand;
 
-use java_bindings::{JniExecutor, MainExecutor};
-use java_bindings::jni::JavaVM;
 use integration_tests::vm::{create_vm_for_leak_tests, KIB, MIB};
+use java_bindings::jni::JavaVM;
+use java_bindings::{JniExecutor, MainExecutor};
 use rand::prelude::*;
 
 use std::sync::Arc;
@@ -54,9 +54,8 @@ fn executor_must_not_leak_local_references() {
                 // these Java objects will leak until the current thread is stopped.
                 for _ in 0..local_frame_capacity {
                     thread_rng().fill(&mut array[..]);
-                    let _java_obj = env.byte_array_from_slice(&array).expect(
-                        "Can't create new local object.",
-                    );
+                    let _java_obj = env.byte_array_from_slice(&array)
+                        .expect("Can't create new local object.");
                 }
                 Ok(())
             })

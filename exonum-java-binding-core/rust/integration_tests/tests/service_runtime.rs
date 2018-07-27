@@ -1,12 +1,13 @@
+extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
-extern crate exonum_testkit;
 
-use java_bindings::{ServiceConfig, JvmConfig, Config, JavaServiceRuntime};
-use integration_tests::vm::{get_fakes_classpath, get_libpath};
 use exonum_testkit::TestKitBuilder;
+use integration_tests::vm::{get_fakes_classpath, get_libpath};
+use java_bindings::{Config, JavaServiceRuntime, JvmConfig, ServiceConfig};
 
-const TEST_SERVICE_MODULE_NAME: &str = "com.exonum.binding.fakes.services.service.TestServiceModule";
+const TEST_SERVICE_MODULE_NAME: &str =
+    "com.exonum.binding.fakes.services.service.TestServiceModule";
 
 #[test]
 fn bootstrap() {
@@ -16,7 +17,7 @@ fn bootstrap() {
     };
 
     let jvm_config = JvmConfig {
-        debug: true,
+        user_parameters: Vec::new(),
         class_path: get_fakes_classpath(),
         lib_path: get_libpath(),
         log_config_path: "".to_owned(),

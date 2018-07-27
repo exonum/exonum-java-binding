@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,8 @@ public final class LibraryLoader {
 
   private static final String BINDING_LIB_NAME = "java_bindings";
   private static final String JAVA_LIBRARY_PATH_PROPERTY = "java.library.path";
-  private static final String DYNAMIC_LIBRARIES_ENV_VAR = "LD_LIBRARY_PATH";
+  private static final String DYNAMIC_LIBRARIES_ENV_VAR_WINDOWS = "PATH";
+  private static final String DYNAMIC_LIBRARIES_ENV_VAR_UNIX = "LD_LIBRARY_PATH";
 
   private static final Logger logger = LogManager.getLogger(LibraryLoader.class);
 
@@ -53,17 +54,26 @@ public final class LibraryLoader {
 
   private static String extraLibLoadErrorInfo() {
     String javaLibPath = System.getProperty(JAVA_LIBRARY_PATH_PROPERTY);
-    String dynamicLibPath = System.getenv(DYNAMIC_LIBRARIES_ENV_VAR);
+    String dynamicLibVar = dynamicLibrariesEnvVar();
+    String dynamicLibPath = System.getenv(dynamicLibVar);
     // todo: clarify this message when LD_LIBRARY_PATH becomes required.
     return "java.library.path=" + javaLibPath + ", \n"
-        + DYNAMIC_LIBRARIES_ENV_VAR + "=" + dynamicLibPath
+        + dynamicLibVar + "=" + dynamicLibPath
         + "\nMake sure that:\n"
         + "1. The path to a directory containing '" + BINDING_LIB_NAME
         + "' dynamic library image is included in either java.library.path system property or "
-        + DYNAMIC_LIBRARIES_ENV_VAR + " environment variable.\n"
+        + dynamicLibVar + " environment variable.\n"
         + "2. The paths to directories containing dynamic libraries required by '"
-        + BINDING_LIB_NAME + "', if any, are included in " + DYNAMIC_LIBRARIES_ENV_VAR
+        + BINDING_LIB_NAME + "', if any, are included in " + dynamicLibVar
         + " environment variable";
+  }
+
+  private static String dynamicLibrariesEnvVar() {
+    if (OsInfo.isWindows()) {
+      return DYNAMIC_LIBRARIES_ENV_VAR_WINDOWS;
+    } else {
+      return DYNAMIC_LIBRARIES_ENV_VAR_UNIX;
+    }
   }
 
   private LibraryLoader() {}

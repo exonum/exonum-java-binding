@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,15 +84,11 @@ public final class MessageReader implements BinaryMessage {
   /**
    * Returns the body of the message as a view in the underlying byte buffer.
    *
-   * <p>The returned byte buffer shares the content of the underlying byte buffer of this message,
-   * and is read-only. Its position is zero, limit is set to the position after-the-last
-   * element of the body.
+   * <p>The returned byte buffer shares the content of the underlying byte buffer of this message.
+   * Its position is zero, limit is set to the position after-the-last element of the body.
+   * The buffer is direct iff the underlying buffer is direct, and it is read-only iff
+   * the underlying buffer is read-only.
    */
-  // !!! todo: shall it be read-only? Perhaps yes, for you don't want anyone to modify
-  // the underlying buffer. But that would make the underlying array inaccessible
-  // if you want to pass it through JNI!
-  // On top of that, we intentionally do not copy the original byte buffer,
-  // so a malicious code may keep a reference to that byte buffer and modify it.
   @Override
   public ByteBuffer getBody() {
     message.position(BODY_OFFSET);
@@ -112,9 +108,11 @@ public final class MessageReader implements BinaryMessage {
    * and is read-only.
    */
   @Override
-  public ByteBuffer getSignature() {
+  public byte[] getSignature() {
     message.position(signatureOffset());
-    return message.slice();
+    byte[] signature = new byte[Message.SIGNATURE_SIZE];
+    message.get(signature);
+    return signature;
   }
 
   @Override
@@ -129,7 +127,7 @@ public final class MessageReader implements BinaryMessage {
    * and is read-only.
    */
   @Override
-  public ByteBuffer getMessage() {
+  public ByteBuffer getSignedMessage() {
     message.position(0);
     return message.duplicate();
   }

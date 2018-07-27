@@ -5,7 +5,7 @@
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
-    <version>0.1.0</version>
+    <version>0.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -18,7 +18,7 @@
 
   <properties>
     <maven-archetype.version>3.0.1</maven-archetype.version>
-    <maven-resourcesPlugin.version>3.0.2</maven-resourcesPlugin.version>
+    <maven-resourcesPlugin.version>3.1.0</maven-resourcesPlugin.version>
   </properties>
 
   <build>

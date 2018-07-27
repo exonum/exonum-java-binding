@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.proofs.map;
 
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.test.Bytes;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -69,8 +69,12 @@ class MapProofValidatorMatchers {
       @Override
       public void describeTo(Description description) {
         description.appendText("valid proof, key=")
-            .appendText(Hashing.toHexString(key))
+            .appendText(keyToHex())
             .appendText(", value=").appendText(expectedValue);
+      }
+
+      private String keyToHex() {
+        return (key == null) ? "null" : Bytes.toHexString(key);
       }
     };
   }

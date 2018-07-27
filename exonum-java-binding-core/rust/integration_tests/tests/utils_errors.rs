@@ -4,10 +4,11 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::{JniExecutor, JniErrorKind, JniResult, MainExecutor};
-use java_bindings::jni::{JavaVM, JNIEnv};
-use java_bindings::utils::{check_error_on_exception, get_and_clear_java_exception, get_class_name,
-                           panic_on_exception};
+use java_bindings::jni::{JNIEnv, JavaVM};
+use java_bindings::utils::{
+    check_error_on_exception, get_and_clear_java_exception, get_class_name, panic_on_exception,
+};
+use java_bindings::{JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
 use std::sync::Arc;
 
@@ -27,7 +28,8 @@ lazy_static! {
 fn panic_on_exception_catch_exact_class() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
-            Ok(panic_on_exception(env, throw(env, EXCEPTION_CLASS)))
+            panic_on_exception(env, throw(env, EXCEPTION_CLASS));
+            Ok(())
         })
         .unwrap();
 }
@@ -37,10 +39,8 @@ fn panic_on_exception_catch_exact_class() {
 fn panic_on_exception_catch_subclass() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
-            Ok(panic_on_exception(
-                env,
-                throw(env, ARITHMETIC_EXCEPTION_CLASS),
-            ))
+            panic_on_exception(env, throw(env, ARITHMETIC_EXCEPTION_CLASS));
+            Ok(())
         })
         .unwrap();
 }
@@ -49,14 +49,20 @@ fn panic_on_exception_catch_subclass() {
 #[should_panic(expected = "JNI error: ")]
 fn panic_on_exception_catch_jni_error() {
     EXECUTOR
-        .with_attached(|env: &JNIEnv| Ok(panic_on_exception(env, make_jni_error())))
+        .with_attached(|env: &JNIEnv| {
+            panic_on_exception(env, make_jni_error());
+            Ok(())
+        })
         .unwrap();
 }
 
 #[test]
 fn panic_on_exception_dont_catch_good_result() {
     EXECUTOR
-        .with_attached(|env: &JNIEnv| Ok(panic_on_exception(env, Ok(()))))
+        .with_attached(|env: &JNIEnv| {
+            panic_on_exception(env, Ok(()));
+            Ok(())
+        })
         .unwrap();
 }
 
@@ -64,9 +70,7 @@ fn panic_on_exception_dont_catch_good_result() {
 #[should_panic(expected = "Java exception: java.lang.Error")]
 fn check_error_on_exception_catch_java_error_exact_class() {
     EXECUTOR
-        .with_attached(|env: &JNIEnv| {
-            Ok(check_error_on_exception(env, throw(env, ERROR_CLASS)))
-        })
+        .with_attached(|env: &JNIEnv| Ok(check_error_on_exception(env, throw(env, ERROR_CLASS))))
         .unwrap()
         .unwrap();
 }
@@ -86,13 +90,10 @@ fn check_error_on_exception_catch_java_error_subclass() {
 fn check_error_on_exception_catch_java_exception_exact_class() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
-            Ok(
-                check_error_on_exception(env, throw(env, EXCEPTION_CLASS))
-                    .map_err(|e| {
-                        assert!(e.starts_with("Java exception: java.lang.Exception"))
-                    })
-                    .expect_err("An exception should lead to an error"),
-            )
+            check_error_on_exception(env, throw(env, EXCEPTION_CLASS))
+                .map_err(|e| assert!(e.starts_with("Java exception: java.lang.Exception")))
+                .expect_err("An exception should lead to an error");
+            Ok(())
         })
         .unwrap();
 }
@@ -101,15 +102,12 @@ fn check_error_on_exception_catch_java_exception_exact_class() {
 fn check_error_on_exception_catch_java_exception_subclass() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
-            Ok(
-                check_error_on_exception(env, throw(env, ARITHMETIC_EXCEPTION_CLASS))
-                    .map_err(|e| {
-                        assert!(e.starts_with(
-                            "Java exception: java.lang.ArithmeticException",
-                        ))
-                    })
-                    .expect_err("An exception should lead to an error"),
-            )
+            check_error_on_exception(env, throw(env, ARITHMETIC_EXCEPTION_CLASS))
+                .map_err(|e| {
+                    assert!(e.starts_with("Java exception: java.lang.ArithmeticException"))
+                })
+                .expect_err("An exception should lead to an error");
+            Ok(())
         })
         .unwrap();
 }
@@ -118,9 +116,7 @@ fn check_error_on_exception_catch_java_exception_subclass() {
 #[should_panic(expected = "JNI error: ")]
 fn check_error_on_exception_catch_jni_error() {
     EXECUTOR
-        .with_attached(|env: &JNIEnv| {
-            Ok(check_error_on_exception(env, make_jni_error()))
-        })
+        .with_attached(|env: &JNIEnv| Ok(check_error_on_exception(env, make_jni_error())))
         .unwrap()
         .unwrap();
 }

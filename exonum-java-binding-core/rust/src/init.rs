@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use exonum::helpers;
-use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::jlong;
+use jni::JNIEnv;
 
 use std::panic;
 

@@ -13,14 +13,13 @@
 // limitations under the License.
 
 use exonum::storage::{Fork, Snapshot};
-use jni::JNIEnv;
 use jni::objects::JClass;
+use jni::JNIEnv;
 
 use utils::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
-
 
 /// A `View` is a wrapper for `Snapshot` or `Fork`, which makes it possible to distinguish them
 /// on the rust side, and transfer them as a raw pointer to the java side.
@@ -116,7 +115,6 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
 ) {
     utils::drop_handle::<View>(&env, view_handle);
 }
-
 
 #[cfg(test)]
 mod tests {
