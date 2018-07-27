@@ -81,6 +81,8 @@
     <java.compiler.target>8</java.compiler.target>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
+    <!-- Skip generating Javadocs by default. Some profiles override this.  -->
+    <maven.javadoc.skip>true</maven.javadoc.skip>
 
     <assertj.version>3.10.0</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
@@ -292,9 +294,15 @@
       </properties>
     </profile>
 
-    <!-- GPG Signature on deploy -->
+    <!-- Profile used during deploy:
+           - Generates Javadocs.
+           - Signs the artefacts.
+           - Deploys them to the remote repository. -->
     <profile>
       <id>deploy-sign-artifacts</id>
+      <properties>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+      </properties>
       <build>
         <plugins>
           <plugin>
