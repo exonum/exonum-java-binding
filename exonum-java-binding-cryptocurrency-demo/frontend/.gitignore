@@ -2,3 +2,6 @@ node_modules/
 npm-debug.log*
 /dist/
 /build/
+
+# The directory in which npm & node are downloaded by the Maven frontend plugin.
+/node/
