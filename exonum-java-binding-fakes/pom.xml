@@ -19,6 +19,7 @@
 
     <properties>
         <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
+        <!-- Disable as some tests running during 'test' phase require the native library. -->
         <skipTests>${project.skipJavaITs}</skipTests>
     </properties>
 

@@ -31,6 +31,7 @@
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
+    <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
   </properties>
 

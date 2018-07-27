@@ -23,6 +23,7 @@
     <protobuf.version>3.5.1</protobuf.version>
     <exonum-bom.version>1.0.0</exonum-bom.version>
     <exonum-java-testing.version>0.1.0</exonum-java-testing.version>
+    <!-- Disable as some tests running during 'test' phase require the native library. -->
     <skipTests>${project.skipJavaITs}</skipTests>
   </properties>
 
