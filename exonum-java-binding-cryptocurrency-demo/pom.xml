@@ -26,6 +26,22 @@
   </properties>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.xolstice.maven.plugins</groupId>
+          <artifactId>protobuf-maven-plugin</artifactId>
+          <version>0.5.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.github.eirslett</groupId>
+          <artifactId>frontend-maven-plugin</artifactId>
+          <version>1.6</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <extensions>
       <!-- Use an extension that sets the OS classifier, required to locate
            the correct protoc executable -->
@@ -61,7 +77,6 @@
       <plugin>
         <groupId>org.xolstice.maven.plugins</groupId>
         <artifactId>protobuf-maven-plugin</artifactId>
-        <version>0.5.1</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -93,6 +108,69 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>install-node-and-npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+          </execution>
+
+          <!-- See exonum-java-binding-cryptocurrency-demo/frontend/package.json -->
+          <execution>
+            <id>npm-install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>npm-lint</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run lint</arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>npm-test</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <arguments>run test</arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>npm-compile</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <arguments>run compile</arguments>
+            </configuration>
+          </execution>
+        </executions>
+
+        <configuration>
+          <workingDirectory>${project.basedir}/frontend</workingDirectory>
+          <!-- The latest LTS versions: https://nodejs.org/en/download/ -->
+          <nodeVersion>v8.11.3</nodeVersion>
+          <npmVersion>5.6.0</npmVersion>
+        </configuration>
       </plugin>
 
       <!-- Skip the deployment of internal module as it is inherited from parent pom -->

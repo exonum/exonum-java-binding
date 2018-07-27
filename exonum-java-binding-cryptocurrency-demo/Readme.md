@@ -13,11 +13,9 @@ It implements most basic operations:
 
 ## Install and run
 
-### Manually
+### Prerequisites
 
-#### Getting started
-
-Be sure you installed necessary packages:
+Be sure you installed the necessary packages:
 - Linux or macOS. Windows support is coming soon.
 - [JDK 1.8+](http://jdk.java.net/10/).
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
@@ -26,7 +24,7 @@ Be sure you installed necessary packages:
 - The [system dependencies](https://exonum.com/doc/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
 - [Rust compiler](https://rustup.rs/)
 
-#### Install and run
+### Build the project
 
 Build the project:
 
@@ -36,17 +34,41 @@ $ mvn install
 $ cd exonum-java-binding-core/rust/ejb-app/
 
 $ cargo install --debug
+```
 
+### Run the demo
+
+Run the Exonum service from `exonum-java-binding-core/rust/ejb-app/`:
+```
 $ ./start_cryptocurrency_node.sh
 ```
 
 <!-- markdownlint-enable MD013 -->
 
-Install frontend dependencies:
+Run the frontend application:
 
 ```sh
 $ cd ../../exonum-java-binding-cryptocurrency-demo/frontend/
 
+$ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http://127.0.0.1:3000
+```
+
+`--port` is a port for Node.JS app.
+
+`--api-root` is a root URL of public API address of one of the nodes.
+
+`--explorer-root` is a root URL of public API address of blockchain explorer.
+
+Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
+
+### Building the frontend manually
+If you don’t want to rebuild the whole project whilst working 
+on the frontend, use the following commands from the frontend base directory 
+`exonum-java-binding-cryptocurrency-demo/frontend/`.
+
+Install frontend dependencies:
+
+```sh
 $ npm install
 ```
 
@@ -55,17 +77,3 @@ Build sources:
 ```sh
 $ npm run build
 ```
-
-Run the application:
-
-```sh
-$ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http://127.0.0.1:3000
-```
-
-`--port` is a port for Node.JS app.
-
-`--api-root` is a root URL of public API address of one of nodes.
-
-`--explorer-root` is a root URL of public API address of blockchain explorer.
-
-Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
