@@ -22,7 +22,7 @@ function header() {
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
 # hence this a bit complex thing.
-JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}/"
+JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}/"
 echo "JAVA_HOME=${JAVA_HOME}"
 
 # Find the directory containing libjvm (the relative path has changed in Java 9)
