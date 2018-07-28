@@ -36,28 +36,27 @@ fn submit_valid_transaction() {
     let (mut node, app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
     let node_handle = node_handle_guard.get();
-    let (java_transaction, _raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
+    let (java_transaction, _raw_message) = create_mock_transaction(&EXECUTOR, true);
     let marker_raw = RawMessage::from_vec(vec![1, 2, 3]);
     let raw_message = marker_raw.clone();
     unwrap_jni(EXECUTOR.with_attached(move |env: &JNIEnv| {
-        Ok(unwrap_jni_verbose(
-            &env,
-            (|| {
-                let message = message_from_raw(env, &raw_message)?;
-                Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
-                    env.clone(),
-                    jclass,
-                    node_handle,
-                    *java_transaction.as_obj(),
-                    *message,
-                    0,
-                    raw_message.len() as i32,
-                );
-                let exception: JObject = env.exception_occurred()?.into();
-                assert!(exception.is_null());
-                Ok(())
-            })(),
-        ))
+        let submit = || {
+            let message = message_from_raw(env, &raw_message)?;
+            Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
+                env.clone(),
+                jclass,
+                node_handle,
+                *java_transaction.as_obj(),
+                *message,
+                0,
+                raw_message.len() as i32,
+            );
+            let exception: JObject = env.exception_occurred()?.into();
+            assert!(exception.is_null());
+            Ok(())
+        };
+        unwrap_jni_verbose(&env, submit());
+        Ok(())
     }));
     let sent_message = app_rx.wait().next().unwrap().unwrap();
     match sent_message {
@@ -75,29 +74,28 @@ fn submit_not_valid_transaction() {
     let (mut node, _app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
     let node_handle = node_handle_guard.get();
-    let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), false);
+    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, false);
     unwrap_jni(EXECUTOR.with_attached(|env: &JNIEnv| {
-        Ok(unwrap_jni_verbose(
-            &env,
-            (|| {
-                let message = message_from_raw(env, &raw_message)?;
-                Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
-                    env.clone(),
-                    jclass,
-                    node_handle,
-                    *java_transaction.as_obj(),
-                    *message,
-                    0,
-                    raw_message.len() as i32,
-                );
-                let exception = get_and_clear_java_exception(&env).into();
-                assert_eq!(
-                    get_class_name(&env, exception)?,
-                    INVALID_TRANSACTION_EXCEPTION
-                );
-                Ok(())
-            })(),
-        ))
+        let submit = || {
+            let message = message_from_raw(env, &raw_message)?;
+            Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
+                env.clone(),
+                jclass,
+                node_handle,
+                *java_transaction.as_obj(),
+                *message,
+                0,
+                raw_message.len() as i32,
+            );
+            let exception = get_and_clear_java_exception(&env);
+            assert_eq!(
+                get_class_name(&env, exception)?,
+                INVALID_TRANSACTION_EXCEPTION
+            );
+            Ok(())
+        };
+        unwrap_jni_verbose(&env, submit());
+        Ok(())
     }));
 }
 

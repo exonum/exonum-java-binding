@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,6 +40,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
 public class UserServiceAdapter {
 
+  private static final String API_ROOT_PATH = "/api";
+
   private final Service service;
   private final Server server;
   private final ViewFactory viewFactory;
@@ -69,8 +71,6 @@ public class UserServiceAdapter {
    *
    * @param transactionMessage a transaction message to be converted
    * @return an executable transaction of this service
-   *         todo: exception(-s) is to be revised when we (a) design the native part and
-   *         (b) implement a certain serialization format
    * @throws NullPointerException if transactionMessage is null, or a user service returns
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
@@ -84,7 +84,7 @@ public class UserServiceAdapter {
     checkNotNull(transaction, "Invalid service implementation: "
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
-        message.getMessageType());  // todo: consider moving this check to the native code?
+        message.getMessageType());
     return new UserTransactionAdapter(transaction, viewFactory);
   }
 
@@ -97,7 +97,6 @@ public class UserServiceAdapter {
    * @return an array of state hashes
    * @see Service#getStateHashes(Snapshot)
    */
-  // todo: if the native code is better of with a flattened array, change the signature
   public byte[][] getStateHashes(long snapshotHandle) {
     assert snapshotHandle != 0;
 
@@ -137,7 +136,12 @@ public class UserServiceAdapter {
     node = new NodeProxy(nodeNativeHandle, viewFactory);
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
-    server.mountSubRouter("/" + getName(), router);
+    server.mountSubRouter(serviceApiPath(), router);
+  }
+
+  private String serviceApiPath() {
+    String serviceName = getName();
+    return API_ROOT_PATH + "/" + serviceName;
   }
 
   /**

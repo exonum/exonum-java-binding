@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.2</version>
   </parent>
 
   <artifactId>exonum-java-binding-core</artifactId>
-  <version>0.1.0</version>
+  <version>0.2</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Core</name>
@@ -22,17 +22,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rust.cargo.executable>cargo</rust.cargo.executable>
-    <rust.compiler.version>stable</rust.compiler.version>
+    <!-- TODO: stable does not work well until ECR-1839 is resolved. -->
+    <rust.compiler.version>1.26.2</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
-    <!-- Intentionally left empty, may be overridden from the command line.
-         See README.md and http://errorprone.info/docs/flags for more. -->
-    <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
-    <java.compiler.errorprone.patchChecksFlag>MissingOverride,DeadException</java.compiler.errorprone.patchChecksFlag>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
-    <auto-value.version>1.6</auto-value.version>
+    <auto-value.version>1.6.2</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
-    <skipITs>${project.skipJavaITs}</skipITs>
+    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
   </properties>
 
   <build>
@@ -41,8 +38,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <compilerArgs>
-            <arg>${java.compiler.errorprone.flag}</arg>
+          <!-- Make it possible to add arguments in the parent configuration.
+               Default is "merge" which will discard any <arg> child elements in the parent. -->
+          <compilerArgs combine.children="append">
             <arg>-h</arg>
             <arg>${project.build.headersDirectory}</arg>
           </compilerArgs>
@@ -205,30 +203,20 @@
           <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 
   <profiles>
-    <profile>
-      <!-- Use this profile to produce a patch with suggested fixes,
-           e.g. `mvn compile -P fixerrors`. See README.md for more.
-        -->
-      <id>fixerrors</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <compilerArgs combine.children="append">
-                <compilerArg>-XepPatchLocation:${basedir}</compilerArg>
-                <compilerArg>-XepPatchChecks:${java.compiler.errorprone.patchChecksFlag}</compilerArg>
-              </compilerArgs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <!-- A build profile for a build performed on a CI server:
             - Fails if the code has style issues
             - Runs FindBugs during verify phase
@@ -253,29 +241,13 @@
         </plugins>
       </build>
     </profile>
-    <!-- A profile to build the native library on Mac. It is used instead of 
-         direct cargo invocation to set LD_LIBRARY_PATH correctly and pass it
-         to cargo process. Such workaround is needed because LD_LIBRARY_PATH
-         set in the parent shell is inaccessible to the cargo process if SIP is enabled.
-     -->
-    <profile>
-      <id>compat-macos</id>
-      <activation>
-        <os>
-          <family>mac</family>
-        </os>
-      </activation>
-      <properties>
-        <rust.cargo.executable>${project.basedir}/rust/cargo-mac.sh</rust.cargo.executable>
-      </properties>
-    </profile>
   </profiles>
 
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-proofs</artifactId>
-      <version>0.1.0</version>
+      <version>0.2</version>
     </dependency>
 
     <dependency>
@@ -318,6 +290,14 @@
       <scope>provided</scope>
     </dependency>
 
+    <!--It is needed for Javadoc generation with JDK 9-->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>${javax-annotation-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -354,7 +334,7 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
-      <version>0.1.0</version>
+      <version>0.2</version>
       <scope>test</scope>
     </dependency>
 
