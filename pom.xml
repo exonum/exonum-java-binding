@@ -96,8 +96,14 @@
     <guava.version>25.1-jre</guava.version>
     <vertx.version>3.5.3</vertx.version>
     <equalsverifier.version>2.4.8</equalsverifier.version>
-    <!-- skip all tests (unit and ITs) until the loading bug is fixed (ECR-942) -->
-    <skipTests>true</skipTests>
+    <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
+         during the build. Sub-modules define to which tests this flag applies depending
+         on where the native library is used.
+
+         This property shall be removed once the loading bug is fixed.
+
+         See ECR-942. -->
+    <project.skipJavaITs>false</project.skipJavaITs>
   </properties>
 
   <build>
@@ -351,6 +357,21 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!-- Skip integration tests requiring the native library on Linux until the loading bug
+         is fixed (ECR-942). -->
+    <profile>
+      <id>skip-ITs-on-linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <name>linux</name>
+        </os>
+      </activation>
+      <properties>
+        <project.skipJavaITs>true</project.skipJavaITs>
+      </properties>
     </profile>
   </profiles>
 
