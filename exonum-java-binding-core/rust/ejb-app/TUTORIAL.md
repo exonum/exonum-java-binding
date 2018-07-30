@@ -3,7 +3,7 @@ This document describes how to configure and run an Exonum node with a Java serv
 
 ## Prerequisites
 
-Build an application following the instructions in [«How to Build»][how-to-build] section
+Build an application following the instructions in [“How to Build”][how-to-build] section
 of the Contribution Guide.
 
 You should also have a ready-to-use Exonum Java service with prepared ServiceModule class.
@@ -21,9 +21,9 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 
 `LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
 You need to provide paths to:
-  - The JVM library (e.g., `libjvm.so` on Linux).
-  - The Rust standard library that was used to build the application.
-  - The application libraries used by Java Binding.
+  - JVM library (e.g., `libjvm.so` on Linux).
+  - Rust standard library that is used to build the application.
+  - Application libraries used by Java Binding.
 
 You can use the following script for this purpose:
 
