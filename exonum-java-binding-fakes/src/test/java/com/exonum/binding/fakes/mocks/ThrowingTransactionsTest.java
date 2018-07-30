@@ -17,6 +17,8 @@
 package com.exonum.binding.fakes.mocks;
 
 import com.exonum.binding.messages.Transaction;
+import java.io.IOException;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -58,6 +60,13 @@ public class ThrowingTransactionsTest {
   public void createThrowingFailsIfUninstantiableThrowable() {
     expectedException.expect(IllegalArgumentException.class);
     ThrowingTransactions.createThrowing(UninstantiableException.class);
+  }
+
+  @Test
+  @Ignore // Unfortunately, we do not perform such checks at the moment: ECR-1988
+  public void createThrowingFailsIfInvalidThrowable() {
+    expectedException.expect(IllegalArgumentException.class);
+    ThrowingTransactions.createThrowing(IOException.class);
   }
 
   abstract static class UninstantiableException extends Exception {}
