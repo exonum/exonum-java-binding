@@ -21,7 +21,6 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rust.cargo.executable>cargo</rust.cargo.executable>
     <!-- TODO: stable does not work well until ECR-1839 is resolved. -->
     <rust.compiler.version>1.26.2</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
@@ -30,6 +29,8 @@
     <auto-value.version>1.6.2</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
     <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
+    <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
+    <skipITs>${project.skipJavaITs}</skipITs>
   </properties>
 
   <build>
@@ -53,7 +54,7 @@
         <version>1.6.0</version>
         <!-- A configuration shared across multiple executions -->
         <configuration>
-          <executable>${rust.cargo.executable}</executable>
+          <executable>cargo</executable>
           <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>
