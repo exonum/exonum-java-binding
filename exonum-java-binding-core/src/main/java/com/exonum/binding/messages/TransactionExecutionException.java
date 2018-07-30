@@ -49,7 +49,6 @@ public class TransactionExecutionException extends Exception {
   /**
    * Constructs a new transaction exception with the specified description.
    *
-   *
    * @param errorCode the transaction error code
    * @param message the detail message. The detail message is saved for later retrieval by the {@link
    * #getMessage()} method.
