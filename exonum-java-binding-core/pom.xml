@@ -54,7 +54,7 @@
         <version>1.6.0</version>
         <!-- A configuration shared across multiple executions -->
         <configuration>
-          <executable>${project.basedir}/rust/cargo.sh</executable>
+          <executable>cargo</executable>
           <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>
