@@ -16,6 +16,8 @@
 
 package com.exonum.binding.messages;
 
+import javax.annotation.Nullable;
+
 /**
  * An exception occurred during transaction execution. The transaction exception includes
  * an integer error code, that may be either service-specific or transaction-specific;
@@ -52,7 +54,7 @@ public class TransactionExecutionException extends Exception {
    * @param message the detail message. The detail message is saved for later retrieval by the {@link
    * #getMessage()} method.
    */
-  public TransactionExecutionException(byte errorCode, String message) {
+  public TransactionExecutionException(byte errorCode, @Nullable String message) {
     this(errorCode, message, null);
   }
 
@@ -68,7 +70,9 @@ public class TransactionExecutionException extends Exception {
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    * (A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown)
    */
-  public TransactionExecutionException(byte errorCode, String message, Throwable cause) {
+  public TransactionExecutionException(byte errorCode,
+      @Nullable String message,
+      @Nullable Throwable cause) {
     super(message, cause);
     this.errorCode = errorCode;
   }
