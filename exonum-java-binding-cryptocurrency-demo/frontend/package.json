@@ -4,6 +4,10 @@
   "description": "Cryptocurrency demo for java binding",
   "author": "Exonum Team <exonum@bitfury.com>",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exonum/exonum-java-binding"
+  },
   "scripts": {
     "lint": "eslint --ext .js,.vue src test",
     "compile": "webpack",
@@ -36,7 +40,7 @@
     "@babel/core": "^7.0.0-beta.49",
     "@babel/preset-env": "^7.0.0-beta.49",
     "axios-mock-adapter": "^1.15.0",
-    "babel-core": "^7.0.0-bridge.0",
+    "babel-core": "^6.26.3",
     "babel-jest": "^23.0.1",
     "babel-loader": "^7.1.4",
     "babel-polyfill": "^6.26.0",
