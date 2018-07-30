@@ -64,7 +64,7 @@ There are several categories of tests:
 ### Running Tests
 <!-- TODO: Shall we explain what `mvn install` runs, and what `run_all_tests`? -->
 For convenience, the tests are divided into several groups.
-To run all tests, just invoke this script:
+To run all tests, invoke this script:
 ```$sh
 $ ./run_all_tests.sh
 ```
