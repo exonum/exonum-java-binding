@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,8 +89,8 @@ public class CreateCounterTxIntegrationTest {
         .setBody(serialize(name))
         .buildRaw();
 
-    // todo: remove extra #getMessage when MessageReader has equals: ECR-992
-    assertThat(tx.getMessage().getMessage(), equalTo(expectedMessage.getMessage()));
+    // todo: remove extra #getSignedMessage when MessageReader has equals: ECR-992
+    assertThat(tx.getMessage().getSignedMessage(), equalTo(expectedMessage.getSignedMessage()));
   }
 
   @Test

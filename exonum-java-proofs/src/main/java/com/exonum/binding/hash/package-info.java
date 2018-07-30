@@ -27,7 +27,6 @@
  * limitations under the License.
  */
 
-// TODO(user): when things stabilize, flesh this out
 /**
  * Hash functions and related structures.
  *

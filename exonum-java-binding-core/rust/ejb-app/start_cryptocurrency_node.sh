@@ -22,12 +22,12 @@ function header() {
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
 # hence this a bit complex thing.
-JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
+JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}/"
 echo "JAVA_HOME=${JAVA_HOME}"
 
 # Find the directory containing libjvm (the relative path has changed in Java 9)
-export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+JVM_LIB_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+echo "JVM_LIB_PATH=${JVM_LIB_PATH}"
 
 EJB_APP_DIR=$(pwd)
 echo "CURRENT_DIR=${EJB_APP_DIR}"
@@ -47,10 +47,10 @@ EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-RUST_LIB_DIR=$(rustup run stable rustc --print sysroot)/lib
+RUST_LIB_DIR="$(rustup run 1.26.2 rustc --print sysroot)/lib"
 echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
 
-LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$JVM_LIB_PATH"
 echo "Final LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
@@ -61,10 +61,17 @@ header "GENERATE COMMON CONFIG"
 ejb-app generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
-ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml --ejb-classpath $EJB_CLASSPATH --ejb-libpath $EJB_LIBPATH --ejb-log-config-path $EJB_LOG_CONFIG_PATH --ejb-debug false --peer-address 127.0.0.1:5400
+ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+ --ejb-classpath $EJB_CLASSPATH \
+ --ejb-libpath $EJB_LIBPATH \
+ --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
+ --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-ejb-app finalize testnet/sec.toml testnet/node.toml --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' --ejb-port 6000 --public-configs testnet/pub.toml
+ejb-app finalize testnet/sec.toml testnet/node.toml \
+ --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' \
+ --ejb-port 6000 \
+ --public-configs testnet/pub.toml
 
 header "START TESTNET"
 ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000

@@ -77,7 +77,7 @@ fn state_hash() {
 
 #[test]
 fn tx_from_raw() {
-    let (java_transaction, raw_message) = create_mock_transaction(EXECUTOR.clone(), true);
+    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, true);
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction(java_transaction)
         .build();

@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ package com.exonum.binding.messages;
  * (e.g., its {@link Transaction#isValid()} returns false).
  */
 public final class InvalidTransactionException extends Exception {
-  // todo: accept transaction and include it in error message?
   InvalidTransactionException(String message) {
     super(message);
   }
