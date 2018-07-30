@@ -50,11 +50,11 @@ public class TransactionExecutionException extends Exception {
    * Constructs a new transaction exception with the specified description.
    *
    * @param errorCode the transaction error code
-   * @param message the detail message. The detail message is saved for later retrieval by the {@link
-   * #getMessage()} method.
+   * @param description the error description. The detail description is saved for
+   *     later retrieval by the {@link #getMessage()} method.
    */
-  public TransactionExecutionException(byte errorCode, @Nullable String message) {
-    this(errorCode, message, null);
+  public TransactionExecutionException(byte errorCode, @Nullable String description) {
+    this(errorCode, description, null);
   }
 
   /**
@@ -64,15 +64,15 @@ public class TransactionExecutionException extends Exception {
    * incorporated in this exception’s detail message.
    *
    * @param errorCode the transaction error code
-   * @param message the detail message (which is saved for later retrieval by the {@link
-   * #getMessage()} method)
+   * @param description the error description. The detail description is saved for
+   *     later retrieval by the {@link #getMessage()} method.
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-   * (A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown)
+   *     A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.
    */
   public TransactionExecutionException(byte errorCode,
-      @Nullable String message,
+      @Nullable String description,
       @Nullable Throwable cause) {
-    super(message, cause);
+    super(description, cause);
     this.errorCode = errorCode;
   }
 
@@ -83,10 +83,8 @@ public class TransactionExecutionException extends Exception {
   }
 
   /**
-   * Returns a description of this error. Includes the actual class name, the optional description,
-   * and the error code.
-   *
-   * @return a string representation of this error
+   * Returns a string representation of this error. Includes the actual class name,
+   * the optional description and the error code.
    */
   @Override
   public String toString() {
