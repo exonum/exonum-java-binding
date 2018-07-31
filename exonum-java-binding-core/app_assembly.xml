@@ -13,5 +13,9 @@
         <file>
             <source>rust/target/debug/ejb-app</source>
         </file>
+        <file>
+            <source>rust/target/debug/libjava_bindings.so</source>
+            <outputDirectory>lib</outputDirectory>
+        </file>
     </files>
 </assembly>
