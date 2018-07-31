@@ -68,7 +68,7 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
     if (!lazySodium
         .cryptoSign(signedMessage, null, message, message.length, privateKey.toBytesNoCopy())) {
-      throw new RuntimeException("Could not sign your message.");
+      throw new RuntimeException("Could not sign the message.");
     }
     return Arrays.copyOfRange(signedMessage, 0, SIGNATURE_BYTES);
   }
