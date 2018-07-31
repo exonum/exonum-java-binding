@@ -7,8 +7,12 @@ sudo: false
 
 addons:
   apt:
+    sources:
+    - sourceline: 'ppa:chris-lea/libsodium'
     packages:
     - build-essential
+      # Install libsodium as it is required for the crypto package in the light client.
+    - libsodium-dev
     - libssl-dev
     - pkg-config
 
