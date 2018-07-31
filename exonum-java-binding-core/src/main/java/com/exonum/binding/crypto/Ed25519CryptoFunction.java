@@ -16,17 +16,15 @@
 
 package com.exonum.binding.crypto;
 
-import static com.exonum.binding.crypto.Crypto.Ed25519.PRIVATE_KEY_BYTES;
-import static com.exonum.binding.crypto.Crypto.Ed25519.PUBLIC_KEY_BYTES;
-import static com.exonum.binding.crypto.Crypto.Ed25519.SEED_BYTES;
-import static com.exonum.binding.crypto.Crypto.Ed25519.SIGNATURE_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PRIVATE_KEY_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SEED_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SIGNATURE_BYTES;
 import static com.exonum.binding.crypto.CryptoUtils.hasLength;
-import static com.exonum.binding.crypto.CryptoUtils.merge;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
-import java.util.Arrays;
 
 /**
  * A ED25519 public-key signature system crypto function.
@@ -42,8 +40,8 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
     checkArgument(hasLength(seed, SEED_BYTES),
         "Seed byte array has invalid size (%s), must be %s", seed.length, SEED_BYTES);
 
-    byte[] publicKey = lazySodium.randomBytesBuf(PUBLIC_KEY_BYTES);
-    byte[] privateKey = lazySodium.randomBytesBuf(PRIVATE_KEY_BYTES);
+    byte[] publicKey = new byte[PUBLIC_KEY_BYTES];
+    byte[] privateKey = new byte[PRIVATE_KEY_BYTES];
 
     if (!lazySodium.cryptoSignSeedKeypair(publicKey, privateKey, seed)) {
       throw new RuntimeException("Failed to generate a key pair");
@@ -53,8 +51,8 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public KeyPair generateKeyPair() {
-    byte[] publicKey = lazySodium.randomBytesBuf(PUBLIC_KEY_BYTES);
-    byte[] privateKey = lazySodium.randomBytesBuf(PRIVATE_KEY_BYTES);
+    byte[] publicKey = new byte[PUBLIC_KEY_BYTES];
+    byte[] privateKey = new byte[PRIVATE_KEY_BYTES];
 
     if (!lazySodium.cryptoSignKeypair(publicKey, privateKey)) {
       throw new RuntimeException("Failed to generate a key pair");
@@ -64,13 +62,14 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public byte[] signMessage(byte[] message, PrivateKey privateKey) {
-    byte[] signedMessage = lazySodium.randomBytesBuf(SIGNATURE_BYTES + message.length);
+    byte[] signature = new byte[SIGNATURE_BYTES];
+    boolean signed = lazySodium.cryptoSignDetached(signature, new long[1], message, message.length,
+        privateKey.toBytesNoCopy());
 
-    if (!lazySodium
-        .cryptoSign(signedMessage, null, message, message.length, privateKey.toBytesNoCopy())) {
+    if (!signed) {
       throw new RuntimeException("Could not sign the message.");
     }
-    return Arrays.copyOfRange(signedMessage, 0, SIGNATURE_BYTES);
+    return signature;
   }
 
   @Override
@@ -78,15 +77,8 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
     if (!hasLength(signature, SIGNATURE_BYTES)) {
       return false;
     }
-    byte[] signedMessage = merge(signature, message);
-
-    return lazySodium.cryptoSignOpen(
-        message,
-        null,
-        signedMessage,
-        signedMessage.length,
-        publicKey.toBytesNoCopy()
-    );
+    return lazySodium
+        .cryptoSignVerifyDetached(signature, message, message.length, publicKey.toBytesNoCopy());
   }
 
 }

@@ -16,12 +16,16 @@
 
 package com.exonum.binding.crypto;
 
-import com.goterl.lazycode.lazysodium.LazySodium;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.io.BaseEncoding;
 
 /**
  * Utils for crypto system.
  */
 class CryptoUtils {
+
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   /**
    * Check that {@code data} byte array has specified {@code size}.
@@ -39,31 +43,19 @@ class CryptoUtils {
    * @return bytes array
    */
   static byte[] hexToByteArray(String hex) {
-    return LazySodium.toBin(hex);
+    checkNotNull(hex);
+    return HEX_ENCODING.decode(hex);
   }
 
   /**
    * Converts bytes to hexadecimal.
    *
-   * @param bin bytes array
+   * @param bytes bytes array
    * @return hexadecimal string
    */
-  static String byteArrayToHex(byte[] bin) {
-    return LazySodium.toHex(bin);
-  }
-
-  /**
-   * Merges two byte arrays.
-   *
-   * @param first  byte array
-   * @param second byte array
-   * @return combined byte array
-   */
-  static byte[] merge(byte[] first, byte[] second) {
-    byte[] combined = new byte[first.length + second.length];
-    System.arraycopy(first, 0, combined, 0, first.length);
-    System.arraycopy(second, 0, combined, first.length, second.length);
-    return combined;
+  static String byteArrayToHex(byte[] bytes) {
+    checkNotNull(bytes);
+    return HEX_ENCODING.encode(bytes);
   }
 
   private CryptoUtils() {

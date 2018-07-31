@@ -16,8 +16,8 @@
 
 package com.exonum.binding.crypto;
 
-import static com.exonum.binding.crypto.Crypto.Ed25519.SEED_BYTES;
-import static com.exonum.binding.crypto.Crypto.Ed25519.SIGNATURE_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SEED_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SIGNATURE_BYTES;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
