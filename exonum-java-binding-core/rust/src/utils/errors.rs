@@ -99,11 +99,9 @@ fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JniErro
     assert!(!exception.is_null(), "No exception thrown.");
     let format = || {
         Ok(format!(
-            "Java exception: {}; {:?}\nMessage: {:?}\nStack trace:\n {:#?}",
+            "Java exception: {}; {:?}",
             get_class_name(env, exception)?,
             get_exception_message(env, exception)?,
-            get_exception_stack_trace(env, exception)?,
-            jni_error.backtrace(),
         ))
     };
     unwrap_jni_verbose(env, format())
