@@ -153,10 +153,7 @@ fn get_exception_message_without_message() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
             let exception = env.new_object(ARITHMETIC_EXCEPTION_CLASS, "()V", &[])?;
-            assert_eq!(
-                get_exception_message(env, exception)?,
-                None
-            );
+            assert_eq!(get_exception_message(env, exception)?, None);
             Ok(())
         })
         .unwrap();
