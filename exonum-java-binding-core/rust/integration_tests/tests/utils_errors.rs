@@ -148,17 +148,11 @@ fn get_and_clear_java_exception_if_exception_occurred() {
         .unwrap();
 }
 
-// FIXME blocked by https://jira.bf.local/browse/ECR-1998
-// Currently (jni 0.11) there is no way to throw exception from native code
-// without message argument.
 #[test]
-#[ignore]
 fn get_exception_message_without_message() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
-            throw(env, ARITHMETIC_EXCEPTION_CLASS)
-                .unwrap_err();
-            let exception = get_and_clear_java_exception(env);
+            let exception = env.new_object(ARITHMETIC_EXCEPTION_CLASS, "()V", &[])?;
             assert_eq!(
                 get_exception_message(env, exception)?,
                 None
