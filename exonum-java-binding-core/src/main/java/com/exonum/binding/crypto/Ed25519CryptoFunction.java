@@ -16,20 +16,17 @@
 
 package com.exonum.binding.crypto;
 
-import static com.exonum.binding.crypto.CryptoUtils.checkReturnValueSuccess;
+import static com.exonum.binding.crypto.Crypto.Ed25519.PRIVATE_KEY_BYTES;
+import static com.exonum.binding.crypto.Crypto.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.crypto.Crypto.Ed25519.SEED_BYTES;
+import static com.exonum.binding.crypto.Crypto.Ed25519.SIGNATURE_BYTES;
 import static com.exonum.binding.crypto.CryptoUtils.hasLength;
+import static com.exonum.binding.crypto.CryptoUtils.merge;
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_SECRETKEYBYTES;
-import static org.abstractj.kalium.NaCl.sodium;
-import static org.abstractj.kalium.crypto.Util.merge;
-import static org.abstractj.kalium.crypto.Util.slice;
-import static org.abstractj.kalium.crypto.Util.zeros;
 
-import jnr.ffi.byref.LongLongByReference;
-import org.abstractj.kalium.crypto.Random;
-import org.abstractj.kalium.crypto.Util;
+import com.goterl.lazycode.lazysodium.LazySodiumJava;
+import com.goterl.lazycode.lazysodium.SodiumJava;
+import java.util.Arrays;
 
 /**
  * A ED25519 public-key signature system crypto function.
@@ -38,17 +35,17 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   INSTANCE;
 
-  private static final int CRYPTO_SIGN_ED25519_SEEDBYTES = 64;
+  private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 
   @Override
   public KeyPair generateKeyPair(byte[] seed) {
-    checkArgument(hasLength(seed, CRYPTO_SIGN_ED25519_SEEDBYTES),
-        "Seed byte array has invalid size (%s), must be 64", seed.length);
+    checkArgument(hasLength(seed, SEED_BYTES),
+        "Seed byte array has invalid size (%s), must be %s", seed.length, SEED_BYTES);
 
-    byte[] privateKey = zeros(CRYPTO_SIGN_ED25519_SECRETKEYBYTES);
-    byte[] publicKey = zeros(CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
-    if (!checkReturnValueSuccess(
-        sodium().crypto_sign_ed25519_seed_keypair(publicKey, privateKey, seed))) {
+    byte[] publicKey = lazySodium.randomBytesBuf(PUBLIC_KEY_BYTES);
+    byte[] privateKey = lazySodium.randomBytesBuf(PRIVATE_KEY_BYTES);
+
+    if (!lazySodium.cryptoSignSeedKeypair(publicKey, privateKey, seed)) {
       throw new RuntimeException("Failed to generate a key pair");
     }
     return KeyPair.createKeyPairNoCopy(privateKey, publicKey);
@@ -56,32 +53,40 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public KeyPair generateKeyPair() {
-    return generateKeyPair(new Random().randomBytes(CRYPTO_SIGN_ED25519_SEEDBYTES));
+    byte[] publicKey = lazySodium.randomBytesBuf(PUBLIC_KEY_BYTES);
+    byte[] privateKey = lazySodium.randomBytesBuf(PRIVATE_KEY_BYTES);
+
+    if (!lazySodium.cryptoSignKeypair(publicKey, privateKey)) {
+      throw new RuntimeException("Failed to generate a key pair");
+    }
+    return KeyPair.createKeyPairNoCopy(privateKey, publicKey);
   }
 
   @Override
   public byte[] signMessage(byte[] message, PrivateKey privateKey) {
-    byte[] signedMessage = Util.prependZeros(CRYPTO_SIGN_ED25519_BYTES, message);
-    LongLongByReference bufferLen = new LongLongByReference(0);
-    sodium()
-        .crypto_sign_ed25519(
-            signedMessage, bufferLen, message, message.length, privateKey.toBytesNoCopy());
-    byte[] signature = slice(signedMessage, 0, CRYPTO_SIGN_ED25519_BYTES);
-    return signature;
+    byte[] signedMessage = lazySodium.randomBytesBuf(SIGNATURE_BYTES + message.length);
+
+    if (!lazySodium
+        .cryptoSign(signedMessage, null, message, message.length, privateKey.toBytesNoCopy())) {
+      throw new RuntimeException("Could not sign your message.");
+    }
+    return Arrays.copyOfRange(signedMessage, 0, SIGNATURE_BYTES);
   }
 
   @Override
   public boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
-    if (!hasLength(signature, CRYPTO_SIGN_ED25519_BYTES)) {
+    if (!hasLength(signature, SIGNATURE_BYTES)) {
       return false;
     }
-    byte[] sigAndMsg = merge(signature, message);
-    byte[] buffer = zeros(sigAndMsg.length);
-    LongLongByReference bufferLen = new LongLongByReference(0);
+    byte[] signedMessage = merge(signature, message);
 
-    return checkReturnValueSuccess(
-        sodium()
-            .crypto_sign_ed25519_open(
-                buffer, bufferLen, sigAndMsg, sigAndMsg.length, publicKey.toBytesNoCopy()));
+    return lazySodium.cryptoSignOpen(
+        message,
+        null,
+        signedMessage,
+        signedMessage.length,
+        publicKey.toBytesNoCopy()
+    );
   }
+
 }

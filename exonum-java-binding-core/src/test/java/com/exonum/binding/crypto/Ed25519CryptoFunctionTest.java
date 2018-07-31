@@ -16,8 +16,9 @@
 
 package com.exonum.binding.crypto;
 
+import static com.exonum.binding.crypto.Crypto.Ed25519.SEED_BYTES;
+import static com.exonum.binding.crypto.Crypto.Ed25519.SIGNATURE_BYTES;
 import static com.exonum.binding.test.Bytes.bytes;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -36,7 +37,7 @@ public class Ed25519CryptoFunctionTest {
 
   @Test
   public void generateKeyPairWithSeed() {
-    byte[] seed = new byte[64];
+    byte[] seed = new byte[SEED_BYTES];
 
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
     assertNotNull(keyPair);
@@ -44,10 +45,10 @@ public class Ed25519CryptoFunctionTest {
 
   @Test
   public void generateKeyPairInvalidSeedSize() {
-    // Try to use a two-byte seed, must be 64 byte long
+    // Try to use a two-byte seed, must be 32 byte long
     byte[] seed = bytes(0x01, 0x02);
 
-    expectedException.expectMessage("Seed byte array has invalid size (2), must be 64");
+    expectedException.expectMessage("Seed byte array has invalid size (2), must be " + SEED_BYTES);
     expectedException.expect(IllegalArgumentException.class);
     CRYPTO_FUNCTION.generateKeyPair(seed);
   }
@@ -92,7 +93,7 @@ public class Ed25519CryptoFunctionTest {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
-    byte[] invalidSignature = Bytes.createPrefixed(message, CRYPTO_SIGN_ED25519_BYTES);
+    byte[] invalidSignature = Bytes.createPrefixed(message, SIGNATURE_BYTES);
     assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
   }
 

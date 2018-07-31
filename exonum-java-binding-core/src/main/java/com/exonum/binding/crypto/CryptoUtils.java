@@ -16,6 +16,8 @@
 
 package com.exonum.binding.crypto;
 
+import com.goterl.lazycode.lazysodium.LazySodium;
+
 /**
  * Utils for crypto system.
  */
@@ -23,6 +25,7 @@ class CryptoUtils {
 
   /**
    * Check that {@code data} byte array has specified {@code size}.
+   *
    * @throws NullPointerException if it is {@code null}
    */
   static boolean hasLength(byte[] data, int size) {
@@ -30,9 +33,39 @@ class CryptoUtils {
   }
 
   /**
-   * Check that returned status is a success status.
+   * Converts hexadecimal to bytes.
+   *
+   * @param hex hexadecimal string
+   * @return bytes array
    */
-  static boolean checkReturnValueSuccess(int status) {
-    return status == 0;
+  static byte[] hexToByteArray(String hex) {
+    return LazySodium.toBin(hex);
+  }
+
+  /**
+   * Converts bytes to hexadecimal.
+   *
+   * @param bin bytes array
+   * @return hexadecimal string
+   */
+  static String byteArrayToHex(byte[] bin) {
+    return LazySodium.toHex(bin);
+  }
+
+  /**
+   * Merges two byte arrays.
+   *
+   * @param first  byte array
+   * @param second byte array
+   * @return combined byte array
+   */
+  static byte[] merge(byte[] first, byte[] second) {
+    byte[] combined = new byte[first.length + second.length];
+    System.arraycopy(first, 0, combined, 0, first.length);
+    System.arraycopy(second, 0, combined, first.length, second.length);
+    return combined;
+  }
+
+  private CryptoUtils() {
   }
 }
