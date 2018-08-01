@@ -16,8 +16,11 @@
 
 package com.exonum.binding.crypto;
 
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PRIVATE_KEY_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SEED_BYTES;
 import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SIGNATURE_BYTES;
+import static com.exonum.binding.crypto.CryptoUtils.hasLength;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -41,6 +44,8 @@ public class Ed25519CryptoFunctionTest {
 
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
     assertNotNull(keyPair);
+    assertTrue(hasLength(keyPair.getPrivateKey().toBytesNoCopy(), PRIVATE_KEY_BYTES));
+    assertTrue(hasLength(keyPair.getPublicKey().toBytesNoCopy(), PUBLIC_KEY_BYTES));
   }
 
   @Test
@@ -122,7 +127,9 @@ public class Ed25519CryptoFunctionTest {
 
     // Try to use a public key of incorrect length.
     PublicKey publicKey = PublicKey.fromHexString("abcd");
-    assertFalse(CRYPTO_FUNCTION.verify(message, signature, publicKey));
+    expectedException.expectMessage("Public key has invalid size (2), must be " + PUBLIC_KEY_BYTES);
+    expectedException.expect(IllegalArgumentException.class);
+    CRYPTO_FUNCTION.verify(message, signature, publicKey);
   }
 
   @Test

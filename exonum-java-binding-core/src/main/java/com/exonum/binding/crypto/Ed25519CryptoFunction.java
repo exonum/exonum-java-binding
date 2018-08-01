@@ -75,7 +75,8 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
-    checkArgument(hasLength(publicKey.toBytesNoCopy(), PUBLIC_KEY_BYTES));
+    checkArgument(hasLength(publicKey.toBytesNoCopy(), PUBLIC_KEY_BYTES),
+        "Public key has invalid size (%s), must be %s", publicKey.size(), PUBLIC_KEY_BYTES);
     if (!hasLength(signature, SIGNATURE_BYTES)) {
       return false;
     }
