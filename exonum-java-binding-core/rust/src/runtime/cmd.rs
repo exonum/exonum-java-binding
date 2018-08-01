@@ -165,12 +165,16 @@ impl CommandExtension for Run {
 fn get_system_classpath() -> String {
     let mut jars = Vec::new();
     let jars_directory = {
+        // Get current path to EJB App.
         let mut current_directory =
-            env::current_dir().expect("Could not get current working directory");
+            env::current_exe().expect("Could not get current working directory");
+        // Get directory where EJB App is.
+        current_directory.pop();
+        // Add relative path to java classes.
         current_directory.push("lib/java");
         current_directory
     };
-    for entry in fs::read_dir(jars_directory).unwrap() {
+    for entry in fs::read_dir(jars_directory).expect("Could not read java classes directory") {
         let file = entry.unwrap();
         if file.file_type().unwrap().is_file() {
             jars.push(file.path());
