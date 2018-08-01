@@ -58,11 +58,11 @@ rm -rf testnet
 mkdir testnet
 
 header "GENERATE COMMON CONFIG"
-ejb-app generate-template --validators-count=1 testnet/common.toml
+ejb-app generate-template --validators-count=1 testnet/common.toml \
+ --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule'
 
 header "GENERATE CONFIG"
 ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
- --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"

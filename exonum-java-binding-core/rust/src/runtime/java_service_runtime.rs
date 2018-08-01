@@ -6,7 +6,7 @@ use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
+use runtime::cmd::{Finalize, GenerateTemplate, Run};
 use runtime::config::{self, Config, PrivateConfig};
 use utils::{join_paths, unwrap_jni};
 use MainExecutor;
@@ -125,7 +125,7 @@ impl ServiceFactory for JavaServiceFactory {
         use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
         match command {
-            v if v == fabric::GenerateNodeConfig::name() => Some(Box::new(GenerateNodeConfig)),
+            v if v == fabric::GenerateCommonConfig::name() => Some(Box::new(GenerateTemplate)),
             v if v == fabric::Finalize::name() => Some(Box::new(Finalize)),
             v if v == fabric::Run::name() => Some(Box::new(Run)),
             _ => None,

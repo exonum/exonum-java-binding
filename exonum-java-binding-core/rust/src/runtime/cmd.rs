@@ -3,7 +3,6 @@ use exonum::helpers::fabric::keys;
 use exonum::helpers::fabric::Argument;
 use exonum::helpers::fabric::CommandExtension;
 use exonum::helpers::fabric::Context;
-use exonum::helpers::fabric::NodePublicConfig;
 use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
@@ -18,9 +17,9 @@ const EJB_PORT: &str = "EJB_PORT";
 const EJB_PUBLIC_CONFIG_NAME: &str = "ejb_public_config";
 pub const EJB_CONFIG_NAME: &str = "ejb";
 
-pub struct GenerateNodeConfig;
+pub struct GenerateTemplate;
 
-impl CommandExtension for GenerateNodeConfig {
+impl CommandExtension for GenerateTemplate {
     fn args(&self) -> Vec<Argument> {
         vec![Argument::new_named(
             EJB_MODULE_NAME,
@@ -37,9 +36,7 @@ impl CommandExtension for GenerateNodeConfig {
 
         let public_config = PublicConfig { module_name };
 
-        let mut services_public_configs = context
-            .get(keys::SERVICES_PUBLIC_CONFIGS)
-            .unwrap_or_default();
+        let mut services_public_configs = context.get(keys::SERVICES_CONFIG).unwrap_or_default();
         services_public_configs.extend(
             vec![(
                 EJB_PUBLIC_CONFIG_NAME.to_owned(),
@@ -47,7 +44,7 @@ impl CommandExtension for GenerateNodeConfig {
             )].into_iter(),
         );
 
-        context.set(keys::SERVICES_PUBLIC_CONFIGS, services_public_configs);
+        context.set(keys::SERVICES_CONFIG, services_public_configs);
 
         Ok(context)
     }
@@ -78,13 +75,11 @@ impl CommandExtension for Finalize {
             port: 0,
         };
 
-        let public_node_config_list: Vec<NodePublicConfig> = context.get(keys::PUBLIC_CONFIG_LIST)?;
-
-        let public_node_config: &NodePublicConfig = &public_node_config_list[0];
-        let public_config = public_node_config
-            .services_public_configs
+        let common_config = context.get(keys::COMMON_CONFIG)?;
+        let public_config = common_config
+            .services_config
             .get(EJB_PUBLIC_CONFIG_NAME)
-            .expect("Can't get public EJB config")
+            .expect("EJB public config not found")
             .clone()
             .try_into()?;
 
@@ -136,9 +131,7 @@ impl CommandExtension for Run {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = context
-            .arg_multiple(EJB_JVM_ARGUMENTS)
-            .unwrap_or_default();
+        let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let port = context.arg(EJB_PORT)?;
 
