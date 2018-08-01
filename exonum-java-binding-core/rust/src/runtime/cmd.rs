@@ -10,7 +10,7 @@ use toml::Value;
 
 use std::{env, fs};
 
-const EJB_USER_PARAMETERS: &str = "EJB_USER_PARAMETERS";
+const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_SERVICE_CLASSPATH: &str = "EJB_SERVICE_CLASSPATH";
 const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
@@ -108,7 +108,7 @@ impl CommandExtension for Run {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
-                EJB_USER_PARAMETERS,
+                EJB_JVM_ARGUMENTS,
                 false,
                 "Additional parameters for JVM. Must not have a leading dash. \
                  For example, `Xmx2G` or `Xdebug`",
@@ -137,7 +137,7 @@ impl CommandExtension for Run {
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
         let user_parameters = context
-            .arg_multiple(EJB_USER_PARAMETERS)
+            .arg_multiple(EJB_JVM_ARGUMENTS)
             .unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let port = context.arg(EJB_PORT)?;
