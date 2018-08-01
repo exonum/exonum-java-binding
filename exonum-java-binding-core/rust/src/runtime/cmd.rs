@@ -36,6 +36,7 @@ impl CommandExtension for GenerateTemplate {
 
         let public_config = PublicConfig { module_name };
 
+        // Adding EJB public config to the services public configs section in common.toml.
         let mut services_public_configs = context.get(keys::SERVICES_CONFIG).unwrap_or_default();
         services_public_configs.extend(
             vec![(
@@ -43,7 +44,6 @@ impl CommandExtension for GenerateTemplate {
                 Value::try_from(public_config).unwrap(),
             )].into_iter(),
         );
-
         context.set(keys::SERVICES_CONFIG, services_public_configs);
 
         Ok(context)
@@ -67,6 +67,7 @@ impl CommandExtension for Finalize {
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
         let service_class_path = context.arg(EJB_SERVICE_CLASSPATH)?;
 
+        // Creating new private config.
         let private_config = PrivateConfig {
             user_parameters: Vec::new(),
             system_class_path: get_system_classpath(),
@@ -75,6 +76,7 @@ impl CommandExtension for Finalize {
             port: 0,
         };
 
+        // Getting public config saved at first step out of common section of configuration.
         let common_config = context.get(keys::COMMON_CONFIG)?;
         let public_config = common_config
             .services_config
@@ -83,11 +85,13 @@ impl CommandExtension for Finalize {
             .clone()
             .try_into()?;
 
+        // Forming full EJB config.
         let config = Config {
             public_config,
             private_config,
         };
 
+        // Writing EJB config to the node services configuration section.
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
         node_config
             .services_configs
@@ -135,6 +139,7 @@ impl CommandExtension for Run {
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let port = context.arg(EJB_PORT)?;
 
+        // Getting full EJB config saved at finalize step.
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
         let mut ejb_config: Config = node_config
             .services_configs
@@ -142,10 +147,13 @@ impl CommandExtension for Run {
             .cloned()
             .unwrap()
             .try_into()?;
+
+        // Updating parameters in EJB config using provided arguments.
         ejb_config.private_config.user_parameters = user_parameters;
         ejb_config.private_config.log_config_path = log_config_path;
         ejb_config.private_config.port = port;
 
+        // Updating EJB config.
         node_config
             .services_configs
             .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(ejb_config)?);
