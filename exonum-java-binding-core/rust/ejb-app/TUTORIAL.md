@@ -20,23 +20,27 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 #### `LD_LIBRARY_PATH` and `EJB_LIBPATH`
 
 `LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
-You need to provide paths to:
-  - JVM library (e.g., `libjvm.so` on Linux).
-  - Rust standard library that is used to build the application.
-  - Application libraries used by Java Binding.
 
 You can use the following script for this purpose:
 
 ```bash
+export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
+export LD_LIBRARY_PATH="${EJB_LIBPATH}"
+```
+
+##### Specifying a JVM
+The application automatically locates the JVM library and the Rust standard library that
+were used to build the application. If you need to run a different version of JVM than 
+the one used during the build, append the path to the directory containing its `libjvm` 
+shared library to `LD_LIBRARY_PATH`:
+
+```bash
+# Java home is the path to the JVM you would like to use:
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
 LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
-RUST_LIB_PATH="$(rustup run 1.26.2 rustc --print sysroot)/lib"
-
-export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
-
-export LD_LIBRARY_PATH="${LIBJVM_PATH}:${RUST_LIB_PATH}:${EJB_LIBPATH}"
-```
+export LD_LIBRARY_PATH="${LIBJVM_PATH}:${LD_LIBRARY_PATH}"
+``` 
 
 #### CLASSPATH
 Classpath is used to locate Java classes of your service and its dependencies, including 
