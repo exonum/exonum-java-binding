@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 /**
  * An exception occurred during transaction execution. The transaction exception includes
  * an integer error code, that may be either service-specific or transaction-specific;
- * and an optional description — an exception message. Both the error code and the description
+ * with an optional description — an exception message. Both the error code and the description
  * are saved in the database, but only the value of the error code affects the blockchain state.
  *
  * <p>The other attributes of a Java exception — a stack trace, a cause, suppressed exceptions —
@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
  */
 public class TransactionExecutionException extends Exception {
 
-  // TODO: Consider using enums and taking their ordinal as the error code?
+  // TODO: Consider using enums and taking their ordinal as the error code: ECR-2006?
   private final byte errorCode;
 
   /**
