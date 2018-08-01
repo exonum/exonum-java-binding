@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ public class PutValueTransactionTest {
       .setMessageType(PutValueTransaction.ID)
       .setVersion((byte) 1)
       .setBody(encode("any value"))
-      .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+      .setSignature(new byte[Message.SIGNATURE_SIZE])
       .buildPartial();
 
   @Test(expected = IllegalArgumentException.class)

@@ -15,18 +15,23 @@ You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
   * [JDK 1.8+](http://jdk.java.net/10/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
-  * The latest stable [Rust](https://www.rust-lang.org/).
+  * [Rust 1.26.2](https://www.rust-lang.org/).
+    To install specific Rust version, use `rustup install 1.26.2` command.
   * The [system dependencies](https://exonum.com/doc/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
 
 ### Building
-Run
+Set required environment variables, once in a shell you use to build the project:
+```$sh
+$ source tests_profile
+```
+Then run:
 ```$sh
 $ mvn install
 ```
 
 #### Building Java Binding App
-Run
+Run:
 ```$sh
 $ cd exonum-java-binding-core/rust/ejb-app
 $ cargo install --debug --force
@@ -58,15 +63,15 @@ There are several categories of tests:
 
 ### Running Tests
 <!-- TODO: Shall we explain what `mvn install` runs, and what `run_all_tests`? -->
-To run the unit and integration tests, invoke this script:
+For convenience, the tests are divided into several groups.
+To run all tests, invoke this script:
 ```$sh
 $ ./run_all_tests.sh
 ```
-
-Integration tests in Rust may be run separately with this script:
-```$sh
-$ ./run_native_integration_tests.sh
-```
+The following scripts can be run separately:
+* `./run_maven_tests.sh` - all tests in Java and unit tests in Rust.
+* `./run_native_integration_tests.sh` - integration tests in Rust.
+* `./run_ejb_app_tests.sh` - application tests in Rust.
 
 ### Writing Tests
 #### Java
@@ -87,8 +92,10 @@ to the JVM when running tests. For more details, see the failsafe plugin
 [configuration](exonum-java-binding-core/pom.xml).
 
 #### Rust
-Most Rust integration tests require a path to `libjvm.so` in `LD_LIBRARY_PATH` to run.
-It’s more convenient to use the script: `./run_native_integration_tests.sh`.
+All tests require several environment variables to be set.
+These variables with the brief explanation can be found in the `./tests_profile` script.
+They can be imported into the current shell with `source ./tests_profile`.
+It’s more convenient to use the corresponding `./run_XXX_tests.sh` script.
 
 ## The Code Style
 ### Java
@@ -108,7 +115,7 @@ Rust code follows the [Rust style guide](https://github.com/rust-lang-nursery/fm
 After installation, you can run it with
 ```$sh
 $ cd exonum-java-binding-core/rust
-$ cargo fmt --all -- --write-mode=diff
+$ cargo fmt --all -- --write-mode=check
 ```
 
 ## Submitting Issues

@@ -7,11 +7,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.2</version>
   </parent>
 
   <artifactId>exonum-java-proofs</artifactId>
-  <version>0.1.0</version>
+  <version>0.2</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Proofs</name>
@@ -49,6 +49,16 @@
           </argLine>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 
@@ -79,7 +89,13 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
-      <version>0.1.0</version>
+      <version>0.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

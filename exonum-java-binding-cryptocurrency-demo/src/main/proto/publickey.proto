@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-option java_package = "com.exonum.binding.cryptocurrency.transactions";
-option java_outer_classname = "PublicKeyProtos";
-
-message PublicKey {
-  bytes rawKey = 1;
-}

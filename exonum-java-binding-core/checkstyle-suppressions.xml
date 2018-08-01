@@ -8,6 +8,9 @@
     <!-- Exclude (mostly) auto-generated code -->
     <suppress files="Message_Builder2\.java" checks=".*"/>
 
+    <!-- Allow underscore in the class name so that IDEs work properly. -->
+    <suppress files="Message_Builder2Test\.java" checks="TypeName"/>
+
     <!-- fixme: remove when https://github.com/checkstyle/checkstyle/issues/5088 is resolved -->
     <suppress files="Node.*\.java" checks="JavadocMethod"/>
 

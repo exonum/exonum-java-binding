@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 final class FrequencyStatsFormatter {
 
   static <ElementT, KeyT>
-      String itemsFrequency(Collection<ElementT> items,
-                            Function<? super ElementT, ? extends KeyT> keyExtractor) {
+      String itemsFrequency(Collection<? extends ElementT> items,
+                            Function<? super ElementT, KeyT> keyExtractor) {
 
     Map<KeyT, Long> numItemsByType = items.stream()
         .collect(groupingBy(keyExtractor, counting()));
