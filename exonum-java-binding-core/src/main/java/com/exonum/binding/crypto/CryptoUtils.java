@@ -16,8 +16,6 @@
 
 package com.exonum.binding.crypto;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.io.BaseEncoding;
 
 /**
@@ -43,7 +41,6 @@ class CryptoUtils {
    * @return bytes array
    */
   static byte[] hexToByteArray(String hex) {
-    checkNotNull(hex);
     return HEX_ENCODING.decode(hex);
   }
 
@@ -54,7 +51,6 @@ class CryptoUtils {
    * @return hexadecimal string
    */
   static String byteArrayToHex(byte[] bytes) {
-    checkNotNull(bytes);
     return HEX_ENCODING.encode(bytes);
   }
 

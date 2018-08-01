@@ -20,10 +20,11 @@ import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PRIVATE_KEY_BYTE
 import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SEED_BYTES;
 import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SIGNATURE_BYTES;
-import static com.exonum.binding.crypto.CryptoUtils.hasLength;
 import static com.exonum.binding.test.Bytes.bytes;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.test.Bytes;
@@ -44,8 +45,8 @@ public class Ed25519CryptoFunctionTest {
 
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
     assertNotNull(keyPair);
-    assertTrue(hasLength(keyPair.getPrivateKey().toBytesNoCopy(), PRIVATE_KEY_BYTES));
-    assertTrue(hasLength(keyPair.getPublicKey().toBytesNoCopy(), PUBLIC_KEY_BYTES));
+    assertThat(keyPair.getPrivateKey().size(), equalTo(PRIVATE_KEY_BYTES));
+    assertThat(keyPair.getPublicKey().size(), equalTo(PUBLIC_KEY_BYTES));
   }
 
   @Test
