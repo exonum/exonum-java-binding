@@ -18,8 +18,6 @@ function header() {
     echo
 }
 
-function join { local IFS="$1"; shift; echo "$*"; }
-
 # Use an already set JAVA_HOME, or infer it from java.home system property.
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
