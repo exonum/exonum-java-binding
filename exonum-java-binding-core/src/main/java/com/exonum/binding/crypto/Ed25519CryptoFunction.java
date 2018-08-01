@@ -62,8 +62,9 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public byte[] signMessage(byte[] message, PrivateKey privateKey) {
+    checkArgument(hasLength(privateKey.toBytesNoCopy(), PRIVATE_KEY_BYTES));
     byte[] signature = new byte[SIGNATURE_BYTES];
-    boolean signed = lazySodium.cryptoSignDetached(signature, new long[1], message, message.length,
+    boolean signed = lazySodium.cryptoSignDetached(signature, null, message, message.length,
         privateKey.toBytesNoCopy());
 
     if (!signed) {
@@ -74,6 +75,7 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
+    checkArgument(hasLength(publicKey.toBytesNoCopy(), PUBLIC_KEY_BYTES));
     if (!hasLength(signature, SIGNATURE_BYTES)) {
       return false;
     }
