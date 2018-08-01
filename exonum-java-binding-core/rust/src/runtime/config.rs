@@ -3,13 +3,13 @@ use std::fmt;
 /// JavaServiceRuntime configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    /// JVM configuration.
+    /// Private part of the EJB configuration parameters.
     pub private_config: PrivateConfig,
-    /// Java service configuration.
+    /// Public part of the EJB configuration parameters.
     pub public_config: PublicConfig,
 }
 
-/// JVM configuration.
+/// Private EJB configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PrivateConfig {
     /// Additional parameters for JVM.
@@ -28,7 +28,7 @@ pub struct PrivateConfig {
     pub port: i32,
 }
 
-/// Java service configuration.
+/// Public EJB configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PublicConfig {
     /// Fully qualified service module name.
