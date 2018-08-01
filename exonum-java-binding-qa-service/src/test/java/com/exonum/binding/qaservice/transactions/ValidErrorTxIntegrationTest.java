@@ -17,11 +17,10 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.exonum.binding.messages.TransactionExecutionException;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
@@ -31,7 +30,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.Test;
 
-public class ValidThrowingTxIntegrationTest {
+public class ValidErrorTxIntegrationTest {
 
   static {
     LibraryLoader.load();
@@ -40,7 +39,7 @@ public class ValidThrowingTxIntegrationTest {
   @Test
   public void executeClearsQaServiceData() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
       // Initialize storage with a counter equal to 10
@@ -49,21 +48,18 @@ public class ValidThrowingTxIntegrationTest {
       createCounter(view, name, value);
 
       // Create the transaction
-      ValidThrowingTx tx = new ValidThrowingTx(0L);
+      byte errorCode = 1;
+      ValidErrorTx tx = new ValidErrorTx(0L, errorCode, "Boom");
 
       try {
         // Execute the transaction
         tx.execute(view);
         fail("#execute above must throw");
-      } catch (IllegalStateException expected) {
+      } catch (TransactionExecutionException expected) {
         // Check that execute cleared the maps
         QaSchema schema = new QaSchema(view);
         checkIsEmpty(schema.counters());
         checkIsEmpty(schema.counterNames());
-
-        // Check the exception message
-        String message = expected.getMessage();
-        assertThat(message, startsWith("#execute of this transaction always throws"));
       }
     }
   }

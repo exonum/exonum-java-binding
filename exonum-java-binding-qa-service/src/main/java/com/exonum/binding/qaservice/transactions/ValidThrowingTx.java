@@ -17,18 +17,17 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
-import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
-import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTxBody;
 import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.indices.MapIndex;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Objects;
 
 public final class ValidThrowingTx implements Transaction {
@@ -54,12 +53,9 @@ public final class ValidThrowingTx implements Transaction {
   @Override
   public void execute(Fork view) {
     QaSchema schema = new QaSchema(view);
-    MapIndex<HashCode, Long> counters = schema.counters();
-    MapIndex<HashCode, String> names = schema.counterNames();
 
     // Attempt to clear all service indices.
-    counters.clear();
-    names.clear();
+    schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
     throw new IllegalStateException("#execute of this transaction always throws: " + this);
@@ -99,37 +95,36 @@ public final class ValidThrowingTx implements Transaction {
   private enum TransactionConverter implements TransactionMessageConverter<ValidThrowingTx> {
     INSTANCE;
 
-    static final int BODY_SIZE = Long.BYTES;
-
     @Override
     public ValidThrowingTx fromMessage(Message message) {
       checkMessage(message);
 
-      long seed = message.getBody()
-          .order(ByteOrder.LITTLE_ENDIAN)
-          .getLong();
-
-      return new ValidThrowingTx(seed);
+      try {
+        long seed = ValidThrowingTxBody.parseFrom(message.getBody())
+            .getSeed();
+        return new ValidThrowingTx(seed);
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalArgumentException(e);
+      }
     }
 
     @Override
     public BinaryMessage toMessage(ValidThrowingTx transaction) {
       return newQaTransactionBuilder(ID)
-          .setBody(serialize(transaction))
+          .setBody(serializeBody(transaction))
           .buildRaw();
     }
 
     private void checkMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
-      checkMessageSize(txMessage, BODY_SIZE);
     }
+  }
 
-    private static ByteBuffer serialize(ValidThrowingTx transaction) {
-      ByteBuffer body = ByteBuffer.allocate(Long.BYTES)
-          .order(ByteOrder.LITTLE_ENDIAN)
-          .putLong(transaction.seed);
-      body.rewind();
-      return body;
-    }
+  @VisibleForTesting
+  static ByteBuffer serializeBody(ValidThrowingTx transaction) {
+    ValidThrowingTxBody body = ValidThrowingTxBody.newBuilder()
+        .setSeed(transaction.seed)
+        .build();
+    return ByteBuffer.wrap(body.toByteArray());
   }
 }
