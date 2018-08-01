@@ -29,6 +29,8 @@
     <auto-value.version>1.6.2</auto-value.version>
     <kalium.version>0.8.0</kalium.version>
     <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
+    <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
+    <skipITs>${project.skipJavaITs}</skipITs>
   </properties>
 
   <build>
@@ -52,7 +54,7 @@
         <version>1.6.0</version>
         <!-- A configuration shared across multiple executions -->
         <configuration>
-          <executable>${project.basedir}/rust/cargo.sh</executable>
+          <executable>cargo</executable>
           <workingDirectory>${project.basedir}/rust/</workingDirectory>
         </configuration>
         <executions>

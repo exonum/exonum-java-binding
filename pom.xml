@@ -88,16 +88,22 @@
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.0</guice.version>
-    <log4j.version>2.11.0</log4j.version>
+    <log4j.version>2.11.1</log4j.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
-    <mockito-core.version>2.19.1</mockito-core.version>
+    <mockito-core.version>2.20.1</mockito-core.version>
     <guava.version>25.1-jre</guava.version>
     <vertx.version>3.5.3</vertx.version>
-    <equalsverifier.version>2.4.8</equalsverifier.version>
-    <!-- skip all tests (unit and ITs) until the loading bug is fixed (ECR-942) -->
-    <skipTests>true</skipTests>
+    <equalsverifier.version>2.5</equalsverifier.version>
+    <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
+         during the build. Sub-modules define to which tests this flag applies depending
+         on where the native library is used.
+
+         This property shall be removed once the loading bug is fixed.
+
+         See ECR-942. -->
+    <project.skipJavaITs>false</project.skipJavaITs>
   </properties>
 
   <build>
@@ -106,7 +112,7 @@
          <plugin>
            <groupId>org.apache.maven.plugins</groupId>
            <artifactId>maven-compiler-plugin</artifactId>
-           <version>3.7.0</version>
+           <version>3.8.0</version>
            <configuration>
              <showWarnings>true</showWarnings>
              <source>${java.compiler.source}</source>
@@ -256,7 +262,7 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
-            <id>enforce-versions</id>
+            <id>check-build-prerequisites</id>
             <phase>validate</phase>
             <goals>
               <goal>enforce</goal>
@@ -271,10 +277,20 @@
                   <message>Java 8 is the minimum supported version.</message>
                 </requireJavaVersion>
                 <requireOS>
+                  <!-- If we *do* support Windows and still rely on RUSTFLAGS (see the rule below
+                       and 'tests_profile'), update the instructions. -->
                   <family>!windows</family>
                   <message>Java Binding cannot be built on Windows at the moment.
                            You are welcome to hack on ECR-446 and ECR-587!</message>
                 </requireOS>
+                <requireEnvironmentVariable>
+                  <variableName>RUSTFLAGS</variableName>
+                  <message>
+                    RUSTFLAGS with proper runtime paths are required to run most integration tests.
+                    Use 'source tests_profile' in your terminal to set the required
+                    environment variables. See also CONTRIBUTING.md.
+                  </message>
+                </requireEnvironmentVariable>
               </rules>
             </configuration>
           </execution>
@@ -341,6 +357,21 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!-- Skip integration tests requiring the native library on Linux until the loading bug
+         is fixed (ECR-942). -->
+    <profile>
+      <id>skip-ITs-on-linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <name>linux</name>
+        </os>
+      </activation>
+      <properties>
+        <project.skipJavaITs>true</project.skipJavaITs>
+      </properties>
     </profile>
   </profiles>
 
