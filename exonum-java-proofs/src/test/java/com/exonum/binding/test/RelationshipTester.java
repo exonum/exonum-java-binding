@@ -79,7 +79,6 @@ final class RelationshipTester<T> {
     this.itemReporter = checkNotNull(itemReporter);
   }
 
-  // TODO(cpovirk): should we reject null items, since the tests already check null automatically?
   public RelationshipTester<T> addRelatedGroup(Iterable<? extends T> group) {
     groups.add(ImmutableList.copyOf(group));
     return this;

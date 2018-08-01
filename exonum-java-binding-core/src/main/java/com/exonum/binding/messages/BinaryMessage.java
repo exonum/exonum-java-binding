@@ -93,10 +93,6 @@ public interface BinaryMessage extends Message {
   /**
    * Returns the whole binary message. It includes a message header, body and signature.
    */
-  // todo: consider renaming, for this class *is* a message.
-  //   - ¿Message#getBuffer
-  //   - ¿Message#getMessageBuffer
-  //   - ¿Message#getMessagePacket
   ByteBuffer getSignedMessage();
 
   /**

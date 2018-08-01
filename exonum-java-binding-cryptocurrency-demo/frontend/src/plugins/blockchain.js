@@ -33,6 +33,7 @@ const TX_WALLET_ID = 1
 const SIGNATURE_LENGTH = 64
 const PAYLOD_SIZE_OFFSET = 6
 const PER_PAGE = 10
+const MAX_VALUE = 2147483647
 
 const MessageHead = Exonum.newType({
   fields: [
@@ -94,7 +95,7 @@ module.exports = {
       },
 
       generateSeed() {
-        return bigInt.randBetween(0, 2147483647).valueOf()
+        return bigInt.randBetween(0, MAX_VALUE).valueOf()
       },  
 
       createWallet(keyPair, balance) {
@@ -178,7 +179,8 @@ module.exports = {
       },
 
       getTransaction(hash) {
-        return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => response.data)
+        return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => {
+          return response.data })
       }
     }
   }

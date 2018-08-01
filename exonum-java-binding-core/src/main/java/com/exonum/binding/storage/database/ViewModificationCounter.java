@@ -31,8 +31,9 @@ import java.util.concurrent.ConcurrentMap;
  * (i.e., if each thread has its own Views, which must be the case for Views are not thread-safe).
  * Such property is useful in the integration tests.
  */
-// TODO(dt): when we migrate to RocksDB, extract the interface and implement it inside
-//           each collection.
+// TODO(dt): when we migrate to RocksDB, extract the interface and implement it inside…
+//           each collection, if it is safe to iterate over a collection whilst modifying another
+//           independent collection.
 public final class ViewModificationCounter {
 
   static final int INITIAL_COUNT = 0;

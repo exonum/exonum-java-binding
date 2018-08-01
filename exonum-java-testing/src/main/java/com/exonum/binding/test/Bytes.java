@@ -74,6 +74,15 @@ public final class Bytes {
   }
 
   /**
+   * Returns the array as a hexadecimal String.
+   *
+   * @throws NullPointerException if the array is null
+   */
+  public static String toHexString(byte[] bytes) {
+    return HEX_ENCODING.encode(bytes);
+  }
+
+  /**
    * Creates a byte array of the given size with the specified prefix.
    * Bytes after the prefix are set to zero.
    *

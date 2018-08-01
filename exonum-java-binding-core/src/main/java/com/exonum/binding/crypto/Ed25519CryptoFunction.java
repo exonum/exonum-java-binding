@@ -38,7 +38,7 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
 
   INSTANCE;
 
-  private static int CRYPTO_SIGN_ED25519_SEEDBYTES = 64;
+  private static final int CRYPTO_SIGN_ED25519_SEEDBYTES = 64;
 
   @Override
   public KeyPair generateKeyPair(byte[] seed) {

@@ -71,8 +71,6 @@ public class UserServiceAdapter {
    *
    * @param transactionMessage a transaction message to be converted
    * @return an executable transaction of this service
-   *         todo: exception(-s) is to be revised when we (a) design the native part and
-   *         (b) implement a certain serialization format
    * @throws NullPointerException if transactionMessage is null, or a user service returns
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
@@ -86,7 +84,7 @@ public class UserServiceAdapter {
     checkNotNull(transaction, "Invalid service implementation: "
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
-        message.getMessageType());  // todo: consider moving this check to the native code?
+        message.getMessageType());
     return new UserTransactionAdapter(transaction, viewFactory);
   }
 
@@ -99,7 +97,6 @@ public class UserServiceAdapter {
    * @return an array of state hashes
    * @see Service#getStateHashes(Snapshot)
    */
-  // todo: if the native code is better of with a flattened array, change the signature
   public byte[][] getStateHashes(long snapshotHandle) {
     assert snapshotHandle != 0;
 

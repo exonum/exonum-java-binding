@@ -8,11 +8,8 @@ Below are the features we intend to work on:
 * Full support of Exonum proofs, including block proofs 
   for [blockchain clients](https://exonum.com/doc/architecture/clients/).
 * Rich APIs to access the [framework state](https://exonum.com/doc/architecture/storage/#system-tables).
-* System services bundled in the app: 
-  [configuration](https://exonum.com/doc/advanced/configuration-updater/),
-  [time oracle](https://exonum.com/doc/advanced/time/)
-  and [anchoring service](https://exonum.com/doc/get-started/design-overview/#anchoring-service).
-* An SDK to ease integration with the blockchain application, including 
+* [Time oracle](https://exonum.com/doc/advanced/time/) service bundled in the app.
+* An SDK to ease integration with the blockchain application, including
   support for creating and signing transaction messages and verification of proofs.
 * Support for multiple Java services in a system.
 * UX improvements: new transaction messages, better serialization support, 

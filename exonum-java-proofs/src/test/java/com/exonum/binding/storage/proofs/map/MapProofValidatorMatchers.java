@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.proofs.map;
 
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.test.Bytes;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -69,8 +69,12 @@ class MapProofValidatorMatchers {
       @Override
       public void describeTo(Description description) {
         description.appendText("valid proof, key=")
-            .appendText(Hashing.toHexString(key))
+            .appendText(keyToHex())
             .appendText(", value=").appendText(expectedValue);
+      }
+
+      private String keyToHex() {
+        return (key == null) ? "null" : Bytes.toHexString(key);
       }
     };
   }

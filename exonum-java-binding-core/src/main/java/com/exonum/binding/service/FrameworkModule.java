@@ -36,8 +36,8 @@ final class FrameworkModule extends AbstractModule {
   protected void configure() {
     bind(Server.class).toProvider(Server::create).in(Singleton.class);
     bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
-    //  fixme: if that's a proxy of a NodeProxy :-)
-    // bind(Node.class);
+    // todo: Consider providing an implementation of a Node —
+    // requires changing its contract.
     bindInterceptor(subclassesOf(UserServiceAdapter.class), any(), new LoggingInterceptor());
     bind(UserServiceAdapter.class);
   }

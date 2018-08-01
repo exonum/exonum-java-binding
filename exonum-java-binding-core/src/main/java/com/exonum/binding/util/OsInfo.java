@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.indices;
+package com.exonum.binding.util;
 
-import com.exonum.binding.storage.database.View;
+class OsInfo {
 
-/**
- * Storage index is a persistent, named collection built on top of Exonum key-value storage.
- *
- * <p>Also known as a collection, a table, and also as (rarely) a view for
- * a {@linkplain View database view} is inherently associated with an index.
- */
-interface StorageIndex {
+  private static final boolean onWindows;
 
-  /** Returns the name of this index. */
-  String getName();
+  static {
+    String osName = System.getProperty("os.name").toLowerCase();
+    onWindows = osName.contains("windows");
+  }
+
+  /**
+   * Returns true if the OS is Windows.
+   */
+  static boolean isWindows() {
+    return onWindows;
+  }
+
+  private OsInfo() {}
 }
