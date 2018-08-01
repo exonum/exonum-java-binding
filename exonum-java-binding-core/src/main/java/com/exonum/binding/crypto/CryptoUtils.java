@@ -16,13 +16,18 @@
 
 package com.exonum.binding.crypto;
 
+import com.google.common.io.BaseEncoding;
+
 /**
  * Utils for crypto system.
  */
 class CryptoUtils {
 
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
+
   /**
    * Check that {@code data} byte array has specified {@code size}.
+   *
    * @throws NullPointerException if it is {@code null}
    */
   static boolean hasLength(byte[] data, int size) {
@@ -30,9 +35,25 @@ class CryptoUtils {
   }
 
   /**
-   * Check that returned status is a success status.
+   * Converts hexadecimal to bytes.
+   *
+   * @param hex hexadecimal string
+   * @return bytes array
    */
-  static boolean checkReturnValueSuccess(int status) {
-    return status == 0;
+  static byte[] hexToByteArray(String hex) {
+    return HEX_ENCODING.decode(hex);
+  }
+
+  /**
+   * Converts bytes to hexadecimal.
+   *
+   * @param bytes bytes array
+   * @return hexadecimal string
+   */
+  static String byteArrayToHex(byte[] bytes) {
+    return HEX_ENCODING.encode(bytes);
+  }
+
+  private CryptoUtils() {
   }
 }
