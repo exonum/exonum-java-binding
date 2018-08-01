@@ -57,7 +57,7 @@ impl CommandExtension for Finalize {
         vec![Argument::new_named(
             EJB_SERVICE_CLASSPATH,
             true,
-            "Java service classpath.",
+            "Java service classpath. Shall not include Java Binding classes.",
             None,
             "ejb-service-classpath",
             false,
