@@ -67,6 +67,7 @@ pub(crate) fn validate_and_convert(
 
 fn check_not_forbidden(user_parameter: &str) -> Result<(), ForbiddenParameterError> {
     if user_parameter.starts_with("Djava.class.path")
+        || user_parameter.starts_with("Djava.library.path")
         || user_parameter.starts_with("Dlog4j.configurationFile")
     {
         Err(ForbiddenParameterError(user_parameter.to_string()))
@@ -98,6 +99,12 @@ mod tests {
     #[should_panic(expected = "Trying to specify JVM parameter")]
     fn class_path() {
         validate_and_convert("Djava.class.path=target").unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "Trying to specify JVM parameter")]
+    fn library_path() {
+        validate_and_convert("Djava.library.path=some-dir").unwrap();
     }
 
     #[test]
