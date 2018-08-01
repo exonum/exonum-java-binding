@@ -80,7 +80,7 @@ impl CommandExtension for Finalize {
 
         let public_node_config_list: Vec<NodePublicConfig> = context.get(keys::PUBLIC_CONFIG_LIST)?;
 
-        let public_node_config: &NodePublicConfig = public_node_config_list.get(0).unwrap();
+        let public_node_config: &NodePublicConfig = &public_node_config_list[0];
         let public_config = public_node_config
             .services_public_configs
             .get(EJB_PUBLIC_CONFIG_NAME)
