@@ -7,7 +7,6 @@ use exonum::helpers::fabric::NodePublicConfig;
 use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
-use utils::join_paths;
 
 use std::{env, fs};
 
@@ -179,6 +178,6 @@ fn get_system_classpath() -> String {
         }
     }
 
-    let jars: Vec<&str> = jars.iter().map(|p| p.to_str().unwrap()).collect();
-    join_paths(&jars)
+    let jars = jars.iter().map(|p| p.to_str().unwrap());
+    env::join_paths(jars).unwrap().into_string().unwrap()
 }
