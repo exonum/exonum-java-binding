@@ -131,6 +131,16 @@ public interface Message {
       setSignature(new byte[SIGNATURE_SIZE]);
     }
 
+    /**
+     * Sets the message body.
+     *
+     * @return this {@code Builder} object
+     * @throws NullPointerException if {@code body} is null
+     */
+    public Builder setBody(byte[] body) {
+      return setBody(ByteBuffer.wrap(body));
+    }
+
     @Override
     public Builder setBody(ByteBuffer body) {
       int bodySize = body.remaining();

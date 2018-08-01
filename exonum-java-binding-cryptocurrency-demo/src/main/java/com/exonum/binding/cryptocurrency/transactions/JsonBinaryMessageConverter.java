@@ -27,7 +27,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.ByteString;
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 
 /**
  * A class converting JSON messages into binary messages.
@@ -100,7 +99,7 @@ public final class JsonBinaryMessageConverter {
         .setMessageType(message.getMessageId())
         .setServiceId(message.getServiceId())
         .setVersion(message.getProtocolVersion())
-        .setBody(ByteBuffer.wrap(binaryBody))
+        .setBody(binaryBody)
         .setSignature(decodeHex(message.getSignature()))
         .buildRaw();
   }

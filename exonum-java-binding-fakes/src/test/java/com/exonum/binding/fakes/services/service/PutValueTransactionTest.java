@@ -30,7 +30,6 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import java.nio.ByteBuffer;
 import org.junit.Test;
 
 public class PutValueTransactionTest {
@@ -98,7 +97,7 @@ public class PutValueTransactionTest {
     verify(testMap).put(eq(hash), eq(value));
   }
 
-  private static ByteBuffer encode(String value) {
-    return ByteBuffer.wrap(value.getBytes(BODY_CHARSET));
+  private static byte[] encode(String value) {
+    return value.getBytes(BODY_CHARSET);
   }
 }

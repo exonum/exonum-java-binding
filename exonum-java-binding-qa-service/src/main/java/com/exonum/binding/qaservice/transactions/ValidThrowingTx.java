@@ -27,7 +27,6 @@ import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTx
 import com.exonum.binding.storage.database.Fork;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public final class ValidThrowingTx implements Transaction {
@@ -121,10 +120,10 @@ public final class ValidThrowingTx implements Transaction {
   }
 
   @VisibleForTesting
-  static ByteBuffer serializeBody(ValidThrowingTx transaction) {
-    ValidThrowingTxBody body = ValidThrowingTxBody.newBuilder()
+  static byte[] serializeBody(ValidThrowingTx transaction) {
+    return ValidThrowingTxBody.newBuilder()
         .setSeed(transaction.seed)
-        .build();
-    return ByteBuffer.wrap(body.toByteArray());
+        .build()
+        .toByteArray();
   }
 }

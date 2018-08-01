@@ -16,6 +16,12 @@
 
 package com.exonum.binding.messages;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
+import com.exonum.binding.messages.Message.Builder;
+import com.exonum.binding.test.Bytes;
+import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
@@ -23,6 +29,18 @@ import org.junit.Test;
  * A test of our patches to the auto-generated message builder.
  */
 public class Message_Builder2Test {
+
+  @Test
+  public void setBodyBytes() {
+    byte[] source = Bytes.fromHex("12ab");
+
+    Message message = new Builder()
+        .setBody(source)
+        .buildPartial();
+
+    ByteBuffer expectedBody = ByteBuffer.wrap(source);
+    assertThat(message.getBody(), equalTo(expectedBody));
+  }
 
   @Test
   public void valueEquals() {
