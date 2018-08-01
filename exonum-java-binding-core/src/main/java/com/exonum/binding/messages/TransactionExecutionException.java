@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 /**
  * An exception occurred during transaction execution. The transaction exception includes
  * an integer error code, that may be either service-specific or transaction-specific;
- * with an optional description — an exception message. Both the error code and the description
+ * and an optional description — an exception message. Both the error code and the description
  * are saved in the database, but only the value of the error code affects the blockchain state.
  *
  * <p>The other attributes of a Java exception — a stack trace, a cause, suppressed exceptions —

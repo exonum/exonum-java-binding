@@ -49,7 +49,7 @@ public interface Transaction {
    * @param view a database view, which allows to modify the blockchain state
    * @throws TransactionExecutionException if the transaction cannot be executed normally
    *     and has to be rolled back. The transaction will be committed as failed (status "error"),
-   *     the error code and the optional description will be saved into the storage. The client
+   *     the error code with the optional description will be saved into the storage. The client
    *     can request the error code to know the reason of the failure.
    * @throws RuntimeException if an unexpected error occurs. A correct transaction implementation
    *     must not throw such exceptions. The transaction will be committed as failed
