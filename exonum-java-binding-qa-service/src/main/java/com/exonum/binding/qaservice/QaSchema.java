@@ -69,6 +69,12 @@ public final class QaSchema implements Schema {
         StandardSerializers.string());
   }
 
+  /** Clears all collections of the service. */
+  public void clearAll() {
+    counters().clear();
+    counterNames().clear();
+  }
+
   private static String fullIndexName(String name) {
     return NAMESPACE + "__" + name;
   }

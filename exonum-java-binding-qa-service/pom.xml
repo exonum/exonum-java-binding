@@ -20,11 +20,22 @@
         <ejb-core.nativeLibPath>${project.parent.basedir}/exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
         <gson.version>2.8.5</gson.version>
         <exonum-bom.version>0.2</exonum-bom.version>
+        <protobuf.version>3.6.0</protobuf.version>
         <!-- Disable as some tests running during 'test' phase require the native library. -->
         <skipTests>${project.skipJavaITs}</skipTests>
     </properties>
 
     <build>
+        <extensions>
+            <!-- Use an extension that sets the OS classifier, required to locate
+                 the correct protoc executable -->
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.0</version>
+            </extension>
+        </extensions>
+
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -35,6 +46,23 @@
                 <configuration>
                     <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.5.1</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -109,6 +137,12 @@
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
         </dependency>
 
         <dependency>

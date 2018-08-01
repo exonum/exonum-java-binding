@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.qaservice.transactions.CreateCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -34,11 +35,9 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,10 +52,10 @@ public class CreateCounterTxIntegrationTest {
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
-  static final Message CREATE_COUNTER_MESSAGE_TEMPLATE = new Message.Builder()
+  static final Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
       .setMessageType(CREATE_COUNTER.id())
-      .setBody(serialize("counter"))
+      .setBody(serializeBody(new CreateCounterTx("Test counter")))
       .buildPartial();
 
   @Test
@@ -77,20 +76,6 @@ public class CreateCounterTxIntegrationTest {
 
     expectedException.expect(IllegalArgumentException.class);
     CreateCounterTx.converter().fromMessage(message);
-  }
-
-  @Test
-  public void converterToMessage() {
-    String name = "counter";
-    CreateCounterTx tx = new CreateCounterTx(name);
-
-    BinaryMessage expectedMessage = messageBuilder()
-        .setMessageType(CREATE_COUNTER.id())
-        .setBody(serialize(name))
-        .buildRaw();
-
-    // todo: remove extra #getSignedMessage when MessageReader has equals: ECR-992
-    assertThat(tx.getMessage().getSignedMessage(), equalTo(expectedMessage.getSignedMessage()));
   }
 
   @Test
@@ -199,11 +184,7 @@ public class CreateCounterTxIntegrationTest {
   /** Creates a builder of create counter transaction message. */
   private static Message.Builder messageBuilder() {
     return new Message.Builder()
-        .mergeFrom(CREATE_COUNTER_MESSAGE_TEMPLATE);
-  }
-
-  private static ByteBuffer serialize(String txName) {
-    return ByteBuffer.wrap(StandardSerializers.string().toBytes(txName));
+        .mergeFrom(MESSAGE_TEMPLATE);
   }
 
   /** Creates a counter in the storage with the given name and initial value. */

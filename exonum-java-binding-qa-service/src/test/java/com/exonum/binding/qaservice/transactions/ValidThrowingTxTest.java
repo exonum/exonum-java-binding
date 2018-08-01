@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.qaservice.transactions.ValidThrowingTx.serializeBody;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -37,25 +38,11 @@ public class ValidThrowingTxTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  static final Message VALID_THROWING_TEMPLATE = new Message.Builder()
+  static final Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
       .setMessageType(QaTransaction.VALID_THROWING.id())
-      .setBody(body(0))
+      .setBody(serializeBody(new ValidThrowingTx(1L)))
       .buildPartial();
-
-  @Test
-  public void converterFromMessage() {
-    long seed = 10L;
-    BinaryMessage message = new Message.Builder()
-        .mergeFrom(VALID_THROWING_TEMPLATE)
-        .setBody(body(seed))
-        .buildRaw();
-
-    ValidThrowingTx tx = ValidThrowingTx.converter().fromMessage(message);
-
-    ValidThrowingTx expectedTx = new ValidThrowingTx(seed);
-    assertThat(tx, equalTo(expectedTx));
-  }
 
   @Test
   public void converterRoundtrip() {
