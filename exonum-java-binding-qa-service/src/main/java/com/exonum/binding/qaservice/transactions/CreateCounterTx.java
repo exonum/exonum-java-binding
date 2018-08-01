@@ -129,11 +129,10 @@ public final class CreateCounterTx implements Transaction {
   }
 
   @VisibleForTesting
-  static ByteBuffer serializeBody(CreateCounterTx tx) {
-    byte[] body = CreateCounterTxBody.newBuilder()
+  static byte[] serializeBody(CreateCounterTx tx) {
+    return CreateCounterTxBody.newBuilder()
         .setName(tx.name)
         .build()
         .toByteArray();
-    return ByteBuffer.wrap(body);
   }
 }

@@ -140,12 +140,12 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @VisibleForTesting
-  static ByteBuffer serializeBody(IncrementCounterTx transaction) {
-    IncrementCounterTxBody txBody = IncrementCounterTxBody.newBuilder()
+  static byte[] serializeBody(IncrementCounterTx transaction) {
+    return IncrementCounterTxBody.newBuilder()
         .setSeed(transaction.seed)
         .setCounterId(toByteString(transaction.counterId))
-        .build();
-    return ByteBuffer.wrap(txBody.toByteArray());
+        .build()
+        .toByteArray();
   }
 
   private static ByteString toByteString(HashCode hash) {

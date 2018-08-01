@@ -156,12 +156,12 @@ public final class ValidErrorTx implements Transaction {
   }
 
   @VisibleForTesting
-  static ByteBuffer serializeBody(ValidErrorTx transaction) {
-    ValidErrorTxBody txBody = ValidErrorTxBody.newBuilder()
+  static byte[] serializeBody(ValidErrorTx transaction) {
+    return ValidErrorTxBody.newBuilder()
         .setSeed(transaction.seed)
         .setErrorCode(transaction.errorCode)
         .setErrorDescription(Strings.nullToEmpty(transaction.errorDescription))
-        .build();
-    return ByteBuffer.wrap(txBody.toByteArray());
+        .build()
+        .toByteArray();
   }
 }
