@@ -18,6 +18,7 @@ package com.exonum.binding.crypto;
 
 /**
  * A crypto function that provides several signature system crypto methods.
+ * All method arguments can't be null otherwise {@link NullPointerException} will be thrown.
  */
 public interface CryptoFunction {
 

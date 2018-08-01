@@ -16,10 +16,10 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_PUBLICKEYBYTES;
 
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
@@ -45,9 +45,9 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
   CreateWalletTx(BinaryMessage message, PublicKey ownerPublicKey, long initialBalance) {
     super(message);
 
-    checkArgument(ownerPublicKey.size() == CRYPTO_SIGN_ED25519_PUBLICKEYBYTES,
+    checkArgument(ownerPublicKey.size() == PUBLIC_KEY_BYTES,
         "Public key has invalid size (%s), must be %s bytes long.", ownerPublicKey.size(),
-        CRYPTO_SIGN_ED25519_PUBLICKEYBYTES);
+        PUBLIC_KEY_BYTES);
     checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
         initialBalance);
 

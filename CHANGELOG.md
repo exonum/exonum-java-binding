@@ -55,6 +55,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `Message#getSignature` returns a byte array. (#339)
 
+### Removed
+- `--ejb-debug` option — use the corresponding JVM flags, e.g.,
+  `--ejb-jvm-args=Xcheck:jni`. (#342)
+
 ## 0.1.2 - 2018-07-19
 
 Parent module and BOM module were released as they are required dependencies to define a Java service.
