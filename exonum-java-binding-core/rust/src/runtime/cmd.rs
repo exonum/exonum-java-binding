@@ -1,13 +1,13 @@
 use super::{Config, PrivateConfig, PublicConfig};
-use utils::join_paths;
 use exonum::helpers::fabric::keys;
 use exonum::helpers::fabric::Argument;
 use exonum::helpers::fabric::CommandExtension;
 use exonum::helpers::fabric::Context;
-use exonum::node::NodeConfig;
 use exonum::helpers::fabric::NodePublicConfig;
+use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
+use utils::join_paths;
 
 use std::{env, fs};
 
@@ -23,31 +23,29 @@ pub struct GenerateNodeConfig;
 
 impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
-        vec![
-            Argument::new_named(
-                EJB_MODULE_NAME,
-                true,
-                "A fully-qualified class name of the user service module.",
-                None,
-                "ejb-module-name",
-                false
-            ),
-        ]
+        vec![Argument::new_named(
+            EJB_MODULE_NAME,
+            true,
+            "A fully-qualified class name of the user service module.",
+            None,
+            "ejb-module-name",
+            false,
+        )]
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
         let module_name = context.arg(EJB_MODULE_NAME)?;
 
-        let public_config = PublicConfig {
-            module_name,
-        };
+        let public_config = PublicConfig { module_name };
 
-        let mut services_public_configs = context.get(keys::SERVICES_PUBLIC_CONFIGS).unwrap_or_default();
+        let mut services_public_configs = context
+            .get(keys::SERVICES_PUBLIC_CONFIGS)
+            .unwrap_or_default();
         services_public_configs.extend(
             vec![(
                 EJB_PUBLIC_CONFIG_NAME.to_owned(),
                 Value::try_from(public_config).unwrap(),
-                )].into_iter(),
+            )].into_iter(),
         );
 
         context.set(keys::SERVICES_PUBLIC_CONFIGS, services_public_configs);
@@ -56,21 +54,18 @@ impl CommandExtension for GenerateNodeConfig {
     }
 }
 
-
 pub struct Finalize;
 
 impl CommandExtension for Finalize {
     fn args(&self) -> Vec<Argument> {
-        vec![
-            Argument::new_named(
-                EJB_SERVICE_CLASSPATH,
-                true,
-                "Java service classpath.",
-                None,
-                "ejb-service-classpath",
-                false,
-            ),
-        ]
+        vec![Argument::new_named(
+            EJB_SERVICE_CLASSPATH,
+            true,
+            "Java service classpath.",
+            None,
+            "ejb-service-classpath",
+            false,
+        )]
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
@@ -87,7 +82,9 @@ impl CommandExtension for Finalize {
         let public_node_config_list: Vec<NodePublicConfig> = context.get(keys::PUBLIC_CONFIG_LIST)?;
 
         let public_node_config: &NodePublicConfig = public_node_config_list.get(0).unwrap();
-        let public_config = public_node_config.services_public_configs.get(EJB_PUBLIC_CONFIG_NAME)
+        let public_config = public_node_config
+            .services_public_configs
+            .get(EJB_PUBLIC_CONFIG_NAME)
             .expect("Can't get public EJB config")
             .clone()
             .try_into()?;
@@ -140,12 +137,19 @@ impl CommandExtension for Run {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = context.arg_multiple(EJB_USER_PARAMETERS).unwrap_or_default();
+        let user_parameters = context
+            .arg_multiple(EJB_USER_PARAMETERS)
+            .unwrap_or_default();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let port = context.arg(EJB_PORT)?;
 
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
-        let mut ejb_config: Config = node_config.services_configs.get(EJB_CONFIG_NAME).cloned().unwrap().try_into()?;
+        let mut ejb_config: Config = node_config
+            .services_configs
+            .get(EJB_CONFIG_NAME)
+            .cloned()
+            .unwrap()
+            .try_into()?;
         ejb_config.private_config.user_parameters = user_parameters;
         ejb_config.private_config.log_config_path = log_config_path;
         ejb_config.private_config.port = port;
@@ -161,7 +165,8 @@ impl CommandExtension for Run {
 fn get_system_classpath() -> String {
     let mut jars = Vec::new();
     let jars_directory = {
-        let mut current_directory = env::current_dir().expect("Could not get current working directory");
+        let mut current_directory =
+            env::current_dir().expect("Could not get current working directory");
         current_directory.push("lib/java");
         current_directory
     };
@@ -170,7 +175,7 @@ fn get_system_classpath() -> String {
         if file.file_type().unwrap().is_file() {
             jars.push(file.path());
         } else {
-            continue
+            continue;
         }
     }
 

@@ -36,7 +36,11 @@ impl JavaServiceRuntime {
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
                 let java_vm = Self::create_java_vm(&config.private_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
-                let service_proxy = Self::create_service(&config.public_config.module_name, config.private_config.port, executor.clone());
+                let service_proxy = Self::create_service(
+                    &config.public_config.module_name,
+                    config.private_config.port,
+                    executor.clone(),
+                );
                 let runtime = JavaServiceRuntime {
                     executor,
                     service_proxy,
