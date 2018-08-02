@@ -21,18 +21,18 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.primitives.UnsignedBytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class BytesTest {
+class BytesTest {
 
   @Test
-  public void fromHex() {
+  void fromHex() {
     assertThat(Bytes.fromHex("abcd01"), equalTo(new byte[] {UnsignedBytes.checkedCast(0xAB),
         UnsignedBytes.checkedCast(0xCD), 0x01}));
   }
 
   @Test
-  public void toHexStringAllHexNumbersLower() {
+  void toHexStringAllHexNumbersLower() {
     for (byte b = 0; b <= 0xF; b++) {
       String expected = "0" + UnsignedBytes.toString(b, 16);
       assertThat(Bytes.toHexString(bytes(b)), equalTo(expected));
@@ -40,7 +40,7 @@ public class BytesTest {
   }
 
   @Test
-  public void toHexStringAllHexNumbersUpper() {
+  void toHexStringAllHexNumbersUpper() {
     for (int i = 1; i <= 0xF; i++) {
       byte b = (byte) (i << 4);
       String expected = UnsignedBytes.toString(b, 16);
