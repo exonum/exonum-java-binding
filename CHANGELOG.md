@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- `Transaction#execute` can throw `TransactionExecutionException` to roll back 
+  any changes to the database. The exception includes an error code and an optional 
+  description which the framework saves to the storage for later retrieval. (#392)
+
 ### Removed
 - `Hashing#toHexString`. (#379)
 
@@ -49,6 +54,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Prepended `/api` before the path to the REST API endpoints of a service. (#340)
 
 - `Message#getSignature` returns a byte array. (#339)
+
+### Removed
+- `--ejb-debug` option — use the corresponding JVM flags, e.g.,
+  `--ejb-jvm-args=Xcheck:jni`. (#342)
 
 ## 0.1.2 - 2018-07-19
 
