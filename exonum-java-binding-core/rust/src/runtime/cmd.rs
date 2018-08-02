@@ -166,13 +166,13 @@ fn get_system_classpath() -> String {
     let mut jars = Vec::new();
     let jars_directory = {
         // Get current path to EJB App.
-        let mut current_directory =
-            env::current_exe().expect("Could not get current working directory");
+        let mut exe_location =
+            env::current_exe().expect("Could not get the executable location");
         // Get directory where EJB App is.
-        current_directory.pop();
+        exe_location.pop();
         // Add relative path to java classes.
-        current_directory.push("lib/java");
-        current_directory
+        exe_location.push("lib/java");
+        exe_location
     };
     for entry in fs::read_dir(jars_directory).expect("Could not read java classes directory") {
         let file = entry.unwrap();
