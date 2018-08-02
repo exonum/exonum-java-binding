@@ -69,3 +69,5 @@ fi
 RUSTFLAGS=""
 export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,\$ORIGIN/lib"
 echo "RUSTFLAGS=${RUSTFLAGS}"
+
+mvn package
