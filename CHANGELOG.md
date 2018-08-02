@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- `Transaction#execute` can throw `TransactionExecutionException` to roll back 
+  any changes to the database. The exception includes an error code and an optional 
+  description which the framework saves to the storage for later retrieval. (#392)
+
 ### Removed
 - `Hashing#toHexString`. (#379)
 

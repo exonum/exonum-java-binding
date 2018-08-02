@@ -16,7 +16,16 @@
 
 package com.exonum.binding.fakes.mocks;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.messages.TransactionExecutionException;
+import com.exonum.binding.storage.database.Fork;
+import java.io.IOException;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -58,6 +67,28 @@ public class ThrowingTransactionsTest {
   public void createThrowingFailsIfUninstantiableThrowable() {
     expectedException.expect(IllegalArgumentException.class);
     ThrowingTransactions.createThrowing(UninstantiableException.class);
+  }
+
+  @Test
+  @Ignore // Unfortunately, we do not perform such checks at the moment: ECR-1988
+  public void createThrowingFailsIfInvalidThrowable() {
+    expectedException.expect(IllegalArgumentException.class);
+    ThrowingTransactions.createThrowing(IOException.class);
+  }
+
+  @Test
+  public void createThrowingExecutionException() {
+    byte errorCode = 1;
+    String description = "Foo";
+    Transaction tx = ThrowingTransactions.createThrowingExecutionException(errorCode, description);
+
+    try {
+      tx.execute(mock(Fork.class));
+      fail("Must throw " + TransactionExecutionException.class);
+    } catch (TransactionExecutionException actual) {
+      assertThat(actual.getErrorCode(), equalTo(errorCode));
+      assertThat(actual.getMessage(), equalTo(description));
+    }
   }
 
   abstract static class UninstantiableException extends Exception {}
