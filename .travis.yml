@@ -7,10 +7,13 @@ sudo: false
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:chris-lea/libsodium'
     packages:
-    - build-essential
-    - libssl-dev
-    - pkg-config
+      - build-essential
+      - libsodium-dev
+      - libssl-dev
+      - pkg-config
 
 env:
   global:
@@ -46,10 +49,8 @@ before_install:
   - cargo-audit -V || cargo install cargo-audit --force
     # List all installed cargo packages.
   - cargo install --list
-    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
-  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
-    # force building instead of using from apt.
-  - export SODIUM_BUILD=1
+    # Force building some of Exonum dependencies instead of using the system ones, if any.
+    # Required because using system RocksDB results in broken artefacts on older CPUs, see ECR-1658.
   - export ROCKSDB_BUILD=1
   - export SNAPPY_BUILD=1
 
