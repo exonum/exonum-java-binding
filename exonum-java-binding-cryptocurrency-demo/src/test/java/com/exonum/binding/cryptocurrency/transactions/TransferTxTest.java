@@ -44,7 +44,6 @@ import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
-import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
@@ -106,13 +105,13 @@ public class TransferTxTest {
   private static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
                                                      PublicKey recipientId, long amount) {
     return newCryptocurrencyTransactionBuilder(TransferTx.ID)
-          .setBody(ByteBuffer.wrap(TxMessagesProtos.TransferTx.newBuilder()
+          .setBody(TxMessagesProtos.TransferTx.newBuilder()
               .setSeed(seed)
               .setFromWallet(fromPublicKey(senderId))
               .setToWallet(fromPublicKey(recipientId))
               .setSum(amount)
               .build()
-              .toByteArray()))
+              .toByteArray())
           .buildRaw();
   }
 
