@@ -10,6 +10,9 @@ powered by Exonum.
 The project is at alpha stage. Currently you can define a stateful Exonum Service 
 in Java, configure a network of nodes and run the service in it.
 
+If you are using Exonum in your project and want to be listed on our website & GitHub
+list — write us a line to <exonum@bitfury.com>.
+
 For more information see the relevant documentation on the tool:
   - [What is Exonum?](https://exonum.com/doc/get-started/what-is-exonum/)
   - [User guide](https://exonum.com/doc/get-started/java-binding)
