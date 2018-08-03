@@ -430,6 +430,13 @@
       </dependency>
 
       <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
         <groupId>org.powermock</groupId>
         <artifactId>powermock-module-junit4</artifactId>
         <version>${powermock.version}</version>
@@ -461,12 +468,6 @@
 
   <dependencies>
     <!-- Shared test dependencies of all sub-modules. -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>java-hamcrest</artifactId>

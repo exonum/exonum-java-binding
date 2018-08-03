@@ -158,6 +158,12 @@
     </dependency>
 
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
       <version>${exonum-java-testing.version}</version>

@@ -26,16 +26,16 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class QaSchemaTest {
+class QaSchemaTest {
 
   static {
     LibraryLoader.load();
   }
 
   @Test
-  public void getStateHashesEmptyDb() throws CloseFailuresException {
+  void getStateHashesEmptyDb() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = db.createSnapshot(cleaner);

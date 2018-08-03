@@ -22,12 +22,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.util.Arrays;
 import java.util.Collection;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class QaTransactionTest {
+class QaTransactionTest {
 
   @Test
-  public void hasUniqueIds() {
+  void hasUniqueIds() {
     QaTransaction[] elements = QaTransaction.values();
 
     Multimap<Short, QaTransaction> elementsById = Multimaps.index(Arrays.asList(elements),

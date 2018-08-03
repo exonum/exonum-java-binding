@@ -18,25 +18,18 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.ValidThrowingTx.serializeBody;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.qaservice.QaService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class ValidThrowingTxTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class ValidThrowingTxTest {
 
   static final Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
@@ -45,7 +38,7 @@ public class ValidThrowingTxTest {
       .buildPartial();
 
   @Test
-  public void converterRoundtrip() {
+  void converterRoundtrip() {
     long seed = 10L;
     ValidThrowingTx tx = new ValidThrowingTx(seed);
 
@@ -57,7 +50,7 @@ public class ValidThrowingTxTest {
   }
 
   @Test
-  public void isValid() {
+  void isValid() {
     long seed = 10L;
     ValidThrowingTx tx = new ValidThrowingTx(seed);
 
@@ -65,7 +58,7 @@ public class ValidThrowingTxTest {
   }
 
   @Test
-  public void info() {
+  void info() {
     long seed = 10L;
     ValidThrowingTx tx = new ValidThrowingTx(seed);
     String info = tx.info();
@@ -80,16 +73,8 @@ public class ValidThrowingTxTest {
   }
 
   @Test
-  public void equals() {
+  void equals() {
     EqualsVerifier.forClass(ValidThrowingTx.class)
         .verify();
-  }
-
-  private static ByteBuffer body(long seed) {
-    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .putLong(seed);
-    buffer.rewind();
-    return buffer;
   }
 }

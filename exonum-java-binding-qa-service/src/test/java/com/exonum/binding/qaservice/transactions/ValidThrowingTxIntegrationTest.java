@@ -18,9 +18,9 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -29,16 +29,16 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ValidThrowingTxIntegrationTest {
+class ValidThrowingTxIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
   @Test
-  public void executeClearsQaServiceData() throws CloseFailuresException {
+  void executeClearsQaServiceData() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);

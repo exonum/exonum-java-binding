@@ -18,7 +18,7 @@ package com.exonum.binding.test;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.primitives.UnsignedBytes;
 import org.junit.jupiter.api.Test;
