@@ -16,7 +16,7 @@ source tests_profile
 if [ "$#" -eq 0 ]; then
   # Compile Java artefacts.
   echo "Compiling the Java artefacts…"
-  mvn -DskipTests compile --quiet
+  mvn compile --quiet
 else
   if [ "$1" != "--skip-compile" ]; then
     echo "Unknown option: $1"

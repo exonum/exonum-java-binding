@@ -14,12 +14,13 @@ pub const TEST_MAP_NAME: &str = "test_map";
 /// Creates a test service.
 pub fn create_test_service(executor: MainExecutor) -> ServiceProxy {
     let test_service = unwrap_jni(executor.with_attached(|env| {
-        let test_service = env.call_static_method(
-            NATIVE_FACADE_CLASS,
-            "createTestService",
-            format!("()L{};", SERVICE_ADAPTER_CLASS),
-            &[],
-        )?
+        let test_service = env
+            .call_static_method(
+                NATIVE_FACADE_CLASS,
+                "createTestService",
+                format!("()L{};", SERVICE_ADAPTER_CLASS),
+                &[],
+            )?
             .l()?;
         env.new_global_ref(test_service)
     }));

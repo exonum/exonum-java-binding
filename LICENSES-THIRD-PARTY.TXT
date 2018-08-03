@@ -11,7 +11,7 @@ The following third party software components are governed under Apache 2.0 lice
   - Guice, (c) 2018 Google https://github.com/google/guice
   - Vert.x Web, (c) 2018 https://vertx.io/
   - Apache Log4j, (c) 1999-2018 The Apache Software Foundation https://logging.apache.org/log4j/2.x/
-  - Kalium, (c) 2018 http://abstractj.github.io/kalium/
+  - Lazysodium, (c) 2018 Terl https://github.com/terl/lazysodium-java
 
 The following third party software components are governed under both Apache 2.0 and MIT licenses:
   - jni, (c) 2018 Josh Chase https://github.com/prevoty/jni-rs

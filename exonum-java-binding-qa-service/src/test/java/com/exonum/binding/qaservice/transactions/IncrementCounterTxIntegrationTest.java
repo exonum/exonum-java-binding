@@ -17,6 +17,7 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
+import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -38,9 +39,8 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import java.nio.ByteBuffer;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,10 +52,10 @@ public class IncrementCounterTxIntegrationTest {
     LibraryLoader.load();
   }
 
-  static Message INC_COUNTER_TX_MESSAGE_TEMPLATE = new Message.Builder()
+  static Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
       .setMessageType(INCREMENT_COUNTER.id())
-      .setBody(ByteBuffer.allocate(IncrementCounterTx.BODY_SIZE))
+      .setBody(serializeBody(new IncrementCounterTx(1, Hashing.sha256().hashInt(1))))
       .buildPartial();
 
   @Rule
@@ -177,6 +177,6 @@ public class IncrementCounterTxIntegrationTest {
 
   private static Message.Builder messageBuilder() {
     return new Message.Builder()
-        .mergeFrom(INC_COUNTER_TX_MESSAGE_TEMPLATE);
+        .mergeFrom(MESSAGE_TEMPLATE);
   }
 }

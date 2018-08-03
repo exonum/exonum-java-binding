@@ -82,19 +82,23 @@ public class QaTransactionConverterTest {
 
   @Test
   public void toTransaction() {
-    Map<Class<? extends Transaction>, Message> transactionTemplates = ImmutableMap.of(
-        CreateCounterTx.class, CreateCounterTxIntegrationTest.CREATE_COUNTER_MESSAGE_TEMPLATE,
-        IncrementCounterTx.class, IncrementCounterTxIntegrationTest.INC_COUNTER_TX_MESSAGE_TEMPLATE,
-        InvalidThrowingTx.class, new Message.Builder()
-            .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-            .setMessageType(QaTransaction.INVALID_THROWING.id())
-            .buildRaw(),
-        InvalidTx.class, new Message.Builder()
-            .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-            .setMessageType(QaTransaction.INVALID.id())
-            .buildRaw(),
-        ValidThrowingTx.class, ValidThrowingTxTest.VALID_THROWING_TEMPLATE
-    );
+    Map<Class<? extends Transaction>, Message> transactionTemplates =
+        ImmutableMap.<Class<? extends Transaction>, Message>builder()
+            .put(CreateCounterTx.class,
+                CreateCounterTxIntegrationTest.MESSAGE_TEMPLATE)
+            .put(IncrementCounterTx.class,
+                IncrementCounterTxIntegrationTest.MESSAGE_TEMPLATE)
+            .put(InvalidThrowingTx.class, new Message.Builder()
+                .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
+                .setMessageType(QaTransaction.INVALID_THROWING.id())
+                .buildRaw())
+            .put(InvalidTx.class, new Message.Builder()
+                .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
+                .setMessageType(QaTransaction.INVALID.id())
+                .buildRaw())
+            .put(ValidThrowingTx.class, ValidThrowingTxTest.MESSAGE_TEMPLATE)
+            .put(ValidErrorTx.class, ValidErrorTxTest.MESSAGE_TEMPLATE)
+            .build();
 
     // Check that the test data includes all known transactions.
     assertThat(transactionTemplates).hasSameSizeAs(QaTransaction.values());

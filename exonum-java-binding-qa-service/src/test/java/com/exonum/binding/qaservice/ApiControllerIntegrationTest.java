@@ -24,8 +24,10 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.quality.Strictness.STRICT_STUBS;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
@@ -53,8 +55,11 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 
 @RunWith(VertxUnitRunner.class)
@@ -68,6 +73,9 @@ public class ApiControllerIntegrationTest {
 
   @ClassRule
   public static RunTestOnContext rule = new RunTestOnContext();
+
+  @Rule
+  public MockitoRule mockito = MockitoJUnit.rule().strictness(STRICT_STUBS);
 
   QaService qaService;
 
@@ -236,6 +244,36 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
+  public void submitValidError(TestContext context) {
+    long seed = 1L;
+    byte errorCode = 2;
+    String description = "Boom";
+    MultiMap params = multiMap("seed", Long.toString(seed),
+        "errorCode", Byte.toString(errorCode),
+        "errorDescription", description);
+
+    when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), eq(description)))
+        .thenReturn(EXPECTED_TX_HASH);
+
+    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
+  }
+
+  @Test
+  public void submitValidErrorNoDescription(TestContext context) {
+    long seed = 1L;
+    byte errorCode = 2;
+    MultiMap params = multiMap("seed", Long.toString(seed),
+        "errorCode", Byte.toString(errorCode));
+
+    when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), isNull()))
+        .thenReturn(EXPECTED_TX_HASH);
+
+    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
+  }
+
+  @Test
   public void submitUnknown(TestContext context) {
     when(qaService.submitUnknownTx())
         .thenReturn(EXPECTED_TX_HASH);
@@ -292,6 +330,17 @@ public class ApiControllerIntegrationTest {
         })));
   }
 
+  @Test
+  public void multiMapTest() {
+    MultiMap m = multiMap("k1", "v1",
+        "k2", "v2",
+        "k3", "v3");
+
+    assertThat(m.get("k1")).isEqualTo("v1");
+    assertThat(m.get("k2")).isEqualTo("v2");
+    assertThat(m.get("k3")).isEqualTo("v3");
+  }
+
   private HttpRequest<Buffer> post(String requestPath) {
     return webClient.post(port, HOST, requestPath);
   }
@@ -307,7 +356,7 @@ public class ApiControllerIntegrationTest {
         .add(k1, v1);
     int numEntries = entries.length / 2;
     IntStream.range(0, numEntries)
-        .forEach(i -> params.add(entries[i], entries[i + 1]));
+        .forEach(i -> params.add(entries[2 * i], entries[2 * i + 1]));
 
     return params;
   }
@@ -341,11 +390,11 @@ public class ApiControllerIntegrationTest {
       TestContext context, HashCode expectedTxHash) {
     return context.asyncAssertSuccess(
         ar -> context.verify(v -> {
+          assertThat(ar.bodyAsString())
+              .isEqualTo(expectedTxHash.toString());
           assertThat(ar.statusCode()).isEqualTo(HTTP_CREATED);
           assertThat(ar.getHeader("Location"))
               .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash);
-          assertThat(ar.bodyAsString())
-              .isEqualTo(expectedTxHash.toString());
         })
     );
   }

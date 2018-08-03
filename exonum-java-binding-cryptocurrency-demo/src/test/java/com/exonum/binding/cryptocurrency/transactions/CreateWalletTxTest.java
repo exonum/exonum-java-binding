@@ -39,7 +39,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.ByteString;
-import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
@@ -93,11 +92,11 @@ public class CreateWalletTxTest {
 
   private BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
     return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
-        .setBody(ByteBuffer.wrap(TxMessagesProtos.CreateWalletTx.newBuilder()
+        .setBody(TxMessagesProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
             .setInitialBalance(initialBalance)
             .build()
-            .toByteArray()))
+            .toByteArray())
         .setSignature(new byte[Message.SIGNATURE_SIZE])
         .buildRaw();
   }

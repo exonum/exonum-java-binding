@@ -19,38 +19,26 @@ package com.exonum.binding.messages;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import com.exonum.binding.messages.Message.Builder;
-import com.exonum.binding.test.Bytes;
-import java.nio.ByteBuffer;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
-/**
- * A test of our patches to the auto-generated message builder.
- */
-public class Message_Builder2Test {
+public class TransactionExecutionExceptionTest {
 
   @Test
-  public void setBodyBytes() {
-    byte[] source = Bytes.fromHex("12ab");
+  public void toStringNoDescription() {
+    byte errorCode = 2;
+    TransactionExecutionException e = new TransactionExecutionException(errorCode);
 
-    Message message = new Builder()
-        .setBody(source)
-        .buildPartial();
-
-    ByteBuffer expectedBody = ByteBuffer.wrap(source);
-    assertThat(message.getBody(), equalTo(expectedBody));
+    assertThat(e.toString(),
+        equalTo("com.exonum.binding.messages.TransactionExecutionException: errorCode=2"));
   }
 
   @Test
-  public void valueEquals() {
-    EqualsVerifier.forClass(Message_Builder2.Value.class)
-        .verify();
-  }
+  public void toStringWithDescription() {
+    byte errorCode = 2;
+    String description = "Foo";
+    TransactionExecutionException e = new TransactionExecutionException(errorCode, description);
 
-  @Test
-  public void partialEquals() {
-    EqualsVerifier.forClass(Message_Builder2.Partial.class)
-        .verify();
+    assertThat(e.toString(),
+        equalTo("com.exonum.binding.messages.TransactionExecutionException: Foo, errorCode=2"));
   }
 }

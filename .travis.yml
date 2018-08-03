@@ -7,10 +7,13 @@ sudo: false
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:chris-lea/libsodium'
     packages:
-    - build-essential
-    - libssl-dev
-    - pkg-config
+      - build-essential
+      - libsodium-dev
+      - libssl-dev
+      - pkg-config
 
 env:
   global:

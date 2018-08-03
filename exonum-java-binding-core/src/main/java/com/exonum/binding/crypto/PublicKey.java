@@ -16,7 +16,7 @@
 
 package com.exonum.binding.crypto;
 
-import static org.abstractj.kalium.encoders.Encoder.HEX;
+import static com.exonum.binding.crypto.CryptoUtils.hexToByteArray;
 
 /**
  * Represent a public key in a digital signature system.
@@ -45,6 +45,6 @@ public final class PublicKey extends AbstractKey {
    * Creates a {@code PublicKey} from a hexadecimal string.
    */
   public static PublicKey fromHexString(String stringKey) {
-    return new PublicKey(HEX.decode(stringKey));
+    return new PublicKey(hexToByteArray(stringKey));
   }
 }
