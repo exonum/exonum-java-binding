@@ -9,6 +9,15 @@
             <outputDirectory>java</outputDirectory>
         </dependencySet>
     </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>rust/target/prepackage</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>%regex[libstd.*]</include>
+            </includes>
+        </fileSet>
+    </fileSets>
     <files>
         <file>
             <source>rust/target/debug/ejb-app</source>

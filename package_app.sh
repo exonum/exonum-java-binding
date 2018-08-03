@@ -58,6 +58,9 @@ echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
+mkdir exonum-java-binding-core/rust/target/prepackage
+cp $RUST_LIB_DIR/libstd* exonum-java-binding-core/rust/target/prepackage
+
 # Linking options with additional paths for the application and tests.
 # Note: `-C link-args` can be used only once, therefore, `-C link-arg` is used.
 # Currently we don't support stacking of RUSTFLAGS with a user environment RUSTFLAGS,
@@ -66,8 +69,9 @@ echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 if [[ "${RUSTFLAGS:-}" != "" ]]; then
     echo "Warning: the RUSTFLAGS variable will be overriden. Merge is not yet supported."
 fi
-RUSTFLAGS=""
+export RUSTFLAGS=""
 export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,\$ORIGIN/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
 echo "RUSTFLAGS=${RUSTFLAGS}"
 
-mvn package
+mvn package -Dmaven.skip.test=true
