@@ -21,8 +21,6 @@ install_rust_compiler() {
     rustup component add rustfmt-preview --toolchain stable
     rustup run stable rustfmt -V
     rustup default "$RUST_COMPILER_VERSION"
-    # Install cargo-audit if it's not already.
-    cargo-audit -V || cargo install cargo-audit --force # ~5 mins
     # List all installed cargo packages.
     cargo install --list
     # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
@@ -45,6 +43,8 @@ perform_rust_checks() {
     echo 'Performing checks over the rust code'
     # about 10 minutes to get to this step
     cd "${EJB_RUST_BUILD_DIR}"
+    # Install cargo-audit if it's not already.
+    cargo-audit -V || cargo install cargo-audit --force # ~5 mins
     cargo +stable fmt --all -- --check
     # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
     # Next 2 lines are a workaround to prevent clippy checking dependencies.
