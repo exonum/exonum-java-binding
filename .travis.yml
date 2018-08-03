@@ -41,6 +41,26 @@ cache:
 before_install:
     # Skip the build if only md files were updated.
   - source skip-ci.sh
+  - export PATH="$PATH":"$HOME/.cargo/bin"
+  - # Install rustup if it's not already installed (i.e., not in CI cache).
+  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
+  - # Save the path to stdlib of the default toolchain to use it in scripts.
+  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
+  - # Install rustfmt.
+  - # Use stable Rust for rustfmt.
+  - # TODO: use stable rust everywhere when ECR-1839 fixed.
+  - rustup toolchain install stable
+  - rustup component add rustfmt-preview --toolchain stable
+  - rustup run stable rustfmt -V
+  - rustup default "$RUST_COMPILER_VERSION"
+  - # List all installed cargo packages.
+  - cargo install --list
+  - # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
+  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
+  - # force building instead of using from apt.
+  - export SODIUM_BUILD=1
+  - export ROCKSDB_BUILD=1
+  - export SNAPPY_BUILD=1
   - source run_rust_checks.sh
 
 install: true  # Skip the installation step, as Maven requires
