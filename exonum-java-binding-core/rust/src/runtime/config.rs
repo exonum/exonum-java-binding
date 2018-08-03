@@ -3,15 +3,15 @@ use std::fmt;
 /// JavaServiceRuntime configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    /// JVM configuration.
-    pub jvm_config: JvmConfig,
-    /// Java service configuration.
-    pub service_config: ServiceConfig,
+    /// Private part of the EJB configuration parameters.
+    pub private_config: PrivateConfig,
+    /// Public part of the EJB configuration parameters.
+    pub public_config: PublicConfig,
 }
 
-/// JVM configuration.
+/// Private EJB configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JvmConfig {
+pub struct PrivateConfig {
     /// Additional parameters for JVM.
     ///
     /// Passed directly to JVM while initializing EJB runtime.
@@ -22,23 +22,19 @@ pub struct JvmConfig {
     pub system_class_path: String,
     /// Java service classpath.
     pub service_class_path: String,
-    /// Path to java-bindings shared library.
-    ///
-    /// Should be path to exonum-java-binding-core/rust/target/{debug, release}
-    pub lib_path: String,
     /// Path to `log4j` configuration file.
     pub log_config_path: String,
+    /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
+    pub port: i32,
 }
 
-/// Java service configuration.
+/// Public EJB configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServiceConfig {
+pub struct PublicConfig {
     /// Fully qualified service module name.
     ///
     /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
     pub module_name: String,
-    /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
-    pub port: i32,
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.
@@ -92,23 +88,23 @@ mod tests {
 
     #[test]
     fn not_forbidden_user_parameter() {
-        let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
+        let validation_result = validate_and_convert("Duser.parameter=Djava.class.path");
         assert_eq!(
             validation_result,
-            Ok("-Duser.parameter=Djava.library.path".to_string())
+            Ok("-Duser.parameter=Djava.class.path".to_string())
         );
-    }
-
-    #[test]
-    #[should_panic(expected = "Trying to specify JVM parameter")]
-    fn library_path() {
-        validate_and_convert("Djava.library.path=.").unwrap();
     }
 
     #[test]
     #[should_panic(expected = "Trying to specify JVM parameter")]
     fn class_path() {
         validate_and_convert("Djava.class.path=target").unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "Trying to specify JVM parameter")]
+    fn library_path() {
+        validate_and_convert("Djava.library.path=some-dir").unwrap();
     }
 
     #[test]

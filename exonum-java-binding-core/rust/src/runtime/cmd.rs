@@ -1,4 +1,4 @@
-use super::{Config, JvmConfig, ServiceConfig};
+use super::{Config, PrivateConfig, PublicConfig};
 use exonum::helpers::fabric::keys;
 use exonum::helpers::fabric::Argument;
 use exonum::helpers::fabric::CommandExtension;
@@ -7,19 +7,103 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
+use std::{env, fs};
+
 const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
-const EJB_SYSTEM_CLASSPATH: &str = "EJB_SYSTEM_CLASSPATH";
 const EJB_SERVICE_CLASSPATH: &str = "EJB_SERVICE_CLASSPATH";
-const EJB_LIBPATH: &str = "EJB_LIBPATH";
 const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
 const EJB_PORT: &str = "EJB_PORT";
-const EJB_JVM_CONFIG_NAME: &str = "ejb_jvm_config";
+const EJB_PUBLIC_CONFIG_NAME: &str = "ejb_public_config";
 pub const EJB_CONFIG_NAME: &str = "ejb";
 
-pub struct GenerateNodeConfig;
+pub struct GenerateTemplate;
 
-impl CommandExtension for GenerateNodeConfig {
+impl CommandExtension for GenerateTemplate {
+    fn args(&self) -> Vec<Argument> {
+        vec![Argument::new_named(
+            EJB_MODULE_NAME,
+            true,
+            "A fully-qualified class name of the user service module.",
+            None,
+            "ejb-module-name",
+            false,
+        )]
+    }
+
+    fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
+        let module_name = context.arg(EJB_MODULE_NAME)?;
+
+        let public_config = PublicConfig { module_name };
+
+        // Adding EJB public config to the services public configs section in common.toml.
+        let mut services_public_configs = context.get(keys::SERVICES_CONFIG).unwrap_or_default();
+        services_public_configs.extend(
+            vec![(
+                EJB_PUBLIC_CONFIG_NAME.to_owned(),
+                Value::try_from(public_config).unwrap(),
+            )].into_iter(),
+        );
+        context.set(keys::SERVICES_CONFIG, services_public_configs);
+
+        Ok(context)
+    }
+}
+
+pub struct Finalize;
+
+impl CommandExtension for Finalize {
+    fn args(&self) -> Vec<Argument> {
+        vec![Argument::new_named(
+            EJB_SERVICE_CLASSPATH,
+            true,
+            "Java service classpath. Shall not include Java Binding classes.",
+            None,
+            "ejb-service-classpath",
+            false,
+        )]
+    }
+
+    fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
+        let service_class_path = context.arg(EJB_SERVICE_CLASSPATH)?;
+
+        // Creating new private config.
+        let private_config = PrivateConfig {
+            user_parameters: Vec::new(),
+            system_class_path: get_system_classpath(),
+            service_class_path,
+            log_config_path: String::new(),
+            port: 0,
+        };
+
+        // Getting public config saved at first step out of common section of configuration.
+        let common_config = context.get(keys::COMMON_CONFIG)?;
+        let public_config = common_config
+            .services_config
+            .get(EJB_PUBLIC_CONFIG_NAME)
+            .expect("EJB public config not found")
+            .clone()
+            .try_into()?;
+
+        // Forming full EJB config.
+        let config = Config {
+            public_config,
+            private_config,
+        };
+
+        // Writing EJB config to the node services configuration section.
+        let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
+        node_config
+            .services_configs
+            .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(config)?);
+        context.set(keys::NODE_CONFIG, node_config);
+        Ok(context)
+    }
+}
+
+pub struct Run;
+
+impl CommandExtension for Run {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
@@ -40,77 +124,6 @@ impl CommandExtension for GenerateNodeConfig {
                 false,
             ),
             Argument::new_named(
-                EJB_SYSTEM_CLASSPATH,
-                true,
-                "Java bindings framework system classpath.",
-                None,
-                "ejb-classpath",
-                false,
-            ),
-            Argument::new_named(
-                EJB_SERVICE_CLASSPATH,
-                true,
-                "Java service classpath.",
-                None,
-                "ejb-service-classpath",
-                false,
-            ),
-            Argument::new_named(
-                EJB_LIBPATH,
-                true,
-                "Path to java-bindings shared library.",
-                None,
-                "ejb-libpath",
-                false,
-            ),
-        ]
-    }
-
-    fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
-        let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
-        let system_class_path = context.arg(EJB_SYSTEM_CLASSPATH)?;
-        let service_class_path = context.arg(EJB_SERVICE_CLASSPATH)?;
-        let lib_path = context.arg(EJB_LIBPATH)?;
-
-        let jvm_config = JvmConfig {
-            user_parameters,
-            system_class_path,
-            service_class_path,
-            lib_path,
-            log_config_path,
-        };
-
-        let mut services_secret_configs = context
-            .get(keys::SERVICES_SECRET_CONFIGS)
-            .unwrap_or_default();
-        services_secret_configs.extend(
-            vec![(
-                EJB_JVM_CONFIG_NAME.to_owned(),
-                Value::try_from(jvm_config).unwrap(),
-            )].into_iter(),
-        );
-
-        context.set(keys::SERVICES_SECRET_CONFIGS, services_secret_configs);
-
-        Ok(context)
-    }
-}
-
-pub struct Finalize;
-
-impl CommandExtension for Finalize {
-    fn args(&self) -> Vec<Argument> {
-        vec![
-            Argument::new_named(
-                EJB_MODULE_NAME,
-                true,
-                "A fully-qualified class name of the user service module.",
-                None,
-                "ejb-module-name",
-                false
-            ),
-            Argument::new_named(
                 EJB_PORT,
                 true,
                 "A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.",
@@ -122,29 +135,53 @@ impl CommandExtension for Finalize {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let module_name = context.arg(EJB_MODULE_NAME)?;
+        let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
+        let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let port = context.arg(EJB_PORT)?;
 
-        let service_config = ServiceConfig { module_name, port };
-
-        let jvm_config: JvmConfig = context
-            .get(keys::SERVICES_SECRET_CONFIGS)
-            .expect("Can't get services secret configs")
-            .get(EJB_JVM_CONFIG_NAME)
-            .expect("Can't get JVM config")
-            .clone()
+        // Getting full EJB config saved at finalize step.
+        let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
+        let mut ejb_config: Config = node_config
+            .services_configs
+            .get(EJB_CONFIG_NAME)
+            .cloned()
+            .unwrap()
             .try_into()?;
 
-        let config = Config {
-            jvm_config,
-            service_config,
-        };
+        // Updating parameters in EJB config using provided arguments.
+        ejb_config.private_config.user_parameters = user_parameters;
+        ejb_config.private_config.log_config_path = log_config_path;
+        ejb_config.private_config.port = port;
 
-        let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
+        // Updating EJB config.
         node_config
             .services_configs
-            .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(config)?);
+            .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(ejb_config)?);
         context.set(keys::NODE_CONFIG, node_config);
         Ok(context)
     }
+}
+
+fn get_system_classpath() -> String {
+    let mut jars = Vec::new();
+    let jars_directory = {
+        // Get current path to EJB App.
+        let mut exe_location = env::current_exe().expect("Could not get the executable location");
+        // Get directory where EJB App is.
+        exe_location.pop();
+        // Add relative path to java classes.
+        exe_location.push("lib/java");
+        exe_location
+    };
+    for entry in fs::read_dir(jars_directory).expect("Could not read java classes directory") {
+        let file = entry.unwrap();
+        if file.file_type().unwrap().is_file() {
+            jars.push(file.path());
+        } else {
+            continue;
+        }
+    }
+
+    let jars = jars.iter().map(|p| p.to_str().unwrap());
+    env::join_paths(jars).unwrap().into_string().unwrap()
 }
