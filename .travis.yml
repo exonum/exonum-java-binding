@@ -28,9 +28,9 @@ env:
 matrix:
   exclude:
   - jdk: openjdk10
-    env: CHECK_RUST=true
-  - jdk: openjdk8
     env: CHECK_RUST=false
+  - jdk: openjdk8
+    env: CHECK_RUST=true
 
 
 cache:
