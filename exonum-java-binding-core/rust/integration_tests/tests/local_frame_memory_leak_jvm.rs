@@ -52,7 +52,8 @@ fn jvm_must_not_leak_local_references_exceeding_frame_capacity() {
             // Create and leak 'references_per_frame' Java arrays.
             for _ in 0..references_per_frame {
                 thread_rng().fill(&mut array[..]);
-                let _java_obj = env.byte_array_from_slice(&array)
+                let _java_obj = env
+                    .byte_array_from_slice(&array)
                     .expect("Can't create new local object.");
             }
             Ok(JObject::null())
