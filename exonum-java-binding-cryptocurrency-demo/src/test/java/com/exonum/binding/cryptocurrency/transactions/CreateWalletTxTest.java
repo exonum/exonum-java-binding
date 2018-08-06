@@ -19,9 +19,10 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.crypto.KeyPair;
@@ -40,11 +41,9 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class CreateWalletTxTest {
+class CreateWalletTxTest {
 
   static {
     LibraryLoader.load();
@@ -54,10 +53,8 @@ public class CreateWalletTxTest {
 
   private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.firstOwnerKey;
 
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
-
   @Test
-  public void fromMessage() {
+  void fromMessage() {
     long initialBalance = 100L;
     BinaryMessage m = createUnsignedMessage(OWNER_KEY, initialBalance);
 
@@ -67,7 +64,7 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void isValidSigned() {
+  void isValidSigned() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     BinaryMessage m = createSignedMessage(keyPair);
 
@@ -77,7 +74,7 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void isValidUnsigned() {
+  void isValidUnsigned() {
     BinaryMessage m = createUnsignedMessage(OWNER_KEY, DEFAULT_BALANCE);
     CreateWalletTx tx = CreateWalletTx.fromMessage(m);
 
@@ -102,25 +99,28 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void constructorRejectsInvalidSizedKey() {
+  void constructorRejectsInvalidSizedKey() {
     PublicKey publicKey = PublicKey.fromBytes(new byte[1]);
 
-    expectedException.expectMessage("Public key has invalid size (1), must be 32 bytes long.");
-    expectedException.expect(IllegalArgumentException.class);
-    withMockMessage(publicKey, DEFAULT_BALANCE);
+    Throwable t = assertThrows(IllegalArgumentException.class,
+        () -> withMockMessage(publicKey, DEFAULT_BALANCE)
+    );
+    assertThat(t.getMessage(), equalTo("Public key has invalid size (1), must be 32 bytes long."));
   }
 
   @Test
-  public void constructorRejectsNegativeBalance() {
+  void constructorRejectsNegativeBalance() {
     long initialBalance = -1L;
 
-    expectedException.expectMessage("The initial balance (-1) must not be negative.");
-    expectedException.expect(IllegalArgumentException.class);
-    withMockMessage(OWNER_KEY, initialBalance);
+    Throwable t = assertThrows(IllegalArgumentException.class,
+        () -> withMockMessage(OWNER_KEY, initialBalance)
+    );
+    assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
+    
   }
 
   @Test
-  public void executeCreateWalletTx() throws CloseFailuresException {
+  void executeCreateWalletTx() throws CloseFailuresException {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
@@ -138,7 +138,7 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void executeAlreadyExistingWalletTx() throws CloseFailuresException {
+  void executeAlreadyExistingWalletTx() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -167,7 +167,7 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void info() {
+  void info() {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     String info = tx.info();
@@ -179,7 +179,7 @@ public class CreateWalletTxTest {
   }
 
   @Test
-  public void verifyEquals() {
+  void verifyEquals() {
     EqualsVerifier
         .forClass(CreateWalletTx.class)
         .verify();
