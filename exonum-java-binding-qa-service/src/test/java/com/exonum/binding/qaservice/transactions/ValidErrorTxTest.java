@@ -23,7 +23,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.messages.BinaryMessage;
@@ -100,13 +99,11 @@ class ValidErrorTxTest {
     byte errorCode = 2;
     Transaction tx = new ValidErrorTx(1L, errorCode, null);
 
-    try {
-      tx.execute(mock(Fork.class));
-      fail("Must throw");
-    } catch (TransactionExecutionException expected) {
-      assertThat(expected.getErrorCode(), equalTo(errorCode));
-      assertNull(expected.getMessage());
-    }
+    TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
+        () -> tx.execute(mock(Fork.class)));
+
+    assertThat(expected.getErrorCode(), equalTo(errorCode));
+    assertNull(expected.getMessage());
   }
 
   @Test
@@ -115,13 +112,11 @@ class ValidErrorTxTest {
     String description = "Boom";
     Transaction tx = new ValidErrorTx(1L, errorCode, description);
 
-    try {
-      tx.execute(mock(Fork.class));
-      fail("Must throw");
-    } catch (TransactionExecutionException expected) {
-      assertThat(expected.getErrorCode(), equalTo(errorCode));
-      assertThat(expected.getMessage(), equalTo(description));
-    }
+    TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
+        () -> tx.execute(mock(Fork.class)));
+
+    assertThat(expected.getErrorCode(), equalTo(errorCode));
+    assertThat(expected.getMessage(), equalTo(description));
   }
 
   @Test

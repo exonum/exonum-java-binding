@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.messages.TransactionExecutionException;
 import com.exonum.binding.proxy.Cleaner;
@@ -51,16 +51,13 @@ class ValidErrorTxIntegrationTest {
       byte errorCode = 1;
       ValidErrorTx tx = new ValidErrorTx(0L, errorCode, "Boom");
 
-      try {
-        // Execute the transaction
-        tx.execute(view);
-        fail("#execute above must throw");
-      } catch (TransactionExecutionException expected) {
-        // Check that execute cleared the maps
-        QaSchema schema = new QaSchema(view);
-        checkIsEmpty(schema.counters());
-        checkIsEmpty(schema.counterNames());
-      }
+      // Execute the transaction
+      assertThrows(TransactionExecutionException.class, () -> tx.execute(view));
+
+      // Check that execute cleared the maps
+      QaSchema schema = new QaSchema(view);
+      checkIsEmpty(schema.counters());
+      checkIsEmpty(schema.counterNames());
     }
   }
 

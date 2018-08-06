@@ -20,7 +20,7 @@ import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrati
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -51,20 +51,18 @@ class ValidThrowingTxIntegrationTest {
       // Create the transaction
       ValidThrowingTx tx = new ValidThrowingTx(0L);
 
-      try {
-        // Execute the transaction
-        tx.execute(view);
-        fail("#execute above must throw");
-      } catch (IllegalStateException expected) {
-        // Check that execute cleared the maps
-        QaSchema schema = new QaSchema(view);
-        checkIsEmpty(schema.counters());
-        checkIsEmpty(schema.counterNames());
+      // Execute the transaction
+      IllegalStateException expected = assertThrows(IllegalStateException.class,
+          () -> tx.execute(view));
 
-        // Check the exception message
-        String message = expected.getMessage();
-        assertThat(message, startsWith("#execute of this transaction always throws"));
-      }
+      // Check that execute cleared the maps
+      QaSchema schema = new QaSchema(view);
+      checkIsEmpty(schema.counters());
+      checkIsEmpty(schema.counterNames());
+
+      // Check the exception message
+      String message = expected.getMessage();
+      assertThat(message, startsWith("#execute of this transaction always throws"));
     }
   }
 
