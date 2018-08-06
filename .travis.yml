@@ -30,12 +30,12 @@ env:
     - CHECK_RUST=false
 # force building instead of using from apt.
 
+# run java tests for jdk8&jdk10 without rust checks, 
+# check rust code with jdk8 without running java tests
 matrix:
   exclude:
   - jdk: openjdk10
     env: CHECK_RUST=true
-# run java tests for jdk8&jdk10 with rust checks, 
-# check rust code with jdk8 without running java tests
 
 cache:
   directories:
@@ -60,7 +60,7 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "$TRAVIS_BUILD_DIR"
-  - ./run_all_tests.sh
+  - ./run_tests.sh
 
 notifications:
   slack:
