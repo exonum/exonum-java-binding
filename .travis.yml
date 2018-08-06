@@ -21,17 +21,21 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
+    - SODIUM_BUILD=1
+    - ROCKSDB_BUILD=1
+    - SNAPPY_BUILD=1
+    - SKIP_COMPILE=true
   matrix:
     - CHECK_RUST=true
     - CHECK_RUST=false
+# force building instead of using from apt.
 
 matrix:
   exclude:
   - jdk: openjdk10
     env: CHECK_RUST=true
-  - jdk: openjdk8
-    env: CHECK_RUST=false
-
+# run java tests for jdk8&jdk10 with rust checks, 
+# check rust code with jdk8 without running java tests
 
 cache:
   directories:
@@ -46,30 +50,17 @@ before_install:
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
   # Save the path to stdlib of the default toolchain to use it in scripts.
   - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
-  # Install rustfmt.
-  # Use stable Rust for rustfmt.
-  # TODO: use stable rust everywhere when ECR-1839 fixed.
-  - rustup toolchain install stable
-  - rustup component add rustfmt-preview --toolchain stable
-  - rustup run stable rustfmt -V
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
   # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
   - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
-  # force building instead of using from apt.
-  - export SODIUM_BUILD=1
-  - export ROCKSDB_BUILD=1
-  - export SNAPPY_BUILD=1
-  - source run_rust_checks.sh
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - ./run_all_tests.sh
-  # Check silently for updates of dependencies
-  - mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
 
 notifications:
   slack:
