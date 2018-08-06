@@ -29,11 +29,16 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
+@DisabledOnOs(OS.LINUX)
 class SetEntryTransactionIntegrationTest {
 
-  static {
+  @BeforeAll
+  static void loadLibrary() {
     LibraryLoader.load();
   }
 
