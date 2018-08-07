@@ -3,8 +3,8 @@ use jni::JNIEnv;
 
 use std::cell::Cell;
 
-use utils::{get_class_name, get_exception_message, get_exception_stack_trace};
-use {JniError, JniErrorKind, JniResult};
+use utils::{get_class_name, get_exception_message};
+use {JniErrorKind, JniResult};
 
 const CLASS_JL_ERROR: &str = "java/lang/Error";
 
@@ -18,7 +18,7 @@ pub fn panic_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> T {
     result.unwrap_or_else(|jni_error| match jni_error.0 {
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
-            panic!(describe_java_exception(env, exception, &jni_error));
+            panic!(describe_java_exception(env, exception));
         }
         _ => unwrap_jni(Err(jni_error)),
     })
@@ -36,7 +36,7 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> Result
     result.map_err(|jni_error| match jni_error.0 {
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
-            let message = describe_java_exception(env, exception, &jni_error);
+            let message = describe_java_exception(env, exception);
             if unwrap_jni_verbose(env, env.is_instance_of(exception, CLASS_JL_ERROR)) {
                 panic!(message);
             }
@@ -75,7 +75,7 @@ pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JniResult<T>) -> T {
                     JniErrorKind::JavaException => {
                         in_recursion.set(true);
                         let exception = get_and_clear_java_exception(env);
-                        let message = describe_java_exception(env, exception, &jni_error);
+                        let message = describe_java_exception(env, exception);
                         in_recursion.set(false);
                         panic!(message);
                     }
@@ -95,7 +95,7 @@ pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
     exception
 }
 
-fn describe_java_exception(env: &JNIEnv, exception: JObject, jni_error: &JniError) -> String {
+fn describe_java_exception(env: &JNIEnv, exception: JObject) -> String {
     assert!(!exception.is_null(), "No exception thrown.");
     let format = || {
         Ok(format!(
