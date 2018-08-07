@@ -40,6 +40,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -120,6 +121,7 @@ class TransferTxTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeTransfer() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -146,6 +148,7 @@ class TransferTxTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeTransferToTheSameWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -168,6 +171,7 @@ class TransferTxTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeNoSuchFromWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -190,6 +194,7 @@ class TransferTxTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeNoSuchToWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {

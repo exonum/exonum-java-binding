@@ -23,8 +23,6 @@
     <protobuf.version>3.6.1</protobuf.version>
     <exonum-bom.version>0.2</exonum-bom.version>
     <exonum-java-testing.version>0.2</exonum-java-testing.version>
-    <!-- Disable as some tests running during 'test' phase require the native library. -->
-    <skipTests>${project.skipJavaITs}</skipTests>
   </properties>
 
   <build>
@@ -210,6 +208,13 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-testing</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
