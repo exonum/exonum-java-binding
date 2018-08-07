@@ -92,10 +92,10 @@
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
-    <mockito-core.version>2.20.1</mockito-core.version>
-    <guava.version>25.1-jre</guava.version>
+    <mockito-core.version>2.21.0</mockito-core.version>
+    <guava.version>26.0-jre</guava.version>
     <vertx.version>3.5.3</vertx.version>
-    <equalsverifier.version>2.5</equalsverifier.version>
+    <equalsverifier.version>2.5.1</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
          on where the native library is used.

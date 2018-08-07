@@ -14,5 +14,5 @@ crate-type = ["dylib"]
 futures = "0.1.14"
 java_bindings = { path = "..", features = ["invocation"] }
 exonum-testkit = "0.8.0"
-lazy_static = "1.0.1"
+lazy_static = "1.1.0"
 rand = "0.5"
