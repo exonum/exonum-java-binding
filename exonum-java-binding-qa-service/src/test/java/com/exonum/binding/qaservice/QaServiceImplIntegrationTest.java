@@ -48,6 +48,7 @@ import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.junit5.VertxExtension;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
@@ -162,7 +163,8 @@ class QaServiceImplIntegrationTest {
     setServiceNode(node);
 
     long seed = 1L;
-    HashCode counterId = HashCode.fromInt(1);
+    HashCode counterId = Hashing.sha256()
+        .hashString("Cats counter", StandardCharsets.UTF_8);
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
     Transaction expectedTx = new IncrementCounterTx(seed, counterId);
