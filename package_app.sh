@@ -74,4 +74,9 @@ export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,\$ORIGIN/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
 echo "RUSTFLAGS=${RUSTFLAGS}"
 
+cd exonum-java-binding-core/rust
+cargo build --all
+
+cd ../..
+
 mvn package -Dmaven.skip.test=true
