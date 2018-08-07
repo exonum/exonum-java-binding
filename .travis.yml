@@ -54,8 +54,6 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
-  # Check silently for updates of dependencies
-  - mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
 
 notifications:
   slack:

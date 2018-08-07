@@ -31,14 +31,10 @@ then
     cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
     # TODO ignoring cargo audit until ECR-1902 is fixed
     cargo audit || true
+    # Check silently for updates of dependencies
+    mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
     echo 'Rust checks are completed.'
 else
     cd "${TRAVIS_BUILD_DIR}"
-    # Run all java tests and native unit tests.
-    ./run_maven_tests.sh
-    # Run native integration tests that require prepared classpaths for fake classes.
-    ./run_native_integration_tests.sh --skip-compile
-    ./run_ejb_app_tests.sh
-    # Check silently for updates of dependencies
-    mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
+    ./run_all_tests.sh
 fi
