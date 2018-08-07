@@ -453,11 +453,12 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             Some(val) => {
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
-                Ok(env.new_object_by_id(
-                    &iterWrapper.element_class,
-                    iterWrapper.constructor_id,
-                    &[key.into(), value.into()],
-                )?
+                Ok(env
+                    .new_object_by_id(
+                        &iterWrapper.element_class,
+                        iterWrapper.constructor_id,
+                        &[key.into(), value.into()],
+                    )?
                     .into_inner())
             }
             None => Ok(ptr::null_mut()),
