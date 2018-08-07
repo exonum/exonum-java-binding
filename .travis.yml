@@ -21,17 +21,14 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
-    - SODIUM_BUILD=1
+    # force building instead of using from apt.
     - ROCKSDB_BUILD=1
     - SNAPPY_BUILD=1
-    - SKIP_COMPILE=true
   matrix:
     - CHECK_RUST=true
     - CHECK_RUST=false
-# force building instead of using from apt.
 
-# run java tests for jdk8&jdk10 without rust checks, 
-# check rust code with jdk8 without running java tests
+# exclude rust code checks with jdk10
 matrix:
   exclude:
   - jdk: openjdk10
@@ -53,14 +50,12 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
-  # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
-  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "$TRAVIS_BUILD_DIR"
-  - ./run_tests.sh
+  - ./run_all_tests.sh
 
 notifications:
   slack:
