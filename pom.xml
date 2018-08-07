@@ -95,7 +95,7 @@
     <mockito-core.version>2.20.1</mockito-core.version>
     <guava.version>26.0-jre</guava.version>
     <vertx.version>3.5.3</vertx.version>
-    <equalsverifier.version>2.5</equalsverifier.version>
+    <equalsverifier.version>2.5.1</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
          on where the native library is used.
