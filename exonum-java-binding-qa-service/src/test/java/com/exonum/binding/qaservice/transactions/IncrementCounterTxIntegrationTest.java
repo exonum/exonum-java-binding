@@ -39,6 +39,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -99,6 +100,7 @@ class IncrementCounterTxIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeIncrementsCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -124,6 +126,7 @@ class IncrementCounterTxIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeNoSuchCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {

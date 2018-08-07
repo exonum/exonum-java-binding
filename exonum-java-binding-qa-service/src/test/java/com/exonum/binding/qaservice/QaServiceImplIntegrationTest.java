@@ -44,6 +44,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -121,6 +122,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {

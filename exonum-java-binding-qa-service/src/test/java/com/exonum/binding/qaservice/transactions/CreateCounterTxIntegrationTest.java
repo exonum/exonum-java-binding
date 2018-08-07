@@ -37,6 +37,7 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -105,6 +106,7 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeNewCounter() throws CloseFailuresException {
     String name = "counter";
 
@@ -130,6 +132,7 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeAlreadyExistingCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {

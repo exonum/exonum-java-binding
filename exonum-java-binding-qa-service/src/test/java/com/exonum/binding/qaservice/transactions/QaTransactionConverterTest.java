@@ -113,9 +113,9 @@ class QaTransactionConverterTest {
             .setMessageType(QaTransaction.INVALID.id())
             .buildRaw()),
 
-        Arguments.of(ValidThrowingTx.class, ValidThrowingTxTest.MESSAGE_TEMPLATE),
+        Arguments.of(ValidThrowingTx.class, ValidThrowingTxIntegrationTest.MESSAGE_TEMPLATE),
 
-        Arguments.of(ValidErrorTx.class, ValidErrorTxTest.MESSAGE_TEMPLATE)
+        Arguments.of(ValidErrorTx.class, ValidErrorTxIntegrationTest.MESSAGE_TEMPLATE)
     );
 
     // Check that the test data includes all known transactions.
