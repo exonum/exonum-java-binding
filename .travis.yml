@@ -46,7 +46,7 @@ before_install:
   # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
   # Save the path to stdlib of the default toolchain to use it in scripts.
-  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
+  - export RUST_LIB_DIR=$(rustup run "$RUST_COMPILER_VERSION" rustc --print sysroot)/lib
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
