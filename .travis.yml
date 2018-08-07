@@ -45,9 +45,6 @@ before_install:
   - export PATH="$PATH":"$HOME/.cargo/bin"
   # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
-  # Save the path to stdlib of the default toolchain to use it in scripts.
-  - export RUST_LIB_DIR=$(rustup run "$RUST_COMPILER_VERSION" rustc --print sysroot)/lib
-  - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
 
@@ -55,7 +52,9 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
   - cd "$TRAVIS_BUILD_DIR"
-  - ./run_all_tests.sh
+  - .travis/run_travis_job.sh
+  # Check silently for updates of dependencies
+  - mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
 
 notifications:
   slack:
