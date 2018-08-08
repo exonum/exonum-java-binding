@@ -93,10 +93,10 @@ class ApiControllerIntegrationTest {
     controller.mountApi(router);
 
     httpServer.requestHandler(router::accept)
-        .listen(0, context.succeeding(r -> {
+        .listen(0, context.succeeding(result -> {
 
           // Set the actual server port.
-          port = r.actualPort();
+          port = result.actualPort();
 
           context.completeNow();
         }));
@@ -123,11 +123,11 @@ class ApiControllerIntegrationTest {
   @Test
   void submitCreateCounter_NoParameter(VertxTestContext context) {
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(MultiMap.caseInsensitiveMultiMap(), context.succeeding(ar -> {
+        .sendForm(MultiMap.caseInsensitiveMultiMap(), context.succeeding(response -> {
           context.verify(() -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
 
-            assertThat(ar.bodyAsString())
+            assertThat(response.bodyAsString())
                 .contains("No required key (name) in request parameters:");
 
             context.completeNow();
@@ -145,11 +145,11 @@ class ApiControllerIntegrationTest {
         .thenThrow(error);
 
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(ar -> {
+        .sendForm(params, context.succeeding(response -> {
           context.verify(() -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
 
-            assertThat(ar.bodyAsString())
+            assertThat(response.bodyAsString())
                 .startsWith("Transaction is not valid:");
 
             context.completeNow();
@@ -167,8 +167,8 @@ class ApiControllerIntegrationTest {
         .thenThrow(error);
 
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(ar -> context.verify(() -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+        .sendForm(params, context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
           context.completeNow();
         })));
   }
@@ -183,9 +183,9 @@ class ApiControllerIntegrationTest {
         .thenThrow(error);
 
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(ar -> {
+        .sendForm(params, context.succeeding(response -> {
           context.verify(() -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+            assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
             context.completeNow();
           });
         }));
@@ -286,11 +286,11 @@ class ApiControllerIntegrationTest {
 
     String getCounterUri = getCounterUri(id);
     get(getCounterUri)
-        .send(context.succeeding(ar -> context.verify(() -> {
-          assertThat(ar.statusCode())
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
-          String body = ar.bodyAsString();
+          String body = response.bodyAsString();
           Counter actualCounter = QaTransactionGson.instance()
               .fromJson(body, Counter.class);
           assertThat(actualCounter).isEqualTo(counter);
@@ -307,8 +307,8 @@ class ApiControllerIntegrationTest {
 
     String getCounterUri = getCounterUri(id);
     get(getCounterUri)
-        .send(context.succeeding(ar -> context.verify(() -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
 
           context.completeNow();
         })));
@@ -320,10 +320,10 @@ class ApiControllerIntegrationTest {
     String getCounterUri = getCounterUri(hash);
 
     get(getCounterUri)
-        .send(context.succeeding(ar -> context.verify(() -> {
+        .send(context.succeeding(response -> context.verify(() -> {
           assertAll(
-              () -> assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
-              () -> assertThat(ar.bodyAsString())
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
+              () -> assertThat(response.bodyAsString())
                   .startsWith("Failed to convert parameter (counterId):"));
           context.completeNow();
         })));
@@ -388,12 +388,13 @@ class ApiControllerIntegrationTest {
   private Handler<AsyncResult<HttpResponse<Buffer>>> checkCreatedTransaction(
       VertxTestContext context, HashCode expectedTxHash) {
     return context.succeeding(
-        ar -> context.verify(() -> {
+        response -> context.verify(() -> {
           assertAll(
-              () -> assertThat(ar.bodyAsString()).isEqualTo(expectedTxHash.toString()),
-              () -> assertThat(ar.statusCode()).isEqualTo(HTTP_CREATED),
-              () -> assertThat(ar.getHeader("Location"))
-                  .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash));
+              () -> assertThat(response.bodyAsString()).isEqualTo(expectedTxHash.toString()),
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_CREATED),
+              () -> assertThat(response.getHeader("Location"))
+                  .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash)
+          );
           context.completeNow();
         }));
   }
@@ -401,10 +402,11 @@ class ApiControllerIntegrationTest {
   private Handler<AsyncResult<HttpResponse<Buffer>>> checkInvalidTransaction(
       VertxTestContext context) {
     return context.succeeding(
-        ar -> context.verify(() -> {
+        response -> context.verify(() -> {
           assertAll(
-              () -> assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
-              () -> assertThat(ar.bodyAsString()).startsWith("Transaction is not valid"));
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
+              () -> assertThat(response.bodyAsString()).startsWith("Transaction is not valid")
+          );
           context.completeNow();
         })
     );

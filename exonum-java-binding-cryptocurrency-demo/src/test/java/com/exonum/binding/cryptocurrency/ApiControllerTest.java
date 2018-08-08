@@ -99,7 +99,7 @@ class ApiControllerTest {
   @AfterEach
   void tearDown(VertxTestContext context) {
     webClient.close();
-    httpServer.close((ar) -> context.completeNow());
+    httpServer.close((r) -> context.completeNow());
   }
 
   @Test
@@ -122,18 +122,18 @@ class ApiControllerTest {
         .sendJsonObject(
             new JsonObject(messageJson),
             context.succeeding(
-                r -> context.verify(() -> {
+                response -> context.verify(() -> {
                   // Check the response status
-                  int statusCode = r.statusCode();
+                  int statusCode = response.statusCode();
                   assertEquals(HTTP_OK, statusCode);
 
                   // Check the payload type
-                  String contentType = r.getHeader("Content-Type");
+                  String contentType = response.getHeader("Content-Type");
                   assertEquals("text/plain", contentType);
 
                   // Check the response body
-                  String response = r.bodyAsString();
-                  assertEquals(expectedResponse, response);
+                  String body = response.bodyAsString();
+                  assertEquals(expectedResponse, body);
 
                   // Verify that a proper transaction was submitted to the network
                   verify(service).submitTransaction(transaction);
@@ -159,8 +159,8 @@ class ApiControllerTest {
     post(ApiController.SUBMIT_TRANSACTION_PATH)
         .sendJsonObject(
             new JsonObject(messageJson),
-            context.succeeding(ar -> context.verify(() -> {
-              assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+            context.succeeding(response -> context.verify(() -> {
+              assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
               verify(service).submitTransaction(transaction);
 
               context.completeNow();
@@ -176,11 +176,11 @@ class ApiControllerTest {
 
     String getWalletUri = getWalletUri(fromKey);
     get(getWalletUri)
-        .send(context.succeeding(ar -> context.verify(() -> {
-          assertThat(ar.statusCode())
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
-          String body = ar.bodyAsString();
+          String body = response.bodyAsString();
           Wallet actualWallet = CryptocurrencyTransactionGson.instance()
               .fromJson(body, Wallet.class);
           assertThat(actualWallet.getBalance()).isEqualTo(wallet.getBalance());
@@ -196,8 +196,8 @@ class ApiControllerTest {
 
     String getWalletUri = getWalletUri(fromKey);
     get(getWalletUri)
-        .send(context.succeeding(ar -> context.verify(() -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
 
           context.completeNow();
         })));
@@ -209,9 +209,9 @@ class ApiControllerTest {
     String getWalletUri = getWalletUri(publicKeyString);
 
     get(getWalletUri)
-        .send(context.succeeding(ar -> context.verify(() -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-          assertThat(ar.bodyAsString())
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+          assertThat(response.bodyAsString())
               .startsWith("Failed to convert parameter (walletId):");
 
           context.completeNow();
