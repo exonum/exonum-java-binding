@@ -41,7 +41,7 @@ cache:
 
 before_install:
   # Skip the build if only md files were updated.
-  - source skip-ci.sh
+  - source .travis/skip-ci.sh
   - export PATH="$PATH":"$HOME/.cargo/bin"
   # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
