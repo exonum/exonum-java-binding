@@ -15,24 +15,31 @@ then
     # Install nightly rust version and clippy.
     rustup toolchain install $RUST_NIGHTLY_VERSION
     cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    echo 'Performing checks over the rust code'
-    cd "${EJB_RUST_BUILD_DIR}"
-    # Install rustfmt.
-    # Use stable Rust for rustfmt.
     # TODO: use stable rust everywhere when ECR-1839 fixed.
+    # Install the stable toolchain and rustfmt.
     rustup toolchain install stable
     rustup component add rustfmt-preview --toolchain stable
     rustup run stable rustfmt -V
+
+    echo 'Performing checks over the rust code'
+    cd "${EJB_RUST_BUILD_DIR}"
+    # Check the formatting.
     cargo +stable fmt --all -- --check
+
+    # Run clippy static analysis.
     # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
     # Next 2 lines are a workaround to prevent clippy checking dependencies.
     cargo +${RUST_NIGHTLY_VERSION} check
     cargo +${RUST_NIGHTLY_VERSION} clean -p java_bindings
     cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
-    # TODO ignoring cargo audit until ECR-1902 is fixed
-    cargo audit || true
-    # Check silently for updates of dependencies
+
+    # Run audit of vulnerable dependencies.
+    cargo audit
+
+    # Check silently for updates of Maven dependencies.
+    cd "${TRAVIS_BUILD_DIR}"
     mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
+
     echo 'Rust checks are completed.'
 else
     cd "${TRAVIS_BUILD_DIR}"
