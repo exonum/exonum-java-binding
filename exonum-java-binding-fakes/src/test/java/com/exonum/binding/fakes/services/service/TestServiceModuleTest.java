@@ -18,17 +18,17 @@ package com.exonum.binding.fakes.services.service;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.exonum.binding.service.Service;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TestServiceModuleTest {
+class TestServiceModuleTest {
 
   @Test
-  public void configure() {
+  void configure() {
     Injector injector = Guice.createInjector(new TestServiceModule());
 
     Service instance = injector.getInstance(Service.class);

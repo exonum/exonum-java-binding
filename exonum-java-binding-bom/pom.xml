@@ -51,6 +51,12 @@
 
       <dependency>
         <groupId>io.vertx</groupId>
+        <artifactId>vertx-junit5</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.vertx</groupId>
         <artifactId>vertx-web</artifactId>
         <version>${vertx.version}</version>
       </dependency>

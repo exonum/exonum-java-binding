@@ -23,8 +23,6 @@
     <protobuf.version>3.6.1</protobuf.version>
     <exonum-bom.version>0.2</exonum-bom.version>
     <exonum-java-testing.version>0.2</exonum-java-testing.version>
-    <!-- Disable as some tests running during 'test' phase require the native library. -->
-    <skipTests>${project.skipJavaITs}</skipTests>
   </properties>
 
   <build>
@@ -157,6 +155,19 @@
       <version>${protobuf.version}</version>
     </dependency>
 
+    <!-- TODO: Move junit-x to <dependency> section in the parent project: ECR-2023 -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
@@ -171,6 +182,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
       <scope>test</scope>
@@ -178,7 +195,7 @@
 
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
+      <artifactId>vertx-junit5</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -191,6 +208,13 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-testing</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
