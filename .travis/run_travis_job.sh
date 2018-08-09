@@ -7,6 +7,9 @@
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
 
+# Echo commands so that the progress can be seen in CI server logs.
+set -x
+
 # Run rust code checks if CHECK_RUST is true, or java tests if it's not
 if [ "$CHECK_RUST" = true ] 
 then
