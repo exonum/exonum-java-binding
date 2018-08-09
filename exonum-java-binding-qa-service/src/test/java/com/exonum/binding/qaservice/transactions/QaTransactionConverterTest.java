@@ -17,33 +17,33 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaService;
-import com.google.common.collect.ImmutableMap;
 import java.nio.ByteBuffer;
-import java.util.Map;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public class QaTransactionConverterTest {
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
+class QaTransactionConverterTest {
 
   private QaTransactionConverter converter;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     converter = new QaTransactionConverter();
   }
 
   @Test
-  public void hasFactoriesForEachTransaction() {
+  void hasFactoriesForEachTransaction() {
     // Check that the QaTransaction enum is kept in sync with the map of transaction factories,
     // i.e., each transaction type is mapped to the corresponding factory.
     for (QaTransaction tx : QaTransaction.values()) {
@@ -56,7 +56,7 @@ public class QaTransactionConverterTest {
   }
 
   @Test
-  public void toTransactionTransactionOfAnotherService() {
+  void toTransactionTransactionOfAnotherService() {
     BinaryMessage message = new Message.Builder()
         .setServiceId((short) (QaService.ID + 1))
         .setMessageType(QaTransaction.INCREMENT_COUNTER.id())
@@ -64,59 +64,63 @@ public class QaTransactionConverterTest {
         .setSignature(new byte[Message.SIGNATURE_SIZE])
         .buildRaw();
 
-    expectedException.expectMessage(matchesPattern(
-        "Wrong service id \\(\\d+\\), must be " + QaService.ID));
-    expectedException.expect(IllegalArgumentException.class);
-    converter.toTransaction(message);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> converter.toTransaction(message));
+    assertThat(e).hasMessageMatching("Wrong service id \\(\\d+\\), must be "
+        + QaService.ID);
   }
 
   @Test
-  public void toTransactionUnknownTransaction() {
+  void toTransactionUnknownTransaction() {
     UnknownTx unknownTx = new UnknownTx();
     BinaryMessage message = unknownTx.getMessage();
 
-    expectedException.expectMessage("Unknown transaction");
-    expectedException.expect(IllegalArgumentException.class);
-    converter.toTransaction(message);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> converter.toTransaction(message));
+    assertThat(e).hasMessageStartingWith("Unknown transaction");
   }
 
-  @Test
-  public void toTransaction() {
-    Map<Class<? extends Transaction>, Message> transactionTemplates =
-        ImmutableMap.<Class<? extends Transaction>, Message>builder()
-            .put(CreateCounterTx.class,
-                CreateCounterTxIntegrationTest.MESSAGE_TEMPLATE)
-            .put(IncrementCounterTx.class,
-                IncrementCounterTxIntegrationTest.MESSAGE_TEMPLATE)
-            .put(InvalidThrowingTx.class, new Message.Builder()
-                .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-                .setMessageType(QaTransaction.INVALID_THROWING.id())
-                .buildRaw())
-            .put(InvalidTx.class, new Message.Builder()
-                .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-                .setMessageType(QaTransaction.INVALID.id())
-                .buildRaw())
-            .put(ValidThrowingTx.class, ValidThrowingTxTest.MESSAGE_TEMPLATE)
-            .put(ValidErrorTx.class, ValidErrorTxTest.MESSAGE_TEMPLATE)
-            .build();
+  @ParameterizedTest
+  @MethodSource("transactionMessages")
+  void toTransaction(Class<? extends Transaction> expectedType, Message messageTemplate) {
+    // Check the converter converts a valid binary message of each known type
+    // to the expected executable transaction type.
+    BinaryMessage message = new Message.Builder()
+        .mergeFrom(messageTemplate)
+        .buildRaw();
+
+    Transaction transaction = converter.toTransaction(message);
+
+    assertThat(transaction)
+        .isInstanceOf(expectedType);
+  }
+
+  private static Collection<Arguments> transactionMessages() {
+    List<Arguments> transactionTemplates = Arrays.asList(
+        Arguments.of(CreateCounterTx.class,
+            CreateCounterTxIntegrationTest.MESSAGE_TEMPLATE),
+
+        Arguments.of(IncrementCounterTx.class,
+            IncrementCounterTxIntegrationTest.MESSAGE_TEMPLATE),
+
+        Arguments.of(InvalidThrowingTx.class, new Message.Builder()
+            .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
+            .setMessageType(QaTransaction.INVALID_THROWING.id())
+            .buildRaw()),
+
+        Arguments.of(InvalidTx.class, new Message.Builder()
+            .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
+            .setMessageType(QaTransaction.INVALID.id())
+            .buildRaw()),
+
+        Arguments.of(ValidThrowingTx.class, ValidThrowingTxTest.MESSAGE_TEMPLATE),
+
+        Arguments.of(ValidErrorTx.class, ValidErrorTxTest.MESSAGE_TEMPLATE)
+    );
 
     // Check that the test data includes all known transactions.
     assertThat(transactionTemplates).hasSameSizeAs(QaTransaction.values());
 
-    // Check it converts a valid binary message of each known type
-    // to the expected executable transaction type.
-    for (Map.Entry<Class<? extends Transaction>, Message> classMessageEntry :
-        transactionTemplates.entrySet()) {
-
-      BinaryMessage message = new Message.Builder()
-          .mergeFrom(classMessageEntry.getValue())
-          .buildRaw();
-
-      Transaction transaction = converter.toTransaction(message);
-
-      Class<? extends Transaction> expectedType = classMessageEntry.getKey();
-      assertThat(transaction)
-          .isInstanceOf(expectedType);
-    }
+    return transactionTemplates;
   }
 }

@@ -91,6 +91,7 @@
     <log4j.version>2.11.1</log4j.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
+    <junit.jupiter.version>5.2.0</junit.jupiter.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
     <mockito-core.version>2.21.0</mockito-core.version>
     <guava.version>26.0-jre</guava.version>
@@ -162,12 +163,12 @@
 
          <plugin>
            <artifactId>maven-surefire-plugin</artifactId>
-           <version>2.21.0</version>
+           <version>2.22.0</version>
          </plugin>
 
          <plugin>
            <artifactId>maven-failsafe-plugin</artifactId>
-           <version>2.21.0</version>
+           <version>2.22.0</version>
          </plugin>
 
          <plugin>
@@ -378,6 +379,14 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
@@ -421,6 +430,13 @@
       </dependency>
 
       <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
         <groupId>org.powermock</groupId>
         <artifactId>powermock-module-junit4</artifactId>
         <version>${powermock.version}</version>
@@ -452,12 +468,6 @@
 
   <dependencies>
     <!-- Shared test dependencies of all sub-modules. -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>java-hamcrest</artifactId>

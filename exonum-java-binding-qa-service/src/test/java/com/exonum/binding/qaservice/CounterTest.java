@@ -17,12 +17,12 @@
 package com.exonum.binding.qaservice;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CounterTest {
+class CounterTest {
 
   @Test
-  public void verifyEquals() {
+  void verifyEquals() {
     EqualsVerifier.forClass(Counter.class)
         .verify();
   }

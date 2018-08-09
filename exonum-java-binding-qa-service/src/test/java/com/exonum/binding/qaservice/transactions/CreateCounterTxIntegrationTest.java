@@ -19,9 +19,11 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
@@ -39,18 +41,13 @@ import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class CreateCounterTxIntegrationTest {
+class CreateCounterTxIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
-
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
 
   static final Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
@@ -59,27 +56,27 @@ public class CreateCounterTxIntegrationTest {
       .buildPartial();
 
   @Test
-  public void converterFromMessageRejectsWrongServiceId() {
+  void converterFromMessageRejectsWrongServiceId() {
     BinaryMessage message = messageBuilder()
         .setServiceId((short) (QaService.ID + 1))
         .buildRaw();
 
-    expectedException.expect(IllegalArgumentException.class);
-    CreateCounterTx.converter().fromMessage(message);
+    assertThrows(IllegalArgumentException.class,
+        () -> CreateCounterTx.converter().fromMessage(message));
   }
 
   @Test
-  public void converterFromMessageRejectsWrongTxId() {
+  void converterFromMessageRejectsWrongTxId() {
     BinaryMessage message = messageBuilder()
         .setMessageType((short) (CREATE_COUNTER.id() + 1))
         .buildRaw();
 
-    expectedException.expect(IllegalArgumentException.class);
-    CreateCounterTx.converter().fromMessage(message);
+    assertThrows(IllegalArgumentException.class,
+        () -> CreateCounterTx.converter().fromMessage(message));
   }
 
   @Test
-  public void converterRoundtrip() {
+  void converterRoundtrip() {
     String name = "counter";
     CreateCounterTx tx = new CreateCounterTx(name);
 
@@ -91,16 +88,16 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void rejectsEmptyName() {
+  void rejectsEmptyName() {
     String name = "";
 
-    expectedException.expectMessage("Name must not be blank");
-    expectedException.expect(IllegalArgumentException.class);
-    new CreateCounterTx(name);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> new CreateCounterTx(name));
+    assertThat(e.getMessage(), containsString("Name must not be blank"));
   }
 
   @Test
-  public void isValid() {
+  void isValid() {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
@@ -108,7 +105,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeNewCounter() throws CloseFailuresException {
+  void executeNewCounter() throws CloseFailuresException {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
@@ -133,7 +130,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeAlreadyExistingCounter() throws CloseFailuresException {
+  void executeAlreadyExistingCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -160,7 +157,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void info() {
+  void info() {
     String name = "counter";
     CreateCounterTx tx = new CreateCounterTx(name);
 
@@ -176,7 +173,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void equals() {
+  void equals() {
     EqualsVerifier.forClass(CreateCounterTx.class)
         .verify();
   }

@@ -18,9 +18,9 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -29,16 +29,16 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ValidThrowingTxIntegrationTest {
+class ValidThrowingTxIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
   @Test
-  public void executeClearsQaServiceData() throws CloseFailuresException {
+  void executeClearsQaServiceData() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -51,20 +51,18 @@ public class ValidThrowingTxIntegrationTest {
       // Create the transaction
       ValidThrowingTx tx = new ValidThrowingTx(0L);
 
-      try {
-        // Execute the transaction
-        tx.execute(view);
-        fail("#execute above must throw");
-      } catch (IllegalStateException expected) {
-        // Check that execute cleared the maps
-        QaSchema schema = new QaSchema(view);
-        checkIsEmpty(schema.counters());
-        checkIsEmpty(schema.counterNames());
+      // Execute the transaction
+      IllegalStateException expected = assertThrows(IllegalStateException.class,
+          () -> tx.execute(view));
 
-        // Check the exception message
-        String message = expected.getMessage();
-        assertThat(message, startsWith("#execute of this transaction always throws"));
-      }
+      // Check that execute cleared the maps
+      QaSchema schema = new QaSchema(view);
+      checkIsEmpty(schema.counters());
+      checkIsEmpty(schema.counterNames());
+
+      // Check the exception message
+      String message = expected.getMessage();
+      assertThat(message, startsWith("#execute of this transaction always throws"));
     }
   }
 
