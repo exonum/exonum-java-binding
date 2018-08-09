@@ -38,6 +38,7 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -120,6 +121,7 @@ class CreateWalletTxTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeCreateWalletTx() throws CloseFailuresException {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
@@ -138,6 +140,7 @@ class CreateWalletTxTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {

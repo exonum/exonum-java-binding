@@ -44,10 +44,12 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.junit5.VertxExtension;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
@@ -120,6 +122,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -162,7 +165,8 @@ class QaServiceImplIntegrationTest {
     setServiceNode(node);
 
     long seed = 1L;
-    HashCode counterId = HashCode.fromInt(1);
+    HashCode counterId = Hashing.sha256()
+        .hashString("Cats counter", StandardCharsets.UTF_8);
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
     Transaction expectedTx = new IncrementCounterTx(seed, counterId);

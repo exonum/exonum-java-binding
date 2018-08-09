@@ -28,13 +28,12 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
-@DisabledOnOs(OS.LINUX)
+@RequiresNativeLibrary
 class SetEntryTransactionIntegrationTest {
 
   @BeforeAll

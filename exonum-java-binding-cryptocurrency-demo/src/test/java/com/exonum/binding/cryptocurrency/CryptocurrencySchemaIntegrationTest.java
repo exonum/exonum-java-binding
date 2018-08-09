@@ -24,10 +24,12 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
+@RequiresNativeLibrary
 class CryptocurrencySchemaIntegrationTest {
 
   static {

@@ -24,13 +24,17 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class QaSchemaTest {
+@RequiresNativeLibrary
+class QaSchemaIntegrationTest {
 
-  static {
+  @BeforeAll
+  static void loadLibrary() {
     LibraryLoader.load();
   }
 
