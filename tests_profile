@@ -63,11 +63,15 @@ echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 # Currently we don't support stacking of RUSTFLAGS with a user environment RUSTFLAGS,
 # since this profile may be reused many times during a user session and because of this
 # RUSTFLAGS can accumulate old and irrelevant options values.
-if [[ "${RUSTFLAGS:-}" != "" ]]; then
-    echo "Warning: RUSTFLAGS variable is set and will be overridden. If you need to pass \
+NEW_RUSTFLAGS="\
+ -C link-arg=-Wl,-rpath,${RUST_LIB_DIR}\
+ -C link-arg=-Wl,-rpath,${JAVA_LIB_DIR}"
+
+if [[ "${RUSTFLAGS:-}" != "" && "${RUSTFLAGS}" != "${NEW_RUSTFLAGS}" ]]; then
+    echo "[WARNING]: RUSTFLAGS variable is set and will be overridden. If you need to pass \
 extra compiler flags, edit 'tests_profile' script."
+    echo "Set RUSTFLAGS=${RUSTFLAGS}"
+    echo "New RUSTFLAGS=${NEW_RUSTFLAGS}"
 fi
-RUSTFLAGS=""
-export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,${RUST_LIB_DIR}"
-export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,${JAVA_LIB_DIR}"
+export RUSTFLAGS="${NEW_RUSTFLAGS}"
 echo "RUSTFLAGS=${RUSTFLAGS}"
