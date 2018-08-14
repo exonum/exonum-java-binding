@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class QaTransactionConverterTest {
@@ -42,17 +43,16 @@ class QaTransactionConverterTest {
     converter = new QaTransactionConverter();
   }
 
-  @Test
-  void hasFactoriesForEachTransaction() {
+  @ParameterizedTest
+  @EnumSource(QaTransaction.class)
+  void hasFactoriesForEachTransaction(QaTransaction tx) {
     // Check that the QaTransaction enum is kept in sync with the map of transaction factories,
     // i.e., each transaction type is mapped to the corresponding factory.
-    for (QaTransaction tx : QaTransaction.values()) {
-      short id = tx.id();
+    short id = tx.id();
 
-      assertThat(QaTransactionConverter.TRANSACTION_FACTORIES)
-          .as("No entry for transaction %s with id=%d", tx, id)
-          .containsKey(id);
-    }
+    assertThat(QaTransactionConverter.TRANSACTION_FACTORIES)
+            .as("No entry for transaction %s with id=%d", tx, id)
+            .containsKey(id);
   }
 
   @Test
