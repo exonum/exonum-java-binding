@@ -102,6 +102,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void getStateHashesLogsThem() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -224,6 +225,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void getValue() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
@@ -248,6 +250,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void getValueNoSuchCounter() {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
