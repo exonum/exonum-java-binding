@@ -13,7 +13,7 @@ in Java, configure a network of nodes and run the service in it.
 For more information see the relevant documentation on the tool:
   - [What is Exonum?](https://exonum.com/doc/get-started/what-is-exonum/)
   - [User guide](https://exonum.com/doc/get-started/java-binding)
-  - [How to run a Java service](exonum-java-binding-core/rust/ejb-app/TUTORIAL.md)
+  - [Cryptocurrency Example](exonum-java-binding-cryptocurrency-demo)
   - [Roadmap](ROADMAP.md)
   - [Contribution guide](CONTRIBUTING.md)
   - [Code of conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
