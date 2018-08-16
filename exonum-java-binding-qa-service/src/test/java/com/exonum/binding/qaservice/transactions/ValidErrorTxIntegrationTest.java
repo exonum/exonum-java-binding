@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
@@ -111,29 +110,37 @@ class ValidErrorTxIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeNoDescription() {
-    byte errorCode = 2;
-    Transaction tx = new ValidErrorTx(1L, errorCode, null);
+  void executeNoDescription() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      byte errorCode = 2;
+      Transaction tx = new ValidErrorTx(1L, errorCode, null);
 
-    TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
-        () -> tx.execute(mock(Fork.class)));
+      Fork view = db.createFork(cleaner);
+      TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
+          () -> tx.execute(view));
 
-    assertThat(expected.getErrorCode(), equalTo(errorCode));
-    assertNull(expected.getMessage());
+      assertThat(expected.getErrorCode(), equalTo(errorCode));
+      assertNull(expected.getMessage());
+    }
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeWithDescription() {
-    byte errorCode = 2;
-    String description = "Boom";
-    Transaction tx = new ValidErrorTx(1L, errorCode, description);
+  void executeWithDescription() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      byte errorCode = 2;
+      String description = "Boom";
+      Transaction tx = new ValidErrorTx(1L, errorCode, description);
 
-    TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
-        () -> tx.execute(mock(Fork.class)));
+      Fork view = db.createFork(cleaner);
+      TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
+          () -> tx.execute(view));
 
-    assertThat(expected.getErrorCode(), equalTo(errorCode));
-    assertThat(expected.getMessage(), equalTo(description));
+      assertThat(expected.getErrorCode(), equalTo(errorCode));
+      assertThat(expected.getMessage(), equalTo(description));
+    }
   }
 
   @Test
