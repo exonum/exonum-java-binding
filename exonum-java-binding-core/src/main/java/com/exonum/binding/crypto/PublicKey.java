@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package com.exonum.binding.crypto;
 
-import static org.abstractj.kalium.encoders.Encoder.HEX;
+import static com.exonum.binding.crypto.CryptoUtils.hexToByteArray;
 
 /**
  * Represent a public key in a digital signature system.
@@ -45,6 +45,6 @@ public final class PublicKey extends AbstractKey {
    * Creates a {@code PublicKey} from a hexadecimal string.
    */
   public static PublicKey fromHexString(String stringKey) {
-    return new PublicKey(HEX.decode(stringKey));
+    return new PublicKey(hexToByteArray(stringKey));
   }
 }

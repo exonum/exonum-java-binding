@@ -17,18 +17,18 @@
 package ${groupId};
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.TransactionConverter;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ServiceModuleTest {
+class ServiceModuleTest {
 
   @Test
-  public void testServiceBinding() {
+  void testServiceBinding() {
     Injector injector = createInjector();
 
     Service s = injector.getInstance(Service.class);
@@ -37,7 +37,7 @@ public class ServiceModuleTest {
   }
 
   @Test
-  public void testTransactionConverterBinding() {
+  void testTransactionConverterBinding() {
     Injector injector = createInjector();
 
     TransactionConverter s = injector.getInstance(TransactionConverter.class);
@@ -45,7 +45,7 @@ public class ServiceModuleTest {
     assertThat(s, instanceOf(MyTransactionConverter.class));
   }
 
-  private Injector createInjector() {
+  private static Injector createInjector() {
     return Guice.createInjector(new ServiceModule());
   }
 }

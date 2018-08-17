@@ -13,7 +13,9 @@ use std::error::Error;
 use std::fmt;
 
 use storage::View;
-use utils::{check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni};
+use utils::{
+    check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni,
+};
 use {JniExecutor, MainExecutor};
 
 /// A proxy for `Transaction`s.
@@ -91,12 +93,13 @@ impl Transaction for TransactionProxy {
 
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let view_handle = to_handle(View::from_ref_fork(fork));
-            let res = env.call_method(
-                self.transaction.as_obj(),
-                "execute",
-                "(J)V",
-                &[JValue::from(view_handle)],
-            ).and_then(JValue::v);
+            let res =
+                env.call_method(
+                    self.transaction.as_obj(),
+                    "execute",
+                    "(J)V",
+                    &[JValue::from(view_handle)],
+                ).and_then(JValue::v);
             Ok(check_error_on_exception(env, res))
         });
         unwrap_jni(res).map_err(|err: String| ExecutionError::with_description(ERROR_CODE, err))

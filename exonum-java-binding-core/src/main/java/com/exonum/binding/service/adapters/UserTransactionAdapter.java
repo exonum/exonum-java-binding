@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package com.exonum.binding.service.adapters;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.messages.TransactionExecutionException;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
@@ -48,12 +49,12 @@ public final class UserTransactionAdapter {
     try {
       return transaction.isValid();
     } catch (Throwable e) {
-      logUserException(e);
+      logUnexpectedException(e);
       throw e;
     }
   }
 
-  public void execute(long forkNativeHandle) {
+  public void execute(long forkNativeHandle) throws TransactionExecutionException {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
@@ -62,11 +63,15 @@ public final class UserTransactionAdapter {
         transaction.execute(view);
       }
 
+    } catch (TransactionExecutionException e) {
+      logger.info("Transaction {} failed:", transaction, e);
+      throw e;
     } catch (CloseFailuresException e) {
-      logger.error(e);
+      logger.error("Failed to close some resources during transaction {} execution:",
+          transaction, e);
       throw new RuntimeException(e);
     } catch (Throwable e) {
-      logUserException(e);
+      logUnexpectedException(e);
       throw e;
     }
   }
@@ -75,12 +80,12 @@ public final class UserTransactionAdapter {
     try {
       return transaction.info();
     } catch (Throwable e) {
-      logUserException(e);
+      logUnexpectedException(e);
       throw e;
     }
   }
 
-  private void logUserException(Throwable e) {
-    logger.error("", e);
+  private void logUnexpectedException(Throwable e) {
+    logger.error("Unexpected exception:", e);
   }
 }

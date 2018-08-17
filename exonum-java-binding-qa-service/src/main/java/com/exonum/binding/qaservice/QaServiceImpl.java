@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
+import com.exonum.binding.qaservice.transactions.ValidErrorTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
@@ -130,6 +131,13 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
     Transaction tx = new ValidThrowingTx(requestSeed);
+    return submitTransaction(tx);
+  }
+
+  @Override
+  public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
+      @Nullable String description) {
+    Transaction tx = new ValidErrorTx(requestSeed, errorCode, description);
     return submitTransaction(tx);
   }
 

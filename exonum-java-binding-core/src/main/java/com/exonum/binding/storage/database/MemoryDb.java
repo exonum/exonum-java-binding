@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 
 /**
  * An in-memory database for testing purposes. It can create both read-only snapshots
- * and read-write forks. The changes made to database forks can be applied to the database state.
+ * and read-write forks. The changes made to database forks can be
+ * {@linkplain MemoryDb#merge(Fork) applied} to the database state.
+ *
+ * @see com.exonum.binding.service.NodeFake
  */
-@VisibleForTesting
 public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
 
   /**

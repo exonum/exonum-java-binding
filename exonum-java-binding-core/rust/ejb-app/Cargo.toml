@@ -1,7 +1,15 @@
 [package]
 name = "ejb-app"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Exonum team <exonum@bitfury.com>"]
 
 [dependencies]
 java_bindings = { path = "..", features = ["invocation"] }
+exonum-configuration = "0.8.0"
+exonum-btc-anchoring = "0.8.1"
+toml = "0.4.6"
+serde = "1.0"
+serde_derive = "1.0"
+
+[dev-dependencies]
+tempfile = "3"

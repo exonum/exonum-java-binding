@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,14 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
+import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
@@ -37,52 +39,47 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import java.nio.ByteBuffer;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class IncrementCounterTxIntegrationTest {
+class IncrementCounterTxIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  static Message INC_COUNTER_TX_MESSAGE_TEMPLATE = new Message.Builder()
+  static Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
       .setMessageType(INCREMENT_COUNTER.id())
-      .setBody(ByteBuffer.allocate(IncrementCounterTx.BODY_SIZE))
+      .setBody(serializeBody(new IncrementCounterTx(1, Hashing.sha256().hashInt(1))))
       .buildPartial();
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Test
-  public void converterFromMessageRejectsWrongServiceId() {
+  void converterFromMessageRejectsWrongServiceId() {
     BinaryMessage message = messageBuilder()
         .setServiceId((short) (QaService.ID + 1))
         .buildRaw();
 
-    expectedException.expect(IllegalArgumentException.class);
-    IncrementCounterTx.converter().fromMessage(message);
+    assertThrows(IllegalArgumentException.class,
+        () -> IncrementCounterTx.converter().fromMessage(message));
   }
 
   @Test
-  public void converterFromMessageRejectsWrongTxId() {
+  void converterFromMessageRejectsWrongTxId() {
     BinaryMessage message = messageBuilder()
         .setMessageType((short) (INCREMENT_COUNTER.id() + 1))
         .buildRaw();
 
-    expectedException.expect(IllegalArgumentException.class);
-    IncrementCounterTx.converter().fromMessage(message);
+    assertThrows(IllegalArgumentException.class,
+        () -> IncrementCounterTx.converter().fromMessage(message));
   }
 
   @Test
-  public void converterRoundtrip() {
+  void converterRoundtrip() {
     long seed = 0;
     HashCode counterId = Hashing.sha256().hashInt(0);
 
@@ -94,7 +91,7 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void isValid() {
+  void isValid() {
     long seed = 0;
     HashCode counterId = Hashing.sha256().hashInt(0);
     IncrementCounterTx tx = new IncrementCounterTx(seed, counterId);
@@ -103,7 +100,8 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeIncrementsCounter() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeIncrementsCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -128,7 +126,8 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeNoSuchCounter() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeNoSuchCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -149,7 +148,7 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void info() {
+  void info() {
     // Create a transaction with the given parameters.
     long seed = Long.MAX_VALUE - 1;
     String name = "new_counter";
@@ -169,7 +168,7 @@ public class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  public void equals() {
+  void equals() {
     EqualsVerifier.forClass(IncrementCounterTx.class)
         .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
         .verify();
@@ -177,6 +176,6 @@ public class IncrementCounterTxIntegrationTest {
 
   private static Message.Builder messageBuilder() {
     return new Message.Builder()
-        .mergeFrom(INC_COUNTER_TX_MESSAGE_TEMPLATE);
+        .mergeFrom(MESSAGE_TEMPLATE);
   }
 }

@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COU
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INVALID;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INVALID_THROWING;
+import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -36,13 +37,14 @@ public final class QaTransactionConverter implements TransactionConverter {
 
   @VisibleForTesting
   static final ImmutableMap<Short, Function<BinaryMessage, Transaction>> TRANSACTION_FACTORIES =
-      ImmutableMap.of(
-          INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromMessage,
-          CREATE_COUNTER.id(), CreateCounterTx.converter()::fromMessage,
-          INVALID.id(), InvalidTx.converter()::fromMessage,
-          INVALID_THROWING.id(), InvalidThrowingTx.converter()::fromMessage,
-          VALID_THROWING.id(), ValidThrowingTx.converter()::fromMessage
-      );
+      ImmutableMap.<Short, Function<BinaryMessage, Transaction>>builder()
+          .put(INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromMessage)
+          .put(CREATE_COUNTER.id(), CreateCounterTx.converter()::fromMessage)
+          .put(INVALID.id(), InvalidTx.converter()::fromMessage)
+          .put(INVALID_THROWING.id(), InvalidThrowingTx.converter()::fromMessage)
+          .put(VALID_THROWING.id(), ValidThrowingTx.converter()::fromMessage)
+          .put(VALID_ERROR.id(), ValidErrorTx.converter()::fromMessage)
+          .build();
 
   @Override
   public Transaction toTransaction(BinaryMessage message) {

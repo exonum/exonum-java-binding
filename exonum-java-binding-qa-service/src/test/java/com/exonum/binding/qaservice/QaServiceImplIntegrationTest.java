@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -43,50 +44,41 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
+import io.vertx.junit5.VertxExtension;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(VertxUnitRunner.class)
-public class QaServiceImplIntegrationTest {
+@ExtendWith(VertxExtension.class)
+class QaServiceImplIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
-
-  @ClassRule
-  public static RunTestOnContext vertxTestContextRule = new RunTestOnContext();
-
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
 
   private QaServiceImpl service;
   private Node node;
   private Vertx vertx;
   private ListAppender logAppender;
 
-
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp(Vertx vertx) {
     TransactionConverter transactionConverter = mock(TransactionConverter.class);
     service = new QaServiceImpl(transactionConverter);
     node = mock(Node.class);
-    vertx = vertxTestContextRule.vertx();
+    this.vertx = vertx;
     logAppender = getCapturingLogAppender();
   }
 
@@ -96,13 +88,13 @@ public class QaServiceImplIntegrationTest {
     return (ListAppender) config.getAppenders().get("ListAppender");
   }
 
-  @After
-  public void tearDown() {
+  @AfterEach
+  void tearDown() {
     logAppender.clear();
   }
 
   @Test
-  public void createDataSchema() {
+  void createDataSchema() {
     View view = mock(View.class);
     Schema dataSchema = service.createDataSchema(view);
 
@@ -110,7 +102,8 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void getStateHashesLogsThem() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void getStateHashesLogsThem() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
@@ -130,7 +123,8 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void initialize() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void initialize() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -155,7 +149,7 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitCreateCounter() throws Exception {
+  void submitCreateCounter() throws Exception {
     setServiceNode(node);
 
     String counterName = "bids";
@@ -168,11 +162,12 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitIncrementCounter() throws Exception {
+  void submitIncrementCounter() throws Exception {
     setServiceNode(node);
 
     long seed = 1L;
-    HashCode counterId = HashCode.fromInt(1);
+    HashCode counterId = Hashing.sha256()
+        .hashString("Cats counter", StandardCharsets.UTF_8);
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
     Transaction expectedTx = new IncrementCounterTx(seed, counterId);
@@ -182,7 +177,7 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitInvalidTx() throws Exception {
+  void submitInvalidTx() throws Exception {
     setServiceNode(node);
 
     service.submitInvalidTx();
@@ -190,7 +185,7 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitInvalidThrowingTx() throws Exception {
+  void submitInvalidThrowingTx() throws Exception {
     setServiceNode(node);
 
     service.submitInvalidThrowingTx();
@@ -198,7 +193,7 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitValidThrowingTx() throws Exception {
+  void submitValidThrowingTx() throws Exception {
     setServiceNode(node);
 
     long seed = 1L;
@@ -211,7 +206,7 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitUnknownTx() throws Exception {
+  void submitUnknownTx() throws Exception {
     setServiceNode(node);
     
     HashCode txHash = service.submitUnknownTx();
@@ -223,15 +218,15 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void submitUnknownTxBeforeNodeIsSet() {
+  void submitUnknownTxBeforeNodeIsSet() {
     // Do not set the node: try to submit transaction with a null node.
-
-    expectedException.expect(IllegalStateException.class);
-    service.submitUnknownTx();
+    assertThrows(IllegalStateException.class,
+        () -> service.submitUnknownTx());
   }
 
   @Test
-  public void getValue() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void getValue() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
@@ -255,7 +250,8 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void getValueNoSuchCounter() {
+  @RequiresNativeLibrary
+  void getValueNoSuchCounter() {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
@@ -267,9 +263,10 @@ public class QaServiceImplIntegrationTest {
   }
 
   @Test
-  public void getValueBeforeInit() {
-    expectedException.expect(IllegalStateException.class);
-    service.getValue(HashCode.fromInt(1));
+  void getValueBeforeInit() {
+    assertThrows(IllegalStateException.class,
+        () -> service.getValue(HashCode.fromInt(1))
+    );
   }
 
   private void setServiceNode(Node node) {

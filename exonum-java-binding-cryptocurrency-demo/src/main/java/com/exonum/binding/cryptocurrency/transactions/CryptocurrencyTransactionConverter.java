@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,6 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction.CREATE_WALLET;
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction.TRANSFER;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
@@ -33,8 +31,8 @@ public final class CryptocurrencyTransactionConverter implements TransactionConv
   private static final ImmutableMap<Short, Function<BinaryMessage, Transaction>>
       TRANSACTION_FACTORIES =
           ImmutableMap.of(
-              CREATE_WALLET.getId(), CreateWalletTx.converter()::fromMessage,
-              TRANSFER.getId(), TransferTx.converter()::fromMessage);
+              CreateWalletTx.ID, CreateWalletTx::fromMessage,
+              TransferTx.ID, TransferTx::fromMessage);
 
   @Override
   public Transaction toTransaction(BinaryMessage message) {

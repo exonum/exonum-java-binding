@@ -85,7 +85,6 @@ public abstract class HashCode {
    * changes to it will <i>not</i> be reflected in this {@code HashCode} object or any other arrays
    * returned by this method.
    */
-  // TODO(user): consider ByteString here, when that is available
   public abstract byte[] asBytes();
 
   /**

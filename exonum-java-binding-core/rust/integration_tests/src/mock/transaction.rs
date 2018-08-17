@@ -24,12 +24,13 @@ pub fn create_throwing_mock_transaction_proxy(
     let (java_tx_mock, raw) = executor
         .with_attached(|env| {
             let exception = env.find_class(exception_class)?;
-            let java_tx_mock = env.call_static_method(
-                NATIVE_FACADE_CLASS,
-                "createThrowingTransaction",
-                format!("(Ljava/lang/Class;)L{};", TRANSACTION_ADAPTER_CLASS),
-                &[JValue::from(JObject::from(exception.into_inner()))],
-            )?
+            let java_tx_mock = env
+                .call_static_method(
+                    NATIVE_FACADE_CLASS,
+                    "createThrowingTransaction",
+                    format!("(Ljava/lang/Class;)L{};", TRANSACTION_ADAPTER_CLASS),
+                    &[JValue::from(JObject::from(exception.into_inner()))],
+                )?
                 .l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
             let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
@@ -42,29 +43,30 @@ pub fn create_throwing_mock_transaction_proxy(
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
 pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> TransactionProxy {
-    let (java_tx_mock, raw) = create_mock_transaction(executor.clone(), valid);
+    let (java_tx_mock, raw) = create_mock_transaction(&executor, valid);
     TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction(executor: MainExecutor, valid: bool) -> (GlobalRef, RawMessage) {
+pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalRef, RawMessage) {
     executor
         .with_attached(|env| {
             let value = env.new_string(ENTRY_VALUE)?;
             let info = env.new_string(INFO_JSON)?;
-            let java_tx_mock = env.call_static_method(
-                NATIVE_FACADE_CLASS,
-                "createTransaction",
-                format!(
-                    "(ZLjava/lang/String;Ljava/lang/String;)L{};",
-                    TRANSACTION_ADAPTER_CLASS
-                ),
-                &[
-                    JValue::from(valid),
-                    JValue::from(JObject::from(value)),
-                    JValue::from(JObject::from(info)),
-                ],
-            )?
+            let java_tx_mock = env
+                .call_static_method(
+                    NATIVE_FACADE_CLASS,
+                    "createTransaction",
+                    format!(
+                        "(ZLjava/lang/String;Ljava/lang/String;)L{};",
+                        TRANSACTION_ADAPTER_CLASS
+                    ),
+                    &[
+                        JValue::from(valid),
+                        JValue::from(JObject::from(value)),
+                        JValue::from(JObject::from(info)),
+                    ],
+                )?
                 .l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
             let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));

@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,14 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.qaservice.transactions.CreateCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
@@ -34,67 +37,47 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class CreateCounterTxIntegrationTest {
+class CreateCounterTxIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
-
-  static final Message CREATE_COUNTER_MESSAGE_TEMPLATE = new Message.Builder()
+  static final Message MESSAGE_TEMPLATE = new Message.Builder()
       .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
       .setMessageType(CREATE_COUNTER.id())
-      .setBody(serialize("counter"))
+      .setBody(serializeBody(new CreateCounterTx("Test counter")))
       .buildPartial();
 
   @Test
-  public void converterFromMessageRejectsWrongServiceId() {
+  void converterFromMessageRejectsWrongServiceId() {
     BinaryMessage message = messageBuilder()
         .setServiceId((short) (QaService.ID + 1))
         .buildRaw();
 
-    expectedException.expect(IllegalArgumentException.class);
-    CreateCounterTx.converter().fromMessage(message);
+    assertThrows(IllegalArgumentException.class,
+        () -> CreateCounterTx.converter().fromMessage(message));
   }
 
   @Test
-  public void converterFromMessageRejectsWrongTxId() {
+  void converterFromMessageRejectsWrongTxId() {
     BinaryMessage message = messageBuilder()
         .setMessageType((short) (CREATE_COUNTER.id() + 1))
         .buildRaw();
 
-    expectedException.expect(IllegalArgumentException.class);
-    CreateCounterTx.converter().fromMessage(message);
+    assertThrows(IllegalArgumentException.class,
+        () -> CreateCounterTx.converter().fromMessage(message));
   }
 
   @Test
-  public void converterToMessage() {
-    String name = "counter";
-    CreateCounterTx tx = new CreateCounterTx(name);
-
-    BinaryMessage expectedMessage = messageBuilder()
-        .setMessageType(CREATE_COUNTER.id())
-        .setBody(serialize(name))
-        .buildRaw();
-
-    // todo: remove extra #getMessage when MessageReader has equals: ECR-992
-    assertThat(tx.getMessage().getMessage(), equalTo(expectedMessage.getMessage()));
-  }
-
-  @Test
-  public void converterRoundtrip() {
+  void converterRoundtrip() {
     String name = "counter";
     CreateCounterTx tx = new CreateCounterTx(name);
 
@@ -106,16 +89,16 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void rejectsEmptyName() {
+  void rejectsEmptyName() {
     String name = "";
 
-    expectedException.expectMessage("Name must not be blank");
-    expectedException.expect(IllegalArgumentException.class);
-    new CreateCounterTx(name);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> new CreateCounterTx(name));
+    assertThat(e.getMessage(), containsString("Name must not be blank"));
   }
 
   @Test
-  public void isValid() {
+  void isValid() {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
@@ -123,7 +106,8 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeNewCounter() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeNewCounter() throws CloseFailuresException {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
@@ -148,7 +132,8 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void executeAlreadyExistingCounter() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeAlreadyExistingCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -175,7 +160,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void info() {
+  void info() {
     String name = "counter";
     CreateCounterTx tx = new CreateCounterTx(name);
 
@@ -191,7 +176,7 @@ public class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  public void equals() {
+  void equals() {
     EqualsVerifier.forClass(CreateCounterTx.class)
         .verify();
   }
@@ -199,11 +184,7 @@ public class CreateCounterTxIntegrationTest {
   /** Creates a builder of create counter transaction message. */
   private static Message.Builder messageBuilder() {
     return new Message.Builder()
-        .mergeFrom(CREATE_COUNTER_MESSAGE_TEMPLATE);
-  }
-
-  private static ByteBuffer serialize(String txName) {
-    return ByteBuffer.wrap(StandardSerializers.string().toBytes(txName));
+        .mergeFrom(MESSAGE_TEMPLATE);
   }
 
   /** Creates a counter in the storage with the given name and initial value. */

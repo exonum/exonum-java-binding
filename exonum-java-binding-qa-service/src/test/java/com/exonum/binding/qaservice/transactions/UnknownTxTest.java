@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,31 +16,27 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.storage.database.Fork;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class UnknownTxTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class UnknownTxTest {
 
   @Test
-  public void isValid() {
+  void isValid() {
     UnknownTx tx = new UnknownTx();
 
     assertTrue(tx.isValid());
   }
 
   @Test
-  public void execute() {
+  void execute() {
     UnknownTx tx = new UnknownTx();
 
-    expectedException.expect(AssertionError.class);
-    tx.execute(mock(Fork.class));
+    assertThrows(AssertionError.class,
+        () -> tx.execute(mock(Fork.class)));
   }
 }

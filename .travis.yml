@@ -7,17 +7,32 @@ sudo: false
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:chris-lea/libsodium'
     packages:
-    - build-essential
-    - libssl-dev
-    - pkg-config
+      - build-essential
+      - libsodium-dev
+      - libssl-dev
+      - pkg-config
 
 env:
   global:
-    - RUST_VERSION=stable
-    - RUST_NIGHTLY_VERSION=nightly-2018-05-26
-    - RUST_CLIPPY_VERSION=0.0.205
+    - RUST_COMPILER_VERSION=1.26.2
+    - RUST_NIGHTLY_VERSION=nightly-2018-06-29
+    - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
+    # force building instead of using from apt.
+    - ROCKSDB_BUILD=1
+    - SNAPPY_BUILD=1
+  matrix:
+    - CHECK_RUST=true
+    - CHECK_RUST=false
+
+# exclude rust code checks with jdk10
+matrix:
+  exclude:
+  - jdk: openjdk10
+    env: CHECK_RUST=true
 
 cache:
   directories:
@@ -25,42 +40,20 @@ cache:
     - "$HOME/.m2"
 
 before_install:
+  # Skip the build if only md files were updated.
+  - source .travis/skip-ci.sh
   - export PATH="$PATH":"$HOME/.cargo/bin"
-    # Install rustup if it's not already installed (i.e., not in CI cache).
-  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
-    # Install nightly rust version and clippy.
-  - rustup toolchain install $RUST_NIGHTLY_VERSION
-  - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    # Set a toolchain as default.
-  - rustup default "$RUST_VERSION"
-    # Save the path to stdlib of the default toolchain to use it in scripts.
-  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
-    # Install rustfmt.
-  - rustup component add rustfmt-preview
-  - rustfmt -V
-    # Install cargo-audit if it's not already.
-  - cargo-audit -V || cargo install cargo-audit --force
-    # List all installed cargo packages.
+  # Install rustup if it's not already installed (i.e., not in CI cache).
+  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
+  - rustup default "$RUST_COMPILER_VERSION"
+  # List all installed cargo packages.
   - cargo install --list
-    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
-  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
-    # force building instead of using from apt.
-  - export SODIUM_BUILD=1
-  - export ROCKSDB_BUILD=1
-  - export SNAPPY_BUILD=1
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
-  - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt --all -- --write-mode=diff
-  # FIXME reenable clippy checks after crashes with jni fixed [ECR-1538]
-  - cargo +$RUST_NIGHTLY_VERSION clippy -- -D warnings || true
-  - cargo audit
-  - cd -
-  - ./run_all_tests.sh
-  # Check silently for updates of dependencies
-  - mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3
+  - cd "$TRAVIS_BUILD_DIR"
+  - .travis/run_travis_job.sh
 
 notifications:
   slack:

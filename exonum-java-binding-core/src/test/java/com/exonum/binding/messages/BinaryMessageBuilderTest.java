@@ -1,11 +1,11 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,9 +64,7 @@ public class BinaryMessageBuilderTest {
     }
     body.flip();
 
-    ByteBuffer signature = allocateBuffer(SIGNATURE_SIZE)
-        .put(createPrefixed(bytes("Signature"), SIGNATURE_SIZE));
-    signature.flip();
+    byte[] signature = createPrefixed(bytes("Signature"), SIGNATURE_SIZE);
 
     return new Message.Builder()
         .setNetworkId((byte) 0xA1)
