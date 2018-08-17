@@ -3,7 +3,7 @@ package com.exonum.binding.storage.proofs.map.flat;
 import java.util.Arrays;
 
 /**
- * A map entry corresponding to a leaf node in the map tree.
+ * A map entry: a key-value pair. This entry does not permit null keys and values.
  */
 public class CheckedMapProofEntry {
   private final byte[] key;
@@ -15,10 +15,12 @@ public class CheckedMapProofEntry {
     this.value = value;
   }
 
+  /** Returns the key in this entry. */
   public byte[] getKey() {
     return key;
   }
 
+  /** Returns the value in this entry. */
   public byte[] getValue() {
     return value;
   }

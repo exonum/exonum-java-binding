@@ -17,6 +17,8 @@
 package com.exonum.binding.storage.proofs.map;
 
 import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.branchDbKey;
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.leafDbKey;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isNotValid;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isValid;
 import static com.exonum.binding.test.Bytes.bytes;
@@ -494,14 +496,6 @@ public class MapProofValidatorTest {
   private static HashCode createHash(String prefix) {
     byte[] prefixBytes = bytes(prefix);
     return HashCode.fromBytes(createPrefixed(prefixBytes, DEFAULT_HASH_SIZE_BYTES));
-  }
-
-  private static DbKey leafDbKey(byte[] key) {
-    return DbKey.newLeafKey(key);
-  }
-
-  private static DbKey branchDbKey(byte[] key, int numSignificantBits) {
-    return DbKey.newBranchKey(key, numSignificantBits);
   }
 
   @Test

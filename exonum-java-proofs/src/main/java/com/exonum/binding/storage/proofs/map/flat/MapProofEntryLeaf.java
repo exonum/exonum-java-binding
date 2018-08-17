@@ -34,6 +34,7 @@ public class MapProofEntryLeaf extends MapProofEntry {
     this.hashFunction = hashFunction;
   }
 
+  /** Returns the value in this entry. */
   public byte[] getValue() {
     return value;
   }

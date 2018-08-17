@@ -11,10 +11,13 @@ import com.exonum.binding.storage.proofs.map.DbKey;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * An unchecked flat map proof, which does not include any intermediate nodes.
@@ -25,15 +28,19 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private final List<MapProofEntry> proofList;
 
-  UncheckedFlatMapProof(List<MapProofEntry> proofList) {
+  private final Set<byte[]> requestedKeys;
+
+  UncheckedFlatMapProof(List<MapProofEntry> proofList, Set<byte[]> requestedKeys) {
     this.proofList = proofList;
+    this.requestedKeys = requestedKeys;
   }
 
   @SuppressWarnings("unused") // Native API
-  static UncheckedFlatMapProof fromUnsorted(MapProofEntry[] proofList) {
+  static UncheckedFlatMapProof fromUnsorted(MapProofEntry[] proofList, byte[][] requestedKeys) {
     List<MapProofEntry> mapProofEntries = Arrays.asList(proofList);
     mapProofEntries.sort(Comparator.comparing(MapProofEntry::getDbKey));
-    return new UncheckedFlatMapProof(mapProofEntries);
+    Set<byte[]> expectedKeys = new HashSet<>(Arrays.asList(requestedKeys));
+    return new UncheckedFlatMapProof(mapProofEntries, expectedKeys);
   }
 
   @Override
@@ -44,19 +51,19 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   @Override
   public CheckedMapProof check() {
     ProofStatus orderCheckResult = orderCheck();
-    List<CheckedMapProofEntry> leafList;
+    Set<CheckedMapProofEntry> leafSet;
     if (orderCheckResult != ProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
     if (proofList.isEmpty()) {
-      leafList = extractEntries(proofList);
-      return CheckedFlatMapProof.correct(getEmptyProofListHash(), leafList);
+      leafSet = Collections.emptySet();
+      return CheckedFlatMapProof.correct(getEmptyProofListHash(), leafSet, requestedKeys);
     } else if (proofList.size() == 1) {
       MapProofEntry singleEntry = proofList.get(0);
       if (singleEntry instanceof MapProofEntryLeaf) {
-        leafList = extractEntries(proofList);
+        leafSet = extractEntries(proofList);
         return CheckedFlatMapProof.correct(
-            getSingletonProofListHash((MapProofEntryLeaf) singleEntry), leafList);
+            getSingletonProofListHash((MapProofEntryLeaf) singleEntry), leafSet, requestedKeys);
       } else {
         return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
       }
@@ -80,8 +87,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       while (contour.size() > 1) {
         lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
       }
-      leafList = extractEntries(proofList);
-      return CheckedFlatMapProof.correct(contour.peek().getHash(), leafList);
+      leafSet = extractEntries(proofList);
+      return CheckedFlatMapProof.correct(contour.peek().getHash(), leafSet, requestedKeys);
     }
   }
 
@@ -133,8 +140,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return commonPrefix;
   }
 
-  private List<CheckedMapProofEntry> extractEntries(List<MapProofEntry> proofList) {
-    List<CheckedMapProofEntry> leafList = new ArrayList<>();
+  private Set<CheckedMapProofEntry> extractEntries(List<MapProofEntry> proofList) {
+    Set<CheckedMapProofEntry> leafList = new HashSet<>();
     for (MapProofEntry entry: proofList) {
       if (entry instanceof MapProofEntryLeaf) {
         byte[] key = entry.getDbKey().getKeySlice();

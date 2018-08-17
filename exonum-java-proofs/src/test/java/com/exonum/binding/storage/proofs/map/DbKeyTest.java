@@ -16,6 +16,7 @@
 
 package com.exonum.binding.storage.proofs.map;
 
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.branchDbKey;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -218,6 +219,22 @@ public class DbKeyTest {
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
 
     assertThat(dbKey.getNumSignificantBits(), equalTo(DbKey.KEY_SIZE_BITS));
+  }
+
+  @Test
+  public void numSignificantBitsLowerThanZeroShouldThrow() {
+    int numSignificantBits = -1;
+
+    expectedException.expect(IllegalArgumentException.class);
+    DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
+  }
+
+  @Test
+  public void numSignificantBitsEqualToKeySizeBitsInBranchShouldThrow() {
+    int numSignificantBits = DbKey.KEY_SIZE_BITS;
+
+    expectedException.expect(IllegalArgumentException.class);
+    DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
   }
 
   /**

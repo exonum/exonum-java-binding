@@ -2,6 +2,7 @@ package com.exonum.binding.storage.proofs.map.flat;
 
 import com.exonum.binding.hash.HashCode;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A checked map proof.
@@ -26,7 +27,13 @@ public interface CheckedMapProof {
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  List<CheckedMapProofEntry> getEntries();
+  Set<CheckedMapProofEntry> getEntries();
+
+  /**
+   * Get all keys that were requested, but did not appear in this proof.
+   * @throws IllegalStateException if the proof is not valid
+   */
+  Set<byte[]> getMissingKeys();
 
   /**
    * If this proof is valid, returns true if there is a given key in the proof;
@@ -39,7 +46,7 @@ public interface CheckedMapProof {
    * Return a hash of a proof root node.
    * @throws IllegalStateException if the proof is not valid
    */
-  HashCode getMerkleRoot();
+  HashCode getRootHash();
 
   /**
    * If this proof is valid, returns the value corresponding to the specified key

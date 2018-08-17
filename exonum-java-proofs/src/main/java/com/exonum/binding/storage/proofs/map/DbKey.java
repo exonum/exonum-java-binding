@@ -196,7 +196,8 @@ public final class DbKey implements Comparable<DbKey> {
   }
 
   /**
-   * Returns new branch DbKey, which is a common prefix of this and another DbKey.
+   * Returns new branch DbKey (unless common prefix of two equals DbKeys is requested, in which
+   * case this DbKey itself is returned), which is a common prefix of this and another DbKey.
    */
   public DbKey commonPrefix(DbKey other) {
     if (other.equals(this)) {
@@ -207,21 +208,20 @@ public final class DbKey implements Comparable<DbKey> {
     int firstSetBitIndex = thisBits.nextSetBit(0);
 
     int minPrefixSize = Math.min(this.numSignificantBits, other.numSignificantBits);
-    int commonPrefixSize;
 
     // firstSetBitIndex equals -1 when either both keys are equal or one is a prefix of another with
     // trailing zeros in their prefixes
     if (firstSetBitIndex == -1) {
-      commonPrefixSize = Math.min(this.numSignificantBits, other.numSignificantBits);
-      byte[] resultingByteArray =
-          this.keyBits().getKeyBits().get(0, commonPrefixSize).toByteArray();
-      return new DbKey(Type.BRANCH, resultingByteArray, commonPrefixSize);
+      byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, minPrefixSize).toByteArray();
+      byte[] newArray = new byte[DbKey.KEY_SIZE];
+      System.arraycopy(resultingByteArray, 0, newArray, 0, resultingByteArray.length);
+      return newBranchKey(newArray, minPrefixSize);
     }
-    commonPrefixSize = Math.min(firstSetBitIndex, minPrefixSize);
+    int commonPrefixSize = Math.min(firstSetBitIndex, minPrefixSize);
     byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, firstSetBitIndex).toByteArray();
     byte[] newArray = new byte[DbKey.KEY_SIZE];
     System.arraycopy(resultingByteArray, 0, newArray, 0, resultingByteArray.length);
-    return new DbKey(Type.BRANCH, newArray, commonPrefixSize);
+    return newBranchKey(newArray, commonPrefixSize);
   }
 
   @Override

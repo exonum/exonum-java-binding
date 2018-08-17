@@ -1,13 +1,12 @@
 package com.exonum.binding.storage.proofs.map;
 
-import static com.exonum.binding.test.Bytes.bytes;
-import static com.exonum.binding.test.Bytes.createPrefixed;
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.branchKeyFromPrefix;
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.leafKeyFromPrefix;
 import static com.exonum.binding.test.TestParameters.parameters;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,11 +39,13 @@ public class DbKeyCommonPrefixParameterizedTest {
   public static Collection<Object[]> testData() {
     return Arrays.asList(
         // "A | B -> C" reads "C is a common prefix of A and B"
+        // # Not a prefix:
         parameters(
             branchKeyFromPrefix("01"),
             branchKeyFromPrefix("10"),
             branchKeyFromPrefix(""),
             "[01] | [10] -> []"),
+        // # Prefixes of various length:
         parameters(
             branchKeyFromPrefix("1010"),
             branchKeyFromPrefix("10111"),
@@ -64,34 +65,62 @@ public class DbKeyCommonPrefixParameterizedTest {
             branchKeyFromPrefix("11111"),
             branchKeyFromPrefix("10111"),
             branchKeyFromPrefix("1"),
-            "[11111] | [11101] -> [1]"));
-  }
-
-  /**
-   * Returns a new branch db key with the given prefix. The number of significant bits
-   * is equal to the number of bits in the string (excluding whitespaces and delimiters).
-   *
-   * @param prefix a key prefix — from the least significant bit to the most significant,
-   *               i.e., "00 01" is 8, "10 00" is 1.
-   *               May contain spaces, underscores or bars (e.g., "00 01|01 11" and "11_10"
-   *               are valid strings).
-   */
-  private static DbKey branchKeyFromPrefix(String prefix) {
-    // Replace spaces that may be used to separate groups of binary digits
-    prefix = prefix.replaceAll("[ _|]", "");
-    // Check the string is correct
-    assert prefix.matches("[01]*");
-    assert prefix.length() <= DbKey.KEY_SIZE_BITS;
-
-    BitSet keyPrefixBits = new BitSet(prefix.length());
-    for (int i = 0; i < prefix.length(); i++) {
-      char bit = prefix.charAt(i);
-      if (bit == '1') {
-        keyPrefixBits.set(i);
-      }
-    }
-
-    byte[] fullKeySlice = createPrefixed(keyPrefixBits.toByteArray(), DbKey.KEY_SIZE);
-    return DbKey.newBranchKey(fullKeySlice, prefix.length());
+            "[11111] | [11101] -> [1]"),
+        // ## Multi-byte keys
+        parameters(
+            branchKeyFromPrefix("1111 1111 | 10_11"),
+            branchKeyFromPrefix("1111 1111 | 10_00"),
+            branchKeyFromPrefix("1111 1111 | 10"),
+            "[1111 1111 | 10_11] | [1111 1111 | 10_00] -> [1111 1111 | 10]"),
+        // ## One is full prefix of another:
+        parameters(
+            branchKeyFromPrefix("11"),
+            branchKeyFromPrefix("111"),
+            branchKeyFromPrefix("11"),
+            "[11] | [111] -> [11]"),
+        parameters(
+            branchKeyFromPrefix("10"),
+            branchKeyFromPrefix("100"),
+            branchKeyFromPrefix("10"),
+            "[10] | [100] -> [10]"),
+        parameters(
+            branchKeyFromPrefix("100"),
+            branchKeyFromPrefix("10"),
+            branchKeyFromPrefix("10"),
+            "[100] | [10] -> [10]"),
+        parameters(
+            branchKeyFromPrefix("0000"),
+            branchKeyFromPrefix("00"),
+            branchKeyFromPrefix("00"),
+            "[0000] | [00] -> [00]"),
+        parameters(
+            branchKeyFromPrefix("0"),
+            branchKeyFromPrefix("000"),
+            branchKeyFromPrefix("0"),
+            "[0] | [000] -> [0]"),
+        // ## Equal keys:
+        parameters(
+            branchKeyFromPrefix("00"),
+            branchKeyFromPrefix("00"),
+            branchKeyFromPrefix("00"),
+            "[00] | [00] -> [00]"),
+        parameters(
+            branchKeyFromPrefix("11"),
+            branchKeyFromPrefix("11"),
+            branchKeyFromPrefix("11"),
+            "[11] | [11] -> [11]"),
+        // ## Leaf keys:
+        parameters(
+            leafKeyFromPrefix("11"),
+            leafKeyFromPrefix("11"),
+            // In practice two leaves shouldn't be equal
+            leafKeyFromPrefix("11"),
+            "[11] | [11] -> [11]"),
+        parameters(
+            leafKeyFromPrefix("1111 1111 | 10_11"),
+            leafKeyFromPrefix("1111 1111 | 10"),
+            branchKeyFromPrefix("1111 1111 | 10"),
+            "[1111 1111 | 10_11] | [1111 1111 | 10] -> [1111 1111 | 10]")
+    );
   }
 }
