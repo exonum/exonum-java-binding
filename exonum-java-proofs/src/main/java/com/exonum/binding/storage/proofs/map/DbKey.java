@@ -212,10 +212,7 @@ public final class DbKey implements Comparable<DbKey> {
     // firstSetBitIndex equals -1 when either both keys are equal or one is a prefix of another with
     // trailing zeros in their prefixes
     if (firstSetBitIndex == -1) {
-      byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, minPrefixSize).toByteArray();
-      byte[] newArray = new byte[DbKey.KEY_SIZE];
-      System.arraycopy(resultingByteArray, 0, newArray, 0, resultingByteArray.length);
-      return newBranchKey(newArray, minPrefixSize);
+      return newBranchKey(this.keySlice, minPrefixSize);
     }
     int commonPrefixSize = Math.min(firstSetBitIndex, minPrefixSize);
     byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, firstSetBitIndex).toByteArray();
