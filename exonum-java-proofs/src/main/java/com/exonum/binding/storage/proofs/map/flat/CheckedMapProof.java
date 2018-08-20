@@ -1,7 +1,6 @@
 package com.exonum.binding.storage.proofs.map.flat;
 
 import com.exonum.binding.hash.HashCode;
-import java.util.List;
 import java.util.Set;
 
 /**

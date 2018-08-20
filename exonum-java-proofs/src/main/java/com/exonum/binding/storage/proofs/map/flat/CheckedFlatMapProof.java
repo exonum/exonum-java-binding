@@ -3,11 +3,9 @@ package com.exonum.binding.storage.proofs.map.flat;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.HashCode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

@@ -9,7 +9,6 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;

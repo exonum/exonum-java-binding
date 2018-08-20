@@ -53,6 +53,7 @@ public class MapProofValidatorTest {
       createPrefixed(bytes("root hash"), DEFAULT_HASH_SIZE_BYTES));
   private static final HashCode EMPTY_HASH = HashCode.fromBytes(
       new byte[DEFAULT_HASH_SIZE_BYTES]);
+  private static final int MAX_SIGNIFICANT_BITS_IN_BRANCH = 255;
 
   private HashFunction hashFunction;
   private Hasher hasher;
@@ -587,8 +588,10 @@ public class MapProofValidatorTest {
     DbKey rightKey = leafDbKey(createKey(stripToKeySize(rightPath.toByteArray())));
     HashCode rightHash = createHash("h1");
 
+    // MAX_SIGNIFICANT_BITS_IN_BRANCH is used in case when proof tree with height of more than 256
+    // is created and we want to keep number of significant bits in branch node less than that
     DbKey leftKey = branchDbKey(createKey(stripToKeySize(pathToThis.toByteArray())),
-        pathToThis.getLength());
+        Math.min(pathToThis.getLength(), MAX_SIGNIFICANT_BITS_IN_BRANCH));
     pathToThis.goLeft();
     return new LeftMapProofBranch(
         createProofTreeNode(pathToThis, height - 1, value),
