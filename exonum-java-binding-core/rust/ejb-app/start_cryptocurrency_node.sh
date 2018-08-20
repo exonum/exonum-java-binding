@@ -47,7 +47,7 @@ EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-RUST_LIB_DIR="$(rustup run 1.26.2 rustc --print sysroot)/lib"
+RUST_LIB_DIR="$(rustup run 1.28.0 rustc --print sysroot)/lib"
 echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
 
 export LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$JVM_LIB_PATH"
