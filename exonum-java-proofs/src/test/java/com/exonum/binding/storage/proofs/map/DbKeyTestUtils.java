@@ -16,22 +16,9 @@ class DbKeyTestUtils {
    *               are valid strings).
    */
   public static DbKey branchKeyFromPrefix(String prefix) {
-    // Replace spaces that may be used to separate groups of binary digits
-    prefix = prefix.replaceAll("[ _|]", "");
-    // Check that the string is correct
-    assert prefix.matches("[01]*");
-    assert prefix.length() <= DbKey.KEY_SIZE_BITS;
-
-    BitSet keyPrefixBits = new BitSet(prefix.length());
-    for (int i = 0; i < prefix.length(); i++) {
-      char bit = prefix.charAt(i);
-      if (bit == '1') {
-        keyPrefixBits.set(i);
-      }
-    }
-
-    byte[] fullKeySlice = createPrefixed(keyPrefixBits.toByteArray(), DbKey.KEY_SIZE);
-    return branchDbKey(fullKeySlice, prefix.length());
+    prefix = filterBitPrefix(prefix);
+    byte[] key = keyFromString(prefix);
+    return branchDbKey(key, prefix.length());
   }
 
   /**
@@ -43,12 +30,22 @@ class DbKeyTestUtils {
    *               are valid strings).
    */
   static DbKey leafKeyFromPrefix(String prefix) {
-    // Replace spaces that may be used to separate groups of binary digits
-    prefix = prefix.replaceAll("[ _|]", "");
-    // Check that the string is correct
-    assert prefix.matches("[01]*");
-    assert prefix.length() <= DbKey.KEY_SIZE_BITS;
+    prefix = filterBitPrefix(prefix);
+    byte[] key = keyFromString(prefix);
+    return leafDbKey(key);
+  }
 
+  /** Replaces spaces that may be used to separate groups of binary digits. */
+  private static String filterBitPrefix(String prefix) {
+    String filtered = prefix.replaceAll("[ _|]", "");
+    // Check that the string is correct
+    assert filtered.matches("[01]*");
+    assert filtered.length() <= DbKey.KEY_SIZE_BITS;
+    return filtered;
+  }
+
+  /** Creates a 32-byte key from the bit prefix. */
+  private static byte[] keyFromString(String prefix) {
     BitSet keyPrefixBits = new BitSet(prefix.length());
     for (int i = 0; i < prefix.length(); i++) {
       char bit = prefix.charAt(i);
@@ -56,9 +53,7 @@ class DbKeyTestUtils {
         keyPrefixBits.set(i);
       }
     }
-
-    byte[] fullKeySlice = createPrefixed(keyPrefixBits.toByteArray(), DbKey.KEY_SIZE);
-    return leafDbKey(fullKeySlice);
+    return createPrefixed(keyPrefixBits.toByteArray(), DbKey.KEY_SIZE);
   }
 
   static DbKey leafDbKey(byte[] key) {
