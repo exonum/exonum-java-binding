@@ -47,4 +47,4 @@ cargo build --all
 
 cd ../..
 
-mvn package -Dmaven.skip.test=true
+mvn package

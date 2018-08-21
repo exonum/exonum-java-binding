@@ -75,7 +75,7 @@ impl JavaServiceRuntime {
         let class_path = join_paths(&[&config.system_class_path, &config.service_class_path]);
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
-        args_builder = args_builder.option(&format!("-Djava.library.path=lib"));
+        args_builder = args_builder.option(&format!("-Djava.library.path={}", absolute_library_path()));
         args_builder = args_builder.option(&format!(
             "-Dlog4j.configurationFile={}",
             config.log_config_path
@@ -101,6 +101,20 @@ impl JavaServiceRuntime {
         }));
         ServiceProxy::from_global_ref(executor, service)
     }
+}
+
+/// Returns path to <ejb-app location>/lib directory in an absolute form.
+fn absolute_library_path() -> String {
+    let library_path = {
+        // Get current path to EJB App.
+        let mut exe_location = env::current_exe().expect("Could not get the executable location");
+        // Get directory where EJB App is.
+        exe_location.pop();
+        // Add relative path to `lib` directory.
+        exe_location.push("lib");
+        exe_location
+    };
+    library_path.to_string_lossy().into_owned()
 }
 
 /// Panics if `_JAVA_OPTIONS` environmental variable is set.
