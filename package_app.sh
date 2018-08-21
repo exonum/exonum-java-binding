@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Prepare environment variables for building and running tests.
-# This requires executables and libraries to be able to find libjvm and Rust stdlib.
+# Package EJB App after preparing necessary environment variables and file structure.
 #
 # ¡Keep it MacOS/Ubuntu compatible!
+
+EJB_RUST_DIR="${PWD}/exonum-java-binding-core/rust"
 
 # Use the Java that Maven uses.
 #
@@ -24,13 +25,6 @@ echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
-# Copy libstd to some known place.
-mkdir -p exonum-java-binding-core/rust/target/prepackage
-cp $RUST_LIB_DIR/libstd* exonum-java-binding-core/rust/target/prepackage
-
-# Generate licenses for native dependencies
-exonum-java-binding-core/rust/generate_licenses.sh
-
 # Checking if RUSTFLAGS has already been set.
 if [[ "${RUSTFLAGS:-}" != "" ]]; then
     echo "Warning: the RUSTFLAGS variable will be overriden. Merge is not yet supported."
@@ -44,10 +38,21 @@ echo "RUSTFLAGS=${RUSTFLAGS}"
 # Set LD_LIBRARY_PATH as needed for building and testing.
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
 
+# Copy libstd to some known place.
+mkdir -p ${EJB_RUST_DIR}/target/prepackage
+cp $RUST_LIB_DIR/libstd* ${EJB_RUST_DIR}/target/prepackage
+
 # Recompile native part.
-cd exonum-java-binding-core/rust
+cd ${EJB_RUST_DIR}
 cargo build --all
 
 cd ../..
+
+# Copy licenses so package tool can pick 'em up.
+cp LICENSE exonum-java-binding-core
+cp LICENSES-THIRD-PARTY.TXT exonum-java-binding-core
+
+# Generate licenses for native dependencies.
+exonum-java-binding-core/rust/generate_licenses.sh
 
 mvn package
