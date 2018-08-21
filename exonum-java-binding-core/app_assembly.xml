@@ -23,6 +23,12 @@
             <source>rust/target/debug/ejb-app</source>
         </file>
         <file>
+            <source>rust/ejb-app/log4j.xml</source>
+        </file>
+        <file>
+            <source>rust/ejb-app/TUTORIAL.md</source>
+        </file>
+        <file>
             <source>rust/target/debug/libjava_bindings.so</source>
             <outputDirectory>lib</outputDirectory>
         </file>
