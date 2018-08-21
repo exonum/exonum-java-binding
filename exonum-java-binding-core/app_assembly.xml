@@ -29,6 +29,9 @@
             <source>rust/ejb-app/TUTORIAL.md</source>
         </file>
         <file>
+            <source>rust/target/LICENSES-THIRD-PARTY-NATIVE</source>
+        </file>
+        <file>
             <source>rust/target/debug/libjava_bindings.so</source>
             <outputDirectory>lib</outputDirectory>
         </file>

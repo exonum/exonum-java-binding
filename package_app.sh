@@ -28,6 +28,9 @@ echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 mkdir -p exonum-java-binding-core/rust/target/prepackage
 cp $RUST_LIB_DIR/libstd* exonum-java-binding-core/rust/target/prepackage
 
+# Generate licenses for native dependencies
+exonum-java-binding-core/rust/generate_licenses.sh
+
 # Checking if RUSTFLAGS has already been set.
 if [[ "${RUSTFLAGS:-}" != "" ]]; then
     echo "Warning: the RUSTFLAGS variable will be overriden. Merge is not yet supported."
