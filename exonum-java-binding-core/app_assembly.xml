@@ -6,7 +6,7 @@
     </formats>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>java</outputDirectory>
+            <outputDirectory>lib/java</outputDirectory>
         </dependencySet>
     </dependencySets>
     <fileSets>
