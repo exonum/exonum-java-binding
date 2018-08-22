@@ -5,13 +5,13 @@ cargo license -h &> /dev/null || cargo install cargo-license
 
 # Going to exonum-java-binding-core/rust directory.
 backup_dir=${PWD}
-script_dir=$(dirname $(readlink -f "$0"))
-cd $(dirname $0)
+script_dir=$(dirname $(readlink -f "$0")) # Directory of this script. Must be exonum-java-binding-core/rust
+cd ${script_dir}
 
 cargo license -da \
-| sed 's@registry+https://github.com/rust-lang/crates.io-index, @@g' \
-| sed 's/\x1b\[[0-9;]*m//g' \
+| sed 's@registry+https://github.com/rust-lang/crates.io-index, @@g' `# Remove unnecessary information from the list` \
+| sed 's/\x1b\[[0-9;]*m//g' `# Remove color escape sequences from the list` \
 > "${script_dir}/target/LICENSES-THIRD-PARTY-NATIVE"
 
-# Returning to root EJB directory.
+# Returning to the root EJB directory.
 cd ${backup_dir}
