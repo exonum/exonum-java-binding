@@ -28,6 +28,7 @@ import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
 
@@ -209,6 +210,24 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   private native MapProof nativeGetProof(long nativeHandle, byte[] key);
+
+  /**
+   * TODO: rewrite this javadoc
+   * Returns a proof that there is a value mapped to the specified key or
+   * that there is no such mapping.
+   *
+   * @param key a proof map key which might be mapped to some value, must be 32-byte long
+   * @throws IllegalStateException  if this map is not valid
+   * @throws IllegalArgumentException if the size of the key is not 32 bytes
+   */
+  public MapProof getProof(List<K> key) {
+//    byte[] dbKey = keySerializer.toBytes(key);
+//    return nativeGetProof(getNativeHandle(), dbKey);
+    return null;
+  }
+
+  // TODO: byte[][] ?
+  private native MapProof nativeGetMultiProof(long nativeHandle, byte[][] key);
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.

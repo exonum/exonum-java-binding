@@ -15,9 +15,8 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -44,13 +43,13 @@ public class UncheckedFlatMapProofTest {
         createBranchMapEntry(thirdKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.singleton(valueKey));
+        new UncheckedFlatMapProof(entries, Collections.singletonList(valueKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(entries, equalTo(uncheckedFlatMapProof.getProofList()));
 
     CheckedMapProofEntry expectedEntry = new CheckedMapProofEntry(valueDbKey.getKeySlice(), VALUE);
-    assertThat(checkedMapProof.getEntries(), equalTo(Collections.singleton(expectedEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(valueDbKey.getKeySlice()));
     assertThat(VALUE, equalTo(checkedMapProof.get(valueDbKey.getKeySlice())));
   }
@@ -73,7 +72,7 @@ public class UncheckedFlatMapProofTest {
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            entries, new HashSet<>(Arrays.asList(firstValueKey, secondValueKey, fourthValueKey)));
+            entries, new ArrayList<>(Arrays.asList(firstValueKey, secondValueKey, fourthValueKey)));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(entries, equalTo(uncheckedFlatMapProof.getProofList()));
@@ -84,7 +83,7 @@ public class UncheckedFlatMapProofTest {
         new CheckedMapProofEntry(fourthValueKey, fourthValue)
     );
 
-    Set<CheckedMapProofEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
+    List<CheckedMapProofEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
 
     assertThat(
         expectedEntriesList,
@@ -113,13 +112,13 @@ public class UncheckedFlatMapProofTest {
     List<MapProofEntry> entries =
         Collections.singletonList(createLeafMapEntry(dbKey.getKeySlice(), VALUE));
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.singleton(key));
+        new UncheckedFlatMapProof(entries, Collections.singletonList(key));
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     assertThat(expectedRootHash, equalTo(checkedMapProof.getRootHash()));
 
     CheckedMapProofEntry expectedEntry = new CheckedMapProofEntry(dbKey.getKeySlice(), VALUE);
-    assertThat(checkedMapProof.getEntries(), equalTo(Collections.singleton(expectedEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(dbKey.getKeySlice()));
     assertThat(VALUE, equalTo(checkedMapProof.get(dbKey.getKeySlice())));
   }
@@ -133,7 +132,7 @@ public class UncheckedFlatMapProofTest {
         createBranchMapEntry(secondKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.emptySet());
+        new UncheckedFlatMapProof(entries, Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.DUPLICATE_PATH));
@@ -148,7 +147,7 @@ public class UncheckedFlatMapProofTest {
         createLeafMapEntry(valueKey, VALUE)
     );
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.singleton(valueKey));
+        new UncheckedFlatMapProof(entries, Collections.singletonList(valueKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_ORDER));
@@ -159,7 +158,7 @@ public class UncheckedFlatMapProofTest {
     List entries = Collections.emptyList();
 
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.emptySet());
+        new UncheckedFlatMapProof(entries, Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));

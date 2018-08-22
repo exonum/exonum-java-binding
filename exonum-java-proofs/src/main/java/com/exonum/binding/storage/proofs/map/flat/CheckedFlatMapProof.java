@@ -3,10 +3,10 @@ package com.exonum.binding.storage.proofs.map.flat;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.HashCode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -14,11 +14,12 @@ import java.util.stream.Collectors;
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private Set<CheckedMapProofEntry> entryList;
+  // TODO: make all entries as current branch entries and keep keys separate
+  private List<CheckedMapProofEntry> entries;
 
-  private Set<byte[]> requestedKeys;
+  private List<byte[]> requestedKeys;
 
-  private Set<byte[]> missingKeys;
+  private List<byte[]> missingKeys;
 
   private HashCode rootHash;
 
@@ -27,36 +28,36 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   private CheckedFlatMapProof(
       ProofStatus status,
       HashCode rootHash,
-      Set<CheckedMapProofEntry> entryList,
-      Set<byte[]> requestedKeys) {
+      List<CheckedMapProofEntry> entries,
+      List<byte[]> requestedKeys) {
     this.status = status;
     this.rootHash = rootHash;
-    this.entryList = new HashSet<>(entryList);
+    this.entries = new ArrayList<>(entries);
     this.requestedKeys = requestedKeys;
     this.missingKeys =
         determineMissingKeys(
             requestedKeys,
-            entryList.stream().map(CheckedMapProofEntry::getKey).collect(Collectors.toSet()));
+            entries.stream().map(CheckedMapProofEntry::getKey).collect(Collectors.toList()));
   }
 
   static CheckedFlatMapProof correct(
-      HashCode rootHash, Set<CheckedMapProofEntry> proofList, Set<byte[]> requestedKeys) {
+      HashCode rootHash, List<CheckedMapProofEntry> proofList, List<byte[]> requestedKeys) {
     return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, proofList, requestedKeys);
   }
 
   static CheckedFlatMapProof invalid(ProofStatus status) {
     return new CheckedFlatMapProof(
-        status, HashCode.fromInt(1), Collections.emptySet(), Collections.emptySet());
+        status, HashCode.fromInt(1), Collections.emptyList(), Collections.emptyList());
   }
 
   @Override
-  public Set<CheckedMapProofEntry> getEntries() {
+  public List<CheckedMapProofEntry> getEntries() {
     checkValid();
-    return entryList;
+    return entries;
   }
 
   @Override
-  public Set<byte[]> getMissingKeys() {
+  public List<byte[]> getMissingKeys() {
     return missingKeys;
   }
 
@@ -64,7 +65,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public boolean containsKey(byte[] key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    for (CheckedMapProofEntry entry: entryList) {
+    for (CheckedMapProofEntry entry: entries) {
       if (Arrays.equals(entry.getKey(), key)) {
         return true;
       }
@@ -82,7 +83,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public byte[] get(byte[] key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    for (CheckedMapProofEntry entry: entryList) {
+    for (CheckedMapProofEntry entry: entries) {
       if (Arrays.equals(entry.getKey(), key)) {
         return entry.getValue();
       }
@@ -113,8 +114,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     throw new IllegalArgumentException("Key that wasn't among requested keys was checked");
   }
 
-  static Set<byte[]> determineMissingKeys(Set<byte[]> requestedKeys, Set<byte[]> foundKeys) {
-    Set<byte[]> missingKeys = new HashSet<>(requestedKeys);
+  static List<byte[]> determineMissingKeys(List<byte[]> requestedKeys, List<byte[]> foundKeys) {
+    List<byte[]> missingKeys = new ArrayList<>(requestedKeys);
     missingKeys.removeAll(foundKeys);
     return missingKeys;
   }

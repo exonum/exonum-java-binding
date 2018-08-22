@@ -9,14 +9,13 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * An unchecked flat map proof, which does not include any intermediate nodes.
@@ -25,11 +24,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
 
+  // TODO: we need to go through all branch entries and check that they are not prefixes of found
+  // keys or missing keys. See proof.rs 499
   private final List<MapProofEntry> proofList;
 
-  private final Set<byte[]> requestedKeys;
+  private final List<byte[]> requestedKeys;
 
-  UncheckedFlatMapProof(List<MapProofEntry> proofList, Set<byte[]> requestedKeys) {
+  UncheckedFlatMapProof(List<MapProofEntry> proofList, List<byte[]> requestedKeys) {
     this.proofList = proofList;
     this.requestedKeys = requestedKeys;
   }
@@ -38,7 +39,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   static UncheckedFlatMapProof fromUnsorted(MapProofEntry[] proofList, byte[][] requestedKeys) {
     List<MapProofEntry> mapProofEntries = Arrays.asList(proofList);
     mapProofEntries.sort(Comparator.comparing(MapProofEntry::getDbKey));
-    Set<byte[]> expectedKeys = new HashSet<>(Arrays.asList(requestedKeys));
+    List<byte[]> expectedKeys = new ArrayList<>(Arrays.asList(requestedKeys));
     return new UncheckedFlatMapProof(mapProofEntries, expectedKeys);
   }
 
@@ -47,22 +48,23 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return proofList;
   }
 
+  // TODO: keep found keys separate from branches
   @Override
   public CheckedMapProof check() {
     ProofStatus orderCheckResult = orderCheck();
-    Set<CheckedMapProofEntry> leafSet;
+    List<CheckedMapProofEntry> leafList;
     if (orderCheckResult != ProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
     if (proofList.isEmpty()) {
-      leafSet = Collections.emptySet();
-      return CheckedFlatMapProof.correct(getEmptyProofListHash(), leafSet, requestedKeys);
+      leafList = Collections.emptyList();
+      return CheckedFlatMapProof.correct(getEmptyProofListHash(), leafList, requestedKeys);
     } else if (proofList.size() == 1) {
       MapProofEntry singleEntry = proofList.get(0);
       if (singleEntry instanceof MapProofEntryLeaf) {
-        leafSet = extractEntries(proofList);
+        leafList = extractEntries(proofList);
         return CheckedFlatMapProof.correct(
-            getSingletonProofListHash((MapProofEntryLeaf) singleEntry), leafSet, requestedKeys);
+            getSingletonProofListHash((MapProofEntryLeaf) singleEntry), leafList, requestedKeys);
       } else {
         return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
       }
@@ -86,8 +88,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       while (contour.size() > 1) {
         lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
       }
-      leafSet = extractEntries(proofList);
-      return CheckedFlatMapProof.correct(contour.peek().getHash(), leafSet, requestedKeys);
+      leafList = extractEntries(proofList);
+      return CheckedFlatMapProof.correct(contour.peek().getHash(), leafList, requestedKeys);
     }
   }
 
@@ -139,8 +141,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return commonPrefix;
   }
 
-  private Set<CheckedMapProofEntry> extractEntries(List<MapProofEntry> proofList) {
-    Set<CheckedMapProofEntry> leafList = new HashSet<>();
+  private List<CheckedMapProofEntry> extractEntries(List<MapProofEntry> proofList) {
+    List<CheckedMapProofEntry> leafList = new ArrayList<>();
     for (MapProofEntry entry: proofList) {
       if (entry instanceof MapProofEntryLeaf) {
         byte[] key = entry.getDbKey().getKeySlice();

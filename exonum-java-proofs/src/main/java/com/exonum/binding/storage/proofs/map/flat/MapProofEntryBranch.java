@@ -7,6 +7,7 @@ import com.exonum.binding.storage.proofs.map.DbKey;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 
 /**
+ * TODO: note that this is not necessarily a branch but could also be a sibling of requested key
  * A flat map proof entry corresponding to a branch node in the map tree.
  */
 public class MapProofEntryBranch extends MapProofEntry {

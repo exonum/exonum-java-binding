@@ -6,8 +6,8 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 
 public class CheckedFlatMapProofTest {
@@ -16,10 +16,10 @@ public class CheckedFlatMapProofTest {
   public void determineAbsenceOfMissingKeys() {
     byte[] firstFoundKey = bytes(0x01);
     byte[] secondFoundKey = bytes(0x02);
-    Set<byte[]> requestedKeys = new HashSet<>(Arrays.asList(firstFoundKey, secondFoundKey));
-    Set<byte[]> foundKeys = new HashSet<>(Arrays.asList(firstFoundKey, secondFoundKey));
-    Set<byte[]> expectedMissingKeys = Collections.emptySet();
-    Set<byte[]> actualMissingKeys =
+    List<byte[]> requestedKeys = new ArrayList<>(Arrays.asList(firstFoundKey, secondFoundKey));
+    List<byte[]> foundKeys = new ArrayList<>(Arrays.asList(firstFoundKey, secondFoundKey));
+    List<byte[]> expectedMissingKeys = Collections.emptyList();
+    List<byte[]> actualMissingKeys =
         CheckedFlatMapProof.determineMissingKeys(requestedKeys, foundKeys);
     assertThat(expectedMissingKeys, containsInAnyOrder(actualMissingKeys.toArray()));
   }
@@ -29,12 +29,12 @@ public class CheckedFlatMapProofTest {
     byte[] foundKey = bytes(0x01);
     byte[] firstMissingKey = bytes(0x02);
     byte[] secondMissingKey = bytes(0x03);
-    Set<byte[]> requestedKeys =
-        new HashSet<>(Arrays.asList(foundKey, firstMissingKey, secondMissingKey));
-    Set<byte[]> foundKeys = Collections.singleton(foundKey);
-    Set<byte[]> expectedMissingKeys =
-        new HashSet<>(Arrays.asList(firstMissingKey, secondMissingKey));
-    Set<byte[]> actualMissingKeys =
+    List<byte[]> requestedKeys =
+        new ArrayList<>(Arrays.asList(foundKey, firstMissingKey, secondMissingKey));
+    List<byte[]> foundKeys = Collections.singletonList(foundKey);
+    List<byte[]> expectedMissingKeys =
+        new ArrayList<>(Arrays.asList(firstMissingKey, secondMissingKey));
+    List<byte[]> actualMissingKeys =
         CheckedFlatMapProof.determineMissingKeys(requestedKeys, foundKeys);
     assertThat(expectedMissingKeys, containsInAnyOrder(actualMissingKeys.toArray()));
   }
