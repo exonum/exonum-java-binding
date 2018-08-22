@@ -5,7 +5,7 @@
 
 EJB_RUST_DIR="${PWD}/exonum-java-binding-core/rust"
 
-# Use the Java that Maven uses.
+# Use active JVM.
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
 # hence this a bit complex thing.
@@ -47,7 +47,7 @@ cargo build --all
 
 cd ../..
 
-# Copy licenses so package tool can pick 'em up.
+# Copy licenses so that the package tool can pick them up.
 cp LICENSE exonum-java-binding-core
 cp LICENSES-THIRD-PARTY.TXT exonum-java-binding-core
 
