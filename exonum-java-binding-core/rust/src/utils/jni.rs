@@ -4,22 +4,13 @@ use jni::JNIEnv;
 use utils::convert_to_string;
 use JniResult;
 
-#[cfg(windows)]
-pub const PATH_SEPARATOR: &str = ";";
-#[cfg(not(windows))]
-pub const PATH_SEPARATOR: &str = ":";
-
-/// Joins several classpaths into a single classpath, using the default path separator.
-/// Preserves the relative order of class path entries.
-pub fn join_paths(parts: &[&str]) -> String {
-    parts.join(PATH_SEPARATOR)
-}
-
 /// Returns a class name of an object as a `String`.
 pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
-    let class_object = env.call_method(object, "getClass", "()Ljava/lang/Class;", &[])?
+    let class_object = env
+        .call_method(object, "getClass", "()Ljava/lang/Class;", &[])?
         .l()?;
-    let class_name = env.call_method(class_object, "getName", "()Ljava/lang/String;", &[])?
+    let class_name = env
+        .call_method(class_object, "getName", "()Ljava/lang/String;", &[])?
         .l()?;
     convert_to_string(env, class_name)
 }

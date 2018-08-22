@@ -8,7 +8,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateTemplate, Run};
 use runtime::config::{self, Config, PrivateConfig};
-use utils::{join_paths, unwrap_jni};
+use utils::{current_directory, join_paths, unwrap_jni};
 use MainExecutor;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
@@ -75,7 +75,8 @@ impl JavaServiceRuntime {
         let class_path = join_paths(&[&config.system_class_path, &config.service_class_path]);
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
-        args_builder = args_builder.option(&format!("-Djava.library.path={}", absolute_library_path()));
+        args_builder =
+            args_builder.option(&format!("-Djava.library.path={}", absolute_library_path()));
         args_builder = args_builder.option(&format!(
             "-Dlog4j.configurationFile={}",
             config.log_config_path
@@ -90,12 +91,13 @@ impl JavaServiceRuntime {
         let service = unwrap_jni(executor.with_attached(|env| {
             let module_name = env.new_string(module_name).unwrap();
             let module_name: jni::objects::JObject = *module_name;
-            let service = env.call_static_method(
-                SERVICE_BOOTSTRAP_PATH,
-                "startService",
-                START_SERVICE_SIGNATURE,
-                &[module_name.into(), port.into()],
-            )?
+            let service = env
+                .call_static_method(
+                    SERVICE_BOOTSTRAP_PATH,
+                    "startService",
+                    START_SERVICE_SIGNATURE,
+                    &[module_name.into(), port.into()],
+                )?
                 .l()?;
             env.new_global_ref(service)
         }));
@@ -106,13 +108,9 @@ impl JavaServiceRuntime {
 /// Returns path to <ejb-app location>/lib directory in an absolute form.
 fn absolute_library_path() -> String {
     let library_path = {
-        // Get current path to EJB App.
-        let mut exe_location = env::current_exe().expect("Could not get the executable location");
-        // Get directory where EJB App is.
-        exe_location.pop();
-        // Add relative path to `lib` directory.
-        exe_location.push("lib");
-        exe_location
+        let mut current_directory = current_directory();
+        current_directory.push("lib");
+        current_directory
     };
     library_path.to_string_lossy().into_owned()
 }
