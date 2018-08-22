@@ -109,7 +109,7 @@ impl JavaServiceRuntime {
 fn absolute_library_path() -> String {
     let library_path = {
         let mut current_directory = current_directory();
-        current_directory.push("lib");
+        current_directory.push("lib/native");
         current_directory
     };
     library_path.to_string_lossy().into_owned()

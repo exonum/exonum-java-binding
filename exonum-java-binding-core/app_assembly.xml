@@ -12,7 +12,7 @@
     <fileSets>
         <fileSet>
             <directory>rust/target/prepackage</directory>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>lib/native</outputDirectory>
             <includes>
                 <include>%regex[libstd.*]</include>
             </includes>
@@ -39,7 +39,7 @@
         </file>
         <file>
             <source>rust/target/debug/libjava_bindings.so</source>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>lib/native</outputDirectory>
         </file>
     </files>
 </assembly>

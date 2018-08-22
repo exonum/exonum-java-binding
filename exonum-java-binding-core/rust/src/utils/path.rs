@@ -16,6 +16,25 @@ pub fn join_paths(parts: &[&str]) -> String {
 pub fn current_directory() -> PathBuf {
     let mut executable_path =
         env::current_exe().expect("Unable to get current executable location");
-    executable_path.pop(); // Drop file name
+    executable_path.pop(); // Drop file name.
     executable_path
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const FOO: &str = "foo";
+    const BAR: &str = "bar";
+    const BAZ: &str = "baz";
+
+    #[cfg(windows)]
+    const FOO_BAR_BAZ: &str = "foo;bar;baz";
+    #[cfg(not(windows))]
+    const FOO_BAR_BAZ: &str = "foo:bar:baz";
+
+    #[test]
+    fn join_paths_preserves_order() {
+        let result = join_paths(&[FOO, BAR, BAZ]);
+        assert_eq!(result, FOO_BAR_BAZ);
+    }
 }

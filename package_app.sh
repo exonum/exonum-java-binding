@@ -31,8 +31,7 @@ if [[ "${RUSTFLAGS:-}" != "" ]]; then
 fi
 
 # Set RUSTFLAGS to adjust RUNPATH of the binary.
-export RUSTFLAGS=""
-export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,\$ORIGIN/lib"
+export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native"
 echo "RUSTFLAGS=${RUSTFLAGS}"
 
 # Set LD_LIBRARY_PATH as needed for building and testing.
