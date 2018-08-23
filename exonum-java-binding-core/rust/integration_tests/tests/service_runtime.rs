@@ -29,7 +29,7 @@ fn bootstrap() {
         },
         InternalConfig {
             system_class_path: get_fakes_classpath(),
-            system_lib_path: "".to_string(),
+            system_lib_path: None,
         },
     );
 

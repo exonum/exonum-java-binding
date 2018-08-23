@@ -79,10 +79,10 @@ impl JavaServiceRuntime {
         ]);
 
         args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
-        if internal_config.system_lib_path != "" {
+        if internal_config.system_lib_path.is_some() {
             args_builder = args_builder.option(&format!(
                 "-Djava.library.path={}",
-                internal_config.system_lib_path
+                internal_config.system_lib_path.unwrap()
             ));
         }
         args_builder = args_builder.option(&format!(
@@ -187,7 +187,7 @@ impl ServiceFactory for JavaServiceFactory {
                 .expect("Invalid EJB configuration format.");
             let internal_config = InternalConfig {
                 system_class_path: system_classpath(),
-                system_lib_path: absolute_library_path(),
+                system_lib_path: Some(absolute_library_path()),
             };
             JavaServiceRuntime::get_or_create(config, internal_config)
         };

@@ -17,7 +17,7 @@ pub struct InternalConfig {
     /// EJB system classpath.
     pub system_class_path: String,
     /// EJB library path.
-    pub system_lib_path: String,
+    pub system_lib_path: Option<String>,
 }
 
 /// Private EJB configuration.
