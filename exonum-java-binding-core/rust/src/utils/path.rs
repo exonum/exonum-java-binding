@@ -13,7 +13,7 @@ pub fn join_paths(parts: &[&str]) -> String {
 }
 
 /// Returns current directory (where executable is placed).
-pub fn current_directory() -> PathBuf {
+pub fn executable_directory() -> PathBuf {
     let mut executable_path =
         env::current_exe().expect("Unable to get current executable location");
     executable_path.pop(); // Drop file name.

@@ -9,7 +9,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateTemplate, Run};
 use runtime::config::{self, Config, InternalConfig, PrivateConfig};
-use utils::{current_directory, join_paths, unwrap_jni};
+use utils::{executable_directory, join_paths, unwrap_jni};
 use MainExecutor;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
@@ -116,7 +116,7 @@ impl JavaServiceRuntime {
 /// Returns path to <ejb-app location>/lib directory in an absolute form.
 fn absolute_library_path() -> String {
     let library_path = {
-        let mut current_directory = current_directory();
+        let mut current_directory = executable_directory();
         current_directory.push("lib/native");
         current_directory
     };
@@ -126,7 +126,7 @@ fn absolute_library_path() -> String {
 fn system_classpath() -> String {
     let mut jars = Vec::new();
     let jars_directory = {
-        let mut current_directory = current_directory();
+        let mut current_directory = executable_directory();
         current_directory.push("lib/java");
         current_directory
     };
