@@ -7,10 +7,6 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
-use std::{env, fs};
-
-use utils::current_directory;
-
 const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_SERVICE_CLASSPATH: &str = "EJB_SERVICE_CLASSPATH";
@@ -72,7 +68,6 @@ impl CommandExtension for Finalize {
         // Creating new private config.
         let private_config = PrivateConfig {
             user_parameters: Vec::new(),
-            system_class_path: get_system_classpath(),
             service_class_path,
             log_config_path: String::new(),
             port: 0,
@@ -162,24 +157,4 @@ impl CommandExtension for Run {
         context.set(keys::NODE_CONFIG, node_config);
         Ok(context)
     }
-}
-
-fn get_system_classpath() -> String {
-    let mut jars = Vec::new();
-    let jars_directory = {
-        let mut current_directory = current_directory();
-        current_directory.push("lib/java");
-        current_directory
-    };
-    for entry in fs::read_dir(jars_directory).expect("Could not read java classes directory") {
-        let file = entry.unwrap();
-        if file.file_type().unwrap().is_file() {
-            jars.push(file.path());
-        } else {
-            continue;
-        }
-    }
-
-    let jars = jars.iter().map(|p| p.to_str().unwrap());
-    env::join_paths(jars).unwrap().into_string().unwrap()
 }

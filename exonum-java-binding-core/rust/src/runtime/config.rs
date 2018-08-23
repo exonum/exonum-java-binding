@@ -9,6 +9,17 @@ pub struct Config {
     pub public_config: PublicConfig,
 }
 
+/// Internal EJB configuration.
+///
+/// Not visible by user, used internally while initializing runtime.
+#[doc(hidden)] // For testing purposes only.
+pub struct InternalConfig {
+    /// EJB system classpath.
+    pub system_class_path: String,
+    /// EJB library path.
+    pub system_lib_path: String,
+}
+
 /// Private EJB configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PrivateConfig {
@@ -18,8 +29,6 @@ pub struct PrivateConfig {
     /// Parameters must not have dash at the beginning.
     /// Some parameters are forbidden for setting up by user.
     pub user_parameters: Vec<String>,
-    /// Java bindings framework system classpath.
-    pub system_class_path: String,
     /// Java service classpath.
     pub service_class_path: String,
     /// Path to `log4j` configuration file.
