@@ -19,8 +19,6 @@
 
     <properties>
         <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
-        <!-- Disable as some tests running during 'test' phase require the native library. -->
-        <skipTests>${project.skipJavaITs}</skipTests>
     </properties>
 
     <build>
@@ -104,6 +102,32 @@
             <artifactId>vertx-codegen</artifactId>
             <version>${vertx.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- TODO: Move junit-x to <dependency> section in the parent project: ECR-2023 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.exonum.binding</groupId>
+            <artifactId>exonum-java-testing</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

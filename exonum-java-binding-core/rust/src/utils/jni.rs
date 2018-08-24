@@ -15,50 +15,15 @@ pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
     convert_to_string(env, class_name)
 }
 
-pub fn get_exception_message(_env: &JNIEnv, exception: JObject) -> JniResult<String> {
+/// Returns the message from the exception if it is not null.
+///
+/// `exception` should extend `java.lang.Throwable` and be not null
+pub fn get_exception_message(env: &JNIEnv, exception: JObject) -> JniResult<Option<String>> {
     assert!(!exception.is_null(), "Invalid exception argument");
-    // FIXME uncomment when the issue is fixed [https://jira.bf.local/browse/ECR-1035]
-    //let message = env.call_method(
-    //    exception,
-    //    "getMessage",
-    //    "()Ljava/lang/String;",
-    //    &[],
-    //)?;
-    //let message = message.l()?;
-    //if message.is_null() {
-    //    return Ok(String::new());
-    //}
-    //convert_to_string(env, message)
-    Ok(String::new())
-}
-
-pub fn get_exception_stack_trace(_env: &JNIEnv, exception: JObject) -> JniResult<String> {
-    assert!(!exception.is_null(), "Invalid exception argument");
-    // FIXME uncomment when the issue is fixed [https://jira.bf.local/browse/ECR-1035]
-    //let frames = env.call_method(
-    //    exception,
-    //    "getStackTrace",
-    //    "()[Ljava/lang/StackTraceElement;",
-    //    &[],
-    //)?
-    //    .l()?;
-    //if frames.is_null() {
-    //    return Ok(String::new());
-    //}
-    //let frames = frames.into_inner();
-    //let frames_len = env.get_array_length(frames)?;
-    //let mut stack: Vec<String> = Vec::with_capacity(frames_len as usize);
-    //for i in 0..frames_len {
-    //    let frame = env.get_object_array_element(frames, i)?;
-    //    let frame_string = env.call_method(
-    //        frame,
-    //        "toString",
-    //        "()Ljava/lang/String;",
-    //        &[],
-    //    )?;
-    //    let frame_string = format!("    at {}\n", convert_to_string(env, frame_string.l()?)?);
-    //    stack.push(frame_string);
-    //}
-    //Ok(stack.join(""))
-    Ok(String::new())
+    let message = env.call_method(exception, "getMessage", "()Ljava/lang/String;", &[])?;
+    let message = message.l()?;
+    if message.is_null() {
+        return Ok(None);
+    }
+    convert_to_string(env, message).map(Some)
 }

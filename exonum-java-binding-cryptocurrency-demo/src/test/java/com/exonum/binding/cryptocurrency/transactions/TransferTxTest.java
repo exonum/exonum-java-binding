@@ -19,9 +19,9 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.crypto.KeyPair;
@@ -40,15 +40,15 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
-import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TransferTxTest {
+class TransferTxTest {
 
   static {
     LibraryLoader.load();
@@ -59,7 +59,7 @@ public class TransferTxTest {
   private static final PublicKey toKey = PredefinedOwnerKeys.secondOwnerKey;
 
   @Test
-  public void fromMessage() {
+  void fromMessage() {
     long seed = 1;
     long amount = 50L;
     BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);
@@ -70,7 +70,7 @@ public class TransferTxTest {
   }
 
   @Test
-  public void isValidSigned() {
+  void isValidSigned() {
     long seed = 1;
     long amount = 50L;
     KeyPair senderKeyPair = CRYPTO_FUNCTION.generateKeyPair();
@@ -84,7 +84,7 @@ public class TransferTxTest {
   }
 
   @Test
-  public void isValidWrongSignature() {
+  void isValidWrongSignature() {
     long seed = 1;
     long amount = 50L;
 
@@ -106,13 +106,13 @@ public class TransferTxTest {
   private static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
                                                      PublicKey recipientId, long amount) {
     return newCryptocurrencyTransactionBuilder(TransferTx.ID)
-          .setBody(ByteBuffer.wrap(TxMessagesProtos.TransferTx.newBuilder()
+          .setBody(TxMessagesProtos.TransferTx.newBuilder()
               .setSeed(seed)
               .setFromWallet(fromPublicKey(senderId))
               .setToWallet(fromPublicKey(recipientId))
               .setSum(amount)
               .build()
-              .toByteArray()))
+              .toByteArray())
           .buildRaw();
   }
 
@@ -121,7 +121,8 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeTransfer() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeTransfer() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -147,7 +148,8 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeTransferToTheSameWallet() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeTransferToTheSameWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -169,7 +171,8 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeNoSuchFromWallet() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeNoSuchFromWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -191,7 +194,8 @@ public class TransferTxTest {
   }
 
   @Test
-  public void executeNoSuchToWallet() throws CloseFailuresException {
+  @RequiresNativeLibrary
+  void executeNoSuchToWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -211,7 +215,7 @@ public class TransferTxTest {
   }
 
   @Test
-  public void info() {
+  void info() {
     long seed = Long.MAX_VALUE - 1L;
     TransferTx tx = withMockMessage(seed, fromKey, toKey, 50L);
 
@@ -226,7 +230,7 @@ public class TransferTxTest {
   }
 
   @Test
-  public void verifyEquals() {
+  void verifyEquals() {
     EqualsVerifier
         .forClass(TransferTx.class)
         .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))

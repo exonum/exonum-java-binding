@@ -24,18 +24,20 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CryptocurrencySchemaIntegrationTest {
+@RequiresNativeLibrary
+class CryptocurrencySchemaIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
   @Test
-  public void getStateHashes() throws CloseFailuresException {
+  void getStateHashes() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
