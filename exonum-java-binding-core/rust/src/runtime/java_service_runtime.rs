@@ -89,12 +89,13 @@ impl JavaServiceRuntime {
         let service = unwrap_jni(executor.with_attached(|env| {
             let module_name = env.new_string(module_name).unwrap();
             let module_name: jni::objects::JObject = *module_name;
-            let service = env.call_static_method(
-                SERVICE_BOOTSTRAP_PATH,
-                "startService",
-                START_SERVICE_SIGNATURE,
-                &[module_name.into(), port.into()],
-            )?
+            let service = env
+                .call_static_method(
+                    SERVICE_BOOTSTRAP_PATH,
+                    "startService",
+                    START_SERVICE_SIGNATURE,
+                    &[module_name.into(), port.into()],
+                )?
                 .l()?;
             env.new_global_ref(service)
         }));

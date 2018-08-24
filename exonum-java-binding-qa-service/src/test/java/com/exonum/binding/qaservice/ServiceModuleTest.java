@@ -21,12 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.service.Service;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ServiceModuleTest {
+class ServiceModuleTest {
 
   @Test
-  public void testServiceBindingsSufficient() {
+  void testServiceBindingsSufficient() {
     Injector injector = createInjector();
 
     Service s = injector.getInstance(Service.class);
@@ -35,7 +35,7 @@ public class ServiceModuleTest {
   }
 
   @Test
-  public void testServiceIsSingleton() {
+  void testServiceIsSingleton() {
     Injector injector = createInjector();
 
     Service service1 = injector.getInstance(Service.class);

@@ -54,7 +54,8 @@ fn executor_must_not_leak_local_references() {
                 // these Java objects will leak until the current thread is stopped.
                 for _ in 0..local_frame_capacity {
                     thread_rng().fill(&mut array[..]);
-                    let _java_obj = env.byte_array_from_slice(&array)
+                    let _java_obj = env
+                        .byte_array_from_slice(&array)
                         .expect("Can't create new local object.");
                 }
                 Ok(())

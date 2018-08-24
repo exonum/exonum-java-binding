@@ -22,12 +22,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TransactionJsonMessageTest {
+class TransactionJsonMessageTest {
 
   @Test
-  public void fromJson() {
+  void fromJson() {
     String message = "{ "
         + "\"protocol_version\": 1, "
         + "\"service_id\": 2, "
