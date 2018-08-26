@@ -3,6 +3,9 @@
 #
 # ¡Keep it MacOS/Ubuntu compatible!
 
+# Fail immediately in case of errors and/or unset variables
+set -eu -o pipefail
+
 EJB_RUST_DIR="${PWD}/exonum-java-binding-core/rust"
 
 # Use active JVM.
@@ -35,7 +38,7 @@ export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native"
 echo "RUSTFLAGS=${RUSTFLAGS}"
 
 # Set LD_LIBRARY_PATH as needed for building and testing.
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
 
 # Copy libstd to some known place.
 mkdir -p ${EJB_RUST_DIR}/target/prepackage

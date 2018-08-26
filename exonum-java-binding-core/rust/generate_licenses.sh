@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Gather licenses for every Rust dependency and print it in the file in a readable form.
 
+# Fail immediately in case of errors and/or unset variables
+set -eu -o pipefail
+
 cargo license -h &> /dev/null || cargo install cargo-license
 
 # Going to exonum-java-binding-core/rust directory.
