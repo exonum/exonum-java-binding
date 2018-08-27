@@ -17,13 +17,10 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 
 `EJB_ROOT` used in examples of this section corresponds to the Java Binding root directory.
 
-#### `LD_LIBRARY_PATH` and `EJB_LIBPATH`
+#### `LD_LIBRARY_PATH`
 
 `LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
-You need to provide paths to:
-  - JVM library (e.g., `libjvm.so` on Linux).
-  - Rust standard library that is used to build the application.
-  - Application libraries used by Java Binding.
+You need to provide path to JVM library (e.g. `libjvm.so` on Linux).
 
 You can use the following script for this purpose:
 
@@ -31,11 +28,7 @@ You can use the following script for this purpose:
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
 LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
-RUST_LIB_PATH="$(rustup run 1.26.2 rustc --print sysroot)/lib"
-
-export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
-
-export LD_LIBRARY_PATH="${LIBJVM_PATH}:${RUST_LIB_PATH}:${EJB_LIBPATH}"
+export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 ```
 
 #### CLASSPATH
@@ -44,7 +37,7 @@ the Exonum Java Binding.
 
 You may package your service in an Uber JAR using 
 the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
-and pass a path to the service artefact during application configuration as `--ejb-classpath`
+and pass a path to the service artefact during application configuration as `--ejb-service-classpath`
 parameter. Alternatively, you may assemble a classpath that includes the service and all of 
 its dependencies and pass it instead.
 
@@ -54,39 +47,41 @@ EJB App configuration is pretty similar to configuration of any other Exonum ser
 with a few additional parameters.
 
 #### Generate Template Config
+Use `--ejb-module-name` for fully qualified name of your `ServiceModule`.
 
 ```$sh
-$ ejb-app generate-template testnet/common.toml
+$ ejb-app generate-template testnet/common.toml \
+    --validators-count=1
+    --ejb-module-name 'com.company.project.ServiceModule'
 ```
 
 #### Generate Node Private and Public Configs
 
-- `--ejb-classpath` for a classpath of your service.
-- `--ejb-libpath` for a path to Java bindings native libraries.
-
 ```$sh
 $ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
-    --ejb-classpath $EJB_CLASSPATH \
-    --ejb-libpath $EJB_LIBPATH \
     --peer-address 127.0.0.1:5400
 ```
 
 #### Finalize Configuration
 
-There are two specific parameters here:
-- `--ejb-module-name` for fully qualified name of your `ServiceModule`.
-- `--ejb-port` for port that your service will use for communication.
-  Java Binding does not use Exonum Core ports directly.
+Use `--ejb-classpath` for a [classpath](#CLASSPATH) of your service.
 
 ```$sh
 $ ejb-app finalize testnet/sec.toml testnet/node.toml \
-    --ejb-module-name 'com.<company-name>.<project-name>.ServiceModule' \
-    --ejb-port 6000 \
+    --ejb-service-classpath $CLASSPATH \
     --public-configs testnet/pub.toml
 ```
 
 ### Step 3. Run Configured Node
+There are two specific parameters here:
+- `--ejb-log-config-path` for path to `log4j` configuration file.
+  Default config provided with EJB App prints to STDOUT.
+- `--ejb-port` for port that your service will use for communication.
+  Java Binding does not use Exonum Core ports directly.
 
 ```$sh
-$ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+$ ejb-app run -d testnet/db -c testnet/node.toml \
+    --ejb-log-config-path "log4j.xml" \
+    --ejb-port 6000 \
+    --public-api-address 127.0.0.1:3000
 ```
