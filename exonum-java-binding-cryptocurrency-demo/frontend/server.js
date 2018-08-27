@@ -1,14 +1,14 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 // Initialize application
-var app = express();
+const app = express();
 
 // Get app params
-var argv = require('yargs-parser')(process.argv.slice(2));
-var port = argv.port;
-var explorerRoot = argv.explorerRoot;
-var apiRoot = argv.apiRoot;
+const argv = require('yargs-parser')(process.argv.slice(2));
+const port = argv.port;
+const explorerRoot = argv.explorerRoot;
+const apiRoot = argv.apiRoot;
 
 if (typeof port === 'undefined') {
   throw new Error('--port parameter is not set.');
@@ -33,12 +33,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/'));
 
 // Activate routers
-var api = require('./routes/api');
+const api = require('./routes/api');
 app.use('/api', api);
-
-// Single Page Application entry point
-app.get('/', function(req, res) {
-  res.sendFile('index.html');
-});
 
 app.listen(port);

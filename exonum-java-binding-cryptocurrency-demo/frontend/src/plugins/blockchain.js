@@ -1,8 +1,7 @@
-import * as Exonum from 'exonum-client'
 import axios from 'axios'
-import * as Protobuf from 'protobufjs/light'
 import bigInt from 'big-integer'
-import nacl from 'tweetnacl'
+import * as Exonum from 'exonum-client'
+import * as Protobuf from 'protobufjs/light'
 
 const Root = Protobuf.Root
 const Type = Protobuf.Type
@@ -44,17 +43,6 @@ const MessageHead = Exonum.newType({
     { name: 'payload', type: Exonum.Uint32 }
   ]
 })
-
-function getWallet(publicKey) {
-  return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
-    .then(response => response.data)
-    .then(data => {
-      return {
-        wallet: data,
-        transactions: []
-      }
-    })
-}
 
 function waitForAcceptance(publicKey, hash) {
   let attempt = ATTEMPTS
@@ -167,7 +155,9 @@ module.exports = {
         }).then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
-      getWallet: getWallet,
+      getWallet (publicKey) {
+        return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`).then(response => { wallet: response.data })
+      },
 
       getBlocks(latest) {
         const suffix = !isNaN(latest) ? '&latest=' + latest : ''

@@ -32,7 +32,6 @@
           </div>
         </div>
         <div class="col-md-6">
-
           <div class="card mt-5">
             <div class="card-header">Transfer funds</div>
             <div class="card-body">
@@ -80,15 +79,10 @@
         balance: 0,
         receiver: '',
         amountToTransfer: '',
-        isSpinnerVisible: false,
-        transactions: []
+        isSpinnerVisible: false
       }
     },
-    computed: Object.assign({
-      reverseTransactions() {
-        return this.transactions.slice().reverse()
-      }
-    }, mapState({
+    computed: Object.assign({}, mapState({
       keyPair: state => state.keyPair
     })),
     methods: {
@@ -104,7 +98,6 @@
         try {
           const data = await this.$blockchain.getWallet(this.keyPair.publicKey)
           this.balance = data.wallet.balance
-          this.transactions = data.transactions
           this.isSpinnerVisible = false
         } catch (error) {
           this.isSpinnerVisible = false
@@ -129,7 +122,6 @@
           await this.$blockchain.transfer(this.keyPair, this.receiver, this.amountToTransfer, seed)
           const data = await this.$blockchain.getWallet(this.keyPair.publicKey)
           this.balance = data.wallet.balance
-          this.transactions = data.transactions
           this.isSpinnerVisible = false
           this.$notify('success', 'Transfer transaction has been written into the blockchain')
         } catch (error) {
