@@ -18,7 +18,7 @@ mock.onPost('/api/cryptocurrency-demo-service/submit-transaction', {
     ownerPublicKey: 'f9cb8a984c8270d67c0eb8d6e6940ea96f859cf9697e2e5a8806ec26008a5722',
     initialBalance: 100
   }
-}).replyOnce(200)
+}).replyOnce(200, '362c7ad9827776b07e160b4dc857f46a5c918112b501aecfca5040c02c60cde3')
 
 mock.onGet('/api/explorer/v1/transactions/362c7ad9827776b07e160b4dc857f46a5c918112b501aecfca5040c02c60cde3').replyOnce(200, {'type': 'in-pool'})
 
@@ -35,7 +35,7 @@ mock.onPost('/api/cryptocurrency-demo-service/submit-transaction', {
     recipientId: '7c3cd965f8084b5730f0f95da1f3b5baf7554c044078d986e249d78c4ee00a98',
     amount: '25'
   }
-}).replyOnce(200)
+}).replyOnce(200, '1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127')
 
 mock.onGet('/api/explorer/v1/transactions/1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {'type': 'in-pool'})
 
@@ -78,6 +78,6 @@ describe('Interaction with blockchain', () => {
     const amountToTransfer = '25'
     const seed = '21093588264774074'
 
-    await expect(Vue.prototype.$blockchain.createWallet(keyPair, receiver, amountToTransfer, seed)).resolves
+    await expect(Vue.prototype.$blockchain.transfer(keyPair, receiver, amountToTransfer, seed)).resolves
   })
 })

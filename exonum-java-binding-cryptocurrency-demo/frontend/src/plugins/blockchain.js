@@ -112,7 +112,7 @@ module.exports = {
          message_id: TX_WALLET_ID,
          signature: signature,
          body: data
-        })
+        }).then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
