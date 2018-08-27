@@ -73,18 +73,18 @@ module.exports = {
 
       createWallet(keyPair, balance) {
         // define schema for transaction with protobuf
-        let CreateTransactionProtobuf = new Type('CreateTransaction').add(new Field('ownerPublicKey', 1, 'bytes'))
+        const CreateTransactionProtobuf = new Type('CreateTransaction').add(new Field('ownerPublicKey', 1, 'bytes'))
         CreateTransactionProtobuf.add(new Field('initialBalance', 2, 'int64'))
 
         // initialize protobuf and add defined schema to protobuf root
-        let root = new Root()
+        const root = new Root()
         root.define('CreateTransactionProtobuf').add(CreateTransactionProtobuf)
 
         // serialize and append message header
-        let buffer = createHeader(TX_WALLET_ID)
+        const buffer = createHeader(TX_WALLET_ID)
 
         // transaction data
-        let data = {
+        const data = {
           ownerPublicKey: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
           initialBalance: balance
         }
@@ -117,17 +117,17 @@ module.exports = {
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
         // define schema for transaction with protobuf
-        let TransferTransactionProtobuf = new Type('TransferTransaction').add(new Field('seed', 1, 'int64'))
+        const TransferTransactionProtobuf = new Type('TransferTransaction').add(new Field('seed', 1, 'int64'))
         TransferTransactionProtobuf.add(new Field('senderId', 2, 'bytes'))
         TransferTransactionProtobuf.add(new Field('recipientId', 3, 'bytes'))
         TransferTransactionProtobuf.add(new Field('amount', 4, 'int64'))
 
         // initialize protobuf and add defined schema to protobuf root
-        let root = new Root()
+        const root = new Root()
         root.define('TransferTransactionProtobuf').add(TransferTransactionProtobuf)
 
         // serialize and append message header
-        let buffer = createHeader(TX_TRANSFER_ID)
+        const buffer = createHeader(TX_TRANSFER_ID)
 
         // transaction data
         const data = {
