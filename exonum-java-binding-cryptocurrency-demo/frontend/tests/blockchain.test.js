@@ -45,7 +45,7 @@ mock.onGet('/api/cryptocurrency-demo-service/wallet/9f3ed8007937950d889981a1f0be
 
 describe('Interaction with blockchain', () => {
   it('should generate new signing key pair', () => {
-    let keyPair = Vue.prototype.$blockchain.generateKeyPair()
+    const keyPair = Vue.prototype.$blockchain.generateKeyPair()
 
     expect(keyPair.publicKey).toMatch(hexRegex)
     expect(keyPair.publicKey).toHaveLength(64)
@@ -54,29 +54,29 @@ describe('Interaction with blockchain', () => {
   })
 
   it('should generate new random seed', () => {
-    let seed = Vue.prototype.$blockchain.generateSeed()
+    const seed = Vue.prototype.$blockchain.generateSeed()
 
     expect(seed).toBeLessThan(MAX_VALUE)
   })
 
   it('should create new wallet', async () => {
-    let keyPair = {
+    const keyPair = {
       publicKey: 'f9cb8a984c8270d67c0eb8d6e6940ea96f859cf9697e2e5a8806ec26008a5722',
       secretKey: 'a188a678048f810253b0c30484ef7a862fe917617bedfac7da57a48658c9c2a9f9cb8a984c8270d67c0eb8d6e6940ea96f859cf9697e2e5a8806ec26008a5722'
     }
-    let balance = 100
+    const balance = 100
 
     await expect(Vue.prototype.$blockchain.createWallet(keyPair, balance)).resolves
   })
 
   it('should transfer funds', async () => {
-    let keyPair = {
+    const keyPair = {
       publicKey: '9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13',
       secretKey: 'e6361a3221d68148bcb5875af57b2ef8f3cbf821dadaab8ad27bc50d29abf22a9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13'
     }
-    let receiver = '7c3cd965f8084b5730f0f95da1f3b5baf7554c044078d986e249d78c4ee00a98'
-    let amountToTransfer = '25'
-    let seed = '21093588264774074'
+    const receiver = '7c3cd965f8084b5730f0f95da1f3b5baf7554c044078d986e249d78c4ee00a98'
+    const amountToTransfer = '25'
+    const seed = '21093588264774074'
 
     await expect(Vue.prototype.$blockchain.createWallet(keyPair, receiver, amountToTransfer, seed)).resolves
   })
