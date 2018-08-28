@@ -17,9 +17,9 @@ addons:
 
 env:
   global:
-    - RUST_COMPILER_VERSION=1.26.2
-    - RUST_NIGHTLY_VERSION=nightly-2018-06-29
-    - RUST_CLIPPY_VERSION=0.0.211
+    - RUST_COMPILER_VERSION=1.27.2
+    - RUST_NIGHTLY_VERSION=nightly-2018-07-06
+    - RUST_CLIPPY_VERSION=0.0.212
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     # force building instead of using from apt.
     - ROCKSDB_BUILD=1
