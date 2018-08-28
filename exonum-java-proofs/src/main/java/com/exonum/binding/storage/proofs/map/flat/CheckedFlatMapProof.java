@@ -14,12 +14,9 @@ import java.util.stream.Collectors;
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  // TODO: make all entries as current branch entries and keep keys separate
   private List<CheckedMapProofEntry> entries;
 
-  private List<byte[]> requestedKeys;
-
-  private List<byte[]> missingKeys;
+  private List<CheckedMapProofAbsentEntry> absentEntries;
 
   private HashCode rootHash;
 
@@ -29,20 +26,18 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       ProofStatus status,
       HashCode rootHash,
       List<CheckedMapProofEntry> entries,
-      List<byte[]> requestedKeys) {
+      List<CheckedMapProofAbsentEntry> absentEntries) {
     this.status = status;
     this.rootHash = rootHash;
     this.entries = new ArrayList<>(entries);
-    this.requestedKeys = requestedKeys;
-    this.missingKeys =
-        determineMissingKeys(
-            requestedKeys,
-            entries.stream().map(CheckedMapProofEntry::getKey).collect(Collectors.toList()));
+    this.absentEntries = absentEntries;
   }
 
   static CheckedFlatMapProof correct(
-      HashCode rootHash, List<CheckedMapProofEntry> proofList, List<byte[]> requestedKeys) {
-    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, proofList, requestedKeys);
+      HashCode rootHash,
+      List<CheckedMapProofEntry> proofList,
+      List<CheckedMapProofAbsentEntry> absentEntries) {
+    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, proofList, absentEntries);
   }
 
   static CheckedFlatMapProof invalid(ProofStatus status) {
@@ -58,7 +53,11 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   @Override
   public List<byte[]> getMissingKeys() {
-    return missingKeys;
+    checkValid();
+    return absentEntries
+        .stream()
+        .map(CheckedMapProofAbsentEntry::getKey)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -98,7 +97,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   @Override
   public boolean compareWithRootHash(HashCode expectedRootHash) {
-    return status == ProofStatus.CORRECT && rootHash.equals(expectedRootHash);
+    checkValid();
+    return rootHash.equals(expectedRootHash);
   }
 
   private void checkValid() {
@@ -106,17 +106,18 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkThatKeyIsRequested(byte[] key) {
+    List<byte[]> requestedKeys =
+        entries.stream().map(CheckedMapProofEntry::getKey).collect(Collectors.toList());
+    requestedKeys.addAll(
+        absentEntries
+            .stream()
+            .map(CheckedMapProofAbsentEntry::getKey)
+            .collect(Collectors.toList()));
     for (byte[] requestedKey: requestedKeys) {
       if (Arrays.equals(requestedKey, key)) {
         return;
       }
     }
     throw new IllegalArgumentException("Key that wasn't among requested keys was checked");
-  }
-
-  static List<byte[]> determineMissingKeys(List<byte[]> requestedKeys, List<byte[]> foundKeys) {
-    List<byte[]> missingKeys = new ArrayList<>(requestedKeys);
-    missingKeys.removeAll(foundKeys);
-    return missingKeys;
   }
 }

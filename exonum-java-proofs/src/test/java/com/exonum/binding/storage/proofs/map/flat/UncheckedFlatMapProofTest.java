@@ -15,7 +15,6 @@ import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,16 +36,16 @@ public class UncheckedFlatMapProofTest {
 
     DbKey valueDbKey = DbKey.newLeafKey(valueKey);
     MapProofEntryLeaf leaf = createLeafMapEntry(valueDbKey.getKeySlice(), VALUE);
-    List<MapProofEntry> entries = Arrays.asList(
+    List<MapProofEntry> branches = Arrays.asList(
         createBranchMapEntry(firstKey),
-        leaf,
         createBranchMapEntry(thirdKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.singletonList(valueKey));
+        new UncheckedFlatMapProof(
+            branches, Collections.singletonList(leaf), Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(entries, equalTo(uncheckedFlatMapProof.getProofList()));
+    assertThat(branches, equalTo(uncheckedFlatMapProof.getProofList()));
 
     CheckedMapProofEntry expectedEntry = new CheckedMapProofEntry(valueDbKey.getKeySlice(), VALUE);
     assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(expectedEntry)));
@@ -63,19 +62,20 @@ public class UncheckedFlatMapProofTest {
 
     byte[] secondValue = "second".getBytes();
     byte[] fourthValue = "fourth".getBytes();
-    List<MapProofEntry> entries = Arrays.asList(
+    List<MapProofEntryLeaf> leaves = Arrays.asList(
         createLeafMapEntry(firstValueKey, VALUE),
         createLeafMapEntry(secondValueKey, secondValue),
-        createBranchMapEntry(thirdBranchKey),
         createLeafMapEntry(fourthValueKey, fourthValue)
     );
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            entries, new ArrayList<>(Arrays.asList(firstValueKey, secondValueKey, fourthValueKey)));
+            Collections.singletonList(createBranchMapEntry(thirdBranchKey)),
+            leaves,
+            Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(entries, equalTo(uncheckedFlatMapProof.getProofList()));
+    assertThat(leaves, equalTo(uncheckedFlatMapProof.getProofList()));
 
     List<CheckedMapProofEntry> expectedEntriesList = Arrays.asList(
         new CheckedMapProofEntry(firstValueKey, VALUE),
@@ -109,10 +109,11 @@ public class UncheckedFlatMapProofTest {
         .putObject(dbKey, dbKeyFunnel())
         .putObject(HASH_FUNCTION.hashBytes(VALUE), hashCodeFunnel())
         .hash();
-    List<MapProofEntry> entries =
-        Collections.singletonList(createLeafMapEntry(dbKey.getKeySlice(), VALUE));
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.singletonList(key));
+        new UncheckedFlatMapProof(
+            Collections.emptyList(),
+            Collections.singletonList(createLeafMapEntry(dbKey.getKeySlice(), VALUE)),
+            Collections.emptyList());
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     assertThat(expectedRootHash, equalTo(checkedMapProof.getRootHash()));
@@ -132,7 +133,7 @@ public class UncheckedFlatMapProofTest {
         createBranchMapEntry(secondKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.emptyList());
+        new UncheckedFlatMapProof(entries, Collections.emptyList(), Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.DUPLICATE_PATH));
@@ -142,12 +143,12 @@ public class UncheckedFlatMapProofTest {
   public void mapProofWithWrongEntriesOrderShouldBeInvalid() {
     byte[] firstKey = createPrefixed(bytes(0b011101), DbKey.KEY_SIZE);
     byte[] valueKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
-    List<MapProofEntry> entries = Arrays.asList(
-        createBranchMapEntry(firstKey),
-        createLeafMapEntry(valueKey, VALUE)
-    );
+
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.singletonList(valueKey));
+        new UncheckedFlatMapProof(
+            Collections.singletonList(createBranchMapEntry(firstKey)),
+            Collections.singletonList(createLeafMapEntry(valueKey, VALUE)),
+            Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_ORDER));
@@ -155,27 +156,44 @@ public class UncheckedFlatMapProofTest {
 
   @Test
   public void mapProofWithoutEntriesShouldBeValid() {
-    List entries = Collections.emptyList();
-
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(entries, Collections.emptyList());
+        new UncheckedFlatMapProof(
+            Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));
   }
 
-  private static MapProofEntryBranch createBranchMapEntry(byte[] key) {
+  @Test
+  public void mapProofWithAbsentKeyShouldBeCorrect() {
+    byte[] firstKey = createPrefixed(bytes(0b001101), DbKey.KEY_SIZE);
+    byte[] valueKey = createPrefixed(bytes(0b011101), DbKey.KEY_SIZE);
+    byte[] absentKey = createPrefixed(bytes(0b111101), DbKey.KEY_SIZE);
+
+    UncheckedMapProof uncheckedFlatMapProof =
+        new UncheckedFlatMapProof(
+            Collections.singletonList(createBranchMapEntry(firstKey)),
+            Collections.singletonList(createLeafMapEntry(valueKey, VALUE)),
+            Collections.singletonList(createAbsentLeafMapEntry(absentKey)));
+
+    CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_ORDER));
+  }
+
+  private static MapProofEntry createBranchMapEntry(byte[] key) {
     byte[] prefixedKey = createPrefixed(key, DbKey.KEY_SIZE);
-    return new MapProofEntryBranch(
+    return new MapProofEntry(
         DbKey.newBranchKey(prefixedKey, key.length),
         HashCode.fromBytes(key));
   }
 
   private static MapProofEntryLeaf createLeafMapEntry(byte[] key, byte[] value) {
     byte[] prefixedKey = createPrefixed(key, DbKey.KEY_SIZE);
-    return new MapProofEntryLeaf(
-        DbKey.newLeafKey(prefixedKey),
-        value,
-        HASH_FUNCTION);
+    return new MapProofEntryLeaf(DbKey.newLeafKey(prefixedKey), value);
+  }
+
+  private static MapProofAbsentEntryLeaf createAbsentLeafMapEntry(byte[] key) {
+    byte[] prefixedKey = createPrefixed(key, DbKey.KEY_SIZE);
+    return new MapProofAbsentEntryLeaf(DbKey.newLeafKey(prefixedKey));
   }
 }
