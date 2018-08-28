@@ -15,7 +15,7 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = "0.8.1"
+exonum = "0.9"
 iron = "0.6.0"
 failure = "0.1.1"
 toml = "0.4.6"
