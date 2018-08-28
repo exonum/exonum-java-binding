@@ -1,4 +1,4 @@
-use exonum::api::{self, ServiceApiBuilder};
+use exonum::api::{self, ServiceApiBuilder, ServiceApiState};
 use exonum::blockchain::{Service, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
@@ -10,7 +10,6 @@ use serde_json::value::Value;
 
 use std::fmt;
 
-use exonum::api::ServiceApiState;
 use proxy::node::NodeContext;
 use storage::View;
 use utils::{

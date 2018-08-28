@@ -1,5 +1,7 @@
 use exonum::blockchain::Service;
-use exonum::helpers::fabric::{self, Command, CommandExtension, CommandName, Context, ServiceFactory};
+use exonum::helpers::fabric::{
+    self, Command, CommandExtension, CommandName, Context, ServiceFactory,
+};
 use jni::{self, JavaVM};
 
 use std::env;
