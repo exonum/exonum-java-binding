@@ -84,15 +84,11 @@ public final class MessageReader implements BinaryMessage {
   /**
    * Returns the body of the message as a view in the underlying byte buffer.
    *
-   * <p>The returned byte buffer shares the content of the underlying byte buffer of this message,
-   * and is read-only. Its position is zero, limit is set to the position after-the-last
-   * element of the body.
+   * <p>The returned byte buffer shares the content of the underlying byte buffer of this message.
+   * Its position is zero, limit is set to the position after-the-last element of the body.
+   * The buffer is direct iff the underlying buffer is direct, and it is read-only iff
+   * the underlying buffer is read-only.
    */
-  // !!! todo: shall it be read-only? Perhaps yes, for you don't want anyone to modify
-  // the underlying buffer. But that would make the underlying array inaccessible
-  // if you want to pass it through JNI!
-  // On top of that, we intentionally do not copy the original byte buffer,
-  // so a malicious code may keep a reference to that byte buffer and modify it.
   @Override
   public ByteBuffer getBody() {
     message.position(BODY_OFFSET);

@@ -38,7 +38,6 @@ final class TransactionPreconditions {
     checkArgument(txId == expectedTxId,
         "This message (%s) has wrong transaction id (%s), must be %s", message, txId, expectedTxId);
 
-    // todo: check empty signature?
     return message;
   }
 

@@ -16,31 +16,27 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.storage.database.Fork;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class UnknownTxTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class UnknownTxTest {
 
   @Test
-  public void isValid() {
+  void isValid() {
     UnknownTx tx = new UnknownTx();
 
     assertTrue(tx.isValid());
   }
 
   @Test
-  public void execute() {
+  void execute() {
     UnknownTx tx = new UnknownTx();
 
-    expectedException.expect(AssertionError.class);
-    tx.execute(mock(Fork.class));
+    assertThrows(AssertionError.class,
+        () -> tx.execute(mock(Fork.class)));
   }
 }

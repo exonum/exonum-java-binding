@@ -16,49 +16,69 @@
 
 package com.exonum.binding.fakes.mocks;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+
 import com.exonum.binding.messages.Transaction;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import com.exonum.binding.messages.TransactionExecutionException;
+import com.exonum.binding.storage.database.Fork;
+import java.io.IOException;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-public class ThrowingTransactionsTest {
-
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
+class ThrowingTransactionsTest {
 
   @Test
-  public void createThrowingIllegalArgument() {
+  void createThrowingIllegalArgument() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    expectedException.expect(exceptionType);
-    transaction.isValid();
+    assertThrows(exceptionType, transaction::isValid);
   }
 
   @Test
-  public void createThrowingIllegalArgumentInInfo() {
+  void createThrowingIllegalArgumentInInfo() {
     // Transaction#info is a default method, check it separately
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    expectedException.expect(exceptionType);
-    transaction.info();
+    assertThrows(exceptionType, transaction::info);
   }
 
   @Test
-  public void createThrowingOutOfMemoryError() {
+  void createThrowingOutOfMemoryError() {
     Class<OutOfMemoryError> exceptionType = OutOfMemoryError.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    expectedException.expect(exceptionType);
-    transaction.isValid();
+    assertThrows(exceptionType, transaction::isValid);
   }
 
   @Test
-  public void createThrowingFailsIfUninstantiableThrowable() {
-    expectedException.expect(IllegalArgumentException.class);
-    ThrowingTransactions.createThrowing(UninstantiableException.class);
+  void createThrowingFailsIfUninstantiableThrowable() {
+    assertThrows(IllegalArgumentException.class,
+        () -> ThrowingTransactions.createThrowing(UninstantiableException.class));
   }
 
-  abstract static class UninstantiableException extends Exception {}
+  @Test
+  @Disabled("Unfortunately, we do not perform such checks at the moment: ECR-1988")
+  void createThrowingFailsIfInvalidThrowable() {
+    assertThrows(IllegalArgumentException.class,
+        () -> ThrowingTransactions.createThrowing(IOException.class));
+  }
+
+  @Test
+  void createThrowingExecutionException() {
+    byte errorCode = 1;
+    String description = "Foo";
+    Transaction tx = ThrowingTransactions.createThrowingExecutionException(errorCode, description);
+
+    TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+        () -> tx.execute(mock(Fork.class)));
+    assertThat(actual.getErrorCode(), equalTo(errorCode));
+    assertThat(actual.getMessage(), equalTo(description));
+  }
+
+  private abstract static class UninstantiableException extends Exception {}
 }

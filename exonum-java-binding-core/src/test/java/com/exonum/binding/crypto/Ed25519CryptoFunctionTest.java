@@ -16,10 +16,15 @@
 
 package com.exonum.binding.crypto;
 
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PRIVATE_KEY_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SEED_BYTES;
+import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.SIGNATURE_BYTES;
 import static com.exonum.binding.test.Bytes.bytes;
-import static org.abstractj.kalium.NaCl.Sodium.CRYPTO_SIGN_ED25519_BYTES;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.test.Bytes;
@@ -36,18 +41,20 @@ public class Ed25519CryptoFunctionTest {
 
   @Test
   public void generateKeyPairWithSeed() {
-    byte[] seed = new byte[64];
+    byte[] seed = new byte[SEED_BYTES];
 
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
     assertNotNull(keyPair);
+    assertThat(keyPair.getPrivateKey().size(), equalTo(PRIVATE_KEY_BYTES));
+    assertThat(keyPair.getPublicKey().size(), equalTo(PUBLIC_KEY_BYTES));
   }
 
   @Test
   public void generateKeyPairInvalidSeedSize() {
-    // Try to use a two-byte seed, must be 64 byte long
+    // Try to use a two-byte seed, must be 32 byte long
     byte[] seed = bytes(0x01, 0x02);
 
-    expectedException.expectMessage("Seed byte array has invalid size (2), must be 64");
+    expectedException.expectMessage("Seed byte array has invalid size (2), must be " + SEED_BYTES);
     expectedException.expect(IllegalArgumentException.class);
     CRYPTO_FUNCTION.generateKeyPair(seed);
   }
@@ -92,7 +99,7 @@ public class Ed25519CryptoFunctionTest {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
-    byte[] invalidSignature = Bytes.createPrefixed(message, CRYPTO_SIGN_ED25519_BYTES);
+    byte[] invalidSignature = Bytes.createPrefixed(message, SIGNATURE_BYTES);
     assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
   }
 
@@ -121,7 +128,9 @@ public class Ed25519CryptoFunctionTest {
 
     // Try to use a public key of incorrect length.
     PublicKey publicKey = PublicKey.fromHexString("abcd");
-    assertFalse(CRYPTO_FUNCTION.verify(message, signature, publicKey));
+    expectedException.expectMessage("Public key has invalid size (2), must be " + PUBLIC_KEY_BYTES);
+    expectedException.expect(IllegalArgumentException.class);
+    CRYPTO_FUNCTION.verify(message, signature, publicKey);
   }
 
   @Test

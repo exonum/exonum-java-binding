@@ -1,10 +1,12 @@
-This document describes how to configure and run an Exonum node with Java service using Java Binding App.
+# Exonum Java Binding App Tutorial
+This document describes how to configure and run an Exonum node with a Java service using Java Binding App.
 
 ## Prerequisites
 
-See [How to Build section of Contribution Guide][how-to-build].
+Build an application following the instructions in [“How to Build”][how-to-build] section
+of the Contribution Guide.
 
-You should also have ready-to-use Exonum Java service with prepared ServiceModule class.
+You should also have a ready-to-use Exonum Java service with prepared ServiceModule class.
 See [Java binding documentation](https://exonum.com/doc/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
@@ -15,19 +17,25 @@ See [Java binding documentation](https://exonum.com/doc/get-started/java-binding
 
 `EJB_ROOT` used in examples of this section corresponds to the Java Binding root directory.
 
-#### LD_LIBRARY_PATH
+#### `LD_LIBRARY_PATH` and `EJB_LIBPATH`
 
 `LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
-You need to provide a path to the JVM library (`libjvm.so`) and to the Rust standard library.
+You need to provide paths to:
+  - JVM library (e.g., `libjvm.so` on Linux).
+  - Rust standard library that is used to build the application.
+  - Application libraries used by Java Binding.
 
 You can use the following script for this purpose:
 
 ```bash
-JAVA_HOME="${JAVA_HOME:-$(mvn --version | grep 'Java home' | sed 's/.*: //')}"
-LIBJVM_DIR="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
+JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
+LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
-export LD_LIBRARY_PATH="$RUST_LIB_DIR:$LIBJVM_DIR"
+RUST_LIB_PATH="$(rustup run 1.26.2 rustc --print sysroot)/lib"
+
+export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
+
+export LD_LIBRARY_PATH="${LIBJVM_PATH}:${RUST_LIB_PATH}:${EJB_LIBPATH}"
 ```
 
 #### CLASSPATH
@@ -40,18 +48,10 @@ and pass a path to the service artefact during application configuration as `--e
 parameter. Alternatively, you may assemble a classpath that includes the service and all of 
 its dependencies and pass it instead.
 
-#### LIBPATH
-
-Libpath is a path to native libraries used by Java Binding (for example, Java Binding needs Exonum native libraries).
-
-Take `$EJB_ROOT/exonum-java-binding-core/rust/target/debug` as your `LIBPATH`.
-
-You should also add your `LIBPATH` to your `LD_LIBRARY_PATH`.
-
-
 ### Step 2. Generate Node Configuration
 
-EJB App configuration is pretty similar to configuration of any other Exonum service, with a few additional parameters.
+EJB App configuration is pretty similar to configuration of any other Exonum service,
+with a few additional parameters.
 
 #### Generate Template Config
 

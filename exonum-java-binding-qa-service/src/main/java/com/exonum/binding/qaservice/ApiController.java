@@ -54,6 +54,8 @@ final class ApiController {
   @VisibleForTesting
   static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
   @VisibleForTesting
+  static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
+  @VisibleForTesting
   static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
   private static final String COUNTER_ID_PARAM = "counterId";
   private static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
@@ -81,6 +83,7 @@ final class ApiController {
             .put(SUBMIT_INVALID_TX_PATH, this::submitInvalidTx)
             .put(SUBMIT_INVALID_THROWING_TX_PATH, this::submitInvalidThrowingTx)
             .put(SUBMIT_VALID_THROWING_TX_PATH, this::submitValidThrowingTx)
+            .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
             .build();
@@ -122,6 +125,16 @@ final class ApiController {
     long seed = getRequiredParameter(parameters, "seed", Long::parseLong);
 
     HashCode txHash = service.submitValidThrowingTx(seed);
+    replyTxSubmitted(rc, txHash);
+  }
+
+  private void submitValidErrorTx(RoutingContext rc) {
+    MultiMap parameters = rc.request().params();
+    long seed = getRequiredParameter(parameters, "seed", Long::parseLong);
+    byte errorCode = getRequiredParameter(parameters, "errorCode", Byte::parseByte);
+    String description = parameters.get("errorDescription");
+
+    HashCode txHash = service.submitValidErrorTx(seed, errorCode, description);
     replyTxSubmitted(rc, txHash);
   }
 

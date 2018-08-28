@@ -24,18 +24,22 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class QaSchemaTest {
+@RequiresNativeLibrary
+class QaSchemaIntegrationTest {
 
-  static {
+  @BeforeAll
+  static void loadLibrary() {
     LibraryLoader.load();
   }
 
   @Test
-  public void getStateHashesEmptyDb() throws CloseFailuresException {
+  void getStateHashesEmptyDb() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = db.createSnapshot(cleaner);

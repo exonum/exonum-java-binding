@@ -26,13 +26,13 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TestServiceTest {
+class TestServiceTest {
 
   @Test
   @SuppressWarnings("unchecked") // No type parameters for clarity
-  public void initialize() {
+  void initialize() {
     Fork fork = mock(Fork.class);
     TestSchema schema = mock(TestSchema.class);
     ProofMapIndexProxy testMap = mock(ProofMapIndexProxy.class);

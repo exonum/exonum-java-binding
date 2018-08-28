@@ -17,9 +17,8 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
-import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
@@ -27,11 +26,13 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Objects;
 
 /**
@@ -41,10 +42,6 @@ import java.util.Objects;
 public final class IncrementCounterTx implements Transaction {
 
   private static final short ID = QaTransaction.INCREMENT_COUNTER.id();
-
-  /** A size of message body of this transaction: seed + hash code of the counter name. */
-  @VisibleForTesting
-  static final int BODY_SIZE = Long.BYTES + Hashing.DEFAULT_HASH_SIZE_BYTES;
 
   private final long seed;
   private final HashCode counterId;
@@ -56,8 +53,9 @@ public final class IncrementCounterTx implements Transaction {
    * @param counterId counter id, a hash of the counter name
    */
   public IncrementCounterTx(long seed, HashCode counterId) {
+    checkArgument(counterId.bits() == Hashing.DEFAULT_HASH_SIZE_BITS);
     this.seed = seed;
-    this.counterId = checkNotNull(counterId);
+    this.counterId = counterId;
   }
 
   @Override
@@ -116,37 +114,41 @@ public final class IncrementCounterTx implements Transaction {
       checkMessage(message);
 
       // Unpack the message.
-      ByteBuffer buf = message.getBody().order(ByteOrder.LITTLE_ENDIAN);
-      assert buf.remaining() == BODY_SIZE;
+      ByteBuffer rawBody = message.getBody();
+      try {
+        IncrementCounterTxBody body = IncrementCounterTxBody.parseFrom(rawBody);
+        long seed = body.getSeed();
+        byte[] rawCounterId = body.getCounterId().toByteArray();
+        HashCode counterId = HashCode.fromBytes(rawCounterId);
 
-      long seed = buf.getLong();
-
-      byte[] hash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
-      buf.get(hash);
-      HashCode counterId = HashCode.fromBytes(hash);
-
-      return new IncrementCounterTx(seed, counterId);
+        return new IncrementCounterTx(seed, counterId);
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalArgumentException(e);
+      }
     }
 
     @Override
     public BinaryMessage toMessage(IncrementCounterTx transaction) {
       return newQaTransactionBuilder(ID)
-          .setBody(serialize(transaction))
+          .setBody(serializeBody(transaction))
           .buildRaw();
     }
 
     private void checkMessage(Message message) {
       checkTransaction(message, ID);
-      checkMessageSize(message, BODY_SIZE);
     }
+  }
 
-    private static ByteBuffer serialize(IncrementCounterTx transaction) {
-      ByteBuffer body = ByteBuffer.allocate(BODY_SIZE)
-          .order(ByteOrder.LITTLE_ENDIAN)
-          .putLong(transaction.seed)
-          .put(transaction.counterId.asBytes());
-      body.rewind();
-      return body;
-    }
+  @VisibleForTesting
+  static byte[] serializeBody(IncrementCounterTx transaction) {
+    return IncrementCounterTxBody.newBuilder()
+        .setSeed(transaction.seed)
+        .setCounterId(toByteString(transaction.counterId))
+        .build()
+        .toByteArray();
+  }
+
+  private static ByteString toByteString(HashCode hash) {
+    return ByteString.copyFrom(hash.asBytes());
   }
 }

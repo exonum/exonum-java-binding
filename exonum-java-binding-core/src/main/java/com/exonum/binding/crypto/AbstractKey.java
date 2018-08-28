@@ -16,8 +16,8 @@
 
 package com.exonum.binding.crypto;
 
+import static com.exonum.binding.crypto.CryptoUtils.byteArrayToHex;
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.abstractj.kalium.encoders.Encoder.HEX;
 
 import java.util.Arrays;
 
@@ -76,6 +76,6 @@ public abstract class AbstractKey {
 
   @Override
   public String toString() {
-    return HEX.encode(rawKey);
+    return byteArrayToHex(rawKey);
   }
 }
