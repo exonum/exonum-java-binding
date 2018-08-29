@@ -47,7 +47,7 @@ EJB App configuration is pretty similar to configuration of any other Exonum ser
 with a few additional parameters.
 
 #### Generate Template Config
-Use `--ejb-module-name` for fully qualified name of your `ServiceModule`.
+Use `--ejb-module-name` for fully qualified name of your service module.
 
 ```$sh
 $ ejb-app generate-template testnet/common.toml \
@@ -77,7 +77,7 @@ There are two specific parameters here:
 - `--ejb-log-config-path` for path to `log4j` configuration file.
   Default config provided with EJB App prints to STDOUT.
 - `--ejb-port` for port that your service will use for communication.
-  Java Binding does not use Exonum Core ports directly.
+  Java Binding does not use Exonum Core API port directly.
 
 ```$sh
 $ ejb-app run -d testnet/db -c testnet/node.toml \
