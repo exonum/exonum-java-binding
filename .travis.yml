@@ -31,8 +31,13 @@ env:
 # exclude rust code checks with jdk10
 matrix:
   exclude:
-  - jdk: openjdk10
-    env: CHECK_RUST=true
+    - jdk: openjdk10
+      env: CHECK_RUST=true
+  # See ECR-1734
+  allow_failures:
+    - jdk: openjdk10
+  # Report the result of JDK 8 build as it is ready.
+  fast_finish: true
 
 cache:
   directories:
