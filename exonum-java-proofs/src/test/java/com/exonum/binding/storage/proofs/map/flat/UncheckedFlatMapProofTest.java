@@ -75,7 +75,7 @@ public class UncheckedFlatMapProofTest {
             Collections.emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    // TODO: proofList contains both leaves and branches
+    // TODO: proofList now contains both leaves and branches
     assertThat(leaves, equalTo(uncheckedFlatMapProof.getProofList()));
 
     List<CheckedMapProofEntry> expectedEntriesList = Arrays.asList(

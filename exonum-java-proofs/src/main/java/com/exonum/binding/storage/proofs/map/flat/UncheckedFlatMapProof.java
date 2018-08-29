@@ -47,10 +47,10 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       MapProofEntry[] proofList,
       MapProofEntryLeaf[] leaves,
       MapProofAbsentEntryLeaf[] absentLeaves) {
-    List<MapProofEntry> mapProofEntries = Arrays.asList(proofList);
+    List<MapProofEntry> branchesList = Arrays.asList(proofList);
     List<MapProofEntryLeaf> leavesList = Arrays.asList(leaves);
     List<MapProofAbsentEntryLeaf> absentLeavesList = Arrays.asList(absentLeaves);
-    return new UncheckedFlatMapProof(mapProofEntries, leavesList, absentLeavesList);
+    return new UncheckedFlatMapProof(branchesList, leavesList, absentLeavesList);
   }
 
   @Override
@@ -177,7 +177,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     allLeaves.addAll(
         absentLeaves.stream().map(MapProofAbsentEntryLeaf::getDbKey).collect(Collectors.toList()));
     for (DbKey leafEntryKey : allLeaves) {
-      for (MapProofEntry branchEntry : proofList) {
+      for (MapProofEntry branchEntry : branches) {
         DbKey anotherEntryKey = branchEntry.getDbKey();
         // Check that no other entry is a prefix of a leaf entry.
         if (leafEntryKey.commonPrefix(anotherEntryKey).equals(anotherEntryKey)) {

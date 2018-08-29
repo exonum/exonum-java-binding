@@ -61,6 +61,7 @@ public interface CheckedMapProof {
 
   /**
    * Checks that proof is correct and {@code expectedRootHash} is equal to the root hash.
+   * @throws IllegalStateException if the proof is not valid
    */
   boolean compareWithRootHash(HashCode expectedRootHash);
 }
