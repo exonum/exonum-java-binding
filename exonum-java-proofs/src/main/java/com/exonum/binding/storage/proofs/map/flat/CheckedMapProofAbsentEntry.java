@@ -3,7 +3,7 @@ package com.exonum.binding.storage.proofs.map.flat;
 import java.util.Arrays;
 
 /**
- * An entry, representing key that was requested, but not found in a map.
+ * An entry that represents key that was requested, but not found in a map.
  */
 public class CheckedMapProofAbsentEntry {
   private final byte[] key;

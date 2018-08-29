@@ -3,7 +3,6 @@ package com.exonum.binding.storage.proofs.map.flat;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.HashCode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,15 +28,15 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       List<CheckedMapProofAbsentEntry> absentEntries) {
     this.status = status;
     this.rootHash = rootHash;
-    this.entries = new ArrayList<>(entries);
+    this.entries = entries;
     this.absentEntries = absentEntries;
   }
 
   static CheckedFlatMapProof correct(
       HashCode rootHash,
-      List<CheckedMapProofEntry> proofList,
+      List<CheckedMapProofEntry> entries,
       List<CheckedMapProofAbsentEntry> absentEntries) {
-    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, proofList, absentEntries);
+    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, absentEntries);
   }
 
   static CheckedFlatMapProof invalid(ProofStatus status) {

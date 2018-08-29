@@ -5,7 +5,7 @@ import com.exonum.binding.storage.proofs.map.DbKey;
 
 /**
  * A flat map proof entry corresponding to either a branch node or a leaf node with computed hash
- * in the map tree.
+ * in a map tree.
  */
 public class MapProofEntry {
 
@@ -14,18 +14,18 @@ public class MapProofEntry {
   private final HashCode hash;
 
   /**
-   * Creates a new entry in a flat map proof corresponding to a branch node.
+   * Creates a new entry in a flat map proof corresponding to a branch or a leaf node.
    * @param dbKey a 34-byte database key of the corresponding branch node
-   * @param branchNodeHash a hash of the corresponding branch node
+   * @param nodeHash a hash of the corresponding node
    */
   @SuppressWarnings("unused") // Native API
-  MapProofEntry(byte[] dbKey, byte[] branchNodeHash) {
-    this(DbKey.fromBytes(dbKey), HashCode.fromBytes(branchNodeHash));
+  MapProofEntry(byte[] dbKey, byte[] nodeHash) {
+    this(DbKey.fromBytes(dbKey), HashCode.fromBytes(nodeHash));
   }
 
-  MapProofEntry(DbKey dbKey, HashCode branchNodeHash) {
+  MapProofEntry(DbKey dbKey, HashCode nodeHash) {
     this.dbKey = dbKey;
-    this.hash = branchNodeHash;
+    this.hash = nodeHash;
   }
 
   /**

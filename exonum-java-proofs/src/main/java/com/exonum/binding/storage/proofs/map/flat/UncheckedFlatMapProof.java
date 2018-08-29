@@ -8,6 +8,7 @@ import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,19 +24,22 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
 
-  private final List<MapProofEntry> proofList;
+  private final List<MapProofEntry> proofList = new ArrayList<>();
+
+  private final List<MapProofEntry> branches;
 
   private final List<MapProofEntryLeaf> leaves;
 
   private final List<MapProofAbsentEntryLeaf> absentLeaves;
 
   UncheckedFlatMapProof(
-      List<MapProofEntry> proofList,
+      List<MapProofEntry> branches,
       List<MapProofEntryLeaf> leaves,
       List<MapProofAbsentEntryLeaf> absentLeaves) {
-    this.proofList = proofList;
+    this.branches = branches;
     this.leaves = leaves;
     this.absentLeaves = absentLeaves;
+    mergeLeavesWithBranches();
   }
 
   @SuppressWarnings("unused") // Native API
@@ -51,7 +55,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   @Override
   public List<MapProofEntry> getProofList() {
-    return proofList;
+    return new ArrayList<>(proofList);
   }
 
   @Override
@@ -59,14 +63,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     if (!prefixesCheck()) {
       return CheckedFlatMapProof.invalid(ProofStatus.INVALID_STRUCTURE);
     }
-    mergeLeavesWithBranches();
     ProofStatus orderCheckResult = orderCheck();
     if (orderCheckResult != ProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
     if (proofList.isEmpty()) {
       return CheckedFlatMapProof.correct(
-          getEmptyProofListHash(), Collections.emptyList(), Collections.emptyList());
+          getEmptyProofListHash(), Collections.emptyList(), convertIntoCheckedProofAbsentEntries());
     } else if (proofList.size() == 1) {
       // Proof is correct if the only node is a leaf
       if (proofList.get(0).getDbKey().equals(leaves.get(0).getDbKey())) {
@@ -105,12 +108,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    * Compute hashes of leaf entries and merge them into list of branches.
    */
   private void mergeLeavesWithBranches() {
+    proofList.addAll(branches);
     proofList.addAll(
         leaves
             .stream()
             .map(
                 l ->
-                    new MapProofEntry(l.getDbKey(), getSingletonProofListHash(l)))
+                    new MapProofEntry(l.getDbKey(), getSingleLeafHash(l)))
             .collect(Collectors.toList()));
     proofList.sort(Comparator.comparing(MapProofEntry::getDbKey));
   }
@@ -212,7 +216,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
   }
 
-  private static HashCode getSingletonProofListHash(MapProofEntryLeaf entry) {
+  private static HashCode getSingleLeafHash(MapProofEntryLeaf entry) {
     return HASH_FUNCTION.newHasher()
         .putObject(entry.getDbKey(), dbKeyFunnel())
         .putObject(HASH_FUNCTION.hashBytes(entry.getValue()), hashCodeFunnel())

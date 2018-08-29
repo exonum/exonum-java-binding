@@ -37,7 +37,7 @@ public class MapProofEntryLeaf {
     return dbKey;
   }
 
-  /** Returns the value in this entry. */
+  /** Returns the value of this entry. */
   public byte[] getValue() {
     return value;
   }
