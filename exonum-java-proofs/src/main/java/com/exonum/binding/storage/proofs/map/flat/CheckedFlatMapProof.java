@@ -105,15 +105,21 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkThatKeyIsRequested(byte[] key) {
-    List<byte[]> requestedKeys =
-        entries.stream().map(CheckedMapProofEntry::getKey).collect(Collectors.toList());
-    requestedKeys.addAll(
+    for (byte[] entryKey :
+        entries
+            .stream()
+            .map(CheckedMapProofEntry::getKey)
+            .collect(Collectors.toList())) {
+      if (Arrays.equals(entryKey, key)) {
+        return;
+      }
+    }
+    for (byte[] absentKey :
         absentEntries
             .stream()
             .map(CheckedMapProofAbsentEntry::getKey)
-            .collect(Collectors.toList()));
-    for (byte[] requestedKey: requestedKeys) {
-      if (Arrays.equals(requestedKey, key)) {
+            .collect(Collectors.toList())) {
+      if (Arrays.equals(absentKey, key)) {
         return;
       }
     }
