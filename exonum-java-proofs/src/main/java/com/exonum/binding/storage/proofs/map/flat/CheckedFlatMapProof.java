@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A checked flat map proof, which does not include any intermediate nodes.
@@ -63,12 +64,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public boolean containsKey(byte[] key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    for (CheckedMapProofEntry entry: entries) {
-      if (Arrays.equals(entry.getKey(), key)) {
-        return true;
-      }
-    }
-    return false;
+    return entries.stream().anyMatch(entry -> Arrays.equals(entry.getKey(), key));
   }
 
   @Override
@@ -81,12 +77,12 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public byte[] get(byte[] key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    for (CheckedMapProofEntry entry: entries) {
-      if (Arrays.equals(entry.getKey(), key)) {
-        return entry.getValue();
-      }
-    }
-    return null;
+    return entries
+        .stream()
+        .filter(entry -> Arrays.equals(entry.getKey(), key))
+        .map(CheckedMapProofEntry::getValue)
+        .findFirst()
+        .orElse(null);
   }
 
   @Override
@@ -105,24 +101,12 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkThatKeyIsRequested(byte[] key) {
-    for (byte[] entryKey :
-        entries
-            .stream()
-            .map(CheckedMapProofEntry::getKey)
-            .collect(Collectors.toList())) {
-      if (Arrays.equals(entryKey, key)) {
-        return;
-      }
-    }
-    for (byte[] absentKey :
-        absentEntries
-            .stream()
-            .map(CheckedMapProofAbsentEntry::getKey)
-            .collect(Collectors.toList())) {
-      if (Arrays.equals(absentKey, key)) {
-        return;
-      }
-    }
-    throw new IllegalArgumentException("Key that wasn't among requested keys was checked");
+    Stream.concat(
+        entries.stream().map(CheckedMapProofEntry::getKey),
+        absentEntries.stream().map(CheckedMapProofAbsentEntry::getKey))
+        .filter(entryKey -> Arrays.equals(entryKey, key))
+        .findFirst()
+        .orElseThrow(
+            () -> new IllegalArgumentException("Key that wasn't among requested keys was checked"));
   }
 }

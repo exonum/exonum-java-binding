@@ -2,6 +2,7 @@ package com.exonum.binding.storage.proofs.map.flat;
 
 import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
@@ -15,7 +16,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An unchecked flat map proof, which does not include any intermediate nodes.
@@ -60,10 +61,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   @Override
   public CheckedMapProof check() {
-    if (!prefixesCheck()) {
-      return CheckedFlatMapProof.invalid(ProofStatus.INVALID_STRUCTURE);
-    }
-    ProofStatus orderCheckResult = orderCheck();
+    ProofStatus orderCheckResult = preCheck();
     if (orderCheckResult != ProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
@@ -112,15 +110,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     proofList.addAll(
         leaves
             .stream()
-            .map(
-                l ->
-                    new MapProofEntry(l.getDbKey(), getSingleLeafHash(l)))
-            .collect(Collectors.toList()));
+            .map(l -> new MapProofEntry(l.getDbKey(), getSingleLeafHash(l)))
+            .collect(toList()));
     proofList.sort(Comparator.comparing(MapProofEntry::getDbKey));
   }
 
   /**
-   * Check that all entries are in the valid order.
+   * Check that all entries are in the valid order and that none of the branch keys is a prefix of
+   * a leaf.
    * The following algorithm is used:
    * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
    * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
@@ -131,8 +128,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
    *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
    *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
+   *         {@code ProofStatus.INVALID_STRUCTURE} if any of the branch keys is a prefix of a leaf
    */
-  private ProofStatus orderCheck() {
+  private ProofStatus preCheck() {
     for (int i = 1; i < proofList.size(); i++) {
       DbKey key = proofList.get(i - 1).getDbKey();
       DbKey nextKey = proofList.get(i).getDbKey();
@@ -143,7 +141,25 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         return ProofStatus.DUPLICATE_PATH;
       }
     }
+    if (prefixesIncluded()) {
+      return ProofStatus.INVALID_STRUCTURE;
+    }
     return ProofStatus.CORRECT;
+  }
+
+  /*
+   * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
+   * keys are checked.
+   */
+  private boolean prefixesIncluded() {
+    return Stream.concat(
+        leaves.stream().map(MapProofEntryLeaf::getDbKey),
+        absentLeaves.stream().map(MapProofAbsentEntryLeaf::getDbKey))
+        .anyMatch(leafEntryKey -> branches.stream()
+            .map(MapProofEntry::getDbKey)
+            .anyMatch(branchEntryKey ->
+                leafEntryKey.commonPrefix(branchEntryKey).equals(branchEntryKey))
+        );
   }
 
   /**
@@ -167,39 +183,18 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return commonPrefix;
   }
 
-  /*
-   * Check that no entry has a prefix among the paths in the proof entries. Both found and absent
-   * keys are checked.
-   */
-  private boolean prefixesCheck() {
-    List<DbKey> allLeaves =
-        leaves.stream().map(MapProofEntryLeaf::getDbKey).collect(Collectors.toList());
-    allLeaves.addAll(
-        absentLeaves.stream().map(MapProofAbsentEntryLeaf::getDbKey).collect(Collectors.toList()));
-    for (DbKey leafEntryKey : allLeaves) {
-      for (MapProofEntry branchEntry : branches) {
-        DbKey anotherEntryKey = branchEntry.getDbKey();
-        // Check that no other entry is a prefix of a leaf entry.
-        if (leafEntryKey.commonPrefix(anotherEntryKey).equals(anotherEntryKey)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
   private List<CheckedMapProofEntry> convertIntoCheckedProofEntries() {
     return leaves
         .stream()
         .map(l -> new CheckedMapProofEntry(l.getDbKey().getKeySlice(), l.getValue()))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private List<CheckedMapProofAbsentEntry> convertIntoCheckedProofAbsentEntries() {
     return absentLeaves
         .stream()
         .map(e -> new CheckedMapProofAbsentEntry(e.getDbKey().getKeySlice()))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
