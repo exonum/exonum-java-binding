@@ -19,6 +19,8 @@ You need to install the following dependencies:
     To install specific Rust version, use `rustup install 1.26.2` command.
   * The [system dependencies](https://exonum.com/doc/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
+  * For automatic packaging of the EJB App you also need `CMake` installed in your system. 
+  **Automatic EJB App packaging is only supported on Linux platform at the moment**. 
 
 ### Building
 Set required environment variables, once in a shell you use to build the project:
@@ -33,9 +35,12 @@ $ mvn install
 #### Building Java Binding App
 Run:
 ```$sh
-$ cd exonum-java-binding-core/rust/ejb-app
-$ cargo install --debug --force
+$ ./package_app.sh
 ```
+This command will build and package EJB App with all the necessary runtime dependencies
+in a single `zip` archive in `exonum-java-binding-core/target` directory.
+
+**Automatic EJB App packaging is only supported on Linux platform.**
 
 ## Modules
 The project is split into several modules. Here are the main ones:

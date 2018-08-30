@@ -41,7 +41,7 @@ CRYPTOCURRENCY_TXT="exonum-java-binding-cryptocurrency-demo/target/cryptocurrenc
 EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/exonum-java-binding-cryptocurrency-demo/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
-EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
+EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
