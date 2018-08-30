@@ -227,7 +227,6 @@ class ApiControllerTest {
 
   private Throwable logSafeExceptionMock(Class<? extends Throwable> exceptionType) {
     Throwable t = mock(exceptionType);
-    when(t.getStackTrace()).thenReturn(new StackTraceElement[0]);
     return t;
   }
 

@@ -40,8 +40,9 @@ then
     cargo audit
 
     # Check silently for updates of Maven dependencies.
-    cd "${TRAVIS_BUILD_DIR}"
-    mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
+    # TODO Disabled until ECR-2252 is fixed.
+    #cd "${TRAVIS_BUILD_DIR}"
+    #mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
 
     echo 'Rust checks are completed.'
 else
