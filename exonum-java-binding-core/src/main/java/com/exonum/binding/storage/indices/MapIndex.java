@@ -134,9 +134,11 @@ public interface MapIndex<K, V> extends StorageIndex {
   void clear();
 
   /**
-   * Checks that map has no elements.
+   * Returns true if this map has no entries.
    *
-   * @return true if map has no elements
+   * <p>Note: there is no {@code size()} method because
+   * implementations of MapIndex do not currently track
+   * the number of entries.
    */
   default boolean isEmpty() {
     return !keys().hasNext();

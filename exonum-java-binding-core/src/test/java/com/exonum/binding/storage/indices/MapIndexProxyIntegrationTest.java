@@ -439,8 +439,7 @@ public class MapIndexProxyIntegrationTest
   @Test
   public void isEmptyShouldReturnFalseForNonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<String, String>> entries = createMapEntries(1);
-      putAll(map, entries);
+      map.put(K1, V1);
 
       assertFalse(map.isEmpty());
     });

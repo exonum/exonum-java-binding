@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
-- `MapIndex.isEmpty()` added method to check if MapIndex is empty.
+- `MapIndex.isEmpty()` method to check if MapIndex is empty.
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
