@@ -1,9 +1,9 @@
-use exonum::blockchain::{ApiContext, Service, Transaction};
+use exonum::api::{self, ServiceApiBuilder, ServiceApiState};
+use exonum::blockchain::{Service, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
 use exonum::messages::RawMessage;
 use exonum::storage::{Fork, Snapshot};
-use iron::Handler;
 use jni::objects::{GlobalRef, JObject, JValue};
 use serde_json;
 use serde_json::value::Value;
@@ -151,26 +151,32 @@ impl Service for ServiceProxy {
         }
     }
 
-    fn public_api_handler(&self, context: &ApiContext) -> Option<Box<Handler>> {
-        let node = NodeContext::new(
-            self.exec.clone(),
-            context.blockchain().clone(),
-            *context.public_key(),
-            context.node_channel().clone(),
+    fn wire_api(&self, builder: &mut ServiceApiBuilder) {
+        let self_ = self.clone();
+        builder.public_scope().endpoint(
+            "",
+            move |state: &ServiceApiState, _: ()| -> api::Result<()> {
+                let node = NodeContext::new(
+                    self_.exec.clone(),
+                    state.blockchain().clone(),
+                    *state.public_key(),
+                    state.sender().clone(),
+                );
+                unwrap_jni(self_.exec.with_attached(|env| {
+                    let node_handle = to_handle(node);
+                    panic_on_exception(
+                        env,
+                        env.call_method(
+                            self_.service.as_obj(),
+                            "mountPublicApiHandler",
+                            "(J)V",
+                            &[JValue::from(node_handle)],
+                        ),
+                    );
+                    Ok(())
+                }));
+                Ok(())
+            },
         );
-        unwrap_jni(self.exec.with_attached(|env| {
-            let node_handle = to_handle(node);
-            panic_on_exception(
-                env,
-                env.call_method(
-                    self.service.as_obj(),
-                    "mountPublicApiHandler",
-                    "(J)V",
-                    &[JValue::from(node_handle)],
-                ),
-            );
-            Ok(())
-        }));
-        None
     }
 }
