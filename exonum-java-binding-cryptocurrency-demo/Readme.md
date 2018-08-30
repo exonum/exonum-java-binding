@@ -70,8 +70,8 @@ $ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http
 
 Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
-## See also
-- The [reference documentation](https://exonum.com/doc/get-started/java-binding).
+## See Also
+- [Reference Documentation](https://exonum.com/doc/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.  
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding-core/rust/ejb-app/TUTORIAL.md
