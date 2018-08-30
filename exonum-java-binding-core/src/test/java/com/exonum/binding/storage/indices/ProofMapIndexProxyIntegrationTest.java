@@ -537,6 +537,21 @@ public class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Test
+  public void isEmptyShouldReturnTrueForEmptyMap() {
+    runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
+  }
+
+  @Test
+  public void isEmptyShouldReturnFalseForNonEmptyMap() {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
+      putAll(map, entries);
+
+      assertFalse(map.isEmpty());
+    });
+  }
+
   /**
    * Create a proof key of length 32 with the specified suffix.
    *
