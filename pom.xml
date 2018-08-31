@@ -473,6 +473,13 @@
       <artifactId>java-hamcrest</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava-testlib -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
+      <version>22.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <modules>
