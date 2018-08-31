@@ -132,4 +132,15 @@ public interface MapIndex<K, V> extends StorageIndex {
    * @throws UnsupportedOperationException if this map is read-only
    */
   void clear();
+
+  /**
+   * Returns true if this map has no entries.
+   *
+   * <p>Note: there is no {@code size()} method because
+   * implementations of MapIndex do not currently track
+   * the number of entries.
+   */
+  default boolean isEmpty() {
+    return !keys().hasNext();
+  }
 }

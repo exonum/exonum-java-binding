@@ -431,6 +431,20 @@ public class MapIndexProxyIntegrationTest
     });
   }
 
+  @Test
+  public void isEmptyShouldReturnTrueForEmptyMap() {
+    runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
+  }
+
+  @Test
+  public void isEmptyShouldReturnFalseForNonEmptyMap() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(K1, V1);
+
+      assertFalse(map.isEmpty());
+    });
+  }
+
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
                                       Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));

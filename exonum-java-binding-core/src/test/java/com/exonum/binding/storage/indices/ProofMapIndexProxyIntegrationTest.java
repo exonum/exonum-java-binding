@@ -524,8 +524,8 @@ public class ProofMapIndexProxyIntegrationTest
    */
   @Test
   public void constructorShallPreserveTypeInformation() {
-    runTestWithView(database::createFork, (view, proofMap) -> {
-      proofMap.put(PK1, "v1");
+    runTestWithView(database::createFork, (view, map) -> {
+      map.put(PK1, "v1");
 
       expectedException.expectMessage(
           "Attempt to access index '" + MAP_NAME
@@ -534,6 +534,20 @@ public class ProofMapIndexProxyIntegrationTest
       // Create a regular map with the same name as the proof map above.
       MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
           StandardSerializers.hash(), StandardSerializers.string());
+    });
+  }
+
+  @Test
+  public void isEmptyShouldReturnTrueForEmptyMap() {
+    runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
+  }
+
+  @Test
+  public void isEmptyShouldReturnFalseForNonEmptyMap() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, "v1");
+
+      assertFalse(map.isEmpty());
     });
   }
 
