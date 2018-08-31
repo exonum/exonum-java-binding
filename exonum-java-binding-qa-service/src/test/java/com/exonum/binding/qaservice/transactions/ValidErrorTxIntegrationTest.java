@@ -21,7 +21,6 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_
 import static com.exonum.binding.qaservice.transactions.ValidErrorTx.serializeBody;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +35,6 @@ import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -164,13 +162,10 @@ class ValidErrorTxIntegrationTest {
 
       // Check that execute cleared the maps
       QaSchema schema = new QaSchema(view);
-      checkIsEmpty(schema.counters());
-      checkIsEmpty(schema.counterNames());
-    }
-  }
 
-  private static <K,V> void checkIsEmpty(MapIndex<K, V> map) {
-    assertFalse(map.keys().hasNext());
+      assertTrue(schema.counters().isEmpty());
+      assertTrue(schema.counterNames().isEmpty());
+    }
   }
 
   @Test

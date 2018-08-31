@@ -21,7 +21,6 @@ import static com.exonum.binding.qaservice.transactions.ValidThrowingTx.serializ
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +32,6 @@ import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.Gson;
@@ -111,17 +109,13 @@ class ValidThrowingTxIntegrationTest {
 
       // Check that execute cleared the maps
       QaSchema schema = new QaSchema(view);
-      checkIsEmpty(schema.counters());
-      checkIsEmpty(schema.counterNames());
+      assertTrue(schema.counters().isEmpty());
+      assertTrue(schema.counterNames().isEmpty());
 
       // Check the exception message
       String message = expected.getMessage();
       assertThat(message, startsWith("#execute of this transaction always throws"));
     }
-  }
-
-  private static <K,V> void checkIsEmpty(MapIndex<K, V> map) {
-    assertFalse(map.keys().hasNext());
   }
 
   @Test
