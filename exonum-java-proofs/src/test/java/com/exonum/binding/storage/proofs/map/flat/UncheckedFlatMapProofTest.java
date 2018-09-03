@@ -191,7 +191,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithSingleLeafProofEntryShouldBeInvalid() {
+  public void mapProofWithSingleLeafProofEntryShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.leafKeyFromPrefix("1011111");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
 
