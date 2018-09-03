@@ -69,7 +69,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     } else if (proofList.size() == 1) {
       // Proof is correct if the only node is a found leaf
       if (leaves.size() == 1) {
-          return CheckedFlatMapProof.correct(proofList.get(0).getHash(), leaves, absentLeaves);
+        return CheckedFlatMapProof.correct(proofList.get(0).getHash(), leaves, absentLeaves);
       } else {
         return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
       }

@@ -1,7 +1,5 @@
 package com.exonum.binding.storage.proofs.map.flat;
 
-import java.util.List;
-
 /**
  * An unchecked map proof.
  * It's used to get a checked map proof.
