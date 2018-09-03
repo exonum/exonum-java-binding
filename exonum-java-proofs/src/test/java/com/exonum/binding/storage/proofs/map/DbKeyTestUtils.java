@@ -4,7 +4,7 @@ import static com.exonum.binding.test.Bytes.createPrefixed;
 
 import java.util.BitSet;
 
-class DbKeyTestUtils {
+public class DbKeyTestUtils {
 
   /**
    * Returns a new branch db key with the given prefix. The number of significant bits
@@ -29,7 +29,7 @@ class DbKeyTestUtils {
    *               May contain spaces, underscores or bars (e.g., "00 01|01 11" and "11_10"
    *               are valid strings).
    */
-  static DbKey leafKeyFromPrefix(String prefix) {
+  public static DbKey leafKeyFromPrefix(String prefix) {
     prefix = filterBitPrefix(prefix);
     byte[] key = keyFromString(prefix);
     return leafDbKey(key);
@@ -45,7 +45,7 @@ class DbKeyTestUtils {
   }
 
   /** Creates a 32-byte key from the bit prefix. */
-  private static byte[] keyFromString(String prefix) {
+  public static byte[] keyFromString(String prefix) {
     BitSet keyPrefixBits = new BitSet(prefix.length());
     for (int i = 0; i < prefix.length(); i++) {
       char bit = prefix.charAt(i);

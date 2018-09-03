@@ -26,7 +26,7 @@ public interface CheckedMapProof {
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  List<CheckedMapProofEntry> getEntries();
+  List<MapEntry> getEntries();
 
   /**
    * Get all keys that were requested, but did not appear in this proof.

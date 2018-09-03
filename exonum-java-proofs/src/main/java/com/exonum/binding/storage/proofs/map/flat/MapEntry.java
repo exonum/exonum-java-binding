@@ -5,12 +5,17 @@ import java.util.Arrays;
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
  */
-public class CheckedMapProofEntry {
+public class MapEntry {
   private final byte[] key;
 
   private final byte[] value;
 
-  CheckedMapProofEntry(byte[] key, byte[] value) {
+  /**
+   * Creates a new entry in a flat map proof corresponding to a leaf node.
+   * @param key a node key
+   * @param value a value mapped to the key
+   */
+  MapEntry(byte[] key, byte[] value) {
     this.key = key;
     this.value = value;
   }
@@ -33,7 +38,7 @@ public class CheckedMapProofEntry {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CheckedMapProofEntry that = (CheckedMapProofEntry) o;
+    MapEntry that = (MapEntry) o;
     return Arrays.equals(key, that.key) && Arrays.equals(value, that.value);
   }
 

@@ -20,10 +20,6 @@ import java.util.List;
  * </code></pre>
  */
 public interface UncheckedMapProof {
-  /**
-   * Get all entries of this proof.
-   */
-  List<MapProofEntry> getProofList();
 
   /**
    * Checks that a proof has either correct or incorrect structure and returns a CheckedMapProof.

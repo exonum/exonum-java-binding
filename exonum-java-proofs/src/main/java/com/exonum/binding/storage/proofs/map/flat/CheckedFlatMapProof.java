@@ -6,7 +6,6 @@ import com.exonum.binding.hash.HashCode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -14,9 +13,9 @@ import java.util.stream.Stream;
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private List<CheckedMapProofEntry> entries;
+  private List<MapEntry> entries;
 
-  private List<CheckedMapProofAbsentEntry> absentEntries;
+  private List<byte[]> absentEntries;
 
   private HashCode rootHash;
 
@@ -25,8 +24,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   private CheckedFlatMapProof(
       ProofStatus status,
       HashCode rootHash,
-      List<CheckedMapProofEntry> entries,
-      List<CheckedMapProofAbsentEntry> absentEntries) {
+      List<MapEntry> entries,
+      List<byte[]> absentEntries) {
     this.status = status;
     this.rootHash = rootHash;
     this.entries = entries;
@@ -35,8 +34,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   static CheckedFlatMapProof correct(
       HashCode rootHash,
-      List<CheckedMapProofEntry> entries,
-      List<CheckedMapProofAbsentEntry> absentEntries) {
+      List<MapEntry> entries,
+      List<byte[]> absentEntries) {
     return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, absentEntries);
   }
 
@@ -46,7 +45,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public List<CheckedMapProofEntry> getEntries() {
+  public List<MapEntry> getEntries() {
     checkValid();
     return entries;
   }
@@ -54,10 +53,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   @Override
   public List<byte[]> getMissingKeys() {
     checkValid();
-    return absentEntries
-        .stream()
-        .map(CheckedMapProofAbsentEntry::getKey)
-        .collect(Collectors.toList());
+    return absentEntries;
   }
 
   @Override
@@ -80,7 +76,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     return entries
         .stream()
         .filter(entry -> Arrays.equals(entry.getKey(), key))
-        .map(CheckedMapProofEntry::getValue)
+        .map(MapEntry::getValue)
         .findFirst()
         .orElse(null);
   }
@@ -102,8 +98,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   private void checkThatKeyIsRequested(byte[] key) {
     Stream.concat(
-        entries.stream().map(CheckedMapProofEntry::getKey),
-        absentEntries.stream().map(CheckedMapProofAbsentEntry::getKey))
+        entries.stream().map(MapEntry::getKey),
+        absentEntries.stream())
         .filter(entryKey -> Arrays.equals(entryKey, key))
         .findFirst()
         .orElseThrow(
