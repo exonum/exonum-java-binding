@@ -161,6 +161,21 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
+  public void mapProofWithInvalidOrderShouldBeIncorrect() {
+    DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("10");
+    DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
+
+    UncheckedMapProof uncheckedFlatMapProof =
+        new UncheckedFlatMapProof(
+            Arrays.asList(createMapProofEntry(firstDbKey), createMapProofEntry(secondDbKey)),
+            Collections.emptyList(),
+            Collections.emptyList());
+
+    CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_ORDER));
+  }
+
+  @Test
   public void mapProofWithSingleBranchProofEntryShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
