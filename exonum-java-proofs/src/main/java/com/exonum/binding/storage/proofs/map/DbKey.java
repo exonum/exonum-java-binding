@@ -221,6 +221,13 @@ public final class DbKey implements Comparable<DbKey> {
     return newBranchKey(newArray, commonPrefixSize);
   }
 
+  /**
+   * Returns whether this {@code DbKey} is a prefix of that {@code DbKey}.
+   */
+  public boolean isPrefixOf(DbKey other) {
+    return this.keyBits().isPrefixOf(other.keyBits());
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

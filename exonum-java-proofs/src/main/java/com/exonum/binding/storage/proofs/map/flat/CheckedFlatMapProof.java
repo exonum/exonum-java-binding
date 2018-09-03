@@ -15,7 +15,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   private List<MapEntry> entries;
 
-  private List<byte[]> absentEntries;
+  private List<byte[]> missingKeys;
 
   private HashCode rootHash;
 
@@ -25,18 +25,18 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       ProofStatus status,
       HashCode rootHash,
       List<MapEntry> entries,
-      List<byte[]> absentEntries) {
+      List<byte[]> missingKeys) {
     this.status = status;
     this.rootHash = rootHash;
     this.entries = entries;
-    this.absentEntries = absentEntries;
+    this.missingKeys = missingKeys;
   }
 
   static CheckedFlatMapProof correct(
       HashCode rootHash,
       List<MapEntry> entries,
-      List<byte[]> absentEntries) {
-    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, absentEntries);
+      List<byte[]> missingKeys) {
+    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
 
   static CheckedFlatMapProof invalid(ProofStatus status) {
@@ -53,7 +53,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   @Override
   public List<byte[]> getMissingKeys() {
     checkValid();
-    return absentEntries;
+    return missingKeys;
   }
 
   @Override
@@ -99,7 +99,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   private void checkThatKeyIsRequested(byte[] key) {
     Stream.concat(
         entries.stream().map(MapEntry::getKey),
-        absentEntries.stream())
+        missingKeys.stream())
         .filter(entryKey -> Arrays.equals(entryKey, key))
         .findFirst()
         .orElseThrow(

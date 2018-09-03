@@ -36,10 +36,10 @@ public class UncheckedFlatMapProofTest {
     byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
 
-    MapEntry leaf = createLeafMapEntry(valueKey, FIRST_VALUE);
+    MapEntry leaf = createMapEntry(valueKey, FIRST_VALUE);
     List<MapProofEntry> branches = Arrays.asList(
-        createBranchMapEntry(firstDbKey),
-        createBranchMapEntry(thirdDbKey)
+        createMapProofEntry(firstDbKey),
+        createMapProofEntry(thirdDbKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
@@ -50,7 +50,7 @@ public class UncheckedFlatMapProofTest {
     MapEntry expectedEntry = new MapEntry(valueKey, FIRST_VALUE);
     assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(valueKey));
-    assertThat(FIRST_VALUE, equalTo(checkedMapProof.get(valueKey)));
+    assertThat(checkedMapProof.get(valueKey), equalTo(FIRST_VALUE));
   }
 
   @Test
@@ -61,14 +61,14 @@ public class UncheckedFlatMapProofTest {
     byte[] fourthKey = DbKeyTestUtils.keyFromString("1000_1101");
 
     List<MapEntry> leaves = Arrays.asList(
-        createLeafMapEntry(firstKey, FIRST_VALUE),
-        createLeafMapEntry(secondKey, SECOND_VALUE),
-        createLeafMapEntry(fourthKey, THIRD_VALUE)
+        createMapEntry(firstKey, FIRST_VALUE),
+        createMapEntry(secondKey, SECOND_VALUE),
+        createMapEntry(fourthKey, THIRD_VALUE)
     );
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            Collections.singletonList(createBranchMapEntry(thirdDbKey)),
+            Collections.singletonList(createMapProofEntry(thirdDbKey)),
             leaves,
             Collections.emptyList());
 
@@ -83,14 +83,13 @@ public class UncheckedFlatMapProofTest {
     List<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
 
     assertThat(
-        expectedEntriesList,
-        containsInAnyOrder(
-            actualCheckedEntriesList.toArray()));
+        actualCheckedEntriesList,
+        containsInAnyOrder(expectedEntriesList.toArray()));
 
     assertTrue(checkedMapProof.containsKey(firstKey));
-    assertThat(FIRST_VALUE, equalTo(checkedMapProof.get(firstKey)));
-    assertThat(SECOND_VALUE, equalTo(checkedMapProof.get(secondKey)));
-    assertThat(THIRD_VALUE, equalTo(checkedMapProof.get(fourthKey)));
+    assertThat(checkedMapProof.get(firstKey), equalTo(FIRST_VALUE));
+    assertThat(checkedMapProof.get(secondKey), equalTo(SECOND_VALUE));
+    assertThat(checkedMapProof.get(fourthKey), equalTo(THIRD_VALUE));
 
     // If a user checks for key that wasn't required, an IllegalArgumentException is thrown
     expectedException.expect(IllegalArgumentException.class);
@@ -100,6 +99,7 @@ public class UncheckedFlatMapProofTest {
   @Test
   public void mapProofWithOneElementShouldBeValid() {
     byte[] key = DbKeyTestUtils.keyFromString("01");
+    MapEntry mapEntry = createMapEntry(key, FIRST_VALUE);
     HashCode expectedRootHash = HASH_FUNCTION
         .newHasher()
         .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
@@ -108,16 +108,15 @@ public class UncheckedFlatMapProofTest {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
             Collections.emptyList(),
-            Collections.singletonList(createLeafMapEntry(key, FIRST_VALUE)),
+            Collections.singletonList(mapEntry),
             Collections.emptyList());
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    assertThat(expectedRootHash, equalTo(checkedMapProof.getRootHash()));
+    assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
 
-    MapEntry expectedEntry = new MapEntry(key, FIRST_VALUE);
-    assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(expectedEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));
-    assertThat(FIRST_VALUE, equalTo(checkedMapProof.get(key)));
+    assertThat(checkedMapProof.get(key), equalTo(FIRST_VALUE));
   }
 
   @Test
@@ -125,8 +124,8 @@ public class UncheckedFlatMapProofTest {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     DbKey secondKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     List<MapProofEntry> entries = Arrays.asList(
-        createBranchMapEntry(firstDbKey),
-        createBranchMapEntry(secondKey)
+        createMapProofEntry(firstDbKey),
+        createMapProofEntry(secondKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(entries, Collections.emptyList(), Collections.emptyList());
@@ -153,8 +152,8 @@ public class UncheckedFlatMapProofTest {
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            Collections.singletonList(createBranchMapEntry(firstDbKey)),
-            Collections.singletonList(createLeafMapEntry(valueKey, FIRST_VALUE)),
+            Collections.singletonList(createMapProofEntry(firstDbKey)),
+            Collections.singletonList(createMapEntry(valueKey, FIRST_VALUE)),
             Collections.singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
@@ -162,18 +161,33 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithSingleProofEntryShouldBeInvalid() {
+  public void mapProofWithSingleBranchProofEntryShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            Collections.singletonList(createBranchMapEntry(firstDbKey)),
+            Collections.singletonList(createMapProofEntry(firstDbKey)),
             Collections.emptyList(),
             Collections.singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.NON_TERMINAL_NODE));
+  }
+
+  @Test
+  public void mapProofWithSingleLeafProofEntryShouldBeInvalid() {
+    DbKey firstDbKey = DbKeyTestUtils.leafKeyFromPrefix("1011111");
+    byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
+
+    UncheckedMapProof uncheckedFlatMapProof =
+        new UncheckedFlatMapProof(
+            Collections.singletonList(createMapProofEntry(firstDbKey)),
+            Collections.emptyList(),
+            Collections.singletonList(absentKey));
+
+    CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));
   }
 
   @Test
@@ -185,8 +199,8 @@ public class UncheckedFlatMapProofTest {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
             Arrays.asList(
-                new MapProofEntry(firstDbKey, HashCode.fromBytes(firstDbKey.getKeySlice())),
-                new MapProofEntry(secondDbKey, HashCode.fromBytes(secondDbKey.getKeySlice()))),
+                createMapProofEntry(firstDbKey),
+                createMapProofEntry(secondDbKey)),
             Collections.emptyList(),
             Collections.singletonList(absentKey));
 
@@ -194,13 +208,11 @@ public class UncheckedFlatMapProofTest {
     assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_STRUCTURE));
   }
 
-  private static MapProofEntry createBranchMapEntry(DbKey key) {
-    return new MapProofEntry(
-        key,
-        HashCode.fromBytes(key.getKeySlice()));
+  private static MapProofEntry createMapProofEntry(DbKey dbKey) {
+    return new MapProofEntry(dbKey, HashCode.fromBytes(dbKey.getKeySlice()));
   }
 
-  private static MapEntry createLeafMapEntry(byte[] key, byte[] value) {
+  private static MapEntry createMapEntry(byte[] key, byte[] value) {
     return new MapEntry(key, value);
   }
 }
