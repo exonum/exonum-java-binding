@@ -26,6 +26,7 @@
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <test.nativeLibPath>${build.nativeLibPath}/test_native</test.nativeLibPath>
     <auto-value.version>1.6.2</auto-value.version>
     <lazysodium-java.version>3.3.0</lazysodium-java.version>
     <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
@@ -104,6 +105,8 @@
                 <argument>${rust.itSubCrate}</argument>
                 <argument>--color</argument>
                 <argument>always</argument>
+                <argument>--target-dir</argument>
+                <argument>${test.nativeLibPath}</argument>
               </arguments>
             </configuration>
             <goals>
@@ -125,6 +128,8 @@
                 <argument>${rust.itSubCrate}</argument>
                 <argument>--color</argument>
                 <argument>always</argument>
+                <argument>--target-dir</argument>
+                <argument>${test.nativeLibPath}</argument>
               </arguments>
             </configuration>
             <goals>
