@@ -3,13 +3,13 @@
      Error log entries go to stdout. -->
 <Configuration status="WARN">
     <Appenders>
-        <List name="ListAppender">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
-        </List>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
     </Appenders>
     <Loggers>
         <Root level="error">
-            <AppenderRef ref="ListAppender" level="All" />
+            <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
 </Configuration>
