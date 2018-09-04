@@ -44,7 +44,7 @@ import com.exonum.binding.util.LibraryLoader;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
-public class CreateWalletTxTest {
+class CreateWalletTxTest {
 
   static {
     LibraryLoader.load();

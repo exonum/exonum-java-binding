@@ -29,7 +29,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.google.protobuf.ByteString;
 
 
-class TransferTxBase {
+public class TransferTxBase {
 
   /**
    * Creates new signed binary transfer transaction message using provided keys and
