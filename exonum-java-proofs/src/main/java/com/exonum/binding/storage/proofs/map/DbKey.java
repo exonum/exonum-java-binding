@@ -222,7 +222,7 @@ public final class DbKey implements Comparable<DbKey> {
   }
 
   /**
-   * Returns whether this {@code DbKey} is a prefix of that {@code DbKey}.
+   * Returns true if this {@code DbKey} is a prefix of that {@code DbKey}.
    */
   public boolean isPrefixOf(DbKey other) {
     return this.keyBits().isPrefixOf(other.keyBits());

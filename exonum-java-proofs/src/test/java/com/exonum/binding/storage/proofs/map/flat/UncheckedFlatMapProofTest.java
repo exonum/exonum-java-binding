@@ -1,7 +1,21 @@
+/*
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.proofs.map.flat;
 
-import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
-import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -100,11 +114,7 @@ public class UncheckedFlatMapProofTest {
   public void mapProofWithOneElementShouldBeValid() {
     byte[] key = DbKeyTestUtils.keyFromString("01");
     MapEntry mapEntry = createMapEntry(key, FIRST_VALUE);
-    HashCode expectedRootHash = HASH_FUNCTION
-        .newHasher()
-        .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
-        .putObject(HASH_FUNCTION.hashBytes(FIRST_VALUE), hashCodeFunnel())
-        .hash();
+    HashCode expectedRootHash = HASH_FUNCTION.hashBytes(FIRST_VALUE);
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
             Collections.emptyList(),

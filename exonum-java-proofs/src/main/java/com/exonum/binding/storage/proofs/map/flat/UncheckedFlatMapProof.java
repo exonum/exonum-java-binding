@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.storage.proofs.map.flat;
 
 import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
@@ -63,39 +79,60 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     if (orderCheckResult != ProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
-    mergeLeavesWithBranches();
-    if (proofList.isEmpty()) {
-      return CheckedFlatMapProof.correct(
-          getEmptyProofListHash(), Collections.emptyList(), missingKeys);
-    } else if (proofList.size() == 1) {
-      // One element proof is correct only if the node is a leaf
-      if (proof.size() == 1 && proof.get(0).getDbKey().getNodeType() != Type.LEAF) {
+    if (isEmptyProof()) {
+      return checkEmptyProof();
+    } else if (isSingletonProof()) {
+      return checkSingletonProof();
+    } else {
+      return checkProof();
+    }
+  }
+
+  private CheckedMapProof checkEmptyProof() {
+    return CheckedFlatMapProof.correct(
+        getEmptyProofListHash(), Collections.emptyList(), missingKeys);
+  }
+
+  private CheckedMapProof checkSingletonProof() {
+    if (proof.size() == 1) {
+      // There are no entries, therefore, the proof node must correspond to a leaf.
+      MapProofEntry entry = proof.get(0);
+      DbKey.Type nodeType = entry.getDbKey().getNodeType();
+      if (nodeType == Type.BRANCH) {
         return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
       } else {
-        return CheckedFlatMapProof.correct(proofList.get(0).getHash(), entries, missingKeys);
+        return CheckedFlatMapProof.correct(getSingleEntryProofHash(entry), entries, missingKeys);
       }
     } else {
-      Deque<MapProofEntry> contour = new ArrayDeque<>();
-      MapProofEntry first = proofList.get(0);
-      MapProofEntry second = proofList.get(1);
-      DbKey lastPrefix = first.getDbKey().commonPrefix(second.getDbKey());
-      contour.push(first);
-      contour.push(second);
-      for (int i = 2; i < proofList.size(); i++) {
-        MapProofEntry currentEntry = proofList.get(i);
-        DbKey newPrefix = contour.peek().getDbKey().commonPrefix(currentEntry.getDbKey());
-        while (contour.size() > 1
-            && newPrefix.getNumSignificantBits() < lastPrefix.getNumSignificantBits()) {
-          lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
-        }
-        contour.push(currentEntry);
-        lastPrefix = newPrefix;
-      }
-      while (contour.size() > 1) {
+      // The proof consists of a single leaf with a required key
+      MapEntry entry = entries.get(0);
+      return CheckedFlatMapProof.correct(
+          HASH_FUNCTION.hashBytes(entry.getValue()), entries, missingKeys);
+    }
+  }
+
+  private CheckedMapProof checkProof() {
+    mergeLeavesWithBranches();
+    Deque<MapProofEntry> contour = new ArrayDeque<>();
+    MapProofEntry first = proofList.get(0);
+    MapProofEntry second = proofList.get(1);
+    DbKey lastPrefix = first.getDbKey().commonPrefix(second.getDbKey());
+    contour.push(first);
+    contour.push(second);
+    for (int i = 2; i < proofList.size(); i++) {
+      MapProofEntry currentEntry = proofList.get(i);
+      DbKey newPrefix = contour.peek().getDbKey().commonPrefix(currentEntry.getDbKey());
+      while (contour.size() > 1
+          && newPrefix.getNumSignificantBits() < lastPrefix.getNumSignificantBits()) {
         lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
       }
-      return CheckedFlatMapProof.correct(contour.peek().getHash(), entries, missingKeys);
+      contour.push(currentEntry);
+      lastPrefix = newPrefix;
     }
+    while (contour.size() > 1) {
+      lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
+    }
+    return CheckedFlatMapProof.correct(contour.peek().getHash(), entries, missingKeys);
   }
 
   /**
@@ -106,7 +143,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     List<MapProofEntry> leafEntries =
         entries
             .stream()
-            .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getSingleLeafHash(e)))
+            .map(e ->
+                    new MapProofEntry(
+                        DbKey.newLeafKey(e.getKey()), HASH_FUNCTION.hashBytes(e.getValue())))
             .collect(toList());
     proofList.addAll(leafEntries);
     proofList.sort(Comparator.comparing(MapProofEntry::getDbKey));
@@ -178,6 +217,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return commonPrefix;
   }
 
+  private boolean isEmptyProof() {
+    return proof.size() + entries.size() == 0;
+  }
+
+  private boolean isSingletonProof() {
+    return proof.size() + entries.size() == 1;
+  }
+
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
     return HASH_FUNCTION
         .newHasher()
@@ -192,10 +239,10 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
   }
 
-  private static HashCode getSingleLeafHash(MapEntry entry) {
+  private static HashCode getSingleEntryProofHash(MapProofEntry entry) {
     return HASH_FUNCTION.newHasher()
-        .putObject(DbKey.newLeafKey(entry.getKey()), dbKeyFunnel())
-        .putObject(HASH_FUNCTION.hashBytes(entry.getValue()), hashCodeFunnel())
+        .putObject(entry.getDbKey(), dbKeyFunnel())
+        .putObject(entry.getHash(), hashCodeFunnel())
         .hash();
   }
 }
