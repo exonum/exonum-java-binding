@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.crypto.CryptoFunction;
 import com.exonum.binding.crypto.CryptoFunctions;
 import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.InternalServerError;
 import com.exonum.binding.messages.InvalidTransactionException;
@@ -66,7 +65,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public void createPublicApiHandlers(Node node, Router router) {
     this.node = node;
 
-    ApiController controller = new ApiController(this, new JsonBinaryMessageConverter());
+    ApiController controller = new ApiController(this);
     controller.mountApi(router);
   }
 

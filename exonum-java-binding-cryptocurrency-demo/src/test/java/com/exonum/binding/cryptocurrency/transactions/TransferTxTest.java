@@ -17,7 +17,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
+import static com.exonum.binding.cryptocurrency.transactions.TransferTxBase.createSignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.TransferTxBase.createUnsignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.TransferTxBase.createWallet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.crypto.KeyPair;
-import com.exonum.binding.crypto.PrivateKey;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
@@ -96,26 +97,6 @@ class TransferTxTest {
     assertFalse(tx.isValid());
   }
 
-  private static BinaryMessage createSignedMessage(long seed, PublicKey senderId,
-                                                   PrivateKey senderSecret,
-                                                   PublicKey recipientId, long amount) {
-    BinaryMessage packetUnsigned = createUnsignedMessage(seed, senderId, recipientId, amount);
-    return packetUnsigned.sign(CRYPTO_FUNCTION, senderSecret);
-  }
-
-  private static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
-                                                     PublicKey recipientId, long amount) {
-    return newCryptocurrencyTransactionBuilder(TransferTx.ID)
-          .setBody(TxMessagesProtos.TransferTx.newBuilder()
-              .setSeed(seed)
-              .setFromWallet(fromPublicKey(senderId))
-              .setToWallet(fromPublicKey(recipientId))
-              .setSum(amount)
-              .build()
-              .toByteArray())
-          .buildRaw();
-  }
-
   private static ByteString fromPublicKey(PublicKey k) {
     return ByteString.copyFrom(k.toBytes());
   }
@@ -151,7 +132,7 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransferToTheSameWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
+         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
       long initialBalance = 100L;
@@ -224,7 +205,8 @@ class TransferTxTest {
     // Check the transaction parameters in JSON
     Gson gson = CryptocurrencyTransactionGson.instance();
 
-    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {}.getType());
+    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {
+    }.getType());
 
     assertThat(txParameters, equalTo(tx));
   }
@@ -237,16 +219,10 @@ class TransferTxTest {
         .verify();
   }
 
-  private static TransferTx withMockMessage(long seed, PublicKey senderId, PublicKey recipientId,
-                                            long amount) {
+  private TransferTx withMockMessage(long seed, PublicKey senderId, PublicKey recipientId,
+      long amount) {
     // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
     // and put it here, replacing `mock(BinaryMessage.class)`.
     return new TransferTx(mock(BinaryMessage.class), seed, senderId, recipientId, amount);
-  }
-
-  private void createWallet(Fork view, PublicKey publicKey, Long initialBalance) {
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
-    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-    wallets.put(publicKey, new Wallet(initialBalance));
   }
 }
