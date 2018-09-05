@@ -153,12 +153,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       if (nodeType == Type.BRANCH) {
         return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
       } else {
-        return CheckedFlatMapProof.correct(getSingleEntryProofHash(entry), entries, missingKeys);
+        HashCode rootHash = getSingleEntryRootHash(entry);
+        return CheckedFlatMapProof.correct(rootHash, entries, missingKeys);
       }
     } else {
       // The proof consists of a single leaf with a required key
       MapEntry entry = entries.get(0);
-      return CheckedFlatMapProof.correct(getMapEntryHash(entry), entries, missingKeys);
+      HashCode rootHash = getSingleEntryRootHash(entry);
+      return CheckedFlatMapProof.correct(rootHash, entries, missingKeys);
     }
   }
 
@@ -233,10 +235,21 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
   }
 
-  private static HashCode getSingleEntryProofHash(MapProofEntry entry) {
+  private static HashCode getSingleEntryRootHash(MapProofEntry entry) {
+    return getSingleEntryRootHash(entry.getDbKey(), entry.getHash());
+  }
+
+  private static HashCode getSingleEntryRootHash(MapEntry entry) {
+    DbKey dbKey = DbKey.newLeafKey(entry.getKey());
+    HashCode valueHash = HASH_FUNCTION.hashBytes(entry.getValue());
+    return getSingleEntryRootHash(dbKey, valueHash);
+  }
+
+  private static HashCode getSingleEntryRootHash(DbKey key, HashCode valueHash) {
+    assert key.getNodeType() == Type.LEAF;
     return HASH_FUNCTION.newHasher()
-        .putObject(entry.getDbKey(), dbKeyFunnel())
-        .putObject(entry.getHash(), hashCodeFunnel())
+        .putObject(key, dbKeyFunnel())
+        .putObject(valueHash, hashCodeFunnel())
         .hash();
   }
 
