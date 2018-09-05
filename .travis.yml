@@ -17,7 +17,7 @@ addons:
 
 env:
   global:
-    - RUST_COMPILER_VERSION=1.28.0
+    - RUST_COMPILER_VERSION=stable
     - RUST_NIGHTLY_VERSION=nightly-2018-07-07
     - RUST_CLIPPY_VERSION=0.0.212
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
