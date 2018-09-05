@@ -76,8 +76,7 @@ class TransferTxTest {
     long amount = 50L;
     KeyPair senderKeyPair = CRYPTO_FUNCTION.generateKeyPair();
 
-    BinaryMessage m = createSignedMessage(seed, senderKeyPair.getPublicKey(),
-        senderKeyPair.getPrivateKey(), toKey, amount);
+    BinaryMessage m = createSignedMessage(seed, senderKeyPair, toKey, amount);
 
     TransferTx tx = TransferTx.fromMessage(m);
 

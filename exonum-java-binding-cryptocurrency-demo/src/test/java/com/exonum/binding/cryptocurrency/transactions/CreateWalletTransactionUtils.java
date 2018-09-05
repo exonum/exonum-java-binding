@@ -9,30 +9,35 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.google.protobuf.ByteString;
 
-public class CreateWalletTransactionUtils {
+class CreateWalletTransactionUtils {
 
-  public static final long DEFAULT_BALANCE = 100L;
+  static final long DEFAULT_BALANCE = 100L;
+
+  private CreateWalletTransactionUtils() {
+    throw new AssertionError("Non-instantiable");
+  }
 
   /**
-   * Creates new signed binary create wallet message using provided key pair.
+   * Creates new signed binary create wallet message using provided owner key pair.
    */
-  public static BinaryMessage createSignedMessage(KeyPair ownerKeyPair) {
+  static BinaryMessage createSignedMessage(KeyPair ownerKeyPair) {
     BinaryMessage unsignedMessage = createUnsignedMessage(ownerKeyPair.getPublicKey(),
         DEFAULT_BALANCE);
     return unsignedMessage.sign(CRYPTO_FUNCTION, ownerKeyPair.getPrivateKey());
   }
 
   /**
-   * Creates new unsigned binary create wallet message using provided key pair and default balance.
+   * Creates new unsigned binary create wallet message using provided owner key and default balance.
    */
-  public static BinaryMessage createUnsignedMessage(PublicKey ownerKey) {
+  static BinaryMessage createUnsignedMessage(PublicKey ownerKey) {
     return createUnsignedMessage(ownerKey, DEFAULT_BALANCE);
   }
 
   /**
-   * Creates new unsigned binary create wallet message using provided key pair and provided balance.
+   * Creates new unsigned binary create wallet message using provided owner key and provided
+   * balance.
    */
-  public static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
+  static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
     return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
         .setBody(TxMessagesProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))

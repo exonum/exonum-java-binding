@@ -19,7 +19,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 
-import com.exonum.binding.crypto.PrivateKey;
+import com.exonum.binding.crypto.KeyPair;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -29,23 +29,28 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.google.protobuf.ByteString;
 
 
-public class CreateTransferTransactionUtils {
+class CreateTransferTransactionUtils {
+
+  private CreateTransferTransactionUtils() {
+    throw new AssertionError("Non-instantiable");
+  }
 
   /**
    * Creates new signed binary transfer transaction message using provided keys and
    * provided amount.
    */
-  public static BinaryMessage createSignedMessage(long seed, PublicKey senderId,
-      PrivateKey senderSecret, PublicKey recipientId, long amount) {
-    BinaryMessage packetUnsigned = createUnsignedMessage(seed, senderId, recipientId, amount);
-    return packetUnsigned.sign(CRYPTO_FUNCTION, senderSecret);
+  static BinaryMessage createSignedMessage(long seed, KeyPair senderKeyPair, PublicKey recipientId,
+      long amount) {
+    BinaryMessage packetUnsigned = createUnsignedMessage(seed, senderKeyPair.getPublicKey(),
+        recipientId, amount);
+    return packetUnsigned.sign(CRYPTO_FUNCTION, senderKeyPair.getPrivateKey());
   }
 
   /**
    * Creates new unsigned binary transfer transaction message using provided keys and
    * provided amount.
    */
-  public static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
+  static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
       PublicKey recipientId, long amount) {
     return newCryptocurrencyTransactionBuilder(TransferTx.ID)
         .setBody(TxMessagesProtos.TransferTx.newBuilder()
@@ -61,14 +66,14 @@ public class CreateTransferTransactionUtils {
   /**
    * Returns key byte string.
    */
-  public static ByteString fromPublicKey(PublicKey k) {
+  private static ByteString fromPublicKey(PublicKey k) {
     return ByteString.copyFrom(k.toBytes());
   }
 
   /**
    * Creates wallets with initial balance and adds them to database view.
    */
-  public static void createWallet(Fork view, PublicKey publicKey, Long initialBalance) {
+  static void createWallet(Fork view, PublicKey publicKey, Long initialBalance) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
     wallets.put(publicKey, new Wallet(initialBalance));
