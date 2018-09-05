@@ -88,9 +88,62 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     }
   }
 
+  /**
+   * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
+   * keys are checked.
+   */
+  private boolean prefixesIncluded() {
+    // TODO: entries are sorted, so it's possible to use binary search here
+    Stream<DbKey> requestedKeysStream =
+        Stream.concat(
+            entries.stream().map(e -> DbKey.newLeafKey(e.getKey())),
+            missingKeys.stream().map(DbKey::newLeafKey));
+    return requestedKeysStream
+        .anyMatch(leafEntryKey -> proof.stream()
+            .map(MapProofEntry::getDbKey)
+            .anyMatch(proofEntryKey ->
+                proofEntryKey.isPrefixOf(leafEntryKey))
+        );
+  }
+
+  /**
+   * Check that all entries are in the valid order.
+   * The following algorithm is used:
+   * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
+   * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
+   * these indexes indicates the greater key.
+   * If there is no such bit, then lengths of these keys are compared and the key with greater
+   * length is considered a greater key.
+   * Every following key should be greater than the previous.
+   * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
+   *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
+   *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
+   */
+  private ProofStatus orderCheck() {
+    for (int i = 1; i < proof.size(); i++) {
+      DbKey key = proof.get(i - 1).getDbKey();
+      DbKey nextKey = proof.get(i).getDbKey();
+      int comparisonResult = nextKey.compareTo(key);
+      if (comparisonResult < 0) {
+        return ProofStatus.INVALID_ORDER;
+      } else if (comparisonResult == 0) {
+        return ProofStatus.DUPLICATE_PATH;
+      }
+    }
+    return ProofStatus.CORRECT;
+  }
+
+  private boolean isEmptyProof() {
+    return proof.size() + entries.size() == 0;
+  }
+
   private CheckedMapProof checkEmptyProof() {
     return CheckedFlatMapProof.correct(
         getEmptyProofListHash(), Collections.emptyList(), missingKeys);
+  }
+
+  private boolean isSingletonProof() {
+    return proof.size() + entries.size() == 1;
   }
 
   private CheckedMapProof checkSingletonProof() {
@@ -149,51 +202,6 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
-   * Check that all entries are in the valid order.
-   * The following algorithm is used:
-   * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
-   * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
-   * these indexes indicates the greater key.
-   * If there is no such bit, then lengths of these keys are compared and the key with greater
-   * length is considered a greater key.
-   * Every following key should be greater than the previous.
-   * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
-   *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
-   *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
-   */
-  private ProofStatus orderCheck() {
-    for (int i = 1; i < proof.size(); i++) {
-      DbKey key = proof.get(i - 1).getDbKey();
-      DbKey nextKey = proof.get(i).getDbKey();
-      int comparisonResult = nextKey.compareTo(key);
-      if (comparisonResult < 0) {
-        return ProofStatus.INVALID_ORDER;
-      } else if (comparisonResult == 0) {
-        return ProofStatus.DUPLICATE_PATH;
-      }
-    }
-    return ProofStatus.CORRECT;
-  }
-
-  /*
-   * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
-   * keys are checked.
-   */
-  private boolean prefixesIncluded() {
-    // TODO: entries are sorted, so it's possible to use binary search here
-    Stream<DbKey> requestedKeysStream =
-        Stream.concat(
-                entries.stream().map(e -> DbKey.newLeafKey(e.getKey())),
-                missingKeys.stream().map(DbKey::newLeafKey));
-    return requestedKeysStream
-        .anyMatch(leafEntryKey -> proof.stream()
-            .map(MapProofEntry::getDbKey)
-            .anyMatch(proofEntryKey ->
-                proofEntryKey.isPrefixOf(leafEntryKey))
-        );
-  }
-
-  /**
    * Folds two last entries in a contour and replaces them with the folded entry.
    * Returns an updated common prefix between two last entries in the contour.
    */
@@ -214,12 +222,19 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return commonPrefix;
   }
 
-  private boolean isEmptyProof() {
-    return proof.size() + entries.size() == 0;
+  private static HashCode getEmptyProofListHash() {
+    return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
   }
 
-  private boolean isSingletonProof() {
-    return proof.size() + entries.size() == 1;
+  private static HashCode getSingleEntryProofHash(MapProofEntry entry) {
+    return HASH_FUNCTION.newHasher()
+        .putObject(entry.getDbKey(), dbKeyFunnel())
+        .putObject(entry.getHash(), hashCodeFunnel())
+        .hash();
+  }
+
+  private static HashCode getMapEntryHash(MapEntry entry) {
+    return HASH_FUNCTION.hashBytes(entry.getValue());
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
@@ -229,21 +244,6 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .putObject(rightChild.getHash(), hashCodeFunnel())
         .putObject(leftChild.getDbKey(), dbKeyFunnel())
         .putObject(rightChild.getDbKey(), dbKeyFunnel())
-        .hash();
-  }
-
-  private static HashCode getMapEntryHash(MapEntry entry) {
-    return HASH_FUNCTION.hashBytes(entry.getValue());
-  }
-
-  private static HashCode getEmptyProofListHash() {
-    return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
-  }
-
-  private static HashCode getSingleEntryProofHash(MapProofEntry entry) {
-    return HASH_FUNCTION.newHasher()
-        .putObject(entry.getDbKey(), dbKeyFunnel())
-        .putObject(entry.getHash(), hashCodeFunnel())
         .hash();
   }
 }
