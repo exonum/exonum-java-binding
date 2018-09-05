@@ -17,9 +17,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
-import static com.exonum.binding.cryptocurrency.transactions.TransferTxBase.createSignedMessage;
-import static com.exonum.binding.cryptocurrency.transactions.TransferTxBase.createUnsignedMessage;
-import static com.exonum.binding.cryptocurrency.transactions.TransferTxBase.createWallet;
+import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createSignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createUnsignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -205,8 +205,7 @@ class TransferTxTest {
     // Check the transaction parameters in JSON
     Gson gson = CryptocurrencyTransactionGson.instance();
 
-    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {
-    }.getType());
+    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {}.getType());
 
     assertThat(txParameters, equalTo(tx));
   }

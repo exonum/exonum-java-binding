@@ -9,9 +9,9 @@ import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
 import com.google.protobuf.ByteString;
 
-public class CreateWalletTxBase {
+public class CreateWalletTransactionUtils {
 
-  static final long DEFAULT_BALANCE = 100L;
+  public static final long DEFAULT_BALANCE = 100L;
 
   /**
    * Creates new signed binary create wallet message using provided key pair.
@@ -25,14 +25,14 @@ public class CreateWalletTxBase {
   /**
    * Creates new unsigned binary create wallet message using provided key pair and default balance.
    */
-  static BinaryMessage createUnsignedMessage(PublicKey ownerKey) {
+  public static BinaryMessage createUnsignedMessage(PublicKey ownerKey) {
     return createUnsignedMessage(ownerKey, DEFAULT_BALANCE);
   }
 
   /**
    * Creates new unsigned binary create wallet message using provided key pair and provided balance.
    */
-  static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
+  public static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
     return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
         .setBody(TxMessagesProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))

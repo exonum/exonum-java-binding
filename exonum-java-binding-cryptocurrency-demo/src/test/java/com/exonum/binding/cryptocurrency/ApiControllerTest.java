@@ -16,8 +16,6 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTxBase.createSignedMessage;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -31,9 +29,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.crypto.KeyPair;
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
+import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.InternalServerError;
@@ -63,6 +61,8 @@ import org.mockito.quality.Strictness;
 class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
+
+  private static final short CREATE_WALLET_TX_ID = 1;
 
   private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
 
@@ -104,7 +104,7 @@ class ApiControllerTest {
 
   @Test
   void submitValidTransaction(VertxTestContext context) {
-    BinaryMessage message = getBinaryMessage();
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
 
     String messageHash = "1234";
     Transaction transaction = mock(Transaction.class);
@@ -142,7 +142,7 @@ class ApiControllerTest {
 
   @Test
   void submitTransactionOfIncorrectMessageSize(VertxTestContext context) {
-    BinaryMessage message = getBinaryMessage();
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
     byte errorByte = 1;
 
     post(ApiController.SUBMIT_TRANSACTION_PATH)
@@ -150,6 +150,8 @@ class ApiControllerTest {
             Buffer.buffer(message.getSignedMessage().array()).appendByte(errorByte),
             context.succeeding(response -> context.verify(() -> {
               assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+
+              verify(service, never()).convertToTransaction(any(BinaryMessage.class));
               verify(service, never()).submitTransaction(any(Transaction.class));
 
               context.completeNow();
@@ -158,7 +160,7 @@ class ApiControllerTest {
 
   @Test
   void submitTransactionWhenInternalServerErrorIsThrown(VertxTestContext context) {
-    BinaryMessage message = getBinaryMessage();
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
 
     Transaction transaction = mock(Transaction.class);
     Throwable error = wrappingChecked(InternalServerError.class);
@@ -230,9 +232,9 @@ class ApiControllerTest {
         })));
   }
 
-  private BinaryMessage getBinaryMessage() {
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
-    return createSignedMessage(keyPair);
+  private BinaryMessage createTestBinaryMessage(short txId) {
+    return CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder(txId)
+        .buildRaw();
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {

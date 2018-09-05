@@ -17,9 +17,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTxBase.DEFAULT_BALANCE;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTxBase.createSignedMessage;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTxBase.createUnsignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createSignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createUnsignedMessage;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
