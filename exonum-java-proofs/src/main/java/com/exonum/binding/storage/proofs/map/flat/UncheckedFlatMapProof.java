@@ -106,8 +106,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     } else {
       // The proof consists of a single leaf with a required key
       MapEntry entry = entries.get(0);
-      return CheckedFlatMapProof.correct(
-          HASH_FUNCTION.hashBytes(entry.getValue()), entries, missingKeys);
+      return CheckedFlatMapProof.correct(getMapEntryHash(entry), entries, missingKeys);
     }
   }
 
@@ -143,9 +142,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     List<MapProofEntry> leafEntries =
         entries
             .stream()
-            .map(e ->
-                    new MapProofEntry(
-                        DbKey.newLeafKey(e.getKey()), HASH_FUNCTION.hashBytes(e.getValue())))
+            .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getMapEntryHash(e)))
             .collect(toList());
     proofList.addAll(leafEntries);
     proofList.sort(Comparator.comparing(MapProofEntry::getDbKey));
@@ -233,6 +230,10 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .putObject(leftChild.getDbKey(), dbKeyFunnel())
         .putObject(rightChild.getDbKey(), dbKeyFunnel())
         .hash();
+  }
+
+  private static HashCode getMapEntryHash(MapEntry entry) {
+    return HASH_FUNCTION.hashBytes(entry.getValue());
   }
 
   private static HashCode getEmptyProofListHash() {
