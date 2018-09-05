@@ -25,7 +25,7 @@ import java.util.List;
  * throw IllegalStateException.
  * Example usage:
  * <pre><code>
- * byte[] key = "The key for which I want a proved value";
+ * byte[] key = "The key for which I want a proved value".getBytes();
  * HashCode expectedRootHash = // get a known root hash from block proof //
  * UncheckedMapProof proof = requestProofForKey(key);
  * // Convert to checked
