@@ -18,7 +18,6 @@ package com.exonum.binding.storage.proofs.map.flat;
 
 import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
-import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
@@ -41,8 +40,6 @@ import java.util.stream.Stream;
 public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
-
-  private final List<MapProofEntry> proofList = new ArrayList<>();
 
   private final List<MapProofEntry> proof;
 
@@ -166,7 +163,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private CheckedMapProof checkProof() {
-    mergeLeavesWithBranches();
+    List<MapProofEntry> proofList = mergeLeavesWithBranches();
     Deque<MapProofEntry> contour = new ArrayDeque<>();
     MapProofEntry first = proofList.get(0);
     MapProofEntry second = proofList.get(1);
@@ -190,17 +187,25 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
-   * Compute hashes of leaf entries and merge them into list of branches.
+   * Creates an initial proof tree contour, by computing hashes of leaf entries and merging them
+   * with the list of proof entries.
    */
-  private void mergeLeavesWithBranches() {
-    proofList.addAll(proof);
-    List<MapProofEntry> leafEntries =
-        entries
-            .stream()
-            .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getMapEntryHash(e)))
-            .collect(toList());
-    proofList.addAll(leafEntries);
-    proofList.sort(Comparator.comparing(MapProofEntry::getDbKey));
+  private List<MapProofEntry> mergeLeavesWithBranches() {
+    int contourSize = proof.size() + entries.size();
+    assert contourSize > 1 :
+        "This method computes the hashes correctly for trees with multiple nodes only";
+
+    List<MapProofEntry> proofContour = new ArrayList<>(contourSize);
+
+    proofContour.addAll(proof);
+    entries
+        .stream()
+        .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getMapEntryHash(e)))
+        .forEach(proofContour::add);
+
+    proofContour.sort(Comparator.comparing(MapProofEntry::getDbKey));
+
+    return proofContour;
   }
 
   /**

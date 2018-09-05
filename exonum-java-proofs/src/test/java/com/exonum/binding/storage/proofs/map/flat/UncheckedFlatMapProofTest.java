@@ -217,8 +217,8 @@ public class UncheckedFlatMapProofTest {
 
   @Test
   public void mapProofWithIncludedPrefixesShouldBeInvalid() {
-    DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("11");
-    DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
+    DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
+    DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("11");
     byte[] absentKey = DbKeyTestUtils.keyFromString("111111");
 
     UncheckedMapProof uncheckedFlatMapProof =
