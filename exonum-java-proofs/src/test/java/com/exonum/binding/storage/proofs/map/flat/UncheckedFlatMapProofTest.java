@@ -16,6 +16,8 @@
 
 package com.exonum.binding.storage.proofs.map.flat;
 
+import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -113,8 +115,15 @@ public class UncheckedFlatMapProofTest {
   @Test
   public void mapProofWithOneElementShouldBeValid() {
     byte[] key = DbKeyTestUtils.keyFromString("01");
-    MapEntry mapEntry = createMapEntry(key, FIRST_VALUE);
-    HashCode expectedRootHash = HASH_FUNCTION.hashBytes(FIRST_VALUE);
+    byte[] value = FIRST_VALUE;
+    MapEntry mapEntry = createMapEntry(key, value);
+
+    HashCode valueHash = HASH_FUNCTION.hashBytes(value);
+    HashCode expectedRootHash = HASH_FUNCTION.newHasher()
+        .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
+        .putObject(valueHash, hashCodeFunnel())
+        .hash();
+
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
             Collections.emptyList(),
@@ -126,7 +135,7 @@ public class UncheckedFlatMapProofTest {
 
     assertThat(checkedMapProof.getEntries(), equalTo(Collections.singletonList(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));
-    assertThat(checkedMapProof.get(key), equalTo(FIRST_VALUE));
+    assertThat(checkedMapProof.get(key), equalTo(value));
   }
 
   @Test
