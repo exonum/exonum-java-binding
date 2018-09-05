@@ -35,8 +35,8 @@ public class CreateTransferTransactionUtils {
    * Creates new signed binary transfer transaction message using provided keys and
    * provided amount.
    */
-  public static BinaryMessage createSignedMessage(long seed, PublicKey senderId, PrivateKey senderSecret,
-      PublicKey recipientId, long amount) {
+  public static BinaryMessage createSignedMessage(long seed, PublicKey senderId,
+      PrivateKey senderSecret, PublicKey recipientId, long amount) {
     BinaryMessage packetUnsigned = createUnsignedMessage(seed, senderId, recipientId, amount);
     return packetUnsigned.sign(CRYPTO_FUNCTION, senderSecret);
   }
@@ -45,8 +45,8 @@ public class CreateTransferTransactionUtils {
    * Creates new unsigned binary transfer transaction message using provided keys and
    * provided amount.
    */
-  public static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId, PublicKey recipientId,
-      long amount) {
+  public static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
+      PublicKey recipientId, long amount) {
     return newCryptocurrencyTransactionBuilder(TransferTx.ID)
         .setBody(TxMessagesProtos.TransferTx.newBuilder()
             .setSeed(seed)
