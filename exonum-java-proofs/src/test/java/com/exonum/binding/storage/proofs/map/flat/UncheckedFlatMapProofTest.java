@@ -133,6 +133,7 @@ public class UncheckedFlatMapProofTest {
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
+    assertTrue(checkedMapProof.compareWithRootHash(expectedRootHash));
 
     assertThat(checkedMapProof.getEntries(), equalTo(singletonList(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));

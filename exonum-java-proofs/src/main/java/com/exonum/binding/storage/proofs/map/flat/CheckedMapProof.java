@@ -31,7 +31,7 @@ import java.util.List;
  * // Convert to checked
  * CheckedMapProof checkedProof = proof.check();
  * // Check the root hash
- * if (compareWithRootHash(HashCode expectedRootHash)) {
+ * if (checkedProof.compareWithRootHash(HashCode expectedRootHash)) {
  *   // Get and use the value(s)
  *   byte[] value = checked.get(key);
  * }
