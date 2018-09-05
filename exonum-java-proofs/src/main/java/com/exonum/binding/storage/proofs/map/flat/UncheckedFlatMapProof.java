@@ -72,12 +72,12 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   @Override
   public CheckedMapProof check() {
-    if (prefixesIncluded()) {
-      return CheckedFlatMapProof.invalid(ProofStatus.INVALID_STRUCTURE);
-    }
     ProofStatus orderCheckResult = orderCheck();
     if (orderCheckResult != ProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
+    }
+    if (prefixesIncluded()) {
+      return CheckedFlatMapProof.invalid(ProofStatus.INVALID_STRUCTURE);
     }
     if (isEmptyProof()) {
       return checkEmptyProof();
@@ -89,35 +89,15 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
-   * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
-   * keys are checked.
-   */
-  private boolean prefixesIncluded() {
-    // TODO: entries are sorted, so it's possible to use binary search here
-    Stream<DbKey> requestedKeysStream =
-        Stream.concat(
-            entries.stream().map(e -> DbKey.newLeafKey(e.getKey())),
-            missingKeys.stream().map(DbKey::newLeafKey));
-    return requestedKeysStream
-        .anyMatch(leafEntryKey -> proof.stream()
-            .map(MapProofEntry::getDbKey)
-            .anyMatch(proofEntryKey ->
-                proofEntryKey.isPrefixOf(leafEntryKey))
-        );
-  }
-
-  /**
-   * Check that all entries are in the valid order.
-   * The following algorithm is used:
-   * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
-   * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
-   * these indexes indicates the greater key.
-   * If there is no such bit, then lengths of these keys are compared and the key with greater
-   * length is considered a greater key.
-   * Every following key should be greater than the previous.
+   * Checks that all entries in the proof are in the valid order.
+   *
+   * <p>The keys must be in ascending order as defined by
+   * the {@linkplain DbKey#compareTo(DbKey) comparator}; there must not be duplicates.
+   *
    * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
    *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
    *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
+   * @see DbKey#compareTo(DbKey)
    */
   private ProofStatus orderCheck() {
     for (int i = 1; i < proof.size(); i++) {
@@ -131,6 +111,28 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       }
     }
     return ProofStatus.CORRECT;
+  }
+
+  /**
+   * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
+   * keys are checked.
+   */
+  private boolean prefixesIncluded() {
+    Stream<DbKey> requestedKeys =
+        Stream.concat(
+            entries.stream()
+                .map(MapEntry::getKey),
+            missingKeys.stream())
+        .map(DbKey::newLeafKey);
+
+    // TODO: proof entries are checked to be sorted at this stage, so it's possible …
+    // to use binary search here
+    return requestedKeys
+        .anyMatch(leafEntryKey -> proof.stream()
+            .map(MapProofEntry::getDbKey)
+            .anyMatch(proofEntryKey ->
+                proofEntryKey.isPrefixOf(leafEntryKey))
+        );
   }
 
   private boolean isEmptyProof() {
