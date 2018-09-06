@@ -31,10 +31,6 @@ import com.google.protobuf.ByteString;
 
 class CreateTransferTransactionUtils {
 
-  private CreateTransferTransactionUtils() {
-    throw new AssertionError("Non-instantiable");
-  }
-
   /**
    * Creates new signed binary transfer transaction message using provided keys and
    * provided amount.
@@ -77,5 +73,9 @@ class CreateTransferTransactionUtils {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
     wallets.put(publicKey, new Wallet(initialBalance));
+  }
+
+  private CreateTransferTransactionUtils() {
+    throw new AssertionError("Non-instantiable");
   }
 }
