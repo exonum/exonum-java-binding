@@ -74,7 +74,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
     if (prefixesIncluded()) {
-      return CheckedFlatMapProof.invalid(ProofStatus.INVALID_STRUCTURE);
+      return CheckedFlatMapProof.invalid(ProofStatus.EMBEDDED_PATH);
     }
     if (isEmptyProof()) {
       return checkEmptyProof();
@@ -105,6 +105,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         return ProofStatus.INVALID_ORDER;
       } else if (comparisonResult == 0) {
         return ProofStatus.DUPLICATE_PATH;
+      } else if (key.isPrefixOf(nextKey)) {
+        return ProofStatus.EMBEDDED_PATH;
       }
     }
     return ProofStatus.CORRECT;

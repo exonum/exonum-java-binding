@@ -48,7 +48,7 @@ public class UncheckedFlatMapProofTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void mapProofShouldBeValid() {
+  public void mapProofShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
@@ -71,7 +71,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithSeveralLeafsShouldBeValid() {
+  public void mapProofWithSeveralLeafsShouldBeCorrect() {
     byte[] firstKey = DbKeyTestUtils.keyFromString("0011_0101");
     byte[] secondKey = DbKeyTestUtils.keyFromString("0011_0110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
@@ -114,7 +114,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithOneElementShouldBeValid() {
+  public void mapProofWithOneElementShouldBeCorrect() {
     byte[] key = DbKeyTestUtils.keyFromString("01");
     byte[] value = FIRST_VALUE;
     MapEntry mapEntry = createMapEntry(key, value);
@@ -156,7 +156,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithoutEntriesShouldBeValid() {
+  public void mapProofWithoutEntriesShouldBeCorrect() {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
             emptyList(), emptyList(), emptyList());
@@ -241,7 +241,25 @@ public class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_STRUCTURE));
+    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.EMBEDDED_PATH));
+  }
+
+  @Test
+  public void mapProofWithIncludedBranchPrefixesShouldBeInvalid() {
+    DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
+    DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("011");
+    byte[] absentKey = DbKeyTestUtils.keyFromString("111111");
+
+    UncheckedMapProof uncheckedFlatMapProof =
+        new UncheckedFlatMapProof(
+            Arrays.asList(
+                createMapProofEntry(firstDbKey),
+                createMapProofEntry(secondDbKey)),
+            emptyList(),
+            singletonList(absentKey));
+
+    CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.EMBEDDED_PATH));
   }
 
   private static MapProofEntry createMapProofEntry(DbKey dbKey) {
