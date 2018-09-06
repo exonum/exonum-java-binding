@@ -24,7 +24,7 @@ import java.util.Objects;
 /**
  * A key bit set.
  */
-final class KeyBitSet {
+public final class KeyBitSet {
 
   private final BitSet keyBits;
 
@@ -41,10 +41,18 @@ final class KeyBitSet {
    * @param key key bytes
    * @param length a length in bits, i.e., the number of significant bits in key array
    */
-  KeyBitSet(byte[] key, int length) {
+  public KeyBitSet(byte[] key, int length) {
     checkArgument(length >= 0, "length (%s) must be non-negative", length);
     keyBits = BitSet.valueOf(key);
     this.length = length;
+  }
+
+  public int getLength() {
+    return length;
+  }
+
+  public BitSet getKeyBits() {
+    return (BitSet) keyBits.clone();
   }
 
   /**

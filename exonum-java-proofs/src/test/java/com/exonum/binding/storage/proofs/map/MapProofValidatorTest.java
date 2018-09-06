@@ -17,6 +17,8 @@
 package com.exonum.binding.storage.proofs.map;
 
 import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.branchDbKey;
+import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.leafDbKey;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isNotValid;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isValid;
 import static com.exonum.binding.test.Bytes.bytes;
@@ -32,7 +34,6 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hasher;
-import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import com.exonum.binding.storage.proofs.map.MapProofValidator.Status;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.Arrays;
@@ -52,6 +53,7 @@ public class MapProofValidatorTest {
       createPrefixed(bytes("root hash"), DEFAULT_HASH_SIZE_BYTES));
   private static final HashCode EMPTY_HASH = HashCode.fromBytes(
       new byte[DEFAULT_HASH_SIZE_BYTES]);
+  private static final int MAX_SIGNIFICANT_BITS_IN_BRANCH = 255;
 
   private HashFunction hashFunction;
   private Hasher hasher;
@@ -497,14 +499,6 @@ public class MapProofValidatorTest {
     return HashCode.fromBytes(createPrefixed(prefixBytes, DEFAULT_HASH_SIZE_BYTES));
   }
 
-  private static DbKey leafDbKey(byte[] key) {
-    return new DbKey(Type.LEAF, key, DbKey.KEY_SIZE_BITS);
-  }
-
-  private static DbKey branchDbKey(byte[] key, int numSignificantBits) {
-    return new DbKey(Type.BRANCH, key, numSignificantBits);
-  }
-
   @Test
   public void testVisitRightLeaningTree_H1_Valid() {
     int height = 1;
@@ -594,8 +588,10 @@ public class MapProofValidatorTest {
     DbKey rightKey = leafDbKey(createKey(stripToKeySize(rightPath.toByteArray())));
     HashCode rightHash = createHash("h1");
 
+    // MAX_SIGNIFICANT_BITS_IN_BRANCH is used in case when proof tree with height of more than 256
+    // is created and we want to keep number of significant bits in branch node less than that
     DbKey leftKey = branchDbKey(createKey(stripToKeySize(pathToThis.toByteArray())),
-        pathToThis.getLength());
+        Math.min(pathToThis.getLength(), MAX_SIGNIFICANT_BITS_IN_BRANCH));
     pathToThis.goLeft();
     return new LeftMapProofBranch(
         createProofTreeNode(pathToThis, height - 1, value),
