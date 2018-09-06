@@ -20,7 +20,7 @@ import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.messages.Message;
 import java.nio.ByteBuffer;
 
-final class CryptocurrencyTransactionTemplate {
+public final class CryptocurrencyTransactionTemplate {
 
   private static final short INVALID_MESSAGE_TYPE = 0;
 
@@ -42,7 +42,7 @@ final class CryptocurrencyTransactionTemplate {
    * @return a message builder that has an ID of cryptocurrency service, the given transaction ID,
    *     empty body and all-zero signature
    */
-  static Message.Builder newCryptocurrencyTransactionBuilder(short transactionId) {
+  public static Message.Builder newCryptocurrencyTransactionBuilder(short transactionId) {
     return new Message.Builder()
         .mergeFrom(CRYPTOCURRENCY_TRANSACTION_TEMPLATE)
         .setMessageType(transactionId);

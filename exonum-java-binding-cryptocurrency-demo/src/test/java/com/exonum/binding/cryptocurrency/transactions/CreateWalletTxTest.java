@@ -17,7 +17,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createSignedMessage;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createUnsignedMessage;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,7 +33,6 @@ import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
@@ -40,7 +41,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -49,8 +49,6 @@ class CreateWalletTxTest {
   static {
     LibraryLoader.load();
   }
-
-  private static final long DEFAULT_BALANCE = 100L;
 
   private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.firstOwnerKey;
 
@@ -76,27 +74,10 @@ class CreateWalletTxTest {
 
   @Test
   void isValidUnsigned() {
-    BinaryMessage m = createUnsignedMessage(OWNER_KEY, DEFAULT_BALANCE);
+    BinaryMessage m = createUnsignedMessage(OWNER_KEY);
     CreateWalletTx tx = CreateWalletTx.fromMessage(m);
 
     assertFalse(tx.isValid());
-  }
-
-  private BinaryMessage createSignedMessage(KeyPair ownerKeyPair) {
-    BinaryMessage unsignedMessage = createUnsignedMessage(ownerKeyPair.getPublicKey(),
-        DEFAULT_BALANCE);
-    return unsignedMessage.sign(CRYPTO_FUNCTION, ownerKeyPair.getPrivateKey());
-  }
-
-  private BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
-    return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
-        .setBody(TxMessagesProtos.CreateWalletTx.newBuilder()
-            .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
-            .setInitialBalance(initialBalance)
-            .build()
-            .toByteArray())
-        .setSignature(new byte[Message.SIGNATURE_SIZE])
-        .buildRaw();
   }
 
   @Test
@@ -117,7 +98,7 @@ class CreateWalletTxTest {
         () -> withMockMessage(OWNER_KEY, initialBalance)
     );
     assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
-    
+
   }
 
   @Test

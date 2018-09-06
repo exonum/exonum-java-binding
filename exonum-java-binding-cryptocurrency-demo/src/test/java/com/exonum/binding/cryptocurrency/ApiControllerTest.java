@@ -22,14 +22,16 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
-import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
+import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.InternalServerError;
@@ -37,7 +39,6 @@ import com.exonum.binding.messages.Transaction;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
@@ -61,11 +62,11 @@ class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
+  private static final short CREATE_WALLET_TX_ID = 1;
+
   private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
 
   private CryptocurrencyService service;
-
-  private JsonBinaryMessageConverter jsonBinaryMessageConverter;
 
   private ApiController controller;
 
@@ -78,8 +79,7 @@ class ApiControllerTest {
   @BeforeEach
   void setup(Vertx vertx, VertxTestContext context) {
     service = mock(CryptocurrencyService.class);
-    jsonBinaryMessageConverter = mock(JsonBinaryMessageConverter.class);
-    controller = new ApiController(service, jsonBinaryMessageConverter);
+    controller = new ApiController(service);
 
     httpServer = vertx.createHttpServer();
     webClient = WebClient.create(vertx);
@@ -104,14 +104,12 @@ class ApiControllerTest {
 
   @Test
   void submitValidTransaction(VertxTestContext context) {
-    String messageJson = "{\"service_id\":42}";
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
+
     String messageHash = "1234";
-    BinaryMessage message = mock(BinaryMessage.class);
     Transaction transaction = mock(Transaction.class);
 
-    when(jsonBinaryMessageConverter.toMessage(messageJson))
-        .thenReturn(message);
-    when(service.convertToTransaction(message))
+    when(service.convertToTransaction(any(BinaryMessage.class)))
         .thenReturn(transaction);
     when(service.submitTransaction(transaction))
         .thenReturn(HashCode.fromString(messageHash));
@@ -119,8 +117,8 @@ class ApiControllerTest {
     String expectedResponse = messageHash;
     // Send a request to submitTransaction
     post(ApiController.SUBMIT_TRANSACTION_PATH)
-        .sendJsonObject(
-            new JsonObject(messageJson),
+        .sendBuffer(
+            Buffer.buffer(message.getSignedMessage().array()),
             context.succeeding(
                 response -> context.verify(() -> {
                   // Check the response status
@@ -143,22 +141,38 @@ class ApiControllerTest {
   }
 
   @Test
+  void submitTransactionOfIncorrectMessageSize(VertxTestContext context) {
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
+    byte errorByte = 1;
+
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendBuffer(
+            Buffer.buffer(message.getSignedMessage().array()).appendByte(errorByte),
+            context.succeeding(response -> context.verify(() -> {
+              assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+
+              verify(service, never()).convertToTransaction(any(BinaryMessage.class));
+              verify(service, never()).submitTransaction(any(Transaction.class));
+
+              context.completeNow();
+            })));
+  }
+
+  @Test
   void submitTransactionWhenInternalServerErrorIsThrown(VertxTestContext context) {
-    String messageJson = "{\"service_id\":42}";
-    BinaryMessage message = mock(BinaryMessage.class);
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
+
     Transaction transaction = mock(Transaction.class);
     Throwable error = wrappingChecked(InternalServerError.class);
 
-    when(jsonBinaryMessageConverter.toMessage(messageJson))
-        .thenReturn(message);
-    when(service.convertToTransaction(message))
+    when(service.convertToTransaction(any(BinaryMessage.class)))
         .thenReturn(transaction);
     when(service.submitTransaction(transaction))
         .thenThrow(error);
 
     post(ApiController.SUBMIT_TRANSACTION_PATH)
-        .sendJsonObject(
-            new JsonObject(messageJson),
+        .sendBuffer(
+            Buffer.buffer(message.getSignedMessage().array()),
             context.succeeding(response -> context.verify(() -> {
               assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
               verify(service).submitTransaction(transaction);
@@ -216,6 +230,11 @@ class ApiControllerTest {
 
           context.completeNow();
         })));
+  }
+
+  private BinaryMessage createTestBinaryMessage(short txId) {
+    return CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder(txId)
+        .buildRaw();
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
