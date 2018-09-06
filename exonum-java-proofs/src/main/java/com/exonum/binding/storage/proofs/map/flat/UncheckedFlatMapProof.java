@@ -94,19 +94,22 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
    *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
    *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
+   *         {@code ProofStatus.EMBEDDED_PATH} if one key is a prefix of another
    * @see DbKey#compareTo(DbKey)
    */
   private ProofStatus orderCheck() {
     for (int i = 1; i < proof.size(); i++) {
       DbKey key = proof.get(i - 1).getDbKey();
       DbKey nextKey = proof.get(i).getDbKey();
-      int comparisonResult = nextKey.compareTo(key);
+      int comparisonResult = key.compareTo(nextKey);
       if (comparisonResult < 0) {
-        return ProofStatus.INVALID_ORDER;
+        if (key.isPrefixOf(nextKey)) {
+          return ProofStatus.EMBEDDED_PATH;
+        }
       } else if (comparisonResult == 0) {
         return ProofStatus.DUPLICATE_PATH;
-      } else if (key.isPrefixOf(nextKey)) {
-        return ProofStatus.EMBEDDED_PATH;
+      } else {
+        return ProofStatus.INVALID_ORDER;
       }
     }
     return ProofStatus.CORRECT;

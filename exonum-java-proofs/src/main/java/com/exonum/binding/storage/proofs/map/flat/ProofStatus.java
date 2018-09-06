@@ -22,10 +22,9 @@ package com.exonum.binding.storage.proofs.map.flat;
 public enum ProofStatus {
   CORRECT("Proof has a valid structure"),
   NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
-  INVALID_STRUCTURE("Proof has invalid structure"),
   INVALID_ORDER("Proof entries are placed in the wrong order"),
   DUPLICATE_PATH("There are entries with duplicate keys"),
-  EMBEDDED_PATH("Some keys in a proof are prefixes of others");
+  EMBEDDED_PATH("One key in the proof is a prefix of another key");
 
   final String description;
 
