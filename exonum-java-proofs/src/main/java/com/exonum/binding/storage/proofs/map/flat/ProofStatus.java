@@ -25,7 +25,6 @@ public enum ProofStatus {
   INVALID_STRUCTURE("Proof has invalid structure"),
   INVALID_ORDER("Proof entries are placed in the wrong order"),
   DUPLICATE_PATH("There are entries with duplicate keys"),
-  // TODO: rewrite?
   EMBEDDED_PATH("Some keys in a proof are prefixes of others");
 
   final String description;
