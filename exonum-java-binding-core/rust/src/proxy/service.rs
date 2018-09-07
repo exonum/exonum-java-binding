@@ -1,4 +1,4 @@
-use exonum::api::{self, ServiceApiBuilder, ServiceApiState};
+use exonum::api::ServiceApiBuilder;
 use exonum::blockchain::{Service, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
@@ -152,31 +152,30 @@ impl Service for ServiceProxy {
     }
 
     fn wire_api(&self, builder: &mut ServiceApiBuilder) {
-        let self_ = self.clone();
-        builder.public_scope().endpoint(
-            "",
-            move |state: &ServiceApiState, _: ()| -> api::Result<()> {
-                let node = NodeContext::new(
-                    self_.exec.clone(),
-                    state.blockchain().clone(),
-                    *state.public_key(),
-                    state.sender().clone(),
-                );
-                unwrap_jni(self_.exec.with_attached(|env| {
-                    let node_handle = to_handle(node);
-                    panic_on_exception(
-                        env,
-                        env.call_method(
-                            self_.service.as_obj(),
-                            "mountPublicApiHandler",
-                            "(J)V",
-                            &[JValue::from(node_handle)],
-                        ),
-                    );
-                    Ok(())
-                }));
-                Ok(())
-            },
+
+        if builder.blockchain().is_none() {
+            panic!("No Blockchain instance in ServiceApiBuilder");
+        }
+
+        let node = NodeContext::new(
+            self.exec.clone(),
+            builder.blockchain().unwrap().clone(),
+            builder.public_key().unwrap(),
+            builder.api_sender().unwrap().clone(),
         );
+
+        unwrap_jni(self.exec.with_attached(|env| {
+            let node_handle = to_handle(node);
+            panic_on_exception(
+                env,
+                env.call_method(
+                    self.service.as_obj(),
+                    "mountPublicApiHandler",
+                    "(J)V",
+                    &[JValue::from(node_handle)],
+                ),
+            );
+            Ok(())
+        }));
     }
 }
