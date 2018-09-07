@@ -28,7 +28,7 @@ import com.exonum.binding.hash.PrimitiveSink;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -47,7 +47,7 @@ public final class ListProofValidator<E> implements ListProofVisitor {
 
   private final int expectedLeafDepth;
 
-  private final Map<Long, E> elements;
+  private final NavigableMap<Long, E> elements;
 
   private long index;
 
@@ -187,7 +187,7 @@ public final class ListProofValidator<E> implements ListProofVisitor {
    *
    * @throws IllegalStateException if proof is not valid
    */
-  public Map<Long, E> getElements() {
+  public NavigableMap<Long, E> getElements() {
     checkState(isValid(), "Proof is not valid: %s", getReason());
     return elements;
   }

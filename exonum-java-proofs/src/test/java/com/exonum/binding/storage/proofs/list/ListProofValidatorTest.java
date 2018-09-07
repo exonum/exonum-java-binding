@@ -31,7 +31,6 @@ import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.HashFunction;
 import com.exonum.binding.hash.Hasher;
 import com.exonum.binding.storage.serialization.StandardSerializers;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
@@ -120,8 +119,7 @@ public class ListProofValidatorTest {
     validator.visit(root);
 
     assertTrue(validator.isValid());
-    Map<Long, String> elements = validator.getElements();
-    assertThat(elements, equalTo(of(0L, V1,
+    assertThat(validator.getElements(), equalTo(of(0L, V1,
         1L, V2)));
   }
 
