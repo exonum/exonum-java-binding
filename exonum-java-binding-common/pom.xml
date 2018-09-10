@@ -16,7 +16,9 @@
 
   <name>Exonum Java Binding: Common</name>
   <description>
-    A Common library module for the Exonum core and Java clients.
+    A common library module for the Exonum core and Java clients,
+    providing Exonum proofs, hashing and cryptographic operations,
+    and serialization support.
   </description>
 
   <properties>
