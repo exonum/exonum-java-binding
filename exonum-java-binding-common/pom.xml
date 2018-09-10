@@ -16,7 +16,7 @@
 
   <name>Exonum Java Binding: Common</name>
   <description>
-    A library that provides classes to represent and verify Exonum proofs.
+    A Common library module for the Exonum core and Java clients.
   </description>
 
   <properties>
