@@ -26,7 +26,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
 
-// This class is a slightly modified copy of the one in exonum-java-proofs.
+// This class is a slightly modified copy of the one in exonum-java-common.
 // It is specialized to work with maps with HashCode keys and String values only.
 class MapProofValidatorMatcher extends TypeSafeMatcher<MapProofValidator<String>> {
 

@@ -10,7 +10,7 @@
     <version>0.2</version>
   </parent>
 
-  <artifactId>exonum-java-proofs</artifactId>
+  <artifactId>exonum-java-common</artifactId>
   <version>0.2</version>
   <packaging>jar</packaging>
 
