@@ -10,11 +10,11 @@
     <version>0.2</version>
   </parent>
 
-  <artifactId>exonum-java-common</artifactId>
+  <artifactId>exonum-java-binding-common</artifactId>
   <version>0.2</version>
   <packaging>jar</packaging>
 
-  <name>Exonum Java Binding: Proofs</name>
+  <name>Exonum Java Binding: Common</name>
   <description>
     A library that provides classes to represent and verify Exonum proofs.
   </description>
