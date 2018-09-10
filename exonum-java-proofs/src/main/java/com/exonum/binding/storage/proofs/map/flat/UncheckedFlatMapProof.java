@@ -57,7 +57,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   @SuppressWarnings("unused") // Native API
-  static UncheckedFlatMapProof fromUnsorted(
+  static UncheckedFlatMapProof fromNative(
       MapProofEntry[] proofList,
       MapEntry[] entries,
       byte[][] missingKeys) {
