@@ -16,15 +16,15 @@
 
 package com.exonum.binding.service;
 
-import static com.exonum.binding.messages.TemplateMessage.TEMPLATE_MESSAGE;
+import static com.exonum.binding.common.message.TemplateMessage.TEMPLATE_MESSAGE;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.Fork;

@@ -20,8 +20,8 @@ import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.ne
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
 import java.util.Collections;

@@ -19,8 +19,8 @@ package com.exonum.binding.qaservice.transactions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.transaction.Transaction;
 import java.nio.ByteBuffer;

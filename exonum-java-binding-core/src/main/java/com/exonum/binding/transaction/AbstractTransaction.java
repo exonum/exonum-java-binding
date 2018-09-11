@@ -18,7 +18,7 @@ package com.exonum.binding.transaction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 
 /**
  * An abstract Exonum transaction. It includes a reference to a binary Exonum message

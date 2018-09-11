@@ -18,7 +18,7 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;

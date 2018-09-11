@@ -22,7 +22,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.AbstractTransaction;

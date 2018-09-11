@@ -24,7 +24,7 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERRO
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.transaction.Transaction;

@@ -19,7 +19,7 @@ package com.exonum.binding.fakes.services.transactions;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.serialization.StandardSerializers;

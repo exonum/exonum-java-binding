@@ -31,7 +31,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;

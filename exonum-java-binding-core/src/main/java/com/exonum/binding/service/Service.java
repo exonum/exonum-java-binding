@@ -17,7 +17,7 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;

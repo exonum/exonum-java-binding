@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.common.message;
 
-import com.exonum.binding.common.message.Message;
-import com.exonum.binding.qaservice.QaService;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-final class Transactions {
+public class ByteBufferAllocator {
 
-  /** A template of QA service transaction. */
-  static final Message QA_TX_MESSAGE_TEMPLATE = new Message.Builder()
-      .setNetworkId((byte) 0)
-      .setVersion((byte) 0)
-      .setServiceId(QaService.ID)
-      .setMessageType(Short.MAX_VALUE)
-      .setBody(ByteBuffer.allocate(0))
-      .setSignature(new byte[Message.SIGNATURE_SIZE])
-      .buildPartial();
-
-  private Transactions() {
-    throw new AssertionError("Non-instantiable");
+  /**
+   * Allocates a byte buffer of the given size, and sets its order to little-endian.
+   *
+   * @param size size of the buffer in bytes
+   *
+   * @return a new byte buffer of the given size
+   */
+  public static ByteBuffer allocateBuffer(int size) {
+    return ByteBuffer.allocate(size)
+        .order(ByteOrder.LITTLE_ENDIAN);
   }
+
+  private ByteBufferAllocator() {}
 }

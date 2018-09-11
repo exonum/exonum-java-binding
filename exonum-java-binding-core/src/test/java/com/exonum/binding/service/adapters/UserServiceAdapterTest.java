@@ -29,9 +29,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.TemplateMessage;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
+import com.exonum.binding.common.message.TemplateMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Snapshot;

@@ -16,8 +16,8 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.PromoteToCore;
 import com.exonum.binding.transaction.Transaction;
 

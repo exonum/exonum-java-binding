@@ -27,8 +27,8 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import org.junit.jupiter.api.Test;

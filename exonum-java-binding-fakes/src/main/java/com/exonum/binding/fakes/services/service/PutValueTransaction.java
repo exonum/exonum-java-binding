@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.AbstractTransaction;

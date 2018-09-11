@@ -16,7 +16,7 @@
 
 package ${groupId};
 
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.service.TransactionConverter;
 

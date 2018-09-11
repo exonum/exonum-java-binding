@@ -17,7 +17,7 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.annotations.AutoGenerationCandidate;
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.transaction.Transaction;
 
 /**

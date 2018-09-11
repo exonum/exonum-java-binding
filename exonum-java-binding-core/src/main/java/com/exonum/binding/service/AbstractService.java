@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.transaction.Transaction;
