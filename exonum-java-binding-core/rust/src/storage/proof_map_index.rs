@@ -200,7 +200,7 @@ fn create_java_proof_nodes<'a>(
     let proof_entries = map_proof.proof_unchecked();
     let java_entries = env.new_object_array(proof_entries.len() as jsize, MAP_PROOF_ENTRY, JObject::null())?;
     for (i, (proof_path, value_hash)) in proof_entries.iter().enumerate() {
-        // todo: Estimate precisely the upper bound on the number of references ^ and
+        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
         //   consider using a single frame
         env.with_local_frame(8, || {
             let je = create_java_proof_node(env, &proof_path, &value_hash)?;
@@ -234,7 +234,7 @@ fn create_java_map_entries<'a>(
     let entries: Vec<(&Key, &Value)> = checked_proof.entries();
     let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
     for (i, (key, value)) in entries.iter().enumerate() {
-        // todo: Estimate precisely the upper bound on the number of references ^ and
+        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
         //   consider using a single frame
         env.with_local_frame(8, || {
             let je = create_java_map_entry(env, key, value)?;
