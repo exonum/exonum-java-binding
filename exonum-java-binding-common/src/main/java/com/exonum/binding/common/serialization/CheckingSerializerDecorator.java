@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.serialization;
+package com.exonum.binding.common.serialization;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;

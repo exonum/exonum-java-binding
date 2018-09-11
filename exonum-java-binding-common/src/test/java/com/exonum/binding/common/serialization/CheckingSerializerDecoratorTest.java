@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.serialization;
+package com.exonum.binding.common.serialization;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;

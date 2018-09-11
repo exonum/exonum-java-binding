@@ -1,4 +1,4 @@
-package com.exonum.binding.storage.serialization;
+package com.exonum.binding.common.serialization;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;

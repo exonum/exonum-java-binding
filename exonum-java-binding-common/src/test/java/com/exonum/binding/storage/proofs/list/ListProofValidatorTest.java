@@ -30,7 +30,7 @@ import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hasher;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;

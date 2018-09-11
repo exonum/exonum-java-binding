@@ -16,7 +16,7 @@
 
 package com.exonum.binding.common.crypto;
 
-import com.exonum.binding.storage.serialization.Serializer;
+import com.exonum.binding.common.serialization.Serializer;
 
 public enum PublicKeySerializer implements Serializer<PublicKey> {
   INSTANCE;

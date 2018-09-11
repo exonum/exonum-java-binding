@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.serialization;
+package com.exonum.binding.common.serialization;
 
 /**
  * Converts Java objects into a binary representation in some format, and vice versa.

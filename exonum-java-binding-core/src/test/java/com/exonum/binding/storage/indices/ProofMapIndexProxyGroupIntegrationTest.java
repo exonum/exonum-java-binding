@@ -21,8 +21,8 @@ import static com.exonum.binding.storage.indices.ProofMapIndexProxyIntegrationTe
 import static com.exonum.binding.storage.indices.ProofMapIndexProxyIntegrationTest.PK3;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableMap;
 
 public class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<HashCode> {

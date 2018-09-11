@@ -22,13 +22,13 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkStora
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Iterator;
