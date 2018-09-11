@@ -14,4 +14,4 @@ See: https://jira.bf.local/browse/XYZ
 - [ ] Public API has Javadoc
 - [ ] Method preconditions are checked and documented in the Javadoc of the method
 - [ ] Changelog is updated if needed (in case of notable or breaking changes)
-- [ ] The [continuous integration build](https://www.travis-ci.org/exonum/exonum-java-binding) passes
+- [ ] The continuous integration build passes
