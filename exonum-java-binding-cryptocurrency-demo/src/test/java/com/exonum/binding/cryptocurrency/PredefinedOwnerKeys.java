@@ -16,9 +16,9 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.test.Bytes;
 
 public class PredefinedOwnerKeys {

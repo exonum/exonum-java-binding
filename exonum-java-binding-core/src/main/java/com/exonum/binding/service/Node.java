@@ -16,10 +16,8 @@
 
 package com.exonum.binding.service;
 
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.Transaction;
 import java.util.function.Function;
 
 /**

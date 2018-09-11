@@ -16,11 +16,11 @@
 
 package com.exonum.binding.fakes.services.service;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
 

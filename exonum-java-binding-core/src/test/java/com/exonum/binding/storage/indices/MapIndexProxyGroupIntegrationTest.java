@@ -19,8 +19,8 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;

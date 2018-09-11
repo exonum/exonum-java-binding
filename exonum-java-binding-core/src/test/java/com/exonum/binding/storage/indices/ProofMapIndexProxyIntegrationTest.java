@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
@@ -38,14 +38,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.map.MapProof;
+import com.exonum.binding.common.proofs.map.MapProofTreePrinter;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.proofs.map.MapProof;
-import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

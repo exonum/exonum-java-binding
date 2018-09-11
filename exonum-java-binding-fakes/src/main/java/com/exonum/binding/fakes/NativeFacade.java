@@ -23,11 +23,11 @@ import com.exonum.binding.fakes.mocks.UserServiceAdapterMockBuilder;
 import com.exonum.binding.fakes.services.service.TestSchema;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.fakes.services.transactions.SetEntryTransaction;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.exonum.binding.util.LibraryLoader;
 
