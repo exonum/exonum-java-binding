@@ -39,6 +39,7 @@ const UNCHECKED_FLAT_MAP_PROOF: &str =
     "com/exonum/binding/storage/proofs/map/flat/UncheckedFlatMapProof";
 const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
     "([Lcom/exonum/binding/storage/proofs/map/flat/MapProofEntry;[Lcom/exonum/binding/storage/proofs/map/flat/MapEntry;[[B)Lcom/exonum/binding/storage/proofs/map/flat/UncheckedFlatMapProof;";
+const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
@@ -178,22 +179,21 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             IndexType::ForkIndex(ref map) => map.get_proof(key),
         };
 
-        let proof_entries: JObject = create_java_map_proof_entries(&env, &proof)?;
+        let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
         let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
 
-        // TODO: avoid checking proofs (ECR-1802)
+        // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
         let checked_proof = proof.check().unwrap();
-
         let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
-        let unchecked_flat_map_proof = create_java_unchecked_flat_map_proof(
-            &env, proof_entries, map_entries, missing_keys)?;
 
+        let unchecked_flat_map_proof = create_java_unchecked_flat_map_proof(
+            &env, proof_nodes, map_entries, missing_keys)?;
         Ok(unchecked_flat_map_proof.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-fn create_java_map_proof_entries<'a>(
+fn create_java_proof_nodes<'a>(
     env: &'a JNIEnv,
     map_proof: &MapProof<Key, Value>
 ) -> JniResult<JObject<'a>> {
@@ -203,7 +203,7 @@ fn create_java_map_proof_entries<'a>(
         // todo: Estimate precisely the upper bound on the number of references ^ and
         //   consider using a single frame
         env.with_local_frame(8, || {
-            let je = create_java_map_proof_entry(env, &proof_path, &value_hash)?;
+            let je = create_java_proof_node(env, &proof_path, &value_hash)?;
             env.set_object_array_element(java_entries, i as jsize, je)?;
             Ok(JObject::null())
         })?;
@@ -211,7 +211,9 @@ fn create_java_map_proof_entries<'a>(
     Ok(java_entries.into())
 }
 
-fn create_java_map_proof_entry<'a>(
+/// Creates a proof node — a node in a proof contour that corresponds to a tree node
+/// that does not contain any of the requested keys.
+fn create_java_proof_node<'a>(
     env: &'a JNIEnv,
     proof_path: &ProofPath,
     hash: &Hash,
@@ -262,7 +264,7 @@ fn create_java_missing_keys<'a>(
     map_proof: &MapProof<Key, Value>
 ) -> JniResult<JObject<'a>> {
     let missing_keys = map_proof.missing_keys_unchecked();
-    let java_missing_keys = env.new_object_array(missing_keys.len() as jsize, "[B", JObject::null())?;
+    let java_missing_keys = env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
     for (i, key) in missing_keys.iter().enumerate() {
         let java_key = env.byte_array_from_slice(key.as_ref())?.into();
         env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
@@ -273,7 +275,7 @@ fn create_java_missing_keys<'a>(
 
 fn create_java_unchecked_flat_map_proof<'a>(
     env: &'a JNIEnv,
-    proof_entries: JObject,
+    proof_nodes: JObject,
     map_entries: JObject,
     missing_keys: JObject
 ) -> JniResult<JObject<'a>> {
@@ -281,7 +283,7 @@ fn create_java_unchecked_flat_map_proof<'a>(
         UNCHECKED_FLAT_MAP_PROOF,
         "fromNative",
         UNCHECKED_FLAT_MAP_PROOF_SIG,
-        &[proof_entries.into(), map_entries.into(), missing_keys.into()],
+        &[proof_nodes.into(), map_entries.into(), missing_keys.into()],
     )?;
     java_proof.l()
 }
