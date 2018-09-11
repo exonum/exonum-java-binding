@@ -33,6 +33,7 @@ use JniResult;
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 const MAP_PROOF_ENTRY: &str = "com/exonum/binding/storage/proofs/map/flat/MapProofEntry";
 const MAP_ENTRY: &str = "com/exonum/binding/storage/proofs/map/flat/MapEntry";
 const UNCHECKED_FLAT_MAP_PROOF: &str =
@@ -47,8 +48,6 @@ enum IndexType {
 }
 
 type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
-
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
