@@ -7,7 +7,7 @@ use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
 
-use std::{panic, ptr};
+use std::{io, panic, ptr};
 
 use proxy::{MainExecutor, TransactionProxy};
 use storage::View;
@@ -64,7 +64,7 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: Box<Transaction>) -> ::std::io::Result<()> {
+    pub fn submit(&self, transaction: Box<Transaction>) -> io::Result<()> {
         self.channel.send(transaction)
     }
 }
