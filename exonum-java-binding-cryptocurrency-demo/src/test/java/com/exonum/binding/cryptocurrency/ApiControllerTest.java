@@ -29,9 +29,9 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.transaction.Transaction;
 import io.vertx.core.Vertx;

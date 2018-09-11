@@ -19,9 +19,9 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.common.message.Message;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

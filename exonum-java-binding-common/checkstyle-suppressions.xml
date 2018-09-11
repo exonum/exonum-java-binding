@@ -7,4 +7,11 @@
 <suppressions>
     <!-- Exclude repackaged Guava code -->
     <suppress files="com.exonum.binding.common.hash" checks=".*"/>
+
+    <!-- Exclude (mostly) auto-generated code -->
+    <suppress files="Message_Builder2\.java" checks=".*"/>
+
+    <!-- Allow underscore in the class name so that IDEs work properly. -->
+    <suppress files="Message_Builder2Test\.java" checks="TypeName"/>
+
 </suppressions>

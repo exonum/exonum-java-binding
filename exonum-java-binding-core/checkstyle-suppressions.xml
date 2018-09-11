@@ -5,12 +5,6 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <!-- Exclude (mostly) auto-generated code -->
-    <suppress files="Message_Builder2\.java" checks=".*"/>
-
-    <!-- Allow underscore in the class name so that IDEs work properly. -->
-    <suppress files="Message_Builder2Test\.java" checks="TypeName"/>
-
     <!-- fixme: remove both below when https://github.com/checkstyle/checkstyle/issues/5088 is resolved -->
     <suppress files="Node.*\.java" checks="JavadocMethod"/>
     <suppress files="Transaction\.java" checks="JavadocMethod"/>

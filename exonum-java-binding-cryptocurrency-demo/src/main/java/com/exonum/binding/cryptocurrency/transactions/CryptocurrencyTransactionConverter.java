@@ -18,8 +18,8 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.collect.ImmutableMap;
