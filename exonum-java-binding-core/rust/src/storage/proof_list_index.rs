@@ -13,14 +13,16 @@
 // limitations under the License.
 
 use exonum::crypto::Hash;
-use exonum::storage::{Fork, ProofListIndex, Snapshot};
 use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
+use exonum::storage::{Fork, ProofListIndex, Snapshot};
 use jni::errors::Result;
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jint, jlong, jobject};
+use jni::JNIEnv;
+
 use std::panic;
 use std::ptr;
+
 use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle};
 
