@@ -21,8 +21,8 @@ use std::ptr;
 
 use exonum::crypto::Hash;
 use exonum::storage::proof_map_index::{
-    ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath, PROOF_MAP_KEY_SIZE,
-    CheckedMapProof, MapProof
+    CheckedMapProof, MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
+    ProofPath, PROOF_MAP_KEY_SIZE,
 };
 use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 
@@ -186,8 +186,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
         let checked_proof = proof.check().unwrap();
         let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
 
-        let unchecked_flat_map_proof = create_java_unchecked_flat_map_proof(
-            &env, proof_nodes, map_entries, missing_keys)?;
+        let unchecked_flat_map_proof =
+            create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)?;
         Ok(unchecked_flat_map_proof.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -195,10 +195,14 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 fn create_java_proof_nodes<'a>(
     env: &'a JNIEnv,
-    map_proof: &MapProof<Key, Value>
+    map_proof: &MapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
     let proof_entries = map_proof.proof_unchecked();
-    let java_entries = env.new_object_array(proof_entries.len() as jsize, MAP_PROOF_ENTRY, JObject::null())?;
+    let java_entries = env.new_object_array(
+        proof_entries.len() as jsize,
+        MAP_PROOF_ENTRY,
+        JObject::null(),
+    )?;
     for (i, (proof_path, value_hash)) in proof_entries.iter().enumerate() {
         // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
         //   consider using a single frame
@@ -229,7 +233,7 @@ fn create_java_proof_node<'a>(
 
 fn create_java_map_entries<'a>(
     env: &'a JNIEnv,
-    checked_proof: &CheckedMapProof<Key, Value>
+    checked_proof: &CheckedMapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
     let entries: Vec<(&Key, &Value)> = checked_proof.entries();
     let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
@@ -245,26 +249,19 @@ fn create_java_map_entries<'a>(
     Ok(java_entries.into())
 }
 
-fn create_java_map_entry<'a>(
-    env: &'a JNIEnv,
-    key: &Key,
-    value: &Value,
-) -> JniResult<JObject<'a>> {
+fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
     let key: JObject = env.byte_array_from_slice(key)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
-    env.new_object(
-        MAP_ENTRY,
-        "([B[B)V",
-        &[key.into(), value.into()]
-    )
+    env.new_object(MAP_ENTRY, "([B[B)V", &[key.into(), value.into()])
 }
 
 fn create_java_missing_keys<'a>(
     env: &'a JNIEnv,
-    map_proof: &MapProof<Key, Value>
+    map_proof: &MapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
     let missing_keys = map_proof.missing_keys_unchecked();
-    let java_missing_keys = env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
+    let java_missing_keys =
+        env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
     for (i, key) in missing_keys.iter().enumerate() {
         let java_key = env.byte_array_from_slice(key.as_ref())?.into();
         env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
@@ -277,7 +274,7 @@ fn create_java_unchecked_flat_map_proof<'a>(
     env: &'a JNIEnv,
     proof_nodes: JObject,
     map_entries: JObject,
-    missing_keys: JObject
+    missing_keys: JObject,
 ) -> JniResult<JObject<'a>> {
     let java_proof = env.call_static_method(
         UNCHECKED_FLAT_MAP_PROOF,
