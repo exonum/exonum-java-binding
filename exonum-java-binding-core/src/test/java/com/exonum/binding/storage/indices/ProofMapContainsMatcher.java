@@ -19,9 +19,9 @@ package com.exonum.binding.storage.indices;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.map.MapProof;
+import com.exonum.binding.common.proofs.map.MapProofValidator;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.storage.proofs.map.MapProof;
-import com.exonum.binding.storage.proofs.map.MapProofValidator;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;

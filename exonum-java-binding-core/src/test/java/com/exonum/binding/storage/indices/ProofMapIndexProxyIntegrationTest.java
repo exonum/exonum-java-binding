@@ -40,12 +40,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.map.MapProof;
+import com.exonum.binding.common.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.proofs.map.MapProof;
-import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

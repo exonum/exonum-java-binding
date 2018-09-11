@@ -20,13 +20,13 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInG
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.map.MapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.proofs.map.MapProof;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.LongSupplier;

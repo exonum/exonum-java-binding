@@ -13,16 +13,14 @@
 // limitations under the License.
 
 use exonum::crypto::Hash;
-use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
 use exonum::storage::{Fork, ProofListIndex, Snapshot};
+use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
 use jni::errors::Result;
+use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jboolean, jbyteArray, jint, jlong, jobject};
-use jni::JNIEnv;
-
 use std::panic;
 use std::ptr;
-
 use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle};
 
@@ -389,7 +387,7 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
 fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
     let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     env.new_object(
-        "com/exonum/binding/storage/proofs/list/ProofListElement",
+        "com/exonum/binding/common/proofs/list/ProofListElement",
         "([B)V",
         &[value.as_obj().into()],
     )
@@ -403,9 +401,9 @@ fn make_java_proof_branch<'a>(
     let left = env.auto_local(left);
     let right = env.auto_local(right);
     env.new_object(
-        "com/exonum/binding/storage/proofs/list/ListProofBranch",
-        "(Lcom/exonum/binding/storage/proofs/list/ListProof;\
-         Lcom/exonum/binding/storage/proofs/list/ListProof;)V",
+        "com/exonum/binding/common/proofs/list/ListProofBranch",
+        "(Lcom/exonum/binding/common/proofs/list/ListProof;\
+         Lcom/exonum/binding/common/proofs/list/ListProof;)V",
         &[left.as_obj().into(), right.as_obj().into()],
     )
 }
@@ -413,7 +411,7 @@ fn make_java_proof_branch<'a>(
 fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>> {
     let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
     env.new_object(
-        "com/exonum/binding/storage/proofs/list/HashNode",
+        "com/exonum/binding/common/proofs/list/HashNode",
         "([B)V",
         &[hash.as_obj().into()],
     )
