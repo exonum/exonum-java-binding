@@ -21,10 +21,10 @@ import static com.exonum.binding.qaservice.transactions.TransactionPreconditions
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTxBody;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;

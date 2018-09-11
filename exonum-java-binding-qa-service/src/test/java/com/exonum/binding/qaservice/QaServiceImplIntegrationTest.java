@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
@@ -45,6 +44,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;

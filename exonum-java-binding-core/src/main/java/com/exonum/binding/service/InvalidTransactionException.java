@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.messages;
+package com.exonum.binding.service;
+
+import com.exonum.binding.transaction.Transaction;
 
 /**
  * Indicates that a transaction is not valid

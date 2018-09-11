@@ -18,7 +18,7 @@ package com.exonum.binding.service;
 
 import com.exonum.binding.annotations.AutoGenerationCandidate;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.transaction.Transaction;
 
 /**
  * A converter of a binary Exonum message, which contains transaction data,

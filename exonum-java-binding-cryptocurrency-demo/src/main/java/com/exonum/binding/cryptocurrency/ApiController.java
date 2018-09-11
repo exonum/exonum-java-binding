@@ -26,8 +26,8 @@ import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionG
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.service.InvalidTransactionException;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;

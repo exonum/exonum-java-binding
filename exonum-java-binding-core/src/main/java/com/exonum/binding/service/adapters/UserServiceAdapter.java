@@ -21,13 +21,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;

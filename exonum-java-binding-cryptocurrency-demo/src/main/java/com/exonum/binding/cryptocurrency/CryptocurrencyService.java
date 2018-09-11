@@ -18,8 +18,8 @@ package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.crypto.PublicKey;
 import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.Service;
+import com.exonum.binding.transaction.Transaction;
 import java.util.Optional;
 
 public interface CryptocurrencyService extends Service {

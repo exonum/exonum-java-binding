@@ -21,9 +21,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.messages.TransactionExecutionException;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

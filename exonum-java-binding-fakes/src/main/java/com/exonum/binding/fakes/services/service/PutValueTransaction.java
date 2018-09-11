@@ -21,10 +21,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.AbstractTransaction;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.AbstractTransaction;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;

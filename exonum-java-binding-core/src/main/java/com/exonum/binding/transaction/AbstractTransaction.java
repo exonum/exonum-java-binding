@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.messages;
+package com.exonum.binding.transaction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.exonum.binding.messages.BinaryMessage;
 
 /**
  * An abstract Exonum transaction. It includes a reference to a binary Exonum message

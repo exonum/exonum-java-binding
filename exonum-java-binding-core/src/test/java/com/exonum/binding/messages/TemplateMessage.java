@@ -16,8 +16,10 @@
 
 package com.exonum.binding.messages;
 
-import static com.exonum.binding.messages.ByteBufferAllocator.allocateBuffer;
 import static com.exonum.binding.messages.Message.SIGNATURE_SIZE;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class TemplateMessage {
 
@@ -31,7 +33,8 @@ public class TemplateMessage {
       .setVersion((byte) 0)
       .setServiceId((short) 0)
       .setMessageType((short) 1)
-      .setBody(allocateBuffer(2))
+      .setBody(ByteBuffer.allocate(2)
+          .order(ByteOrder.LITTLE_ENDIAN))
       .setSignature(new byte[SIGNATURE_SIZE])
       .buildPartial();
 

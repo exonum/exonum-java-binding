@@ -18,8 +18,8 @@ package com.exonum.binding.qaservice.transactions;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.PromoteToCore;
+import com.exonum.binding.transaction.Transaction;
 
 /**
  * A converter between executable transaction & its binary message.

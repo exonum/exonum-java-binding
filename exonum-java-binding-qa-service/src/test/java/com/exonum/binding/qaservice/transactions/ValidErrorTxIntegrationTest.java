@@ -27,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.messages.TransactionExecutionException;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
@@ -36,6 +34,8 @@ import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeAll;

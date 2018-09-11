@@ -25,9 +25,9 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THRO
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.service.TransactionConverter;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.Function;

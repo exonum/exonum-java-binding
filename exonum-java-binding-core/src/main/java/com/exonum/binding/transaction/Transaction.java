@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.messages;
+package com.exonum.binding.transaction;
 
 import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 
 /**

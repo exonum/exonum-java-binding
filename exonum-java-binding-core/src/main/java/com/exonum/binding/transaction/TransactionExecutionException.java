@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.messages;
+package com.exonum.binding.transaction;
 
 import javax.annotation.Nullable;
 

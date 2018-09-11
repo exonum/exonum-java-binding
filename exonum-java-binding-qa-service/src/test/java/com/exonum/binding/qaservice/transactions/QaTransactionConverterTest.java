@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.qaservice.QaService;
+import com.exonum.binding.transaction.Transaction;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;

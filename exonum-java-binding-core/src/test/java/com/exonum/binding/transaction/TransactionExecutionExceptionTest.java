@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.messages;
+package com.exonum.binding.transaction;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class TransactionExecutionExceptionTest {
     TransactionExecutionException e = new TransactionExecutionException(errorCode);
 
     assertThat(e.toString(),
-        equalTo("com.exonum.binding.messages.TransactionExecutionException: errorCode=2"));
+        containsString("TransactionExecutionException: errorCode=2"));
   }
 
   @Test
@@ -39,6 +39,6 @@ public class TransactionExecutionExceptionTest {
     TransactionExecutionException e = new TransactionExecutionException(errorCode, description);
 
     assertThat(e.toString(),
-        equalTo("com.exonum.binding.messages.TransactionExecutionException: Foo, errorCode=2"));
+        containsString("TransactionExecutionException: Foo, errorCode=2"));
   }
 }
