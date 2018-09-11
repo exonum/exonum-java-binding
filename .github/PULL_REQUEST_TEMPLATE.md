@@ -13,5 +13,5 @@ See: https://jira.bf.local/browse/XYZ
 - [ ] The [coding guidelines](https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#the-code-style) are followed
 - [ ] Public API has Javadoc
 - [ ] Method preconditions are checked and documented in the Javadoc of the method
-- [ ] Change is not breaking **or** mentioned in the Changelog
+- [ ] Changelog is updated if needed (in case of notable or breaking change)
 - [ ] The [continuous integration build](https://www.travis-ci.org/exonum/exonum-java-binding) passes
