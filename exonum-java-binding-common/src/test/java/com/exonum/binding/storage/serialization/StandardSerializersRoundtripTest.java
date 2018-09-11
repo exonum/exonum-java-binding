@@ -3,7 +3,7 @@ package com.exonum.binding.storage.serialization;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.Test;

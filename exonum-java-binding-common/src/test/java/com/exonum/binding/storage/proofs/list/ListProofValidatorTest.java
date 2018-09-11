@@ -26,10 +26,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.Funnel;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.HashFunction;
-import com.exonum.binding.hash.Hasher;
+import com.exonum.binding.common.hash.Funnel;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
+import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.Optional;
 import org.junit.Before;

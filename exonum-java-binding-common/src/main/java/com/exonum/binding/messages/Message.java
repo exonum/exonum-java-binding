@@ -18,7 +18,7 @@ package com.exonum.binding.messages;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.CryptoFunctions;
 import java.nio.ByteBuffer;
 
 /**

@@ -27,13 +27,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.crypto.CryptoFunction;
-import com.exonum.binding.crypto.CryptoFunctions;
-import com.exonum.binding.crypto.KeyPair;
-import com.exonum.binding.crypto.PrivateKey;
-import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PrivateKey;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.test.Bytes;
 import org.junit.Test;
 

@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.proofs.map;
 
-import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.branchDbKey;
 import static com.exonum.binding.storage.proofs.map.DbKeyTestUtils.leafDbKey;
 import static com.exonum.binding.storage.proofs.map.MapProofValidatorMatchers.isNotValid;
@@ -31,9 +31,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.HashFunction;
-import com.exonum.binding.hash.Hasher;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
+import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.storage.proofs.map.MapProofValidator.Status;
 import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.Arrays;

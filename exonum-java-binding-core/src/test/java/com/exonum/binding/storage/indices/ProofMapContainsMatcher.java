@@ -18,7 +18,7 @@ package com.exonum.binding.storage.indices;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.proofs.map.MapProof;
 import com.exonum.binding.storage.proofs.map.MapProofValidator;
 import com.exonum.binding.storage.serialization.StandardSerializers;

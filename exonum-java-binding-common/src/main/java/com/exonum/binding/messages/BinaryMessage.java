@@ -16,12 +16,12 @@
 
 package com.exonum.binding.messages;
 
-import com.exonum.binding.crypto.CryptoFunction;
-import com.exonum.binding.crypto.PrivateKey;
-import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.HashFunction;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.PrivateKey;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
+import com.exonum.binding.common.hash.Hashing;
 import com.google.errorprone.annotations.CheckReturnValue;
 import java.nio.ByteBuffer;
 

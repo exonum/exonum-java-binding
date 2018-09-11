@@ -6,5 +6,5 @@
 
 <suppressions>
     <!-- Exclude repackaged Guava code -->
-    <suppress files="com.exonum.binding.hash" checks=".*"/>
+    <suppress files="com.exonum.binding.common.hash" checks=".*"/>
 </suppressions>

@@ -18,7 +18,7 @@ package com.exonum.binding.storage.proofs.map.flat;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

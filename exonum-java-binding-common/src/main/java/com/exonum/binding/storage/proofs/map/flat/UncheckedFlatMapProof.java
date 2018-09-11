@@ -16,12 +16,12 @@
 
 package com.exonum.binding.storage.proofs.map.flat;
 
-import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.storage.proofs.DbKeyFunnel.dbKeyFunnel;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.HashFunction;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.storage.proofs.map.DbKey;
 import com.exonum.binding.storage.proofs.map.DbKey.Type;
 import java.util.ArrayDeque;

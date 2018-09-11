@@ -16,7 +16,7 @@
 
 package com.exonum.binding.transaction;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 

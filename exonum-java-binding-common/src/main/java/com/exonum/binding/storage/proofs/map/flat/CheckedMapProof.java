@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.proofs.map.flat;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import java.util.List;
 
 /**

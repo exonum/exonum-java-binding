@@ -24,8 +24,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.exonum.binding.hash.Funnel;
-import com.exonum.binding.hash.PrimitiveSink;
+import com.exonum.binding.common.hash.Funnel;
+import com.exonum.binding.common.hash.PrimitiveSink;
 import org.junit.Test;
 
 public class ProofListElementTest {

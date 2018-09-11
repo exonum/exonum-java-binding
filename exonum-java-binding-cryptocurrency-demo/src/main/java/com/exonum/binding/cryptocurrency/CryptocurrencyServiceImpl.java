@@ -18,11 +18,11 @@ package com.exonum.binding.cryptocurrency;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.crypto.CryptoFunction;
-import com.exonum.binding.crypto.CryptoFunctions;
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
-import com.exonum.binding.hash.HashCode;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;

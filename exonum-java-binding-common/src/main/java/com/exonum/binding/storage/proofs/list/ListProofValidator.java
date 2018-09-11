@@ -16,15 +16,15 @@
 
 package com.exonum.binding.storage.proofs.list;
 
-import static com.exonum.binding.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.HashFunction;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.hash.PrimitiveSink;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.storage.serialization.Serializer;
 import com.google.common.annotations.VisibleForTesting;

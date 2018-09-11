@@ -18,7 +18,7 @@ package com.exonum.binding.storage.serialization;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
