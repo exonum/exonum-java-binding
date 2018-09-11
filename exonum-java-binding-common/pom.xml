@@ -10,18 +10,21 @@
     <version>0.2</version>
   </parent>
 
-  <artifactId>exonum-java-proofs</artifactId>
+  <artifactId>exonum-java-binding-common</artifactId>
   <version>0.2</version>
   <packaging>jar</packaging>
 
-  <name>Exonum Java Binding: Proofs</name>
+  <name>Exonum Java Binding: Common</name>
   <description>
-    A library that provides classes to represent and verify Exonum proofs.
+    A common library module for the Exonum core and Java clients,
+    providing Exonum proofs, hashing and cryptographic operations,
+    and serialization support.
   </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <lazysodium-java.version>3.3.0</lazysodium-java.version>
   </properties>
 
   <build>
@@ -69,6 +72,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.goterl.lazycode</groupId>
+      <artifactId>lazysodium-java</artifactId>
+      <version>${lazysodium-java.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -104,5 +113,19 @@
       <artifactId>guava-testlib</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>nl.jqno.equalsverifier</groupId>
+      <artifactId>equalsverifier</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>lazysodium</id>
+      <url>https://dl.bintray.com/terl/lazysodium-maven</url>
+    </repository>
+  </repositories>
+
 </project>
