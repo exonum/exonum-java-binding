@@ -24,6 +24,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <lazysodium-java.version>3.3.0</lazysodium-java.version>
   </properties>
 
   <build>
@@ -71,6 +72,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.goterl.lazycode</groupId>
+      <artifactId>lazysodium-java</artifactId>
+      <version>${lazysodium-java.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -106,5 +113,19 @@
       <artifactId>guava-testlib</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>nl.jqno.equalsverifier</groupId>
+      <artifactId>equalsverifier</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>lazysodium</id>
+      <url>https://dl.bintray.com/terl/lazysodium-maven</url>
+    </repository>
+  </repositories>
+
 </project>
