@@ -247,7 +247,7 @@
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-proofs</artifactId>
+      <artifactId>exonum-java-binding-common</artifactId>
       <version>0.2</version>
     </dependency>
 

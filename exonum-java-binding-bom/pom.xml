@@ -18,7 +18,7 @@
 
   <properties>
     <exonum-core.version>0.2</exonum-core.version>
-    <exonum-java-proofs.version>0.2</exonum-java-proofs.version>
+    <exonum-java-binding-common.version>0.2</exonum-java-binding-common.version>
   </properties>
 
   <dependencyManagement>
@@ -32,8 +32,8 @@
 
       <dependency>
         <groupId>com.exonum.binding</groupId>
-        <artifactId>exonum-java-proofs</artifactId>
-        <version>${exonum-java-proofs.version}</version>
+        <artifactId>exonum-java-binding-common</artifactId>
+        <version>${exonum-java-binding-common.version}</version>
       </dependency>
       
       <!-- Exported third-party artefacts the services depend upon. -->
