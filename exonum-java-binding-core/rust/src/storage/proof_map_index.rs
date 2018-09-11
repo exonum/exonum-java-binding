@@ -33,13 +33,13 @@ type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
 const MAP_PROOF_ENTRY_BRANCH: &str =
-    "com/exonum/binding/storage/proofs/map/flat/MapProofEntryBranch";
-const MAP_PROOF_ENTRY_LEAF: &str = "com/exonum/binding/storage/proofs/map/flat/MapProofEntryLeaf";
-const MAP_PROOF_ENTRY: &str = "com/exonum/binding/storage/proofs/map/flat/MapProofEntry";
+    "com/exonum/binding/common/proofs/map/flat/MapProofEntryBranch";
+const MAP_PROOF_ENTRY_LEAF: &str = "com/exonum/binding/common/proofs/map/flat/MapProofEntryLeaf";
+const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/flat/MapProofEntry";
 const UNCHECKED_FLAT_MAP_PROOF: &str =
-    "com/exonum/binding/storage/proofs/map/flat/UncheckedFlatMapProof";
+    "com/exonum/binding/common/proofs/map/flat/UncheckedFlatMapProof";
 const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
-    "([Lcom/exonum/binding/storage/proofs/map/flat/MapProofEntry;)Lcom/exonum/binding/storage/proofs/map/flat/UncheckedFlatMapProof;";
+    "([Lcom/exonum/binding/common/proofs/map/flat/MapProofEntry;)Lcom/exonum/binding/common/proofs/map/flat/UncheckedFlatMapProof;";
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),

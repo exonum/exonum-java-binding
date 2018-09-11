@@ -18,9 +18,9 @@ use utils::{
 };
 use JniResult;
 
-const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/messages/InternalServerError";
+const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/service/InternalServerError";
 const INVALID_TRANSACTION_EXCEPTION: &str =
-    "com/exonum/binding/messages/InvalidTransactionException";
+    "com/exonum/binding/service/InvalidTransactionException";
 const VERIFY_ERROR_MESSAGE: &str = "Unable to verify transaction";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
