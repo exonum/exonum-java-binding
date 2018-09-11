@@ -20,13 +20,13 @@ import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.ne
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.messages.TransactionExecutionException;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidErrorTxBody;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 
 /**
  * A valid transaction that will always have "error" status, i.e.,
- * throw an {@link com.exonum.binding.messages.TransactionExecutionException}.
+ * throw an {@link TransactionExecutionException}.
  * Clears all collections of this service before throwing the exception.
  */
 public final class ValidErrorTx implements Transaction {

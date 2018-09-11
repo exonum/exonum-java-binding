@@ -16,7 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.PublicKey;
 
 class CreateWalletTxData {
   final PublicKey ownerPublicKey;

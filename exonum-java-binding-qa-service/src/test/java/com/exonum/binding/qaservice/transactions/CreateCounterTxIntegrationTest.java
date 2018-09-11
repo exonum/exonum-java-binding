@@ -25,10 +25,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;

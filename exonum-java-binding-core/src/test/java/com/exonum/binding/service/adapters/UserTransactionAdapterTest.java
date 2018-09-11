@@ -25,10 +25,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.messages.Transaction;
-import com.exonum.binding.messages.TransactionExecutionException;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

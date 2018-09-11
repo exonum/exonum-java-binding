@@ -19,7 +19,7 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.storage.serialization.Serializer;
+import com.exonum.binding.common.serialization.Serializer;
 
 /**
  * A serializer decorator that checks proof map keys for correctness.

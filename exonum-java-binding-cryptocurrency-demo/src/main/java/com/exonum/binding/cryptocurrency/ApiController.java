@@ -21,13 +21,13 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.service.InvalidTransactionException;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;

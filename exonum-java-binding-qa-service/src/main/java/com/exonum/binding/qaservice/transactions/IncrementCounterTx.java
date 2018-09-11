@@ -20,15 +20,15 @@ import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.ne
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
