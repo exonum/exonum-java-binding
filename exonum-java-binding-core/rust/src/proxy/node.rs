@@ -7,7 +7,7 @@ use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
 
-use std::{io, panic, ptr};
+use std::{error::Error, io, panic, ptr};
 
 use proxy::{MainExecutor, TransactionProxy};
 use storage::View;
@@ -102,14 +102,15 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
                 let exec = node.executor().clone();
                 let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
                 if let Err(err) = node.submit(Box::new(transaction)) {
-                    let error_msg = format!("{}", err);
                     let class;
-                    if error_msg == VERIFY_ERROR_MESSAGE {
+                    if err.kind() == io::ErrorKind::Other
+                        && err.description() == VERIFY_ERROR_MESSAGE
+                    {
                         class = INVALID_TRANSACTION_EXCEPTION;
                     } else {
                         class = INTERNAL_SERVER_ERROR;
                     };
-                    env.throw_new(class, &error_msg)?;
+                    env.throw_new(class, err.description())?;
                 }
                 Ok(())
             }(),
