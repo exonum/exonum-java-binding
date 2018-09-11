@@ -594,7 +594,7 @@ name = "ejb-app"
 version = "0.2.0"
 dependencies = [
  "exonum-btc-anchoring 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-configuration 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-configuration 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.2.0",
  "serde 1.0.75 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.75 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -705,7 +705,7 @@ dependencies = [
 
 [[package]]
 name = "exonum"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "actix 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -751,7 +751,7 @@ dependencies = [
  "byteorder 1.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "display_derive 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum_bitcoinrpc 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -767,12 +767,12 @@ dependencies = [
 
 [[package]]
 name = "exonum-configuration"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.5.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -783,11 +783,11 @@ dependencies = [
 
 [[package]]
 name = "exonum-testkit"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "actix-web 0.6.15 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1114,7 +1114,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "integration_tests"
 version = "0.2.0"
 dependencies = [
- "exonum-testkit 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-testkit 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.2.0",
  "lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1166,7 +1166,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "java_bindings"
 version = "0.2.0"
 dependencies = [
- "exonum 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "iron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "jni 0.10.1 (git+https://github.com/alexander-irbis/jni-rs?branch=clone-jnienv)",
@@ -2899,10 +2899,10 @@ dependencies = [
 "checksum error-chain 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "faa976b4fd2e4c2b2f3f486874b19e61944d3de3de8b61c9fcf835d583871bcc"
 "checksum error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ff511d5dc435d703f4971bc399647c9bc38e20cb41452e3b9feb4765419ed3f3"
 "checksum error-chain 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6930e04918388a9a2e41d518c25cf679ccafe26733fb4127dbf21993f2575d46"
-"checksum exonum 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)" = "5a167cdafdd7a6afc27e813e4f644290d2fc55d576b90c5680ad505cf44c32d8"
+"checksum exonum 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)" = "252fc5becc9ba41ef886d88f969c7f0419476bae614160a5a62f2e3aa2231a35"
 "checksum exonum-btc-anchoring 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "296a945d7371f817ad93b28da9cb1f22368388798351f352d0ce7d89add1fdd2"
-"checksum exonum-configuration 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f869ddf9370c3c60a3fcc2c381808f21387f7b44dd70358218ad7984cc8ec16c"
-"checksum exonum-testkit 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)" = "de7e0c875a03f9e40b6c915a62b528affc6c9cf644165aca6f71786ae456716b"
+"checksum exonum-configuration 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f951c9a063cf665dd009b03ca94d4cd52e9e39f32aa91fe0a201d5b55b0a8c3e"
+"checksum exonum-testkit 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)" = "32d141d55f51efd2c4e265d7c969f5643e66337e7e39afe4b4f1118b3c52f0fb"
 "checksum exonum_bitcoinrpc 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f42607124d08885602b1273cb7b22e612a3d34d35ebdaba78f320daa84a33e86"
 "checksum exonum_jsonrpc 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "4ba216d239a922fedd39303af5e89d08affd2df5e26e12e4aeae2f14d301cc45"
 "checksum exonum_librocksdb-sys 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b666a95d4440df63ac27157864c75f6f9ac199ac644cf52d8c15b930f64b8d1f"

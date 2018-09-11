@@ -3,7 +3,6 @@ use exonum::crypto::PublicKey;
 use exonum::messages::RawMessage;
 use exonum::node::{ApiSender, TransactionSend};
 use exonum::storage::Snapshot;
-use failure::Error as FailureError;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
@@ -65,7 +64,7 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: Box<Transaction>) -> Result<(), FailureError> {
+    pub fn submit(&self, transaction: Box<Transaction>) -> ::std::io::Result<()> {
         self.channel.send(transaction)
     }
 }
