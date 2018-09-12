@@ -152,9 +152,7 @@ impl Service for ServiceProxy {
     }
 
     fn wire_api(&self, builder: &mut ServiceApiBuilder) {
-        if builder.blockchain().is_none() {
-            panic!("No Blockchain instance in ServiceApiBuilder");
-        }
+        assert!(builder.blockchain().is_some());
 
         let node = NodeContext::new(
             self.exec.clone(),

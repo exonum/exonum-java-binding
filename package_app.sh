@@ -46,7 +46,7 @@ cp $RUST_LIB_DIR/libstd* ${EJB_RUST_DIR}/target/prepackage
 
 # Recompile native part.
 cd ${EJB_RUST_DIR}
-cargo build --all
+cargo +${RUST_COMPILER_VERSION} build --all
 
 cd ../..
 
