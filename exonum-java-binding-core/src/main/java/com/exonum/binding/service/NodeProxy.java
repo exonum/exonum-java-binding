@@ -57,7 +57,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   /**
    * {@inheritDoc}
    *
-   * @throws IllegalStateException if the node proxy is closed]
+   * @throws IllegalStateException if the node proxy is closed
    */
   @Override
   public void submitTransaction(Transaction transaction)
