@@ -18,11 +18,11 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.Transaction;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

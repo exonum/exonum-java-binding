@@ -68,7 +68,7 @@ fn submit_valid_transaction() {
 #[test]
 fn submit_not_valid_transaction() {
     const INVALID_TRANSACTION_EXCEPTION: &str =
-        "com.exonum.binding.messages.InvalidTransactionException";
+        "com.exonum.binding.service.InvalidTransactionException";
 
     let jclass = JObject::null().into();
     let (mut node, _app_rx) = create_node();

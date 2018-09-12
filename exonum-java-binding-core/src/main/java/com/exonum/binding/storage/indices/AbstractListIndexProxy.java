@@ -19,9 +19,9 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkNoNulls;
 
+import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

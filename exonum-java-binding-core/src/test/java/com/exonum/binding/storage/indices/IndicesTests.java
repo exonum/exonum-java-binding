@@ -16,11 +16,11 @@
 
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.IndexConstructors.IndexConstructorOne;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
