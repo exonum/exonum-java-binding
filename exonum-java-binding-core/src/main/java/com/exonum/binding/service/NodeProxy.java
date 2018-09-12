@@ -124,6 +124,8 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
 
   @Override
   protected void disposeInternal() {
-    // TODO: It is responsible to destroy the corresponding native object [ECR-1910].
+    nativeFree(getNativeHandle());
   }
+
+  private static native void nativeFree(long nodeNativeHandle);
 }
