@@ -16,7 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import com.exonum.binding.storage.serialization.Serializer;
+import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum WalletSerializer implements Serializer<Wallet> {

@@ -16,7 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
 import java.nio.ByteBuffer;
 

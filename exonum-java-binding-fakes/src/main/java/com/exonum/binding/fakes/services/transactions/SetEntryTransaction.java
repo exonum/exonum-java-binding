@@ -19,11 +19,11 @@ package com.exonum.binding.fakes.services.transactions;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.transaction.Transaction;
 
 /**
  * A transaction whose behaviour can be configured. It's not a mock: it writes a given value

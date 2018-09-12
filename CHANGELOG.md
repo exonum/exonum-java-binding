@@ -18,11 +18,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
+- Flat map proofs support. (#250)
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
   any changes to the database. The exception includes an error code and an optional 
   description which the framework saves to the storage for later retrieval. (#392)
+- `ListProofValidator` returns an instance of `NavigableMap` instead of `Map`. (#457)
 
 ### Removed
 - `Hashing#toHexString`. (#379)

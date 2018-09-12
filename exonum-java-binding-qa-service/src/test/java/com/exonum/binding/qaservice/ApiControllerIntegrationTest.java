@@ -30,11 +30,11 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
+import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.service.InvalidTransactionException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;

@@ -16,8 +16,8 @@
 
 package com.exonum.binding.fakes.services.service;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;

@@ -18,14 +18,14 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
 import java.util.NoSuchElementException;
 
 /**

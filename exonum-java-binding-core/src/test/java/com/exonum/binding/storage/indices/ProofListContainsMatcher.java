@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import com.exonum.binding.storage.proofs.list.ListProof;
-import com.exonum.binding.storage.proofs.list.ListProofValidator;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.common.proofs.list.ListProof;
+import com.exonum.binding.common.proofs.list.ListProofValidator;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

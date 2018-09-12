@@ -16,8 +16,8 @@
 
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 
 public class ListIndexProxyGroupIntegrationTest extends BaseListIndexProxyGroupTestable {
 
