@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   any changes to the database. The exception includes an error code and an optional 
   description which the framework saves to the storage for later retrieval. (#392)
 - `ListProofValidator` returns an instance of `NavigableMap` instead of `Map`. (#457)
+- Refactor `exonum-java-proofs` module to `exonum-java-binding-common` module 
+  with `com.exonum.binding.common` root package. (#459)
+  - Move `crypto` package to `exonum-java-binding-common` module. (#467)
+  - Move `hash` package to `exonum-java-binding-common` module. (#469)
+  - Move `Transaction`-related classes to the new `transaction` package. (#469)
+  - Move `messages` package to `message` package in `exonum-java-binding-common` module. (#469)
+  - Move `proofs` package to `com.exonum.binding.common` package. (#469)
+  - Move `serialization` package to `com.exonum.binding.common` package. (#469)
 
 ### Removed
 - `Hashing#toHexString`. (#379)
