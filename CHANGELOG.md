@@ -27,12 +27,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `ListProofValidator` returns an instance of `NavigableMap` instead of `Map`. (#457)
 - Refactor `exonum-java-proofs` module to `exonum-java-binding-common` module 
   with `com.exonum.binding.common` root package. (#459)
-- Refactor `crypto` package to `exonum-java-binding-common` module. (#467)
-- Refactor `hash` package to `exonum-java-binding-common` module. (#469)
-- Refactor `Transaction`-related classes to the new `transaction` package. (#469)
-- Refactor `messages` package to `message` package in `exonum-java-binding-common` module. (#469)
-- Refactor `proofs` package to `com.exonum.binding.common` package. (#469)
-- Refactor `serialization` package to `com.exonum.binding.common` package. (#469)
+  - Move `crypto` package to `exonum-java-binding-common` module. (#467)
+  - Move `hash` package to `exonum-java-binding-common` module. (#469)
+  - Move `Transaction`-related classes to the new `transaction` package. (#469)
+  - Move `messages` package to `message` package in `exonum-java-binding-common` module. (#469)
+  - Move `proofs` package to `com.exonum.binding.common` package. (#469)
+  - Move `serialization` package to `com.exonum.binding.common` package. (#469)
 
 ### Removed
 - `Hashing#toHexString`. (#379)
