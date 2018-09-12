@@ -248,6 +248,7 @@ fn create_java_map_entries<'a>(
     Ok(java_entries.into())
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
 fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
     let key: JObject = env.byte_array_from_slice(key)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
