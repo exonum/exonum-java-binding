@@ -28,6 +28,8 @@ import static org.junit.Assert.assertTrue;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
+import com.exonum.binding.common.proofs.full.unchecked.UncheckedMapProof;
 import com.exonum.binding.common.proofs.map.DbKey;
 import com.exonum.binding.common.proofs.map.DbKeyTestUtils;
 import java.util.Arrays;

@@ -19,6 +19,7 @@ package com.exonum.binding.common.proofs.map.flat;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map.flat;
+package com.exonum.binding.common.proofs.full.checked;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.map.flat.MapEntry;
+import com.exonum.binding.common.proofs.map.flat.ProofStatus;
 import java.util.List;
+import java.util.NavigableMap;
 
 /**
  * A checked map proof.

@@ -22,6 +22,8 @@ import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
+import com.exonum.binding.common.proofs.full.unchecked.UncheckedMapProof;
 import com.exonum.binding.common.proofs.map.DbKey;
 import com.exonum.binding.common.proofs.map.DbKey.Type;
 import java.util.ArrayDeque;
@@ -87,14 +89,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   /**
    * Checks that all entries in the proof are in the valid order.
-   *
+   * <p>
    * <p>The keys must be in ascending order as defined by
    * the {@linkplain DbKey#compareTo(DbKey) comparator}; there must not be duplicates.
    *
    * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
-   *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
-   *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
-   *         {@code ProofStatus.EMBEDDED_PATH} if one key is a prefix of another
+   * {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
+   * {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
+   * {@code ProofStatus.EMBEDDED_PATH} if one key is a prefix of another
    * @see DbKey#compareTo(DbKey)
    */
   private ProofStatus orderCheck() {
@@ -125,7 +127,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
             entries.stream()
                 .map(MapEntry::getKey),
             missingKeys.stream())
-        .map(DbKey::newLeafKey);
+            .map(DbKey::newLeafKey);
 
     // TODO: proof entries are checked to be sorted at this stage, so it's possible …
     // to use binary search here
