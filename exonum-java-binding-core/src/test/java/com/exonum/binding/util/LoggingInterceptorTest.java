@@ -29,13 +29,11 @@ import com.exonum.binding.service.Service;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
+import com.exonum.binding.testutils.LoggingTestUtils;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
 import org.junit.After;
 import org.junit.Before;
@@ -54,9 +52,7 @@ public class LoggingInterceptorTest {
 
   @Before
   public void setUp() {
-    final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    final Configuration config = ctx.getConfiguration();
-    appender = (ListAppender) config.getAppenders().get("ListAppender");
+    appender = LoggingTestUtils.getCapturingLogAppender();
 
     Injector injector = Guice.createInjector(new TestModule());
     serviceAdapter = injector.getInstance(UserServiceAdapter.class);

@@ -23,11 +23,9 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.exonum.binding.testutils.LoggingTestUtils;
 import com.google.common.testing.NullPointerTester;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
 import org.junit.After;
 import org.junit.Before;
@@ -47,15 +45,9 @@ public class CleanerTest {
 
   @Before
   public void setUp() {
-    logAppender = getCapturingLogAppender();
+    logAppender = LoggingTestUtils.getCapturingLogAppender();
 
     context = new Cleaner();
-  }
-
-  private static ListAppender getCapturingLogAppender() {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    Configuration config = ctx.getConfiguration();
-    return (ListAppender) config.getAppenders().get("ListAppender");
   }
 
   @After
