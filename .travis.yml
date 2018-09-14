@@ -1,4 +1,7 @@
 language: java
+os:
+  - linux
+  - osx
 dist: trusty
 jdk:
   - openjdk8
@@ -32,6 +35,8 @@ env:
 matrix:
   exclude:
     - jdk: openjdk10
+      env: CHECK_RUST=true
+    - os: osx
       env: CHECK_RUST=true
   # See ECR-1734
   allow_failures:
