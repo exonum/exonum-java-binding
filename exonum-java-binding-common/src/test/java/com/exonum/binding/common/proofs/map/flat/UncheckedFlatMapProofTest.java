@@ -18,6 +18,11 @@ package com.exonum.binding.common.proofs.map.flat;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
+import static com.exonum.binding.common.proofs.model.ProofStatus.MapProofStatus.CORRECT;
+import static com.exonum.binding.common.proofs.model.ProofStatus.MapProofStatus.DUPLICATE_PATH;
+import static com.exonum.binding.common.proofs.model.ProofStatus.MapProofStatus.EMBEDDED_PATH;
+import static com.exonum.binding.common.proofs.model.ProofStatus.MapProofStatus.INVALID_ORDER;
+import static com.exonum.binding.common.proofs.model.ProofStatus.MapProofStatus.NON_TERMINAL_NODE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -154,7 +159,7 @@ public class UncheckedFlatMapProofTest {
         new UncheckedFlatMapProof(entries, emptyList(), emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.DUPLICATE_PATH));
+    assertThat(checkedMapProof.getStatus(), equalTo(DUPLICATE_PATH));
   }
 
   @Test
@@ -164,7 +169,7 @@ public class UncheckedFlatMapProofTest {
             emptyList(), emptyList(), emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));
+    assertThat(checkedMapProof.getStatus(), equalTo(CORRECT));
   }
 
   @Test
@@ -180,7 +185,7 @@ public class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));
+    assertThat(checkedMapProof.getStatus(), equalTo(CORRECT));
   }
 
   @Test
@@ -195,7 +200,7 @@ public class UncheckedFlatMapProofTest {
             emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.INVALID_ORDER));
+    assertThat(checkedMapProof.getStatus(), equalTo(INVALID_ORDER));
   }
 
   @Test
@@ -210,7 +215,7 @@ public class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.NON_TERMINAL_NODE));
+    assertThat(checkedMapProof.getStatus(), equalTo(NON_TERMINAL_NODE));
   }
 
   @Test
@@ -225,7 +230,7 @@ public class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.CORRECT));
+    assertThat(checkedMapProof.getStatus(), equalTo(CORRECT));
   }
 
   @Test
@@ -243,7 +248,7 @@ public class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.EMBEDDED_PATH));
+    assertThat(checkedMapProof.getStatus(), equalTo(EMBEDDED_PATH));
   }
 
   @Test
@@ -261,7 +266,7 @@ public class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(ProofStatus.EMBEDDED_PATH));
+    assertThat(checkedMapProof.getStatus(), equalTo(EMBEDDED_PATH));
   }
 
   private static MapProofEntry createMapProofEntry(DbKey dbKey) {

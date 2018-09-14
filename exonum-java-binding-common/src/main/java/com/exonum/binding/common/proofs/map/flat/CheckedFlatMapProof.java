@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
+import com.exonum.binding.common.proofs.model.ProofStatus;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       HashCode rootHash,
       List<MapEntry> entries,
       List<byte[]> missingKeys) {
-    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, missingKeys);
+    return new CheckedFlatMapProof(ProofStatus.MapProofStatus.CORRECT, rootHash, entries,
+        missingKeys);
   }
 
   static CheckedFlatMapProof invalid(ProofStatus status) {
@@ -110,7 +112,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkValid() {
-    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
+    checkState(status == ProofStatus.MapProofStatus.CORRECT, "Proof is not valid: %s", status);
   }
 
   private void checkThatKeyIsRequested(byte[] key) {

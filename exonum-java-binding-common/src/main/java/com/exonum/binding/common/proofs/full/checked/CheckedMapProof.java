@@ -18,9 +18,7 @@ package com.exonum.binding.common.proofs.full.checked;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.MapEntry;
-import com.exonum.binding.common.proofs.map.flat.ProofStatus;
 import java.util.List;
-import java.util.NavigableMap;
 
 /**
  * A checked map proof.
@@ -40,7 +38,7 @@ import java.util.NavigableMap;
  * }
  * </code></pre>
  */
-public interface CheckedMapProof {
+public interface CheckedMapProof extends CheckedCollectionProof {
   /**
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
@@ -61,22 +59,11 @@ public interface CheckedMapProof {
   boolean containsKey(byte[] key);
 
   /**
-   * Return a hash of a proof root node.
-   * @throws IllegalStateException if the proof is not valid
-   */
-  HashCode getRootHash();
-
-  /**
    * If this proof is valid, returns the value corresponding to the specified key
    * or null if there is no such key in the proof.
    * @throws IllegalStateException if the proof is not valid
    */
   byte[] get(byte[] key);
-
-  /**
-   * Returns the status of this proof: whether it is structurally valid.
-   */
-  ProofStatus getStatus();
 
   /**
    * Checks that proof is correct and {@code expectedRootHash} is equal to the root hash.

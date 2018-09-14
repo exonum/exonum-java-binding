@@ -20,7 +20,7 @@ public interface ListProofVisitor {
 
   void visit(ListProofBranch branch);
 
-  void visit(HashNode hashNode);
+  void visit(ListProofHashNode listProofHashNode);
 
-  void visit(ProofListElement value);
+  void visit(ListProofElement value);
 }

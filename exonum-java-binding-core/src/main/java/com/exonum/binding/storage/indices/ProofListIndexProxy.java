@@ -22,7 +22,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.list.ListProof;
+import com.exonum.binding.common.proofs.list.ListProofData;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.proxy.Cleaner;
@@ -133,12 +133,12 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @throws IndexOutOfBoundsException if the index is invalid
    * @throws IllegalStateException if this list is not valid
    */
-  public ListProof getProof(long index) {
+  public ListProofData getProof(long index) {
     checkElementIndex(index, size());
     return nativeGetProof(getNativeHandle(), index);
   }
 
-  private native ListProof nativeGetProof(long nativeHandle, long index);
+  private native ListProofData nativeGetProof(long nativeHandle, long index);
 
   /**
    * Returns a proof that some elements exist in the specified range in this list.
@@ -148,13 +148,13 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @throws IndexOutOfBoundsException if the range is not valid
    * @throws IllegalStateException if this list is not valid
    */
-  public ListProof getRangeProof(long from, long to) {
+  public ListProofData getRangeProof(long from, long to) {
     long size = size();
     return nativeGetRangeProof(getNativeHandle(), checkElementIndex(from, size),
         checkPositionIndex(to, size));
   }
 
-  private native ListProof nativeGetRangeProof(long nativeHandle, long from, long to);
+  private native ListProofData nativeGetRangeProof(long nativeHandle, long from, long to);
 
   /**
    * Returns the root hash of the proof list.

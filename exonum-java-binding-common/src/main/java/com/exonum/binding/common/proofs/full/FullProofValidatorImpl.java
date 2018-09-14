@@ -16,10 +16,11 @@
 
 package com.exonum.binding.common.proofs.full;
 
-import static com.exonum.binding.common.proofs.full.FullProof.FullProofStatus.VALID;
+import static com.exonum.binding.common.proofs.model.ProofStatus.FullProofStatus.VALID;
 
 import com.exonum.binding.common.proofs.full.checked.CheckedListProof;
 import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
+import com.exonum.binding.common.proofs.model.ProofStatus;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.List;
 
@@ -27,11 +28,11 @@ import java.util.List;
  * A validator of full proofs.
  *
  */
-public final class FullProofValidatorImpl implements FullProofValidator{
+public final class FullProofValidatorImpl implements FullProofValidator {
   private FullProof fullProof;
-  private FullProof.FullProofStatus status;
+  private ProofStatus.FullProofStatus status;
 
-  private FullProofValidatorImpl(FullProof.FullProofStatus status, FullProof fullProof) {
+  private FullProofValidatorImpl(ProofStatus.FullProofStatus status, FullProof fullProof) {
     this.status = status;
     this.fullProof = fullProof;
   }
@@ -39,33 +40,37 @@ public final class FullProofValidatorImpl implements FullProofValidator{
   @Override
   public FullProofValidator check(FullProof fullProof, int collectionId,
       List<byte[]> expectedKeys) {
-    FullProof.FullProofStatus proofStatus = someCheck(fullProof, collectionId, expectedKeys);
+    ProofStatus.FullProofStatus proofStatus = someCheck(fullProof, collectionId, expectedKeys);
 
     return new FullProofValidatorImpl(proofStatus, fullProof);
   }
 
   @Override
   public CheckedListProof getCheckedListProof(int collectionId) {
+    //TODO need's to be implemented
     return null;
   }
 
   @Override
   public CheckedMapProof getCheckedMapProof(int collectionId) {
+    //TODO need's to be implemented
     return null;
   }
 
   @Override
   public CheckedListProof getSerializedCheckedListProof(int collectionId, Serializer serializer) {
+    //TODO need's to be implemented
     return null;
   }
 
   @Override
   public CheckedMapProof getSerializedCheckedMapProof(int collectionId, Serializer keySerializer,
       Serializer valueSerializer) {
+    //TODO need's to be implemented
     return null;
   }
 
-  private static FullProof.FullProofStatus someCheck(FullProof fullProof, int collectionId,
+  private static ProofStatus.FullProofStatus someCheck(FullProof fullProof, int collectionId,
       List<byte[]> expectedKeys) {
     /**
      * TODO
@@ -78,11 +83,10 @@ public final class FullProofValidatorImpl implements FullProofValidator{
      * - Check precommit messages
      */
 
-
     return VALID;
   }
 
-  public FullProof.FullProofStatus getStatus() {
+  public ProofStatus.FullProofStatus getStatus() {
     return status;
   }
 

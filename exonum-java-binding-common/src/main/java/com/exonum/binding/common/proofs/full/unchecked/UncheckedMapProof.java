@@ -16,6 +16,8 @@
 
 package com.exonum.binding.common.proofs.full.unchecked;
 
+import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
+
 /**
  * An unchecked map proof.
  * It's used to get a checked map proof.
@@ -34,4 +36,8 @@ package com.exonum.binding.common.proofs.full.unchecked;
  * </code></pre>
  */
 public interface UncheckedMapProof extends UncheckedCollectionProof {
+  /**
+   * Checks that a proof has either correct or incorrect structure and returns a CheckedMapProof.
+   */
+  CheckedMapProof check();
 }

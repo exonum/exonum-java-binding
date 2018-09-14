@@ -43,16 +43,4 @@ public class FullProof {
     return blockProof;
   }
 
-  public enum FullProofStatus {
-    VALID("Proof has a valid structure"),
-    INCORRECT_USER_KEY_PROOF("User collection proof is incorrect"),
-    INCORRECT_STATE_HASH_PROOF("Aggregate state hash proof is incorect"),
-    INCORRECT_BLOCK_PROOF("Block and precommit proof is incorrect");
-
-    String message;
-
-    FullProofStatus(String message) {
-      this.message = message;
-    }
-  }
 }

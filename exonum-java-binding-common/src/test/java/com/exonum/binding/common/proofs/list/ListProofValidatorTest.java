@@ -87,7 +87,7 @@ public class ListProofValidatorTest {
   @Test
   @SuppressWarnings("unchecked")
   public void visit_SingletonListProof() {
-    ListProof root = leafOf(V1);
+    ListProofData root = leafOf(V1);
     when(hashFunction.hashObject(eq(root), any(Funnel.class)))
         .thenReturn(ROOT_HASH);
 
@@ -101,10 +101,10 @@ public class ListProofValidatorTest {
 
   @Test
   public void visit_FullProof2elements() {
-    ProofListElement left = leafOf(V1);
+    ListProofElement left = leafOf(V1);
     when(hashFunction.hashBytes(bytesOf(V1))).thenReturn(H1);
 
-    ProofListElement right = leafOf(V2);
+    ListProofElement right = leafOf(V2);
     when(hashFunction.hashBytes(bytesOf(V2))).thenReturn(H2);
 
     ListProofBranch root = new ListProofBranch(left, right);
@@ -153,8 +153,8 @@ public class ListProofValidatorTest {
 
   @Test
   public void visit_FullProof2elementsHashMismatch() {
-    ProofListElement left = leafOf(V1);
-    ProofListElement right = leafOf(V2);
+    ListProofElement left = leafOf(V1);
+    ListProofElement right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
     when(hasher.hash()).thenReturn(H3); // Just always return H3
@@ -175,7 +175,7 @@ public class ListProofValidatorTest {
   public void visit_IllegalProofOfSingletonTree() {
     int listSize = 1;
 
-    ProofListElement left = leafOf(V1);
+    ListProofElement left = leafOf(V1);
     when(hashFunction.hashBytes(bytesOf(V1))).thenReturn(H1);
 
     // A proof for a list of size 1 must not contain branch nodes.
@@ -191,10 +191,10 @@ public class ListProofValidatorTest {
   public void visit_ProofLeftValue() {
     int listSize = 2;
 
-    ListProof left = leafOf(V1);
+    ListProofData left = leafOf(V1);
     when(hashFunction.hashBytes(bytesOf(V1))).thenReturn(H1);
 
-    ListProof right = new HashNode(H2);
+    ListProofData right = new ListProofHashNode(H2);
 
     ListProofBranch root = new ListProofBranch(left, right);
 
@@ -209,9 +209,9 @@ public class ListProofValidatorTest {
   public void visit_ProofRightValue() {
     int listSize = 2;
 
-    ListProof left = new HashNode(H1);
+    ListProofData left = new ListProofHashNode(H1);
 
-    ListProof right = leafOf(V2);
+    ListProofData right = leafOf(V2);
     when(hashFunction.hashBytes(bytesOf(V2))).thenReturn(H2);
 
     ListProofBranch root = new ListProofBranch(left, right);
@@ -227,8 +227,8 @@ public class ListProofValidatorTest {
   public void visit_InvalidBranchHashesAsChildren() {
     int listSize = 2;
 
-    ListProof left = new HashNode(H1);
-    ListProof right = new HashNode(H2);
+    ListProofData left = new ListProofHashNode(H1);
+    ListProofData right = new ListProofHashNode(H2);
     ListProofBranch root = new ListProofBranch(left, right);
 
     validator = createListProofValidator(listSize);
@@ -244,7 +244,7 @@ public class ListProofValidatorTest {
   public void visit_InvalidBranchLeftHashNoRight() {
     int listSize = 2;
 
-    ListProof left = new HashNode(H1);
+    ListProofData left = new ListProofHashNode(H1);
     ListProofBranch root = new ListProofBranch(left, null);
 
     validator = createListProofValidator(listSize);
@@ -261,7 +261,7 @@ public class ListProofValidatorTest {
   public void visit_UnbalancedInTheRightSubTree() {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(leafOf(V1),
-            new HashNode(H2)),
+            new ListProofHashNode(H2)),
         leafOf(V3) // <-- A value at the wrong depth.
     );
 
@@ -281,7 +281,7 @@ public class ListProofValidatorTest {
     ListProofBranch root = new ListProofBranch(
         leafOf(V1), // <-- A value at the wrong depth.
         new ListProofBranch(leafOf(V2),
-            new HashNode(H3))
+            new ListProofHashNode(H3))
     );
 
     int listSize = 3;
@@ -298,7 +298,7 @@ public class ListProofValidatorTest {
   @Test
   public void visit_UnbalancedLeafNodeTooDeep() {
     int depth = 4;
-    ListProof root = generateLeftLeaningProofTree(depth);
+    ListProofData root = generateLeftLeaningProofTree(depth);
 
     // A list of size 4 has a height equal to 2, however, the proof tree exceeds that height.
     long listSize = 4;
@@ -318,21 +318,21 @@ public class ListProofValidatorTest {
         hashFunction);
   }
 
-  private static ProofListElement leafOf(String element) {
+  private static ListProofElement leafOf(String element) {
     byte[] dbElement = bytesOf(element);
-    return new ProofListElement(dbElement);
+    return new ListProofElement(dbElement);
   }
 
   private static byte[] bytesOf(String element) {
     return StandardSerializers.string().toBytes(element);
   }
 
-  private ListProof generateLeftLeaningProofTree(int depth) {
-    ListProof root = null;
-    ListProof left = leafOf(V1);
+  private ListProofData generateLeftLeaningProofTree(int depth) {
+    ListProofData root = null;
+    ListProofData left = leafOf(V1);
     int d = depth;
     while (d != 0) {
-      ListProof right = new HashNode(H1);
+      ListProofData right = new ListProofHashNode(H1);
       root = new ListProofBranch(left, right);
       left = root;
       d--;

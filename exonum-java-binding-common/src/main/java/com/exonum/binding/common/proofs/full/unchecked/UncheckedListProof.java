@@ -16,5 +16,11 @@
 
 package com.exonum.binding.common.proofs.full.unchecked;
 
+import com.exonum.binding.common.proofs.full.checked.CheckedListProof;
+
 public interface UncheckedListProof extends UncheckedCollectionProof {
+  /**
+   * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
+   */
+  CheckedListProof check();
 }

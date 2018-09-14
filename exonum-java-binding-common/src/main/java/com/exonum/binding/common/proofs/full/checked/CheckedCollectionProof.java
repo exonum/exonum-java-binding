@@ -16,5 +16,19 @@
 
 package com.exonum.binding.common.proofs.full.checked;
 
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.model.ProofStatus;
+
 public interface CheckedCollectionProof {
+
+  /**
+   * Return a hash of a proof root node.
+   * @throws IllegalStateException if the proof is not valid
+   */
+  HashCode getRootHash();
+
+  /**
+   * Returns the status of this proof: whether it is structurally valid.
+   */
+  ProofStatus getStatus();
 }

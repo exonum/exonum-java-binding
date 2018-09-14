@@ -16,11 +16,12 @@
 
 package com.exonum.binding.common.proofs.full.checked;
 
+import com.exonum.binding.common.proofs.list.ListProofElement;
 import java.util.NavigableMap;
 
 /**
  * A checked list proof.
  */
-public interface CheckedListProof {
-  NavigableMap<Long, ListEntry> getElements();
+public interface CheckedListProof extends CheckedCollectionProof {
+  NavigableMap<Long, ListProofElement> getElements();
 }
