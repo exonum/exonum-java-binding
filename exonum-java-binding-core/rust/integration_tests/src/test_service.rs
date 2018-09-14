@@ -20,8 +20,7 @@ pub fn create_test_service(executor: MainExecutor) -> ServiceProxy {
                 "createTestService",
                 format!("()L{};", SERVICE_ADAPTER_CLASS),
                 &[],
-            )?
-            .l()?;
+            )?.l()?;
         env.new_global_ref(test_service)
     }));
     ServiceProxy::from_global_ref(executor, test_service)

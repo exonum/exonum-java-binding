@@ -93,8 +93,8 @@ impl Transaction for TransactionProxy {
 
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let view_handle = to_handle(View::from_ref_fork(fork));
-            let res =
-                env.call_method(
+            let res = env
+                .call_method(
                     self.transaction.as_obj(),
                     "execute",
                     "(J)V",
