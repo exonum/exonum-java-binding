@@ -247,7 +247,7 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-binding-common</artifactId>
-      <version>0.2</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -340,7 +340,7 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
-      <version>0.2</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
