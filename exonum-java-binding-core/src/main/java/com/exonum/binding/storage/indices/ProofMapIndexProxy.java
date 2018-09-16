@@ -21,6 +21,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.MapProof;
+import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.proxy.Cleaner;
@@ -203,12 +204,12 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalStateException  if this map is not valid
    * @throws IllegalArgumentException if the size of the key is not 32 bytes
    */
-  public MapProof getProof(K key) {
+  public UncheckedMapProof getProof(K key) {
     byte[] dbKey = keySerializer.toBytes(key);
     return nativeGetProof(getNativeHandle(), dbKey);
   }
 
-  private native MapProof nativeGetProof(long nativeHandle, byte[] key);
+  private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.

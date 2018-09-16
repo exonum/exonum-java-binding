@@ -19,9 +19,8 @@ package com.exonum.binding.storage.indices;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.MapProof;
-import com.exonum.binding.common.proofs.map.MapProofValidator;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -29,42 +28,38 @@ import org.hamcrest.TypeSafeMatcher;
 class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCode, String>> {
 
   private final HashCode key;
-  private final MapProofValidatorMatcher proofValidatorMatcher;
+
+  private final CheckedMapProofMatcher checkedMapProofMatcher;
 
   private ProofMapContainsMatcher(HashCode key, @Nullable String expectedValue) {
     this.key = key;
-    proofValidatorMatcher = MapProofValidatorMatcher.isValid(key, expectedValue);
+    checkedMapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue);
   }
 
   @Override
   protected boolean matchesSafely(ProofMapIndexProxy<HashCode, String> map) {
-    MapProofValidator validator = checkProof(map);
+    CheckedMapProof checkedProof = checkProof(map);
 
-    return proofValidatorMatcher.matches(validator);
+    return checkedMapProofMatcher.matches(checkedProof);
   }
 
   @Override
   public void describeTo(Description description) {
     description.appendText("proof map providing ")
-        .appendDescriptionOf(proofValidatorMatcher);
+        .appendDescriptionOf(checkedMapProofMatcher);
   }
 
   @Override
   protected void describeMismatchSafely(ProofMapIndexProxy<HashCode, String> map,
                                         Description mismatchDescription) {
-    MapProofValidator validator = checkProof(map);
-    proofValidatorMatcher.describeMismatch(validator, mismatchDescription);
+    CheckedMapProof checkedProof = checkProof(map);
+    checkedMapProofMatcher.describeMismatch(checkedProof, mismatchDescription);
   }
 
-  private MapProofValidator checkProof(ProofMapIndexProxy<HashCode, String> map) {
-    MapProof proof = map.getProof(key);
+  private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {
+    UncheckedMapProof proof = map.getProof(key);
     assert proof != null : "The proof must not be null";
-    HashCode rootHash = map.getRootHash();
-    MapProofValidator<String> validator = new MapProofValidator<>(rootHash, key.asBytes(),
-        StandardSerializers.string());
-
-    proof.accept(validator);
-    return validator;
+    return proof.check();
   }
 
   /**
