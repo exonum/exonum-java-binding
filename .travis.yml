@@ -25,8 +25,9 @@ env:
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     # force building instead of using from apt.
-    - ROCKSDB_BUILD=1
-    - SNAPPY_BUILD=1
+    # let's see what would happen
+    # - ROCKSDB_BUILD=1
+    # - SNAPPY_BUILD=1
   matrix:
     - CHECK_RUST=true
     - CHECK_RUST=false
@@ -38,6 +39,8 @@ matrix:
       env: CHECK_RUST=true
     - os: osx
       env: CHECK_RUST=true
+    - os: osx
+      jdk: openjdk10
   # See ECR-1734
   allow_failures:
     - jdk: openjdk10
@@ -58,6 +61,8 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
+  # Install OSX requirements
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsodium rocksdb pkg-config; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
