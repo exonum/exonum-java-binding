@@ -30,13 +30,11 @@ pub fn create_throwing_mock_transaction_proxy(
                     "createThrowingTransaction",
                     format!("(Ljava/lang/Class;)L{};", TRANSACTION_ADAPTER_CLASS),
                     &[JValue::from(JObject::from(exception.into_inner()))],
-                )?
-                .l()?;
+                )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
             let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
             Ok((java_tx_mock, raw))
-        })
-        .unwrap();
+        }).unwrap();
 
     TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
@@ -66,11 +64,9 @@ pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalR
                         JValue::from(JObject::from(value)),
                         JValue::from(JObject::from(info)),
                     ],
-                )?
-                .l()?;
+                )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
             let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
             Ok((java_tx_mock, raw))
-        })
-        .unwrap()
+        }).unwrap()
 }
