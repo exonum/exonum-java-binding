@@ -20,7 +20,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.flat.MapEntry;
 import com.exonum.binding.common.proofs.map.flat.ProofStatus;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -46,15 +48,21 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
+    ProofStatus status = checkedMapProof.getStatus();
+    List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
+    List<MapEntry> entries = checkedMapProof.getEntries();
+
     // In case of null expectedValue the absence of the key is checked
     if (expectedValue == null) {
-      return checkedMapProof.getStatus() == ProofStatus.CORRECT
-          && checkedMapProof.getMissingKeys().size() == 1
+      return status == ProofStatus.CORRECT
+          && missingKeys.size() == 1
+          && entries.isEmpty()
           && keyMatcher.matches(checkedMapProof.getMissingKeys().get(0));
     } else {
-      return checkedMapProof.getStatus() == ProofStatus.CORRECT
-          && checkedMapProof.getEntries().size() == 1
-          && keyMatcher.matches(checkedMapProof.getEntries().get(0).getKey())
+      return status == ProofStatus.CORRECT
+          && entries.size() == 1
+          && missingKeys.isEmpty()
+          && keyMatcher.matches(entries.get(0).getKey())
           && valueMatcher.matches(checkedMapProof.get(key.asBytes()));
     }
   }

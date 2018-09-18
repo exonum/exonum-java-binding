@@ -59,7 +59,11 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
   private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {
     UncheckedMapProof proof = map.getProof(key);
     assert proof != null : "The proof must not be null";
-    return proof.check();
+
+    CheckedMapProof checkedProof = proof.check();
+    assert checkedProof.compareWithRootHash(map.getRootHash())
+        : "The root hash of the proof should be the same as root hash of the map";
+    return checkedProof;
   }
 
   /**
