@@ -61,7 +61,7 @@ public final class CryptocurrencySchema implements Schema {
   }
 
   /**
-   * Returns transactions history of the wallet
+   * Returns transactions history of the wallet.
    *
    * @param key wallet address
    * @return transactions history

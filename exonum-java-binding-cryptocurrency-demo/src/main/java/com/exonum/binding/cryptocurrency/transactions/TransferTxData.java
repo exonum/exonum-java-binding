@@ -25,7 +25,15 @@ public class TransferTxData {
   private final PublicKey recipientId;
   private final long amount;
 
-  TransferTxData(long seed, PublicKey senderId, PublicKey recipientId, long amount) {
+  /**
+   * Constructs the instance.
+   *
+   * @param seed        seed
+   * @param senderId    sender id
+   * @param recipientId recipient id
+   * @param amount      amount
+   */
+  public TransferTxData(long seed, PublicKey senderId, PublicKey recipientId, long amount) {
     this.seed = seed;
     this.senderId = senderId;
     this.recipientId = recipientId;

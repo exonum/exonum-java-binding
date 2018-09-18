@@ -20,6 +20,8 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,8 +34,10 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
+import com.exonum.binding.cryptocurrency.transactions.TransferTxData;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.transaction.Transaction;
+import com.google.gson.reflect.TypeToken;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
@@ -44,7 +48,9 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -218,6 +224,44 @@ class ApiControllerTest {
         })));
   }
 
+  @Test
+  void getWalletHistory(VertxTestContext context) {
+    List<TransferTxData> history = singletonList(
+        new TransferTxData(1L, fromKey, fromKey, 10L));
+    when(service.getWalletHistory(fromKey)).thenReturn(history);
+
+    String uri = getWalletHistoryUri(fromKey);
+
+    get(uri)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          Type listType = new TypeToken<List<TransferTxData>>() {
+          }.getType();
+          List<TransferTxData> actualHistory = CryptocurrencyTransactionGson.instance()
+              .fromJson(response.bodyAsString(), listType);
+
+          assertThat(actualHistory).containsExactly(history.get(0));
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getWalletHistoryNoRecords(VertxTestContext context) {
+    when(service.getWalletHistory(fromKey)).thenReturn(emptyList());
+
+    String uri = getWalletHistoryUri(fromKey);
+
+    get(uri)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+
+          context.completeNow();
+        })));
+  }
+
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
     Throwable wrappingException = logSafeExceptionMock(RuntimeException.class);
     Throwable cause = logSafeExceptionMock(checkedException);
@@ -237,6 +281,14 @@ class ApiControllerTest {
   private String getWalletUri(String id) {
     try {
       return "/wallet/" + URLEncoder.encode(id, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 must be supported", e);
+    }
+  }
+
+  private String getWalletHistoryUri(PublicKey publicKey) {
+    try {
+      return "/wallet/" + URLEncoder.encode(publicKey.toString(), "UTF-8") + "/history";
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 must be supported", e);
     }
