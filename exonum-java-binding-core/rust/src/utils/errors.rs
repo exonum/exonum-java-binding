@@ -7,7 +7,8 @@ use utils::{get_class_name, get_exception_message};
 use {JniErrorKind, JniResult};
 
 const CLASS_JL_ERROR: &str = "java/lang/Error";
-const CLASS_TRANSACTION_EXCEPTION: &str = "com/exonum/binding/transaction/TransactionExecutionException";
+const CLASS_TRANSACTION_EXCEPTION: &str =
+    "com/exonum/binding/transaction/TransactionExecutionException";
 
 /// Unwraps the result, returning its content.
 ///
@@ -56,12 +57,18 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> Result
 /// - Panics if there is some JNI error.
 /// - If there is a pending Java throwable that IS NOT an instance or subclass of the
 /// `TransactionExecutionException`.
-pub fn check_transaction_execution_result<T>(env: &JNIEnv, result: JniResult<T>) -> Result<T, String> {
+pub fn check_transaction_execution_result<T>(
+    env: &JNIEnv,
+    result: JniResult<T>,
+) -> Result<T, String> {
     result.map_err(|jni_error| match jni_error.0 {
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = describe_java_exception(env, exception);
-            if !unwrap_jni_verbose(env, env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION)) {
+            if !unwrap_jni_verbose(
+                env,
+                env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION),
+            ) {
                 panic!(message);
             }
             message
