@@ -14,7 +14,8 @@ use std::fmt;
 
 use storage::View;
 use utils::{
-    check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni,
+    check_error_on_exception, check_transaction_execution_result, convert_to_string,
+    panic_on_exception, to_handle, unwrap_jni,
 };
 use {JniExecutor, MainExecutor};
 
@@ -100,7 +101,7 @@ impl Transaction for TransactionProxy {
                     "(J)V",
                     &[JValue::from(view_handle)],
                 ).and_then(JValue::v);
-            Ok(check_error_on_exception(env, res))
+            Ok(check_transaction_execution_result(env, res))
         });
         unwrap_jni(res).map_err(|err: String| ExecutionError::with_description(ERROR_CODE, err))
     }
