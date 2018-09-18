@@ -31,17 +31,18 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
 
   private final CheckedMapProofMatcher checkedMapProofMatcher;
 
-  private ProofMapContainsMatcher(
-      HashCode key, @Nullable String expectedValue, HashCode expectedRootHash) {
+  private ProofMapContainsMatcher(HashCode key, @Nullable String expectedValue) {
     this.key = key;
-    checkedMapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue, expectedRootHash);
+    checkedMapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue);
   }
 
   @Override
   protected boolean matchesSafely(ProofMapIndexProxy<HashCode, String> map) {
     CheckedMapProof checkedProof = checkProof(map);
+    HashCode expectedRootHash = map.getRootHash();
 
-    return checkedMapProofMatcher.matches(checkedProof);
+    return checkedMapProofMatcher.matches(checkedProof)
+        && checkedProof.compareWithRootHash(expectedRootHash);
   }
 
   @Override
@@ -70,11 +71,9 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
    *
    * @param key a key to request proof for
    * @param value an expected value mapped to the key
-   * @param expectedRootHash an expected root hash of the proof
    */
-  static ProofMapContainsMatcher provesThatContains(
-      HashCode key, String value, HashCode expectedRootHash) {
-    return new ProofMapContainsMatcher(key, checkNotNull(value), expectedRootHash);
+  static ProofMapContainsMatcher provesThatContains(HashCode key, String value) {
+    return new ProofMapContainsMatcher(key, checkNotNull(value));
   }
 
   /**
@@ -82,9 +81,8 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
    * that it does not map any value to the specified key and has the expected root hash.
    *
    * @param key a key to request proof for
-   * @param expectedRootHash an expected root hash of the proof
    */
-  static ProofMapContainsMatcher provesNoMappingFor(HashCode key, HashCode expectedRootHash) {
-    return new ProofMapContainsMatcher(key, null, expectedRootHash);
+  static ProofMapContainsMatcher provesNoMappingFor(HashCode key) {
+    return new ProofMapContainsMatcher(key, null);
   }
 }
