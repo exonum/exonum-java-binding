@@ -31,9 +31,10 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
 
   private final CheckedMapProofMatcher checkedMapProofMatcher;
 
-  private ProofMapContainsMatcher(HashCode key, @Nullable String expectedValue) {
+  private ProofMapContainsMatcher(
+      HashCode key, @Nullable String expectedValue, HashCode expectedRootHash) {
     this.key = key;
-    checkedMapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue);
+    checkedMapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue, expectedRootHash);
   }
 
   @Override
@@ -60,30 +61,30 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
     UncheckedMapProof proof = map.getProof(key);
     assert proof != null : "The proof must not be null";
 
-    CheckedMapProof checkedProof = proof.check();
-    assert checkedProof.compareWithRootHash(map.getRootHash())
-        : "The root hash of the proof should be the same as root hash of the map";
-    return checkedProof;
+    return proof.check();
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof
-   * that it maps the specified value to the specified key.
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that it maps
+   * the specified value to the specified key and has the expected root hash.
    *
    * @param key a key to request proof for
    * @param value an expected value mapped to the key
+   * @param expectedRootHash an expected root hash of the proof
    */
-  static ProofMapContainsMatcher provesThatContains(HashCode key, String value) {
-    return new ProofMapContainsMatcher(key, checkNotNull(value));
+  static ProofMapContainsMatcher provesThatContains(
+      HashCode key, String value, HashCode expectedRootHash) {
+    return new ProofMapContainsMatcher(key, checkNotNull(value), expectedRootHash);
   }
 
   /**
    * Creates a matcher for a proof map that matches iff the map provides a valid proof
-   * that it does not map any value to the specified key.
+   * that it does not map any value to the specified key and has the expected root hash.
    *
    * @param key a key to request proof for
+   * @param expectedRootHash an expected root hash of the proof
    */
-  static ProofMapContainsMatcher provesNoMappingFor(HashCode key) {
-    return new ProofMapContainsMatcher(key, null);
+  static ProofMapContainsMatcher provesNoMappingFor(HashCode key, HashCode expectedRootHash) {
+    return new ProofMapContainsMatcher(key, null, expectedRootHash);
   }
 }

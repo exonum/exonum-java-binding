@@ -35,12 +35,16 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Nullable
   private final String expectedValue;
 
+  private final HashCode expectedRootHash;
+
   private final Matcher<byte[]> keyMatcher;
   private final Matcher<byte[]> valueMatcher;
 
-  private CheckedMapProofMatcher(HashCode key, @Nullable String expectedValue) {
+  private CheckedMapProofMatcher(
+      HashCode key, @Nullable String expectedValue, HashCode expectedRootHash) {
     this.key = checkNotNull(key);
     this.expectedValue = expectedValue;
+    this.expectedRootHash = checkNotNull(expectedRootHash);
     keyMatcher = IsEqual.equalTo(key.asBytes());
     valueMatcher =
         expectedValue != null ? IsEqual.equalTo(expectedValue.getBytes()) : IsEqual.equalTo(null);
@@ -55,32 +59,38 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     // In case of null expectedValue the absence of the key is checked
     if (expectedValue == null) {
       return status == ProofStatus.CORRECT
+          && checkedMapProof.compareWithRootHash(expectedRootHash)
           && missingKeys.size() == 1
           && entries.isEmpty()
-          && keyMatcher.matches(checkedMapProof.getMissingKeys().get(0));
+          && keyMatcher.matches(missingKeys.get(0));
     } else {
       return status == ProofStatus.CORRECT
+          && checkedMapProof.compareWithRootHash(expectedRootHash)
           && entries.size() == 1
           && missingKeys.isEmpty()
           && keyMatcher.matches(entries.get(0).getKey())
-          && valueMatcher.matches(checkedMapProof.get(key.asBytes()));
+          && valueMatcher.matches(entries.get(0).getValue());
     }
   }
 
   @Override
   public void describeTo(Description description) {
-    description.appendText("valid proof, key=").appendText(key.toString())
+    description.appendText("valid proof, root hash=").appendText(expectedRootHash.toString())
+        .appendText(", key=").appendText(key.toString())
         .appendText(", value=").appendText(expectedValue);
   }
 
   /**
-   * Creates a matcher of a checked proof that is valid and has the same key and value as specified.
+   * Creates a matcher of a checked proof that is valid, has the same key and value as specified
+   * and has the expected root hash.
    *
    * @param key a requested key
-   * @param expectedValue a value that is expected to be mapped to the requested key,
-   *                      or null if there must not be such mapping in the proof map
+   * @param expectedValue a value that is expected to be mapped to the requested key, or null if
+   *     there must not be such mapping in the proof map
+   * @param expectedRootHash a hash that is expected to be the root hash of the map
    */
-  static CheckedMapProofMatcher isValid(HashCode key, @Nullable String expectedValue) {
-    return new CheckedMapProofMatcher(key, expectedValue);
+  static CheckedMapProofMatcher isValid(
+      HashCode key, @Nullable String expectedValue, HashCode expectedRootHash) {
+    return new CheckedMapProofMatcher(key, expectedValue, expectedRootHash);
   }
 }

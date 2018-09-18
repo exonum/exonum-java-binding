@@ -232,7 +232,7 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   public void getProof_EmptyMap() {
     runTestWithView(database::createSnapshot,
-        (map) -> assertThat(map, provesNoMappingFor(PK1))
+        (map) -> assertThat(map, provesNoMappingFor(PK1, map.getRootHash()))
     );
   }
 
@@ -243,7 +243,7 @@ public class ProofMapIndexProxyIntegrationTest
       String value = V1;
       map.put(key, value);
 
-      assertThat(map, provesThatContains(key, value));
+      assertThat(map, provesThatContains(key, value, map.getRootHash()));
     });
   }
 
@@ -252,7 +252,7 @@ public class ProofMapIndexProxyIntegrationTest
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      assertThat(map, provesNoMappingFor(PK2));
+      assertThat(map, provesNoMappingFor(PK2, map.getRootHash()));
     });
   }
 
@@ -272,7 +272,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatContains(e.getKey(), e.getValue(), map.getRootHash()));
       }
     });
   }
@@ -292,7 +292,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatContains(e.getKey(), e.getValue(), map.getRootHash()));
       }
     });
   }
@@ -316,7 +316,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatContains(e.getKey(), e.getValue(), map.getRootHash()));
       }
     });
   }
@@ -339,7 +339,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatContains(e.getKey(), e.getValue(), map.getRootHash()));
       }
     });
   }
@@ -351,7 +351,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatContains(e.getKey(), e.getValue(), map.getRootHash()));
       }
     });
   }
@@ -373,7 +373,7 @@ public class ProofMapIndexProxyIntegrationTest
       );
 
       for (HashCode key : otherKeys) {
-        assertThat(map, provesNoMappingFor(key));
+        assertThat(map, provesNoMappingFor(key, map.getRootHash()));
       }
     });
   }
@@ -389,7 +389,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatContains(e.getKey(), e.getValue(), map.getRootHash()));
       }
     });
   }
