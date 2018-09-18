@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list.wrapper;
+package com.exonum.binding.common.proofs.list.adapter;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.full.checked.CheckedListProof;
@@ -22,11 +22,11 @@ import com.exonum.binding.common.proofs.list.ListProofElement;
 import com.exonum.binding.common.proofs.model.ProofStatus;
 import java.util.NavigableMap;
 
-public class CheckedListProofData implements CheckedListProof {
+public class CheckedListProofAdapter implements CheckedListProof {
   private final NavigableMap<Long, ListProofElement> elements;
   private final HashCode rootHash;
 
-  public CheckedListProofData(NavigableMap<Long, ListProofElement> elements, HashCode rootHash) {
+  public CheckedListProofAdapter(NavigableMap<Long, ListProofElement> elements, HashCode rootHash) {
     this.elements = elements;
     this.rootHash = rootHash;
   }

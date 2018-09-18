@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list.wrapper;
+package com.exonum.binding.common.proofs.list.adapter;
 
 import com.exonum.binding.common.proofs.full.checked.CheckedListProof;
 import com.exonum.binding.common.proofs.full.unchecked.UncheckedListProof;
@@ -22,12 +22,12 @@ import com.exonum.binding.common.proofs.list.ListProofData;
 import com.exonum.binding.common.proofs.list.ListProofElement;
 import com.exonum.binding.common.proofs.list.ListProofValidator;
 
-public class UncheckedListProofData implements UncheckedListProof {
+public class UncheckedListProofAdapter implements UncheckedListProof {
 
   private final ListProofData listProofData;
   private final ListProofValidator<ListProofElement> listProofValidator;
 
-  public UncheckedListProofData(ListProofData listProofData,
+  public UncheckedListProofAdapter(ListProofData listProofData,
       ListProofValidator<ListProofElement> listProofValidator) {
     this.listProofData = listProofData;
     this.listProofValidator = listProofValidator;
@@ -37,7 +37,7 @@ public class UncheckedListProofData implements UncheckedListProof {
   public CheckedListProof check() {
     listProofData.accept(listProofValidator);
 
-    return new CheckedListProofData(listProofValidator.getElements(),
+    return new CheckedListProofAdapter(listProofValidator.getElements(),
         listProofValidator.getRootHash());
   }
 }
