@@ -32,24 +32,20 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;
 
-/** A transaction that transfers cryptocurrency between two wallets. */
+/**
+ * A transaction that transfers cryptocurrency between two wallets.
+ */
 public final class TransferTx extends AbstractTransaction implements Transaction {
 
   static final short ID = 2;
 
-  private final long seed;
-  private final PublicKey fromWallet;
-  private final PublicKey toWallet;
-  private final long sum;
+  private final TransferTxData data;
 
   @VisibleForTesting
   TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet,
-             long sum) {
+      long sum) {
     super(message);
-    this.seed = seed;
-    this.fromWallet = fromWallet;
-    this.toWallet = toWallet;
-    this.sum = sum;
+    data = new TransferTxData(seed, fromWallet, toWallet, sum);
   }
 
   /**
@@ -79,21 +75,22 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public boolean isValid() {
-    return getMessage().verify(CRYPTO_FUNCTION, fromWallet);
+    return getMessage().verify(CRYPTO_FUNCTION, data.getSenderId());
   }
 
   @Override
   public void execute(Fork view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-    if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
-      Wallet from = wallets.get(fromWallet);
-      Wallet to = wallets.get(toWallet);
-      if (from.getBalance() < sum || fromWallet.equals(toWallet)) {
+    if (wallets.containsKey(data.getRecipientId()) && wallets.containsKey(data.getSenderId())) {
+      Wallet from = wallets.get(data.getSenderId());
+      Wallet to = wallets.get(data.getRecipientId());
+      if (from.getBalance() < data.getAmount() || data.getSenderId()
+          .equals(data.getRecipientId())) {
         return;
       }
-      wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
-      wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+      schema.changeWalletBalance(data.getSenderId(), from.getBalance() - data.getAmount(), data);
+      schema.changeWalletBalance(data.getRecipientId(), to.getBalance() + data.getAmount(), data);
     }
   }
 
@@ -111,14 +108,11 @@ public final class TransferTx extends AbstractTransaction implements Transaction
       return false;
     }
     TransferTx that = (TransferTx) o;
-    return seed == that.seed
-        && sum == that.sum
-        && Objects.equals(fromWallet, that.fromWallet)
-        && Objects.equals(toWallet, that.toWallet);
+    return Objects.equals(this.data, that.data);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(seed, fromWallet, toWallet, sum);
+    return Objects.hash(data);
   }
 }

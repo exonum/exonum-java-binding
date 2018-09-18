@@ -17,17 +17,54 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.google.common.base.Objects;
 
-class TransferTxData {
-  final long seed;
-  final PublicKey senderId;
-  final PublicKey recipientId;
-  final long amount;
+public class TransferTxData {
+  private final long seed;
+  private final PublicKey senderId;
+  private final PublicKey recipientId;
+  private final long amount;
 
   TransferTxData(long seed, PublicKey senderId, PublicKey recipientId, long amount) {
     this.seed = seed;
     this.senderId = senderId;
     this.recipientId = recipientId;
     this.amount = amount;
+  }
+
+  public long getSeed() {
+    return seed;
+  }
+
+  public PublicKey getSenderId() {
+    return senderId;
+  }
+
+  public PublicKey getRecipientId() {
+    return recipientId;
+  }
+
+  public long getAmount() {
+    return amount;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TransferTxData that = (TransferTxData) o;
+    return seed == that.seed
+        && amount == that.amount
+        && Objects.equal(senderId, that.senderId)
+        && Objects.equal(recipientId, that.recipientId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(seed, senderId, recipientId, amount);
   }
 }

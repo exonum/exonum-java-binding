@@ -21,8 +21,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.crypto.PublicKeySerializer;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.cryptocurrency.transactions.TransferSerializer;
+import com.exonum.binding.cryptocurrency.transactions.TransferTxData;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -55,6 +58,23 @@ public final class CryptocurrencySchema implements Schema {
     String name = fullIndexName("wallets");
     return ProofMapIndexProxy.newInstance(name, view, PublicKeySerializer.INSTANCE,
         WalletSerializer.INSTANCE);
+  }
+
+  /**
+   * Returns transactions history of the wallet
+   *
+   * @param key wallet address
+   * @return transactions history
+   */
+  public ProofListIndexProxy<TransferTxData> walletHistory(PublicKey key) {
+    String name = fullIndexName("wallet_history");
+    return ProofListIndexProxy.newInGroupUnsafe(name, key.toBytes(), view,
+        TransferSerializer.INSTANCE);
+  }
+
+  public void changeWalletBalance(PublicKey walletOwner, long amount, TransferTxData transaction) {
+    wallets().put(walletOwner, new Wallet(amount));
+    walletHistory(walletOwner).add(transaction);
   }
 
   private static String fullIndexName(String name) {
