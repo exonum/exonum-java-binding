@@ -85,7 +85,10 @@ class QaServiceImplIntegrationTest {
   private static ListAppender getCapturingLogAppender() {
     LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
     Configuration config = ctx.getConfiguration();
-    return (ListAppender) config.getAppenders().get("ListAppender");
+    ListAppender appender = (ListAppender) config.getAppenders().get("ListAppender");
+    // Clear the appender so that it doesn't contain entries from the previous tests.
+    appender.clear();
+    return appender;
   }
 
   @AfterEach
