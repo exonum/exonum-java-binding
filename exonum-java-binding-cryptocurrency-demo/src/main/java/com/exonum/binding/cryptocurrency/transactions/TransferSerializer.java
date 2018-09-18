@@ -35,8 +35,6 @@ public enum TransferSerializer implements Serializer<TransferTxData> {
       throw new IllegalArgumentException(
           "Unable to instantiate TxMessagesProtos.TransferTx instance from provided binary data",
           e);
-
     }
-
   }
 }

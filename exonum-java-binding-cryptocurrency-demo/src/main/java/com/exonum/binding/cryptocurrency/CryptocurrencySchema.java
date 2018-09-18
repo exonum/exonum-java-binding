@@ -72,11 +72,6 @@ public final class CryptocurrencySchema implements Schema {
         TransferSerializer.INSTANCE);
   }
 
-  public void changeWalletBalance(PublicKey walletOwner, long amount, TransferTxData transaction) {
-    wallets().put(walletOwner, new Wallet(amount));
-    walletHistory(walletOwner).add(transaction);
-  }
-
   private static String fullIndexName(String name) {
     return NAMESPACE + "__" + name;
   }

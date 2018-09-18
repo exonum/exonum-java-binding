@@ -85,12 +85,14 @@ public final class TransferTx extends AbstractTransaction implements Transaction
     if (wallets.containsKey(data.getRecipientId()) && wallets.containsKey(data.getSenderId())) {
       Wallet from = wallets.get(data.getSenderId());
       Wallet to = wallets.get(data.getRecipientId());
-      if (from.getBalance() < data.getAmount() || data.getSenderId()
-          .equals(data.getRecipientId())) {
+      if (from.getBalance() < data.getAmount()
+          || data.getSenderId().equals(data.getRecipientId())) {
         return;
       }
-      schema.changeWalletBalance(data.getSenderId(), from.getBalance() - data.getAmount(), data);
-      schema.changeWalletBalance(data.getRecipientId(), to.getBalance() + data.getAmount(), data);
+      wallets.put(data.getSenderId(), new Wallet(from.getBalance() - data.getAmount()));
+      schema.walletHistory(data.getSenderId()).add(data);
+      wallets.put(data.getRecipientId(), new Wallet(to.getBalance() + data.getAmount()));
+      schema.walletHistory(data.getRecipientId()).add(data);
     }
   }
 
