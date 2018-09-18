@@ -3,14 +3,21 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::vm::create_vm_for_tests;
-use java_bindings::jni::{JNIEnv, JavaVM};
-use java_bindings::utils::{
-    check_error_on_exception, get_and_clear_java_exception, get_class_name, get_exception_message,
-    panic_on_exception,
+use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use java_bindings::{
+    JniErrorKind, JniExecutor, JniResult, MainExecutor,
+    jni::{
+        JNIEnv, JavaVM,
+        objects::{
+            JThrowable, JValue,
+        },
+        sys::jbyte,
+    },
+    utils::{
+        check_error_on_exception, get_and_clear_java_exception, get_class_name, get_exception_message,
+        panic_on_exception, check_transaction_execution_result,
+    }
 };
-use java_bindings::{JniErrorKind, JniExecutor, JniResult, MainExecutor};
-
 use std::sync::Arc;
 
 const ERROR_CLASS: &str = "java/lang/Error";
@@ -19,9 +26,11 @@ const EXCEPTION_CLASS: &str = "java/lang/Exception";
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 const CUSTOM_EXCEPTION_MESSAGE: &str = "Test exception message";
+const CLASS_TX_EXEC_EXCEPTION: &str = "com/exonum/binding/transaction/TransactionExecutionException";
+const CLASS_TX_EXEC_EXCEPTION_SUBCLASS: &str = "com/exonum/binding/fakes/test/TestTxExecException";
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = create_vm_for_tests();
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
     pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
@@ -124,6 +133,87 @@ fn check_error_on_exception_dont_catch_good_result() {
 }
 
 #[test]
+#[should_panic(expected = "Java exception: java.lang.Error")]
+fn check_transaction_execution_result_panic_on_java_error_exact_class() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| Ok(check_transaction_execution_result(env, throw(env, ERROR_CLASS)))).unwrap()
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
+fn check_transaction_execution_result_panic_on_java_error_subclass() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| {
+            Ok(check_transaction_execution_result(env, throw(env, OOM_ERROR_CLASS)))
+        }).unwrap()
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Java exception: java.lang.Exception")]
+fn check_transaction_execution_result_panic_on_java_exception_exact_class() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| {
+            Ok(check_transaction_execution_result(env, throw(env, EXCEPTION_CLASS)))
+        }).unwrap()
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Java exception: java.lang.ArithmeticException")]
+fn check_transaction_execution_result_panic_on_java_exception_subclass() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| {
+            Ok(check_transaction_execution_result(env, throw(env, ARITHMETIC_EXCEPTION_CLASS)))
+        }).unwrap()
+        .unwrap();
+}
+
+#[test]
+fn check_transaction_execution_result_catch_java_expected_exception_exact_class() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| {
+            check_transaction_execution_result(env, throw_tx_exec_exception(env, CLASS_TX_EXEC_EXCEPTION, 0))
+                .map_err(|e| {
+                    assert!(e.starts_with("Java exception: com.exonum.binding.transaction.TransactionExecutionException"))
+                })
+                .expect_err("An exception should lead to an error");
+            Ok(())
+        })
+        .unwrap();
+}
+
+#[test]
+fn check_transaction_execution_result_catch_java_expected_exception_subclass() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| {
+            check_transaction_execution_result(env, throw_tx_exec_exception(env, CLASS_TX_EXEC_EXCEPTION_SUBCLASS, 0))
+                .map_err(|e| {
+                    assert!(e.starts_with("Java exception: com.exonum.binding.fakes.test.TestTxExecException"))
+                })
+                .expect_err("An exception should lead to an error");
+            Ok(())
+        })
+        .unwrap();
+}
+
+#[test]
+#[should_panic(expected = "JNI error: ")]
+fn check_transaction_execution_result_panic_on_jni_error() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| Ok(check_transaction_execution_result(env, make_jni_error()))).unwrap()
+        .unwrap();
+}
+
+#[test]
+fn check_transaction_execution_result_dont_catch_good_result() {
+    EXECUTOR
+        .with_attached(|env: &JNIEnv| Ok(check_transaction_execution_result(env, Ok(())))).unwrap()
+        .unwrap();
+}
+
+#[test]
 fn get_and_clear_java_exception_if_exception_occurred() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
@@ -182,6 +272,13 @@ fn throw(env: &JNIEnv, exception_class: &str) -> JniResult<()> {
 
 fn throw_with_message(env: &JNIEnv, exception_class: &str, message: &str) -> JniResult<()> {
     env.throw((exception_class, message))?;
+    Err(JniErrorKind::JavaException.into())
+}
+
+fn throw_tx_exec_exception(env: &JNIEnv, class: &str, err_code: jbyte) -> JniResult<()> {
+    let ex: JThrowable = env.new_object(class, "(B)V", &[JValue::from(err_code)])?
+        .into();
+    env.throw(ex)?;
     Err(JniErrorKind::JavaException.into())
 }
 
