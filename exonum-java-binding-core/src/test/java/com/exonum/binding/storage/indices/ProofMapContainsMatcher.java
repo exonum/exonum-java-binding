@@ -29,11 +29,11 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
 
   private final HashCode key;
 
-  private final CheckedMapProofMatcher checkedMapProofMatcher;
+  private final CheckedMapProofMatcher mapProofMatcher;
 
   private ProofMapContainsMatcher(HashCode key, @Nullable String expectedValue) {
     this.key = key;
-    checkedMapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue);
+    mapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue);
   }
 
   @Override
@@ -41,21 +41,24 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
     CheckedMapProof checkedProof = checkProof(map);
     HashCode expectedRootHash = map.getRootHash();
 
-    return checkedMapProofMatcher.matches(checkedProof)
+    return mapProofMatcher.matches(checkedProof)
         && checkedProof.compareWithRootHash(expectedRootHash);
   }
 
   @Override
   public void describeTo(Description description) {
     description.appendText("proof map providing ")
-        .appendDescriptionOf(checkedMapProofMatcher);
+        .appendDescriptionOf(mapProofMatcher);
   }
 
   @Override
   protected void describeMismatchSafely(ProofMapIndexProxy<HashCode, String> map,
                                         Description mismatchDescription) {
+    mismatchDescription.appendText("was a proof map with Merkle root=")
+        .appendValue(map.getRootHash())
+        .appendText(" providing a proof that ");
     CheckedMapProof checkedProof = checkProof(map);
-    checkedMapProofMatcher.describeMismatch(checkedProof, mismatchDescription);
+    mapProofMatcher.describeMismatch(checkedProof, mismatchDescription);
   }
 
   private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {

@@ -16,11 +16,13 @@
 
 package com.exonum.binding.common.proofs.map.flat;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.emptyList;
 
 import com.exonum.binding.common.hash.HashCode;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -29,35 +31,51 @@ import java.util.stream.Stream;
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private List<MapEntry> entries;
+  private final List<MapEntry> entries;
 
-  private List<byte[]> missingKeys;
+  private final List<byte[]> missingKeys;
 
-  private HashCode rootHash;
+  private final HashCode rootHash;
 
-  private ProofStatus status;
+  private final ProofStatus status;
 
   private CheckedFlatMapProof(
       ProofStatus status,
       HashCode rootHash,
       List<MapEntry> entries,
       List<byte[]> missingKeys) {
-    this.status = status;
-    this.rootHash = rootHash;
-    this.entries = entries;
-    this.missingKeys = missingKeys;
+    this.status = checkNotNull(status);
+    this.rootHash = checkNotNull(rootHash);
+    this.entries = checkNotNull(entries);
+    this.missingKeys = checkNotNull(missingKeys);
   }
 
-  static CheckedFlatMapProof correct(
+  /**
+   * Creates a valid map proof.
+   *
+   * @param rootHash the Merkle root hash calculated by the validator
+   * @param entries the list of entries that are proved to be in the map
+   * @param missingKeys the list of keys that are proved <em>not</em> to be in the map
+   * @return a new checked proof
+   */
+  public static CheckedFlatMapProof correct(
       HashCode rootHash,
       List<MapEntry> entries,
       List<byte[]> missingKeys) {
     return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
 
-  static CheckedFlatMapProof invalid(ProofStatus status) {
+  /**
+   * Creates an invalid map proof.
+   *
+   * @param status the status explaining why the proof is not valid;
+   *   must not be {@link ProofStatus#CORRECT}
+   * @return a new checked proof
+   */
+  public static CheckedFlatMapProof invalid(ProofStatus status) {
+    checkArgument(status != ProofStatus.CORRECT);
     return new CheckedFlatMapProof(
-        status, HashCode.fromInt(1), Collections.emptyList(), Collections.emptyList());
+        status, HashCode.fromInt(1), emptyList(), emptyList());
   }
 
   @Override
