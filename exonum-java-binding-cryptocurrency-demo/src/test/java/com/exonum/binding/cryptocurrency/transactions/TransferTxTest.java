@@ -19,6 +19,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +32,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.proxy.Cleaner;
@@ -145,6 +147,16 @@ class TransferTxTest {
       assertThat(wallets.get(fromKey).getBalance(), equalTo(expectedFromValue));
       long expectedToValue = initialBalance + transferSum;
       assertThat(wallets.get(toKey).getBalance(), equalTo(expectedToValue));
+      // Check history
+      HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
+          .setSeed(1L)
+          .setWalletFrom(fromKey)
+          .setWalletTo(toKey)
+          .setAmount(transferSum)
+          .setTransactionHash(tx.hash())
+          .build();
+      assertThat(schema.walletHistory(fromKey), hasItem(expectedEntity));
+      assertThat(schema.walletHistory(toKey), hasItem(expectedEntity));
     }
   }
 

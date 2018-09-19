@@ -37,13 +37,13 @@ import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.transaction.Transaction;
 import com.google.gson.reflect.TypeToken;
-import com.google.protobuf.ByteString;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -243,10 +243,7 @@ class ApiControllerTest {
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode()).isEqualTo(HTTP_OK);
 
-          Type listType = new TypeToken<List<HistoryEntity>>() {
-          }.getType();
-          List<HistoryEntity> actualHistory = CryptocurrencyTransactionGson.instance()
-              .fromJson(response.bodyAsString(), listType);
+          List<HistoryEntity> actualHistory = parseWalletHistory(response);
 
           assertThat(actualHistory).isEqualTo(history);
 
@@ -255,7 +252,7 @@ class ApiControllerTest {
   }
 
   @Test
-  void getWalletHistoryNoRecords(VertxTestContext context) {
+  void getWalletHistoryNonexistentWallet(VertxTestContext context) {
     when(service.getWalletHistory(fromKey)).thenReturn(emptyList());
 
     String uri = getWalletUri(fromKey) + "/history";
@@ -263,13 +260,16 @@ class ApiControllerTest {
     get(uri)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode()).isEqualTo(HTTP_OK);
-
+          assertThat(parseWalletHistory(response)).isEmpty();
           context.completeNow();
         })));
   }
 
-  private static ByteString keyToWallet(PublicKey key) {
-    return ByteString.copyFrom(key.toBytes());
+  private List<HistoryEntity> parseWalletHistory(HttpResponse<Buffer> response) {
+    Type listType = new TypeToken<List<HistoryEntity>>() {
+    }.getType();
+    return CryptocurrencyTransactionGson.instance()
+        .fromJson(response.bodyAsString(), listType);
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
