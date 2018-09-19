@@ -15,8 +15,7 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = "0.8.1"
-iron = "0.6.0"
+exonum = "0.9.2"
 failure = "0.1.1"
 toml = "0.4.6"
 jni = { version = "0.10.1", git = "https://github.com/alexander-irbis/jni-rs", branch = "clone-jnienv", features = ["invocation"] }

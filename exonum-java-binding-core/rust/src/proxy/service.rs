@@ -1,9 +1,9 @@
-use exonum::blockchain::{ApiContext, Service, Transaction};
+use exonum::api::ServiceApiBuilder;
+use exonum::blockchain::{Service, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
 use exonum::messages::RawMessage;
 use exonum::storage::{Fork, Snapshot};
-use iron::Handler;
 use jni::objects::{GlobalRef, JObject, JValue};
 use serde_json;
 use serde_json::value::Value;
@@ -146,18 +146,20 @@ impl Service for ServiceProxy {
                         "JSON deserialization error: {:?}; json string: {:?}",
                         e, json_config
                     )
-                })
-                .unwrap(),
+                }).unwrap(),
         }
     }
 
-    fn public_api_handler(&self, context: &ApiContext) -> Option<Box<Handler>> {
+    fn wire_api(&self, builder: &mut ServiceApiBuilder) {
+        assert!(builder.blockchain().is_some());
+
         let node = NodeContext::new(
             self.exec.clone(),
-            context.blockchain().clone(),
-            *context.public_key(),
-            context.node_channel().clone(),
+            builder.blockchain().unwrap().clone(),
+            builder.public_key().unwrap(),
+            builder.api_sender().unwrap().clone(),
         );
+
         unwrap_jni(self.exec.with_attached(|env| {
             let node_handle = to_handle(node);
             panic_on_exception(
@@ -171,6 +173,5 @@ impl Service for ServiceProxy {
             );
             Ok(())
         }));
-        None
     }
 }

@@ -7,8 +7,7 @@ use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
 
-use std::error::Error;
-use std::{io, panic, ptr};
+use std::{error::Error, io, panic, ptr};
 
 use proxy::{MainExecutor, TransactionProxy};
 use storage::View;

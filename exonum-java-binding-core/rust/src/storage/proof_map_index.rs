@@ -199,8 +199,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
                 let path = ProofPath::new(key);
                 let value: Vec<u8> = optional_value.cloned().unwrap().into_bytes();
                 create_java_map_proof_entry_leaf(&env, &path, &value)
-            })
-            .collect::<JniResult<_>>()?;
+            }).collect::<JniResult<_>>()?;
         let array = create_java_array_map_proof_entry(&env, &leaves, &branches)?;
         let unchecked_flat_map_proof = create_java_unchecked_flat_map_proof(&env, array)?;
         Ok(unchecked_flat_map_proof.into_inner())
@@ -458,8 +457,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[key.into(), value.into()],
-                    )?
-                    .into_inner())
+                    )?.into_inner())
             }
             None => Ok(ptr::null_mut()),
         }

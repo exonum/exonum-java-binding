@@ -21,7 +21,7 @@ echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to locate libstd.
 # TODO: stable does not work well until ECR-1839 is resolved
-export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-1.26.2}"
+export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-1.27.2}"
 echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 
 # Find the directory containing Rust libstd.
@@ -46,7 +46,7 @@ cp $RUST_LIB_DIR/libstd* ${EJB_RUST_DIR}/target/prepackage
 
 # Recompile native part.
 cd ${EJB_RUST_DIR}
-cargo build --all
+cargo +${RUST_COMPILER_VERSION} build --all
 
 cd ../..
 
