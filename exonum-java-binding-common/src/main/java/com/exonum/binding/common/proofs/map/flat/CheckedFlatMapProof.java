@@ -69,7 +69,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
    * Creates an invalid map proof.
    *
    * @param status the status explaining why the proof is not valid;
-   *   must not be {@link ProofStatus#CORRECT}
+   *     must not be {@link ProofStatus#CORRECT}
    * @return a new checked proof
    */
   public static CheckedFlatMapProof invalid(ProofStatus status) {
