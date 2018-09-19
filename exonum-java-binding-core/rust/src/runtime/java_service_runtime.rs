@@ -107,8 +107,7 @@ impl JavaServiceRuntime {
                     "startService",
                     START_SERVICE_SIGNATURE,
                     &[module_name.into(), port.into()],
-                )?
-                .l()?;
+                )?.l()?;
             env.new_global_ref(service)
         }));
         ServiceProxy::from_global_ref(executor, service)

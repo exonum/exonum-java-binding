@@ -146,8 +146,7 @@ impl Service for ServiceProxy {
                         "JSON deserialization error: {:?}; json string: {:?}",
                         e, json_config
                     )
-                })
-                .unwrap(),
+                }).unwrap(),
         }
     }
 

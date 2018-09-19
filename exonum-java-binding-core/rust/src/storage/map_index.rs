@@ -327,8 +327,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_MapIndexProxy_nat
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[key.into(), value.into()],
-                    )?
-                    .into_inner())
+                    )?.into_inner())
             }
             None => Ok(ptr::null_mut()),
         }
