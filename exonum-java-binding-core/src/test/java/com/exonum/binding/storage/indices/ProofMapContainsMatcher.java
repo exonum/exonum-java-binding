@@ -67,7 +67,7 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
 
   /**
    * Creates a matcher for a proof map that matches iff the map provides a valid proof that it maps
-   * the specified value to the specified key and has the expected root hash.
+   * the specified value to the specified key.
    *
    * @param key a key to request proof for
    * @param value an expected value mapped to the key
@@ -78,7 +78,7 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
 
   /**
    * Creates a matcher for a proof map that matches iff the map provides a valid proof
-   * that it does not map any value to the specified key and has the expected root hash.
+   * that it does not map any value to the specified key.
    *
    * @param key a key to request proof for
    */

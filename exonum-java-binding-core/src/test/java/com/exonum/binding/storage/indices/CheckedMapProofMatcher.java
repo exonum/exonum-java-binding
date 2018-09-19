@@ -75,8 +75,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   }
 
   /**
-   * Creates a matcher of a checked proof that is valid, has the same key and value as specified
-   * and has the expected root hash.
+   * Creates a matcher of a checked proof that is valid, has the same key and value as specified.
    *
    * @param key a requested key
    * @param expectedValue a value that is expected to be mapped to the requested key, or null if
