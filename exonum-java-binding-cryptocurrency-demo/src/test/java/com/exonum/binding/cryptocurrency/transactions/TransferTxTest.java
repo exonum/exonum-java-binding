@@ -149,7 +149,7 @@ class TransferTxTest {
       assertThat(wallets.get(toKey).getBalance(), equalTo(expectedToValue));
       // Check history
       HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
-          .setSeed(1L)
+          .setSeed(seed)
           .setWalletFrom(fromKey)
           .setWalletTo(toKey)
           .setAmount(transferSum)
