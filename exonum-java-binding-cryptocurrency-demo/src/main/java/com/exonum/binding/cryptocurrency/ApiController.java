@@ -26,7 +26,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
-import com.exonum.binding.cryptocurrency.transactions.TransferTxData;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
@@ -46,12 +45,15 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** Controller for submitting transactions. */
+/**
+ * Controller for submitting transactions.
+ */
 final class ApiController {
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
-  @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
+  @VisibleForTesting
+  static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final String WALLET_ID_PARAM = "walletId";
   private static final String GET_WALLET_PATH = "/wallet/:" + WALLET_ID_PARAM;
   private static final String GET_WALLET_HISTORY_PATH = "/wallet/:" + WALLET_ID_PARAM + "/history";
@@ -61,7 +63,7 @@ final class ApiController {
 
   @Inject
   ApiController(CryptocurrencyService service,
-                JsonBinaryMessageConverter jsonBinaryMessageConverter) {
+      JsonBinaryMessageConverter jsonBinaryMessageConverter) {
     this.service = service;
     this.jsonBinaryMessageConverter = jsonBinaryMessageConverter;
   }
@@ -120,7 +122,7 @@ final class ApiController {
   private void getWalletHistory(RoutingContext rc) {
     PublicKey walletId =
         getRequiredParameter(rc.request(), WALLET_ID_PARAM, PublicKey::fromHexString);
-    List<TransferTxData> walletHistory = service.getWalletHistory(walletId);
+    List<HistoryEntity> walletHistory = service.getWalletHistory(walletId);
 
     rc.response()
         .putHeader("Content-Type", "application/json")

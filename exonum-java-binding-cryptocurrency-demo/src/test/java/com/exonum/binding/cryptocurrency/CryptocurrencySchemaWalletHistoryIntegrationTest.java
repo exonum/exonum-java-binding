@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
-import com.exonum.binding.cryptocurrency.transactions.TransferTxData;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
@@ -25,8 +25,14 @@ class CryptocurrencySchemaWalletHistoryIntegrationTest {
   }
 
   private KeyPair keyPair = CryptoFunctions.ed25519().generateKeyPair();
-  private TransferTxData testTransfer =
-      new TransferTxData(1L, keyPair.getPublicKey(), keyPair.getPublicKey(), 10L);
+  private HistoryEntity testTransfer =
+      HistoryEntity.Builder.newBuilder()
+          .setSeed(1L)
+          .setWalletFrom(keyPair.getPublicKey())
+          .setWalletTo(keyPair.getPublicKey())
+          .setAmount(10L)
+          .setTransactionHash(HashCode.fromString("a0a0a0"))
+          .build();
 
   @Test
   void walletHistoryNoRecords() throws CloseFailuresException {
@@ -46,9 +52,9 @@ class CryptocurrencySchemaWalletHistoryIntegrationTest {
       Fork fork = db.createFork(cleaner);
       CryptocurrencySchema schema = new CryptocurrencySchema(fork);
 
-      schema.changeWalletBalance(keyPair.getPublicKey(), 10L, testTransfer);
+      schema.walletHistory(keyPair.getPublicKey()).add(testTransfer);
 
-      ProofListIndexProxy<TransferTxData> history = schema.walletHistory(keyPair.getPublicKey());
+      ListIndexProxy<HistoryEntity> history = schema.walletHistory(keyPair.getPublicKey());
       assertFalse(history.isEmpty());
 
       assertThat(history.get(0)).isEqualTo(testTransfer);

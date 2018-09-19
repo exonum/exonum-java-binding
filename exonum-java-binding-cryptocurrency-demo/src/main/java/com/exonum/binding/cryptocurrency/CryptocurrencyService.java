@@ -18,7 +18,6 @@ package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.cryptocurrency.transactions.TransferTxData;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.transaction.Transaction;
 import java.util.List;
@@ -32,5 +31,5 @@ public interface CryptocurrencyService extends Service {
 
   Optional<Wallet> getWallet(PublicKey ownerKey);
 
-  List<TransferTxData> getWalletHistory(PublicKey ownerKey);
+  List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
 }

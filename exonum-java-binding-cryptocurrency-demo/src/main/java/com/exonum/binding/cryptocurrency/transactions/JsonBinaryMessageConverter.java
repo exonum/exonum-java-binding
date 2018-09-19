@@ -78,10 +78,10 @@ public final class JsonBinaryMessageConverter {
 
         TransferTxData txParameters = message.getBody();
         byte[] binaryBody = TxMessagesProtos.TransferTx.newBuilder()
-            .setSeed(txParameters.getSeed())
-            .setFromWallet(publicKeyToProtoBytes(txParameters.getSenderId()))
-            .setToWallet(publicKeyToProtoBytes(txParameters.getRecipientId()))
-            .setSum(txParameters.getAmount())
+            .setSeed(txParameters.seed)
+            .setFromWallet(publicKeyToProtoBytes(txParameters.senderId))
+            .setToWallet(publicKeyToProtoBytes(txParameters.recipientId))
+            .setSum(txParameters.amount)
             .build()
             .toByteArray();
 

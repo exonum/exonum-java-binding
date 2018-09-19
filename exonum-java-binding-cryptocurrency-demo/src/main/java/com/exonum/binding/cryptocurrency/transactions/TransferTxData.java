@@ -19,41 +19,17 @@ package com.exonum.binding.cryptocurrency.transactions;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.google.common.base.Objects;
 
-public class TransferTxData {
-  private final long seed;
-  private final PublicKey senderId;
-  private final PublicKey recipientId;
-  private final long amount;
+class TransferTxData {
+  final long seed;
+  final PublicKey senderId;
+  final PublicKey recipientId;
+  final long amount;
 
-  /**
-   * Constructs the instance.
-   *
-   * @param seed        seed
-   * @param senderId    sender id
-   * @param recipientId recipient id
-   * @param amount      amount
-   */
-  public TransferTxData(long seed, PublicKey senderId, PublicKey recipientId, long amount) {
+  TransferTxData(long seed, PublicKey senderId, PublicKey recipientId, long amount) {
     this.seed = seed;
     this.senderId = senderId;
     this.recipientId = recipientId;
     this.amount = amount;
-  }
-
-  public long getSeed() {
-    return seed;
-  }
-
-  public PublicKey getSenderId() {
-    return senderId;
-  }
-
-  public PublicKey getRecipientId() {
-    return recipientId;
-  }
-
-  public long getAmount() {
-    return amount;
   }
 
   @Override

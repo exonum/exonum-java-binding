@@ -39,13 +39,19 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   static final short ID = 2;
 
-  private final TransferTxData data;
+  private final long seed;
+  private final PublicKey fromWallet;
+  private final PublicKey toWallet;
+  private final long sum;
 
   @VisibleForTesting
   TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet,
       long sum) {
     super(message);
-    data = new TransferTxData(seed, fromWallet, toWallet, sum);
+    this.seed = seed;
+    this.fromWallet = fromWallet;
+    this.toWallet = toWallet;
+    this.sum = sum;
   }
 
   /**
@@ -75,24 +81,23 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public boolean isValid() {
-    return getMessage().verify(CRYPTO_FUNCTION, data.getSenderId());
+    return getMessage().verify(CRYPTO_FUNCTION, fromWallet);
   }
 
   @Override
   public void execute(Fork view) {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-    if (wallets.containsKey(data.getRecipientId()) && wallets.containsKey(data.getSenderId())) {
-      Wallet from = wallets.get(data.getSenderId());
-      Wallet to = wallets.get(data.getRecipientId());
-      if (from.getBalance() < data.getAmount()
-          || data.getSenderId().equals(data.getRecipientId())) {
+    if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
+      Wallet from = wallets.get(fromWallet);
+      Wallet to = wallets.get(toWallet);
+      if (from.getBalance() < sum || fromWallet.equals(toWallet)) {
         return;
       }
-      wallets.put(data.getSenderId(), new Wallet(from.getBalance() - data.getAmount()));
-      schema.walletHistory(data.getSenderId()).add(data);
-      wallets.put(data.getRecipientId(), new Wallet(to.getBalance() + data.getAmount()));
-      schema.walletHistory(data.getRecipientId()).add(data);
+      wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
+      //      schema.walletHistory(fromWallet).add(data);
+      wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+      //      schema.walletHistory(toWallet).add(data);
     }
   }
 
@@ -110,11 +115,14 @@ public final class TransferTx extends AbstractTransaction implements Transaction
       return false;
     }
     TransferTx that = (TransferTx) o;
-    return Objects.equals(this.data, that.data);
+    return seed == that.seed
+        && sum == that.sum
+        && Objects.equals(fromWallet, that.fromWallet)
+        && Objects.equals(toWallet, that.toWallet);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(data);
+    return Objects.hash(seed, fromWallet, toWallet, sum);
   }
 }
