@@ -237,7 +237,7 @@ class ApiControllerTest {
     );
     when(service.getWalletHistory(fromKey)).thenReturn(history);
 
-    String uri = getWalletHistoryUri(fromKey);
+    String uri = getWalletUri(fromKey) + "/history";
 
     get(uri)
         .send(context.succeeding(response -> context.verify(() -> {
@@ -258,7 +258,7 @@ class ApiControllerTest {
   void getWalletHistoryNoRecords(VertxTestContext context) {
     when(service.getWalletHistory(fromKey)).thenReturn(emptyList());
 
-    String uri = getWalletHistoryUri(fromKey);
+    String uri = getWalletUri(fromKey) + "/history";
 
     get(uri)
         .send(context.succeeding(response -> context.verify(() -> {
@@ -291,14 +291,6 @@ class ApiControllerTest {
   private String getWalletUri(String id) {
     try {
       return "/wallet/" + URLEncoder.encode(id, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new AssertionError("UTF-8 must be supported", e);
-    }
-  }
-
-  private String getWalletHistoryUri(PublicKey publicKey) {
-    try {
-      return "/wallet/" + URLEncoder.encode(publicKey.toString(), "UTF-8") + "/history";
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 must be supported", e);
     }

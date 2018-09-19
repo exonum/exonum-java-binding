@@ -22,6 +22,8 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.HistoryEntity;
+import com.exonum.binding.cryptocurrency.HistoryEntity.Builder;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
@@ -45,8 +47,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   private final long sum;
 
   @VisibleForTesting
-  TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet,
-      long sum) {
+  TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet, long sum) {
     super(message);
     this.seed = seed;
     this.fromWallet = fromWallet;
@@ -95,9 +96,17 @@ public final class TransferTx extends AbstractTransaction implements Transaction
         return;
       }
       wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
-      //      schema.walletHistory(fromWallet).add(data);
       wallets.put(toWallet, new Wallet(to.getBalance() + sum));
-      //      schema.walletHistory(toWallet).add(data);
+
+      HistoryEntity historyEntity = Builder.newBuilder()
+          .setSeed(seed)
+          .setWalletFrom(fromWallet)
+          .setWalletTo(toWallet)
+          .setAmount(sum)
+          .setTransactionHash(hash())
+          .build();
+      schema.walletHistory(fromWallet).add(historyEntity);
+      schema.walletHistory(fromWallet).add(historyEntity);
     }
   }
 

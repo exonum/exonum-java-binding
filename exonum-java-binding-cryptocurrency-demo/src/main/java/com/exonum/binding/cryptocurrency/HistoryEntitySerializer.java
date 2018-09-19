@@ -23,7 +23,6 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
         .build();
 
     return entity.toByteArray();
-
   }
 
   @Override
@@ -53,4 +52,5 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
   private static PublicKey bytesToKey(ByteString bytes) {
     return PublicKey.fromBytes(bytes.toByteArray());
   }
+
 }

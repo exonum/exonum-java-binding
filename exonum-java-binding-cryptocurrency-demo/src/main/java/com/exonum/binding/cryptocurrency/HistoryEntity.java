@@ -50,11 +50,11 @@ public class HistoryEntity {
       return false;
     }
     HistoryEntity that = (HistoryEntity) o;
-    return seed == that.seed &&
-        amount == that.amount &&
-        Objects.equal(walletFrom, that.walletFrom) &&
-        Objects.equal(walletTo, that.walletTo) &&
-        Objects.equal(transactionHash, that.transactionHash);
+    return seed == that.seed
+        && amount == that.amount
+        && Objects.equal(walletFrom, that.walletFrom)
+        && Objects.equal(walletTo, that.walletTo)
+        && Objects.equal(transactionHash, that.transactionHash);
   }
 
   @Override

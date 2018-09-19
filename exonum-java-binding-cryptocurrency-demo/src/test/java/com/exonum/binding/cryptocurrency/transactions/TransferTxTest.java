@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PrivateKey;
@@ -241,7 +242,9 @@ class TransferTxTest {
                                             long amount) {
     // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
     // and put it here, replacing `mock(BinaryMessage.class)`.
-    return new TransferTx(mock(BinaryMessage.class), seed, senderId, recipientId, amount);
+    BinaryMessage message = mock(BinaryMessage.class);
+    when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
+    return new TransferTx(message, seed, senderId, recipientId, amount);
   }
 
   private void createWallet(Fork view, PublicKey publicKey, Long initialBalance) {
