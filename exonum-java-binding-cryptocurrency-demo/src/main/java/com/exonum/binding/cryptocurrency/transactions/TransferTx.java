@@ -106,7 +106,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
           .setTransactionHash(hash())
           .build();
       schema.walletHistory(fromWallet).add(historyEntity);
-      schema.walletHistory(fromWallet).add(historyEntity);
+      schema.walletHistory(toWallet).add(historyEntity);
     }
   }
 
