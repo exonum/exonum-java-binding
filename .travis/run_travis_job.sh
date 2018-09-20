@@ -14,7 +14,7 @@ set -x
 if [ "$CHECK_RUST" = true ] 
 then
     # Install cargo-audit if it's not already.
-    cargo-audit -V || cargo install cargo-audit --force
+    cargo list | grep audit > /dev/null || cargo install cargo-audit --force
     # Install nightly rust version and clippy.
     rustup toolchain install $RUST_NIGHTLY_VERSION
     cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
