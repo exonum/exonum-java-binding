@@ -39,26 +39,31 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** Controller for submitting transactions. */
+/**
+ * Controller for submitting transactions.
+ */
 final class ApiController {
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
-  @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
+  @VisibleForTesting
+  static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final String WALLET_ID_PARAM = "walletId";
   private static final String GET_WALLET_PATH = "/wallet/:" + WALLET_ID_PARAM;
+  private static final String GET_WALLET_HISTORY_PATH = "/wallet/:" + WALLET_ID_PARAM + "/history";
 
   private final CryptocurrencyService service;
   private final JsonBinaryMessageConverter jsonBinaryMessageConverter;
 
   @Inject
   ApiController(CryptocurrencyService service,
-                JsonBinaryMessageConverter jsonBinaryMessageConverter) {
+      JsonBinaryMessageConverter jsonBinaryMessageConverter) {
     this.service = service;
     this.jsonBinaryMessageConverter = jsonBinaryMessageConverter;
   }
@@ -72,6 +77,7 @@ final class ApiController {
         ImmutableMap.<String, Handler<RoutingContext>>builder()
             .put(SUBMIT_TRANSACTION_PATH, this::submitTransaction)
             .put(GET_WALLET_PATH, this::getWallet)
+            .put(GET_WALLET_HISTORY_PATH, this::getWalletHistory)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -111,6 +117,16 @@ final class ApiController {
           .setStatusCode(HTTP_NOT_FOUND)
           .end();
     }
+  }
+
+  private void getWalletHistory(RoutingContext rc) {
+    PublicKey walletId =
+        getRequiredParameter(rc.request(), WALLET_ID_PARAM, PublicKey::fromHexString);
+    List<HistoryEntity> walletHistory = service.getWalletHistory(walletId);
+
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(CryptocurrencyTransactionGson.instance().toJson(walletHistory));
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,
