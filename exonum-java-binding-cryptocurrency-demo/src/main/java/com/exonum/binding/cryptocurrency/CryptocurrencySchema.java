@@ -64,6 +64,7 @@ public final class CryptocurrencySchema implements Schema {
    * @param key wallet address
    * @return transactions history
    */
+  //TODO: replace by HashCode instead of HistoryEntity when blockchain::Schema will be supported
   public ListIndexProxy<HistoryEntity> walletHistory(PublicKey key) {
     String name = fullIndexName("wallet_history");
 

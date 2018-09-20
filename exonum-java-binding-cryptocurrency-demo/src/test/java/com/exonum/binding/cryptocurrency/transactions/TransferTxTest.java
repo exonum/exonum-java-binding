@@ -23,8 +23,8 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PrivateKey;
@@ -194,6 +194,7 @@ class TransferTxTest {
       createWallet(view, fromKey, initialBalance);
 
       long seed = 1L;
+
       long transferValue = 50L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
       // Execute the transaction that attempts to transfer to an unknown wallet
@@ -255,7 +256,7 @@ class TransferTxTest {
     // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
     // and put it here, replacing `mock(BinaryMessage.class)`.
     BinaryMessage message = mock(BinaryMessage.class);
-    when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
+    lenient().when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
     return new TransferTx(message, seed, senderId, recipientId, amount);
   }
 
