@@ -1,5 +1,5 @@
 use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
-use java_bindings::jni::objects::{GlobalRef, JObject, JString, JValue};
+use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
 use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
 
@@ -55,7 +55,7 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
                     format!("(BLjava/lang/String;)L{};", TRANSACTION_ADAPTER_CLASS),
                     &[
                         JValue::from(error_code),
-                        JValue::from(JObject::from(JString::from(err_msg))),
+                        JValue::from(JObject::from(err_msg)),
                     ],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
