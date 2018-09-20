@@ -31,7 +31,7 @@ public class MapEntry {
    * @param key a node key
    * @param value a value mapped to the key
    */
-  MapEntry(byte[] key, byte[] value) {
+  public MapEntry(byte[] key, byte[] value) {
     this.key = key;
     this.value = value;
   }
