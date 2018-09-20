@@ -79,15 +79,17 @@ public final class NativeFacade {
    * Creates a UserTransactionAdapter that contains a transaction that throws
    * {@link TransactionExecutionException} in its execute method.
    *
+   * @param isSubclass whether method should produce a subclass of TransactionExecutionException
    * @param errorCode an error code that will be included in the exception
    * @param description a description; may be {@code null}
    * @return a transaction mock throwing in execute
    */
   public static UserTransactionAdapter createThrowingExecutionExceptionTransaction(
+          boolean isSubclass,
           byte errorCode,
           @Nullable String description) {
     Transaction transaction = ThrowingTransactions
-            .createThrowingExecutionException(errorCode, description);
+            .createThrowingExecutionException(isSubclass, errorCode, description);
     return new UserTransactionAdapter(transaction, VIEW_FACTORY);
   }
 

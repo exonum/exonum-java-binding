@@ -42,6 +42,7 @@ pub fn create_throwing_mock_transaction_proxy(
 /// Creates `TransactionProxy` which throws TransactionExecutionException on the `execute` call.
 pub fn create_throwing_exec_exception_mock_transaction_proxy(
     executor: MainExecutor,
+    is_subclass: bool,
     error_code: i8,
     error_message: &str,
 ) -> TransactionProxy {
@@ -52,8 +53,9 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
                 .call_static_method(
                     NATIVE_FACADE_CLASS,
                     "createThrowingExecutionExceptionTransaction",
-                    format!("(BLjava/lang/String;)L{};", TRANSACTION_ADAPTER_CLASS),
+                    format!("(ZBLjava/lang/String;)L{};", TRANSACTION_ADAPTER_CLASS),
                     &[
+                        JValue::from(is_subclass),
                         JValue::from(error_code),
                         JValue::from(JObject::from(err_msg)),
                     ],
