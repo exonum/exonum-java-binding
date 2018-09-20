@@ -16,7 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
 import java.nio.ByteBuffer;
 
@@ -29,7 +29,7 @@ final class Transactions {
       .setServiceId(QaService.ID)
       .setMessageType(Short.MAX_VALUE)
       .setBody(ByteBuffer.allocate(0))
-      .setSignature(ByteBuffer.allocate(Message.SIGNATURE_SIZE))
+      .setSignature(new byte[Message.SIGNATURE_SIZE])
       .buildPartial();
 
   private Transactions() {

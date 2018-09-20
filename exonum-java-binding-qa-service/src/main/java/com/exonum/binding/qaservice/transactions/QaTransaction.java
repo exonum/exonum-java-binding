@@ -32,7 +32,8 @@ public enum QaTransaction {
   // Badly-behaved transactions, do some crazy things.
   INVALID(10),
   INVALID_THROWING(11),
-  VALID_THROWING(12);
+  VALID_THROWING(12),
+  VALID_ERROR(13);
 
   private final short id;
 

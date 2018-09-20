@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 final class FrequencyStatsFormatter {
 
   static <ElementT, KeyT>
-      String itemsFrequency(Collection<ElementT> items,
-                            Function<? super ElementT, ? extends KeyT> keyExtractor) {
+      String itemsFrequency(Collection<? extends ElementT> items,
+                            Function<? super ElementT, KeyT> keyExtractor) {
 
     Map<KeyT, Long> numItemsByType = items.stream()
         .collect(groupingBy(keyExtractor, counting()));

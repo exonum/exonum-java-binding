@@ -21,15 +21,17 @@ import static com.exonum.binding.qaservice.transactions.TransactionPreconditions
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.transaction.Transaction;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -106,35 +108,31 @@ public final class CreateCounterTx implements Transaction {
     @Override
     public CreateCounterTx fromMessage(Message txMessage) {
       checkTransaction(txMessage, ID);
-      ByteBuffer body = txMessage.getBody();
-      String name = getUtf8String(body);
-      return new CreateCounterTx(name);
-    }
+      ByteBuffer rawBody = txMessage.getBody();
+      try {
+        CreateCounterTxBody body = CreateCounterTxBody
+            .parseFrom(rawBody);
+        String name = body.getName();
 
-    private static String getUtf8String(ByteBuffer buffer) {
-      byte[] s = getRemainingBytes(buffer);
-
-      return StandardSerializers.string()
-          .fromBytes(s);
-    }
-
-    private static byte[] getRemainingBytes(ByteBuffer buffer) {
-      int numBytes = buffer.remaining();
-      byte[] dst = new byte[numBytes];
-      buffer.get(dst);
-      return dst;
+        return new CreateCounterTx(name);
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalArgumentException(e);
+      }
     }
 
     @Override
     public BinaryMessage toMessage(CreateCounterTx transaction) {
       return newQaTransactionBuilder(ID)
-          .setBody(serialize(transaction))
+          .setBody(serializeBody(transaction))
           .buildRaw();
     }
+  }
 
-    private static ByteBuffer serialize(CreateCounterTx tx) {
-      byte[] nameBytes = StandardSerializers.string().toBytes(tx.name);
-      return ByteBuffer.wrap(nameBytes);
-    }
+  @VisibleForTesting
+  static byte[] serializeBody(CreateCounterTx tx) {
+    return CreateCounterTxBody.newBuilder()
+        .setName(tx.name)
+        .build()
+        .toByteArray();
   }
 }

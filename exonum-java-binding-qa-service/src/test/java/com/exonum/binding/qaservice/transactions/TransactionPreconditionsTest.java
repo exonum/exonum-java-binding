@@ -19,21 +19,17 @@ package com.exonum.binding.qaservice.transactions;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
 import java.nio.ByteBuffer;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class TransactionPreconditionsTest {
-
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
+class TransactionPreconditionsTest {
 
   @Test
-  public void checkTransactionValid() {
+  void checkTransactionValid() {
     short messageType = 0x01;
     Message message = new Message.Builder()
         .setServiceId(QaService.ID)
@@ -46,7 +42,7 @@ public class TransactionPreconditionsTest {
   }
 
   @Test
-  public void checkTransactionOfAnotherService() {
+  void checkTransactionOfAnotherService() {
     short messageType = 0x01;
     short serviceId = 10;
     Message message = new Message.Builder()
@@ -54,15 +50,14 @@ public class TransactionPreconditionsTest {
         .setMessageType(messageType)
         .buildPartial();
 
-    expectedException.expectMessage(
-        matchesPattern("This message \\(.+\\) does not belong to this service: "
-            + "wrong service id \\(10\\), must be " + QaService.ID));
-    expectedException.expect(IllegalArgumentException.class);
-    TransactionPreconditions.checkTransaction(message, messageType);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> TransactionPreconditions.checkTransaction(message, messageType));
+    assertThat(e.getMessage(), matchesPattern("This message \\(.+\\) does not belong "
+        + "to this service: wrong service id \\(10\\), must be " + QaService.ID));
   }
 
   @Test
-  public void checkTransactionOfAnotherType() {
+  void checkTransactionOfAnotherType() {
     short expectedMessageType = 20;
     short messageType = 1;
     short serviceId = QaService.ID;
@@ -71,15 +66,14 @@ public class TransactionPreconditionsTest {
         .setMessageType(messageType)
         .buildPartial();
 
-    expectedException.expectMessage(
-        matchesPattern("This message \\(.+\\) has wrong transaction id \\(1\\), must be "
-            + expectedMessageType));
-    expectedException.expect(IllegalArgumentException.class);
-    TransactionPreconditions.checkTransaction(message, expectedMessageType);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> TransactionPreconditions.checkTransaction(message, expectedMessageType));
+    assertThat(e.getMessage(), matchesPattern("This message \\(.+\\) "
+        + "has wrong transaction id \\(1\\), must be " + expectedMessageType));
   }
 
   @Test
-  public void checkMessageCorrectSize() {
+  void checkMessageCorrectSize() {
     int body = 10;
     Message message = new Message.Builder()
         .setBody(ByteBuffer.allocate(body))
@@ -91,16 +85,16 @@ public class TransactionPreconditionsTest {
   }
 
   @Test
-  public void checkMessageWrongSize() {
+  void checkMessageWrongSize() {
     int expectedBody = 11;
     int body = 10;
     Message message = new Message.Builder()
         .setBody(ByteBuffer.allocate(body))
         .buildPartial();
 
-    expectedException.expectMessage(
-        matchesPattern("This message \\(.+\\) has wrong size \\(\\d+\\), expected \\d+ bytes"));
-    expectedException.expect(IllegalArgumentException.class);
-    TransactionPreconditions.checkMessageSize(message, expectedBody);
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> TransactionPreconditions.checkMessageSize(message, expectedBody));
+    assertThat(e.getMessage(), matchesPattern("This message \\(.+\\) "
+        + "has wrong size \\(\\d+\\), expected \\d+ bytes"));
   }
 }

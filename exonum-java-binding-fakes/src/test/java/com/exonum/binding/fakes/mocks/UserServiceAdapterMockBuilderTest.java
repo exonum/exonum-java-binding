@@ -17,24 +17,20 @@
 package com.exonum.binding.fakes.mocks;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class UserServiceAdapterMockBuilderTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class UserServiceAdapterMockBuilderTest {
 
   private static final int MIN_MESSAGE_SIZE = Message.messageSize(0);
 
   @Test
-  public void buildWithId() {
+  void buildWithId() {
     short id = 10;
     UserServiceAdapterMockBuilder builder = new UserServiceAdapterMockBuilder();
     builder.id(id);
@@ -44,19 +40,18 @@ public class UserServiceAdapterMockBuilderTest {
   }
 
   @Test
-  public void buildThrowing() {
+  void buildThrowing() {
     UserServiceAdapterMockBuilder builder = new UserServiceAdapterMockBuilder();
     Class<? extends Throwable> exceptionType = IllegalArgumentException.class;
     builder.convertTransactionThrowing(exceptionType);
     UserServiceAdapter service = builder.build();
 
     byte[] rawTxMessage = new byte[MIN_MESSAGE_SIZE];
-    expectedException.expect(exceptionType);
-    service.convertTransaction(rawTxMessage);
+    assertThrows(exceptionType, () -> service.convertTransaction(rawTxMessage));
   }
 
   @Test
-  public void buildWithNullConfig() {
+  void buildWithNullConfig() {
     UserServiceAdapterMockBuilder builder = new UserServiceAdapterMockBuilder();
     builder.initialGlobalConfig(null);
 

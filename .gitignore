@@ -15,7 +15,6 @@ out/
 *.DS_Store
 
 # Rust stuff
-**/Cargo.lock
 **/*.rs.bk
 .cargo/
 
@@ -41,3 +40,6 @@ hs_err_pid*
 
 # jenv configuration file
 **/.java-version
+
+# VS Code workspace configuration
+.vscode/

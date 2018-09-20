@@ -18,17 +18,17 @@ package com.exonum.binding.qaservice;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
+import com.exonum.binding.qaservice.transactions.ValidErrorTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.AbstractService;
+import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
@@ -36,6 +36,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -130,6 +131,13 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
     Transaction tx = new ValidThrowingTx(requestSeed);
+    return submitTransaction(tx);
+  }
+
+  @Override
+  public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
+      @Nullable String description) {
+    Transaction tx = new ValidErrorTx(requestSeed, errorCode, description);
     return submitTransaction(tx);
   }
 

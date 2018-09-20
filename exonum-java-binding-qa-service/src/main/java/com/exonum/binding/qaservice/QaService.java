@@ -16,9 +16,10 @@
 
 package com.exonum.binding.qaservice;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Service;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * A simple service for QA purposes.
@@ -37,6 +38,8 @@ public interface QaService extends Service {
   HashCode submitInvalidThrowingTx();
 
   HashCode submitValidThrowingTx(long requestSeed);
+
+  HashCode submitValidErrorTx(long requestSeed, byte errorCode, @Nullable String description);
 
   HashCode submitUnknownTx();
 

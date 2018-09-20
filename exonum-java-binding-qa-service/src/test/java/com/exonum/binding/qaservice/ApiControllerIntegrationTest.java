@@ -23,57 +23,57 @@ import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
+import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.service.InvalidTransactionException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 
-@RunWith(VertxUnitRunner.class)
+@ExtendWith(VertxExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 @SuppressWarnings("WeakerAccess")
-public class ApiControllerIntegrationTest {
+class ApiControllerIntegrationTest {
 
   private static final String HOST = "0.0.0.0";
 
   private static final HashCode EXPECTED_TX_HASH = Hashing.sha256()
       .hashInt(1);
 
-  @ClassRule
-  public static RunTestOnContext rule = new RunTestOnContext();
-
   QaService qaService;
 
   ApiController controller;
-
-  Vertx vertx;
 
   HttpServer httpServer;
 
@@ -81,12 +81,10 @@ public class ApiControllerIntegrationTest {
 
   volatile int port = -1;
 
-  @Before
-  public void setup(TestContext context) {
+  @BeforeEach
+  void setup(Vertx vertx, VertxTestContext context) {
     qaService = mock(QaService.class);
     controller = new ApiController(qaService);
-
-    vertx = rule.vertx();
 
     httpServer = vertx.createHttpServer();
     webClient = WebClient.create(vertx);
@@ -94,27 +92,24 @@ public class ApiControllerIntegrationTest {
     Router router = Router.router(vertx);
     controller.mountApi(router);
 
-    Async async = context.async();
     httpServer.requestHandler(router::accept)
-        .listen(0, event -> {
-          assert event.succeeded();
+        .listen(0, context.succeeding(result -> {
 
           // Set the actual server port.
-          port = event.result().actualPort();
-          // Notify that the HTTP Server is accepting connections.
-          async.complete();
-        });
+          port = result.actualPort();
+
+          context.completeNow();
+        }));
   }
 
-  @After
-  public void tearDown(TestContext context) {
-    Async async = context.async();
+  @AfterEach
+  void tearDown(VertxTestContext context) {
     webClient.close();
-    httpServer.close(ar -> async.complete());
+    httpServer.close(context.succeeding(r -> context.completeNow()));
   }
 
   @Test
-  public void submitCreateCounter(TestContext context) {
+  void submitCreateCounter(VertxTestContext context) {
     String counterName = "counter 1";
     MultiMap params = multiMap("name", counterName);
 
@@ -126,20 +121,22 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
-  public void submitCreateCounter_NoParameter(TestContext context) {
+  void submitCreateCounter_NoParameter(VertxTestContext context) {
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(MultiMap.caseInsensitiveMultiMap(), context.asyncAssertSuccess(ar -> {
-          context.verify(v -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+        .sendForm(MultiMap.caseInsensitiveMultiMap(), context.succeeding(response -> {
+          context.verify(() -> {
+            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
 
-            assertThat(ar.bodyAsString())
+            assertThat(response.bodyAsString())
                 .contains("No required key (name) in request parameters:");
+
+            context.completeNow();
           });
         }));
   }
 
   @Test
-  public void submitCreateCounter_InvalidTransaction(TestContext context) {
+  void submitCreateCounter_InvalidTransaction(VertxTestContext context) {
     String counterName = "counter 1";
     MultiMap params = multiMap("name", counterName);
 
@@ -148,18 +145,20 @@ public class ApiControllerIntegrationTest {
         .thenThrow(error);
 
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.asyncAssertSuccess(ar -> {
-          context.verify(v -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+        .sendForm(params, context.succeeding(response -> {
+          context.verify(() -> {
+            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
 
-            assertThat(ar.bodyAsString())
+            assertThat(response.bodyAsString())
                 .startsWith("Transaction is not valid:");
+
+            context.completeNow();
           });
         }));
   }
 
   @Test
-  public void submitCreateCounter_IllegalArgumentSomewhere(TestContext context) {
+  void submitCreateCounter_IllegalArgumentSomewhere(VertxTestContext context) {
     String counterName = "counter 1";
     MultiMap params = multiMap("name", counterName);
 
@@ -168,13 +167,14 @@ public class ApiControllerIntegrationTest {
         .thenThrow(error);
 
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+        .sendForm(params, context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+          context.completeNow();
         })));
   }
 
   @Test
-  public void submitCreateCounter_InternalServerError(TestContext context) {
+  void submitCreateCounter_InternalServerError(VertxTestContext context) {
     String counterName = "counter 1";
     MultiMap params = multiMap("name", counterName);
 
@@ -183,15 +183,16 @@ public class ApiControllerIntegrationTest {
         .thenThrow(error);
 
     post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.asyncAssertSuccess(ar -> {
-          context.verify(v -> {
-            assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+        .sendForm(params, context.succeeding(response -> {
+          context.verify(() -> {
+            assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+            context.completeNow();
           });
         }));
   }
 
   @Test
-  public void submitIncrementCounter(TestContext context) {
+  void submitIncrementCounter(VertxTestContext context) {
     long seed = 1L;
     HashCode counterId = HashCode.fromInt(1);
     MultiMap params = multiMap("seed", Long.toString(seed),
@@ -205,7 +206,7 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
-  public void submitInvalidTx(TestContext context) {
+  void submitInvalidTx(VertxTestContext context) {
     Throwable error = wrappingChecked(InvalidTransactionException.class);
     when(qaService.submitInvalidTx()).thenThrow(error);
 
@@ -214,7 +215,7 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
-  public void submitInvalidThrowingTx(TestContext context) {
+  void submitInvalidThrowingTx(VertxTestContext context) {
     Throwable error = wrappingChecked(InvalidTransactionException.class);
     when(qaService.submitInvalidThrowingTx()).thenThrow(error);
 
@@ -223,7 +224,7 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
-  public void submitValidThrowing(TestContext context) {
+  void submitValidThrowing(VertxTestContext context) {
     long seed = 10L;
 
     when(qaService.submitValidThrowingTx(seed))
@@ -236,7 +237,37 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
-  public void submitUnknown(TestContext context) {
+  void submitValidError(VertxTestContext context) {
+    long seed = 1L;
+    byte errorCode = 2;
+    String description = "Boom";
+    MultiMap params = multiMap("seed", Long.toString(seed),
+        "errorCode", Byte.toString(errorCode),
+        "errorDescription", description);
+
+    when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), eq(description)))
+        .thenReturn(EXPECTED_TX_HASH);
+
+    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
+  }
+
+  @Test
+  void submitValidErrorNoDescription(VertxTestContext context) {
+    long seed = 1L;
+    byte errorCode = 2;
+    MultiMap params = multiMap("seed", Long.toString(seed),
+        "errorCode", Byte.toString(errorCode));
+
+    when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), isNull()))
+        .thenReturn(EXPECTED_TX_HASH);
+
+    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
+  }
+
+  @Test
+  void submitUnknown(VertxTestContext context) {
     when(qaService.submitUnknownTx())
         .thenReturn(EXPECTED_TX_HASH);
 
@@ -245,7 +276,7 @@ public class ApiControllerIntegrationTest {
   }
 
   @Test
-  public void getCounter(TestContext context) {
+  void getCounter(VertxTestContext context) {
     HashCode id = Hashing.sha256().hashInt(2);
     String name = "counter";
     long value = 10L;
@@ -255,41 +286,58 @@ public class ApiControllerIntegrationTest {
 
     String getCounterUri = getCounterUri(id);
     get(getCounterUri)
-        .send(context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode())
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
-          String body = ar.bodyAsString();
+          String body = response.bodyAsString();
           Counter actualCounter = QaTransactionGson.instance()
               .fromJson(body, Counter.class);
           assertThat(actualCounter).isEqualTo(counter);
+
+          context.completeNow();
         })));
   }
 
   @Test
-  public void getCounter_NoCounter(TestContext context) {
+  void getCounter_NoCounter(VertxTestContext context) {
     HashCode id = Hashing.sha256().hashInt(2);
     when(qaService.getValue(id))
         .thenReturn(Optional.empty());
 
     String getCounterUri = getCounterUri(id);
     get(getCounterUri)
-        .send(context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+
+          context.completeNow();
         })));
   }
 
   @Test
-  public void getCounter_InvalidIdFormat(TestContext context) {
+  void getCounter_InvalidIdFormat(VertxTestContext context) {
     String hash = "Invalid hexadecimal hash";
     String getCounterUri = getCounterUri(hash);
 
     get(getCounterUri)
-        .send(context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-          assertThat(ar.bodyAsString())
-              .startsWith("Failed to convert parameter (counterId):");
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
+              () -> assertThat(response.bodyAsString())
+                  .startsWith("Failed to convert parameter (counterId):"));
+          context.completeNow();
         })));
+  }
+
+  @Test
+  void multiMapTest() {
+    MultiMap m = multiMap("k1", "v1",
+        "k2", "v2",
+        "k3", "v3");
+
+    assertThat(m.get("k1")).isEqualTo("v1");
+    assertThat(m.get("k2")).isEqualTo("v2");
+    assertThat(m.get("k3")).isEqualTo("v3");
   }
 
   private HttpRequest<Buffer> post(String requestPath) {
@@ -307,7 +355,7 @@ public class ApiControllerIntegrationTest {
         .add(k1, v1);
     int numEntries = entries.length / 2;
     IntStream.range(0, numEntries)
-        .forEach(i -> params.add(entries[i], entries[i + 1]));
+        .forEach(i -> params.add(entries[2 * i], entries[2 * i + 1]));
 
     return params;
   }
@@ -333,29 +381,33 @@ public class ApiControllerIntegrationTest {
 
   private Throwable logSafeExceptionMock(Class<? extends Throwable> exceptionType) {
     Throwable t = mock(exceptionType);
-    when(t.getStackTrace()).thenReturn(new StackTraceElement[0]);
+    lenient().when(t.getStackTrace()).thenReturn(new StackTraceElement[0]);
     return t;
   }
 
   private Handler<AsyncResult<HttpResponse<Buffer>>> checkCreatedTransaction(
-      TestContext context, HashCode expectedTxHash) {
-    return context.asyncAssertSuccess(
-        ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_CREATED);
-          assertThat(ar.getHeader("Location"))
-              .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash);
-          assertThat(ar.bodyAsString())
-              .isEqualTo(expectedTxHash.toString());
-        })
-    );
+      VertxTestContext context, HashCode expectedTxHash) {
+    return context.succeeding(
+        response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.bodyAsString()).isEqualTo(expectedTxHash.toString()),
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_CREATED),
+              () -> assertThat(response.getHeader("Location"))
+                  .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash)
+          );
+          context.completeNow();
+        }));
   }
 
-  private Handler<AsyncResult<HttpResponse<Buffer>>> checkInvalidTransaction(TestContext context) {
-    return context.asyncAssertSuccess(
-        ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-          assertThat(ar.bodyAsString())
-              .startsWith("Transaction is not valid");
+  private Handler<AsyncResult<HttpResponse<Buffer>>> checkInvalidTransaction(
+      VertxTestContext context) {
+    return context.succeeding(
+        response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
+              () -> assertThat(response.bodyAsString()).startsWith("Transaction is not valid")
+          );
+          context.completeNow();
         })
     );
   }

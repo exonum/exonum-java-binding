@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.PromoteToCore;
 import com.exonum.binding.qaservice.QaService;
 
@@ -38,7 +38,6 @@ final class TransactionPreconditions {
     checkArgument(txId == expectedTxId,
         "This message (%s) has wrong transaction id (%s), must be %s", message, txId, expectedTxId);
 
-    // todo: check empty signature?
     return message;
   }
 

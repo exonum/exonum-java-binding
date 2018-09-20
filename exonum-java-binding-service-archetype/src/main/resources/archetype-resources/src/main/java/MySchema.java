@@ -16,7 +16,7 @@
 
 package ${groupId};
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import java.util.Collections;

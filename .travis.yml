@@ -1,4 +1,7 @@
 language: java
+os:
+  - linux
+  - osx
 dist: trusty
 jdk:
   - openjdk8
@@ -7,65 +10,65 @@ sudo: false
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:chris-lea/libsodium'
     packages:
-    - build-essential
-    - libssl-dev
-    - pkg-config
+      - build-essential
+      - libsodium-dev
+      - libssl-dev
+      - pkg-config
 
 env:
   global:
-    - RUST_VERSION=stable
+    - RUST_COMPILER_VERSION=1.26.2
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
   matrix:
+    - CHECK_RUST=true
+    - CHECK_RUST=false
     # REPO_TOKEN used for integration with coveralls is encoded here
     secure: Fp22iaJpttsIArAyWmdCGNtljIALTYRVKO7O+H2hgBkwHHqrU7+15sbaq3xzhz4YNWNfuFMIkFUBgd/KYHgAuNDDrtm2agib13C0lQT1NFQO9ccmNCJNsXQrYrXGwpnNqPKp0YmfBfgNwzEpBerlbtvzV/T/RZukT/403XxwxU9y5tHfQokwVLibqP2jJsxdihTfCKIOs+o6hBfArmsn+e+panEv17ZrCjOmBIM/W70Rf2rEM26wFnYsfnAUTCkpl4Ong0SYNpZZxNMtw61W8ApDY8bpz7cKUxCv7SmD3kO7Y+TTHWfWYx6FNXtUpE1vCi6I7fZAY16rViTWOX55NCeFQz56XER7ArJQZtC/nC1lZ9tGKtcofu2Rq7WUoRuTwvLTaf6VzAP/CUj0DUxkV+8WUggl3s/Im7Y9rn8Aqvh8LReZmqzTY+dJ0hFG4DLoLtl71eTEnNoumi5UleBhJPaei3wPNPHg1WlOmhFyhRCsbIIGiyFtSj/faLmdc7tN/sBFANb0g4Exl0mRNvB0IfS1gM6XouEGUTlVree68p11PnsGJGs/QaUB9F9AAGVKTZ2kz7sqkCDdGmLxzbdidYDHZtYWfOIYSJCQsA09n2Txi0fwNByKfl/spdyMmtI1uGeT803rhN9vu0NGrQFG3mU7mqO33fUDEStIQ6/xn0A=
+
+# exclude rust code checks with jdk10
+matrix:
+  exclude:
+    - jdk: openjdk10
+      env: CHECK_RUST=true
+    - os: osx
+      env: CHECK_RUST=true
+    - os: osx
+      jdk: openjdk10
+  # See ECR-1734
+  allow_failures:
+    - jdk: openjdk10
+  # Report the result of JDK 8 build as it is ready.
+  fast_finish: true
+
 cache:
   directories:
     - "$HOME/.cargo"
     - "$HOME/.m2"
 
 before_install:
+  # Skip the build if only md files were updated.
+  - source .travis/skip-ci.sh
   - export PATH="$PATH":"$HOME/.cargo/bin"
-    # Install rustup if it's not already installed (i.e., not in CI cache).
-  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_VERSION"
-    # Install nightly rust version and clippy.
-  - rustup toolchain install $RUST_NIGHTLY_VERSION
-  - cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    # Set a toolchain as default.
-  - rustup default "$RUST_VERSION"
-    # Save the path to stdlib of the default toolchain to use it in scripts.
-  - export RUST_LIB_DIR=$(rustup run "$RUST_VERSION" rustc --print sysroot)/lib
-    # Install rustfmt.
-  - rustup component add rustfmt-preview
-  - rustfmt -V
-    # Install cargo-audit if it's not already.
-  - cargo-audit -V || cargo install cargo-audit --force
-    # List all installed cargo packages.
+  # Install rustup if it's not already installed (i.e., not in CI cache).
+  - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
+  - rustup default "$RUST_COMPILER_VERSION"
+  # List all installed cargo packages.
   - cargo install --list
-    # libjava_bindings.so and native application both need to load common Rust libs (eg libstd.so).
-  - export LD_LIBRARY_PATH=$RUST_LIB_DIR:$LD_LIBRARY_PATH
-    # force building instead of using from apt.
-  - export SODIUM_BUILD=1
-  - export ROCKSDB_BUILD=1
-  - export SNAPPY_BUILD=1
+  # Install OSX requirements
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsodium rocksdb pkg-config; fi
+  # force building instead of using from apt.
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 script:
-  - cd "${EJB_RUST_BUILD_DIR}"
-  - cargo fmt --all -- --write-mode=diff
-  # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
-  # Next 2 lines are a workaround to prevent clippy checking dependencies.
-  - cargo +${RUST_NIGHTLY_VERSION} check
-  - cargo +${RUST_NIGHTLY_VERSION} clean -p java_bindings
-  - cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
-  - cargo audit
-  - cd -
-  - ./run_all_tests_with_coverage.sh
-  # Check silently for updates of dependencies
-  - mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3
+  - cd "$TRAVIS_BUILD_DIR"
+  - .travis/run_travis_job.sh
 
 notifications:
   slack:

@@ -21,70 +21,65 @@ import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransaction;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
-import com.exonum.binding.cryptocurrency.transactions.TransferTx;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.Transaction;
-import com.google.common.collect.ImmutableMap;
+import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
+import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.transaction.Transaction;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.Map;
 import java.util.Optional;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@RunWith(VertxUnitRunner.class)
-public class ApiControllerTest {
+@ExtendWith(VertxExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
+class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
   private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
 
-  private static final PublicKey toKey = PredefinedOwnerKeys.secondOwnerKey;
+  private CryptocurrencyService service;
 
-  @ClassRule public static RunTestOnContext rule = new RunTestOnContext();
+  private JsonBinaryMessageConverter jsonBinaryMessageConverter;
 
-  CryptocurrencyService service;
+  private ApiController controller;
 
-  ApiController controller;
+  private HttpServer httpServer;
 
-  Vertx vertx;
+  private WebClient webClient;
 
-  HttpServer httpServer;
+  private volatile int port = -1;
 
-  WebClient webClient;
-
-  volatile int port = -1;
-
-  @Before
-  public void setup(TestContext context) {
+  @BeforeEach
+  void setup(Vertx vertx, VertxTestContext context) {
     service = mock(CryptocurrencyService.class);
-    controller = new ApiController(service);
-
-    vertx = rule.vertx();
+    jsonBinaryMessageConverter = mock(JsonBinaryMessageConverter.class);
+    controller = new ApiController(service, jsonBinaryMessageConverter);
 
     httpServer = vertx.createHttpServer();
     webClient = WebClient.create(vertx);
@@ -92,71 +87,88 @@ public class ApiControllerTest {
     Router router = Router.router(vertx);
     controller.mountApi(router);
 
-    Async async = context.async();
     httpServer.requestHandler(router::accept)
-        .listen(0, event -> {
-          assert event.succeeded();
-
+        .listen(0, context.succeeding(result -> {
           // Set the actual server port.
-          port = event.result().actualPort();
+          port = result.actualPort();
           // Notify that the HTTP Server is accepting connections.
-          async.complete();
-        });
+          context.completeNow();
+        }));
   }
 
-  @After
-  public void tearDown(TestContext context) {
-    Async async = context.async();
+  @AfterEach
+  void tearDown(VertxTestContext context) {
     webClient.close();
-    httpServer.close((ar) -> async.complete());
+    httpServer.close((r) -> context.completeNow());
   }
 
   @Test
-  public void handlesAllKnownTransactions(TestContext context) {
-    Map<CryptocurrencyTransaction, Transaction> transactionTemplates =
-        ImmutableMap.of(
-            CryptocurrencyTransaction.CREATE_WALLET,
-                new CreateWalletTx(fromKey),
-            CryptocurrencyTransaction.TRANSFER,
-                new TransferTx(
-                    0L,
-                    fromKey,
-                    toKey,
-                    40L));
+  void submitValidTransaction(VertxTestContext context) {
+    String messageJson = "{\"service_id\":42}";
+    String messageHash = "1234";
+    BinaryMessage message = mock(BinaryMessage.class);
+    Transaction transaction = mock(Transaction.class);
 
-    for (Map.Entry<CryptocurrencyTransaction, Transaction> entry :
-        transactionTemplates.entrySet()) {
-      Transaction sourceTx = entry.getValue();
-      String expectedResponse = String.valueOf(sourceTx.hash());
+    when(jsonBinaryMessageConverter.toMessage(messageJson))
+        .thenReturn(message);
+    when(service.convertToTransaction(message))
+        .thenReturn(transaction);
+    when(service.submitTransaction(transaction))
+        .thenReturn(HashCode.fromString(messageHash));
 
-      String sourceTxMessage = sourceTx.info();
+    String expectedResponse = messageHash;
+    // Send a request to submitTransaction
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendJsonObject(
+            new JsonObject(messageJson),
+            context.succeeding(
+                response -> context.verify(() -> {
+                  // Check the response status
+                  int statusCode = response.statusCode();
+                  assertEquals(HTTP_OK, statusCode);
 
-      when(service.submitTransaction(eq(sourceTx)))
-          .thenReturn(sourceTx.hash());
+                  // Check the payload type
+                  String contentType = response.getHeader("Content-Type");
+                  assertEquals("text/plain", contentType);
 
-      // Send a request to submitTransaction
-      post(ApiController.SUBMIT_TRANSACTION_PATH)
-          .sendJsonObject(
-              new JsonObject(sourceTxMessage),
-              context.asyncAssertSuccess(
-                  r -> {
+                  // Check the response body
+                  String body = response.bodyAsString();
+                  assertEquals(expectedResponse, body);
 
-                    // Check the response status
-                    int statusCode = r.statusCode();
-                    context.assertEquals(statusCode, HttpURLConnection.HTTP_OK);
+                  // Verify that a proper transaction was submitted to the network
+                  verify(service).submitTransaction(transaction);
 
-                    // Check the response body
-                    String response = r.bodyAsString();
-                    context.assertEquals(response, expectedResponse);
-
-                    // Verify that a proper transaction was submitted to the network
-                    verify(service).submitTransaction(eq(sourceTx));
-                  }));
-    }
+                  context.completeNow();
+                })));
   }
 
   @Test
-  public void getWallet(TestContext context) {
+  void submitTransactionWhenInternalServerErrorIsThrown(VertxTestContext context) {
+    String messageJson = "{\"service_id\":42}";
+    BinaryMessage message = mock(BinaryMessage.class);
+    Transaction transaction = mock(Transaction.class);
+    Throwable error = wrappingChecked(InternalServerError.class);
+
+    when(jsonBinaryMessageConverter.toMessage(messageJson))
+        .thenReturn(message);
+    when(service.convertToTransaction(message))
+        .thenReturn(transaction);
+    when(service.submitTransaction(transaction))
+        .thenThrow(error);
+
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendJsonObject(
+            new JsonObject(messageJson),
+            context.succeeding(response -> context.verify(() -> {
+              assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+              verify(service).submitTransaction(transaction);
+
+              context.completeNow();
+            })));
+  }
+
+  @Test
+  void getWallet(VertxTestContext context) {
     long balance = 200L;
     Wallet wallet = new Wallet(balance);
     when(service.getWallet(eq(fromKey)))
@@ -164,59 +176,46 @@ public class ApiControllerTest {
 
     String getWalletUri = getWalletUri(fromKey);
     get(getWalletUri)
-        .send(context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode())
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
-          String body = ar.bodyAsString();
+          String body = response.bodyAsString();
           Wallet actualWallet = CryptocurrencyTransactionGson.instance()
               .fromJson(body, Wallet.class);
           assertThat(actualWallet.getBalance()).isEqualTo(wallet.getBalance());
+
+          context.completeNow();
         })));
   }
 
   @Test
-  public void getNonexistentWallet(TestContext context) {
+  void getNonexistentWallet(VertxTestContext context) {
     when(service.getWallet(fromKey))
         .thenReturn(Optional.empty());
 
     String getWalletUri = getWalletUri(fromKey);
     get(getWalletUri)
-        .send(context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+
+          context.completeNow();
         })));
   }
 
   @Test
-  public void getWalletUsingInvalidKey(TestContext context) {
+  void getWalletUsingInvalidKey(VertxTestContext context) {
     String publicKeyString = "Invalid key";
     String getWalletUri = getWalletUri(publicKeyString);
 
     get(getWalletUri)
-        .send(context.asyncAssertSuccess(ar -> context.verify(v -> {
-          assertThat(ar.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-          assertThat(ar.bodyAsString())
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+          assertThat(response.bodyAsString())
               .startsWith("Failed to convert parameter (walletId):");
+
+          context.completeNow();
         })));
-  }
-
-  @Test
-  public void submitTransactionWhenInternalServerErrorIsThrown(TestContext context) {
-    Throwable error = wrappingChecked(InternalServerError.class);
-
-    Transaction transaction = new CreateWalletTx(fromKey);
-    when(service.submitTransaction(eq(transaction)))
-        .thenThrow(error);
-    String sourceTxMessage = transaction.info();
-
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
-        .sendJsonObject(
-            new JsonObject(sourceTxMessage),
-            context.asyncAssertSuccess(ar -> {
-              context.verify(v -> {
-                assertThat(ar.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
-              });
-            }));
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
@@ -228,7 +227,6 @@ public class ApiControllerTest {
 
   private Throwable logSafeExceptionMock(Class<? extends Throwable> exceptionType) {
     Throwable t = mock(exceptionType);
-    when(t.getStackTrace()).thenReturn(new StackTraceElement[0]);
     return t;
   }
 

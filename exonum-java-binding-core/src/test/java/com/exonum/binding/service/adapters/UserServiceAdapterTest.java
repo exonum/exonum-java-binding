@@ -28,14 +28,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
-import com.exonum.binding.messages.TemplateMessage;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
+import com.exonum.binding.common.message.TemplateMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
@@ -84,7 +84,7 @@ public class UserServiceAdapterTest {
         .thenReturn(expectedTransaction);
 
     byte[] message = getServiceMessage(serviceId)
-        .getMessage()
+        .getSignedMessage()
         .array();
 
     UserTransactionAdapter transactionAdapter = serviceAdapter.convertTransaction(message);
@@ -101,7 +101,7 @@ public class UserServiceAdapterTest {
         .thenReturn(null);
 
     byte[] message = getServiceMessage(serviceId)
-        .getMessage()
+        .getSignedMessage()
         .array();
 
     expectedException.expectMessage("Invalid service implementation: "
@@ -213,7 +213,7 @@ public class UserServiceAdapterTest {
         .thenReturn(serviceName);
 
     serviceAdapter.mountPublicApiHandler(0x0A);
-    verify(server).mountSubRouter(eq("/service1"), eq(router));
+    verify(server).mountSubRouter(eq("/api/service1"), eq(router));
   }
 
   @Test

@@ -33,21 +33,22 @@ fn local_frame_allows_overflow() {
             let mut java_strings = Vec::new();
             for i in 0..references_per_frame {
                 print!("Try: {}; limit: {}. ", i + 1, local_frame_capacity);
-                let java_string = env.new_string(expected_string_at(i))
+                let java_string = env
+                    .new_string(expected_string_at(i))
                     .expect("Can't create new local object.");
                 java_strings.push(java_string);
                 println!(" Ok.");
             }
             // Check all the references can be used to access the corresponding Java string.
             for (i, java_string_ref) in java_strings.into_iter().enumerate() {
-                let java_string: String = env.get_string(java_string_ref)
+                let java_string: String = env
+                    .get_string(java_string_ref)
                     .expect("Can't get object.")
                     .into();
                 assert_eq!(java_string, expected_string_at(i));
             }
             Ok(())
-        })
-        .unwrap();
+        }).unwrap();
 }
 
 fn expected_string_at(index: usize) -> String {

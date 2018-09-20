@@ -18,16 +18,14 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.Transaction;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +48,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param viewFactory a factory to instantiate native database views
    */
   public NodeProxy(long nativeHandle, ViewFactory viewFactory) {
-    // fixme: remove this comment when https://jira.bf.local/browse/ECR-251 is resolved
     super(nativeHandle, false);
     this.viewFactory = viewFactory;
   }
@@ -64,7 +61,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   public void submitTransaction(Transaction transaction)
       throws InvalidTransactionException, InternalServerError {
     BinaryMessage message = transaction.getMessage();
-    ByteBuffer messageBuffer = message.getMessage();
+    ByteBuffer messageBuffer = message.getSignedMessage();
 
     // Currently this method and the native code support only array-backed ByteBuffers.
     checkArgument(messageBuffer.hasArray(),
@@ -127,6 +124,8 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
 
   @Override
   protected void disposeInternal() {
-    // no-op: this class is not responsible to destroy the corresponding native object
+    nativeFree(getNativeHandle());
   }
+
+  private static native void nativeFree(long nodeNativeHandle);
 }

@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
@@ -38,14 +38,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.map.MapProof;
+import com.exonum.binding.common.proofs.map.MapProofTreePrinter;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.proofs.map.MapProof;
-import com.exonum.binding.storage.proofs.map.MapProofTreePrinter;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -524,8 +524,8 @@ public class ProofMapIndexProxyIntegrationTest
    */
   @Test
   public void constructorShallPreserveTypeInformation() {
-    runTestWithView(database::createFork, (view, proofMap) -> {
-      proofMap.put(PK1, "v1");
+    runTestWithView(database::createFork, (view, map) -> {
+      map.put(PK1, "v1");
 
       expectedException.expectMessage(
           "Attempt to access index '" + MAP_NAME
@@ -534,6 +534,20 @@ public class ProofMapIndexProxyIntegrationTest
       // Create a regular map with the same name as the proof map above.
       MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
           StandardSerializers.hash(), StandardSerializers.string());
+    });
+  }
+
+  @Test
+  public void isEmptyShouldReturnTrueForEmptyMap() {
+    runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
+  }
+
+  @Test
+  public void isEmptyShouldReturnFalseForNonEmptyMap() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, "v1");
+
+      assertFalse(map.isEmpty());
     });
   }
 

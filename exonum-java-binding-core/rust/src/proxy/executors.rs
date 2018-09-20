@@ -138,7 +138,8 @@ impl HackyExecutor {
     }
 
     fn attach_current_thread(&self) -> JniResult<JNIEnv> {
-        let mut num_attached_threads = self.num_attached_threads
+        let mut num_attached_threads = self
+            .num_attached_threads
             .lock()
             .expect("Failed to acquire the mutex on the attached threads number");
         if *num_attached_threads == self.attach_limit {

@@ -16,21 +16,21 @@
 
 package com.exonum.binding.service;
 
-import static com.exonum.binding.messages.TemplateMessage.TEMPLATE_MESSAGE;
+import static com.exonum.binding.common.message.TemplateMessage.TEMPLATE_MESSAGE;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.AbstractTransaction;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.transaction.AbstractTransaction;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -57,7 +57,7 @@ public class ServiceBootstrapIntegrationTest {
         .mergeFrom(TEMPLATE_MESSAGE)
         .setServiceId(service.getId())
         .buildRaw();
-    byte[] messageBytes = message.getMessage().array();
+    byte[] messageBytes = message.getSignedMessage().array();
 
     UserTransactionAdapter transactionAdapter = service.convertTransaction(messageBytes);
     assertTrue(transactionAdapter.isValid());

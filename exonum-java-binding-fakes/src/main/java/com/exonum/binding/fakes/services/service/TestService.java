@@ -16,8 +16,8 @@
 
 package com.exonum.binding.fakes.services.service;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;
@@ -35,7 +35,7 @@ public final class TestService extends AbstractService {
   public static final short ID = 0x110B;
   public static final String NAME = "experimentalTestService";
 
-  static final String INITIAL_CONFIGURATION = "{ \"version\": 0.1 }";
+  static final String INITIAL_CONFIGURATION = "{ \"version\": \"0.2.0\" }";
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";

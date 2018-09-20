@@ -7,22 +7,18 @@
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
-    <version>0.1.0</version>
+    <version>0.2</version>
   </parent>
 
   <artifactId>exonum-java-binding-bom</artifactId>
-  <version>1.0.0</version>
+  <version>0.2</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding: Bill of Materials</name>
 
   <properties>
-    <exonum-core.version>0.1.0</exonum-core.version>
-    <exonum-java-proofs.version>0.1.0</exonum-java-proofs.version>
-    <guice.version>4.2.0</guice.version>
-    <log4j.version>2.11.0</log4j.version>
-    <guava.version>25.1-jre</guava.version>
-    <vertx.version>3.5.2</vertx.version>
+    <exonum-core.version>0.2</exonum-core.version>
+    <exonum-java-binding-common.version>0.2</exonum-java-binding-common.version>
   </properties>
 
   <dependencyManagement>
@@ -36,8 +32,8 @@
 
       <dependency>
         <groupId>com.exonum.binding</groupId>
-        <artifactId>exonum-java-proofs</artifactId>
-        <version>${exonum-java-proofs.version}</version>
+        <artifactId>exonum-java-binding-common</artifactId>
+        <version>${exonum-java-binding-common.version}</version>
       </dependency>
       
       <!-- Exported third-party artefacts the services depend upon. -->
@@ -50,6 +46,12 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-unit</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-junit5</artifactId>
         <version>${vertx.version}</version>
       </dependency>
 

@@ -24,7 +24,6 @@ import com.exonum.binding.storage.database.View;
  * <p>Also known as a collection, a table, and also as (rarely) a view for
  * a {@linkplain View database view} is inherently associated with an index.
  */
-// todo: Document the various index types if this becomes public (ECR-595)
 interface StorageIndex {
 
   /** Returns the name of this index. */

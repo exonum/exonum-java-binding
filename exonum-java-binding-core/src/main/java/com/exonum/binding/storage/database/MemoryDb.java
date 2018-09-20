@@ -24,9 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 
 /**
  * An in-memory database for testing purposes. It can create both read-only snapshots
- * and read-write forks. The changes made to database forks can be applied to the database state.
+ * and read-write forks. The changes made to database forks can be
+ * {@linkplain MemoryDb#merge(Fork) applied} to the database state.
+ *
+ * @see com.exonum.binding.service.NodeFake
  */
-@VisibleForTesting
 public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
 
   /**
