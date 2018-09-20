@@ -136,7 +136,7 @@ fn check_transaction_execution_result<T>(
     result.map_err(|jni_error| match jni_error.0 {
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
-            let message = unwrap_jni_verbose(env, get_exception_message(env, exception));
+            let message = unwrap_jni(get_exception_message(env, exception));
             if !unwrap_jni_verbose(
                 env,
                 env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION),
@@ -145,7 +145,7 @@ fn check_transaction_execution_result<T>(
                 panic!(panic_msg);
             }
 
-            let err_code = unwrap_jni_verbose(env, get_tx_error_code(env, exception)) as u8;
+            let err_code = unwrap_jni(get_tx_error_code(env, exception)) as u8;
             match message {
                 Some(msg) => ExecutionError::with_description(err_code, msg),
                 None => ExecutionError::new(err_code),
