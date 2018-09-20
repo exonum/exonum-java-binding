@@ -16,20 +16,26 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.service.Service;
-import com.exonum.binding.transaction.Transaction;
-import java.util.List;
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public interface CryptocurrencyService extends Service {
-  short ID = 42;
-  String NAME = "cryptocurrency-demo-service";
+import org.junit.jupiter.api.Test;
 
-  HashCode submitTransaction(Transaction tx);
+class WalletSerializerTest {
 
-  Optional<Wallet> getWallet(PublicKey ownerKey);
+  private WalletSerializer serializer = WalletSerializer.INSTANCE;
 
-  List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
+  @Test
+  void roundTrip() {
+    Wallet expectedWallet = testWallet();
+
+    byte[] bytes = serializer.toBytes(expectedWallet);
+    Wallet actualWallet = serializer.fromBytes(bytes);
+
+    assertThat(actualWallet).isEqualTo(expectedWallet);
+  }
+
+  private static Wallet testWallet() {
+    return new Wallet(100L);
+  }
+
 }
