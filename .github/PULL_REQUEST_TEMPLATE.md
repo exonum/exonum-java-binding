@@ -1,10 +1,8 @@
 ## Overview
-
-Please describe your changes here and list any open questions you might have.
+<!-- Please describe your changes here and list any open questions you might have. -->
 
 ---
-See: https://jira.bf.local/browse/XYZ
-
+See: https://jira.bf.local/browse/ECR-XYZ
 
 ### Definition of Done
 
