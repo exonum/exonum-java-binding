@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
 - Flat map proofs support. (#250)
-- Wallet transactions history support to the cryptocurrency-demo (#481)
+- Wallet transactions history support to the cryptocurrency-demo. (#481)
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
