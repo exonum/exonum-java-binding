@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.fakes.test.TestTxExecException;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionExecutionException;
