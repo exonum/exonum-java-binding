@@ -126,12 +126,12 @@ public final class ListProofValidator<E> implements ListProofVisitor {
   }
 
   @Override
-  public void visit(HashNode hashNode) {
-    this.hash = hashNode.getHash();
+  public void visit(ListProofHashNode listProofHashNode) {
+    this.hash = listProofHashNode.getHash();
   }
 
   @Override
-  public void visit(ProofListElement value) {
+  public void visit(ListProofElement value) {
     assert !elements.containsKey(index) :
         "Error: already an element by such index in the map: i=" + index
             + ", e=" + elements.get(index);
@@ -140,7 +140,7 @@ public final class ListProofValidator<E> implements ListProofVisitor {
     if (isBalanced) {
       E element = serializer.fromBytes(value.getElement());
       elements.put(index, element);
-      hash = hashFunction.hashObject(value, ProofListElement.funnel());
+      hash = hashFunction.hashObject(value, ListProofElement.funnel());
     }
   }
 
@@ -190,6 +190,16 @@ public final class ListProofValidator<E> implements ListProofVisitor {
   public NavigableMap<Long, E> getElements() {
     checkState(isValid(), "Proof is not valid: %s", getReason());
     return elements;
+  }
+
+  /**
+   * Returns calculated root hash.
+   *
+   * @throws IllegalStateException if proof is not valid
+   */
+  public HashCode getRootHash() {
+    checkState(isValid(), "Proof is not valid: %s", getReason());
+    return hash;
   }
 
   private String getReason() {

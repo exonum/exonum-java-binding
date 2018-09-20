@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs.full.checked;
 
-public interface ListProofVisitor {
+import com.exonum.binding.common.proofs.list.ListProofElement;
+import java.util.NavigableMap;
 
-  void visit(ListProofBranch branch);
-
-  void visit(ListProofHashNode listProofHashNode);
-
-  void visit(ListProofElement value);
+/**
+ * A checked list proof.
+ */
+public interface CheckedListProof extends CheckedCollectionProof {
+  NavigableMap<Long, ListProofElement> getElements();
 }

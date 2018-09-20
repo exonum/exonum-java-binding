@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map.flat;
+package com.exonum.binding.common.proofs.full.unchecked;
+
+import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
 
 /**
  * An unchecked map proof.
@@ -33,8 +35,7 @@ package com.exonum.binding.common.proofs.map.flat;
  * }
  * </code></pre>
  */
-public interface UncheckedMapProof {
-
+public interface UncheckedMapProof extends UncheckedCollectionProof {
   /**
    * Checks that a proof has either correct or incorrect structure and returns a CheckedMapProof.
    */

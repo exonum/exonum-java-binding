@@ -22,19 +22,19 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
- * Represents a branch node of a {@link ListProof}.
+ * Represents a branch node of a {@link ListProofData}.
  *
  * <p>A branch node always has a left child, but there might not be a right child
  * (if the underlying Merkle tree is not a full binary tree).
  */
-public final class ListProofBranch implements ListProof {
+public final class ListProofBranch implements ListProofData {
 
-  private final ListProof left;
+  private final ListProofData left;
 
   @Nullable
-  private final ListProof right;
+  private final ListProofData right;
 
-  public ListProofBranch(ListProof left, @Nullable ListProof right) {
+  public ListProofBranch(ListProofData left, @Nullable ListProofData right) {
     this.left = checkNotNull(left);
     this.right = right;
   }
@@ -47,7 +47,7 @@ public final class ListProofBranch implements ListProof {
   /**
    * Returns the left child in the proof tree.
    */
-  public ListProof getLeft() {
+  public ListProofData getLeft() {
     return left;
   }
 
@@ -57,7 +57,7 @@ public final class ListProofBranch implements ListProof {
    * <p>There might not be a right child if the Merkle tree of the ProofList is not
    * a full binary tree.
    */
-  public Optional<ListProof> getRight() {
+  public Optional<ListProofData> getRight() {
     return Optional.ofNullable(right);
   }
 }

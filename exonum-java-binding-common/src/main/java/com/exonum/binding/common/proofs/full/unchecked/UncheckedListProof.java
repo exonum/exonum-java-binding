@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs.full.unchecked;
 
-public interface ListProofVisitor {
+import com.exonum.binding.common.proofs.full.checked.CheckedListProof;
 
-  void visit(ListProofBranch branch);
-
-  void visit(ListProofHashNode listProofHashNode);
-
-  void visit(ListProofElement value);
+public interface UncheckedListProof extends UncheckedCollectionProof {
+  /**
+   * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
+   */
+  CheckedListProof check();
 }

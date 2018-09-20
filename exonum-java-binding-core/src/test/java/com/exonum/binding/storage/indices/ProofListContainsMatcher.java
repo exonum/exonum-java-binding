@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import com.exonum.binding.common.proofs.list.ListProof;
+import com.exonum.binding.common.proofs.list.ListProofData;
 import com.exonum.binding.common.proofs.list.ListProofValidator;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
@@ -34,11 +34,12 @@ import org.hamcrest.TypeSafeMatcher;
 
 class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<String>> {
 
-  private final Function<ProofListIndexProxy<String>, ListProof> proofFunction;
+  private final Function<ProofListIndexProxy<String>, ListProofData> proofFunction;
   private final Matcher<Map<Long, String>> elementsMatcher;
 
-  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>, ListProof> proofFunction,
-                                   Map<Long, String> expectedProofElements) {
+  private ProofListContainsMatcher(
+      Function<ProofListIndexProxy<String>, ListProofData> proofFunction,
+      Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
     this.elementsMatcher = equalTo(expectedProofElements);
   }
@@ -49,7 +50,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       return false;
     }
 
-    ListProof proof = proofFunction.apply(list);
+    ListProofData proof = proofFunction.apply(list);
     ListProofValidator<String> validator = newProofValidator(list);
     proof.accept(validator);
 
@@ -65,7 +66,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   @Override
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
-    ListProof proof = proofFunction.apply(list);
+    ListProofData proof = proofFunction.apply(list);
     ListProofValidator<String> validator = newProofValidator(list);
     proof.accept(validator);
 
@@ -99,7 +100,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProofData> proofFunction =
         (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction,
@@ -124,7 +125,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
     long to = from + expectedValues.size();
-    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProofData> proofFunction =
         (list) -> list.getRangeProof(from, to);
 
     Map<Long, String> expectedProofElements = new TreeMap<>();

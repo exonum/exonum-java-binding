@@ -16,38 +16,17 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.exonum.binding.common.hash.HashCode;
-
 /**
- * Represents a hash of a Merkle sub-tree: a leaf node in proof trees.
+ * Represents a proof that some elements exist in a ProofList at certain positions.
  */
-public final class HashNode implements ListProof {
-
-  private final HashCode hash;
+public interface ListProofData {
 
   /**
-   * Creates a new hash node.
+   * Applies the visitor to this proof node.
+   *
+   * <p>Most implementations simply call {@code visitor.visit(this);}
+   *
+   * @param visitor a visitor to apply to this node
    */
-  @SuppressWarnings("unused")  // native API
-  HashNode(byte[] hash) {
-    this(HashCode.fromBytes(hash));
-  }
-
-  public HashNode(HashCode hash) {
-    this.hash = checkNotNull(hash);
-  }
-
-  @Override
-  public void accept(ListProofVisitor visitor) {
-    visitor.visit(this);
-  }
-
-  /**
-   * Returns the hash value.
-   */
-  public HashCode getHash() {
-    return hash;
-  }
+  void accept(ListProofVisitor visitor);
 }

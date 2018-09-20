@@ -32,20 +32,20 @@ public class ProofListElementTest {
 
   private static final byte[] E1 = bytes("element 1");
 
-  private ProofListElement node;
+  private ListProofElement node;
 
   @Test
   public void getElement() {
-    node = new ProofListElement(E1);
+    node = new ListProofElement(E1);
 
     assertThat(node.getElement(), equalTo(E1));
   }
 
   @Test
   public void funnel() {
-    node = new ProofListElement(E1);
+    node = new ListProofElement(E1);
 
-    Funnel<ProofListElement> funnel = ProofListElement.funnel();
+    Funnel<ListProofElement> funnel = ListProofElement.funnel();
     assertNotNull(funnel);
 
     PrimitiveSink sink = mock(PrimitiveSink.class);

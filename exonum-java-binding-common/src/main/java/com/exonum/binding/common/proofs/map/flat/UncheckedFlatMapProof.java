@@ -22,8 +22,11 @@ import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.full.checked.CheckedMapProof;
+import com.exonum.binding.common.proofs.full.unchecked.UncheckedMapProof;
 import com.exonum.binding.common.proofs.map.DbKey;
 import com.exonum.binding.common.proofs.map.DbKey.Type;
+import com.exonum.binding.common.proofs.model.ProofStatus;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,11 +73,11 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   @Override
   public CheckedMapProof check() {
     ProofStatus orderCheckResult = orderCheck();
-    if (orderCheckResult != ProofStatus.CORRECT) {
+    if (orderCheckResult != ProofStatus.MapProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
     if (prefixesIncluded()) {
-      return CheckedFlatMapProof.invalid(ProofStatus.EMBEDDED_PATH);
+      return CheckedFlatMapProof.invalid(ProofStatus.MapProofStatus.EMBEDDED_PATH);
     }
     if (isEmptyProof()) {
       return checkEmptyProof();
@@ -92,9 +95,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    * the {@linkplain DbKey#compareTo(DbKey) comparator}; there must not be duplicates.
    *
    * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
-   *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
-   *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
-   *         {@code ProofStatus.EMBEDDED_PATH} if one key is a prefix of another
+   * {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
+   * {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
+   * {@code ProofStatus.EMBEDDED_PATH} if one key is a prefix of another
    * @see DbKey#compareTo(DbKey)
    */
   private ProofStatus orderCheck() {
@@ -104,15 +107,15 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       int comparisonResult = key.compareTo(nextKey);
       if (comparisonResult < 0) {
         if (key.isPrefixOf(nextKey)) {
-          return ProofStatus.EMBEDDED_PATH;
+          return ProofStatus.MapProofStatus.EMBEDDED_PATH;
         }
       } else if (comparisonResult == 0) {
-        return ProofStatus.DUPLICATE_PATH;
+        return ProofStatus.MapProofStatus.DUPLICATE_PATH;
       } else {
-        return ProofStatus.INVALID_ORDER;
+        return ProofStatus.MapProofStatus.INVALID_ORDER;
       }
     }
-    return ProofStatus.CORRECT;
+    return ProofStatus.MapProofStatus.CORRECT;
   }
 
   /**
@@ -125,7 +128,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
             entries.stream()
                 .map(MapEntry::getKey),
             missingKeys.stream())
-        .map(DbKey::newLeafKey);
+            .map(DbKey::newLeafKey);
 
     // TODO: proof entries are checked to be sorted at this stage, so it's possible …
     // to use binary search here
@@ -156,7 +159,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       MapProofEntry entry = proof.get(0);
       DbKey.Type nodeType = entry.getDbKey().getNodeType();
       if (nodeType == Type.BRANCH) {
-        return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
+        return CheckedFlatMapProof.invalid(ProofStatus.MapProofStatus.NON_TERMINAL_NODE);
       } else {
         HashCode rootHash = getSingleEntryRootHash(entry);
         return CheckedFlatMapProof.correct(rootHash, entries, missingKeys);

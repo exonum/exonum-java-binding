@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs.full.checked;
 
-public interface ListProofVisitor {
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.model.ProofStatus;
 
-  void visit(ListProofBranch branch);
+public interface CheckedCollectionProof {
 
-  void visit(ListProofHashNode listProofHashNode);
+  /**
+   * Return a hash of a proof root node.
+   * @throws IllegalStateException if the proof is not valid
+   */
+  HashCode getRootHash();
 
-  void visit(ListProofElement value);
+  /**
+   * Returns the status of this proof: whether it is structurally valid.
+   */
+  ProofStatus getStatus();
 }

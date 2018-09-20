@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs.full;
 
-public interface ListProofVisitor {
+import java.util.List;
 
-  void visit(ListProofBranch branch);
-
-  void visit(ListProofHashNode listProofHashNode);
-
-  void visit(ListProofElement value);
+public class BlockProof {
+  byte[] block;
+  List<byte[]> precommitMessages;
 }
