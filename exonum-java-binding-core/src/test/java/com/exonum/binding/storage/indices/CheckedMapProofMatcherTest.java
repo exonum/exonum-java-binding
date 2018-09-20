@@ -33,10 +33,13 @@ import org.junit.Test;
 
 public class CheckedMapProofMatcherTest {
 
+  private static final HashCode TEST_KEY = HashCode.fromString("ab");
+  private static final String TEST_VALUE = "hello";
+  private static final HashCode ROOT_HASH = HashCode.fromString("123456ef");
+
   @Test
   public void matchesInvalidProof() {
-    HashCode key = HashCode.fromString("ab");
-    CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(key, null);
+    CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_KEY, null);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
         ProofStatus.DUPLICATE_PATH);
@@ -46,16 +49,15 @@ public class CheckedMapProofMatcherTest {
 
   @Test
   public void matchesValidProof() {
-    HashCode key = HashCode.fromString("ab");
-    String value = "hello";
+    HashCode key = TEST_KEY;
+    String value = TEST_VALUE;
 
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(key, value);
 
     MapEntry entry = new MapEntry(key.asBytes(), StandardSerializers.string().toBytes(value));
 
-    HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
-        rootHash,
+        ROOT_HASH,
         Collections.singletonList(entry),
         Collections.emptyList());
 
@@ -68,8 +70,8 @@ public class CheckedMapProofMatcherTest {
     String expectedValue = null;  // No value
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(key, expectedValue);
 
-    String actualValue = "hello";
-    MapEntry entry = new MapEntry(key.asBytes(), StandardSerializers.string().toBytes(actualValue));
+    byte[] actualValue = StandardSerializers.string().toBytes("value");
+    MapEntry entry = new MapEntry(key.asBytes(), actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
@@ -79,14 +81,13 @@ public class CheckedMapProofMatcherTest {
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
 
-    assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> hello)], "
+    assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> value)], "
         + "missing keys=[], Merkle root=<123456ef>"));
   }
 
   @Test
   public void describeMismatchSafelyInvalidProof() {
-    HashCode key = HashCode.fromString("ab");
-    CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(key, null);
+    CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_KEY, null);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
         ProofStatus.DUPLICATE_PATH);
