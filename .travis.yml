@@ -1,9 +1,20 @@
 language: java
+os:
+  - linux
+  - osx
 dist: trusty
 jdk:
   - openjdk8
   - openjdk10
 sudo: false
+
+# Build only the following branches/tags pushed to the repository:
+branches:
+  only:
+    - master
+    - ejb-app-configuration
+    # Also build tagged revisions, e.g. v1.2.3-beta
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 addons:
   apt:
@@ -21,9 +32,6 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
-    # force building instead of using from apt.
-    - ROCKSDB_BUILD=1
-    - SNAPPY_BUILD=1
   matrix:
     - CHECK_RUST=true
     - CHECK_RUST=false
@@ -33,6 +41,10 @@ matrix:
   exclude:
     - jdk: openjdk10
       env: CHECK_RUST=true
+    - os: osx
+      env: CHECK_RUST=true
+    - os: osx
+      jdk: openjdk10
   # See ECR-1734
   allow_failures:
     - jdk: openjdk10
@@ -53,6 +65,10 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
+  # Install OSX requirements
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsodium rocksdb pkg-config; fi
+  # force building instead of using from apt.
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
