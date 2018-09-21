@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option java_package = "com.exonum.binding.cryptocurrency.transactions";
-option java_outer_classname = "TxMessagesProtos";
+option java_outer_classname = "TxMessageProtos";
 
 message TransferTx {
   int64 seed = 1;

@@ -63,7 +63,7 @@ public final class JsonBinaryMessageConverter {
             GSON.fromJson(messageJson, messageType);
 
         CreateWalletTxData txParameters = message.getBody();
-        byte[] binaryBody = TxMessagesProtos.CreateWalletTx.newBuilder()
+        byte[] binaryBody = TxMessageProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(publicKeyToProtoBytes(txParameters.ownerPublicKey))
             .setInitialBalance(txParameters.initialBalance)
             .build()
@@ -77,7 +77,7 @@ public final class JsonBinaryMessageConverter {
         TransactionJsonMessage<TransferTxData> message = GSON.fromJson(messageJson, messageType);
 
         TransferTxData txParameters = message.getBody();
-        byte[] binaryBody = TxMessagesProtos.TransferTx.newBuilder()
+        byte[] binaryBody = TxMessageProtos.TransferTx.newBuilder()
             .setSeed(txParameters.seed)
             .setFromWallet(publicKeyToProtoBytes(txParameters.senderId))
             .setToWallet(publicKeyToProtoBytes(txParameters.recipientId))

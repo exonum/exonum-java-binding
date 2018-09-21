@@ -109,7 +109,7 @@ class TransferTxTest {
   private static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
                                                      PublicKey recipientId, long amount) {
     return newCryptocurrencyTransactionBuilder(TransferTx.ID)
-          .setBody(TxMessagesProtos.TransferTx.newBuilder()
+          .setBody(TxMessageProtos.TransferTx.newBuilder()
               .setSeed(seed)
               .setFromWallet(fromPublicKey(senderId))
               .setToWallet(fromPublicKey(recipientId))
