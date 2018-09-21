@@ -5,4 +5,4 @@
 ./run_all_tests.sh
 
 # Generate a coverage report.
-mvn jacoco:report coveralls:report
+mvn org.jacoco:jacoco-maven-plugin:report org.eluder.coveralls:coveralls-maven-plugin:report
