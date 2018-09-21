@@ -96,7 +96,7 @@ pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
     exception
 }
 
-/// Describes Java exception in a form of "Java ecception: EXCEPTION_NAME: EXCEPTION_DETAILS"
+/// Describes Java exception in a form of "Java exception: EXCEPTION_NAME: EXCEPTION_DETAILS"
 pub fn describe_java_exception(env: &JNIEnv, exception: JObject) -> String {
     assert!(!exception.is_null(), "No exception thrown.");
     let format = || {
