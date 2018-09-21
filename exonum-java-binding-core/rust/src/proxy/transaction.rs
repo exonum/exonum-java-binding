@@ -16,7 +16,6 @@ use storage::View;
 use utils::{
     check_error_on_exception, convert_to_string, describe_java_exception,
     get_and_clear_java_exception, get_exception_message, panic_on_exception, to_handle, unwrap_jni,
-    unwrap_jni_verbose,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
