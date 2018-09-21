@@ -48,6 +48,13 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
 ) -> TransactionProxy {
     let (java_tx_mock, raw) = executor
         .with_attached(|env| {
+            let msg = match error_message {
+                Some(err_msg) => {
+                    let msg = env.new_string(err_msg)?;
+                    JObject::from(msg)
+                }
+                None => JObject::null(),
+            };
             let java_tx_mock = env
                 .call_static_method(
                     NATIVE_FACADE_CLASS,
@@ -56,13 +63,7 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
                     &[
                         JValue::from(is_subclass),
                         JValue::from(error_code),
-                        match error_message {
-                            Some(err_msg) => {
-                                let msg = env.new_string(err_msg)?;
-                                JValue::from(JObject::from(msg))
-                            }
-                            None => JValue::Void,
-                        },
+                        JValue::from(msg),
                     ],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;

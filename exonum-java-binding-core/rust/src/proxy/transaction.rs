@@ -137,10 +137,7 @@ fn check_transaction_execution_result<T>(
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = unwrap_jni(get_exception_message(env, exception));
-            if !unwrap_jni_verbose(
-                env,
-                env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION),
-            ) {
+            if !unwrap_jni(env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION)) {
                 let panic_msg = describe_java_exception(env, exception);
                 panic!(panic_msg);
             }
