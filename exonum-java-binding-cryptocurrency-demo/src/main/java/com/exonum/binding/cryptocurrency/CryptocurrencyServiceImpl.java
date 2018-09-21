@@ -31,21 +31,29 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.transaction.Transaction;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-/** A cryptocurrency demo service. */
+/**
+ * A cryptocurrency demo service.
+ */
 public final class CryptocurrencyServiceImpl extends AbstractService
     implements CryptocurrencyService {
 
-  /** A cryptographic function for signing transaction messages of this service. */
+  /**
+   * A cryptographic function for signing transaction messages of this service.
+   */
   public static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
-  @Nullable private Node node;
+  @Nullable
+  private Node node;
 
   @Inject
   public CryptocurrencyServiceImpl(TransactionConverter transactionConverter) {
@@ -94,6 +102,23 @@ public final class CryptocurrencyServiceImpl extends AbstractService
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
+    });
+  }
+
+  @Override
+  public List<HistoryEntity> getWalletHistory(PublicKey ownerKey) {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot(view -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      ListIndex<HistoryEntity> history = schema.walletHistory(ownerKey);
+
+      List<HistoryEntity> result = new ArrayList<>();
+      for (HistoryEntity tx : history) {
+        result.add(tx);
+      }
+
+      return result;
     });
   }
 

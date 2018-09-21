@@ -23,6 +23,7 @@ import com.exonum.binding.common.crypto.PublicKeySerializer;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -55,6 +56,20 @@ public final class CryptocurrencySchema implements Schema {
     String name = fullIndexName("wallets");
     return ProofMapIndexProxy.newInstance(name, view, PublicKeySerializer.INSTANCE,
         WalletSerializer.INSTANCE);
+  }
+
+  /**
+   * Returns transactions history of the wallet.
+   *
+   * @param key wallet address
+   * @return transactions history
+   */
+  //TODO: replace by HashCode instead of HistoryEntity when blockchain::Schema will be supported
+  public ListIndexProxy<HistoryEntity> walletHistory(PublicKey key) {
+    String name = fullIndexName("wallet_history");
+
+    return ListIndexProxy.newInGroupUnsafe(name, key.toBytes(), view,
+        HistoryEntitySerializer.INSTANCE);
   }
 
   private static String fullIndexName(String name) {

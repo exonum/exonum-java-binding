@@ -14,3 +14,11 @@ message CreateWalletTx {
   bytes ownerPublicKey = 1;
   int64 initialBalance = 2;
 }
+
+message HistoryEntity {
+  int64 seed = 1;
+  bytes walletFrom = 2;
+  bytes walletTo = 3;
+  int64 sum = 4;
+  bytes hash = 5;
+}

@@ -16,6 +16,9 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+
 public final class Wallet {
 
   private final long balance;
@@ -27,4 +30,29 @@ public final class Wallet {
   public long getBalance() {
     return balance;
   }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("balance", balance)
+        .toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Wallet wallet = (Wallet) o;
+    return balance == wallet.balance;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(balance);
+  }
+
 }
