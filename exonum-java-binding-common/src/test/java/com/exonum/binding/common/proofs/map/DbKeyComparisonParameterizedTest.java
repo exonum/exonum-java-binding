@@ -23,13 +23,15 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
+@Disabled
 public class DbKeyComparisonParameterizedTest {
 
   @Parameter(0)
@@ -45,14 +47,14 @@ public class DbKeyComparisonParameterizedTest {
   public String description;
 
   @Test
-  public void dbKeyCompareTest() {
+  void dbKeyCompareTest() {
     int comparisonResult = firstKey.compareTo(secondKey);
 
     assertThat(comparisonResult > 0, equalTo(expectedResult));
   }
 
   @Parameters(name = "{index} = {3}")
-  public static Collection<Object[]> testData() {
+  static Collection<Object[]> testData() {
     return Arrays.asList(
         // "A > B" reads "Key A is bigger than key B"
         parameters(

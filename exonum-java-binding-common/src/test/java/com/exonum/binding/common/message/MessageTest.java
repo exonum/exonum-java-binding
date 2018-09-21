@@ -19,24 +19,21 @@ package com.exonum.binding.common.message;
 import static com.exonum.binding.common.message.ByteBufferAllocator.allocateBuffer;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class MessageTest {
+class MessageTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void messageSize_emptyBody() {
+  void messageSize_emptyBody() {
     assertThat(Message.messageSize(0),
         equalTo(Message.HEADER_SIZE + Message.SIGNATURE_SIZE));
   }
 
   @Test
-  public void messageSize_nonEmptyBody() {
+  void messageSize_nonEmptyBody() {
     int bodySize = 8;
     int expected = bodySize + Message.HEADER_SIZE + Message.SIGNATURE_SIZE;
     assertThat(Message.messageSize(bodySize), equalTo(expected));
@@ -44,20 +41,22 @@ public class MessageTest {
 
   @Test
   @SuppressWarnings({"ResultOfMethodCallIgnored"})
-  public void messageSize_negSize() {
-    expectedException.expect(IllegalArgumentException.class);
-    Message.messageSize(-1);
+  void messageSize_negSize() {
+
+    assertThrows(IllegalArgumentException.class, () -> Message.messageSize(-1));
+
   }
 
   @Test
   @SuppressWarnings({"ResultOfMethodCallIgnored"})
-  public void messageSize_tooBigSize() {
-    expectedException.expect(IllegalArgumentException.class);
-    Message.messageSize(Integer.MAX_VALUE);
+  void messageSize_tooBigSize() {
+
+    assertThrows(IllegalArgumentException.class, () -> Message.messageSize(Integer.MAX_VALUE));
+
   }
 
   @Test
-  public void signatureOffset_emptyBody() {
+  void signatureOffset_emptyBody() {
     int bodySize = 0;
     Message m = new Message.Builder()
         .setBody(allocateBuffer(bodySize))
@@ -67,7 +66,7 @@ public class MessageTest {
   }
 
   @Test
-  public void signatureOffset_nonEmptyBody() {
+  void signatureOffset_nonEmptyBody() {
     int bodySize = 4;
     Message m = new Message.Builder()
         .setBody(allocateBuffer(bodySize))
@@ -77,7 +76,7 @@ public class MessageTest {
   }
 
   @Test
-  public void size_nonEmptyBody() {
+  void size_nonEmptyBody() {
     int bodySize = 4;
     Message m = new Message.Builder()
         .setBody(allocateBuffer(bodySize))
@@ -87,25 +86,27 @@ public class MessageTest {
   }
 
   @Test
-  public void builder_rejectsSmallSignature() {
+  void builder_rejectsSmallSignature() {
     Message.Builder builder = new Message.Builder();
 
     int signatureSize = 63;
     byte[] signature = new byte[signatureSize];
 
-    expectedException.expect(IllegalArgumentException.class);
-    builder.setSignature(signature);
+
+    assertThrows(IllegalArgumentException.class, () -> builder.setSignature(signature));
+
   }
 
   @Test
-  public void builder_rejectsBigSignature() {
+  void builder_rejectsBigSignature() {
     Message.Builder builder = new Message.Builder();
 
     int signatureSize = 65;
     byte[] signature = new byte[signatureSize];
 
-    expectedException.expect(IllegalArgumentException.class);
-    builder.setSignature(signature);
+
+    assertThrows(IllegalArgumentException.class, () -> builder.setSignature(signature));
+
   }
 
 }

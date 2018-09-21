@@ -29,50 +29,51 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class MessageReaderTest {
+class MessageReaderTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
-  public void wrapThrowsIfTooSmall() {
+  void wrapThrowsIfTooSmall() {
     ByteBuffer buf = allocateBuffer(2);
 
-    expectedException.expectMessage("The buffer size (2) is less than the minimal possible "
-        + "message size (74)");
-    expectedException.expect(IllegalArgumentException.class);
-    MessageReader.wrap(buf);
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> MessageReader.wrap(buf));
+    assertEquals("The buffer size (2) is less than the minimal possible "
+        + "message size (74)", thrown.getMessage());
   }
 
   @Test
-  public void wrapThrowsIfTooSmall2() {
+  void wrapThrowsIfTooSmall2() {
     ByteBuffer buf = allocateBuffer(MIN_MESSAGE_BUFFER_SIZE - 1);
 
-    expectedException.expectMessage("The buffer size (73) is less than the minimal possible "
-        + "message size (74)");
-    expectedException.expect(IllegalArgumentException.class);
-    MessageReader.wrap(buf);
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> MessageReader.wrap(buf));
+    assertEquals("The buffer size (73) is less than the minimal possible "
+        + "message size (74)", thrown.getMessage());
   }
 
   @Test
-  public void wrapThrowsIfTooSmallWithSetMessageSize() {
+  void wrapThrowsIfTooSmallWithSetMessageSize() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE - 1);
 
-    expectedException.expectMessage("The buffer size (73) is less than the minimal possible "
-        + "message size (74)");
-    expectedException.expect(IllegalArgumentException.class);
-    MessageReader.wrap(buf);
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> MessageReader.wrap(buf));
+    assertEquals("The buffer size (73) is less than the minimal possible "
+        + "message size (74)", thrown.getMessage());
   }
 
   @Test
-  public void wrapsMinimalMessage() {
+  void wrapsMinimalMessage() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE);
 
     MessageReader m = MessageReader.wrap(buf);
@@ -81,7 +82,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapsWhenLimitNotEqualCapacity() {
+  void wrapsWhenLimitNotEqualCapacity() {
     ByteBuffer buf = allocateBuffer(2 * MIN_MESSAGE_BUFFER_SIZE)
         .putInt(PAYLOAD_LENGTH_OFFSET, MIN_MESSAGE_BUFFER_SIZE);
     buf.limit(MIN_MESSAGE_BUFFER_SIZE);
@@ -92,35 +93,37 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void wrapThrowsIfMessageSizeFieldGreaterThanActual() {
+  void wrapThrowsIfMessageSizeFieldGreaterThanActual() {
     int bufferSize = MIN_MESSAGE_BUFFER_SIZE;
     ByteBuffer buf = allocateBuffer(bufferSize);
     int messageSize = 2048;
     buf.putInt(PAYLOAD_LENGTH_OFFSET, messageSize);
 
-    expectedException.expectMessage("The size of the buffer (" + bufferSize
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> MessageReader.wrap(buf));
+    assertEquals("The size of the buffer (" + bufferSize
         + ") does not match the expected size specified in the message header (" + messageSize
-        + ")");
-    expectedException.expect(IllegalArgumentException.class);
-    MessageReader.wrap(buf);
+        + ")", thrown.getMessage());
   }
 
   @Test
-  public void wrapThrowsIfMessageSizeFieldLessThanActual() {
+  void wrapThrowsIfMessageSizeFieldLessThanActual() {
     int bufferSize = 2 * MIN_MESSAGE_BUFFER_SIZE;
     ByteBuffer buf = allocateBuffer(bufferSize);
     int messageSize = bufferSize - 1;
     buf.putInt(PAYLOAD_LENGTH_OFFSET, messageSize);
 
-    expectedException.expectMessage("The size of the buffer (" + bufferSize
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> MessageReader.wrap(buf));
+    assertEquals("The size of the buffer (" + bufferSize
         + ") does not match the expected size specified in the message header (" + messageSize
-        + ")");
-    expectedException.expect(IllegalArgumentException.class);
-    MessageReader.wrap(buf);
+        + ")", thrown.getMessage());
   }
 
   @Test
-  public void getNetworkId() {
+  void getNetworkId() {
     byte netId = 0x01;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .put(NET_ID_OFFSET, netId);
@@ -131,7 +134,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getVersion() {
+  void getVersion() {
     byte version = 0x02;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .put(VERSION_OFFSET, version);
@@ -142,7 +145,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getServiceId() {
+  void getServiceId() {
     short serviceId = 0x0BCD;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .putShort(SERVICE_ID_OFFSET, serviceId);
@@ -153,7 +156,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getMessageType() {
+  void getMessageType() {
     short messageType = 0x0BCD;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .putShort(MESSAGE_TYPE_OFFSET, messageType);
@@ -164,7 +167,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getBody_Empty() {
+  void getBody_Empty() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE);
     boolean directBuffer = buf.isDirect();
 
@@ -176,7 +179,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getBody_4Bytes() {
+  void getBody_4Bytes() {
     int bodySize = Integer.BYTES;
     int bodyValue = 0x12345678;
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE + bodySize)
@@ -191,7 +194,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getSignature() {
+  void getSignature() {
     byte[] signature = createPrefixed(bytes("Signature bytes"), SIGNATURE_SIZE);
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE);
     buf.position(MIN_MESSAGE_BUFFER_SIZE - SIGNATURE_SIZE);
@@ -204,7 +207,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void getMessage() {
+  void getMessage() {
     ByteBuffer buf = allocateMessageBuffer(MIN_MESSAGE_BUFFER_SIZE)
         .put(NET_ID_OFFSET, (byte) 0x02)
         .put(VERSION_OFFSET, (byte) 0x01)
@@ -217,7 +220,7 @@ public class MessageReaderTest {
   }
 
   @Test
-  public void size() {
+  void size() {
     int bufferSize = MIN_MESSAGE_BUFFER_SIZE;
     ByteBuffer buf = allocateMessageBuffer(bufferSize);
 

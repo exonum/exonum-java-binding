@@ -17,10 +17,12 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -32,15 +34,10 @@ import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ListProofValidatorTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class ListProofValidatorTest {
 
   private static final String V1 = "v1";
   private static final String V2 = "v2";
@@ -57,9 +54,9 @@ public class ListProofValidatorTest {
   private HashFunction hashFunction;
   private ListProofValidator<String> validator;
 
-  @Before
+  @BeforeEach
   @SuppressWarnings("unchecked")
-  public void setUp() {
+  void setUp() {
     hasher = mock(Hasher.class);
     when(hasher.putObject(any(), any())).thenReturn(hasher);
     // Return the root hash by default. Individual tests might override that behaviour.
@@ -73,20 +70,18 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void constructorRejectsZeroSize() {
-    expectedException.expect(IllegalArgumentException.class);
-    validator = createListProofValidator(0);
+  void constructorRejectsZeroSize() {
+    assertThrows(IllegalArgumentException.class, () -> validator = createListProofValidator(0));
   }
 
   @Test
-  public void constructorRejectsNegativeSize() {
-    expectedException.expect(IllegalArgumentException.class);
-    validator = createListProofValidator(-1);
+  void constructorRejectsNegativeSize() {
+    assertThrows(IllegalArgumentException.class, () -> validator = createListProofValidator(-1));
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void visit_SingletonListProof() {
+  void visit_SingletonListProof() {
     ListProof root = leafOf(V1);
     when(hashFunction.hashObject(eq(root), any(Funnel.class)))
         .thenReturn(ROOT_HASH);
@@ -100,7 +95,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_FullProof2elements() {
+  void visit_FullProof2elements() {
     ProofListElement left = leafOf(V1);
     when(hashFunction.hashBytes(bytesOf(V1))).thenReturn(H1);
 
@@ -124,7 +119,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_FullProof4elements() {
+  void visit_FullProof4elements() {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             leafOf(V1),
@@ -152,7 +147,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_FullProof2elementsHashMismatch() {
+  void visit_FullProof2elementsHashMismatch() {
     ProofListElement left = leafOf(V1);
     ProofListElement right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
@@ -165,14 +160,14 @@ public class ListProofValidatorTest {
 
     assertFalse(validator.isValid());
 
-    expectedException.expectMessage("hash mismatch: expected=" + ROOT_HASH
-        + ", actual=" + H3);
-    expectedException.expect(IllegalStateException.class);
-    validator.getElements();
+    IllegalStateException thrown = assertThrows(IllegalStateException.class,
+        () -> validator.getElements());
+    assertThat(thrown.getMessage(), containsString("hash mismatch: expected=" + ROOT_HASH
+        + ", actual=" + H3));
   }
 
   @Test
-  public void visit_IllegalProofOfSingletonTree() {
+  void visit_IllegalProofOfSingletonTree() {
     int listSize = 1;
 
     ProofListElement left = leafOf(V1);
@@ -188,7 +183,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_ProofLeftValue() {
+  void visit_ProofLeftValue() {
     int listSize = 2;
 
     ListProof left = leafOf(V1);
@@ -206,7 +201,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_ProofRightValue() {
+  void visit_ProofRightValue() {
     int listSize = 2;
 
     ListProof left = new HashNode(H1);
@@ -224,7 +219,7 @@ public class ListProofValidatorTest {
   }
 
   @Test
-  public void visit_InvalidBranchHashesAsChildren() {
+  void visit_InvalidBranchHashesAsChildren() {
     int listSize = 2;
 
     ListProof left = new HashNode(H1);
@@ -236,12 +231,11 @@ public class ListProofValidatorTest {
 
     assertFalse(validator.isValid());
 
-    expectedException.expect(IllegalStateException.class);
-    validator.getElements();
+    assertThrows(IllegalStateException.class, () -> validator.getElements());
   }
 
   @Test
-  public void visit_InvalidBranchLeftHashNoRight() {
+  void visit_InvalidBranchLeftHashNoRight() {
     int listSize = 2;
 
     ListProof left = new HashNode(H1);
@@ -252,13 +246,13 @@ public class ListProofValidatorTest {
 
     assertFalse(validator.isValid());
 
-    expectedException.expectMessage("the tree does not contain any value nodes");
-    expectedException.expect(IllegalStateException.class);
-    validator.getElements();
+    IllegalStateException thrown = assertThrows(IllegalStateException.class,
+        () -> validator.getElements());
+    assertThat(thrown.getMessage(), containsString("the tree does not contain any value nodes"));
   }
 
   @Test
-  public void visit_UnbalancedInTheRightSubTree() {
+  void visit_UnbalancedInTheRightSubTree() {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(leafOf(V1),
             new HashNode(H2)),
@@ -271,13 +265,13 @@ public class ListProofValidatorTest {
 
     assertFalse(validator.isValid());
 
-    expectedException.expectMessage("a value node appears at the wrong level");
-    expectedException.expect(IllegalStateException.class);
-    validator.getElements();
+    IllegalStateException thrown = assertThrows(IllegalStateException.class,
+        () -> validator.getElements());
+    assertThat(thrown.getMessage(), containsString("a value node appears at the wrong level"));
   }
 
   @Test
-  public void visit_UnbalancedInTheLeftSubTree() {
+  void visit_UnbalancedInTheLeftSubTree() {
     ListProofBranch root = new ListProofBranch(
         leafOf(V1), // <-- A value at the wrong depth.
         new ListProofBranch(leafOf(V2),
@@ -290,13 +284,13 @@ public class ListProofValidatorTest {
 
     assertFalse(validator.isValid());
 
-    expectedException.expectMessage("a value node appears at the wrong level");
-    expectedException.expect(IllegalStateException.class);
-    validator.getElements();
+    IllegalStateException thrown = assertThrows(IllegalStateException.class,
+        () -> validator.getElements());
+    assertThat(thrown.getMessage(), containsString("a value node appears at the wrong level"));
   }
 
   @Test
-  public void visit_UnbalancedLeafNodeTooDeep() {
+  void visit_UnbalancedLeafNodeTooDeep() {
     int depth = 4;
     ListProof root = generateLeftLeaningProofTree(depth);
 
@@ -308,9 +302,9 @@ public class ListProofValidatorTest {
 
     assertFalse(validator.isValid());
 
-    expectedException.expectMessage("a value node appears at the wrong level");
-    expectedException.expect(IllegalStateException.class);
-    validator.getElements();
+    IllegalStateException thrown = assertThrows(IllegalStateException.class,
+        () -> validator.getElements());
+    assertThat(thrown.getMessage(), containsString("a value node appears at the wrong level"));
   }
 
   private ListProofValidator<String> createListProofValidator(long numElements) {

@@ -31,6 +31,7 @@
 
 package com.exonum.binding.common.hash;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -135,11 +136,7 @@ public class FunnelsTest extends TestCase {
             }
           }
         };
-    try {
-      funnel.funnel(null, primitiveSink);
-      fail();
-    } catch (NullPointerException ok) {
-    }
+    assertThrows(NullPointerException.class, () -> funnel.funnel(null, primitiveSink));
   }
 
   public void testAsOutputStream() throws Exception {

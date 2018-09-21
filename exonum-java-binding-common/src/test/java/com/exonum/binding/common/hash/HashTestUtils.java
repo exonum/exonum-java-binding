@@ -33,6 +33,7 @@ package com.exonum.binding.common.hash;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.test.EqualsTester;
 import com.google.common.base.Charsets;
@@ -54,9 +55,12 @@ import org.junit.Assert;
  * @author Kurt Alfred Kluever
  */
 final class HashTestUtils {
-  private HashTestUtils() {}
+  private HashTestUtils() {
+  }
 
-  /** Converts a string, which should contain only ascii-representable characters, to a byte[]. */
+  /**
+   * Converts a string, which should contain only ascii-representable characters, to a byte[].
+   */
   static byte[] ascii(String string) {
     byte[] bytes = new byte[string.length()];
     for (int i = 0; i < string.length(); i++) {
@@ -234,7 +238,7 @@ final class HashTestUtils {
     PUT_STRING_LOW_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[] {randomLowSurrogate(random)});
+        String s = new String(new char[]{randomLowSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -243,7 +247,7 @@ final class HashTestUtils {
     PUT_STRING_HIGH_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[] {randomHighSurrogate(random)});
+        String s = new String(new char[]{randomHighSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -252,7 +256,7 @@ final class HashTestUtils {
     PUT_STRING_LOW_HIGH_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[] {randomLowSurrogate(random), randomHighSurrogate(random)});
+        String s = new String(new char[]{randomLowSurrogate(random), randomHighSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -261,7 +265,7 @@ final class HashTestUtils {
     PUT_STRING_HIGH_LOW_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[] {randomHighSurrogate(random), randomLowSurrogate(random)});
+        String s = new String(new char[]{randomHighSurrogate(random), randomLowSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -284,7 +288,7 @@ final class HashTestUtils {
    * most key spaces are ANYTHING BUT uniformly distributed. A bit(i) in the input is said to
    * 'affect' a bit(j) in the output if two inputs, identical but for bit(i), will differ at output
    * bit(j) about half the time
-   *
+   * <p>
    * <p>Funneling is pretty simple to detect. The key idea is to find example keys which
    * unequivocally demonstrate that funneling cannot be occurring. This is done bit-by-bit. For each
    * input bit(i) and output bit(j), two pairs of keys must be found with all bits identical except
@@ -339,7 +343,7 @@ final class HashTestUtils {
   /**
    * Test for avalanche. Avalanche means that output bits differ with roughly 1/2 probability on
    * different input keys. This test verifies that each possible 1-bit key delta achieves avalanche.
-   *
+   * <p>
    * <p>For more information: http://burtleburtle.net/bob/hash/avalanche.html
    */
   static void checkAvalanche(HashFunction function, int trials, double epsilon) {
@@ -378,7 +382,7 @@ final class HashTestUtils {
    * the output. For example, if f() is a block cipher and c is a characteristic, then f(x^c) =
    * f(x)^c with greater than expected probability. The test for funneling is merely a test for
    * 1-bit characteristics.
-   *
+   * <p>
    * <p>There is more general code provided by Bob Jenkins to test arbitrarily sized characteristics
    * using the magic of gaussian elimination: http://burtleburtle.net/bob/crypto/findingc.html.
    */
@@ -389,7 +393,9 @@ final class HashTestUtils {
     // get every one of (keyBits choose 2) deltas:
     for (int i = 0; i < keyBits; i++) {
       for (int j = 0; j < keyBits; j++) {
-        if (j <= i) continue;
+        if (j <= i) {
+          continue;
+        }
         int count = 0;
         int maxCount = 20; // the probability of error here is miniscule
         boolean diff = false;
@@ -442,7 +448,9 @@ final class HashTestUtils {
     int hashBits = function.bits();
     for (int bit1 = 0; bit1 < keyBits; bit1++) {
       for (int bit2 = 0; bit2 < keyBits; bit2++) {
-        if (bit2 <= bit1) continue;
+        if (bit2 <= bit1) {
+          continue;
+        }
         int delta = (1 << bit1) | (1 << bit2);
         int[] same = new int[hashBits];
         int[] diff = new int[hashBits];
@@ -547,21 +555,12 @@ final class HashTestUtils {
       HashCode unused = hashFunction.hashBytes(new byte[64], 0, 0);
     }
 
-    try {
-      hashFunction.hashBytes(new byte[128], -1, 128);
-      Assert.fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
-    try {
-      hashFunction.hashBytes(new byte[128], 64, 256 /* too long len */);
-      Assert.fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
-    try {
-      hashFunction.hashBytes(new byte[64], 0, -1);
-      Assert.fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
+    assertThrows(IndexOutOfBoundsException.class,
+        () -> hashFunction.hashBytes(new byte[128], -1, 128));
+    assertThrows(IndexOutOfBoundsException.class,
+        () -> hashFunction.hashBytes(new byte[128], 64, 256 /* too long len */));
+    assertThrows(IndexOutOfBoundsException.class,
+        () -> hashFunction.hashBytes(new byte[64], 0, -1));
   }
 
   static void assertIndependentHashers(HashFunction hashFunction) {

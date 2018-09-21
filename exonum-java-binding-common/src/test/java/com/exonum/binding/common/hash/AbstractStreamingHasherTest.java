@@ -32,6 +32,7 @@
 package com.exonum.binding.common.hash;
 
 import static com.google.common.base.Charsets.UTF_16LE;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashTestUtils.RandomHasherAction;
 import com.google.common.collect.Iterables;
@@ -128,21 +129,9 @@ public class AbstractStreamingHasherTest extends TestCase {
 
   public void testCorrectExceptions() {
     Sink sink = new Sink(4);
-    try {
-      sink.putBytes(new byte[8], -1, 4);
-      fail();
-    } catch (IndexOutOfBoundsException ok) {
-    }
-    try {
-      sink.putBytes(new byte[8], 0, 16);
-      fail();
-    } catch (IndexOutOfBoundsException ok) {
-    }
-    try {
-      sink.putBytes(new byte[8], 0, -1);
-      fail();
-    } catch (IndexOutOfBoundsException ok) {
-    }
+    assertThrows(IndexOutOfBoundsException.class, () -> sink.putBytes(new byte[8], -1, 4));
+    assertThrows(IndexOutOfBoundsException.class, () -> sink.putBytes(new byte[8], 0, 16));
+    assertThrows(IndexOutOfBoundsException.class, () -> sink.putBytes(new byte[8], 0, -1));
   }
 
   /**

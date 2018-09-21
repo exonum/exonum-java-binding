@@ -19,38 +19,34 @@ package com.exonum.binding.common.serialization;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked") // No type parameters for clarity
-public class CheckingSerializerDecoratorTest {
+class CheckingSerializerDecoratorTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  private Serializer delegateMock;
 
-  Serializer delegateMock;
+  private CheckingSerializerDecorator decorator;
 
-  CheckingSerializerDecorator decorator;
-
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     delegateMock = mock(Serializer.class);
     decorator = CheckingSerializerDecorator.from(delegateMock);
   }
 
   @Test
-  public void fromSelf() {
+  void fromSelf() {
     assertThat(CheckingSerializerDecorator.from(decorator), sameInstance(decorator));
   }
 
   @Test
-  public void toBytes() {
+  void toBytes() {
     Object value = new Object();
     byte[] valueBytes = new byte[0];
     when(delegateMock.toBytes(value)).thenReturn(valueBytes);
@@ -59,21 +55,19 @@ public class CheckingSerializerDecoratorTest {
   }
 
   @Test
-  public void toBytes_NullValue() {
-    expectNpe();
-    decorator.toBytes(null);
+  void toBytes_NullValue() {
+    assertThrows(NullPointerException.class, () -> decorator.toBytes(null));
   }
 
   @Test
-  public void toBytes_NullFromDelegate() {
+  void toBytes_NullFromDelegate() {
     when(delegateMock.toBytes(any())).thenReturn(null);
 
-    expectBrokenSerializerException();
-    decorator.toBytes(new Object());
+    assertThrows(IllegalStateException.class, () -> decorator.toBytes(new Object()));
   }
 
   @Test
-  public void fromBytes() {
+  void fromBytes() {
     Object value = new Object();
     byte[] valueBytes = new byte[0];
     when(delegateMock.fromBytes(valueBytes)).thenReturn(value);
@@ -82,25 +76,14 @@ public class CheckingSerializerDecoratorTest {
   }
 
   @Test
-  public void fromBytes_NullValue() {
-    expectNpe();
-    decorator.fromBytes(null);
+  void fromBytes_NullValue() {
+    assertThrows(NullPointerException.class, () -> decorator.toBytes(null));
   }
 
   @Test
-  public void fromBytes_NullFromDelegate() {
+  void fromBytes_NullFromDelegate() {
     when(delegateMock.fromBytes(any())).thenReturn(null);
 
-    expectBrokenSerializerException();
-    decorator.fromBytes(new byte[0]);
-  }
-
-  private void expectBrokenSerializerException() {
-    expectedException.expectMessage("Broken serializer");
-    expectedException.expect(IllegalStateException.class);
-  }
-
-  private void expectNpe() {
-    expectedException.expect(NullPointerException.class);
+    assertThrows(IllegalStateException.class, () -> decorator.fromBytes(new byte[0]));
   }
 }

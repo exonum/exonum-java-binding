@@ -31,6 +31,8 @@
 
 package com.exonum.binding.common.hash;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -75,11 +77,7 @@ public class MessageDigestHashFunctionTest extends TestCase {
         sha256.putString("The quick brown fox jumps over the lazy dog", Charsets.UTF_8)
             .hash()
             .toString());
-    try {
-      sha256.putInt(42);
-      fail();
-    } catch (IllegalStateException expected) {
-    }
+    assertThrows(IllegalStateException.class, () -> sha256.putInt(42));
   }
 
   public void testHashTwice() {
@@ -90,11 +88,7 @@ public class MessageDigestHashFunctionTest extends TestCase {
         sha256.putString("The quick brown fox jumps over the lazy dog", Charsets.UTF_8)
             .hash()
             .toString());
-    try {
-      sha256.hash();
-      fail();
-    } catch (IllegalStateException expected) {
-    }
+    assertThrows(IllegalStateException.class, () -> sha256.hash());
   }
 
   public void testToString() {
@@ -112,12 +106,10 @@ public class MessageDigestHashFunctionTest extends TestCase {
             HashCode.fromBytes(Arrays.copyOf(digest.digest(input), bytes)),
             new MessageDigestHashFunction(algorithmName, bytes, algorithmName).hashBytes(input));
       }
-      try {
+      assertThrows(IllegalArgumentException.class, () -> {
         int maxSize = digest.getDigestLength();
         new MessageDigestHashFunction(algorithmName, maxSize + 1, algorithmName);
-        fail();
-      } catch (IllegalArgumentException expected) {
-      }
+      });
     } catch (NoSuchAlgorithmException nsae) {
       throw new AssertionError(nsae);
     }

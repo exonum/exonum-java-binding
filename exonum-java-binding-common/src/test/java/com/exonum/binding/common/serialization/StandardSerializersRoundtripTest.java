@@ -6,12 +6,12 @@ import static org.junit.Assert.assertThat;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class StandardSerializersRoundtripTest {
+class StandardSerializersRoundtripTest {
 
   @Test
-  public void roundtripLongTest() {
+  void roundtripLongTest() {
     List<Long> valuesToTest = ImmutableList.of(
         Long.MIN_VALUE,
         0L,
@@ -21,7 +21,7 @@ public class StandardSerializersRoundtripTest {
   }
 
   @Test
-  public void roundtripStringTest() {
+  void roundtripStringTest() {
     List<String> valuesToTest = ImmutableList.of(
         "",
         "a",
@@ -35,7 +35,7 @@ public class StandardSerializersRoundtripTest {
   }
 
   @Test
-  public void roundtripHashCodeTest() {
+  void roundtripHashCodeTest() {
     List<HashCode> valuesToTest = ImmutableList.of(
         HashCode.fromInt(0x89abcdef),
         HashCode.fromInt(0x13579bdf),
@@ -45,7 +45,9 @@ public class StandardSerializersRoundtripTest {
     valuesToTest.forEach(v -> roundTripTest(v, StandardSerializers.hash()));
   }
 
-  /** Performs a round trip test: ObjectT -> Binary -> ObjectT. */
+  /**
+   * Performs a round trip test: ObjectT -> Binary -> ObjectT.
+   */
   private static <ObjectT, SerializerT extends Serializer<ObjectT>> void roundTripTest(
       ObjectT expected, SerializerT serializer) {
     byte[] bytes = serializer.toBytes(expected);

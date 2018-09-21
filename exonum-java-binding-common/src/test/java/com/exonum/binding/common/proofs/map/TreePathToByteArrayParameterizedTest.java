@@ -24,14 +24,16 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
+@Disabled
 public class TreePathToByteArrayParameterizedTest {
 
   @Parameter(0)
@@ -45,18 +47,18 @@ public class TreePathToByteArrayParameterizedTest {
 
   private TreePath path;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     path = new TreePath(BitSet.valueOf(pathBytes), pathLength);
   }
 
   @Test
-  public void toByteArray() {
+  void toByteArray() {
     assertThat(path.toByteArray(), equalTo(pathBytes));
   }
 
   @Parameters(name = "{index} = {2}")
-  public static Collection<Object[]> testData() {
+  static Collection<Object[]> testData() {
     return Arrays.asList(
         // "A <- B" reads "A is a prefix of B"
         // "!P" reads "not P"

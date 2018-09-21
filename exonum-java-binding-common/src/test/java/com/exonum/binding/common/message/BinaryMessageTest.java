@@ -35,9 +35,9 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.test.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class BinaryMessageTest {
+class BinaryMessageTest {
 
   private static final Message MESSAGE_TEMPLATE = new Message.Builder()
       .setNetworkId((byte) 0x01)
@@ -49,7 +49,7 @@ public class BinaryMessageTest {
       .build();
 
   @Test
-  public void getMessageNoSignature() {
+  void getMessageNoSignature() {
     BinaryMessage message = new Message.Builder()
         .setNetworkId((byte) 0x01)
         .setVersion((byte) 0x02)
@@ -64,7 +64,7 @@ public class BinaryMessageTest {
   }
 
   @Test
-  public void hash() {
+  void hash() {
     BinaryMessage message = new Message.Builder()
         .mergeFrom(MESSAGE_TEMPLATE)
         .buildRaw();
@@ -75,7 +75,7 @@ public class BinaryMessageTest {
   }
 
   @Test
-  public void verifyValid() {
+  void verifyValid() {
     BinaryMessage message = new Message.Builder()
         .mergeFrom(MESSAGE_TEMPLATE)
         .buildRaw();
@@ -89,7 +89,7 @@ public class BinaryMessageTest {
   }
 
   @Test
-  public void verifyInvalid() {
+  void verifyInvalid() {
     BinaryMessage message = new Message.Builder()
         .mergeFrom(MESSAGE_TEMPLATE)
         .buildRaw();
@@ -103,7 +103,7 @@ public class BinaryMessageTest {
   }
 
   @Test
-  public void sign() {
+  void sign() {
     byte[] expectedSignature = Bytes.createPrefixed(Bytes.bytes(0x0A, 0x0B),
         Message.SIGNATURE_SIZE);
 
@@ -123,7 +123,7 @@ public class BinaryMessageTest {
   }
 
   @Test
-  public void signVerifyRoundtripIntegrationTest() {
+  void signVerifyRoundtripIntegrationTest() {
     CryptoFunction cf = CryptoFunctions.ed25519();
     KeyPair keyPair = cf.generateKeyPair();
 

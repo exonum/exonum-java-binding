@@ -23,15 +23,15 @@ import com.exonum.binding.common.message.Message.Builder;
 import com.exonum.binding.test.Bytes;
 import java.nio.ByteBuffer;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * A test of our patches to the auto-generated message builder.
  */
-public class Message_Builder2Test {
+class Message_Builder2Test {
 
   @Test
-  public void setBodyBytes() {
+  void setBodyBytes() {
     byte[] source = Bytes.fromHex("12ab");
 
     Message message = new Builder()
@@ -43,13 +43,13 @@ public class Message_Builder2Test {
   }
 
   @Test
-  public void valueEquals() {
+  void valueEquals() {
     EqualsVerifier.forClass(Message_Builder2.Value.class)
         .verify();
   }
 
   @Test
-  public void partialEquals() {
+  void partialEquals() {
     EqualsVerifier.forClass(Message_Builder2.Partial.class)
         .verify();
   }
