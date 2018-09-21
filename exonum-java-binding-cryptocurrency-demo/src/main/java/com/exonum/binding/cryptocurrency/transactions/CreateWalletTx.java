@@ -63,8 +63,8 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
     checkTransaction(message, ID);
 
     try {
-      TxMessagesProtos.CreateWalletTx messageBody =
-          TxMessagesProtos.CreateWalletTx.parseFrom(message.getBody());
+      TxMessageProtos.CreateWalletTx messageBody =
+          TxMessageProtos.CreateWalletTx.parseFrom(message.getBody());
 
       PublicKey ownerPublicKey = PublicKey.fromBytes(
           (messageBody.getOwnerPublicKey().toByteArray()));
@@ -72,7 +72,7 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
       return new CreateWalletTx(message, ownerPublicKey, initialBalance);
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
-          "Unable to instantiate TxMessagesProtos.CreateWalletTx instance from provided"
+          "Unable to instantiate TxMessageProtos.CreateWalletTx instance from provided"
               + " binary data", e);
     }
   }

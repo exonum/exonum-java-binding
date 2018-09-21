@@ -58,7 +58,7 @@ class JsonBinaryMessageConverterTest {
     assertThat(message.getSignature()).inHexadecimal()
         .isEqualTo(SIGNATURE);
 
-    TxMessagesProtos.CreateWalletTx txData = TxMessagesProtos.CreateWalletTx.parseFrom(
+    TxMessageProtos.CreateWalletTx txData = TxMessageProtos.CreateWalletTx.parseFrom(
         message.getBody());
 
     assertThat(txData.getOwnerPublicKey())
@@ -90,7 +90,7 @@ class JsonBinaryMessageConverterTest {
     assertThat(message.getSignature()).inHexadecimal()
         .isEqualTo(SIGNATURE);
 
-    TxMessagesProtos.TransferTx txData = TxMessagesProtos.TransferTx.parseFrom(
+    TxMessageProtos.TransferTx txData = TxMessageProtos.TransferTx.parseFrom(
         message.getBody());
 
     assertThat(txData.getSeed()).isEqualTo(1);
