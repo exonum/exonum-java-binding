@@ -322,7 +322,9 @@
               <!-- Generated files are excluded. -->
               <excludes>
                 <exclude>**/AutoValue_*</exclude>
+                <!-- Remove after merging https://github.com/exonum/exonum-java-binding/pull/490 -->
                 <exclude>**/TxMessagesProtos*</exclude>
+                <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
               </excludes>
             </configuration>
