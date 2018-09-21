@@ -309,6 +309,50 @@
       <properties>
         <checkstyle.severity>error</checkstyle.severity>
       </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.1</version>
+            <configuration>
+              <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+              <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+              <!-- Generated files are excluded. -->
+              <excludes>
+                <exclude>**/AutoValue_*</exclude>
+                <exclude>**/TxMessagesProtos*</exclude>
+                <exclude>**/WalletProtos*</exclude>
+              </excludes>
+            </configuration>
+            <executions>
+              <execution>
+                <id>default-prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>default-report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+            <version>4.3.0</version>
+            <configuration>
+              <repoToken>${env.COVERALLS_TOKEN}</repoToken>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <!-- Profile used during deploy:

@@ -47,5 +47,5 @@ then
     echo 'Rust checks are completed.'
 else
     cd "${TRAVIS_BUILD_DIR}"
-    ./run_all_tests.sh
+    ./run_all_tests_with_coverage.sh
 fi
