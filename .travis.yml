@@ -1,5 +1,10 @@
 language: java
+os:
+  - linux
 dist: trusty
+jdk:
+  - openjdk8
+  - openjdk10
 sudo: false
 
 # Build only the following branches/tags pushed to the repository:
@@ -30,22 +35,16 @@ env:
     - CHECK_RUST=true
     - CHECK_RUST=false
 
-# exclude rust code checks with jdk10
+# Exclude rust code checks with JDK 10
 matrix:
   include:
-  - name: "Linux JDK 8"
-    os: linux
-    jdk: openjdk8
-  - name: "Linux JDK 10"
-    os: linux
-    jdk: openjdk10
-  - name: "OSX JDK 8"
-    os: osx
-    osx_image: xcode9.3
+    - name: "OSX JDK 8 CHECK_RUST=false"
+      os: osx
+      # Add `xcode9.4` for JDK 10 OSX support
+      osx_image: xcode9.3
+      env: CHECK_RUST=false
   exclude:
     - jdk: openjdk10
-      env: CHECK_RUST=true
-    - os: osx
       env: CHECK_RUST=true
   # See ECR-1734
   allow_failures:
