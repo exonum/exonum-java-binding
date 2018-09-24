@@ -16,6 +16,7 @@
 
 package com.exonum.binding.common.serialization;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 @SuppressWarnings("unchecked") // No type parameters for clarity
 class CheckingSerializerDecoratorTest {
@@ -63,7 +65,7 @@ class CheckingSerializerDecoratorTest {
   void toBytes_NullFromDelegate() {
     when(delegateMock.toBytes(any())).thenReturn(null);
 
-    assertThrows(IllegalStateException.class, () -> decorator.toBytes(new Object()));
+    expectBrokenSerializerException(() -> decorator.toBytes(new Object()));
   }
 
   @Test
@@ -84,6 +86,11 @@ class CheckingSerializerDecoratorTest {
   void fromBytes_NullFromDelegate() {
     when(delegateMock.fromBytes(any())).thenReturn(null);
 
-    assertThrows(IllegalStateException.class, () -> decorator.fromBytes(new byte[0]));
+    expectBrokenSerializerException(() -> decorator.fromBytes(new byte[0]));
+  }
+
+  private void expectBrokenSerializerException(Executable function) {
+    IllegalStateException thrown = assertThrows(IllegalStateException.class, function);
+    assertThat(thrown.getMessage(), containsString("Broken serializer"));
   }
 }

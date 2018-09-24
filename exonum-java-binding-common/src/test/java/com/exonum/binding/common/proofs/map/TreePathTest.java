@@ -35,31 +35,23 @@ class TreePathTest {
 
   @Test
   void ctorFailsIfNegativeLength1() {
-
     assertThrows(IllegalArgumentException.class, () -> new TreePath(new BitSet(), -1, 1));
-
   }
 
   @Test
   void ctorFailsIfNegativeLengthAndMaxLength() {
-
     assertThrows(IllegalArgumentException.class, () -> new TreePath(new BitSet(), -1, -2));
-
   }
 
   @Test
   void ctorFailsIfInvalidLength() {
-
     assertThrows(IllegalArgumentException.class, () -> new TreePath(new BitSet(), 2, 1));
-
   }
 
   @Test
   void ctorFailsIfInvalidLengthOfBitSet() {
-
     assertThrows(IllegalArgumentException.class,
         () -> new TreePath(BitSet.valueOf(bytes(0x02)), 1));
-
   }
 
   @Test
@@ -84,9 +76,7 @@ class TreePathTest {
   void goLeftThrowsIfMaxLength0IsExceeded() {
     TreePath path = new TreePath(0);
 
-
     assertThrows(IllegalStateException.class, () -> path.goLeft());
-
   }
 
   @Test
@@ -94,18 +84,14 @@ class TreePathTest {
     TreePath path = new TreePath(1);
     path.goLeft();
 
-
     assertThrows(IllegalStateException.class, () -> path.goLeft());
-
   }
 
   @Test
   void goRightThrowsIfMaxLength0IsExceeded() {
     TreePath path = new TreePath(0);
 
-
     assertThrows(IllegalStateException.class, () -> path.goRight());
-
   }
 
   @Test
@@ -113,8 +99,6 @@ class TreePathTest {
     TreePath path = new TreePath(1);
     path.goRight();
 
-
     assertThrows(IllegalStateException.class, () -> path.goRight());
-
   }
 }

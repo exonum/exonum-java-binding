@@ -390,7 +390,6 @@ public class MapProofValidatorTest {
 
   /**
    * Tests a case when a key length increases for more than a single bit.
-   * <p>
    * <pre>
    *                        o
    * +0                 /        \
@@ -555,7 +554,7 @@ public class MapProofValidatorTest {
 
   /**
    * Creates a right-leaning map proof tree.
-   * <p>
+   *
    * <p>The tree below is an example of height 3:
    * <pre>
    *       o
@@ -569,9 +568,9 @@ public class MapProofValidatorTest {
    *
    * @param height a height of the tree. <em>May</em> exceed the maximum allowed height to create
    *               invalid inputs.
-   * @param value  a value to put into the value node
+   * @param value a value to put into the value node
    * @return a right-leaning map proof tree of the given height. At level equal to the height
-   * it has a value node; all other nodes are LeftMapProofBranch nodes.
+   *         it has a value node; all other nodes are LeftMapProofBranch nodes.
    */
   private static MapProof createProofTree(int height, String value) {
     checkArgument(height > 0);

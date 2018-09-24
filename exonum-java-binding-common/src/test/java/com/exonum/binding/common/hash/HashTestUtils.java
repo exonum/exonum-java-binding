@@ -288,7 +288,7 @@ final class HashTestUtils {
    * most key spaces are ANYTHING BUT uniformly distributed. A bit(i) in the input is said to
    * 'affect' a bit(j) in the output if two inputs, identical but for bit(i), will differ at output
    * bit(j) about half the time
-   * <p>
+   *
    * <p>Funneling is pretty simple to detect. The key idea is to find example keys which
    * unequivocally demonstrate that funneling cannot be occurring. This is done bit-by-bit. For each
    * input bit(i) and output bit(j), two pairs of keys must be found with all bits identical except
