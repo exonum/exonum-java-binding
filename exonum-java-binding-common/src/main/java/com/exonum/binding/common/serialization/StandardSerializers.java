@@ -19,6 +19,7 @@ package com.exonum.binding.common.serialization;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.google.protobuf.MessageLite;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
@@ -47,6 +48,17 @@ public final class StandardSerializers {
   /** Returns a serializer of hash codes. */
   public static Serializer<HashCode> hash() {
     return HashCodeSerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer for the given protobuf message type.
+   *
+   * @param messageType the class of a protobuf message
+   * @param <MessageT> the type of a message
+   */
+  public static <MessageT extends MessageLite> Serializer<MessageT> protobuf(
+      Class<MessageT> messageType) {
+    return new ProtobufSerializer<>(messageType);
   }
 
   enum LongSerializer implements Serializer<Long> {

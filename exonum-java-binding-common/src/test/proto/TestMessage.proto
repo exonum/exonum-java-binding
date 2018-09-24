@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.common.serialization";
+option java_outer_classname = "TestProtos";
+
+message Point {
+    sint32 x = 1;
+    sint32 y = 2;
+}

@@ -46,7 +46,7 @@ public class StandardSerializersRoundtripTest {
   }
 
   /** Performs a round trip test: ObjectT -> Binary -> ObjectT. */
-  private static <ObjectT, SerializerT extends Serializer<ObjectT>> void roundTripTest(
+  static <ObjectT, SerializerT extends Serializer<ObjectT>> void roundTripTest(
       ObjectT expected, SerializerT serializer) {
     byte[] bytes = serializer.toBytes(expected);
     ObjectT actual = serializer.fromBytes(bytes);
