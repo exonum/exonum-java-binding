@@ -47,5 +47,7 @@ then
     echo 'Rust checks are completed.'
 else
     cd "${TRAVIS_BUILD_DIR}"
-    ./run_all_tests_with_coverage.sh
+    # Linux builds currently skip some tests, so only OSX builds should update code coverage report.
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./run_all_tests.sh; fi
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./run_all_tests_with_coverage.sh; fi
 fi
