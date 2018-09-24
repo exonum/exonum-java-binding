@@ -90,7 +90,7 @@ class CreateWalletTxTest {
 
   private BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
     return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
-        .setBody(TxMessagesProtos.CreateWalletTx.newBuilder()
+        .setBody(TxMessageProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
             .setInitialBalance(initialBalance)
             .build()

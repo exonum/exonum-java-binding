@@ -86,6 +86,7 @@ pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JniResult<T>) -> T {
     })
 }
 
+/// Returns (and clears) any exception that is currently being thrown.
 pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
     let exception: JObject = unwrap_jni(env.exception_occurred()).into();
     // A null exception from #exception_occurred indicates that there is no pending exception.
@@ -95,7 +96,8 @@ pub fn get_and_clear_java_exception<'e>(env: &'e JNIEnv) -> JObject<'e> {
     exception
 }
 
-fn describe_java_exception(env: &JNIEnv, exception: JObject) -> String {
+/// Describes Java exception in a form of "Java exception: EXCEPTION_NAME: EXCEPTION_DETAILS"
+pub fn describe_java_exception(env: &JNIEnv, exception: JObject) -> String {
     assert!(!exception.is_null(), "No exception thrown.");
     let format = || {
         Ok(format!(

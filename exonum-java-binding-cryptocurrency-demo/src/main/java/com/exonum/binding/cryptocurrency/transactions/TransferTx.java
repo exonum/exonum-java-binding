@@ -62,8 +62,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
     checkTransaction(message, ID);
 
     try {
-      TxMessagesProtos.TransferTx messageBody =
-          TxMessagesProtos.TransferTx.parseFrom(message.getBody());
+      TxMessageProtos.TransferTx messageBody =
+          TxMessageProtos.TransferTx.parseFrom(message.getBody());
 
       long seed = messageBody.getSeed();
       PublicKey fromWallet = toPublicKey(messageBody.getFromWallet());
@@ -72,7 +72,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
       return new TransferTx(message, seed, fromWallet, toWallet, sum);
     } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Invalid TxMessagesProtos.TransferTx buffer", e);
+      throw new IllegalArgumentException("Invalid TxMessageProtos.TransferTx buffer", e);
     }
   }
 

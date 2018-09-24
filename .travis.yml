@@ -1,7 +1,6 @@
 language: java
 os:
   - linux
-  - osx
 dist: trusty
 jdk:
   - openjdk8
@@ -36,15 +35,18 @@ env:
     - CHECK_RUST=true
     - CHECK_RUST=false
 
-# exclude rust code checks with jdk10
 matrix:
+  include:
+    - name: "OSX JDK 8 CHECK_RUST=false"
+      os: osx
+      # Specify the image containing JDK 8, use `xcode9.4`
+      # in case JDK 10 is needed.
+      osx_image: xcode9.3
+      env: CHECK_RUST=false
+  # Exclude Rust code checks with JDK 10
   exclude:
     - jdk: openjdk10
       env: CHECK_RUST=true
-    - os: osx
-      env: CHECK_RUST=true
-    - os: osx
-      jdk: openjdk10
   # See ECR-1734
   allow_failures:
     - jdk: openjdk10

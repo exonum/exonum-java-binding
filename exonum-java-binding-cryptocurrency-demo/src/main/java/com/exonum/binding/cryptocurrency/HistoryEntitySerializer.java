@@ -21,7 +21,7 @@ import static com.google.protobuf.ByteString.copyFrom;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.cryptocurrency.transactions.TxMessagesProtos;
+import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -30,7 +30,7 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
 
   @Override
   public byte[] toBytes(HistoryEntity value) {
-    TxMessagesProtos.HistoryEntity entity = TxMessagesProtos.HistoryEntity.newBuilder()
+    TxMessageProtos.HistoryEntity entity = TxMessageProtos.HistoryEntity.newBuilder()
         .setSeed(value.getSeed())
         .setWalletFrom(keyToByte(value.getWalletFrom()))
         .setWalletTo(keyToByte(value.getWalletTo()))
@@ -44,7 +44,7 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
   @Override
   public HistoryEntity fromBytes(byte[] serializedValue) {
     try {
-      TxMessagesProtos.HistoryEntity entity = TxMessagesProtos.HistoryEntity
+      TxMessageProtos.HistoryEntity entity = TxMessageProtos.HistoryEntity
           .parseFrom(serializedValue);
 
       return HistoryEntity.Builder.newBuilder()
@@ -56,7 +56,7 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
           .build();
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
-          "Unable to instantiate TxMessagesProtos.TransferTx instance from provided binary data",
+          "Unable to instantiate TxMessageProtos.TransferTx instance from provided binary data",
           e);
     }
   }
