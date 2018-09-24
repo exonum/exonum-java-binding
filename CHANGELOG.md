@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
 - Flat map proofs support. (#250)
 - Wallet transactions history support to the cryptocurrency-demo. (#481)
+- A `Serializer` of any protobuf message — `StandardSerializers#protobuf`. (#493) 
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
