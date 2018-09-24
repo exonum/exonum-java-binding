@@ -103,6 +103,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>
       <version>0.2</version>

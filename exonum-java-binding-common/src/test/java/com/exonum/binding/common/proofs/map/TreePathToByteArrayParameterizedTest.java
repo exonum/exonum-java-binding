@@ -17,59 +17,34 @@
 package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.test.Bytes.bytes;
-import static com.exonum.binding.test.TestParameters.parameters;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
-import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collection;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
-@Disabled
-public class TreePathToByteArrayParameterizedTest {
+class TreePathToByteArrayParameterizedTest {
 
-  @Parameter(0)
-  public byte[] pathBytes;
-
-  @Parameter(1)
-  public int pathLength;
-
-  @Parameter(2)
-  public String description;
-
-  private TreePath path;
-
-  @BeforeEach
-  void setUp() {
-    path = new TreePath(BitSet.valueOf(pathBytes), pathLength);
-  }
-
-  @Test
-  void toByteArray() {
+  @ParameterizedTest(name = "{index} => pathBytes={0}, pathLength={1}, description={2}")
+  @MethodSource("testData")
+  void toByteArray(byte[] pathBytes, int pathLength, String description) {
+    TreePath path = new TreePath(BitSet.valueOf(pathBytes), pathLength);
     assertThat(path.toByteArray(), equalTo(pathBytes));
   }
 
-  @Parameters(name = "{index} = {2}")
-  static Collection<Object[]> testData() {
-    return Arrays.asList(
-        // "A <- B" reads "A is a prefix of B"
-        // "!P" reads "not P"
-        parameters(bytes(), 0, "[]"),
-
-        parameters(bytes(), 2, "[00]"),
-        parameters(bytes(0x0F), 4, "[1111]"),
-        parameters(bytes(0x0F), 5, "[1111 0]"),
-
-        parameters(bytes(0x00, 0xFF), 2 * Byte.SIZE, "[00 FF]"),
-        parameters(bytes(0x00, 0xFF, 0xEA, 0x01), 4 * Byte.SIZE, "[00 FF EA 01]")
+  private static Stream<Arguments> testData() {
+    // "A <- B" reads "A is a prefix of B"
+    // "!P" reads "not P"
+    return Stream.of(
+        Arguments.of(bytes(), 0, "[]"),
+        Arguments.of(bytes(), 2, "[00]"),
+        Arguments.of(bytes(0x0F), 4, "[1111]"),
+        Arguments.of(bytes(0x0F), 5, "[1111 0]"),
+        Arguments.of(bytes(0x00, 0xFF), 2 * Byte.SIZE, "[00 FF]"),
+        Arguments.of(bytes(0x00, 0xFF, 0xEA, 0x01), 4 * Byte.SIZE, "[00 FF EA 01]")
     );
   }
 }
