@@ -39,6 +39,41 @@ pub fn create_throwing_mock_transaction_proxy(
     TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
 }
 
+/// Creates `TransactionProxy` which throws TransactionExecutionException on the `execute` call.
+pub fn create_throwing_exec_exception_mock_transaction_proxy(
+    executor: MainExecutor,
+    is_subclass: bool,
+    error_code: i8,
+    error_message: Option<&str>,
+) -> TransactionProxy {
+    let (java_tx_mock, raw) = executor
+        .with_attached(|env| {
+            let msg = match error_message {
+                Some(err_msg) => {
+                    let msg = env.new_string(err_msg)?;
+                    JObject::from(msg)
+                }
+                None => JObject::null(),
+            };
+            let java_tx_mock = env
+                .call_static_method(
+                    NATIVE_FACADE_CLASS,
+                    "createThrowingExecutionExceptionTransaction",
+                    format!("(ZBLjava/lang/String;)L{};", TRANSACTION_ADAPTER_CLASS),
+                    &[
+                        JValue::from(is_subclass),
+                        JValue::from(error_code),
+                        JValue::from(msg),
+                    ],
+                )?.l()?;
+            let java_tx_mock = env.new_global_ref(java_tx_mock)?;
+            let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
+            Ok((java_tx_mock, raw))
+        }).unwrap();
+
+    TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
+}
+
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
 pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> TransactionProxy {
     let (java_tx_mock, raw) = create_mock_transaction(&executor, valid);

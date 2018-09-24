@@ -3,16 +3,23 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::mock::transaction::{
-    create_mock_transaction_proxy, create_throwing_mock_transaction_proxy, ENTRY_NAME, ENTRY_VALUE,
-    INFO_VALUE,
+use integration_tests::{
+    mock::transaction::{
+        create_mock_transaction_proxy, create_throwing_exec_exception_mock_transaction_proxy,
+        create_throwing_mock_transaction_proxy, ENTRY_NAME, ENTRY_VALUE, INFO_VALUE,
+    },
+    vm::create_vm_for_tests_with_fake_classes,
 };
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::exonum::blockchain::{Transaction, TransactionError};
-use java_bindings::exonum::encoding::serialize::json::ExonumJson;
-use java_bindings::exonum::storage::{Database, Entry, MemoryDB, Snapshot};
-use java_bindings::jni::JavaVM;
-use java_bindings::MainExecutor;
+
+use java_bindings::{
+    exonum::{
+        blockchain::{Transaction, TransactionError, TransactionErrorType},
+        encoding::serialize::json::ExonumJson,
+        storage::{Database, Entry, MemoryDB, Snapshot},
+    },
+    jni::JavaVM,
+    MainExecutor,
+};
 
 use std::sync::Arc;
 
@@ -84,20 +91,91 @@ fn execute_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-fn execute_should_return_err_if_java_exception_occurred() {
-    let invalid_tx =
+#[should_panic(expected = "Java exception: java.lang.ArithmeticException")]
+fn execute_should_panic_if_java_exception_occurred() {
+    let panic_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+    panic_tx.execute(&mut fork).unwrap();
+}
+
+#[test]
+fn execute_should_return_err_if_tx_exec_exception_occurred() {
+    let err_code: i8 = 1;
+    let err_message = "Expected exception";
+    let invalid_tx = create_throwing_exec_exception_mock_transaction_proxy(
+        EXECUTOR.clone(),
+        false,
+        err_code,
+        Some(err_message),
+    );
     let db = MemoryDB::new();
     let mut fork = db.fork();
     let err = invalid_tx
         .execute(&mut fork)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
-    assert!(
-        err.description()
-            .unwrap()
-            .starts_with("Java exception: java.lang.ArithmeticException",)
+    assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
+    assert!(err.description().unwrap().starts_with(err_message));
+}
+
+#[test]
+fn execute_should_return_err_if_tx_exec_exception_subclass_occurred() {
+    let err_code: i8 = 2;
+    let err_message = "Expected exception subclass";
+    let invalid_tx = create_throwing_exec_exception_mock_transaction_proxy(
+        EXECUTOR.clone(),
+        true,
+        err_code,
+        Some(err_message),
     );
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+    let err = invalid_tx
+        .execute(&mut fork)
+        .map_err(TransactionError::from)
+        .expect_err("This transaction should be executed with an error!");
+    assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
+    assert!(err.description().unwrap().starts_with(err_message));
+}
+
+#[test]
+fn execute_should_return_err_if_tx_exec_exception_occurred_no_message() {
+    let err_code: i8 = 3;
+    let invalid_tx = create_throwing_exec_exception_mock_transaction_proxy(
+        EXECUTOR.clone(),
+        false,
+        err_code,
+        None,
+    );
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+    let err = invalid_tx
+        .execute(&mut fork)
+        .map_err(TransactionError::from)
+        .expect_err("This transaction should be executed with an error!");
+    assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
+    assert!(err.description().is_none());
+}
+
+#[test]
+fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message() {
+    let err_code: i8 = 4;
+    let invalid_tx = create_throwing_exec_exception_mock_transaction_proxy(
+        EXECUTOR.clone(),
+        true,
+        err_code,
+        None,
+    );
+    let db = MemoryDB::new();
+    let mut fork = db.fork();
+    let err = invalid_tx
+        .execute(&mut fork)
+        .map_err(TransactionError::from)
+        .expect_err("This transaction should be executed with an error!");
+    assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
+    assert!(err.description().is_none());
 }
 
 #[test]

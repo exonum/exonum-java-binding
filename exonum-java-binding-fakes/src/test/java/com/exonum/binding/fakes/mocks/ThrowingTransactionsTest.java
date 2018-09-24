@@ -72,9 +72,23 @@ class ThrowingTransactionsTest {
   void createThrowingExecutionException() {
     byte errorCode = 1;
     String description = "Foo";
-    Transaction tx = ThrowingTransactions.createThrowingExecutionException(errorCode, description);
+    Transaction tx = ThrowingTransactions.createThrowingExecutionException(false,
+            errorCode, description);
 
     TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+        () -> tx.execute(mock(Fork.class)));
+    assertThat(actual.getErrorCode(), equalTo(errorCode));
+    assertThat(actual.getMessage(), equalTo(description));
+  }
+
+  @Test
+  void createThrowingExecutionExceptionSubclass() {
+    byte errorCode = 1;
+    String description = "Foo";
+    Transaction tx = ThrowingTransactions.createThrowingExecutionException(true,
+            errorCode, description);
+
+    TransactionExecutionException actual = assertThrows(TestTxExecException.class,
         () -> tx.execute(mock(Fork.class)));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));

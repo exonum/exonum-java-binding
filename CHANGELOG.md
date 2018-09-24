@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
 - Flat map proofs support. (#250)
+- Wallet transactions history support to the cryptocurrency-demo. (#481)
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
@@ -33,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Move `messages` package to `message` package in `exonum-java-binding-common` module. (#469)
   - Move `proofs` package to `com.exonum.binding.common` package. (#469)
   - Move `serialization` package to `com.exonum.binding.common` package. (#469)
+- Replace tree proof with flat proof in `ProofMapIndexProxy`. (#478)
 
 ### Removed
 - `Hashing#toHexString`. (#379)
