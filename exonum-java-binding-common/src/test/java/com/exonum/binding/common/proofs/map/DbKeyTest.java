@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.proofs.map.DbKey.Type;
 import com.google.common.primitives.UnsignedBytes;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -335,5 +336,23 @@ class DbKeyTest {
     KeyBitSet keyBits = dbKey.keyBits();
 
     assertThat(keyBits, equalTo(expectedKeyBits));
+  }
+
+  @Test
+  void verifyEquals() {
+    // Switch off the assertions in equals
+    setAssertionStatus(false);
+    try {
+      EqualsVerifier.forClass(DbKey.class)
+          .withOnlyTheseFields("rawDbKey")
+          .verify();
+    } finally {
+      setAssertionStatus(true);
+    }
+  }
+
+  private static void setAssertionStatus(boolean enabled) {
+    ClassLoader classLoader = DbKey.class.getClassLoader();
+    classLoader.setClassAssertionStatus(DbKey.class.getName(), enabled);
   }
 }

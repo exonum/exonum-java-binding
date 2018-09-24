@@ -18,7 +18,6 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Objects;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -248,7 +247,7 @@ public final class DbKey implements Comparable<DbKey> {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(rawDbKey, nodeType, keySlice, numSignificantBits);
+    return Arrays.hashCode(rawDbKey);
   }
 
   /**
