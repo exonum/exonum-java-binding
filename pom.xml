@@ -87,7 +87,7 @@
     <assertj.version>3.11.1</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
-    <guice.version>4.2.0</guice.version>
+    <guice.version>4.2.1</guice.version>
     <log4j.version>2.11.1</log4j.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
