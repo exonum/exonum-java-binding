@@ -31,6 +31,9 @@
 
 package com.exonum.binding.common.hash;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,7 +45,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 /**
@@ -50,28 +53,33 @@ import org.mockito.InOrder;
  *
  * @author Dimitris Andreou
  */
-public class FunnelsTest extends TestCase {
-  public void testForBytes() {
+class FunnelsTest {
+  @Test
+  void testForBytes() {
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
-    Funnels.byteArrayFunnel().funnel(new byte[] {4, 3, 2, 1}, primitiveSink);
-    verify(primitiveSink).putBytes(new byte[] {4, 3, 2, 1});
+    Funnels.byteArrayFunnel().funnel(new byte[]{4, 3, 2, 1}, primitiveSink);
+    verify(primitiveSink).putBytes(new byte[]{4, 3, 2, 1});
   }
 
-  public void testForBytes_null() {
+  @Test
+  void testForBytes_null() {
     assertNullsThrowException(Funnels.byteArrayFunnel());
   }
 
-  public void testForStrings() {
+  @Test
+  void testForStrings() {
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
     Funnels.unencodedCharsFunnel().funnel("test", primitiveSink);
     verify(primitiveSink).putUnencodedChars("test");
   }
 
-  public void testForStrings_null() {
+  @Test
+  void testForStrings_null() {
     assertNullsThrowException(Funnels.unencodedCharsFunnel());
   }
 
-  public void testForStringsCharset() {
+  @Test
+  void testForStringsCharset() {
     for (Charset charset : Charset.availableCharsets().values()) {
       PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
       Funnels.stringFunnel(charset).funnel("test", primitiveSink);
@@ -79,35 +87,41 @@ public class FunnelsTest extends TestCase {
     }
   }
 
-  public void testForStringsCharset_null() {
+  @Test
+  void testForStringsCharset_null() {
     for (Charset charset : Charset.availableCharsets().values()) {
       assertNullsThrowException(Funnels.stringFunnel(charset));
     }
   }
 
-  public void testForInts() {
+  @Test
+  void testForInts() {
     Integer value = 1234;
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
     Funnels.integerFunnel().funnel(value, primitiveSink);
     verify(primitiveSink).putInt(1234);
   }
 
-  public void testForInts_null() {
+  @Test
+  void testForInts_null() {
     assertNullsThrowException(Funnels.integerFunnel());
   }
 
-  public void testForLongs() {
+  @Test
+  void testForLongs() {
     Long value = 1234L;
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
     Funnels.longFunnel().funnel(value, primitiveSink);
     verify(primitiveSink).putLong(1234);
   }
 
-  public void testForLongs_null() {
+  @Test
+  void testForLongs_null() {
     assertNullsThrowException(Funnels.longFunnel());
   }
 
-  public void testSequential() {
+  @Test
+  void testSequential() {
     @SuppressWarnings("unchecked")
     Funnel<Object> elementFunnel = mock(Funnel.class);
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
@@ -120,6 +134,7 @@ public class FunnelsTest extends TestCase {
     inOrder.verify(elementFunnel).funnel("quux", primitiveSink);
   }
 
+  @Test
   private static void assertNullsThrowException(Funnel<?> funnel) {
     PrimitiveSink primitiveSink =
         new AbstractStreamingHasher(4, 4) {
@@ -135,14 +150,11 @@ public class FunnelsTest extends TestCase {
             }
           }
         };
-    try {
-      funnel.funnel(null, primitiveSink);
-      fail();
-    } catch (NullPointerException ok) {
-    }
+    assertThrows(NullPointerException.class, () -> funnel.funnel(null, primitiveSink));
   }
 
-  public void testAsOutputStream() throws Exception {
+  @Test
+  void testAsOutputStream() throws Exception {
     PrimitiveSink sink = mock(PrimitiveSink.class);
     OutputStream out = Funnels.asOutputStream(sink);
     byte[] bytes = {1, 2, 3, 4};
@@ -154,7 +166,8 @@ public class FunnelsTest extends TestCase {
     verify(sink).putBytes(bytes, 1, 2);
   }
 
-  public void testSerialization() {
+  @Test
+  void testSerialization() {
     assertSame(
         Funnels.byteArrayFunnel(), SerializableTester.reserialize(Funnels.byteArrayFunnel()));
     assertSame(Funnels.integerFunnel(), SerializableTester.reserialize(Funnels.integerFunnel()));
@@ -170,7 +183,8 @@ public class FunnelsTest extends TestCase {
         SerializableTester.reserialize(Funnels.stringFunnel(Charsets.US_ASCII)));
   }
 
-  public void testEquals() {
+  @Test
+  void testEquals() {
     new EqualsTester()
         .addEqualityGroup(Funnels.byteArrayFunnel())
         .addEqualityGroup(Funnels.integerFunnel())

@@ -38,7 +38,6 @@ import com.google.common.base.Equivalence;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.List;
-import junit.framework.AssertionFailedError;
 
 /**
  * Implementation helper for {@link EqualsTester} that tests for equivalence classes.
@@ -96,13 +95,13 @@ final class RelationshipTester<T> {
         }
         // check unrelated items in all other groups
         for (int unrelatedGroupNumber = 0;
-            unrelatedGroupNumber < groups.size();
-            unrelatedGroupNumber++) {
+             unrelatedGroupNumber < groups.size();
+             unrelatedGroupNumber++) {
           if (groupNumber != unrelatedGroupNumber) {
             ImmutableList<T> unrelatedGroup = groups.get(unrelatedGroupNumber);
             for (int unrelatedItemNumber = 0;
-                unrelatedItemNumber < unrelatedGroup.size();
-                unrelatedItemNumber++) {
+                 unrelatedItemNumber < unrelatedGroup.size();
+                 unrelatedItemNumber++) {
               assertUnrelated(groupNumber, itemNumber, unrelatedGroupNumber, unrelatedItemNumber);
             }
           }
@@ -150,7 +149,7 @@ final class RelationshipTester<T> {
 
   private void assertWithTemplate(String template, Item<T> item, Item<T> other, boolean condition) {
     if (!condition) {
-      throw new AssertionFailedError(
+      throw new AssertionError(
           template
               .replace("$RELATIONSHIP", relationshipName)
               .replace("$HASH", hashName)

@@ -18,31 +18,31 @@ package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ProofListElementTest {
+class ProofListElementTest {
 
   private static final byte[] E1 = bytes("element 1");
 
   private ProofListElement node;
 
   @Test
-  public void getElement() {
+  void getElement() {
     node = new ProofListElement(E1);
 
     assertThat(node.getElement(), equalTo(E1));
   }
 
   @Test
-  public void funnel() {
+  void funnel() {
     node = new ProofListElement(E1);
 
     Funnel<ProofListElement> funnel = ProofListElement.funnel();

@@ -19,7 +19,7 @@ package com.exonum.binding.common.message;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class ByteBufferAllocator {
+class ByteBufferAllocator {
 
   /**
    * Allocates a byte buffer of the given size, and sets its order to little-endian.
@@ -28,7 +28,7 @@ public class ByteBufferAllocator {
    *
    * @return a new byte buffer of the given size
    */
-  public static ByteBuffer allocateBuffer(int size) {
+  static ByteBuffer allocateBuffer(int size) {
     return ByteBuffer.allocate(size)
         .order(ByteOrder.LITTLE_ENDIAN);
   }

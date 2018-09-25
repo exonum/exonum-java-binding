@@ -30,56 +30,64 @@
 package com.exonum.binding.common.hash;
 
 import static com.google.common.base.Charsets.UTF_16LE;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for AbstractByteHasher.
  *
  * @author Colin Decker
  */
-public class AbstractByteHasherTest extends TestCase {
+class AbstractByteHasherTest {
 
-  public void testBytes() {
+  @Test
+  void testBytes() {
     TestHasher hasher = new TestHasher(); // byte order insignificant here
     byte[] expected = {1, 2, 3, 4, 5, 6, 7, 8};
     hasher.putByte((byte) 1);
-    hasher.putBytes(new byte[] {2, 3, 4, 5, 6});
+    hasher.putBytes(new byte[]{2, 3, 4, 5, 6});
     hasher.putByte((byte) 7);
-    hasher.putBytes(new byte[] {});
-    hasher.putBytes(new byte[] {8});
+    hasher.putBytes(new byte[]{});
+    hasher.putBytes(new byte[]{8});
     hasher.assertBytes(expected);
   }
 
-  public void testShort() {
+  @Test
+  void testShort() {
     TestHasher hasher = new TestHasher();
     hasher.putShort((short) 0x0201);
-    hasher.assertBytes(new byte[] {1, 2});
+    hasher.assertBytes(new byte[]{1, 2});
   }
 
-  public void testInt() {
+  @Test
+  void testInt() {
     TestHasher hasher = new TestHasher();
     hasher.putInt(0x04030201);
-    hasher.assertBytes(new byte[] {1, 2, 3, 4});
+    hasher.assertBytes(new byte[]{1, 2, 3, 4});
   }
 
-  public void testLong() {
+  @Test
+  void testLong() {
     TestHasher hasher = new TestHasher();
     hasher.putLong(0x0807060504030201L);
-    hasher.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
+    hasher.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
   }
 
-  public void testChar() {
+  @Test
+  void testChar() {
     TestHasher hasher = new TestHasher();
     hasher.putChar((char) 0x0201);
-    hasher.assertBytes(new byte[] {1, 2});
+    hasher.assertBytes(new byte[]{1, 2});
   }
 
-  public void testString() {
+  @Test
+  void testString() {
     Random random = new Random();
     for (int i = 0; i < 100; i++) {
       byte[] bytes = new byte[64];
@@ -94,35 +102,26 @@ public class AbstractByteHasherTest extends TestCase {
     }
   }
 
-  public void testFloat() {
+  @Test
+  void testFloat() {
     TestHasher hasher = new TestHasher();
     hasher.putFloat(Float.intBitsToFloat(0x04030201));
-    hasher.assertBytes(new byte[] {1, 2, 3, 4});
+    hasher.assertBytes(new byte[]{1, 2, 3, 4});
   }
 
-  public void testDouble() {
+  @Test
+  void testDouble() {
     TestHasher hasher = new TestHasher();
     hasher.putDouble(Double.longBitsToDouble(0x0807060504030201L));
-    hasher.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
+    hasher.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
   }
 
-  public void testCorrectExceptions() {
+  @Test
+  void testCorrectExceptions() {
     TestHasher hasher = new TestHasher();
-    try {
-      hasher.putBytes(new byte[8], -1, 4);
-      fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
-    try {
-      hasher.putBytes(new byte[8], 0, 16);
-      fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
-    try {
-      hasher.putBytes(new byte[8], 0, -1);
-      fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
+    assertThrows(IndexOutOfBoundsException.class, () -> hasher.putBytes(new byte[8], -1, 4));
+    assertThrows(IndexOutOfBoundsException.class, () -> hasher.putBytes(new byte[8], 0, 16));
+    assertThrows(IndexOutOfBoundsException.class, () -> hasher.putBytes(new byte[8], 0, -1));
   }
 
   @CanIgnoreReturnValue
