@@ -77,6 +77,11 @@ public final class DbKey implements Comparable<DbKey> {
    */
   public static final int DB_KEY_SIZE = KEY_SIZE + 2;
 
+  /**
+   * Position of the user key in a database key.
+   */
+  private static final int KEY_START_POSITION = 1;
+
   private final byte[] rawDbKey;
 
   private final Type nodeType;
@@ -99,10 +104,9 @@ public final class DbKey implements Comparable<DbKey> {
   private DbKey(byte[] rawDbKey) {
     checkArgument(rawDbKey.length == DB_KEY_SIZE,
         "Database key has illegal size: %s", rawDbKey.length);
-    this.rawDbKey = rawDbKey.clone();  // TODO: when you copy, and when not?
+    this.rawDbKey = rawDbKey.clone();
     nodeType = Type.from(rawDbKey[0]);
-    keySlice = new byte[KEY_SIZE];  // TODO: lazy copy?
-    System.arraycopy(rawDbKey, 1, keySlice, 0, KEY_SIZE);
+    keySlice = Arrays.copyOfRange(rawDbKey, KEY_START_POSITION, KEY_START_POSITION + KEY_SIZE);
     int numSignificantBits = Byte.toUnsignedInt(rawDbKey[DB_KEY_SIZE - 1]);
     switch (nodeType) {
       case BRANCH:
@@ -127,9 +131,9 @@ public final class DbKey implements Comparable<DbKey> {
     this.numSignificantBits = numSignificantBits;
     this.rawDbKey = new byte[DB_KEY_SIZE];
     rawDbKey[0] = nodeType.code;
+    System.arraycopy(keySlice, 0, rawDbKey, KEY_START_POSITION, KEY_SIZE);
     rawDbKey[DB_KEY_SIZE - 1] = (numSignificantBits == KEY_SIZE_BITS) ? 0
         : UnsignedBytes.checkedCast(numSignificantBits);
-    System.arraycopy(keySlice, 0, rawDbKey, 1, KEY_SIZE);
   }
 
   /**
@@ -214,10 +218,9 @@ public final class DbKey implements Comparable<DbKey> {
       return newBranchKey(this.keySlice, minPrefixSize);
     }
     int commonPrefixSize = Math.min(firstSetBitIndex, minPrefixSize);
-    byte[] resultingByteArray = this.keyBits().getKeyBits().get(0, firstSetBitIndex).toByteArray();
-    byte[] newArray = new byte[DbKey.KEY_SIZE];
-    System.arraycopy(resultingByteArray, 0, newArray, 0, resultingByteArray.length);
-    return newBranchKey(newArray, commonPrefixSize);
+    byte[] commonPrefix = this.keyBits().getKeyBits().get(0, firstSetBitIndex).toByteArray();
+    byte[] newKeySlice = Arrays.copyOf(commonPrefix, DbKey.KEY_SIZE);
+    return newBranchKey(newKeySlice, commonPrefixSize);
   }
 
   /**
@@ -236,13 +239,7 @@ public final class DbKey implements Comparable<DbKey> {
       return false;
     }
     DbKey dbKey = (DbKey) o;
-    boolean fullRawKeysEqual = Arrays.equals(rawDbKey, dbKey.rawDbKey);
-    if (fullRawKeysEqual) {
-      assert numSignificantBits == dbKey.numSignificantBits
-          && Arrays.equals(keySlice, dbKey.keySlice)
-          && nodeType == dbKey.nodeType;
-    }
-    return fullRawKeysEqual;
+    return Arrays.equals(rawDbKey, dbKey.rawDbKey);
   }
 
   @Override

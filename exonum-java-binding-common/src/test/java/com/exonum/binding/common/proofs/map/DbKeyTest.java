@@ -340,19 +340,8 @@ class DbKeyTest {
 
   @Test
   void verifyEquals() {
-    // Switch off the assertions in equals
-    setAssertionStatus(false);
-    try {
-      EqualsVerifier.forClass(DbKey.class)
-          .withOnlyTheseFields("rawDbKey")
-          .verify();
-    } finally {
-      setAssertionStatus(true);
-    }
-  }
-
-  private static void setAssertionStatus(boolean enabled) {
-    ClassLoader classLoader = DbKey.class.getClassLoader();
-    classLoader.setClassAssertionStatus(DbKey.class.getName(), enabled);
+    EqualsVerifier.forClass(DbKey.class)
+        .withOnlyTheseFields("rawDbKey")
+        .verify();
   }
 }
