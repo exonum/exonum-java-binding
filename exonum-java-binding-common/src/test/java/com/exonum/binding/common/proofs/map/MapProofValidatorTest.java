@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class MapProofValidatorTest {
+class MapProofValidatorTest {
 
 
   private static final String V1 = "v1";
