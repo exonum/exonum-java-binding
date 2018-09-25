@@ -18,9 +18,10 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.branchKeyFromPrefix;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -36,8 +37,8 @@ class DbKeyComparisonParameterizedTest {
     assertThat(comparisonResult > 0, equalTo(expectedResult));
   }
 
-  private static Stream<Arguments> testData() {
-    return Stream.of(
+  private static List<Arguments> testData() {
+    return Arrays.asList(
         // "A > B" reads "Key A is bigger than key B"
         Arguments.of(
             branchKeyFromPrefix("1100"),

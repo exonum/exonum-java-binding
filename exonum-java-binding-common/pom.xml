@@ -77,12 +77,6 @@
       <version>${lazysodium-java.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito2</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!--JUnit5-->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

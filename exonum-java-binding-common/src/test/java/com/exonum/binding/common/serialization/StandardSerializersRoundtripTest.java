@@ -1,7 +1,7 @@
 package com.exonum.binding.common.serialization;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
 import org.junit.jupiter.params.ParameterizedTest;

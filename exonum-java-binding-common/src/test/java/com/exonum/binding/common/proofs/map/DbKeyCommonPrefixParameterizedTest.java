@@ -20,9 +20,10 @@ import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.branchKeyFromP
 import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.leafKeyFromPrefix;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,10 +62,8 @@ class DbKeyCommonPrefixParameterizedTest {
     assertThat(commonPrefix, equalTo(firstKey));
   }
 
-  private static Stream<Arguments> testData() {
-    // "A <- B" reads "A is a prefix of B"
-    // "!P" reads "not P"
-    return Stream.of(
+  private static List<Arguments> testData() {
+    return Arrays.asList(
         // "A | B -> C" reads "C is a common prefix of A and B"
         // # Not a prefix:
         Arguments.of(

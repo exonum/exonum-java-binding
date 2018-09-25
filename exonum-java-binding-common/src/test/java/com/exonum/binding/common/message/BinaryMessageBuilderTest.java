@@ -22,7 +22,7 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;

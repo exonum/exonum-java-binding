@@ -31,6 +31,7 @@
 
 package com.exonum.binding.common.hash;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.base.Charsets;
@@ -39,14 +40,14 @@ import com.google.common.collect.ImmutableSet;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the MessageDigestHashFunction.
  *
  * @author Kurt Alfred Kluever
  */
-public class MessageDigestHashFunctionTest extends TestCase {
+public class MessageDigestHashFunctionTest {
   private static final ImmutableSet<String> INPUTS = ImmutableSet.of("", "Z", "foobar");
 
   // From "How Provider Implementations Are Requested and Supplied" from
@@ -61,7 +62,8 @@ public class MessageDigestHashFunctionTest extends TestCase {
           .put("SHA-512", Hashing.sha512())
           .build();
 
-  public void testHashing() {
+  @Test
+  void testHashing() {
     for (String stringToTest : INPUTS) {
       for (String algorithmToTest : ALGORITHMS.keySet()) {
         assertMessageDigestHashing(HashTestUtils.ascii(stringToTest), algorithmToTest);
@@ -69,7 +71,8 @@ public class MessageDigestHashFunctionTest extends TestCase {
     }
   }
 
-  public void testPutAfterHash() {
+  @Test
+  void testPutAfterHash() {
     Hasher sha256 = Hashing.sha256().newHasher();
 
     assertEquals(
@@ -80,7 +83,8 @@ public class MessageDigestHashFunctionTest extends TestCase {
     assertThrows(IllegalStateException.class, () -> sha256.putInt(42));
   }
 
-  public void testHashTwice() {
+  @Test
+  void testHashTwice() {
     Hasher sha256 = Hashing.sha256().newHasher();
 
     assertEquals(
@@ -91,7 +95,8 @@ public class MessageDigestHashFunctionTest extends TestCase {
     assertThrows(IllegalStateException.class, () -> sha256.hash());
   }
 
-  public void testToString() {
+  @Test
+  void testToString() {
     assertEquals("Hashing.sha256()", Hashing.sha256().toString());
     assertEquals("Hashing.sha512()", Hashing.sha512().toString());
   }

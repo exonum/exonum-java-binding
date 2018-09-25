@@ -31,8 +31,8 @@
 
 package com.exonum.binding.common.hash;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.test.EqualsTester;
@@ -46,7 +46,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * Various utilities for testing {@link HashFunction}s.
@@ -323,7 +323,7 @@ final class HashTestUtils {
         // check whether we've exceeded the probabilistically
         // likely number of trials to have proven no funneling
         if (count > maxCount) {
-          Assert.fail(
+          Assertions.fail(
               "input bit("
                   + i
                   + ") was found not to affect all "
@@ -343,7 +343,7 @@ final class HashTestUtils {
   /**
    * Test for avalanche. Avalanche means that output bits differ with roughly 1/2 probability on
    * different input keys. This test verifies that each possible 1-bit key delta achieves avalanche.
-   * <p>
+   *
    * <p>For more information: http://burtleburtle.net/bob/hash/avalanche.html
    */
   static void checkAvalanche(HashFunction function, int trials, double epsilon) {
@@ -372,7 +372,7 @@ final class HashTestUtils {
       // measure probability and assert it's within margin of error
       for (int j = 0; j < hashBits; j++) {
         double prob = (double) diff[j] / (double) (diff[j] + same[j]);
-        Assert.assertEquals(0.50d, prob, epsilon);
+        assertEquals(0.50d, prob, epsilon);
       }
     }
   }
@@ -382,7 +382,7 @@ final class HashTestUtils {
    * the output. For example, if f() is a block cipher and c is a characteristic, then f(x^c) =
    * f(x)^c with greater than expected probability. The test for funneling is merely a test for
    * 1-bit characteristics.
-   * <p>
+   *
    * <p>There is more general code provided by Bob Jenkins to test arbitrarily sized characteristics
    * using the magic of gaussian elimination: http://burtleburtle.net/bob/crypto/findingc.html.
    */
@@ -422,7 +422,7 @@ final class HashTestUtils {
           // is not a characteristic
           count++;
           if (count > maxCount) {
-            Assert.fail(
+            Assertions.fail(
                 "2-bit delta ("
                     + i
                     + ", "
@@ -473,7 +473,7 @@ final class HashTestUtils {
         // measure probability and assert it's within margin of error
         for (int j = 0; j < hashBits; j++) {
           double prob = (double) diff[j] / (double) (diff[j] + same[j]);
-          Assert.assertEquals(0.50d, prob, epsilon);
+          assertEquals(0.50d, prob, epsilon);
         }
       }
     }
@@ -491,12 +491,12 @@ final class HashTestUtils {
       int value = random.nextInt();
       HashCode hashcode1 = hashFunction.hashInt(value);
       HashCode hashcode2 = hashFunction.hashInt(value);
-      Assert.assertEquals(hashcode1, hashcode2); // idempotent
-      Assert.assertEquals(hashFunction.bits(), hashcode1.bits());
-      Assert.assertEquals(hashFunction.bits(), hashcode1.asBytes().length * 8);
+      assertEquals(hashcode1, hashcode2); // idempotent
+      assertEquals(hashFunction.bits(), hashcode1.bits());
+      assertEquals(hashFunction.bits(), hashcode1.asBytes().length * 8);
       hashcodes.add(hashcode1);
     }
-    Assert.assertTrue(hashcodes.size() > objects * 0.95); // quite relaxed test
+    Assertions.assertTrue(hashcodes.size() > objects * 0.95); // quite relaxed test
 
     assertHashBytesThrowsCorrectExceptions(hashFunction);
     assertIndependentHashers(hashFunction);
@@ -579,8 +579,8 @@ final class HashTestUtils {
       RandomHasherAction.pickAtRandom(random2).performAction(random2, ImmutableSet.of(hasher2));
     }
 
-    Assert.assertEquals(expected1, hasher1.hash());
-    Assert.assertEquals(expected2, hasher2.hash());
+    assertEquals(expected1, hasher1.hash());
+    assertEquals(expected2, hasher2.hash());
   }
 
   static HashCode randomHash(HashFunction hashFunction, Random random, int numActions) {

@@ -17,7 +17,7 @@
 package com.exonum.binding.common.message;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.message.Message.Builder;
 import com.exonum.binding.test.Bytes;

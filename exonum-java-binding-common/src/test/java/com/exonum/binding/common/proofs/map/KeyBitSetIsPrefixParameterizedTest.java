@@ -17,11 +17,12 @@
 package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.test.Bytes.bytes;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -65,8 +66,8 @@ class KeyBitSetIsPrefixParameterizedTest {
     other = new KeyBitSet(otherPathBytes, otherPathLength);
   }
 
-  private static Stream<Arguments> testData() {
-    return Stream.of(
+  private static List<Arguments> testData() {
+    return Arrays.asList(
         // "A <- B" reads "A is a prefix of B"
         // "!P" reads "not P"
         Arguments.of(bytes(), 0, bytes(), 0, true, "[] <- []"),

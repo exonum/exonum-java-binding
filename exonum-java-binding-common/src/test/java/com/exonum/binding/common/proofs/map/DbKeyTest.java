@@ -19,8 +19,8 @@ package com.exonum.binding.common.proofs.map;
 import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.branchDbKey;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.proofs.map.DbKey.Type;
