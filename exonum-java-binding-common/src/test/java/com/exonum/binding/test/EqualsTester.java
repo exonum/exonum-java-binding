@@ -32,6 +32,8 @@
 package com.exonum.binding.test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -131,10 +133,10 @@ public final class EqualsTester {
 
   private void testItems() {
     for (Object item : Iterables.concat(equalityGroups)) {
-      assertThat(item + " must not be Object#equals to null", !item.equals(null));
+      assertThat(item + " must not be Object#equals to null", item, not(equalTo(null)));
       assertThat(
           item + " must not be Object#equals to an arbitrary object of another class",
-          !item.equals(NotAnInstance.EQUAL_TO_NOTHING));
+          item, not(equalTo(NotAnInstance.EQUAL_TO_NOTHING)));
       assertThat(item + " must be Object#equals to itself", item, is(item));
       assertThat(
           "the Object#hashCode of " + item + " must be consistent",
