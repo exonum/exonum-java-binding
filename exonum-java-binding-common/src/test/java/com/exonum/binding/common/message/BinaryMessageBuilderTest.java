@@ -22,15 +22,15 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.ByteBuffer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class BinaryMessageBuilderTest {
+class BinaryMessageBuilderTest {
 
   @Test
-  public void buildFromMessage() {
+  void buildFromMessage() {
     int bodySize = Long.BYTES;
     Message message = createMessage(bodySize);
 
@@ -46,7 +46,7 @@ public class BinaryMessageBuilderTest {
   }
 
   @Test
-  public void buildFromBinaryMessage() {
+  void buildFromBinaryMessage() {
     int bodySize = Long.BYTES;
     Message srcMessage = createMessage(bodySize);
 

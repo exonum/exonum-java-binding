@@ -1,51 +1,42 @@
 package com.exonum.binding.common.serialization;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-public class StandardSerializersRoundtripTest {
+class StandardSerializersRoundtripTest {
 
-  @Test
-  public void roundtripLongTest() {
-    List<Long> valuesToTest = ImmutableList.of(
-        Long.MIN_VALUE,
-        0L,
-        Long.MAX_VALUE
-    );
-    valuesToTest.forEach(v -> roundTripTest(v, StandardSerializers.longs()));
+  @ParameterizedTest
+  @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE})
+  void roundtripLongTest(Long value) {
+    roundTripTest(value, StandardSerializers.longs());
   }
 
-  @Test
-  public void roundtripStringTest() {
-    List<String> valuesToTest = ImmutableList.of(
-        "",
-        "a",
-        "δ", // A two-byte character
-        "\uD83E\uDD37", // A four-byte character: a shrug emoji
-        "ab",
-        "cat",
-        "Iñtërnâtiônàlizætiøn"
-    );
-    valuesToTest.forEach(v -> roundTripTest(v, StandardSerializers.string()));
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "",
+      "a",
+      "δ", // A two-byte character
+      "\uD83E\uDD37", // A four-byte character: a shrug emoji
+      "ab",
+      "cat",
+      "Iñtërnâtiônàlizætiøn"})
+  void roundtripStringTest(String value) {
+    roundTripTest(value, StandardSerializers.string());
   }
 
-  @Test
-  public void roundtripHashCodeTest() {
-    List<HashCode> valuesToTest = ImmutableList.of(
-        HashCode.fromInt(0x89abcdef),
-        HashCode.fromInt(0x13579bdf),
-        HashCode.fromInt(0x0000abcd),
-        HashCode.fromInt(0x0000abcdef)
-    );
-    valuesToTest.forEach(v -> roundTripTest(v, StandardSerializers.hash()));
+  @ParameterizedTest
+  @ValueSource(ints = {0x89abcdef, 0x13579bdf, 0x0000abcd, 0x0000abcdef})
+  void roundtripHashCodeTest(int value) {
+    roundTripTest(HashCode.fromInt(value), StandardSerializers.hash());
   }
 
-  /** Performs a round trip test: ObjectT -> Binary -> ObjectT. */
+  /**
+   * Performs a round trip test: ObjectT -> Binary -> ObjectT.
+   */
   static <ObjectT, SerializerT extends Serializer<ObjectT>> void roundTripTest(
       ObjectT expected, SerializerT serializer) {
     byte[] bytes = serializer.toBytes(expected);

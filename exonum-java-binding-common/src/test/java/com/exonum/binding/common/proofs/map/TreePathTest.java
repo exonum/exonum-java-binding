@@ -17,52 +17,45 @@
 package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.test.Bytes.bytes;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.BitSet;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class TreePathTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class TreePathTest {
 
   @Test
-  public void emptyPath() {
+  void emptyPath() {
     TreePath path = new TreePath();
     assertThat(path, equalTo(new TreePath(new BitSet(), 0, Integer.MAX_VALUE)));
     assertThat(path.getLength(), equalTo(0));
   }
 
   @Test
-  public void ctorFailsIfNegativeLength1() {
-    expectedException.expect(IllegalArgumentException.class);
-    new TreePath(new BitSet(), -1, 1);
+  void ctorFailsIfNegativeLength1() {
+    assertThrows(IllegalArgumentException.class, () -> new TreePath(new BitSet(), -1, 1));
   }
 
   @Test
-  public void ctorFailsIfNegativeLengthAndMaxLength() {
-    expectedException.expect(IllegalArgumentException.class);
-    new TreePath(new BitSet(), -1, -2);
+  void ctorFailsIfNegativeLengthAndMaxLength() {
+    assertThrows(IllegalArgumentException.class, () -> new TreePath(new BitSet(), -1, -2));
   }
 
   @Test
-  public void ctorFailsIfInvalidLength() {
-    expectedException.expect(IllegalArgumentException.class);
-    new TreePath(new BitSet(), 2, 1);
+  void ctorFailsIfInvalidLength() {
+    assertThrows(IllegalArgumentException.class, () -> new TreePath(new BitSet(), 2, 1));
   }
 
   @Test
-  public void ctorFailsIfInvalidLengthOfBitSet() {
-    expectedException.expect(IllegalArgumentException.class);
-    new TreePath(BitSet.valueOf(bytes(0x02)), 1);
+  void ctorFailsIfInvalidLengthOfBitSet() {
+    assertThrows(IllegalArgumentException.class,
+        () -> new TreePath(BitSet.valueOf(bytes(0x02)), 1));
   }
 
   @Test
-  public void goLeft() {
+  void goLeft() {
     TreePath path = new TreePath();
     path.goLeft();
 
@@ -71,7 +64,7 @@ public class TreePathTest {
   }
 
   @Test
-  public void goRight() {
+  void goRight() {
     TreePath path = new TreePath();
     path.goRight();
 
@@ -80,36 +73,32 @@ public class TreePathTest {
   }
 
   @Test
-  public void goLeftThrowsIfMaxLength0IsExceeded() {
+  void goLeftThrowsIfMaxLength0IsExceeded() {
     TreePath path = new TreePath(0);
 
-    expectedException.expect(IllegalStateException.class);
-    path.goLeft();
+    assertThrows(IllegalStateException.class, () -> path.goLeft());
   }
 
   @Test
-  public void goLeftThrowsIfMaxLength1IsExceeded() {
+  void goLeftThrowsIfMaxLength1IsExceeded() {
     TreePath path = new TreePath(1);
     path.goLeft();
 
-    expectedException.expect(IllegalStateException.class);
-    path.goLeft();
+    assertThrows(IllegalStateException.class, () -> path.goLeft());
   }
 
   @Test
-  public void goRightThrowsIfMaxLength0IsExceeded() {
+  void goRightThrowsIfMaxLength0IsExceeded() {
     TreePath path = new TreePath(0);
 
-    expectedException.expect(IllegalStateException.class);
-    path.goRight();
+    assertThrows(IllegalStateException.class, () -> path.goRight());
   }
 
   @Test
-  public void goRightThrowsIfMaxLength1IsExceeded() {
+  void goRightThrowsIfMaxLength1IsExceeded() {
     TreePath path = new TreePath(1);
     path.goRight();
 
-    expectedException.expect(IllegalStateException.class);
-    path.goRight();
+    assertThrows(IllegalStateException.class, () -> path.goRight());
   }
 }

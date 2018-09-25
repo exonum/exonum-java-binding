@@ -31,6 +31,8 @@
 
 package com.exonum.binding.common.hash;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.exonum.binding.common.hash.HashTestUtils.RandomHasherAction;
 import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
@@ -38,15 +40,18 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-/** Tests for AbstractNonStreamingHashFunction. */
-public class AbstractNonStreamingHashFunctionTest extends TestCase {
+/**
+ * Tests for AbstractNonStreamingHashFunction.
+ */
+class AbstractNonStreamingHashFunctionTest {
   /**
    * Constructs two trivial HashFunctions (output := input), one streaming and one non-streaming,
    * and checks that their results are identical, no matter which newHasher version we used.
    */
-  public void testExhaustive() {
+  @Test
+  void testExhaustive() {
     List<Hasher> hashers =
         ImmutableList.of(
             new StreamingVersion().newHasher(),
@@ -66,29 +71,33 @@ public class AbstractNonStreamingHashFunctionTest extends TestCase {
     }
   }
 
-  public void testPutStringWithLowSurrogate() {
+  @Test
+  void testPutStringWithLowSurrogate() {
     // we pad because the dummy hash function we use to test this, merely copies the input into
     // the output, so the input must be at least 32 bits, since the output has to be that long
-    assertPutString(new char[] {'p', HashTestUtils.randomLowSurrogate(new Random())});
+    assertPutString(new char[]{'p', HashTestUtils.randomLowSurrogate(new Random())});
   }
 
-  public void testPutStringWithHighSurrogate() {
+  @Test
+  void testPutStringWithHighSurrogate() {
     // we pad because the dummy hash function we use to test this, merely copies the input into
     // the output, so the input must be at least 32 bits, since the output has to be that long
-    assertPutString(new char[] {'p', HashTestUtils.randomHighSurrogate(new Random())});
+    assertPutString(new char[]{'p', HashTestUtils.randomHighSurrogate(new Random())});
   }
 
-  public void testPutStringWithLowHighSurrogate() {
+  @Test
+  void testPutStringWithLowHighSurrogate() {
     assertPutString(
-        new char[] {
+        new char[]{
             HashTestUtils.randomLowSurrogate(new Random()),
             HashTestUtils.randomHighSurrogate(new Random())
         });
   }
 
-  public void testPutStringWithHighLowSurrogate() {
+  @Test
+  void testPutStringWithHighLowSurrogate() {
     assertPutString(
-        new char[] {
+        new char[]{
             HashTestUtils.randomHighSurrogate(new Random()),
             HashTestUtils.randomLowSurrogate(new Random())
         });
