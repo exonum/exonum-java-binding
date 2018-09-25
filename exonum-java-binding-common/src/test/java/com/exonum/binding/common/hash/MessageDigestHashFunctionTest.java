@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Kurt Alfred Kluever
  */
-public class MessageDigestHashFunctionTest {
+class MessageDigestHashFunctionTest {
   private static final ImmutableSet<String> INPUTS = ImmutableSet.of("", "Z", "foobar");
 
   // From "How Provider Implementations Are Requested and Supplied" from
