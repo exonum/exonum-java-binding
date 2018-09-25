@@ -19,60 +19,56 @@ package com.exonum.binding.common.serialization;
 import static com.exonum.binding.common.serialization.StandardSerializersRoundtripTest.roundTripTest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.TestProtos.Point;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import java.util.Collection;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public class ProtobufSerializerTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class ProtobufSerializerTest {
 
   private ProtobufSerializer<Point> serializer = new ProtobufSerializer<>(Point.class);
 
   @Test
-  public void toBytes() {
+  void toBytes() {
     Point p = createPoint(-1, 1);
 
     assertThat(serializer.toBytes(p), equalTo(p.toByteArray()));
   }
 
   @Test
-  public void toBytesNullMessage() {
-    expectedException.expect(NullPointerException.class);
-
-    serializer.toBytes(null);
+  void toBytesNullMessage() {
+    assertThrows(NullPointerException.class, () -> serializer.toBytes(null));
   }
 
   @Test
-  public void fromBytesNull() {
-    expectedException.expect(NullPointerException.class);
-
-    serializer.fromBytes(null);
+  void fromBytesNull() {
+    assertThrows(NullPointerException.class, () -> serializer.fromBytes(null));
   }
 
   @Test
-  public void fromBytesInvalidInput() {
+  void fromBytesInvalidInput() {
     byte[] invalidBuffer = new byte[32]; // Too big for a Point message
 
-    expectedException.expect(IllegalArgumentException.class);
-
-    serializer.fromBytes(invalidBuffer);
+    assertThrows(IllegalArgumentException.class, () -> serializer.fromBytes(invalidBuffer));
   }
 
-  @Test
-  public void roundtripTest() {
-    List<Point> valuesToTest = ImmutableList.of(
+  @ParameterizedTest
+  @MethodSource("testPoints")
+  void roundtripTest(Point p) {
+    roundTripTest(p, serializer);
+  }
+
+  private static Collection<Point> testPoints() {
+    return ImmutableList.of(
         createPoint(0, 0),
         createPoint(1, 1),
-        createPoint(-1, -1)
+        createPoint(-1, -1),
+        createPoint(Integer.MIN_VALUE, Integer.MAX_VALUE)
     );
-
-    valuesToTest.forEach(v -> roundTripTest(v, StandardSerializers.protobuf(Point.class)));
   }
 
   private static Point createPoint(int x, int y) {
