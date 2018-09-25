@@ -66,8 +66,8 @@ class ProtobufSerializer<MessageT extends MessageLite> implements Serializer<Mes
       output.checkNoSpaceLeft();
       return result;
     } catch (IOException e) {
-      throw new AssertionError("Failed to serialize " + value +
-          " to a byte array (should never happen)", e);
+      throw new AssertionError("Failed to serialize " + value
+          + " to a byte array (should never happen)", e);
     }
   }
 

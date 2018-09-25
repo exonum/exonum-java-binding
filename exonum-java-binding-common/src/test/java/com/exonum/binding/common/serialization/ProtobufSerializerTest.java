@@ -53,7 +53,8 @@ class ProtobufSerializerTest {
 
     ProtobufSerializer<Targets> serializer = new ProtobufSerializer<>(Targets.class);
 
-    assertThat("ProtobufSerializer is not deterministic:", serializer.toBytes(t1), equalTo(serializer.toBytes(t2)));
+    assertThat("ProtobufSerializer is not deterministic:",
+        serializer.toBytes(t1), equalTo(serializer.toBytes(t2)));
   }
 
   @Test
