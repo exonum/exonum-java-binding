@@ -22,8 +22,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.TestProtos.Point;
+import com.exonum.binding.common.serialization.TestProtos.Targets;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,6 +40,20 @@ class ProtobufSerializerTest {
     Point p = createPoint(-1, 1);
 
     assertThat(serializer.toBytes(p), equalTo(p.toByteArray()));
+  }
+
+  @Test
+  void toBytesIsDeterministic() {
+    Point p1 = createPoint(-1, -1);
+    Point p2 = createPoint(1, 1);
+    Point p3 = createPoint(Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+    Targets t1 = pointsAsTargetsInOrder(p1, p2, p3);
+    Targets t2 = pointsAsTargetsInOrder(p3, p2, p1);
+
+    ProtobufSerializer<Targets> serializer = new ProtobufSerializer<>(Targets.class);
+
+    assertThat("ProtobufSerializer is not deterministic:", serializer.toBytes(t1), equalTo(serializer.toBytes(t2)));
   }
 
   @Test
@@ -75,6 +92,18 @@ class ProtobufSerializerTest {
     return Point.newBuilder()
         .setX(x)
         .setY(y)
+        .build();
+  }
+
+  private static Targets pointsAsTargetsInOrder(Point... points) {
+    // Use LinkedHashMap to guarantee that iteration order matches insertion order.
+    Map<String, Point> orderedPoints = new LinkedHashMap<>(points.length);
+    for (Point p : points) {
+      orderedPoints.put(p.toString(), p);
+    }
+
+    return Targets.newBuilder()
+        .putAllTargets(orderedPoints)
         .build();
   }
 }

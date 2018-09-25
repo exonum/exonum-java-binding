@@ -19,6 +19,7 @@ package com.exonum.binding.common.serialization;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.MessageLite;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -51,7 +52,9 @@ public final class StandardSerializers {
   }
 
   /**
-   * Returns a serializer for the given protobuf message type.
+   * Returns a serializer for the given protocol buffer message type. The returned serializer
+   * uses {@linkplain CodedOutputStream#useDeterministicSerialization() deterministic}
+   * serialization mode.
    *
    * @param messageType the class of a protobuf message
    * @param <MessageT> the type of a message; must have a static
