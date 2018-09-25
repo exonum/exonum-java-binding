@@ -165,7 +165,7 @@
          <!-- Use newer version of the standard plugins by default. -->
          <plugin>
            <artifactId>maven-enforcer-plugin</artifactId>
-           <version>3.0.0-M1</version>
+           <version>3.0.0-M2</version>
          </plugin>
 
          <plugin>
@@ -180,12 +180,12 @@
 
          <plugin>
            <artifactId>maven-dependency-plugin</artifactId>
-           <version>3.0.2</version>
+           <version>3.1.1</version>
          </plugin>
 
          <plugin>
            <artifactId>maven-clean-plugin</artifactId>
-           <version>3.0.0</version>
+           <version>3.1.0</version>
          </plugin>
 
          <plugin>
