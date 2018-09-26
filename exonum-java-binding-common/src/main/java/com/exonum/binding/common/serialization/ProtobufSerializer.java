@@ -47,8 +47,8 @@ class ProtobufSerializer<MessageT extends MessageLite> implements Serializer<Mes
       messageParseFrom = lookup
           .findStatic(messageType, "parseFrom", MethodType.methodType(messageType, byte[].class));
     } catch (NoSuchMethodException | IllegalAccessException e) {
-      throw new IllegalArgumentException("Invalid message: cannot find static parseFrom method",
-          e);
+      throw new IllegalArgumentException("Invalid message: cannot find public static parseFrom "
+          + "method in " + messageType, e);
     }
   }
 

@@ -17,13 +17,17 @@
 package com.exonum.binding.common.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializersRoundtripTest.roundTripTest;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.serialization.TestProtos.Point;
 import com.exonum.binding.common.serialization.TestProtos.Targets;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.MessageLite;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +38,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 class ProtobufSerializerTest {
 
   private ProtobufSerializer<Point> serializer = new ProtobufSerializer<>(Point.class);
+
+  @Test
+  void constructorRejectsInvalidMessages() {
+    MessageLite m = mock(MessageLite.class); // Does not have a public static parseFrom.
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> new ProtobufSerializer<>(m.getClass()));
+
+    assertThat(e.getMessage(),
+        containsString("Invalid message: cannot find public static parseFrom"));
+
+    assertThat(e.getCause(), instanceOf(NoSuchMethodException.class));
+  }
 
   @Test
   void toBytes() {

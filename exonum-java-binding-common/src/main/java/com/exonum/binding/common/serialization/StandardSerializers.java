@@ -57,7 +57,7 @@ public final class StandardSerializers {
    * serialization mode.
    *
    * @param messageType the class of a protobuf message
-   * @param <MessageT> the type of a message; must have a static
+   * @param <MessageT> the type of a message; must have a public static
    *     {@code #parseFrom(byte[])} method — as any auto-generated protobuf message does
    * @throws IllegalArgumentException if {@code MessageT} does not contain the static
    *     factory method {@code #parseFrom(byte[])}
