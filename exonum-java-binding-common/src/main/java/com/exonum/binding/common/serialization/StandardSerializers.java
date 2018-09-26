@@ -64,7 +64,7 @@ public final class StandardSerializers {
    */
   public static <MessageT extends MessageLite> Serializer<MessageT> protobuf(
       Class<MessageT> messageType) {
-    return new ProtobufSerializer<>(messageType);
+    return new ProtobufReflectiveSerializer<>(messageType);
   }
 
   enum LongSerializer implements Serializer<Long> {

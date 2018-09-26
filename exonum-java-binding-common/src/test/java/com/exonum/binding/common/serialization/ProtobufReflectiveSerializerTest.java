@@ -35,15 +35,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class ProtobufSerializerTest {
+class ProtobufReflectiveSerializerTest {
 
-  private ProtobufSerializer<Point> serializer = new ProtobufSerializer<>(Point.class);
+  private final ProtobufReflectiveSerializer<Point> serializer =
+      new ProtobufReflectiveSerializer<>(Point.class);
 
   @Test
   void constructorRejectsInvalidMessages() {
-    MessageLite m = mock(MessageLite.class); // Does not have a public static parseFrom.
+    MessageLite m = mock(MessageLite.class); // Does not have a public static parseFrom method.
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> new ProtobufSerializer<>(m.getClass()));
+        () -> new ProtobufReflectiveSerializer<>(m.getClass()));
 
     assertThat(e.getMessage(),
         containsString("Invalid message: cannot find public static parseFrom"));
@@ -67,9 +68,10 @@ class ProtobufSerializerTest {
     Targets t1 = pointsAsTargetsInOrder(p1, p2, p3);
     Targets t2 = pointsAsTargetsInOrder(p3, p2, p1);
 
-    ProtobufSerializer<Targets> serializer = new ProtobufSerializer<>(Targets.class);
+    ProtobufReflectiveSerializer<Targets> serializer =
+        new ProtobufReflectiveSerializer<>(Targets.class);
 
-    assertThat("ProtobufSerializer is not deterministic:",
+    assertThat("The protobuf serializer is not deterministic:",
         serializer.toBytes(t1), equalTo(serializer.toBytes(t2)));
   }
 
