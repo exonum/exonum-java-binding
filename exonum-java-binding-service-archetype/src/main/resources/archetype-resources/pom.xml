@@ -18,8 +18,6 @@
         <hamcrest.version>1.3</hamcrest.version>
         <mockito-core.version>2.22.0</mockito-core.version>
         <exonum-bom.version>0.2</exonum-bom.version>
-        <!--This property is set by jacoco and used in the surefire config further down-->
-        <argLine></argLine>
     </properties>
 
     <dependencyManagement>
@@ -60,7 +58,6 @@
                 <version>2.22.0</version>
                 <configuration>
                     <argLine>
-                        ${argLine}
                         <!-- TODO: Replace with a path to the libjava_bindings.so to enable
                              integration tests that require a native library. -->
                         -Djava.library.path=${project.basedir}/exonum-java-binding-core/rust/target/debug
