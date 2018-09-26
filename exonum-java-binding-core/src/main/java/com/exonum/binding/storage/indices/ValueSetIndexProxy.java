@@ -24,6 +24,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -31,6 +32,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
@@ -66,7 +68,25 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   private final CheckingSerializerDecorator<E> serializer;
 
   /**
-   * Creates a new value set proxy.
+   * Creates a new value set storing protobuf messages.
+   *
+   * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
+   *             [a-zA-Z0-9_]
+   * @param view a database view. Must be valid. If a view is read-only,
+   *             "destructive" operations are not permitted.
+   * @param valueType the class of values-protobuf messages
+   * @param <E> the type of values in this set; must be a protobuf message
+   *     that has a public static {@code #parseFrom(byte[])} method
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name is empty
+   */
+  public static <E extends MessageLite> ValueSetIndexProxy<E> newInstance(
+      String name, View view, Class<E> valueType) {
+    return newInstance(name, view, StandardSerializers.protobuf(valueType));
+  }
+
+  /**
+   * Creates a new value set.
    *
    * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
    *             [a-zA-Z0-9_]
