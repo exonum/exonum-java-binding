@@ -1,27 +1,11 @@
-import * as Exonum from 'exonum-client'
 import axios from 'axios'
-import * as Protobuf from 'protobufjs/light'
 import bigInt from 'big-integer'
-import nacl from 'tweetnacl'
+import * as Exonum from 'exonum-client'
+import * as Protobuf from 'protobufjs/light'
 
 const Root = Protobuf.Root
 const Type = Protobuf.Type
 const Field = Protobuf.Field
-
-//  schema for creating thansaction with protobuf
-let CreateTransactionProtobuf = new Type("CreateTransaction").add(new Field("ownerPublicKey", 1, "bytes"))
-CreateTransactionProtobuf.add(new Field("initialBalance", 2, "int64"))
-
-// creating schema for transfer thansaction with protobuf
-let TransferTransactionProtobuf = new Type("TransferTransaction").add(new Field("seed", 1, "int64"))
-TransferTransactionProtobuf.add(new Field("senderId", 2, "bytes"))
-TransferTransactionProtobuf.add(new Field("recipientId", 3, "bytes"))
-TransferTransactionProtobuf.add(new Field("amount", 4, "int64"))
-
-// add types to protobuf root
-var root = new Root();
-root.define("CreateTransactionProtobuf").add(CreateTransactionProtobuf);
-root.define("TransferTransactionProtobuf").add(TransferTransactionProtobuf);
 
 const TX_URL = '/api/cryptocurrency-demo-service/submit-transaction'
 const ATTEMPTS = 10
@@ -44,17 +28,6 @@ const MessageHead = Exonum.newType({
     { name: 'payload', type: Exonum.Uint32 }
   ]
 })
-
-function getWallet(publicKey) {
-  return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
-    .then(response => response.data)
-    .then(data => {
-      return {
-        wallet: data,
-        transactions: []
-      }
-    })
-}
 
 function waitForAcceptance(publicKey, hash) {
   let attempt = ATTEMPTS
@@ -99,28 +72,38 @@ module.exports = {
       },  
 
       createWallet(keyPair, balance) {
+        // define schema for transaction with protobuf
+        const CreateTransactionProtobuf = new Type('CreateTransaction').add(new Field('ownerPublicKey', 1, 'bytes'))
+        CreateTransactionProtobuf.add(new Field('initialBalance', 2, 'int64'))
+
+        // initialize protobuf and add defined schema to protobuf root
+        const root = new Root()
+        root.define('CreateTransactionProtobuf').add(CreateTransactionProtobuf)
 
         // serialize and append message header
-        let buffer = createHeader(TX_WALLET_ID)
+        const buffer = createHeader(TX_WALLET_ID)
 
-        let data = {
+        // transaction data
+        const data = {
           ownerPublicKey: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
           initialBalance: balance
         }
 
-        // serialize and append message body
-        const body = CreateTransactionProtobuf.encode(data).finish();
+        // serialize data to protobuf
+        const body = CreateTransactionProtobuf.encode(data).finish()
 
+        // concat body to the end of buffer
         body.forEach(element => {
           buffer.push(element)
-        });
+        })
 
         // calculate payload and insert it into buffer
         Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, PAYLOD_SIZE_OFFSET)
 
-        // append signature
+        // calculate digital signature
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
+        // append transaction fields
         data.ownerPublicKey = keyPair.publicKey
 
         return axios.post(TX_URL, {
@@ -129,14 +112,24 @@ module.exports = {
          message_id: TX_WALLET_ID,
          signature: signature,
          body: data
-        })
+        }).then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
       transfer(keyPair, receiver, amountToTransfer, seed) {
-        
-        // serialize and append message header
-        let buffer = createHeader(TX_TRANSFER_ID)
+        // define schema for transaction with protobuf
+        const TransferTransactionProtobuf = new Type('TransferTransaction').add(new Field('seed', 1, 'int64'))
+        TransferTransactionProtobuf.add(new Field('senderId', 2, 'bytes'))
+        TransferTransactionProtobuf.add(new Field('recipientId', 3, 'bytes'))
+        TransferTransactionProtobuf.add(new Field('amount', 4, 'int64'))
 
+        // initialize protobuf and add defined schema to protobuf root
+        const root = new Root()
+        root.define('TransferTransactionProtobuf').add(TransferTransactionProtobuf)
+
+        // serialize and append message header
+        const buffer = createHeader(TX_TRANSFER_ID)
+
+        // transaction data
         const data = {
           seed: seed,
           senderId: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
@@ -144,20 +137,24 @@ module.exports = {
           amount: amountToTransfer
         }
 
-        const body = TransferTransactionProtobuf.encode(data).finish();
+        // serialize data to protobuf
+        const body = TransferTransactionProtobuf.encode(data).finish()
 
+        // concat body to the end of buffer
         body.forEach(element => {
           buffer.push(element)
-        });
+        })
 
         // calculate payload and insert it into buffer
         Exonum.Uint32.serialize(buffer.length + SIGNATURE_LENGTH, buffer, PAYLOD_SIZE_OFFSET)
 
-        // append signature
+        // calculate digital signature
         const signature = Exonum.sign(keyPair.secretKey, buffer)
 
+        // append transaction fields
         data.senderId = keyPair.publicKey
         data.recipientId = receiver
+
         return axios.post(TX_URL, {
           protocol_version: PROTOCOL_VERSION,
           service_id: SERVICE_ID,
@@ -167,7 +164,9 @@ module.exports = {
         }).then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
-      getWallet: getWallet,
+      getWallet (publicKey) {
+        return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`).then(response => { wallet: response.data })
+      },
 
       getBlocks(latest) {
         const suffix = !isNaN(latest) ? '&latest=' + latest : ''
