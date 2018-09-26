@@ -16,24 +16,19 @@
 
   <name>Exonum Java Binding: Bill of Materials</name>
 
-  <properties>
-    <exonum-core.version>0.2</exonum-core.version>
-    <exonum-java-binding-common.version>0.2</exonum-java-binding-common.version>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <!-- Exonum Java Binding artefacts. -->
       <dependency>
         <groupId>com.exonum.binding</groupId>
         <artifactId>exonum-java-binding-core</artifactId>
-        <version>${exonum-core.version}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.exonum.binding</groupId>
         <artifactId>exonum-java-binding-common</artifactId>
-        <version>${exonum-java-binding-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       
       <!-- Exported third-party artefacts the services depend upon. -->

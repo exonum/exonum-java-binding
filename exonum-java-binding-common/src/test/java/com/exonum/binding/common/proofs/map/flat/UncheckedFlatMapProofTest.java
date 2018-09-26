@@ -21,9 +21,10 @@ import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
@@ -32,11 +33,9 @@ import com.exonum.binding.common.proofs.map.DbKey;
 import com.exonum.binding.common.proofs.map.DbKeyTestUtils;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class UncheckedFlatMapProofTest {
+class UncheckedFlatMapProofTest {
 
   private static final byte[] FIRST_VALUE = "testValue".getBytes();
   private static final byte[] SECOND_VALUE = "anotherTestValue".getBytes();
@@ -44,11 +43,8 @@ public class UncheckedFlatMapProofTest {
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Test
-  public void mapProofShouldBeCorrect() {
+  void mapProofShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
@@ -71,7 +67,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithSeveralLeafsShouldBeCorrect() {
+  void mapProofWithSeveralLeafsShouldBeCorrect() {
     byte[] firstKey = DbKeyTestUtils.keyFromString("0011_0101");
     byte[] secondKey = DbKeyTestUtils.keyFromString("0011_0110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
@@ -109,12 +105,14 @@ public class UncheckedFlatMapProofTest {
     assertThat(checkedMapProof.get(fourthKey), equalTo(THIRD_VALUE));
 
     // If a user checks for key that wasn't required, an IllegalArgumentException is thrown
-    expectedException.expect(IllegalArgumentException.class);
-    checkedMapProof.containsKey("not required key".getBytes());
+
+    assertThrows(IllegalArgumentException.class,
+        () -> checkedMapProof.containsKey("not required key".getBytes()));
+
   }
 
   @Test
-  public void mapProofWithOneElementShouldBeCorrect() {
+  void mapProofWithOneElementShouldBeCorrect() {
     byte[] key = DbKeyTestUtils.keyFromString("01");
     byte[] value = FIRST_VALUE;
     MapEntry mapEntry = createMapEntry(key, value);
@@ -141,7 +139,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithEqualEntriesOrderShouldBeInvalid() {
+  void mapProofWithEqualEntriesOrderShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     DbKey secondKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     List<MapProofEntry> entries = Arrays.asList(
@@ -156,7 +154,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithoutEntriesShouldBeCorrect() {
+  void mapProofWithoutEntriesShouldBeCorrect() {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
             emptyList(), emptyList(), emptyList());
@@ -166,7 +164,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithAbsentKeyShouldBeCorrect() {
+  void mapProofWithAbsentKeyShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
@@ -182,7 +180,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithInvalidOrderShouldBeIncorrect() {
+  void mapProofWithInvalidOrderShouldBeIncorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("10");
     DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
 
@@ -197,7 +195,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithSingleBranchProofEntryShouldBeInvalid() {
+  void mapProofWithSingleBranchProofEntryShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
 
@@ -212,7 +210,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithSingleLeafProofEntryShouldBeCorrect() {
+  void mapProofWithSingleLeafProofEntryShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.leafKeyFromPrefix("1011111");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
 
@@ -227,7 +225,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithIncludedPrefixesShouldBeInvalid() {
+  void mapProofWithIncludedPrefixesShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
     DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("11");
     byte[] absentKey = DbKeyTestUtils.keyFromString("111111");
@@ -245,7 +243,7 @@ public class UncheckedFlatMapProofTest {
   }
 
   @Test
-  public void mapProofWithIncludedBranchPrefixesShouldBeInvalid() {
+  void mapProofWithIncludedBranchPrefixesShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("01");
     DbKey secondDbKey = DbKeyTestUtils.branchKeyFromPrefix("011");
     byte[] absentKey = DbKeyTestUtils.keyFromString("111111");
