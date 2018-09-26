@@ -4,7 +4,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.google.common.collect.Streams;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class StandardSerializersRoundtripTest {
@@ -29,19 +35,34 @@ class StandardSerializersRoundtripTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {0x89abcdef, 0x13579bdf, 0x0000abcd, 0x0000abcdef})
-  void roundtripHashCodeTest(int value) {
-    roundTripTest(HashCode.fromInt(value), StandardSerializers.hash());
+  @MethodSource("testHashes")
+  void roundtripHashCodeTest(HashCode hashCode) {
+    roundTripTest(hashCode, StandardSerializers.hash());
   }
 
   /**
    * Performs a round trip test: ObjectT -> Binary -> ObjectT.
    */
-  private static <ObjectT, SerializerT extends Serializer<ObjectT>> void roundTripTest(
+  static <ObjectT, SerializerT extends Serializer<ObjectT>> void roundTripTest(
       ObjectT expected, SerializerT serializer) {
     byte[] bytes = serializer.toBytes(expected);
     ObjectT actual = serializer.fromBytes(bytes);
 
     assertThat(actual, equalTo(expected));
+  }
+
+  private static Stream<HashCode> testHashes() {
+    // Hash codes of zeros of various length
+    Stream<HashCode> zeroHashCodes = IntStream.of(1, 2, 16, 32)
+        .mapToObj(byte[]::new)
+        .map(HashCode::fromBytes);
+
+    // Non-zero 32-byte SHA-256 hash codes
+    Stream<HashCode> sha256HashCodes = Stream.of(
+        "",
+        "a",
+        "hello"
+    ).map(s -> Hashing.sha256().hashString(s, StandardCharsets.UTF_8));
+    return Streams.concat(zeroHashCodes, sha256HashCodes);
   }
 }
