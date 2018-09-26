@@ -181,6 +181,10 @@ module.exports = {
       getTransaction(hash) {
         return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => {
           return response.data })
+      },
+
+      getHistory (publicKey){
+        return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}/history`).then(r => r.data)
       }
     }
   }
