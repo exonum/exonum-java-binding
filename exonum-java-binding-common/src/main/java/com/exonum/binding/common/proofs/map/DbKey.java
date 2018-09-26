@@ -29,9 +29,16 @@ import java.util.BitSet;
  * <ul>
  *   <li>Node type: a branch or a leaf</li>
  *   <li>The key to which the value is mapped for leaf nodes;
- *       the common prefix of keys in the left and right sub-trees</li>
+ *       the common prefix of keys in the left and right sub-trees for branch (= intermediate)
+ *       nodes</li>
  *   <li>The size of the common prefix in branch nodes.</li>
  * </ul>
+ *
+ * <p>The binary layout of the database key is the following:
+ * <pre>
+ *       Offset:   0           1 …                 32  33                   34
+ * Database key: | node type | 32-byte long user key | common prefix size |
+ * </pre>
  */
 public final class DbKey implements Comparable<DbKey> {
 
