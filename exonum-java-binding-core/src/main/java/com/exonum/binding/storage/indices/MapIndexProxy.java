@@ -95,6 +95,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
    * @param <V> the type of values in the map
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
                                                        Serializer<K> keySerializer,
@@ -126,6 +127,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
    * @return a new map proxy
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <K, V> MapIndexProxy<K, V> newInGroupUnsafe(String groupName,
                                                             byte[] mapId,

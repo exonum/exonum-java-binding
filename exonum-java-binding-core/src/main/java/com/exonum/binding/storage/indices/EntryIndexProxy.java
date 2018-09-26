@@ -83,6 +83,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    *
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
+   * @see StandardSerializers
    */
   public static <E> EntryIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {

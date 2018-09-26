@@ -89,6 +89,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * @param <E> the type of keys in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <E> KeySetIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
@@ -116,6 +117,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * @return a new key set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <E> KeySetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
                                                          View view, Serializer<E> serializer) {

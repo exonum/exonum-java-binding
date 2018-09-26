@@ -96,6 +96,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    * @param <E> the type of values in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <E> ValueSetIndexProxy<E> newInstance(String name, View view,
                                                       Serializer<E> serializer) {
@@ -123,6 +124,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    * @return a new value set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <E> ValueSetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
                                                            View view, Serializer<E> serializer) {

@@ -23,6 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -73,6 +74,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param <V> the type of values in the map
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstance(
       String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
@@ -104,6 +106,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @return a new map proxy
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInGroupUnsafe(String groupName,
                                                                  byte[] mapId,

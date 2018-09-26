@@ -82,6 +82,7 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    * @param <E> the type of elements in this list
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <E> ListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
@@ -109,6 +110,7 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    * @return a new list proxy
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <E> ListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
                                                        View view, Serializer<E> serializer) {
