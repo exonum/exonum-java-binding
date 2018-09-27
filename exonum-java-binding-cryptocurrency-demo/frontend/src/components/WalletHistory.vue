@@ -1,37 +1,37 @@
 <template>
-    <div class="card mt-5">
-        <div class="card-header">Funds history</div>
-        <div class="card-body">
-            <div class='table-responsive'>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Amount</th>
-                        <th>Transaction</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for='item in history'>
-                        <td v-bind:class="{'text-success':item.walletFrom === keyPair.publicKey}">
-                            {{item.walletFrom | slice}}
-                        </td>
-                        <td v-bind:class="{'text-success':item.walletTo === keyPair.publicKey}">
-                            {{item.walletTo | slice}}
-                        </td>
-                        <td>{{item.amount}}$</td>
-                        <td>
-                            <router-link :to="{ name: 'transaction', params: { hash: item.transactionHash } }">
-                                {{item.transactionHash | slice}}
-                            </router-link>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="card mt-5">
+    <div class="card-header">Funds history</div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>From</th>
+              <th>To</th>
+              <th>Amount</th>
+              <th>Transaction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in history" :key="item.seed">
+              <td class="{'text-success':item.walletFrom === keyPair.publicKey}">
+                {{ item.walletFrom | slice }}
+              </td>
+              <td class="{'text-success':item.walletTo === keyPair.publicKey}">
+                {{ item.walletTo | slice }}
+              </td>
+              <td>{{ item.amount }}$</td>
+              <td>
+                <router-link :to="{ name: 'transaction', params: { hash: item.transactionHash } }">
+                  {{ item.transactionHash | slice }}
+                </router-link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -64,7 +64,3 @@
     }
   }
 </script>
-
-<style scoped>
-
-</style>
