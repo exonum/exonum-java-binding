@@ -163,7 +163,8 @@
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
-          <argLine>-Djava.library.path=${build.nativeLibPath}
+          <argLine>${itCoverageAgent}
+                   -Djava.library.path=${build.nativeLibPath}
                    -Xcheck:jni
                    ${java.vm.assertionFlag}
                    -Xss1500k
@@ -171,6 +172,7 @@
         </configuration>
         <executions>
           <execution>
+            <id>integration-test</id>
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
