@@ -69,12 +69,12 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   @Override
   public CheckedMapProof check() {
-    ProofStatus orderCheckResult = orderCheck();
-    if (orderCheckResult != ProofStatus.CORRECT) {
+    MapProofStatus orderCheckResult = orderCheck();
+    if (orderCheckResult != MapProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
     if (prefixesIncluded()) {
-      return CheckedFlatMapProof.invalid(ProofStatus.EMBEDDED_PATH);
+      return CheckedFlatMapProof.invalid(MapProofStatus.EMBEDDED_PATH);
     }
     if (isEmptyProof()) {
       return checkEmptyProof();
@@ -91,28 +91,29 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    * <p>The keys must be in ascending order as defined by
    * the {@linkplain DbKey#compareTo(DbKey) comparator}; there must not be duplicates.
    *
-   * @return {@code ProofStatus.CORRECT} if every following key is greater than the previous
-   *         {@code ProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
-   *         {@code ProofStatus.DUPLICATE_PATH} if there are two equal keys
-   *         {@code ProofStatus.EMBEDDED_PATH} if one key is a prefix of another
+   * @return {@code MapProofStatus.CORRECT} if every following key is greater than the previous
+   *         {@code MapProofStatus.INVALID_ORDER} if any following key key is lesser than the
+   *         previous
+   *         {@code MapProofStatus.DUPLICATE_PATH} if there are two equal keys
+   *         {@code MapProofStatus.EMBEDDED_PATH} if one key is a prefix of another
    * @see DbKey#compareTo(DbKey)
    */
-  private ProofStatus orderCheck() {
+  private MapProofStatus orderCheck() {
     for (int i = 1; i < proof.size(); i++) {
       DbKey key = proof.get(i - 1).getDbKey();
       DbKey nextKey = proof.get(i).getDbKey();
       int comparisonResult = key.compareTo(nextKey);
       if (comparisonResult < 0) {
         if (key.isPrefixOf(nextKey)) {
-          return ProofStatus.EMBEDDED_PATH;
+          return MapProofStatus.EMBEDDED_PATH;
         }
       } else if (comparisonResult == 0) {
-        return ProofStatus.DUPLICATE_PATH;
+        return MapProofStatus.DUPLICATE_PATH;
       } else {
-        return ProofStatus.INVALID_ORDER;
+        return MapProofStatus.INVALID_ORDER;
       }
     }
-    return ProofStatus.CORRECT;
+    return MapProofStatus.CORRECT;
   }
 
   /**
@@ -156,7 +157,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       MapProofEntry entry = proof.get(0);
       DbKey.Type nodeType = entry.getDbKey().getNodeType();
       if (nodeType == Type.BRANCH) {
-        return CheckedFlatMapProof.invalid(ProofStatus.NON_TERMINAL_NODE);
+        return CheckedFlatMapProof.invalid(MapProofStatus.NON_TERMINAL_NODE);
       } else {
         HashCode rootHash = getSingleEntryRootHash(entry);
         return CheckedFlatMapProof.correct(rootHash, entries, missingKeys);

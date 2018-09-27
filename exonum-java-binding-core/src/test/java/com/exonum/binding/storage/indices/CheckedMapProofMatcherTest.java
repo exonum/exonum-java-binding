@@ -24,7 +24,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.flat.MapEntry;
-import com.exonum.binding.common.proofs.map.flat.ProofStatus;
+import com.exonum.binding.common.proofs.map.flat.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import org.hamcrest.Description;
@@ -42,7 +42,7 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_KEY, null);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
-        ProofStatus.DUPLICATE_PATH);
+        MapProofStatus.DUPLICATE_PATH);
 
     assertFalse(matcher.matchesSafely(proof));
   }
@@ -90,12 +90,12 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_KEY, null);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
-        ProofStatus.DUPLICATE_PATH);
+        MapProofStatus.DUPLICATE_PATH);
 
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
     assertThat(d.toString(), equalTo("was an invalid proof, status=<"
-        + ProofStatus.DUPLICATE_PATH + ">"));
+        + MapProofStatus.DUPLICATE_PATH + ">"));
   }
 }

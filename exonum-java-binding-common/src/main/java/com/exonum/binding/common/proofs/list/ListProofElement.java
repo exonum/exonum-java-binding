@@ -22,17 +22,17 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
  */
-public final class ProofListElement implements ListProof {
+public final class ListProofElement implements ListProof {
 
   private final byte[] element;
 
   /**
-   * Creates a new ProofListElement.
+   * Creates a new ListProofElement.
    *
    * @param element an element of the list
    * @throws NullPointerException if the element is null
    */
-  public ProofListElement(byte[] element) {
+  public ListProofElement(byte[] element) {
     this.element = element.clone();
   }
 
@@ -48,14 +48,14 @@ public final class ProofListElement implements ListProof {
     return element.clone();
   }
 
-  public static Funnel<ProofListElement> funnel() {
+  public static Funnel<ListProofElement> funnel() {
     return ElementFunnel.INSTANCE;
   }
 
-  enum ElementFunnel implements Funnel<ProofListElement> {
+  enum ElementFunnel implements Funnel<ListProofElement> {
     INSTANCE {
       @Override
-      public void funnel(ProofListElement from, PrimitiveSink into) {
+      public void funnel(ListProofElement from, PrimitiveSink into) {
         into.putBytes(from.element);
       }
     }

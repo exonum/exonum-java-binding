@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.ListProof;
-import com.exonum.binding.common.proofs.list.ListProofValidator;
+import com.exonum.binding.common.proofs.list.ListProofRootHashCalculator;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
@@ -50,10 +50,11 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
 
     ListProof proof = proofFunction.apply(list);
-    ListProofValidator<String> validator = newProofValidator(list);
-    proof.accept(validator);
+    ListProofRootHashCalculator<String> calculator = newProofValidator();
+    proof.accept(calculator);
 
-    return validator.isValid() && elementsMatcher.matches(validator.getElements());
+    //TODO add structure check or root hash check ?
+    return elementsMatcher.matches(calculator.getElements());
   }
 
   @Override
@@ -66,13 +67,10 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
-    ListProofValidator<String> validator = newProofValidator(list);
+    ListProofRootHashCalculator<String> validator = newProofValidator();
     proof.accept(validator);
 
-    if (!validator.isValid()) {
-      mismatchDescription.appendText("proof was not valid: ").appendValue(validator);
-      return;
-    }
+    //TODO add structure check or root hash check ?
 
     if (!elementsMatcher.matches(validator.getElements())) {
       mismatchDescription.appendText("valid proof: ").appendValue(validator)
@@ -81,9 +79,8 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
   }
 
-  private ListProofValidator<String> newProofValidator(ProofListIndexProxy<String> list) {
-    return new ListProofValidator<>(list.getRootHash(), list.size(),
-        StandardSerializers.string());
+  private ListProofRootHashCalculator<String> newProofValidator() {
+    return new ListProofRootHashCalculator<>(StandardSerializers.string());
   }
 
   /**

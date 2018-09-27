@@ -389,7 +389,7 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
 fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
     let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     env.new_object(
-        "com/exonum/binding/common/proofs/list/ProofListElement",
+        "com/exonum/binding/common/proofs/list/ListProofElement",
         "([B)V",
         &[value.as_obj().into()],
     )
@@ -413,7 +413,7 @@ fn make_java_proof_branch<'a>(
 fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>> {
     let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
     env.new_object(
-        "com/exonum/binding/common/proofs/list/HashNode",
+        "com/exonum/binding/common/proofs/list/ListProofHashNode",
         "([B)V",
         &[hash.as_obj().into()],
     )

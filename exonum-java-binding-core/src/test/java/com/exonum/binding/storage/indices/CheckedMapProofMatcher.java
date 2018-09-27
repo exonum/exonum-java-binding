@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.flat.MapEntry;
-import com.exonum.binding.common.proofs.map.flat.ProofStatus;
+import com.exonum.binding.common.proofs.map.flat.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
 import java.util.List;
@@ -54,8 +54,8 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
-    ProofStatus status = checkedMapProof.getStatus();
-    if (status != ProofStatus.CORRECT) {
+    MapProofStatus status = checkedMapProof.getStatus();
+    if (status != MapProofStatus.CORRECT) {
       return false;
     }
 
@@ -83,8 +83,8 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    ProofStatus proofStatus = proof.getStatus();
-    if (proofStatus == ProofStatus.CORRECT) {
+    MapProofStatus mapProofStatus = proof.getStatus();
+    if (mapProofStatus == MapProofStatus.CORRECT) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
@@ -101,7 +101,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .appendText(", Merkle root=").appendValue(proof.getRootHash());
     } else {
       description.appendText("an invalid proof, status=")
-          .appendValue(proofStatus);
+          .appendValue(mapProofStatus);
     }
   }
 
