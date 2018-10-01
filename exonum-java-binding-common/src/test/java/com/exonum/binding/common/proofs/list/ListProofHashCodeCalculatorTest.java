@@ -44,7 +44,7 @@ class ListProofHashCodeCalculatorTest {
 
   @Test
   void visit_SingletonListProof() {
-    ListProof root = leafOf(V1);
+    ListProofNode root = leafOf(V1);
 
     calculator = createListProofCalculator();
     root.accept(calculator);
@@ -115,8 +115,8 @@ class ListProofHashCodeCalculatorTest {
 
   @Test
   void visit_ProofLeftValue() {
-    ListProof left = leafOf(V1);
-    ListProof right = new ListProofHashNode(H2);
+    ListProofNode left = leafOf(V1);
+    ListProofNode right = new ListProofHashNode(H2);
     ListProofBranch root = new ListProofBranch(left, right);
 
     HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), H2);
@@ -130,8 +130,8 @@ class ListProofHashCodeCalculatorTest {
 
   @Test
   void visit_ProofRightValue() {
-    ListProof left = new ListProofHashNode(H1);
-    ListProof right = leafOf(V2);
+    ListProofNode left = new ListProofHashNode(H1);
+    ListProofNode right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
     calculator = createListProofCalculator();

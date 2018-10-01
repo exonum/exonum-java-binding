@@ -22,7 +22,7 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
  */
-public final class ListProofElement implements ListProof {
+public final class ListProofElement implements ListProofNode {
 
   private final byte[] element;
 

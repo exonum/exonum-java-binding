@@ -19,7 +19,7 @@ package com.exonum.binding.common.proofs.list;
 /**
  * Represents a proof that some elements exist in a ProofList at certain positions.
  */
-public interface ListProof {
+public interface ListProofNode {
 
   /**
    * Applies the visitor to this proof node.

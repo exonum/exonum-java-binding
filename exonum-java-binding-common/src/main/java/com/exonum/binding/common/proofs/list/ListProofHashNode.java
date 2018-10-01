@@ -23,7 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 /**
  * Represents a hash of a Merkle sub-tree: a leaf node in proof trees.
  */
-public final class ListProofHashNode implements ListProof {
+public final class ListProofHashNode implements ListProofNode {
 
   private final HashCode hash;
 

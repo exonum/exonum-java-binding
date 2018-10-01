@@ -162,15 +162,15 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    * Class used to store node info additional information.
    */
   static class NodeInfo {
-    private ListProof node;
+    private ListProofNode node;
     private int depth;
 
-    NodeInfo(ListProof node, int depth) {
+    NodeInfo(ListProofNode node, int depth) {
       this.node = node;
       this.depth = depth;
     }
 
-    public ListProof getNode() {
+    public ListProofNode getNode() {
       return node;
     }
 
