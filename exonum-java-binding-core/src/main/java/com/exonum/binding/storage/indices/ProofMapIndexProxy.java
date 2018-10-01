@@ -16,6 +16,7 @@
 
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
@@ -28,6 +29,7 @@ import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
 
@@ -209,6 +211,30 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
+
+  /**
+   * Returns a proof that there are values mapped to the specified keys or that there are no such
+   * mappings.
+   *
+   * @param keyList list of proof map keys which might be mapped to some value, each must be 32-byte
+   *     long
+   * @throws IllegalStateException if this map is not valid
+   * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
+   */
+  public UncheckedMapProof getProof(List<K> keyList) {
+    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyList));
+  }
+
+  private byte[] mergeKeysIntoByteArray(List<K> keyList) {
+    byte[] keyArray = new byte[keyList.size() * PROOF_MAP_KEY_SIZE];
+    for (int i = 0; i < keyList.size(); i++) {
+      byte[] dbKey = keySerializer.toBytes(keyList.get(i));
+      System.arraycopy(dbKey, 0, keyArray, i * PROOF_MAP_KEY_SIZE, dbKey.length);
+    }
+    return keyArray;
+  }
+
+  private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.

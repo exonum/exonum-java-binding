@@ -18,8 +18,11 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.MapEntries.putAll;
+import static com.exonum.binding.storage.indices.MapTestEntry.absentEntry;
+import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
+import static com.exonum.binding.storage.indices.ProofMapMultiContainsMatcher.provesThatCorrect;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -30,6 +33,8 @@ import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
@@ -391,6 +396,164 @@ public class ProofMapIndexProxyIntegrationTest
       for (MapEntry<HashCode, String> e : entries) {
         assertThat(map, provesThatContains(e.getKey(), e.getValue()));
       }
+    });
+  }
+
+  @Test
+  public void getMultiProof_EmptyMap() {
+    runTestWithView(database::createSnapshot, (map) ->
+            assertThat(map, provesThatCorrect(asList(absentEntry(PK1), absentEntry(PK2)))));
+  }
+
+  @Test
+  public void getMultiProof_SingletonMapContains() {
+    runTestWithView(database::createFork, (map) -> {
+      HashCode key = PK1;
+      String value = V1;
+      map.put(key, value);
+
+      assertThat(map, provesThatCorrect(singletonList(presentEntry(key, value))));
+    });
+  }
+
+  @Test
+  public void getMultiProof_SingletonMapDoesNotContain() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      assertThat(map, provesThatCorrect(singletonList(absentEntry(PK2))));
+    });
+  }
+
+  @Test
+  public void getMultiProof_SingletonMapBothContainsAndDoesNot() {
+    runTestWithView(database::createFork, (map) -> {
+      ImmutableMap<HashCode, String> source = ImmutableMap.of(
+          PK1, V1
+      );
+
+      map.putAll(source);
+
+      assertThat(map, provesThatCorrect(asList(presentEntry(PK1, V1), absentEntry(PK2))));
+    });
+  }
+
+  @Test
+  public void getMultiProof_TwoElementMapContains() {
+    runTestWithView(database::createFork, (map) -> {
+      ImmutableMap<HashCode, String> source = ImmutableMap.of(
+          PK1, V1,
+          PK2, V2
+      );
+
+      map.putAll(source);
+
+      assertThat(map, provesThatCorrect(asList(presentEntry(PK1, V1), presentEntry(PK2, V2))));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_LastByte_Contains1() {
+    runTestWithView(database::createFork, (map) -> {
+
+      Stream<HashCode> proofKeys = Stream.of(
+          (byte) 0b0000_0000,
+          (byte) 0b0000_0001,
+          (byte) 0b1000_0000,
+          (byte) 0b1000_0001
+      ).map(ProofMapIndexProxyIntegrationTest::createProofKey);
+
+      List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
+
+      putAll(map, entries);
+
+      assertThat(map, provesThatCorrect(entries
+          .stream()
+          .map(e -> presentEntry(e.getKey(), e.getValue()))
+          .collect(Collectors.toList())));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_LastByte_Contains2() {
+    runTestWithView(database::createFork, (map) -> {
+      Stream<HashCode> proofKeys = Stream.of(
+          (byte) 0b00,
+          (byte) 0b01,
+          (byte) 0b10,
+          (byte) 0b11
+      ).map(ProofMapIndexProxyIntegrationTest::createProofKey);
+
+      List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
+
+      putAll(map, entries);
+
+      assertThat(map, provesThatCorrect(entries
+          .stream()
+          .map(e -> presentEntry(e.getKey(), e.getValue()))
+          .collect(Collectors.toList())));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_FirstByte_Contains() {
+    runTestWithView(database::createFork, (map) -> {
+      byte[] key1 = createRawProofKey();
+      byte[] key2 = createRawProofKey();
+      key2[0] = (byte) 0b0000_0001;
+      byte[] key3 = createRawProofKey();
+      key3[0] = (byte) 0b1000_0000;
+      byte[] key4 = createRawProofKey();
+      key4[0] = (byte) 0b1000_0001;
+
+      List<MapEntry<HashCode, String>> entries = createMapEntries(
+          Stream.of(key1, key2, key3, key4)
+              .map(HashCode::fromBytes)
+      );
+
+      putAll(map, entries);
+
+      assertThat(map, provesThatCorrect(entries
+          .stream()
+          .map(e -> presentEntry(e.getKey(), e.getValue()))
+          .collect(Collectors.toList())));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_FirstAndLastByte_Contains() {
+    runTestWithView(database::createFork, (map) -> {
+      byte[] key1 = createRawProofKey();  // 000…0
+      byte[] key2 = createRawProofKey();  // 100…0
+      key2[0] = (byte) 0x01;
+      byte[] key3 = createRawProofKey((byte) 0x80);  // 000…01
+      byte[] key4 = createRawProofKey((byte) 0x80);  // 100…01
+      key4[0] = (byte) 0x01;
+
+      List<MapEntry<HashCode, String>> entries = createMapEntries(
+          Stream.of(key1, key2, key3, key4)
+              .map(HashCode::fromBytes)
+      );
+
+      putAll(map, entries);
+
+      assertThat(map, provesThatCorrect(entries
+          .stream()
+          .map(e -> presentEntry(e.getKey(), e.getValue()))
+          .collect(Collectors.toList())));
+    });
+  }
+
+  @Test
+  public void getMultiProof_SortedMultiEntryMapContains() {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
+      putAll(map, entries);
+
+      assertThat(map, provesThatCorrect(entries
+          .stream()
+          .map(e -> presentEntry(e.getKey(), e.getValue()))
+          .collect(Collectors.toList())));
     });
   }
 

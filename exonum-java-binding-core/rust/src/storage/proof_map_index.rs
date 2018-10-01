@@ -192,6 +192,35 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
+/// Returns Java-proof object.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetMultiProof(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    keys: jbyteArray,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        let keys = convert_to_keys(&env, keys)?;
+        let proof = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.get_multiproof(keys),
+            IndexType::ForkIndex(ref map) => map.get_multiproof(keys),
+        };
+
+        let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
+        let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
+
+        // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
+        let checked_proof = proof.check().unwrap();
+        let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
+
+        let unchecked_flat_map_proof =
+            create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)?;
+        Ok(unchecked_flat_map_proof.into_inner())
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
 fn create_java_proof_nodes<'a>(
     env: &'a JNIEnv,
     map_proof: &MapProof<Key, Value>,
@@ -559,4 +588,16 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     let mut key = Key::default();
     key.copy_from_slice(&bytes);
     Ok(key)
+}
+
+fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
+    let bytes = env.convert_byte_array(array)?;
+    assert_eq!(bytes.len() % PROOF_MAP_KEY_SIZE, 0);
+
+    let keys = bytes.chunks(PROOF_MAP_KEY_SIZE).map(|bytes| {
+        let mut key = Key::default();
+        key.copy_from_slice(bytes);
+        key
+    }).collect();
+    Ok(keys)
 }
