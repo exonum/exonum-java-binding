@@ -21,11 +21,13 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
+import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.function.LongSupplier;
 
@@ -59,6 +61,24 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
   private final CheckingSerializerDecorator<E> serializer;
 
   /**
+   * Creates a new key set storing protobuf messages.
+   *
+   * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
+   *             [a-zA-Z0-9_]
+   * @param view a database view. Must be valid. If a view is read-only,
+   *             "destructive" operations are not permitted.
+   * @param keyType the class of a key-protobuf message
+   * @param <E> the type of keys in this set; must be a protobuf message
+   *     that has a public static {@code #parseFrom(byte[])} method
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name is empty
+   */
+  public static <E extends MessageLite> KeySetIndexProxy<E> newInstance(
+      String name, View view, Class<E> keyType) {
+    return newInstance(name, view, StandardSerializers.protobuf(keyType));
+  }
+
+  /**
    * Creates a new key set proxy.
    *
    * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
@@ -69,6 +89,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * @param <E> the type of keys in this set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <E> KeySetIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
@@ -96,6 +117,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * @return a new key set
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <E> KeySetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
                                                          View view, Serializer<E> serializer) {
