@@ -33,10 +33,11 @@ package com.exonum.binding.common.hash;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.ByteBuffer;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link Hashing}.
@@ -44,24 +45,27 @@ import junit.framework.TestCase;
  * @author Dimitris Andreou
  * @author Kurt Alfred Kluever
  */
-public class HashingTest extends TestCase {
+class HashingTest {
 
   private static final String ZERO_HASH_HEX =
       "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
   private static final HashCode ZERO_HASH_CODE = HashCode.fromString(ZERO_HASH_HEX);
 
-  public void testGetHashOfEmptyArray() {
+  @Test
+  void testGetHashOfEmptyArray() {
     HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(bytes()), equalTo(ZERO_HASH_CODE));
   }
 
-  public void testGetHashOfEmptyByteBuffer() {
+  @Test
+  void testGetHashOfEmptyByteBuffer() {
     HashFunction f = Hashing.defaultHashFunction();
     assertThat(f.hashBytes(ByteBuffer.allocate(0)), equalTo(ZERO_HASH_CODE));
   }
 
-  public void testSha256() {
+  @Test
+  void testSha256() {
     HashTestUtils.checkAvalanche(Hashing.sha256(), 100, 0.4);
     HashTestUtils.checkNo2BitCharacteristics(Hashing.sha256());
     HashTestUtils.checkNoFunnels(Hashing.sha256());
@@ -69,7 +73,8 @@ public class HashingTest extends TestCase {
     assertEquals("Hashing.sha256()", Hashing.sha256().toString());
   }
 
-  public void testSha384() {
+  @Test
+  void testSha384() {
     HashTestUtils.checkAvalanche(Hashing.sha384(), 100, 0.4);
     HashTestUtils.checkNo2BitCharacteristics(Hashing.sha384());
     HashTestUtils.checkNoFunnels(Hashing.sha384());
@@ -77,7 +82,8 @@ public class HashingTest extends TestCase {
     assertEquals("Hashing.sha384()", Hashing.sha384().toString());
   }
 
-  public void testSha512() {
+  @Test
+  void testSha512() {
     HashTestUtils.checkAvalanche(Hashing.sha512(), 100, 0.4);
     HashTestUtils.checkNo2BitCharacteristics(Hashing.sha512());
     HashTestUtils.checkNoFunnels(Hashing.sha512());

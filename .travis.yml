@@ -60,6 +60,11 @@ cache:
     - "$HOME/.cargo"
     - "$HOME/.m2"
 
+before_cache:
+  # Remove the project artifacts — no need to cache them.
+  - rm -rf ${HOME}/.m2/repository/com/exonum/binding/
+
+
 before_install:
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh

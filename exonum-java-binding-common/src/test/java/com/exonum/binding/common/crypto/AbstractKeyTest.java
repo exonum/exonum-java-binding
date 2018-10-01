@@ -17,19 +17,19 @@
 package com.exonum.binding.common.crypto;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AbstractKeyTest {
+class AbstractKeyTest {
 
   @Test
-  public void verifyEqualsPublicKey() {
+  void verifyEqualsPublicKey() {
     EqualsVerifier.forClass(PublicKey.class)
         .usingGetClass()
         .verify();
   }
 
   @Test
-  public void verifyEqualsPrivateKey() {
+  void verifyEqualsPrivateKey() {
     EqualsVerifier.forClass(PrivateKey.class)
         .usingGetClass()
         .verify();

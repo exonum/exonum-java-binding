@@ -21,26 +21,23 @@ import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KE
 import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.SEED_BYTES;
 import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.SIGNATURE_BYTES;
 import static com.exonum.binding.test.Bytes.bytes;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.test.Bytes;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class Ed25519CryptoFunctionTest {
+class Ed25519CryptoFunctionTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Test
-  public void generateKeyPairWithSeed() {
+  void generateKeyPairWithSeed() {
     byte[] seed = new byte[SEED_BYTES];
 
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
@@ -50,23 +47,24 @@ public class Ed25519CryptoFunctionTest {
   }
 
   @Test
-  public void generateKeyPairInvalidSeedSize() {
+  void generateKeyPairInvalidSeedSize() {
     // Try to use a two-byte seed, must be 32 byte long
     byte[] seed = bytes(0x01, 0x02);
 
-    expectedException.expectMessage("Seed byte array has invalid size (2), must be " + SEED_BYTES);
-    expectedException.expect(IllegalArgumentException.class);
-    CRYPTO_FUNCTION.generateKeyPair(seed);
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> CRYPTO_FUNCTION.generateKeyPair(seed));
+    assertEquals("Seed byte array has invalid size (2), must be "
+        + SEED_BYTES, thrown.getMessage());
   }
 
   @Test
-  public void generateKeyPairNullSeed() {
-    expectedException.expect(NullPointerException.class);
-    CRYPTO_FUNCTION.generateKeyPair(null);
+  void generateKeyPairNullSeed() {
+    assertThrows(NullPointerException.class, () -> CRYPTO_FUNCTION.generateKeyPair(null));
   }
 
   @Test
-  public void validSignatureVerificationTest() {
+  void validSignatureVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
@@ -76,7 +74,7 @@ public class Ed25519CryptoFunctionTest {
   }
 
   @Test
-  public void validSignatureEmptyMessageVerificationTest() {
+  void validSignatureEmptyMessageVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
@@ -86,7 +84,7 @@ public class Ed25519CryptoFunctionTest {
   }
 
   @Test
-  public void invalidLengthSignatureVerificationTest() {
+  void invalidLengthSignatureVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
@@ -95,7 +93,7 @@ public class Ed25519CryptoFunctionTest {
   }
 
   @Test
-  public void invalidSignatureVerificationTest() {
+  void invalidSignatureVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
@@ -104,7 +102,7 @@ public class Ed25519CryptoFunctionTest {
   }
 
   @Test
-  public void invalidPublicKeyVerificationTest() {
+  void invalidPublicKeyVerificationTest() {
     // Generate a key pair.
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
@@ -118,7 +116,7 @@ public class Ed25519CryptoFunctionTest {
   }
 
   @Test
-  public void invalidPublicKeyLengthVerificationTest() {
+  void invalidPublicKeyLengthVerificationTest() {
     // Generate a key pair.
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
@@ -128,13 +126,15 @@ public class Ed25519CryptoFunctionTest {
 
     // Try to use a public key of incorrect length.
     PublicKey publicKey = PublicKey.fromHexString("abcd");
-    expectedException.expectMessage("Public key has invalid size (2), must be " + PUBLIC_KEY_BYTES);
-    expectedException.expect(IllegalArgumentException.class);
-    CRYPTO_FUNCTION.verify(message, signature, publicKey);
+
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> CRYPTO_FUNCTION.verify(message, signature, publicKey));
+    assertEquals("Public key has invalid size (2), must be "
+        + PUBLIC_KEY_BYTES, thrown.getMessage());
   }
 
   @Test
-  public void invalidMessageVerificationTest() {
+  void invalidMessageVerificationTest() {
     KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();

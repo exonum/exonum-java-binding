@@ -32,6 +32,10 @@
 package com.exonum.binding.common.hash;
 
 import static com.google.common.base.Charsets.UTF_16LE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashTestUtils.RandomHasherAction;
 import com.google.common.collect.Iterables;
@@ -43,60 +47,66 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for AbstractStreamingHasher.
  *
  * @author Dimitris Andreou
  */
-public class AbstractStreamingHasherTest extends TestCase {
-  public void testBytes() {
+class AbstractStreamingHasherTest {
+  @Test
+  void testBytes() {
     Sink sink = new Sink(4); // byte order insignificant here
     byte[] expected = {1, 2, 3, 4, 5, 6, 7, 8};
     sink.putByte((byte) 1);
-    sink.putBytes(new byte[] {2, 3, 4, 5, 6});
+    sink.putBytes(new byte[]{2, 3, 4, 5, 6});
     sink.putByte((byte) 7);
-    sink.putBytes(new byte[] {});
-    sink.putBytes(new byte[] {8});
+    sink.putBytes(new byte[]{});
+    sink.putBytes(new byte[]{8});
     HashCode unused = sink.hash();
     sink.assertInvariants(8);
     sink.assertBytes(expected);
   }
 
-  public void testShort() {
+  @Test
+  void testShort() {
     Sink sink = new Sink(4);
     sink.putShort((short) 0x0201);
     HashCode unused = sink.hash();
     sink.assertInvariants(2);
-    sink.assertBytes(new byte[] {1, 2, 0, 0}); // padded with zeros
+    sink.assertBytes(new byte[]{1, 2, 0, 0}); // padded with zeros
   }
 
-  public void testInt() {
+  @Test
+  void testInt() {
     Sink sink = new Sink(4);
     sink.putInt(0x04030201);
     HashCode unused = sink.hash();
     sink.assertInvariants(4);
-    sink.assertBytes(new byte[] {1, 2, 3, 4});
+    sink.assertBytes(new byte[]{1, 2, 3, 4});
   }
 
-  public void testLong() {
+  @Test
+  void testLong() {
     Sink sink = new Sink(8);
     sink.putLong(0x0807060504030201L);
     HashCode unused = sink.hash();
     sink.assertInvariants(8);
-    sink.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
+    sink.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
   }
 
-  public void testChar() {
+  @Test
+  void testChar() {
     Sink sink = new Sink(4);
     sink.putChar((char) 0x0201);
     HashCode unused = sink.hash();
     sink.assertInvariants(2);
-    sink.assertBytes(new byte[] {1, 2, 0, 0}); // padded with zeros
+    sink.assertBytes(new byte[]{1, 2, 0, 0}); // padded with zeros
   }
 
-  public void testString() {
+  @Test
+  void testString() {
     Random random = new Random();
     for (int i = 0; i < 100; i++) {
       byte[] bytes = new byte[64];
@@ -110,39 +120,30 @@ public class AbstractStreamingHasherTest extends TestCase {
     }
   }
 
-  public void testFloat() {
+  @Test
+  void testFloat() {
     Sink sink = new Sink(4);
     sink.putFloat(Float.intBitsToFloat(0x04030201));
     HashCode unused = sink.hash();
     sink.assertInvariants(4);
-    sink.assertBytes(new byte[] {1, 2, 3, 4});
+    sink.assertBytes(new byte[]{1, 2, 3, 4});
   }
 
-  public void testDouble() {
+  @Test
+  void testDouble() {
     Sink sink = new Sink(8);
     sink.putDouble(Double.longBitsToDouble(0x0807060504030201L));
     HashCode unused = sink.hash();
     sink.assertInvariants(8);
-    sink.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
+    sink.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
   }
 
-  public void testCorrectExceptions() {
+  @Test
+  void testCorrectExceptions() {
     Sink sink = new Sink(4);
-    try {
-      sink.putBytes(new byte[8], -1, 4);
-      fail();
-    } catch (IndexOutOfBoundsException ok) {
-    }
-    try {
-      sink.putBytes(new byte[8], 0, 16);
-      fail();
-    } catch (IndexOutOfBoundsException ok) {
-    }
-    try {
-      sink.putBytes(new byte[8], 0, -1);
-      fail();
-    } catch (IndexOutOfBoundsException ok) {
-    }
+    assertThrows(IndexOutOfBoundsException.class, () -> sink.putBytes(new byte[8], -1, 4));
+    assertThrows(IndexOutOfBoundsException.class, () -> sink.putBytes(new byte[8], 0, 16));
+    assertThrows(IndexOutOfBoundsException.class, () -> sink.putBytes(new byte[8], 0, -1));
   }
 
   /**
@@ -150,7 +151,8 @@ public class AbstractStreamingHasherTest extends TestCase {
    * process it; all should produce the same answer, the only difference should be the number of
    * process()/processRemaining() invocations, due to alignment.
    */
-  public void testExhaustive() throws Exception {
+  @Test
+  void testExhaustive() throws Exception {
     Random random = new Random(0); // will iteratively make more debuggable, each time it breaks
     for (int totalInsertions = 0; totalInsertions < 200; totalInsertions++) {
 
