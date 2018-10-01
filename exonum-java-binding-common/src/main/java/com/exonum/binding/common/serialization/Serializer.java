@@ -26,6 +26,8 @@ package com.exonum.binding.common.serialization;
  * <p>This interface is designed to be primarily used by storage proxies and proof validators.
  *
  * @param <T> a type of serializable object
+ *
+ * @see StandardSerializers
  */
 public interface Serializer<T> {
 
