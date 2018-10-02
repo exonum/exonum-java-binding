@@ -55,4 +55,5 @@ enum StringSerializer implements Serializer<String> {
       throw new IllegalArgumentException("Cannot decode the input", e);
     }
   }
+
 }

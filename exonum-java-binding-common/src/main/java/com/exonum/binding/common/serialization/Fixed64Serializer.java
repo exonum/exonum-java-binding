@@ -43,4 +43,3 @@ enum Fixed64Serializer implements Serializer<Long> {
   }
 
 }
-

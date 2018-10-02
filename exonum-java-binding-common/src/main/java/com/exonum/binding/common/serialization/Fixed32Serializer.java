@@ -43,4 +43,3 @@ enum Fixed32Serializer implements Serializer<Integer> {
   }
 
 }
-
