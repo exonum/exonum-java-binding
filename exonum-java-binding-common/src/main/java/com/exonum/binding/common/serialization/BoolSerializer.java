@@ -17,6 +17,7 @@
 
 package com.exonum.binding.common.serialization;
 
+import static com.exonum.binding.common.serialization.SerializationUtils.checkLength;
 import static com.google.common.base.Preconditions.checkArgument;
 
 enum BoolSerializer implements Serializer<Boolean> {
@@ -34,8 +35,7 @@ enum BoolSerializer implements Serializer<Boolean> {
 
   @Override
   public Boolean fromBytes(byte[] serializedValue) {
-    checkArgument(serializedValue.length == BOOLEAN_BYTES,
-        "Expected an array of size %s, but was %s", BOOLEAN_BYTES, serializedValue.length);
+    checkLength(serializedValue, BOOLEAN_BYTES);
     byte value = serializedValue[0];
     checkArgument(isValidBoolean(value), "Is not a boolean value");
 

@@ -17,29 +17,22 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.exonum.binding.common.serialization.SerializationUtils.checkLength;
+import static com.google.common.base.Preconditions.checkArgument;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+final class SerializationUtils {
 
-enum DoubleSerializer implements Serializer<Double> {
-  INSTANCE;
-
-  @Override
-  public byte[] toBytes(Double value) {
-    return ByteBuffer.allocate(Double.BYTES)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .putDouble(value)
-        .array();
+  /**
+   * Performs check that serialized value has correct length.
+   *
+   * @param serializedValue serialized value in bytes
+   * @param length expected length
+   * @throws IllegalArgumentException thrown if length is incorrect
+   */
+  static void checkLength(byte[] serializedValue, int length) {
+    checkArgument(serializedValue.length == length,
+        "Expected an array of size %s, but was %s", length, serializedValue.length);
   }
 
-  @Override
-  public Double fromBytes(byte[] serializedValue) {
-    checkLength(serializedValue, Double.BYTES);
-
-    return ByteBuffer.wrap(serializedValue)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getDouble();
+  private SerializationUtils() {
   }
-
 }

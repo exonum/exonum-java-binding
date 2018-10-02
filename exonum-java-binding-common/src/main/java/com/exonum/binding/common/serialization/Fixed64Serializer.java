@@ -17,7 +17,7 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.exonum.binding.common.serialization.SerializationUtils.checkLength;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -35,8 +35,7 @@ enum Fixed64Serializer implements Serializer<Long> {
 
   @Override
   public Long fromBytes(byte[] serializedValue) {
-    checkArgument(serializedValue.length == Long.BYTES,
-        "Expected an array of size 8, but was %s", serializedValue.length);
+    checkLength(serializedValue, Long.BYTES);
 
     return ByteBuffer.wrap(serializedValue)
         .order(ByteOrder.LITTLE_ENDIAN)

@@ -17,7 +17,7 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.exonum.binding.common.serialization.SerializationUtils.checkLength;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -35,8 +35,7 @@ enum FloatSerializer implements Serializer<Float> {
 
   @Override
   public Float fromBytes(byte[] serializedValue) {
-    checkArgument(serializedValue.length == Float.BYTES,
-        "Expected an array of size %s, but was %s", Float.BYTES, serializedValue.length);
+    checkLength(serializedValue, Float.BYTES);
 
     return ByteBuffer.wrap(serializedValue)
         .order(ByteOrder.LITTLE_ENDIAN)
