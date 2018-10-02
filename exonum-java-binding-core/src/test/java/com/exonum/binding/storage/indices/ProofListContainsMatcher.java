@@ -22,6 +22,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.ListProof;
 import com.exonum.binding.common.proofs.list.ListProofRootHashCalculator;
+import com.exonum.binding.common.proofs.list.ListProofStatus;
+import com.exonum.binding.common.proofs.list.ListProofStructureValidator;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
@@ -50,11 +52,15 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
 
     ListProof proof = proofFunction.apply(list);
-    ListProofRootHashCalculator<String> calculator = newProofValidator();
+
+    ListProofStructureValidator validator = newProofStructureValidator();
+    proof.accept(validator);
+
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
     proof.accept(calculator);
 
-    //TODO add structure check or root hash check ?
-    return elementsMatcher.matches(calculator.getElements());
+    return validator.check().equals(ListProofStatus.VALID)
+        && elementsMatcher.matches(calculator.getElements());
   }
 
   @Override
@@ -67,19 +73,30 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
-    ListProofRootHashCalculator<String> validator = newProofValidator();
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
+    proof.accept(calculator);
+
+    ListProofStructureValidator validator = newProofStructureValidator();
     proof.accept(validator);
 
-    //TODO add structure check or root hash check ?
+    if (!validator.check().equals(ListProofStatus.VALID)) {
+      mismatchDescription.appendText("proof was not valid: ")
+          .appendValue(validator.getProofStatus().getDescription());
+      return;
+    }
 
-    if (!elementsMatcher.matches(validator.getElements())) {
+    if (!elementsMatcher.matches(calculator.getElements())) {
       mismatchDescription.appendText("valid proof: ").appendValue(validator)
           .appendText(", elements mismatch: ");
-      elementsMatcher.describeMismatch(validator.getElements(), mismatchDescription);
+      elementsMatcher.describeMismatch(calculator.getElements(), mismatchDescription);
     }
   }
 
-  private ListProofRootHashCalculator<String> newProofValidator() {
+  private ListProofStructureValidator newProofStructureValidator() {
+    return new ListProofStructureValidator();
+  }
+
+  private ListProofRootHashCalculator<String> newProofHashCodeCalculator() {
     return new ListProofRootHashCalculator<>(StandardSerializers.string());
   }
 

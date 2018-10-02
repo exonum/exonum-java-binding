@@ -83,8 +83,8 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    MapProofStatus mapProofStatus = proof.getStatus();
-    if (mapProofStatus == MapProofStatus.CORRECT) {
+    MapProofStatus proofStatus = proof.getStatus();
+    if (proofStatus == MapProofStatus.CORRECT) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
@@ -101,7 +101,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .appendText(", Merkle root=").appendValue(proof.getRootHash());
     } else {
       description.appendText("an invalid proof, status=")
-          .appendValue(mapProofStatus);
+          .appendValue(proofStatus);
     }
   }
 

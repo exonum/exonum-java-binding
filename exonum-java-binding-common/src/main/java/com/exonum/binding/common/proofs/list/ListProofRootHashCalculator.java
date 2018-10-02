@@ -95,23 +95,21 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
     calculatedRootHash = hashFunction.hashObject(value, ListProofElement.funnel());
   }
 
-  private HashCode visitLeft(ListProofBranch branch, long branchIndex) {
-    index = 2 * branchIndex;
+  private HashCode visitLeft(ListProofBranch branch, long parentIndex) {
+    index = 2 * parentIndex;
     branch.getLeft().accept(this);
     return calculatedRootHash;
   }
 
-  private Optional<HashCode> visitRight(ListProofBranch branch, long branchIndex) {
-    index = 2 * branchIndex + 1;
+  private Optional<HashCode> visitRight(ListProofBranch branch, long parentIndex) {
+    index = 2 * parentIndex + 1;
     calculatedRootHash = null;
     branch.getRight().ifPresent((right) -> right.accept(this));
     return Optional.ofNullable(calculatedRootHash);
   }
 
   /**
-   * Returns a non-empty collection of list entries: index-element pairs, ordered by indices.
-   *
-   * @throws IllegalStateException if proof is not valid
+   * Returns a collection of list entries: index-element pairs, ordered by indices.
    */
   public NavigableMap<Long, E> getElements() {
     return elements;

@@ -16,6 +16,8 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static com.exonum.binding.common.proofs.list.ListProofStructureValidator.NodeType;
+
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
 
@@ -25,6 +27,8 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 public final class ListProofElement implements ListProof {
 
   private final byte[] element;
+
+  private final NodeType nodeType = NodeType.ELEMENT;
 
   /**
    * Creates a new ListProofElement.
@@ -39,6 +43,11 @@ public final class ListProofElement implements ListProof {
   @Override
   public void accept(ListProofVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public NodeType getNodeType() {
+    return nodeType;
   }
 
   /**

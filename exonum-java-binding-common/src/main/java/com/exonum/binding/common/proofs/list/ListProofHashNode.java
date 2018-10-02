@@ -16,6 +16,7 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static com.exonum.binding.common.proofs.list.ListProofStructureValidator.NodeType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -26,6 +27,8 @@ import com.exonum.binding.common.hash.HashCode;
 public final class ListProofHashNode implements ListProof {
 
   private final HashCode hash;
+
+  private final NodeType nodeType = NodeType.HASHNODE;
 
   /**
    * Creates a new hash node.
@@ -42,6 +45,11 @@ public final class ListProofHashNode implements ListProof {
   @Override
   public void accept(ListProofVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public NodeType getNodeType() {
+    return nodeType;
   }
 
   /**

@@ -154,9 +154,9 @@ class ListProofStructureValidatorTest {
   }
 
   @Test
-  void visitUnbalancedElementNodeTooDeep() {
+  void visit_UnbalancedElementNodeTooDeep() {
     int depth = ListProofStructureValidator.MAX_NODE_DEPTH + 1;
-    ListProof root = generateLeftLeaningProofTree(depth, leafOf(V1));
+    ListProof root = generateRightLeaningProofTree(depth, leafOf(V1));
 
     validator = createListProofStructureValidator();
     root.accept(validator);
@@ -165,14 +165,30 @@ class ListProofStructureValidatorTest {
   }
 
   @Test
-  void visitUnbalancedHashNodeTooDeep() {
+  void visit_UnbalancedHashNodeTooDeep() {
     int depth = ListProofStructureValidator.MAX_NODE_DEPTH + 1;
-    ListProof root = generateLeftLeaningProofTree(depth, new ListProofHashNode(H2));
+    ListProof root = generateRightLeaningProofTree(depth, new ListProofHashNode(H2));
 
     validator = createListProofStructureValidator();
     root.accept(validator);
 
     assertThat(validator.check(), is(ListProofStatus.INVALID_HASH_NODE_DEPTH));
+  }
+
+  @Test
+  void visit_UnbalancedHashNodesOnlyLeafs() {
+    ListProofBranch root = new ListProofBranch(
+        leafOf(V1),
+        new ListProofBranch(
+            new ListProofHashNode(H1), // <-- left leaf is hash node
+            new ListProofHashNode(H2)  // <-- right leaf is hash node
+        )
+    );
+
+    validator = createListProofStructureValidator();
+    validator.visit(root);
+
+    assertThat(validator.check(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
   }
 
   private ListProofStructureValidator createListProofStructureValidator() {
@@ -188,7 +204,7 @@ class ListProofStructureValidatorTest {
     return StandardSerializers.string().toBytes(element);
   }
 
-  private ListProof generateLeftLeaningProofTree(int depth, ListProof leafNode) {
+  private ListProof generateRightLeaningProofTree(int depth, ListProof leafNode) {
     ListProof root = null;
     ListProof left = leafNode;
     int d = depth;

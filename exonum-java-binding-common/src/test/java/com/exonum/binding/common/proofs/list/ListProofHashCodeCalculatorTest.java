@@ -27,7 +27,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class ListProofHashCodeCalculatorTest {
@@ -63,7 +64,8 @@ class ListProofHashCodeCalculatorTest {
     calculator.visit(root);
 
     //calculate expected root hash
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
+    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1),
+        Optional.of(getNodeHashCode(V2)));
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1,
         1L, V2)));
@@ -84,9 +86,12 @@ class ListProofHashCodeCalculatorTest {
     );
 
     //calculate expected root hash
-    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
-    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), getNodeHashCode(V4));
-    HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
+    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1),
+        Optional.of(getNodeHashCode(V2)));
+    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3),
+        Optional.of(getNodeHashCode(V4)));
+    HashCode expectedRootHash = getBranchHashCode(leftBranchHash,
+        Optional.of(rightBranchHash));
 
     calculator = createListProofCalculator();
     calculator.visit(root);
@@ -105,7 +110,8 @@ class ListProofHashCodeCalculatorTest {
     ListProofElement right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
+    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1),
+        Optional.of(getNodeHashCode(V2)));
 
     calculator = createListProofCalculatorSha256HashingFunction();
     calculator.visit(root);
@@ -119,7 +125,7 @@ class ListProofHashCodeCalculatorTest {
     ListProof right = new ListProofHashNode(H2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), H2);
+    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), Optional.of(H2));
 
     calculator = createListProofCalculator();
     calculator.visit(root);
@@ -137,23 +143,43 @@ class ListProofHashCodeCalculatorTest {
     calculator = createListProofCalculator();
     calculator.visit(root);
 
-    HashCode expectedRootHash = getBranchHashCode(H1, getNodeHashCode(V2));
+    HashCode expectedRootHash = getBranchHashCode(H1, Optional.of(getNodeHashCode(V2)));
 
     assertThat(calculator.getElements(), equalTo(of(1L, V2)));
     assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
   }
 
+  @Test
+  void visit_FullProof3elements() {
+    ListProofBranch root = new ListProofBranch(
+        new ListProofBranch(
+            leafOf(V1),
+            null
+        ),
+        null
+    );
+
+    calculator = createListProofCalculator();
+    calculator.visit(root);
+
+    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), Optional.empty());
+    HashCode expectedRootHash = getBranchHashCode(leftBranchHash, Optional.empty());
+
+    assertThat(calculator.getElements(), equalTo(of(0L, V1)));
+    assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
+  }
+
   private HashCode getNodeHashCode(String v1) {
     return Hashing.defaultHashFunction().newHasher()
-        .putString(v1, Charset.defaultCharset())
+        .putString(v1, StandardCharsets.UTF_8)
         .hash();
   }
 
-  private HashCode getBranchHashCode(HashCode leftHash, HashCode rightHash) {
+  private HashCode getBranchHashCode(HashCode leftHash, Optional<HashCode> rightHash) {
     return Hashing.defaultHashFunction().newHasher()
         .putObject(leftHash, hashCodeFunnel())
-        .putObject(rightHash, (HashCode from, PrimitiveSink into) ->
-            hashCodeFunnel().funnel(from, into))
+        .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
+            from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
         .hash();
   }
 

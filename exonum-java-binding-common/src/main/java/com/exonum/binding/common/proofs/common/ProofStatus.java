@@ -17,14 +17,12 @@
 package com.exonum.binding.common.proofs.common;
 
 /**
- * Common interface for various Proof Statuses.
+ * A status of collection proof verification.
  */
 public interface ProofStatus {
 
   /**
-   * Returns proof status description.
-   *
-   * @return description
+   * Returns the description of the proof verification result.
    */
   String getDescription();
 }
