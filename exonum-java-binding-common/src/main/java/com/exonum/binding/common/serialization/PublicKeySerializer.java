@@ -12,13 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.crypto;
+package com.exonum.binding.common.serialization;
 
-import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.crypto.PublicKey;
 
-public enum PublicKeySerializer implements Serializer<PublicKey> {
+enum PublicKeySerializer implements Serializer<PublicKey> {
   INSTANCE;
 
   @Override
@@ -30,4 +31,5 @@ public enum PublicKeySerializer implements Serializer<PublicKey> {
   public PublicKey fromBytes(byte[] serializedValue) {
     return PublicKey.fromBytes(serializedValue);
   }
+
 }

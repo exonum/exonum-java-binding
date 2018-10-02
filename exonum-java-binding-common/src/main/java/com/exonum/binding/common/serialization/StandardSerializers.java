@@ -16,39 +16,105 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
+import com.exonum.binding.common.crypto.PrivateKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.MessageLite;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.CharBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.StandardCharsets;
 
 /**
  * A collection of pre-defined serializers.
  */
-// todo: test these guys with the code from exonum-serialization, when we migrate to JUnit5
-// (ECR-642)
 public final class StandardSerializers {
 
-  /** Returns a serializer of longs in little-endian byte order. */
-  public static Serializer<Long> longs() {
-    return LongSerializer.INSTANCE;
+  /**
+   * Returns a serializer that does nothing.
+   *
+   * @return no-op serializer
+   */
+  public static Serializer<byte[]> noOp() {
+    return NoOpSerializer.INSTANCE;
   }
 
-  /** Returns a serializer of strings in UTF-8. */
+  /**
+   * Returns a serializer of booleans in little-endian byte order.
+   *
+   * @return boolean serializer
+   */
+  public static Serializer<Boolean> bool() {
+    return BoolSerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of fixed32 (integer) in little-endian byte order.
+   *
+   * @return fixed32 serializer
+   */
+  public static Serializer<Integer> fixed32() {
+    return Fixed32Serializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of fixed64 (long) in little-endian byte order.
+   *
+   * @return fixed64 serializer
+   */
+  public static Serializer<Long> fixed64() {
+    return Fixed64Serializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of floats in little-endian byte order.
+   *
+   * @return float serializer
+   */
+  public static Serializer<Float> floats() {
+    return FloatSerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of doubles in little-endian byte order.
+   *
+   * @return double serializer
+   */
+  public static Serializer<Double> doubles() {
+    return DoubleSerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of strings in UTF-8.
+   *
+   * @return string serializer
+   */
   public static Serializer<String> string() {
     return StringSerializer.INSTANCE;
   }
 
-  /** Returns a serializer of hash codes. */
+  /**
+   * Returns a serializer of hash codes.
+   *
+   * @return hash code serializer
+   */
   public static Serializer<HashCode> hash() {
     return HashCodeSerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of public keys.
+   *
+   * @return public key serializer
+   */
+  public static Serializer<PublicKey> publicKey() {
+    return PublicKeySerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of private keys.
+   *
+   * @return private key serializer
+   */
+  public static Serializer<PrivateKey> privateKey() {
+    return PrivateKeySerializer.INSTANCE;
   }
 
   /**
@@ -58,83 +124,15 @@ public final class StandardSerializers {
    *
    * @param messageType the class of a protobuf message
    * @param <MessageT> the type of a message; must have a public static
-   *     {@code #parseFrom(byte[])} method — as any auto-generated protobuf message does
+   * {@code #parseFrom(byte[])} method — as any auto-generated protobuf message does
    * @throws IllegalArgumentException if {@code MessageT} does not contain the static
-   *     factory method {@code #parseFrom(byte[])}
+   *        factory method {@code #parseFrom(byte[])}
    */
   public static <MessageT extends MessageLite> Serializer<MessageT> protobuf(
       Class<MessageT> messageType) {
     return new ProtobufReflectiveSerializer<>(messageType);
   }
 
-  enum LongSerializer implements Serializer<Long> {
-    INSTANCE;
-
-    @Override
-    public byte[] toBytes(Long value) {
-      ByteBuffer buf = ByteBuffer.allocate(Long.BYTES)
-          .order(ByteOrder.LITTLE_ENDIAN);
-      buf.putLong(value);
-      return buf.array();
-    }
-
-    @Override
-    public Long fromBytes(byte[] serializedValue) {
-      checkArgument(serializedValue.length == Long.BYTES,
-          "Expected an array of size 8, but was %s", serializedValue.length);
-
-      return ByteBuffer.wrap(serializedValue)
-          .order(ByteOrder.LITTLE_ENDIAN)
-          .getLong();
-    }
+  private StandardSerializers() {
   }
-
-  enum StringSerializer implements Serializer<String> {
-    INSTANCE;
-
-    @Override
-    public byte[] toBytes(String value) {
-      return value.getBytes(StandardCharsets.UTF_8);
-    }
-
-    @Override
-    public String fromBytes(byte[] serializedValue) {
-      try {
-        // Since the String(bytes, charset) constructor is specified so that
-        // it "… always replaces malformed-input and unmappable-character sequences …",
-        // it is not suitable for our use-case: we must reject malformed input.
-
-        // Create a new decoder
-        CharsetDecoder decoder = StandardCharsets.UTF_8
-            .newDecoder()
-            // Reject (= report as exception) malformed input.
-            .onMalformedInput(CodingErrorAction.REPORT)
-            // In case some valid UTF-8 characters are not encodable in UTF-16,
-            // we replace them with the default replacement character.
-            .onUnmappableCharacter(CodingErrorAction.REPLACE);
-
-        // Decode the buffer in a character buffer
-        CharBuffer strBuffer = decoder.decode(ByteBuffer.wrap(serializedValue));
-        return new String(strBuffer.array(), strBuffer.arrayOffset(), strBuffer.remaining());
-      } catch (CharacterCodingException e) {
-        throw new IllegalArgumentException("Cannot decode the input", e);
-      }
-    }
-  }
-
-  enum HashCodeSerializer implements Serializer<HashCode> {
-    INSTANCE;
-
-    @Override
-    public byte[] toBytes(HashCode value) {
-      return value.asBytes();
-    }
-
-    @Override
-    public HashCode fromBytes(byte[] serializedValue) {
-      return HashCode.fromBytes(serializedValue);
-    }
-  }
-
-  private StandardSerializers() {}
 }
