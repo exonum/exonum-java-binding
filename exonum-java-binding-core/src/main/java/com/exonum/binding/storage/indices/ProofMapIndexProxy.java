@@ -28,10 +28,12 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
+import java.util.stream.Collector;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -226,12 +228,12 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   private byte[] mergeKeysIntoByteArray(List<K> keyList) {
-    byte[] keyArray = new byte[keyList.size() * PROOF_MAP_KEY_SIZE];
-    for (int i = 0; i < keyList.size(); i++) {
-      byte[] dbKey = keySerializer.toBytes(keyList.get(i));
-      System.arraycopy(dbKey, 0, keyArray, i * PROOF_MAP_KEY_SIZE, dbKey.length);
-    }
-    return keyArray;
+    int arraySize = keyList.size() * PROOF_MAP_KEY_SIZE;
+    return keyList.stream()
+        .map(keySerializer::toBytes)
+        .collect(Collector.of(
+            () -> ByteBuffer.allocate(arraySize),
+            ByteBuffer::put, (a, b) -> b, ByteBuffer::array));
   }
 
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
