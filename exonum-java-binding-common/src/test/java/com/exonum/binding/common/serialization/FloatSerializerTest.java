@@ -21,7 +21,8 @@ import static com.exonum.binding.common.serialization.StandardSerializersTest.in
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
 import com.exonum.binding.test.Bytes;
-import java.util.stream.Stream;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -49,8 +50,8 @@ class FloatSerializerTest {
     invalidBytesValueTest(value, serializer);
   }
 
-  private static Stream<byte[]> invalidFloats() {
-    return Stream.of(
+  private static List<byte[]> invalidFloats() {
+    return ImmutableList.of(
         Bytes.bytes(),
         Bytes.bytes((byte) 0),
         Bytes.bytes(1, 2, 3),

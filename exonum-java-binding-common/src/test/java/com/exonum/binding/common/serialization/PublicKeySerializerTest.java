@@ -41,7 +41,7 @@ class PublicKeySerializerTest {
 
   @Test
   void deserializeInvalidValue() {
-    byte[] invalidValue = {};
+    byte[] invalidValue = Bytes.bytes();
     invalidBytesValueTest(invalidValue, serializer);
   }
 

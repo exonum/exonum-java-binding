@@ -19,7 +19,9 @@ package com.exonum.binding.common.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
-import java.util.stream.Stream;
+import com.exonum.binding.test.Bytes;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -33,13 +35,13 @@ class NoOpSerializerTest {
     roundTripTest(value, serializer);
   }
 
-  private static Stream<byte[]> testSource() {
-    return Stream.of(
-        new byte[]{},
-        new byte[]{-1},
-        new byte[]{-1, 0},
-        new byte[]{-1, 0, 1},
-        new byte[]{Byte.MIN_VALUE, Byte.MAX_VALUE}
+  private static List<byte[]> testSource() {
+    return ImmutableList.of(
+        Bytes.bytes(),
+        Bytes.bytes(0),
+        Bytes.bytes(0, 1),
+        Bytes.bytes(Byte.MIN_VALUE, Byte.MAX_VALUE),
+        Bytes.bytes("some string")
     );
   }
 
