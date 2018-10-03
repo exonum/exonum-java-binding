@@ -27,6 +27,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -112,7 +114,7 @@ public class VertxServerIntegrationTest {
     Vertx wcVertx = null;
     try {
       // Start a server.
-      int port = 8080;
+      int port = findFreePort();
       server.start(port);
 
       // Define a request handler.
@@ -164,4 +166,15 @@ public class VertxServerIntegrationTest {
     int stopTimeout = 2;
     f.get(stopTimeout, TimeUnit.SECONDS);
   }
+
+  /**
+   * Returns random available local port.
+   */
+  private int findFreePort() throws IOException {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      socket.setReuseAddress(true);
+      return socket.getLocalPort();
+    }
+  }
+
 }
