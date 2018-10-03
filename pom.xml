@@ -342,7 +342,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>prepare-package-jacoco-report</id>
+                <id>generate-jacoco-report</id>
                 <phase>prepare-package</phase>
                 <goals>
                   <goal>report</goal>
@@ -352,7 +352,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>pre-integration-test-prepare-jacoco-agent</id>
+                <id>prepare-jacoco-it-agent</id>
                 <phase>pre-integration-test</phase>
                 <goals>
                   <goal>prepare-agent</goal>
@@ -363,7 +363,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>post-integration-test-jacoco-report</id>
+                <id>generate-jacoco-it-report</id>
                 <phase>post-integration-test</phase>
                 <goals>
                   <goal>report</goal>
