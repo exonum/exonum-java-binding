@@ -25,10 +25,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class NoOpSerializerTest {
 
+  private Serializer<byte[]> serializer = NoOpSerializer.INSTANCE;
+
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(byte[] value) {
-    roundTripTest(value, NoOpSerializer.INSTANCE);
+    roundTripTest(value, serializer);
   }
 
   private static Stream<byte[]> testSource() {

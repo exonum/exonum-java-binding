@@ -32,16 +32,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class HashCodeSerializerTest {
 
+  private Serializer<HashCode> serializer = HashCodeSerializer.INSTANCE;
+
   @ParameterizedTest
   @MethodSource("testHashes")
   void roundTrip(HashCode hashCode) {
-    roundTripTest(hashCode, HashCodeSerializer.INSTANCE);
+    roundTripTest(hashCode, serializer);
   }
 
   @Test
   void deserializeInvalidValue() {
     byte[] invalidValue = {};
-    invalidBytesValueTest(invalidValue, HashCodeSerializer.INSTANCE);
+    invalidBytesValueTest(invalidValue, serializer);
   }
 
   private static Stream<HashCode> testHashes() {

@@ -24,13 +24,13 @@ final class SerializationUtils {
   /**
    * Performs check that serialized value has correct length.
    *
-   * @param serializedValue serialized value in bytes
+   * @param array serialized value in bytes
    * @param length expected length
    * @throws IllegalArgumentException thrown if length is incorrect
    */
-  static void checkLength(byte[] serializedValue, int length) {
-    checkArgument(serializedValue.length == length,
-        "Expected an array of size %s, but was %s", length, serializedValue.length);
+  static void checkLength(byte[] array, int length) {
+    checkArgument(array.length == length,
+        "Expected an array of size %s, but was %s", length, array.length);
   }
 
   private SerializationUtils() {

@@ -20,22 +20,38 @@ package com.exonum.binding.common.serialization;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
-import org.junit.jupiter.api.Test;
+import com.exonum.binding.test.Bytes;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class Fixed64SerializerTest {
 
+  private Serializer<Long> serializer = Fixed64Serializer.INSTANCE;
+
   @ParameterizedTest
   @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE})
   void roundTrip(Long value) {
-    roundTripTest(value, Fixed64Serializer.INSTANCE);
+    roundTripTest(value, serializer);
   }
 
-  @Test
-  void deserializeInvalidValue() {
-    byte[] invalidValue = "invalid".getBytes();
-    invalidBytesValueTest(invalidValue, Fixed64Serializer.INSTANCE);
+  @ParameterizedTest
+  @MethodSource("invalidLongs")
+  void deserializeInvalidValue(byte[] value) {
+    invalidBytesValueTest(value, serializer);
+  }
+
+  private static Stream<byte[]> invalidLongs() {
+    return Stream.of(
+        Bytes.bytes(),
+        Bytes.bytes((byte) 0),
+        Bytes.bytes(1, 2, 3),
+        Bytes.bytes(1, 2, 3, 4),
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7),
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        Bytes.bytes("str")
+    );
   }
 
 }

@@ -26,6 +26,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class StringSerializerTest {
 
+  private Serializer<String> serializer = StringSerializer.INSTANCE;
+
   @ParameterizedTest
   @ValueSource(strings = {
       "",
@@ -36,13 +38,13 @@ class StringSerializerTest {
       "cat",
       "Iñtërnâtiônàlizætiøn"})
   void roundTrip(String value) {
-    roundTripTest(value, StringSerializer.INSTANCE);
+    roundTripTest(value, serializer);
   }
 
   @Test
   void deserializeInvalidValue() {
     byte[] invalidValue = {-1};
-    invalidBytesValueTest(invalidValue, StringSerializer.INSTANCE);
+    invalidBytesValueTest(invalidValue, serializer);
   }
 
 }

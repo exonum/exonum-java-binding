@@ -28,36 +28,28 @@ import com.google.protobuf.MessageLite;
 public final class StandardSerializers {
 
   /**
-   * Returns a serializer that does nothing.
-   *
-   * @return no-op serializer
+   * Returns a serializer of byte arrays, which passes them as is.
    */
-  public static Serializer<byte[]> noOp() {
+  public static Serializer<byte[]> bytes() {
     return NoOpSerializer.INSTANCE;
   }
 
   /**
-   * Returns a serializer of booleans in little-endian byte order.
-   *
-   * @return boolean serializer
+   * Returns a serializer of booleans.
    */
   public static Serializer<Boolean> bool() {
     return BoolSerializer.INSTANCE;
   }
 
   /**
-   * Returns a serializer of fixed32 (integer) in little-endian byte order.
-   *
-   * @return fixed32 serializer
+   * Returns a serializer of integers as four bytes in little-endian byte order.
    */
   public static Serializer<Integer> fixed32() {
     return Fixed32Serializer.INSTANCE;
   }
 
   /**
-   * Returns a serializer of fixed64 (long) in little-endian byte order.
-   *
-   * @return fixed64 serializer
+   * Returns a serializer of longs as eight bytes in little-endian byte order.
    */
   public static Serializer<Long> fixed64() {
     return Fixed64Serializer.INSTANCE;
@@ -65,8 +57,6 @@ public final class StandardSerializers {
 
   /**
    * Returns a serializer of floats in little-endian byte order.
-   *
-   * @return float serializer
    */
   public static Serializer<Float> floats() {
     return FloatSerializer.INSTANCE;
@@ -74,17 +64,14 @@ public final class StandardSerializers {
 
   /**
    * Returns a serializer of doubles in little-endian byte order.
-   *
-   * @return double serializer
    */
   public static Serializer<Double> doubles() {
     return DoubleSerializer.INSTANCE;
   }
 
   /**
-   * Returns a serializer of strings in UTF-8.
-   *
-   * @return string serializer
+   * Returns a serializer of strings in UTF-8. Deserializer will reject malformed input,
+   * but replace the characters not representable in UTF-16 with the default replacement character.
    */
   public static Serializer<String> string() {
     return StringSerializer.INSTANCE;
@@ -92,8 +79,6 @@ public final class StandardSerializers {
 
   /**
    * Returns a serializer of hash codes.
-   *
-   * @return hash code serializer
    */
   public static Serializer<HashCode> hash() {
     return HashCodeSerializer.INSTANCE;
@@ -101,8 +86,6 @@ public final class StandardSerializers {
 
   /**
    * Returns a serializer of public keys.
-   *
-   * @return public key serializer
    */
   public static Serializer<PublicKey> publicKey() {
     return PublicKeySerializer.INSTANCE;
@@ -110,8 +93,6 @@ public final class StandardSerializers {
 
   /**
    * Returns a serializer of private keys.
-   *
-   * @return private key serializer
    */
   public static Serializer<PrivateKey> privateKey() {
     return PrivateKeySerializer.INSTANCE;

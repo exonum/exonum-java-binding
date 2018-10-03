@@ -24,16 +24,19 @@ import org.junit.jupiter.api.Test;
 
 class BoolSerializerTest {
 
+  private Serializer<Boolean> serializer = BoolSerializer.INSTANCE;
+
   @Test
   void roundTrip() {
-    roundTripTest(true, BoolSerializer.INSTANCE);
-    roundTripTest(false, BoolSerializer.INSTANCE);
+
+    roundTripTest(true, serializer);
+    roundTripTest(false, serializer);
   }
 
   @Test
   void deserializeInvalidValue() {
     byte[] invalidValue = {2};
-    invalidBytesValueTest(invalidValue, FloatSerializer.INSTANCE);
+    invalidBytesValueTest(invalidValue, serializer);
   }
 
 }

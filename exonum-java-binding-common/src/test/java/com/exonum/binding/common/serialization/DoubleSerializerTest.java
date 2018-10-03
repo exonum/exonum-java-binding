@@ -20,24 +20,45 @@ package com.exonum.binding.common.serialization;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
-import org.junit.jupiter.api.Test;
+import com.exonum.binding.test.Bytes;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class DoubleSerializerTest {
 
+  private Serializer<Double> serializer = DoubleSerializer.INSTANCE;
+
   @ParameterizedTest
-  @ValueSource(doubles = {Double.MIN_VALUE, -1D, 0D, 1.5D, Double.MAX_VALUE,
-      Double.MIN_NORMAL, Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
-      Double.MIN_EXPONENT, Double.MAX_EXPONENT})
+  @ValueSource(doubles = {
+      Double.NaN,
+      Double.NEGATIVE_INFINITY,
+      Double.MIN_VALUE,
+      Double.MIN_NORMAL,
+      -1D, 0D, 1.5D,
+      Double.MAX_VALUE,
+      Double.POSITIVE_INFINITY})
   void roundTrip(Double value) {
-    roundTripTest(value, DoubleSerializer.INSTANCE);
+    roundTripTest(value, serializer);
   }
 
-  @Test
-  void deserializeInvalidValue() {
-    byte[] invalidValue = "invalid".getBytes();
-    invalidBytesValueTest(invalidValue, DoubleSerializer.INSTANCE);
+  @ParameterizedTest
+  @MethodSource("invalidDoubles")
+  void deserializeInvalidValue(byte[] value) {
+    invalidBytesValueTest(value, serializer);
+  }
+
+  private static Stream<byte[]> invalidDoubles() {
+    return Stream.of(
+        Bytes.bytes(),
+        Bytes.bytes((byte) 0),
+        Bytes.bytes(1,2,3),
+        Bytes.bytes(1, 2, 3, 4),
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7),
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        Bytes.bytes("str")
+    );
   }
 
 }

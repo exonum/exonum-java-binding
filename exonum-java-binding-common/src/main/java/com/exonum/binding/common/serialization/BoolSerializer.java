@@ -37,7 +37,7 @@ enum BoolSerializer implements Serializer<Boolean> {
   public Boolean fromBytes(byte[] serializedValue) {
     checkLength(serializedValue, BOOLEAN_BYTES);
     byte value = serializedValue[0];
-    checkArgument(isValidBoolean(value), "Is not a boolean value");
+    checkArgument(isValidBoolean(value), "%s is not a boolean value", value);
 
     return value == BOOLEAN_TRUE;
   }

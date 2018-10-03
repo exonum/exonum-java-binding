@@ -20,22 +20,37 @@ package com.exonum.binding.common.serialization;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
-import org.junit.jupiter.api.Test;
+import com.exonum.binding.test.Bytes;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class Fixed32SerializerTest {
 
+  private Serializer<Integer> serializer = Fixed32Serializer.INSTANCE;
+
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE})
   void roundTrip(Integer value) {
-    roundTripTest(value, Fixed32Serializer.INSTANCE);
+    roundTripTest(value, serializer);
   }
 
-  @Test
-  void deserializeInvalidValue() {
-    byte[] invalidValue = "invalid".getBytes();
-    invalidBytesValueTest(invalidValue, Fixed32Serializer.INSTANCE);
+  @ParameterizedTest
+  @MethodSource("invalidIntegers")
+  void deserializeInvalidValue(byte[] value) {
+    invalidBytesValueTest(value, serializer);
+  }
+
+  private static Stream<byte[]> invalidIntegers() {
+    return Stream.of(
+        Bytes.bytes(),
+        Bytes.bytes((byte) 0),
+        Bytes.bytes(1, 2, 3),
+        Bytes.bytes(1, 2, 3, 4, 5),
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8),
+        Bytes.bytes("str")
+    );
   }
 
 }

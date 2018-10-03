@@ -23,6 +23,7 @@ import static com.exonum.binding.common.serialization.StandardSerializersTest.ro
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.test.Bytes;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,24 +31,33 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class PublicKeySerializerTest {
 
+  private Serializer<PublicKey> serializer = PublicKeySerializer.INSTANCE;
+
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(PublicKey key) {
-    roundTripTest(key, PublicKeySerializer.INSTANCE);
+    roundTripTest(key, serializer);
   }
 
   @Test
   void deserializeInvalidValue() {
     byte[] invalidValue = {};
-    invalidBytesValueTest(invalidValue, PublicKeySerializer.INSTANCE);
+    invalidBytesValueTest(invalidValue, serializer);
   }
 
   private static Stream<PublicKey> testSource() {
-    return Stream.of(
-        ed25519().generateKeyPair(),
-        ed25519().generateKeyPair(),
-        ed25519().generateKeyPair()
-    ).map(KeyPair::getPublicKey);
+    Stream<PublicKey> keysFromBytes =
+        Stream.of(
+            Bytes.bytes("key string"),
+            Bytes.bytes(1, 2, 3, 4, 6))
+            .map(PublicKey::fromBytes);
+
+    Stream<PublicKey> ed25519Keys =
+        Stream.of(
+            ed25519().generateKeyPair())
+            .map(KeyPair::getPublicKey);
+
+    return Stream.concat(keysFromBytes, ed25519Keys);
   }
 
 }
