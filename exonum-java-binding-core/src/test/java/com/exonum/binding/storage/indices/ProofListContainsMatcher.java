@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import com.exonum.binding.common.proofs.list.ListProof;
+import com.exonum.binding.common.proofs.list.ListProofNode;
 import com.exonum.binding.common.proofs.list.ListProofRootHashCalculator;
 import com.exonum.binding.common.proofs.list.ListProofStatus;
 import com.exonum.binding.common.proofs.list.ListProofStructureValidator;
@@ -36,10 +36,11 @@ import org.hamcrest.TypeSafeMatcher;
 
 class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<String>> {
 
-  private final Function<ProofListIndexProxy<String>, ListProof> proofFunction;
+  private final Function<ProofListIndexProxy<String>, ListProofNode> proofFunction;
   private final Matcher<Map<Long, String>> elementsMatcher;
 
-  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>, ListProof> proofFunction,
+  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>,
+                                   ListProofNode> proofFunction,
                                    Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
     this.elementsMatcher = equalTo(expectedProofElements);
@@ -51,7 +52,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       return false;
     }
 
-    ListProof proof = proofFunction.apply(list);
+    ListProofNode proof = proofFunction.apply(list);
 
     ListProofStructureValidator validator = newProofStructureValidator();
     proof.accept(validator);
@@ -73,7 +74,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   @Override
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
-    ListProof proof = proofFunction.apply(list);
+    ListProofNode proof = proofFunction.apply(list);
     ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
     proof.accept(calculator);
 
@@ -122,7 +123,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProofNode> proofFunction =
         (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction,
@@ -147,7 +148,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
     long to = from + expectedValues.size();
-    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProofNode> proofFunction =
         (list) -> list.getRangeProof(from, to);
 
     Map<Long, String> expectedProofElements = new TreeMap<>();

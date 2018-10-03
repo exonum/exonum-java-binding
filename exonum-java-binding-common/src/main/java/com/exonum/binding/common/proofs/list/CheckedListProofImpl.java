@@ -21,9 +21,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.common.ProofStatus;
-import com.exonum.binding.common.proofs.map.flat.MapProofStatus;
 import java.util.NavigableMap;
 
+/**
+ * Checked List Proof which includes list proof verification results.
+ */
 public class CheckedListProofImpl<E> implements CheckedListProof {
 
   private final HashCode calculatedRootHash;
@@ -32,6 +34,12 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
 
   private final ProofStatus proofStatus;
 
+  /**
+   * Creates checked list proof.
+   * @param calculatedRootHash calculated root hash of the proof
+   * @param elements proof elements collection
+   * @param proofStatus a status of proof verification
+   */
   public CheckedListProofImpl(HashCode calculatedRootHash,
       NavigableMap<Long, E> elements, ProofStatus proofStatus) {
     this.calculatedRootHash = checkNotNull(calculatedRootHash);

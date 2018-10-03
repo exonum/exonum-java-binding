@@ -18,9 +18,6 @@ package com.exonum.binding.common.proofs.list;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.common.ProofStatus;
-import com.exonum.binding.common.proofs.map.flat.MapEntry;
-import com.exonum.binding.common.proofs.map.flat.MapProofStatus;
-import java.util.List;
 import java.util.NavigableMap;
 
 /**
@@ -58,5 +55,4 @@ public interface CheckedListProof {
    * Returns the status of this proof: whether it is structurally valid.
    */
   ProofStatus getStatus();
-
 }

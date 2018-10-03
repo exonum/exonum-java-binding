@@ -22,6 +22,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.common.ProofStatus;
 import com.exonum.binding.common.serialization.Serializer;
 
+/**
+ * An Adapter class used to simplify work with ListProof interfaces.
+ */
 public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
   private final ListProofNode listProofNode;
@@ -30,6 +33,15 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
   private final ListProofRootHashCalculator<E> listProofRootHashCalculator;
 
+  /**
+   * Creates UncheckedListProofAdapter for convenient usage of LispProof interfaces.
+   *
+   * <p>UncheckedListProofAdapter check() method will return CheckedListProof containing results of
+   * list proof verification.
+   *
+   * @param listProofNode source list proof
+   * @param serializer proof elements serializer
+   */
   public UncheckedListProofAdapter(ListProofNode listProofNode, Serializer<E> serializer) {
     this.listProofNode = checkNotNull(listProofNode);
     this.listProofStructureValidator = new ListProofStructureValidator();

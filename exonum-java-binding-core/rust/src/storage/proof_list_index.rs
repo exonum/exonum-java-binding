@@ -404,8 +404,8 @@ fn make_java_proof_branch<'a>(
     let right = env.auto_local(right);
     env.new_object(
         "com/exonum/binding/common/proofs/list/ListProofBranch",
-        "(Lcom/exonum/binding/common/proofs/list/ListProof;\
-         Lcom/exonum/binding/common/proofs/list/ListProof;)V",
+        "(Lcom/exonum/binding/common/proofs/list/ListProofNode;\
+         Lcom/exonum/binding/common/proofs/list/ListProofNode;)V",
         &[left.as_obj().into(), right.as_obj().into()],
     )
 }
