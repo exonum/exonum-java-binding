@@ -203,10 +203,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-fn process_proof<'a>(
-    env: &'a JNIEnv,
-    proof: MapProof<Key, Value>
-) -> JniResult<JObject<'a>> {
+fn process_proof<'a>(env: &'a JNIEnv, proof: MapProof<Key, Value>) -> JniResult<JObject<'a>> {
     let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
     let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
 
@@ -590,10 +587,12 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
     let bytes = env.convert_byte_array(array)?;
     assert_eq!(bytes.len() % PROOF_MAP_KEY_SIZE, 0);
 
-    let keys = bytes.chunks(PROOF_MAP_KEY_SIZE).map(|bytes| {
-        let mut key = Key::default();
-        key.copy_from_slice(bytes);
-        key
+    let keys = bytes
+        .chunks(PROOF_MAP_KEY_SIZE)
+        .map(|bytes| {
+            let mut key = Key::default();
+            key.copy_from_slice(bytes);
+            key
     }).collect();
     Ok(keys)
 }
