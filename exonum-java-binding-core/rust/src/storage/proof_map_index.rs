@@ -178,16 +178,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             IndexType::ForkIndex(ref map) => map.get_proof(key),
         };
 
-        let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
-        let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
-
-        // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
-        let checked_proof = proof.check().unwrap();
-        let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
-
-        let unchecked_flat_map_proof =
-            create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)?;
-        Ok(unchecked_flat_map_proof.into_inner())
+        Ok(process_proof(&env, proof)?.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -207,18 +198,23 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             IndexType::ForkIndex(ref map) => map.get_multiproof(keys),
         };
 
-        let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
-        let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
-
-        // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
-        let checked_proof = proof.check().unwrap();
-        let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
-
-        let unchecked_flat_map_proof =
-            create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)?;
-        Ok(unchecked_flat_map_proof.into_inner())
+        Ok(process_proof(&env, proof)?.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+fn process_proof<'a>(
+    env: &'a JNIEnv,
+    proof: MapProof<Key, Value>
+) -> JniResult<JObject<'a>> {
+    let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
+    let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
+
+    // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
+    let checked_proof = proof.check().unwrap();
+    let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
+
+    create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)
 }
 
 fn create_java_proof_nodes<'a>(

@@ -22,7 +22,9 @@ import static com.exonum.binding.storage.indices.MapTestEntry.absentEntry;
 import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
 import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
+import static com.exonum.binding.storage.indices.ProofMapMultiContainsMatcher.provesThatAbsent;
 import static com.exonum.binding.storage.indices.ProofMapMultiContainsMatcher.provesThatCorrect;
+import static com.exonum.binding.storage.indices.ProofMapMultiContainsMatcher.provesThatPresent;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -474,7 +476,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries));
+      assertThat(map, provesThatPresent(entries));
     });
   }
 
@@ -492,7 +494,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries));
+      assertThat(map, provesThatPresent(entries));
     });
   }
 
@@ -514,7 +516,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries));
+      assertThat(map, provesThatPresent(entries));
     });
   }
 
@@ -535,7 +537,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries));
+      assertThat(map, provesThatPresent(entries));
     });
   }
 
@@ -545,7 +547,37 @@ public class ProofMapIndexProxyIntegrationTest
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries));
+      assertThat(map, provesThatPresent(entries));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_LastByte_DoesNotContain1() {
+    runTestWithView(database::createFork, (map) -> {
+
+      List<HashCode> proofKeys = Stream.of(
+          (byte) 0b0000_0000,
+          (byte) 0b0000_0001,
+          (byte) 0b1000_0000,
+          (byte) 0b1000_0001
+      ).map(ProofMapIndexProxyIntegrationTest::createProofKey).collect(Collectors.toList());
+
+      assertThat(map, provesThatAbsent(proofKeys));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_LastByte_DoesNotContain2() {
+    runTestWithView(database::createFork, (map) -> {
+
+      List<HashCode> proofKeys = Stream.of(
+          (byte) 0b00,
+          (byte) 0b01,
+          (byte) 0b10,
+          (byte) 0b11
+      ).map(ProofMapIndexProxyIntegrationTest::createProofKey).collect(Collectors.toList());
+
+      assertThat(map, provesThatAbsent(proofKeys));
     });
   }
 

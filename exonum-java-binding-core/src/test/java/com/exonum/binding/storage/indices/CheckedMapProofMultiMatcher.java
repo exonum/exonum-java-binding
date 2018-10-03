@@ -42,14 +42,14 @@ class CheckedMapProofMultiMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
     ProofStatus status = checkedMapProof.getStatus();
-    List<MapEntry> presentEntries = checkedMapProof.getEntries();
-    List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
     return status == ProofStatus.CORRECT
-        && checkProofSize(presentEntries, missingKeys)
-        && entries.stream().allMatch(e -> checkEntry(presentEntries, missingKeys, e));
+        && checkProofSize(checkedMapProof)
+        && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
   }
 
-  private boolean checkProofSize(List<MapEntry> presentEntries, List<byte[]> missingKeys) {
+  private boolean checkProofSize(CheckedMapProof checkedMapProof) {
+    List<MapEntry> presentEntries = checkedMapProof.getEntries();
+    List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
     long expectedPresentEntries = entries
         .stream()
         .filter(e -> e.getValue().isPresent())
@@ -62,16 +62,17 @@ class CheckedMapProofMultiMatcher extends TypeSafeMatcher<CheckedMapProof> {
         && missingKeys.size() == expectedAbsentEntries;
   }
 
-  private boolean checkEntry(
-      List<MapEntry> presentEntries, List<byte[]> missingKeys, MapTestEntry entry) {
+  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry entry) {
     Optional<String> entryValue = entry.getValue();
     Matcher<byte[]> keyMatcher = IsEqual.equalTo(entry.getKey().asBytes());
 
     if (entryValue.isPresent()) {
       Matcher<byte[]> valueMatcher = IsEqual.equalTo(entryValue.get().getBytes());
+      List<MapEntry> presentEntries = checkedMapProof.getEntries();
       return checkPresentEntry(presentEntries, keyMatcher, valueMatcher);
     }
     else {
+      List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
       return checkAbsentEntry(missingKeys, keyMatcher);
     }
   }
@@ -131,8 +132,9 @@ class CheckedMapProofMultiMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   private static String formatMapMatcherEntry(MapTestEntry e) {
     String key = e.getKey().toString();
-    String value = e.getValue().orElse("No value");
-    return String.format("(%s -> %s)", key, value);
+    return e.getValue().isPresent()
+        ? String.format("(%s -> %s)", key, e.getValue().get())
+        : key;
   }
 
   /**

@@ -31,6 +31,7 @@ import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -203,33 +204,50 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private native byte[] nativeGet(long nativeHandle, byte[] key);
 
   /**
-   * Returns a proof that there is a value mapped to the specified key or
-   * that there is no such mapping.
+   * Returns a proof that there are values mapped to the specified keys or that there are no such
+   * mappings.
    *
    * @param key a proof map key which might be mapped to some value, must be 32-byte long
-   * @throws IllegalStateException  if this map is not valid
-   * @throws IllegalArgumentException if the size of the key is not 32 bytes
+   * @param otherKeys other proof map keys which might be mapped to some values, each must be
+   * 32-byte long
+   * @throws IllegalStateException if this map is not valid
+   * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
    */
-  public UncheckedMapProof getProof(K key) {
-    byte[] dbKey = keySerializer.toBytes(key);
-    return nativeGetProof(getNativeHandle(), dbKey);
+  public UncheckedMapProof getProof(K key, K... otherKeys) {
+    if (otherKeys.length == 0) {
+      byte[] dbKey = keySerializer.toBytes(key);
+      return nativeGetProof(getNativeHandle(), dbKey);
+    } else {
+      List<K> keyList = Arrays.asList(otherKeys);
+      keyList.add(key);
+      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyList));
+    }
   }
-
-  private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
 
   /**
    * Returns a proof that there are values mapped to the specified keys or that there are no such
    * mappings.
    *
-   * @param keys proof map keys which might be mapped to some values, each must be 32-byte long
+   * @param keyCollection proof map keys which might be mapped to some values, each must be
+   * 32-byte long
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
    */
-  public UncheckedMapProof getProof(K... keys) {
-    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(Arrays.asList(keys)));
+  public UncheckedMapProof getProof(Collection<? extends K> keyCollection) {
+    if (keyCollection.size() == 1) {
+      K key = keyCollection.stream()
+          .findFirst()
+          .get();
+      byte[] dbKey = keySerializer.toBytes(key);
+      return nativeGetProof(getNativeHandle(), dbKey);
+    } else {
+      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyCollection));
+    }
   }
 
-  private byte[] mergeKeysIntoByteArray(List<K> keyList) {
+  private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
+
+  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keyList) {
     int arraySize = keyList.size() * PROOF_MAP_KEY_SIZE;
     ByteBuffer flattenedKeys = ByteBuffer.allocate(arraySize);
     keyList.stream()
