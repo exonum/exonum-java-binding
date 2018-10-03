@@ -310,6 +310,7 @@
   <profiles>
     <!-- A build profile for a build performed on a CI server:
             - Fails if the code has style issues
+            - Collects test coverage information
      -->
     <profile>
       <id>ci-build</id>
