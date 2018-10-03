@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.exonum.binding</groupId>
             <artifactId>exonum-java-binding-core</artifactId>
-            <version>0.2</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

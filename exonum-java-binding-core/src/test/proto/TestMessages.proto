@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.storage.indices";
+option java_outer_classname = "TestProtoMessages";
+
+message Id {
+  string id = 1;
+}
+
+message Point {
+  sint32 x = 1;
+  sint32 y = 2;
+}

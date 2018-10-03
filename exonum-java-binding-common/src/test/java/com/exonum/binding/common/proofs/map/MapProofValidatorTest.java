@@ -24,9 +24,10 @@ import static com.exonum.binding.common.proofs.map.MapProofValidatorMatchers.isV
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,15 +39,11 @@ import com.exonum.binding.common.proofs.map.MapProofValidator.Status;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Arrays;
 import java.util.regex.Pattern;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class MapProofValidatorTest {
+class MapProofValidatorTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private static final String V1 = "v1";
   private static final HashCode ROOT_HASH = HashCode.fromBytes(
@@ -59,8 +56,8 @@ public class MapProofValidatorTest {
   private Hasher hasher;
   private MapProofValidator<String> validator;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     hasher = mock(Hasher.class);
     when(hasher.putObject(any(), any())).thenReturn(hasher);
     when(hasher.putBytes(any(byte[].class))).thenReturn(hasher);
@@ -72,7 +69,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitEqualAtRoot_OtherKey() {
+  void testVisitEqualAtRoot_OtherKey() {
     byte[] key = createKey(0b1011);  // [110100…00]
     byte[] otherKey = createKey(0b101);
     MapProof mapProof = equalValueAtRoot(leafDbKey(otherKey), V1);
@@ -85,7 +82,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitEqualAtRoot_BranchDbKey() {
+  void testVisitEqualAtRoot_BranchDbKey() {
     byte[] key = createKey(0b1011);  // [110100…00]
     DbKey databaseKey = branchDbKey(key, 4);
     MapProof mapProof = equalValueAtRoot(databaseKey, V1);
@@ -98,15 +95,16 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitEqualAtRoot_FailsIfAlreadyVisitedBranches() {
+  void testVisitEqualAtRoot_FailsIfAlreadyVisitedBranches() {
     visitSomeBranches();
 
-    expectedException.expect(IllegalStateException.class);
-    validator.visit(equalValueAtRoot(leafDbKey(createKey(0x0F)), V1));
+    assertThrows(IllegalStateException.class,
+        () -> validator.visit(equalValueAtRoot(leafDbKey(createKey(0x0F)), V1)));
+
   }
 
   @Test
-  public void testVisitEqualAtRoot_Valid() {
+  void testVisitEqualAtRoot_Valid() {
     byte[] key = createKey(0b1011);  // [110100…00]
     String value = V1;
     MapProof mapProof = equalValueAtRoot(leafDbKey(key), value);
@@ -118,7 +116,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitNonEqualAtRoot_EqualToRequestedKey() {
+  void testVisitNonEqualAtRoot_EqualToRequestedKey() {
     byte[] key = createKey(0b1011);  // [110100…00]
     MapProof mapProof = new NonEqualValueAtRoot(leafDbKey(key), createHash("h1"));
 
@@ -130,7 +128,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitNonEqualAtRoot_BranchDbKey() {
+  void testVisitNonEqualAtRoot_BranchDbKey() {
     byte[] key = createKey(0b101);
     DbKey databaseKey = branchDbKey(key, 4);
     MapProof mapProof = new NonEqualValueAtRoot(databaseKey, createHash("h1"));
@@ -144,16 +142,18 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitNonEqualAtRoot_FailsIfAlreadyVisitedBranches() {
+  void testVisitNonEqualAtRoot_FailsIfAlreadyVisitedBranches() {
     visitSomeBranches();
 
-    expectedException.expect(IllegalStateException.class);
-    validator.visit(new NonEqualValueAtRoot(leafDbKey(createKey(0x0F)),
-        createHash("h1")));
+
+    assertThrows(IllegalStateException.class,
+        () -> validator.visit(new NonEqualValueAtRoot(leafDbKey(createKey(0x0F)),
+            createHash("h1"))));
+
   }
 
   @Test
-  public void testVisitNonEqualAtRoot_Valid() {
+  void testVisitNonEqualAtRoot_Valid() {
     byte[] key = createKey(0b0100); // [00100…00]
     MapProof mapProof = new NonEqualValueAtRoot(leafDbKey(key),
         createHash("h1"));
@@ -166,7 +166,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitEmptyAtRoot_Valid() {
+  void testVisitEmptyAtRoot_Valid() {
     MapProof mapProof = new EmptyMapProof();
 
     byte[] key = createKey(0b101);
@@ -177,7 +177,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitEmptyAtRoot_NotValid() {
+  void testVisitEmptyAtRoot_NotValid() {
     MapProof mapProof = new EmptyMapProof();
 
     byte[] key = createKey(0b101);
@@ -189,11 +189,12 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitEmptyAtRoot_FailsIfAlreadyVisitedBranches() {
+  void testVisitEmptyAtRoot_FailsIfAlreadyVisitedBranches() {
     visitSomeBranches();
 
-    expectedException.expect(IllegalStateException.class);
-    validator.visit(new EmptyMapProof());
+
+    assertThrows(IllegalStateException.class, () -> validator.visit(new EmptyMapProof()));
+
   }
 
   /**
@@ -218,7 +219,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitMappingNotFound_NotValidNotAPrefixOfKey() {
+  void testVisitMappingNotFound_NotValidNotAPrefixOfKey() {
     byte[] key = createKey(0b100);  // [00100…00]
     MapProof mapProof = new RightMapProofBranch(
         createHash("h3"),
@@ -241,7 +242,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitMappingNotFound_NotValidLeftIsPrefixOfKey() {
+  void testVisitMappingNotFound_NotValidLeftIsPrefixOfKey() {
     byte[] key = createKey(0b100);  // [00100…00]
     MapProof mapProof = new LeftMapProofBranch(
         new MappingNotFoundProofBranch(
@@ -264,7 +265,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitMappingNotFound_NotValidRightIsPrefixOfKey() {
+  void testVisitMappingNotFound_NotValidRightIsPrefixOfKey() {
     byte[] key = createKey(0b110);  // [01100…00]
     MapProof mapProof = new LeftMapProofBranch(
         new MappingNotFoundProofBranch(
@@ -288,7 +289,7 @@ public class MapProofValidatorTest {
 
   // Successful test
   @Test
-  public void testVisitMappingNotFound_ValidAtRoot() {
+  void testVisitMappingNotFound_ValidAtRoot() {
     byte[] key = createKey(0b0100);  // [00100…00]
     MapProof mapProof = new MappingNotFoundProofBranch(
         createHash("h1"),
@@ -303,7 +304,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitMappingNotFound_ValidAsLeftChild() {
+  void testVisitMappingNotFound_ValidAsLeftChild() {
     byte[] key = createKey(0b0100);  // [00100…00]
     MapProof mapProof = new LeftMapProofBranch(
         new MappingNotFoundProofBranch(
@@ -322,7 +323,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_NotValid_NotAPrefixOfKey_LeftSubTree() {
+  void testVisitLeaf_NotValid_NotAPrefixOfKey_LeftSubTree() {
     byte[] key = createKey(0b101);      // [10100…00]
     byte[] otherKey = createKey(0b100); // [00100…00]
     MapProof mapProof = new LeftMapProofBranch(
@@ -341,7 +342,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_NotValid_NotAPrefixOfKey_RightSubTree() {
+  void testVisitLeaf_NotValid_NotAPrefixOfKey_RightSubTree() {
     byte[] key = createKey(0b100);      // [00100…00]
     byte[] otherKey = createKey(0b101); // [10100…00]
     MapProof mapProof = new RightMapProofBranch(
@@ -360,7 +361,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_NotValid_LeafAtRoot() {
+  void testVisitLeaf_NotValid_LeafAtRoot() {
     byte[] key = createKey(0b100);      // [00100…00]
     MapProof mapProof = leafNode(V1);
 
@@ -372,7 +373,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_Valid_L1_LeftSubTree() {
+  void testVisitLeaf_Valid_L1_LeftSubTree() {
     byte[] key = createKey(0b100);      // [00100…00]
     String value = V1;
     MapProof mapProof = new LeftMapProofBranch(
@@ -389,7 +390,6 @@ public class MapProofValidatorTest {
 
   /**
    * Tests a case when a key length increases for more than a single bit.
-   *
    * <pre>
    *                        o
    * +0                 /        \
@@ -399,15 +399,15 @@ public class MapProofValidatorTest {
    * </pre>
    */
   @Test
-  public void testVisitLeaf_Valid_L2_LeftSubTree_PrefixExtension() {
+  void testVisitLeaf_Valid_L2_LeftSubTree_PrefixExtension() {
     byte[] key = createKey(0b1110_1110);      // [011101110…00]
     String value = V1;
     MapProof mapProof = new LeftMapProofBranch(
         new LeftMapProofBranch(
-          leafNode(value),
-          createHash("h2"),
-          leafDbKey(key),
-          branchDbKey(createKey(0b1_1110), 5)
+            leafNode(value),
+            createHash("h2"),
+            leafDbKey(key),
+            branchDbKey(createKey(0b1_1110), 5)
         ),
         createHash("h1"),
         // Prefix extension: left branch adds 1+3 bits to the prefix.
@@ -421,7 +421,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_Valid_L1_RightSubTree() {
+  void testVisitLeaf_Valid_L1_RightSubTree() {
     byte[] key = createKey(0b101);      // [00100…00]
     String value = V1;
     MapProof mapProof = new RightMapProofBranch(
@@ -437,7 +437,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_Valid_L2_RightSubTree_PrefixExtension() {
+  void testVisitLeaf_Valid_L2_RightSubTree_PrefixExtension() {
     byte[] key = createKey(0b1_1001);      // [1000100…0]
     String value = V1;
     MapProof mapProof = new RightMapProofBranch(
@@ -459,7 +459,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitLeaf_ValidTree_L1_HashMismatch() {
+  void testVisitLeaf_ValidTree_L1_HashMismatch() {
     byte[] key = createKey(0b101);      // [10100…00]
     MapProof mapProof = new RightMapProofBranch(
         createHash("h1"),
@@ -500,7 +500,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitRightLeaningTree_H1_Valid() {
+  void testVisitRightLeaningTree_H1_Valid() {
     int height = 1;
     byte[] key = new byte[DbKey.KEY_SIZE];
     String value = V1;
@@ -514,7 +514,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitRightLeaningTree_H256_Valid() {
+  void testVisitRightLeaningTree_H256_Valid() {
     int height = 256;
     byte[] key = new byte[DbKey.KEY_SIZE];
     String value = V1;
@@ -528,7 +528,7 @@ public class MapProofValidatorTest {
   }
 
   @Test
-  public void testVisitRightLeaningTree_H257_NotValid() {
+  void testVisitRightLeaningTree_H257_NotValid() {
     int height = 257;
     byte[] key = new byte[DbKey.KEY_SIZE];
     MapProof mapProof = createProofTree(height, V1);
@@ -546,9 +546,10 @@ public class MapProofValidatorTest {
   private void testGetValueFails(Status status) {
     String errorMessageRegex = "Proof is not valid:.+"
         + "status=" + Pattern.quote(status.toString()) + ".*";
-    expectedException.expectMessage(matchesPattern(errorMessageRegex));
-    expectedException.expect(IllegalStateException.class);
-    validator.getValue();
+
+    IllegalStateException thrown = assertThrows(IllegalStateException.class,
+        () -> validator.getValue());
+    assertThat(thrown.getMessage(), matchesPattern(errorMessageRegex));
   }
 
   /**

@@ -21,10 +21,12 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndex
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.LongSupplier;
@@ -56,6 +58,31 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   private final CheckingSerializerDecorator<V> valueSerializer;
 
   /**
+   * Creates a new MapIndexProxy using protobuf messages.
+   *
+   * <p>If only a key or a value is a protobuf message, use
+   * {@link MapIndexProxy#newInstance(String, View, Serializer, Serializer)}
+   * and {@link com.exonum.binding.common.serialization.StandardSerializers#protobuf(Class)}.
+   *
+   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
+   *             [a-zA-Z0-9_]
+   * @param view a database view. Must be valid
+   *             If a view is read-only, "destructive" operations are not permitted
+   * @param keyType the class of keys-protobuf messages
+   * @param valueType the class of values-protobuf messages
+   * @param <K> the type of keys in the map; must be a protobuf message
+   * @param <V> the type of values in the map; must be a protobuf message
+   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalArgumentException if the name is empty; or a key or value class is
+   *     not a valid protobuf message that has a public static {@code #parseFrom(byte[])} method
+   */
+  public static <K extends MessageLite, V extends MessageLite> MapIndexProxy<K, V> newInstance(
+      String name, View view, Class<K> keyType, Class<V> valueType) {
+    return newInstance(name, view, StandardSerializers.protobuf(keyType),
+        StandardSerializers.protobuf(valueType));
+  }
+
+  /**
    * Creates a new MapIndexProxy.
    *
    * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
@@ -68,6 +95,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
    * @param <V> the type of values in the map
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
+   * @see StandardSerializers
    */
   public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
                                                        Serializer<K> keySerializer,
@@ -99,6 +127,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
    * @return a new map proxy
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
+   * @see StandardSerializers
    */
   public static <K, V> MapIndexProxy<K, V> newInGroupUnsafe(String groupName,
                                                             byte[] mapId,
