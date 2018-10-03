@@ -60,7 +60,8 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     proof.accept(calculator);
 
     return validator.check().equals(ListProofStatus.VALID)
-        && elementsMatcher.matches(calculator.getElements());
+        && elementsMatcher.matches(calculator.getElements())
+        && list.getRootHash().equals(calculator.getCalculatedRootHash());
   }
 
   @Override
@@ -82,6 +83,14 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     if (!validator.check().equals(ListProofStatus.VALID)) {
       mismatchDescription.appendText("proof was not valid: ")
           .appendValue(validator.getProofStatus().getDescription());
+      return;
+    }
+
+    if (!list.getRootHash().equals(calculator.getCalculatedRootHash())) {
+      mismatchDescription.appendText("calculated root hash doesn't match: ")
+          .appendValue(calculator.getCalculatedRootHash())
+          .appendText("expected root hash: ")
+          .appendValue(list.getRootHash());
       return;
     }
 
