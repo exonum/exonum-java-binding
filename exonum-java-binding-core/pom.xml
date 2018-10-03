@@ -198,7 +198,7 @@
         </configuration>
         <executions>
           <execution>
-            <id>integration-test-verify</id>
+            <id>integration-test</id>
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
