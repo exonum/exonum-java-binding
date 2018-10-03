@@ -172,7 +172,7 @@
         </configuration>
         <executions>
           <execution>
-            <id>integration-test</id>
+            <id>integration-test-verify</id>
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>

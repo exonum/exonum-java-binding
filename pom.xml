@@ -326,43 +326,43 @@
             </configuration>
             <executions>
               <execution>
-                <id>default-prepare-agent</id>
+                <id>prepare-jacoco-agent</id>
                 <goals>
                   <goal>prepare-agent</goal>
                 </goals>
                 <configuration>
-                  <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
                 </configuration>
               </execution>
               <execution>
-                <id>default-report</id>
+                <id>prepare-package-jacoco-report</id>
                 <phase>prepare-package</phase>
                 <goals>
                   <goal>report</goal>
                 </goals>
                 <configuration>
-                  <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
                 </configuration>
               </execution>
               <execution>
-                <id>pre-integration-test</id>
+                <id>pre-integration-test-prepare-jacoco-agent</id>
                 <phase>pre-integration-test</phase>
                 <goals>
                   <goal>prepare-agent</goal>
                 </goals>
                 <configuration>
-                  <destFile>${basedir}/target/coverage-reports/jacoco-it.exec</destFile>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
                   <propertyName>itCoverageAgent</propertyName>
                 </configuration>
               </execution>
               <execution>
-                <id>post-integration-test</id>
+                <id>post-integration-test-jacoco-report</id>
                 <phase>post-integration-test</phase>
                 <goals>
                   <goal>report</goal>
                 </goals>
                 <configuration>
-                  <dataFile>${basedir}/target/coverage-reports/jacoco-it.exec</dataFile>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
                 </configuration>
               </execution>
             </executions>
