@@ -29,11 +29,11 @@ import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
-import java.util.stream.Collector;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -218,22 +218,21 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * Returns a proof that there are values mapped to the specified keys or that there are no such
    * mappings.
    *
-   * @param keyList list of proof map keys which might be mapped to some value, each must be 32-byte
-   *     long
+   * @param keys proof map keys which might be mapped to some values, each must be 32-byte long
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
    */
-  public UncheckedMapProof getProof(List<K> keyList) {
-    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyList));
+  public UncheckedMapProof getProof(K... keys) {
+    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(Arrays.asList(keys)));
   }
 
   private byte[] mergeKeysIntoByteArray(List<K> keyList) {
     int arraySize = keyList.size() * PROOF_MAP_KEY_SIZE;
-    return keyList.stream()
+    ByteBuffer flattenedKeys = ByteBuffer.allocate(arraySize);
+    keyList.stream()
         .map(keySerializer::toBytes)
-        .collect(Collector.of(
-            () -> ByteBuffer.allocate(arraySize),
-            ByteBuffer::put, (a, b) -> b, ByteBuffer::array));
+        .forEach(flattenedKeys::put);
+    return flattenedKeys.array();
   }
 
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);

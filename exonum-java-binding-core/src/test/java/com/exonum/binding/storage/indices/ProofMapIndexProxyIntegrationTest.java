@@ -33,8 +33,6 @@ import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
@@ -402,7 +400,7 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   public void getMultiProof_EmptyMap() {
     runTestWithView(database::createSnapshot, (map) ->
-            assertThat(map, provesThatCorrect(asList(absentEntry(PK1), absentEntry(PK2)))));
+            assertThat(map, provesThatCorrect(absentEntry(PK1), absentEntry(PK2))));
   }
 
   @Test
@@ -412,7 +410,7 @@ public class ProofMapIndexProxyIntegrationTest
       String value = V1;
       map.put(key, value);
 
-      assertThat(map, provesThatCorrect(singletonList(presentEntry(key, value))));
+      assertThat(map, provesThatCorrect(presentEntry(key, value)));
     });
   }
 
@@ -421,7 +419,16 @@ public class ProofMapIndexProxyIntegrationTest
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      assertThat(map, provesThatCorrect(singletonList(absentEntry(PK2))));
+      assertThat(map, provesThatCorrect(absentEntry(PK2)));
+    });
+  }
+
+  @Test
+  public void getMultiProof_SingletonMapDoesNotContainSeveralKeys() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      assertThat(map, provesThatCorrect(absentEntry(PK2), absentEntry(PK3)));
     });
   }
 
@@ -434,7 +441,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       map.putAll(source);
 
-      assertThat(map, provesThatCorrect(asList(presentEntry(PK1, V1), absentEntry(PK2))));
+      assertThat(map, provesThatCorrect(presentEntry(PK1, V1), absentEntry(PK2)));
     });
   }
 
@@ -448,7 +455,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       map.putAll(source);
 
-      assertThat(map, provesThatCorrect(asList(presentEntry(PK1, V1), presentEntry(PK2, V2))));
+      assertThat(map, provesThatCorrect(presentEntry(PK1, V1), presentEntry(PK2, V2)));
     });
   }
 
@@ -467,10 +474,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries
-          .stream()
-          .map(e -> presentEntry(e.getKey(), e.getValue()))
-          .collect(Collectors.toList())));
+      assertThat(map, provesThatCorrect(entries));
     });
   }
 
@@ -488,10 +492,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries
-          .stream()
-          .map(e -> presentEntry(e.getKey(), e.getValue()))
-          .collect(Collectors.toList())));
+      assertThat(map, provesThatCorrect(entries));
     });
   }
 
@@ -513,10 +514,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries
-          .stream()
-          .map(e -> presentEntry(e.getKey(), e.getValue()))
-          .collect(Collectors.toList())));
+      assertThat(map, provesThatCorrect(entries));
     });
   }
 
@@ -537,10 +535,7 @@ public class ProofMapIndexProxyIntegrationTest
 
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries
-          .stream()
-          .map(e -> presentEntry(e.getKey(), e.getValue()))
-          .collect(Collectors.toList())));
+      assertThat(map, provesThatCorrect(entries));
     });
   }
 
@@ -550,10 +545,7 @@ public class ProofMapIndexProxyIntegrationTest
       List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
       putAll(map, entries);
 
-      assertThat(map, provesThatCorrect(entries
-          .stream()
-          .map(e -> presentEntry(e.getKey(), e.getValue()))
-          .collect(Collectors.toList())));
+      assertThat(map, provesThatCorrect(entries));
     });
   }
 

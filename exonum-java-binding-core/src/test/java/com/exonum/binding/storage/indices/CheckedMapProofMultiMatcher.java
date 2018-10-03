@@ -42,21 +42,36 @@ class CheckedMapProofMultiMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
     ProofStatus status = checkedMapProof.getStatus();
+    List<MapEntry> presentEntries = checkedMapProof.getEntries();
+    List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
     return status == ProofStatus.CORRECT
-        && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
+        && checkProofSize(presentEntries, missingKeys)
+        && entries.stream().allMatch(e -> checkEntry(presentEntries, missingKeys, e));
   }
 
-  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry entry) {
+  private boolean checkProofSize(List<MapEntry> presentEntries, List<byte[]> missingKeys) {
+    long expectedPresentEntries = entries
+        .stream()
+        .filter(e -> e.getValue().isPresent())
+        .count();
+    long expectedAbsentEntries = entries
+        .stream()
+        .filter(e -> !e.getValue().isPresent())
+        .count();
+    return presentEntries.size() == expectedPresentEntries
+        && missingKeys.size() == expectedAbsentEntries;
+  }
+
+  private boolean checkEntry(
+      List<MapEntry> presentEntries, List<byte[]> missingKeys, MapTestEntry entry) {
     Optional<String> entryValue = entry.getValue();
     Matcher<byte[]> keyMatcher = IsEqual.equalTo(entry.getKey().asBytes());
 
     if (entryValue.isPresent()) {
-      List<MapEntry> presentEntries = checkedMapProof.getEntries();
       Matcher<byte[]> valueMatcher = IsEqual.equalTo(entryValue.get().getBytes());
       return checkPresentEntry(presentEntries, keyMatcher, valueMatcher);
     }
     else {
-      List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
       return checkAbsentEntry(missingKeys, keyMatcher);
     }
   }

@@ -16,11 +16,13 @@
 
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -30,9 +32,9 @@ class ProofMapMultiContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<Ha
 
   private final CheckedMapProofMultiMatcher mapProofMatcher;
 
-  private ProofMapMultiContainsMatcher(List<MapTestEntry> entries) {
-    this.entries = entries;
-    mapProofMatcher = CheckedMapProofMultiMatcher.isValid(entries);
+  private ProofMapMultiContainsMatcher(MapTestEntry... entries) {
+    this.entries = Arrays.asList(entries);
+    mapProofMatcher = CheckedMapProofMultiMatcher.isValid(this.entries);
   }
 
   @Override
@@ -61,20 +63,38 @@ class ProofMapMultiContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<Ha
   }
 
   private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {
-    UncheckedMapProof proof =
-        map.getProof(entries.stream().map(MapTestEntry::getKey).collect(Collectors.toList()));
+    HashCode[] keys = entries
+        .stream()
+        .map(MapTestEntry::getKey)
+        .toArray(HashCode[]::new);
+
+    UncheckedMapProof proof = map.getProof(keys);
     assert proof != null : "The proof must not be null";
 
     return proof.check();
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof that it
-   * either contains a key/value pair or proves that a key is not stored in the map.
-   *
-   * @param entries a list of expected present or absent map entries
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all
+   * the entries that are expected to be present/absent are contained/not contained in the map.
+   * @param entries expected present or absent map entries
    */
-  static ProofMapMultiContainsMatcher provesThatCorrect(List<MapTestEntry> entries) {
+  static ProofMapMultiContainsMatcher provesThatCorrect(MapTestEntry... entries) {
     return new ProofMapMultiContainsMatcher(entries);
+  }
+
+  /**
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all
+   * the entries that are expected to be presentare contained in the map.
+   *
+   * @param entriesList expected list of present map entries
+   */
+  static ProofMapMultiContainsMatcher provesThatCorrect(
+      List<MapEntry<HashCode, String>> entriesList) {
+    MapTestEntry[] testEntries = entriesList
+        .stream()
+        .map(e -> presentEntry(e.getKey(), e.getValue()))
+        .toArray(MapTestEntry[]::new);
+    return new ProofMapMultiContainsMatcher(testEntries);
   }
 }
