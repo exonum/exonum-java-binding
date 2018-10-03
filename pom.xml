@@ -97,7 +97,7 @@
     <mockito-core.version>2.22.0</mockito-core.version>
     <guava.version>26.0-jre</guava.version>
     <vertx.version>3.5.3</vertx.version>
-    <equalsverifier.version>2.5.2</equalsverifier.version>
+    <equalsverifier.version>3.0</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
          on where the native library is used.
@@ -125,7 +125,7 @@
          <plugin>
            <groupId>org.xolstice.maven.plugins</groupId>
            <artifactId>protobuf-maven-plugin</artifactId>
-           <version>0.5.1</version>
+           <version>0.6.1</version>
          </plugin>
 
          <!-- Checkstyle plugin is run during validate phase (before javac) -->
