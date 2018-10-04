@@ -61,6 +61,60 @@ class DbKeyTest {
   }
 
   @Test
+  void throwsIfBranchKeySliceHasBitsAfterSignificantPart0Bits() {
+    int numSignificantBits = 0;
+    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x01), numSignificantBits);
+    assertThrows(IllegalArgumentException.class, () -> {
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
+    });
+  }
+
+  @Test
+  void throwsIfBranchKeySliceHasBitsAfterSignificantPart1Bit() {
+    int numSignificantBits = 1;
+    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x03), numSignificantBits);
+    assertThrows(IllegalArgumentException.class, () -> {
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
+    });
+  }
+
+  @Test
+  void throwsIfBranchKeySliceHasBitsAfterSignificantPart7Bit() {
+    int numSignificantBits = 7;
+    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x80), numSignificantBits);
+    assertThrows(IllegalArgumentException.class, () -> {
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
+    });
+  }
+
+  @Test
+  void throwsIfBranchKeySliceHasBitsAfterSignificantPart8Bit() {
+    int numSignificantBits = 8;
+    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
+    assertThrows(IllegalArgumentException.class, () -> {
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
+    });
+  }
+
+  @Test
+  void throwsIfBranchKeySliceHasBitsAfterSignificantPart12Bit() {
+    int numSignificantBits = 12;
+    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x1F), numSignificantBits);
+    assertThrows(IllegalArgumentException.class, () -> {
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
+    });
+  }
+
+  @Test
+  void throwsIfBranchKeySliceHasBitsAfterSignificantPart16Bit() {
+    int numSignificantBits = 16;
+    byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0xFF, 0x01), numSignificantBits);
+    assertThrows(IllegalArgumentException.class, () -> {
+      DbKey dbKey = DbKey.fromBytes(rawDbKey);
+    });
+  }
+
+  @Test
   void getNodeType_BranchNode() {
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes("a"), 8);
     DbKey dbKey = DbKey.fromBytes(rawDbKey);
