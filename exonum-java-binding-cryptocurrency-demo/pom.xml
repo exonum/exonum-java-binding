@@ -49,6 +49,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>
+            ${argLine}
             -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
           </argLine>
