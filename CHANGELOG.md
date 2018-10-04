@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - `Hashing#toHexString`. (#379)
+- Deprecated full map proofs are removed. (#518)
 
 ## 0.2 - 2018-07-23
 
