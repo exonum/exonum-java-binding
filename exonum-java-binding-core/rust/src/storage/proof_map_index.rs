@@ -36,8 +36,7 @@ type Index<T> = ProofMapIndex<T, Key, Value>;
 const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
 const MAP_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapEntry";
-const UNCHECKED_FLAT_MAP_PROOF: &str =
-    "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
+const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
 const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
     "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/proofs/map/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
 const BYTE_ARRAY: &str = "[B";
