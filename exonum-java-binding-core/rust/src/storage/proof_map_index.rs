@@ -593,6 +593,6 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
             let mut key = Key::default();
             key.copy_from_slice(bytes);
             key
-    }).collect();
+        }).collect();
     Ok(keys)
 }
