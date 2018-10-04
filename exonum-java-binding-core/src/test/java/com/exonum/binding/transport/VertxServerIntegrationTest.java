@@ -43,7 +43,7 @@ public class VertxServerIntegrationTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
-  private static final int PORT = 0;
+  private static final int ANY_PORT = 0;
 
   private VertxServer server;
 
@@ -62,7 +62,7 @@ public class VertxServerIntegrationTest {
 
   @Test
   public void mountSubRouter_stoppedServer() throws Exception {
-    server.start(PORT);
+    server.start(ANY_PORT);
     Router router = server.createRouter();
     blockingStop();
 
@@ -73,10 +73,10 @@ public class VertxServerIntegrationTest {
   @Test
   public void start_WontStartTwice() throws Exception {
     try {
-      server.start(PORT);
+      server.start(ANY_PORT);
 
       expectedException.expect(IllegalStateException.class);
-      server.start(PORT);
+      server.start(ANY_PORT);
     } finally {
       blockingStop();
     }
@@ -84,7 +84,7 @@ public class VertxServerIntegrationTest {
 
   @Test
   public void stop_properlyStops() throws Exception {
-    server.start(PORT);
+    server.start(ANY_PORT);
     CompletableFuture<Void> f = server.stop();
     f.get(4, TimeUnit.SECONDS);
     assertTrue(f.isDone());
@@ -92,7 +92,7 @@ public class VertxServerIntegrationTest {
 
   @Test
   public void stop_subsequentStopsHaveNoEffect() throws Exception {
-    server.start(PORT);
+    server.start(ANY_PORT);
     CompletableFuture<Void> f = server.stop();
     f.get(5, TimeUnit.SECONDS);
 
@@ -102,11 +102,11 @@ public class VertxServerIntegrationTest {
 
   @Test
   public void start_wontStartStopped() throws Exception {
-    server.start(PORT);
+    server.start(ANY_PORT);
     blockingStop();
 
     expectedException.expect(IllegalStateException.class);
-    server.start(PORT);
+    server.start(ANY_PORT);
   }
 
   @Test
@@ -171,8 +171,7 @@ public class VertxServerIntegrationTest {
    * Returns random available local port.
    */
   private int findFreePort() throws IOException {
-    try (ServerSocket socket = new ServerSocket(0)) {
-      socket.setReuseAddress(true);
+    try (ServerSocket socket = new ServerSocket(ANY_PORT)) {
       return socket.getLocalPort();
     }
   }
