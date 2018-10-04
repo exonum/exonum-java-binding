@@ -20,10 +20,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import com.exonum.binding.common.proofs.list.CheckedListProof;
 import com.exonum.binding.common.proofs.list.ListProofNode;
-import com.exonum.binding.common.proofs.list.ListProofRootHashCalculator;
 import com.exonum.binding.common.proofs.list.ListProofStatus;
-import com.exonum.binding.common.proofs.list.ListProofStructureValidator;
+import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
@@ -53,16 +53,11 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
 
     ListProofNode proof = proofFunction.apply(list);
+    CheckedListProof checkedProof = newCheckedListProof(proof);
 
-    ListProofStructureValidator validator = newProofStructureValidator();
-    proof.accept(validator);
-
-    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
-    proof.accept(calculator);
-
-    return validator.check().equals(ListProofStatus.VALID)
-        && elementsMatcher.matches(calculator.getElements())
-        && list.getRootHash().equals(calculator.getCalculatedRootHash());
+    return checkedProof.getStatus().equals(ListProofStatus.VALID)
+        && elementsMatcher.matches(checkedProof.getElements())
+        && list.getRootHash().equals(checkedProof.getRootHash());
   }
 
   @Override
@@ -75,39 +70,31 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
     ListProofNode proof = proofFunction.apply(list);
-    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
-    proof.accept(calculator);
+    CheckedListProof checkedProof = newCheckedListProof(proof);
 
-    ListProofStructureValidator validator = newProofStructureValidator();
-    proof.accept(validator);
-
-    if (!validator.check().equals(ListProofStatus.VALID)) {
+    if (!checkedProof.getStatus().equals(ListProofStatus.VALID)) {
       mismatchDescription.appendText("proof was not valid: ")
-          .appendValue(validator.getProofStatus().getDescription());
+          .appendValue(checkedProof.getStatus().getDescription());
       return;
     }
 
-    if (!list.getRootHash().equals(calculator.getCalculatedRootHash())) {
+    if (!list.getRootHash().equals(checkedProof.getRootHash())) {
       mismatchDescription.appendText("calculated root hash doesn't match: ")
-          .appendValue(calculator.getCalculatedRootHash())
+          .appendValue(checkedProof.getRootHash())
           .appendText("expected root hash: ")
           .appendValue(list.getRootHash());
       return;
     }
 
-    if (!elementsMatcher.matches(calculator.getElements())) {
-      mismatchDescription.appendText("valid proof: ").appendValue(validator)
+    if (!elementsMatcher.matches(checkedProof.getElements())) {
+      mismatchDescription.appendText("valid proof: ").appendValue(checkedProof)
           .appendText(", elements mismatch: ");
-      elementsMatcher.describeMismatch(calculator.getElements(), mismatchDescription);
+      elementsMatcher.describeMismatch(checkedProof.getElements(), mismatchDescription);
     }
   }
 
-  private ListProofStructureValidator newProofStructureValidator() {
-    return new ListProofStructureValidator();
-  }
-
-  private ListProofRootHashCalculator<String> newProofHashCodeCalculator() {
-    return new ListProofRootHashCalculator<>(StandardSerializers.string());
+  private CheckedListProof newCheckedListProof(ListProofNode listProofNode) {
+    return new UncheckedListProofAdapter<>(listProofNode, StandardSerializers.string()).check();
   }
 
   /**

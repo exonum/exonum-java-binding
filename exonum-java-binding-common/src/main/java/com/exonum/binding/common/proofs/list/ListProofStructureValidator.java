@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * A validator that checks list proofs internal structure.
  */
-public final class ListProofStructureValidator implements ListProofVisitor {
+final class ListProofStructureValidator implements ListProofVisitor {
 
   static int MAX_NODE_DEPTH = 63;
 
@@ -42,7 +42,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Creates a new ListProofStructureValidator.
    */
-  public ListProofStructureValidator() {
+  ListProofStructureValidator() {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
@@ -178,7 +178,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    *
    * @return proof status
    */
-  public ProofStatus getProofStatus() {
+  ProofStatus getProofStatus() {
     return proofStatus;
   }
 

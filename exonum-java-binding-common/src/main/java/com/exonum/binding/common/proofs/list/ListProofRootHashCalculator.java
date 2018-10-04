@@ -35,7 +35,7 @@ import java.util.TreeMap;
  *
  * @param <E> the type of elements in the corresponding list
  */
-public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
+final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -52,7 +52,7 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @param serializer a serializer of list elements
    */
-  public ListProofRootHashCalculator(Serializer<E> serializer) {
+  ListProofRootHashCalculator(Serializer<E> serializer) {
     this(serializer, Hashing.defaultHashFunction());
   }
 
@@ -111,7 +111,7 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
   /**
    * Returns a collection of list entries: index-element pairs, ordered by indices.
    */
-  public NavigableMap<Long, E> getElements() {
+  NavigableMap<Long, E> getElements() {
     return elements;
   }
 
@@ -120,7 +120,7 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @return hash code
    */
-  public HashCode getCalculatedRootHash() {
+  HashCode getCalculatedRootHash() {
     return calculatedRootHash;
   }
 
