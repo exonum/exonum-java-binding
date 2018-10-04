@@ -55,7 +55,9 @@ public final class ListProofStructureValidator implements ListProofVisitor {
     int branchDepth = depth;
 
     NodeType leftElementType = branch.getLeft().getNodeType();
-    NodeType rightElementType = branch.getRight().map(ListProof::getNodeType).orElse(NodeType.NONE);
+    NodeType rightElementType = branch.getRight()
+        .map(ListProofNode::getNodeType)
+        .orElse(NodeType.NONE);
     listProofBranchesInfo.add(
         new NodeInfo(branch, depth, Arrays.asList(leftElementType, rightElementType))
     );
@@ -192,21 +194,21 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    * Class used to store node info additional information.
    */
   static class NodeInfo {
-    private ListProof node;
+    private ListProofNode node;
     private int depth;
     private List<NodeType> childElementsTypes;
 
-    NodeInfo(ListProof node, int depth) {
+    NodeInfo(ListProofNode node, int depth) {
       this.node = node;
       this.depth = depth;
     }
 
-    NodeInfo(ListProof node, int depth, List<NodeType> childElementsTypes) {
+    NodeInfo(ListProofNode node, int depth, List<NodeType> childElementsTypes) {
       this(node, depth);
       this.childElementsTypes = childElementsTypes;
     }
 
-    ListProof getNode() {
+    ListProofNode getNode() {
       return node;
     }
 
