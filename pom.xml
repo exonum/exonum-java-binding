@@ -106,7 +106,8 @@
 
          See ECR-942. -->
     <project.skipJavaITs>false</project.skipJavaITs>
-    <!-- Jacoco defaults -->
+    <!-- Default values of properties set by Jacoco when coverage is enabled.
+         Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
   </properties>
