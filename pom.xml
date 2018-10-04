@@ -310,12 +310,82 @@
   <profiles>
     <!-- A build profile for a build performed on a CI server:
             - Fails if the code has style issues
+            - Collects test coverage information
      -->
     <profile>
       <id>ci-build</id>
       <properties>
         <checkstyle.severity>error</checkstyle.severity>
       </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.2</version>
+            <configuration>
+              <!-- Generated files are excluded. -->
+              <excludes>
+                <exclude>**/AutoValue_*</exclude>
+                <exclude>**/TxMessageProtos*</exclude>
+                <exclude>**/WalletProtos*</exclude>
+              </excludes>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-jacoco-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>prepare-jacoco-it-agent</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
+                  <propertyName>itCoverageAgent</propertyName>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-it-report</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+            <version>4.3.0</version>
+            <configuration>
+              <repoToken>${env.COVERALLS_TOKEN}</repoToken>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <!-- Profile used during deploy:
