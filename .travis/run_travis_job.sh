@@ -47,5 +47,11 @@ then
     echo 'Rust checks are completed.'
 else
     cd "${TRAVIS_BUILD_DIR}"
-    ./run_all_tests.sh
+
+    ./run_all_tests.sh;
+    # Linux builds currently skip some tests, so only OSX builds should update code coverage report.
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      # Upload the coverage report to coveralls
+      mvn org.eluder.coveralls:coveralls-maven-plugin:report
+    fi
 fi
