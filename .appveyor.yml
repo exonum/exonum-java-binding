@@ -1,0 +1,22 @@
+image: 
+  - Visual Studio 2017
+
+install:
+# Install Rust and Cargo
+      - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+      - rustup-init.exe --default-host x86_64-pc-windows-msvc --default-toolchain stable -y
+      - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+      - rustc -vV
+      - cargo -vV
+#For build java_bindings
+      - ps: Copy-Item -Path C:\Progra~1\Java\jdk1.8.0\lib\jvm.lib -Destination C:\Progra~1\Java\jdk1.8.0\jre\bin\server\jvm.lib
+      - set SODIUM_BUILD=1
+      - set ROCKSDB_BUILD=1
+      - set SNAPPY_BUILD=1
+
+# Disable appveyor builder
+build: false
+
+test_script:
+  - cd exonum-java-binding-core/rust
+  - cargo build
