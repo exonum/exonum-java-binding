@@ -57,8 +57,7 @@ class DoubleSerializerTest {
         Bytes.bytes(1,2,3),
         Bytes.bytes(1, 2, 3, 4),
         Bytes.bytes(1, 2, 3, 4, 5, 6, 7),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9),
-        Bytes.bytes("str")
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9)
     );
   }
 
