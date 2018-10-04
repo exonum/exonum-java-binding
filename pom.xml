@@ -310,6 +310,7 @@
   <profiles>
     <!-- A build profile for a build performed on a CI server:
             - Fails if the code has style issues
+            - Collects test coverage information
      -->
     <profile>
       <id>ci-build</id>
@@ -322,7 +323,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.1</version>
+            <version>0.8.2</version>
             <configuration>
               <!-- Generated files are excluded. -->
               <excludes>
@@ -342,7 +343,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>prepare-package-jacoco-report</id>
+                <id>generate-jacoco-report</id>
                 <phase>prepare-package</phase>
                 <goals>
                   <goal>report</goal>
@@ -352,7 +353,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>pre-integration-test-prepare-jacoco-agent</id>
+                <id>prepare-jacoco-it-agent</id>
                 <phase>pre-integration-test</phase>
                 <goals>
                   <goal>prepare-agent</goal>
@@ -363,7 +364,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>post-integration-test-jacoco-report</id>
+                <id>generate-jacoco-it-report</id>
                 <phase>post-integration-test</phase>
                 <goals>
                   <goal>report</goal>
