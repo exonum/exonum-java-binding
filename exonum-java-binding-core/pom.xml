@@ -96,7 +96,7 @@
             </goals>
           </execution>
 
-          <!-- Runs rust native tests withour resource manager.
+          <!-- Runs rust native tests without resource manager.
 
                todo: run on a CI server only
                Note: cannot be currently extracted in 'ci-build' profile for will produce a library
@@ -175,7 +175,10 @@
           <excludes>
             <exclude>**/*IntegrationTest.java</exclude>
           </excludes>
-          <argLine>${java.vm.assertionFlag}</argLine>
+          <argLine>
+            ${argLine}
+            ${java.vm.assertionFlag}
+          </argLine>
         </configuration>
       </plugin>
 
@@ -186,7 +189,8 @@
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
-          <argLine>-Djava.library.path=${build.nativeLibPath}
+          <argLine>${itCoverageAgent}
+                   -Djava.library.path=${build.nativeLibPath}
                    -Xcheck:jni
                    ${java.vm.assertionFlag}
                    -Xss1500k
@@ -194,6 +198,7 @@
         </configuration>
         <executions>
           <execution>
+            <id>integration-test</id>
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
