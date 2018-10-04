@@ -70,8 +70,7 @@ class CheckedMapProofMultiMatcher extends TypeSafeMatcher<CheckedMapProof> {
       Matcher<byte[]> valueMatcher = IsEqual.equalTo(entryValue.get().getBytes());
       List<MapEntry> presentEntries = checkedMapProof.getEntries();
       return checkPresentEntry(presentEntries, keyMatcher, valueMatcher);
-    }
-    else {
+    } else {
       List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
       return checkAbsentEntry(missingKeys, keyMatcher);
     }

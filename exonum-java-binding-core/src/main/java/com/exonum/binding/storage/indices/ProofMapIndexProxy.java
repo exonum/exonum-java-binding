@@ -209,7 +209,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    *
    * @param key a proof map key which might be mapped to some value, must be 32-byte long
    * @param otherKeys other proof map keys which might be mapped to some values, each must be
-   * 32-byte long
+   *                  32-byte long
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
    */
@@ -229,7 +229,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * mappings.
    *
    * @param keyCollection proof map keys which might be mapped to some values, each must be
-   * 32-byte long
+   *                      32-byte long
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
    */
