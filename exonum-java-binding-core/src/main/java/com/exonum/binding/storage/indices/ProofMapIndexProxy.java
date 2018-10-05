@@ -19,6 +19,7 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
@@ -235,9 +236,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    *                                  or keys collection is empty
    */
   public UncheckedMapProof getProof(Collection<? extends K> keys) {
-    if (keys.isEmpty()) {
-      throw new IllegalArgumentException("Keys collection should not be empty");
-    }
+    checkArgument(!keys.isEmpty(), "Keys collection should not be empty");
     if (keys.size() == 1) {
       K key = keys.iterator()
           .next();
