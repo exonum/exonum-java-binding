@@ -16,9 +16,9 @@
 
 package com.exonum.binding.storage.database;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndexProxy;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.Rule;
 import org.junit.Test;

@@ -1,9 +1,19 @@
 language: java
+os:
+  - linux
 dist: trusty
 jdk:
   - openjdk8
   - openjdk10
 sudo: false
+
+# Build only the following branches/tags pushed to the repository:
+branches:
+  only:
+    - master
+    - ejb-app-configuration
+    # Also build tagged revisions, e.g. v1.2.3-beta
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 addons:
   apt:
@@ -21,15 +31,21 @@ env:
     - RUST_NIGHTLY_VERSION=nightly-2018-06-29
     - RUST_CLIPPY_VERSION=0.0.211
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
-    # force building instead of using from apt.
-    - ROCKSDB_BUILD=1
-    - SNAPPY_BUILD=1
+    # REPO_TOKEN used for integration with coveralls is encoded here
+    - secure: Fp22iaJpttsIArAyWmdCGNtljIALTYRVKO7O+H2hgBkwHHqrU7+15sbaq3xzhz4YNWNfuFMIkFUBgd/KYHgAuNDDrtm2agib13C0lQT1NFQO9ccmNCJNsXQrYrXGwpnNqPKp0YmfBfgNwzEpBerlbtvzV/T/RZukT/403XxwxU9y5tHfQokwVLibqP2jJsxdihTfCKIOs+o6hBfArmsn+e+panEv17ZrCjOmBIM/W70Rf2rEM26wFnYsfnAUTCkpl4Ong0SYNpZZxNMtw61W8ApDY8bpz7cKUxCv7SmD3kO7Y+TTHWfWYx6FNXtUpE1vCi6I7fZAY16rViTWOX55NCeFQz56XER7ArJQZtC/nC1lZ9tGKtcofu2Rq7WUoRuTwvLTaf6VzAP/CUj0DUxkV+8WUggl3s/Im7Y9rn8Aqvh8LReZmqzTY+dJ0hFG4DLoLtl71eTEnNoumi5UleBhJPaei3wPNPHg1WlOmhFyhRCsbIIGiyFtSj/faLmdc7tN/sBFANb0g4Exl0mRNvB0IfS1gM6XouEGUTlVree68p11PnsGJGs/QaUB9F9AAGVKTZ2kz7sqkCDdGmLxzbdidYDHZtYWfOIYSJCQsA09n2Txi0fwNByKfl/spdyMmtI1uGeT803rhN9vu0NGrQFG3mU7mqO33fUDEStIQ6/xn0A=
   matrix:
     - CHECK_RUST=true
     - CHECK_RUST=false
 
-# exclude rust code checks with jdk10
 matrix:
+  include:
+    - name: "OSX JDK 8 CHECK_RUST=false"
+      os: osx
+      # Specify the image containing JDK 8, use `xcode9.4`
+      # in case JDK 10 is needed.
+      osx_image: xcode9.3
+      env: CHECK_RUST=false
+  # Exclude Rust code checks with JDK 10
   exclude:
     - jdk: openjdk10
       env: CHECK_RUST=true
@@ -44,6 +60,11 @@ cache:
     - "$HOME/.cargo"
     - "$HOME/.m2"
 
+before_cache:
+  # Remove the project artifacts — no need to cache them.
+  - rm -rf ${HOME}/.m2/repository/com/exonum/binding/
+
+
 before_install:
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh
@@ -53,6 +74,10 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
+  # Install OSX requirements
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsodium rocksdb pkg-config; fi
+  # force building instead of using from apt.
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).

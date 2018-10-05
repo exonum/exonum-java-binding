@@ -18,14 +18,16 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.storage.serialization.Serializer;
+import com.google.protobuf.MessageLite;
 import java.util.NoSuchElementException;
 
 /**
@@ -52,6 +54,25 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   private final CheckingSerializerDecorator<T> serializer;
 
   /**
+   * Creates a new Entry storing protobuf messages.
+   *
+   * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
+   *             [a-zA-Z0-9_]
+   * @param view a database view. Must be valid.
+   *             If a view is read-only, "destructive" operations are not permitted.
+   * @param elementType the class of an element-protobuf message
+   * @param <E> the type of entry; must be a protobuf message
+   *     that has a static {@code #parseFrom(byte[])} method
+   *
+   * @throws IllegalArgumentException if the name is empty
+   * @throws IllegalStateException if the view proxy is invalid
+   */
+  public static <E extends MessageLite> EntryIndexProxy<E> newInstance(
+      String name, View view, Class<E> elementType) {
+    return newInstance(name, view, StandardSerializers.protobuf(elementType));
+  }
+
+  /**
    * Creates a new Entry.
    *
    * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
@@ -62,6 +83,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    *
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
+   * @see StandardSerializers
    */
   public static <E> EntryIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {

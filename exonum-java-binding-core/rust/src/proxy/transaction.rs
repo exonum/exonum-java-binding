@@ -4,7 +4,7 @@ use exonum::encoding::serialize::WriteBufferWrapper;
 use exonum::encoding::Offset;
 use exonum::messages::{Message, RawMessage};
 use exonum::storage::Fork;
-use jni::objects::{GlobalRef, JValue};
+use jni::objects::{GlobalRef, JObject, JValue};
 use jni::JNIEnv;
 use serde_json;
 use serde_json::value::Value;
@@ -14,9 +14,13 @@ use std::fmt;
 
 use storage::View;
 use utils::{
-    check_error_on_exception, convert_to_string, panic_on_exception, to_handle, unwrap_jni,
+    check_error_on_exception, convert_to_string, describe_java_exception,
+    get_and_clear_java_exception, get_exception_message, panic_on_exception, to_handle, unwrap_jni,
 };
-use {JniExecutor, MainExecutor};
+use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
+
+const CLASS_TRANSACTION_EXCEPTION: &str =
+    "com/exonum/binding/transaction/TransactionExecutionException";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -87,22 +91,18 @@ impl Transaction for TransactionProxy {
     }
 
     fn execute(&self, fork: &mut Fork) -> ExecutionResult {
-        // A required code for a TransactionProxy#execute error result.
-        // This code has no special meaning.
-        const ERROR_CODE: u8 = 0;
-
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let view_handle = to_handle(View::from_ref_fork(fork));
-            let res =
-                env.call_method(
+            let res = env
+                .call_method(
                     self.transaction.as_obj(),
                     "execute",
                     "(J)V",
                     &[JValue::from(view_handle)],
                 ).and_then(JValue::v);
-            Ok(check_error_on_exception(env, res))
+            Ok(check_transaction_execution_result(env, res))
         });
-        unwrap_jni(res).map_err(|err: String| ExecutionError::with_description(ERROR_CODE, err))
+        unwrap_jni(res)
     }
 }
 
@@ -117,4 +117,42 @@ impl Message for TransactionProxy {
     fn raw(&self) -> &RawMessage {
         &self.raw
     }
+}
+
+/// Handles exceptions after executing transactions
+///
+/// The TransactionExecutionException and its descendants are converted into `Error`s with their
+/// descriptions. The rest (Java and JNI errors) are treated as unrecoverable and result in a panic.
+///
+/// Panics:
+/// - Panics if there is some JNI error.
+/// - If there is a pending Java throwable that IS NOT an instance of the
+/// `TransactionExecutionException`.
+fn check_transaction_execution_result<T>(
+    env: &JNIEnv,
+    result: JniResult<T>,
+) -> Result<T, ExecutionError> {
+    result.map_err(|jni_error| match jni_error.0 {
+        JniErrorKind::JavaException => {
+            let exception = get_and_clear_java_exception(env);
+            let message = unwrap_jni(get_exception_message(env, exception));
+            if !unwrap_jni(env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION)) {
+                let panic_msg = describe_java_exception(env, exception);
+                panic!(panic_msg);
+            }
+
+            let err_code = unwrap_jni(get_tx_error_code(env, exception)) as u8;
+            match message {
+                Some(msg) => ExecutionError::with_description(err_code, msg),
+                None => ExecutionError::new(err_code),
+            }
+        }
+        _ => unwrap_jni(Err(jni_error)),
+    })
+}
+
+/// Returns the error code of the `TransactionExecutionException` instance.
+fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
+    let err_code = env.call_method(exception, "getErrorCode", "()B", &[])?;
+    err_code.b()
 }

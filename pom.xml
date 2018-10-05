@@ -91,12 +91,13 @@
     <log4j.version>2.11.1</log4j.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.3.0</junit.jupiter.version>
+    <junit.jupiter.version>5.3.1</junit.jupiter.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
-    <mockito-core.version>2.21.0</mockito-core.version>
+    <protobuf.version>3.6.1</protobuf.version>
+    <mockito-core.version>2.22.0</mockito-core.version>
     <guava.version>26.0-jre</guava.version>
     <vertx.version>3.5.3</vertx.version>
-    <equalsverifier.version>2.5.2</equalsverifier.version>
+    <equalsverifier.version>3.0</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
          on where the native library is used.
@@ -105,6 +106,10 @@
 
          See ECR-942. -->
     <project.skipJavaITs>false</project.skipJavaITs>
+    <!-- Default values of properties set by Jacoco when coverage is enabled.
+         Passed to the JVM running tests. -->
+    <jacoco.args></jacoco.args>
+    <jacoco.it.args></jacoco.it.args>
   </properties>
 
   <build>
@@ -119,6 +124,12 @@
              <source>${java.compiler.source}</source>
              <target>${java.compiler.target}</target>
            </configuration>
+         </plugin>
+
+         <plugin>
+           <groupId>org.xolstice.maven.plugins</groupId>
+           <artifactId>protobuf-maven-plugin</artifactId>
+           <version>0.6.1</version>
          </plugin>
 
          <!-- Checkstyle plugin is run during validate phase (before javac) -->
@@ -158,7 +169,7 @@
          <!-- Use newer version of the standard plugins by default. -->
          <plugin>
            <artifactId>maven-enforcer-plugin</artifactId>
-           <version>3.0.0-M1</version>
+           <version>3.0.0-M2</version>
          </plugin>
 
          <plugin>
@@ -173,12 +184,12 @@
 
          <plugin>
            <artifactId>maven-dependency-plugin</artifactId>
-           <version>3.0.2</version>
+           <version>3.1.1</version>
          </plugin>
 
          <plugin>
            <artifactId>maven-clean-plugin</artifactId>
-           <version>3.0.0</version>
+           <version>3.1.0</version>
          </plugin>
 
          <plugin>
@@ -209,7 +220,7 @@
          <plugin>
            <groupId>org.codehaus.mojo</groupId>
            <artifactId>versions-maven-plugin</artifactId>
-           <version>2.6</version>
+           <version>2.7</version>
          </plugin>
 
          <plugin>
@@ -303,12 +314,84 @@
   <profiles>
     <!-- A build profile for a build performed on a CI server:
             - Fails if the code has style issues
+            - Collects test coverage information
      -->
     <profile>
       <id>ci-build</id>
       <properties>
         <checkstyle.severity>error</checkstyle.severity>
+        <jacoco.args>${argLine}</jacoco.args>
+        <jacoco.it.args>${itCoverageAgent}</jacoco.it.args>
       </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.2</version>
+            <configuration>
+              <!-- Generated files are excluded. -->
+              <excludes>
+                <exclude>**/AutoValue_*</exclude>
+                <exclude>**/TxMessageProtos*</exclude>
+                <exclude>**/WalletProtos*</exclude>
+              </excludes>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-jacoco-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>prepare-jacoco-it-agent</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
+                  <propertyName>itCoverageAgent</propertyName>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-it-report</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+            <version>4.3.0</version>
+            <configuration>
+              <repoToken>${env.COVERALLS_TOKEN}</repoToken>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <!-- Profile used during deploy:
@@ -402,6 +485,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
@@ -478,7 +567,7 @@
   <modules>
     <module>exonum-java-binding-bom</module>
     <module>exonum-java-testing</module>
-    <module>exonum-java-proofs</module>
+    <module>exonum-java-binding-common</module>
     <module>exonum-java-binding-core</module>
     <module>exonum-java-binding-fakes</module>
     <module>exonum-java-binding-qa-service</module>

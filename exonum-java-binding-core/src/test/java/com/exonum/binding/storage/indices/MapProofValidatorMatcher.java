@@ -18,15 +18,15 @@ package com.exonum.binding.storage.indices;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.proofs.map.MapProofValidator;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.map.MapProofValidator;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
 
-// This class is a slightly modified copy of the one in exonum-java-proofs.
+// This class is a slightly modified copy of the one in exonum-java-binding-common.
 // It is specialized to work with maps with HashCode keys and String values only.
 class MapProofValidatorMatcher extends TypeSafeMatcher<MapProofValidator<String>> {
 

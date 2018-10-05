@@ -16,8 +16,8 @@
 
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
-import static com.exonum.binding.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static java.util.Collections.singletonList;
@@ -25,7 +25,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;

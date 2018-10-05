@@ -16,21 +16,21 @@
 
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.Serializer;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 
 final class IndexConstructors {
 
-  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> from(
+  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> fromOneArg(
       IndexConstructorOne<IndexT, String> constructor) {
     return (name, view) -> constructor.create(name, view,
         StandardSerializers.string()
     );
   }
 
-  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> from(
+  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> fromTwoArg(
       IndexConstructorTwo<IndexT, HashCode, String> constructor) {
     return (name, view) -> constructor.create(name, view,
         StandardSerializers.hash(), StandardSerializers.string()

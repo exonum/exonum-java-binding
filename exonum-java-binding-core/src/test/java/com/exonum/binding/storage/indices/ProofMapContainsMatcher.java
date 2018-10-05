@@ -18,10 +18,9 @@ package com.exonum.binding.storage.indices;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.proofs.map.MapProof;
-import com.exonum.binding.storage.proofs.map.MapProofValidator;
-import com.exonum.binding.storage.serialization.StandardSerializers;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
 import javax.annotation.Nullable;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -29,47 +28,49 @@ import org.hamcrest.TypeSafeMatcher;
 class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCode, String>> {
 
   private final HashCode key;
-  private final MapProofValidatorMatcher proofValidatorMatcher;
+
+  private final CheckedMapProofMatcher mapProofMatcher;
 
   private ProofMapContainsMatcher(HashCode key, @Nullable String expectedValue) {
     this.key = key;
-    proofValidatorMatcher = MapProofValidatorMatcher.isValid(key, expectedValue);
+    mapProofMatcher = CheckedMapProofMatcher.isValid(key, expectedValue);
   }
 
   @Override
   protected boolean matchesSafely(ProofMapIndexProxy<HashCode, String> map) {
-    MapProofValidator validator = checkProof(map);
+    CheckedMapProof checkedProof = checkProof(map);
+    HashCode expectedRootHash = map.getRootHash();
 
-    return proofValidatorMatcher.matches(validator);
+    return mapProofMatcher.matches(checkedProof)
+        && checkedProof.compareWithRootHash(expectedRootHash);
   }
 
   @Override
   public void describeTo(Description description) {
     description.appendText("proof map providing ")
-        .appendDescriptionOf(proofValidatorMatcher);
+        .appendDescriptionOf(mapProofMatcher);
   }
 
   @Override
   protected void describeMismatchSafely(ProofMapIndexProxy<HashCode, String> map,
                                         Description mismatchDescription) {
-    MapProofValidator validator = checkProof(map);
-    proofValidatorMatcher.describeMismatch(validator, mismatchDescription);
+    mismatchDescription.appendText("was a proof map with Merkle root=")
+        .appendValue(map.getRootHash())
+        .appendText(" providing a proof that ");
+    CheckedMapProof checkedProof = checkProof(map);
+    mapProofMatcher.describeMismatch(checkedProof, mismatchDescription);
   }
 
-  private MapProofValidator checkProof(ProofMapIndexProxy<HashCode, String> map) {
-    MapProof proof = map.getProof(key);
+  private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {
+    UncheckedMapProof proof = map.getProof(key);
     assert proof != null : "The proof must not be null";
-    HashCode rootHash = map.getRootHash();
-    MapProofValidator<String> validator = new MapProofValidator<>(rootHash, key.asBytes(),
-        StandardSerializers.string());
 
-    proof.accept(validator);
-    return validator;
+    return proof.check();
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof
-   * that it maps the specified value to the specified key.
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that it maps
+   * the specified value to the specified key.
    *
    * @param key a key to request proof for
    * @param value an expected value mapped to the key

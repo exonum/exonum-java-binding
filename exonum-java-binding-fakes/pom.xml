@@ -43,6 +43,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>
+                        ${jacoco.args}
                         -Djava.library.path=${ejb-core.nativeLibPath}
                         ${java.vm.assertionFlag}
                     </argLine>
@@ -82,7 +83,7 @@
         <dependency>
             <groupId>com.exonum.binding</groupId>
             <artifactId>exonum-java-binding-core</artifactId>
-            <version>0.2</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

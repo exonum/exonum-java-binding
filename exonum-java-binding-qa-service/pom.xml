@@ -19,8 +19,6 @@
         <checkstyle.configLocation>${project.parent.basedir}/checkstyle.xml</checkstyle.configLocation>
         <ejb-core.nativeLibPath>${project.parent.basedir}/exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
         <gson.version>2.8.5</gson.version>
-        <exonum-bom.version>0.2</exonum-bom.version>
-        <protobuf.version>3.6.1</protobuf.version>
     </properties>
 
     <build>
@@ -49,7 +47,6 @@
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.5.1</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -67,6 +64,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>
+                        ${jacoco.args}
                         -Djava.library.path=${ejb-core.nativeLibPath}
                         ${java.vm.assertionFlag}
                     </argLine>
@@ -105,7 +103,7 @@
             <dependency>
                 <groupId>com.exonum.binding</groupId>
                 <artifactId>exonum-java-binding-bom</artifactId>
-                <version>${exonum-bom.version}</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -140,7 +138,6 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
 
         <dependency>

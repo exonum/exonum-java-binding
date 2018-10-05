@@ -22,8 +22,7 @@ pub fn check_nested_attach<E: JniExecutor>(vm: &JavaVM, executor: E) {
             })?;
             check_attached(vm);
             Ok(())
-        })
-        .unwrap();
+        }).unwrap();
 }
 
 pub fn check_attached(vm: &JavaVM) {
@@ -40,8 +39,7 @@ pub fn is_attached(vm: &JavaVM) -> bool {
         .or_else(|jni_err| match jni_err.0 {
             JniErrorKind::ThreadDetached => Ok(false),
             _ => Err(jni_err),
-        })
-        .expect("An unexpected JNI error occurred")
+        }).expect("An unexpected JNI error occurred")
 }
 
 pub fn test_single_thread<E: JniExecutor>(executor: E) {

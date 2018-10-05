@@ -1,7 +1,8 @@
 # Exonum Java Binding
 
-[![Build Status](https://img.shields.io/travis/exonum/exonum-java-binding/master.svg)](https://www.travis-ci.org/exonum/exonum-java-binding)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.exonum.binding/exonum-java-binding-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.exonum.binding/exonum-java-binding-core/)
+[![Build Status](https://img.shields.io/travis/exonum/exonum-java-binding/master.svg)](https://travis-ci.com/exonum/exonum-java-binding)
+[![Maven Central](https://img.shields.io/maven-central/v/com.exonum.binding/exonum-java-binding-core.svg)](https://mvnrepository.com/artifact/com.exonum.binding/exonum-java-binding-core/latest)
+[![Coverage Status](https://coveralls.io/repos/github/exonum/exonum-java-binding/badge.svg?branch=master)](https://coveralls.io/github/exonum/exonum-java-binding?branch=master)
 [![Join the chat on https://gitter.im/exonum/exonum-java-binding](https://img.shields.io/gitter/room/exonum/exonum-java-binding.svg?label=Chat)](https://gitter.im/exonum/exonum-java-binding)
 
 Exonum Java Binding is a framework for building blockchain applications in Java, 

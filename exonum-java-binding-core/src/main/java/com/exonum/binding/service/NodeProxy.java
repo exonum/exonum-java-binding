@@ -18,16 +18,14 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.Transaction;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -126,6 +124,8 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
 
   @Override
   protected void disposeInternal() {
-    // TODO: It is responsible to destroy the corresponding native object [ECR-1910].
+    nativeFree(getNativeHandle());
   }
+
+  private static native void nativeFree(long nodeNativeHandle);
 }

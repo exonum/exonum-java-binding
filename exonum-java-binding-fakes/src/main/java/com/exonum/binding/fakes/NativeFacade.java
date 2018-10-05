@@ -23,13 +23,15 @@ import com.exonum.binding.fakes.mocks.UserServiceAdapterMockBuilder;
 import com.exonum.binding.fakes.services.service.TestSchema;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.fakes.services.transactions.SetEntryTransaction;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.exonum.binding.util.LibraryLoader;
+
+import javax.annotation.Nullable;
 
 /**
  * Provides methods to create mocks and test fakes of Service and Transaction adapters.
@@ -70,6 +72,24 @@ public final class NativeFacade {
   public static UserTransactionAdapter createThrowingTransaction(
       Class<? extends Throwable> exceptionType) {
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
+    return new UserTransactionAdapter(transaction, VIEW_FACTORY);
+  }
+
+  /**
+   * Creates a UserTransactionAdapter that contains a transaction that throws
+   * {@link TransactionExecutionException} in its execute method.
+   *
+   * @param isSubclass whether method should produce a subclass of TransactionExecutionException
+   * @param errorCode an error code that will be included in the exception
+   * @param description a description; may be {@code null}
+   * @return a transaction mock throwing in execute
+   */
+  public static UserTransactionAdapter createThrowingExecutionExceptionTransaction(
+          boolean isSubclass,
+          byte errorCode,
+          @Nullable String description) {
+    Transaction transaction = ThrowingTransactions
+            .createThrowingExecutionException(isSubclass, errorCode, description);
     return new UserTransactionAdapter(transaction, VIEW_FACTORY);
   }
 

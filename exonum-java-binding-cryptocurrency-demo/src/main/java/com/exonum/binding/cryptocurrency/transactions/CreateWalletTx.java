@@ -16,19 +16,19 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.messages.AbstractTransaction;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.transaction.AbstractTransaction;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;
@@ -63,8 +63,8 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
     checkTransaction(message, ID);
 
     try {
-      TxMessagesProtos.CreateWalletTx messageBody =
-          TxMessagesProtos.CreateWalletTx.parseFrom(message.getBody());
+      TxMessageProtos.CreateWalletTx messageBody =
+          TxMessageProtos.CreateWalletTx.parseFrom(message.getBody());
 
       PublicKey ownerPublicKey = PublicKey.fromBytes(
           (messageBody.getOwnerPublicKey().toByteArray()));
@@ -72,7 +72,7 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
       return new CreateWalletTx(message, ownerPublicKey, initialBalance);
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
-          "Unable to instantiate TxMessagesProtos.CreateWalletTx instance from provided"
+          "Unable to instantiate TxMessageProtos.CreateWalletTx instance from provided"
               + " binary data", e);
     }
   }

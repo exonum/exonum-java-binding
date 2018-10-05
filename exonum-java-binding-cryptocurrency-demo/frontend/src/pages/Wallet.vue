@@ -56,6 +56,7 @@
           </div>
         </div>
       </div>
+      <walletHistory />
     </div>
 
     <spinner :visible="isSpinnerVisible"/>
@@ -67,12 +68,14 @@
   import Modal from '../components/Modal.vue'
   import Navbar from '../components/Navbar.vue'
   import Spinner from '../components/Spinner.vue'
+  import WalletHistory from '../components/WalletHistory.vue'
 
   module.exports = {
     components: {
       Modal,
       Navbar,
-      Spinner
+      Spinner,
+      WalletHistory
     },
     data() {
       return {
