@@ -21,10 +21,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.flat.CheckedFlatMapProof;
-import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.flat.MapEntry;
-import com.exonum.binding.common.proofs.map.flat.ProofStatus;
+import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
+import com.exonum.binding.common.proofs.map.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.MapEntry;
+import com.exonum.binding.common.proofs.map.ProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import org.hamcrest.Description;

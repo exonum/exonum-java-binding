@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 /**
- * A MapProof database key.
+ * A map proof database key.
  *
  * <p>It includes:
  * <ul>

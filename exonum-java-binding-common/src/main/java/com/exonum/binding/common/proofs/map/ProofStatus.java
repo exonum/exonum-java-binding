@@ -17,8 +17,25 @@
 package com.exonum.binding.common.proofs.map;
 
 /**
- * A proof that a map contains a mapping for some key.
+ * Possible statuses of a checked map proof.
  */
-public interface MapProof {
-  void accept(MapProofVisitor visitor);
+public enum ProofStatus {
+  CORRECT("Proof has a valid structure"),
+  NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
+  INVALID_ORDER("Proof entries are placed in the wrong order"),
+  DUPLICATE_PATH("There are entries with duplicate keys"),
+  EMBEDDED_PATH("One key in the proof is a prefix of another key");
+
+  final String description;
+
+  ProofStatus(String description) {
+    this.description = description;
+  }
+
+  @Override
+  public String toString() {
+    return "ProofStatus{"
+        + "description='" + description + '\''
+        + '}';
+  }
 }
