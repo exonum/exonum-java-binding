@@ -66,21 +66,22 @@ public class CheckedMapProofMatcherTest {
 
   @Test
   public void describeMismatchSafelyCorrectProof() {
-    HashCode key = TEST_KEY;
+    HashCode key = HashCode.fromString("ab");
     String expectedValue = null;  // No value
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(key, expectedValue);
 
-    byte[] actualValue = StandardSerializers.string().toBytes(TEST_VALUE);
+    byte[] actualValue = StandardSerializers.string().toBytes("value");
     MapEntry entry = new MapEntry(key.asBytes(), actualValue);
+    HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
-        ROOT_HASH,
+        rootHash,
         Collections.singletonList(entry),
         Collections.emptyList());
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
 
-    assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> hello)], "
+    assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> value)], "
         + "missing keys=[], Merkle root=<123456ef>"));
   }
 

@@ -56,7 +56,6 @@ public class CheckedMapProofMultiMatcherTest {
 
   @Test
   public void matchesValidProof() {
-
     CheckedMapProofMultiMatcher matcher = CheckedMapProofMultiMatcher.isValid(TEST_ENTRY_LIST);
 
     MapEntry entry =
@@ -72,18 +71,20 @@ public class CheckedMapProofMultiMatcherTest {
 
   @Test
   public void describeMismatchSafelyCorrectProof() {
-    HashCode key = HashCode.fromString("ab");
-    String expectedValue = null;  // No value
+    HashCode presentKey = HashCode.fromString("ab");
+    HashCode absentKey = HashCode.fromString("cd");
+    String expectedValue = "different value";
     List<MapTestEntry> expectedEntryList =
-        Arrays.asList(presentEntry(TEST_KEY1, expectedValue), absentEntry(TEST_KEY2));
+        Arrays.asList(presentEntry(presentKey, expectedValue), absentEntry(absentKey));
     CheckedMapProofMultiMatcher matcher = CheckedMapProofMultiMatcher.isValid(expectedEntryList);
 
-    byte[] actualValue = StandardSerializers.string().toBytes(TEST_VALUE);
-    MapEntry entry = new MapEntry(key.asBytes(), actualValue);
+    byte[] actualValue = StandardSerializers.string().toBytes("hello");
+    MapEntry entry = new MapEntry(presentKey.asBytes(), actualValue);
+    HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
-        ROOT_HASH,
+        rootHash,
         Collections.singletonList(entry),
-        Collections.singletonList(TEST_KEY2.asBytes()));
+        Collections.singletonList(absentKey.asBytes()));
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);

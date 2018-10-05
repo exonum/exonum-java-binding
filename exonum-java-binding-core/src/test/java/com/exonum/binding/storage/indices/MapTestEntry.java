@@ -16,6 +16,8 @@
 
 package com.exonum.binding.storage.indices;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.exonum.binding.common.hash.HashCode;
 import java.util.Optional;
 
@@ -31,6 +33,7 @@ class MapTestEntry {
   }
 
   static MapTestEntry presentEntry(HashCode key, String value) {
+    checkArgument(value != null, "Value shouldn't be null in present entry");
     return new MapTestEntry(key, value);
   }
 

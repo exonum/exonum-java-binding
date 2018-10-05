@@ -17,6 +17,7 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.storage.indices.CheckedMapProofMultiMatcher.isValid;
 import static com.exonum.binding.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.storage.indices.MapTestEntry.absentEntry;
 import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
@@ -35,6 +36,7 @@ import static com.exonum.binding.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
@@ -45,6 +47,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.flat.ProofStatus;
+import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -57,6 +62,7 @@ import com.google.common.primitives.UnsignedBytes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -552,36 +558,6 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getMultiProof_FourEntryMap_LastByte_DoesNotContain1() {
-    runTestWithView(database::createFork, (map) -> {
-
-      List<HashCode> proofKeys = Stream.of(
-          (byte) 0b0000_0000,
-          (byte) 0b0000_0001,
-          (byte) 0b1000_0000,
-          (byte) 0b1000_0001
-      ).map(ProofMapIndexProxyIntegrationTest::createProofKey).collect(Collectors.toList());
-
-      assertThat(map, provesThatAbsent(proofKeys));
-    });
-  }
-
-  @Test
-  public void getMultiProof_FourEntryMap_LastByte_DoesNotContain2() {
-    runTestWithView(database::createFork, (map) -> {
-
-      List<HashCode> proofKeys = Stream.of(
-          (byte) 0b00,
-          (byte) 0b01,
-          (byte) 0b10,
-          (byte) 0b11
-      ).map(ProofMapIndexProxyIntegrationTest::createProofKey).collect(Collectors.toList());
-
-      assertThat(map, provesThatAbsent(proofKeys));
-    });
-  }
-
-  @Test
   public void remove() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
@@ -690,7 +666,7 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   public void constructorShallPreserveTypeInformation() {
     runTestWithView(database::createFork, (view, map) -> {
-      map.put(PK1, "v1");
+      map.put(PK1, V1);
 
       expectedException.expectMessage(
           "Attempt to access index '" + MAP_NAME
@@ -710,9 +686,58 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   public void isEmptyShouldReturnFalseForNonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
-      map.put(PK1, "v1");
+      map.put(PK1, V1);
 
       assertFalse(map.isEmpty());
+    });
+  }
+
+  @Test
+  public void getProofFromSingleKey() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      UncheckedMapProof proof = map.getProof(PK1);
+      CheckedMapProof checkedProof = proof.check();
+
+      assertThat(checkedProof, isValid(singletonList(presentEntry(PK1, V1))));
+    });
+  }
+
+  @Test
+  public void getProofFromVarargs() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+      map.put(PK2, V2);
+
+      UncheckedMapProof proof = map.getProof(PK1, PK2);
+      CheckedMapProof checkedProof = proof.check();
+
+      assertThat(
+          checkedProof, isValid(Arrays.asList(presentEntry(PK1, V1), presentEntry(PK2, V2))));
+    });
+  }
+
+  @Test
+  public void getProofFromEmptyCollection() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      expectedException.expect(IllegalArgumentException.class);
+      expectedException.expectMessage("Keys collection should not be empty");
+      UncheckedMapProof proof = map.getProof(Collections.emptyList());
+    });
+  }
+
+  @Test
+  public void getProofFromCollection() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      UncheckedMapProof proof = map.getProof(singletonList(PK1));
+      CheckedMapProof checkedProof = proof.check();
+
+      assertThat(checkedProof, isValid(singletonList(presentEntry(PK1, V1))));
     });
   }
 

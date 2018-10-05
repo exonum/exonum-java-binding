@@ -30,6 +30,7 @@ import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -218,7 +219,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
       byte[] dbKey = keySerializer.toBytes(key);
       return nativeGetProof(getNativeHandle(), dbKey);
     } else {
-      List<K> keyList = Arrays.asList(otherKeys);
+      List<K> keyList = new ArrayList<>(Arrays.asList(otherKeys));
       keyList.add(key);
       return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyList));
     }
@@ -228,20 +229,22 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * Returns a proof that there are values mapped to the specified keys or that there are no such
    * mappings.
    *
-   * @param keyCollection proof map keys which might be mapped to some values, each must be
-   *                      32-byte long
+   * @param keys proof map keys which might be mapped to some values, each must be 32-byte long
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
+   *                                  or keys collection is empty
    */
-  public UncheckedMapProof getProof(Collection<? extends K> keyCollection) {
-    if (keyCollection.size() == 1) {
-      K key = keyCollection.stream()
-          .findFirst()
-          .get();
+  public UncheckedMapProof getProof(Collection<? extends K> keys) {
+    if (keys.isEmpty()) {
+      throw new IllegalArgumentException("Keys collection should not be empty");
+    }
+    if (keys.size() == 1) {
+      K key = keys.iterator()
+          .next();
       byte[] dbKey = keySerializer.toBytes(key);
       return nativeGetProof(getNativeHandle(), dbKey);
     } else {
-      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyCollection));
+      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
     }
   }
 
