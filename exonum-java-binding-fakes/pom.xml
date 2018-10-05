@@ -1,132 +1,136 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.exonum.binding</groupId>
-        <artifactId>exonum-java-binding-parent</artifactId>
-        <version>0.2</version>
-    </parent>
-
-    <artifactId>exonum-java-binding-fakes</artifactId>
+  <parent>
+    <groupId>com.exonum.binding</groupId>
+    <artifactId>exonum-java-binding-parent</artifactId>
     <version>0.2</version>
-    <packaging>jar</packaging>
+  </parent>
 
-    <name>Exonum Java Binding: Fakes</name>
-    <description>A module providing mocks and test fakes of Java Services and Transactions.</description>
+  <artifactId>exonum-java-binding-fakes</artifactId>
+  <version>0.2</version>
+  <packaging>jar</packaging>
 
-    <properties>
-        <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug</ejb-core.nativeLibPath>
-    </properties>
+  <name>Exonum Java Binding: Fakes</name>
+  <description>A module providing mocks and test fakes of Java Services and Transactions.
+  </description>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.exonum.binding</groupId>
-            <artifactId>exonum-java-binding-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+  <properties>
+    <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug
+    </ejb-core.nativeLibPath>
+  </properties>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
 
-        <!-- todo: Remove when https://jira.bf.local/browse/ECR-521 (Java 10 migration) is resolved -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-            <version>${vertx.version}</version>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>compile</scope>
+    </dependency>
 
-        <!-- TODO: Move junit-x to <dependency> section in the parent project: ECR-2023 -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
+    <!-- todo: Remove when https://jira.bf.local/browse/ECR-521 (Java 10 migration) is resolved -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <version>${vertx.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
+    <!-- TODO: Move junit-x to <dependency> section in the parent project: ECR-2023 -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>com.exonum.binding</groupId>
-            <artifactId>exonum-java-testing</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-testing</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
-                </configuration>
-            </plugin>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
 
-            <!-- Since there is no much sense in separating unit & integration tests in this module,
-                 run both categories during 'test' phase. -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>
-                        ${jacoco.args}
-                        -Djava.library.path=${ejb-core.nativeLibPath}
-                        ${java.vm.assertionFlag}
-                    </argLine>
-                </configuration>
-            </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
+        </configuration>
+      </plugin>
 
-            <!-- Generates a classpath file to be used by ejb-core-native integration tests.
-                 Bound to the default phase (generate-sources). -->
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <outputFile>${project.build.directory}/ejb-fakes-classpath.txt</outputFile>
-                    <includeScope>runtime</includeScope>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-classpath-file</id>
-                        <goals>
-                            <goal>build-classpath</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+      <!-- Since there is no much sense in separating unit & integration tests in this module,
+           run both categories during 'test' phase. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${jacoco.args}
+            -Djava.library.path=${ejb-core.nativeLibPath}
+            ${java.vm.assertionFlag}
+          </argLine>
+        </configuration>
+      </plugin>
 
-            <!-- Skip the deployment of internal module as it is inherited from parent pom -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+      <!-- Generates a classpath file to be used by ejb-core-native integration tests.
+           Bound to the default phase (generate-sources). -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <outputFile>${project.build.directory}/ejb-fakes-classpath.txt</outputFile>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-classpath-file</id>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Skip the deployment of internal module as it is inherited from parent pom -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
