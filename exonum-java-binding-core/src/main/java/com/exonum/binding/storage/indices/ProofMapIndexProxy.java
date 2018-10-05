@@ -20,7 +20,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInG
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
+import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;

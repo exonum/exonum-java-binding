@@ -49,7 +49,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>
-            ${argLine}
+            ${jacoco.args}
             -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
           </argLine>

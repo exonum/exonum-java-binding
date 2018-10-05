@@ -176,7 +176,7 @@
             <exclude>**/*IntegrationTest.java</exclude>
           </excludes>
           <argLine>
-            ${argLine}
+            ${jacoco.args}
             ${java.vm.assertionFlag}
           </argLine>
         </configuration>
@@ -189,7 +189,7 @@
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
-          <argLine>${itCoverageAgent}
+          <argLine>${jacoco.it.args}
                    -Djava.library.path=${build.nativeLibPath}
                    -Xcheck:jni
                    ${java.vm.assertionFlag}

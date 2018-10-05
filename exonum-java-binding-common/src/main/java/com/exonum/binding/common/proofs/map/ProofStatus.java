@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map.flat;
+package com.exonum.binding.common.proofs.map;
 
 /**
  * Possible statuses of a checked map proof.

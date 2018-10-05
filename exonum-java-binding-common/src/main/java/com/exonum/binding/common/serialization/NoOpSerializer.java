@@ -12,12 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.proofs.map;
+package com.exonum.binding.common.serialization;
 
-/**
- * A node in a map proof tree that has non-zero height.
- * This node corresponds to <em>some</em> node in a Merkle-Patricia tree of a proof map.
- */
-interface MapProofNode extends MapProof {}
+enum NoOpSerializer implements Serializer<byte[]> {
+  INSTANCE;
+
+  @Override
+  public byte[] toBytes(byte[] value) {
+    return value;
+  }
+
+  @Override
+  public byte[] fromBytes(byte[] serializedValue) {
+    return serializedValue;
+  }
+
+}

@@ -12,29 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.proofs.map;
+package com.exonum.binding.common.serialization;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.exonum.binding.common.hash.HashCode;
 
-/**
- * A proof node for a map that contains a mapping for the requested key.
- */
-public final class LeafMapProofNode implements MapProofNode {
+enum HashCodeSerializer implements Serializer<HashCode> {
+  INSTANCE;
 
-  private final byte[] value;
-
-  public LeafMapProofNode(byte[] value) {
-    this.value = checkNotNull(value);
-  }
-
-  public byte[] getValue() {
-    return value;
+  @Override
+  public byte[] toBytes(HashCode value) {
+    return value.asBytes();
   }
 
   @Override
-  public void accept(MapProofVisitor visitor) {
-    visitor.visit(this);
+  public HashCode fromBytes(byte[] serializedValue) {
+    return HashCode.fromBytes(serializedValue);
   }
+
 }

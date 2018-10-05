@@ -12,17 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.proofs.map;
+package com.exonum.binding.common.serialization;
 
-/**
- * A proof node for an empty map.
- */
-public final class EmptyMapProof implements MapProof {
+import static com.google.common.base.Preconditions.checkArgument;
 
-  @Override
-  public void accept(MapProofVisitor visitor) {
-    visitor.visit(this);
+final class SerializationUtils {
+
+  /**
+   * Performs check that serialized value has correct length.
+   *
+   * @param array serialized value in bytes
+   * @param length expected length
+   * @throws IllegalArgumentException thrown if length is incorrect
+   */
+  static void checkLength(byte[] array, int length) {
+    checkArgument(array.length == length,
+        "Expected an array of size %s, but was %s", length, array.length);
+  }
+
+  private SerializationUtils() {
   }
 }
