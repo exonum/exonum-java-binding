@@ -12,6 +12,7 @@ source tests_profile
 #    which are excluded in the default profile.
 #  - Checkstyle checks as errors.
 #  - Native unit & integration tests that do not require a JVM.
+#  - Test coverage information collection.
 # See build definitions of the modules for more.
 mvn install \
   --activate-profiles ci-build \
