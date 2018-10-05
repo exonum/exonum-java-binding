@@ -12,22 +12,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.crypto;
+package com.exonum.binding.common.serialization;
 
-import com.exonum.binding.common.serialization.Serializer;
+import static com.exonum.binding.common.serialization.SerializationUtils.checkLength;
 
-public enum PublicKeySerializer implements Serializer<PublicKey> {
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+enum DoubleSerializer implements Serializer<Double> {
   INSTANCE;
 
   @Override
-  public byte[] toBytes(PublicKey value) {
-    return value.toBytes();
+  public byte[] toBytes(Double value) {
+    return ByteBuffer.allocate(Double.BYTES)
+        .order(ByteOrder.LITTLE_ENDIAN)
+        .putDouble(value)
+        .array();
   }
 
   @Override
-  public PublicKey fromBytes(byte[] serializedValue) {
-    return PublicKey.fromBytes(serializedValue);
+  public Double fromBytes(byte[] serializedValue) {
+    checkLength(serializedValue, Double.BYTES);
+
+    return ByteBuffer.wrap(serializedValue)
+        .order(ByteOrder.LITTLE_ENDIAN)
+        .getDouble();
   }
+
 }
