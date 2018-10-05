@@ -16,7 +16,7 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.exonum.binding.common.serialization.StandardSerializersRoundtripTest.roundTripTest;
+import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
