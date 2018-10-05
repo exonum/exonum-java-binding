@@ -23,14 +23,14 @@ import com.exonum.binding.storage.database.View;
 
 final class IndexConstructors {
 
-  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> from(
+  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> fromOneArg(
       IndexConstructorOne<IndexT, String> constructor) {
     return (name, view) -> constructor.create(name, view,
         StandardSerializers.string()
     );
   }
 
-  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> from(
+  static <IndexT> PartiallyAppliedIndexConstructor<IndexT> fromTwoArg(
       IndexConstructorTwo<IndexT, HashCode, String> constructor) {
     return (name, view) -> constructor.create(name, view,
         StandardSerializers.hash(), StandardSerializers.string()

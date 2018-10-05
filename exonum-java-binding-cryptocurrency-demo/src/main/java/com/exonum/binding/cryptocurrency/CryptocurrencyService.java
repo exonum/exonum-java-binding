@@ -20,6 +20,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.transaction.Transaction;
+import java.util.List;
 import java.util.Optional;
 
 public interface CryptocurrencyService extends Service {
@@ -29,4 +30,6 @@ public interface CryptocurrencyService extends Service {
   HashCode submitTransaction(Transaction tx);
 
   Optional<Wallet> getWallet(PublicKey ownerKey);
+
+  List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
 }
