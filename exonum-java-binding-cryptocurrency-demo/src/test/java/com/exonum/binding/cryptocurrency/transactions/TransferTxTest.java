@@ -21,19 +21,21 @@ import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTrans
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createUnsignedMessage;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.crypto.KeyPair;
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Transaction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
@@ -42,6 +44,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -124,6 +127,16 @@ class TransferTxTest {
       assertThat(wallets.get(fromKey).getBalance(), equalTo(expectedFromValue));
       long expectedToValue = initialBalance + transferSum;
       assertThat(wallets.get(toKey).getBalance(), equalTo(expectedToValue));
+      // Check history
+      HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
+          .setSeed(seed)
+          .setWalletFrom(fromKey)
+          .setWalletTo(toKey)
+          .setAmount(transferSum)
+          .setTransactionHash(tx.hash())
+          .build();
+      assertThat(schema.walletHistory(fromKey), hasItem(expectedEntity));
+      assertThat(schema.walletHistory(toKey), hasItem(expectedEntity));
     }
   }
 
@@ -161,6 +174,7 @@ class TransferTxTest {
       createWallet(view, fromKey, initialBalance);
 
       long seed = 1L;
+
       long transferValue = 50L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
       // Execute the transaction that attempts to transfer to an unknown wallet
@@ -204,7 +218,8 @@ class TransferTxTest {
     // Check the transaction parameters in JSON
     Gson gson = CryptocurrencyTransactionGson.instance();
 
-    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {}.getType());
+    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {
+    }.getType());
 
     assertThat(txParameters, equalTo(tx));
   }
@@ -221,6 +236,8 @@ class TransferTxTest {
       long amount) {
     // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
     // and put it here, replacing `mock(BinaryMessage.class)`.
-    return new TransferTx(mock(BinaryMessage.class), seed, senderId, recipientId, amount);
+    BinaryMessage message = mock(BinaryMessage.class);
+    lenient().when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
+    return new TransferTx(message, seed, senderId, recipientId, amount);
   }
 }

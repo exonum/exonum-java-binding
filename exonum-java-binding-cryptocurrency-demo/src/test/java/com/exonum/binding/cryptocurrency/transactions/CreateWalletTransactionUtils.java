@@ -19,10 +19,10 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 
-import com.exonum.binding.crypto.KeyPair;
-import com.exonum.binding.crypto.PublicKey;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.common.message.Message;
 import com.google.protobuf.ByteString;
 
 class CreateWalletTransactionUtils {
@@ -51,7 +51,7 @@ class CreateWalletTransactionUtils {
    */
   static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
     return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
-        .setBody(TxMessagesProtos.CreateWalletTx.newBuilder()
+        .setBody(TxMessageProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
             .setInitialBalance(initialBalance)
             .build()

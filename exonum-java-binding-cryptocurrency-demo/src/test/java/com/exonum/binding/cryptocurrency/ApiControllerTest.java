@@ -20,6 +20,8 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,23 +31,27 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.InternalServerError;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.transaction.Transaction;
+import com.google.gson.reflect.TypeToken;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -235,6 +241,54 @@ class ApiControllerTest {
   private BinaryMessage createTestBinaryMessage(short txId) {
     return CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder(txId)
         .buildRaw();
+  }
+
+  @Test
+  void getWalletHistory(VertxTestContext context) {
+    List<HistoryEntity> history = singletonList(
+        HistoryEntity.Builder.newBuilder()
+            .setSeed(1L)
+            .setWalletFrom(fromKey)
+            .setWalletTo(fromKey)
+            .setAmount(10L)
+            .setTransactionHash(HashCode.fromString("a0a0a0"))
+            .build()
+    );
+    when(service.getWalletHistory(fromKey)).thenReturn(history);
+
+    String uri = getWalletUri(fromKey) + "/history";
+
+    get(uri)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+
+          List<HistoryEntity> actualHistory = parseWalletHistory(response);
+
+          assertThat(actualHistory).isEqualTo(history);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getWalletHistoryNonexistentWallet(VertxTestContext context) {
+    when(service.getWalletHistory(fromKey)).thenReturn(emptyList());
+
+    String uri = getWalletUri(fromKey) + "/history";
+
+    get(uri)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+          assertThat(parseWalletHistory(response)).isEmpty();
+          context.completeNow();
+        })));
+  }
+
+  private List<HistoryEntity> parseWalletHistory(HttpResponse<Buffer> response) {
+    Type listType = new TypeToken<List<HistoryEntity>>() {
+    }.getType();
+    return CryptocurrencyTransactionGson.instance()
+        .fromJson(response.bodyAsString(), listType);
   }
 
   private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {

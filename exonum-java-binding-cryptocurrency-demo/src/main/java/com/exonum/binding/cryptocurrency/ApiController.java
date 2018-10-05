@@ -21,12 +21,12 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.messages.BinaryMessage;
-import com.exonum.binding.messages.InvalidTransactionException;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.service.InvalidTransactionException;
+import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -39,19 +39,24 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** Controller for submitting transactions. */
+/**
+ * Controller for submitting transactions.
+ */
 final class ApiController {
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
-  @VisibleForTesting static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
+  @VisibleForTesting
+  static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final String WALLET_ID_PARAM = "walletId";
   private static final String GET_WALLET_PATH = "/wallet/:" + WALLET_ID_PARAM;
+  private static final String GET_WALLET_HISTORY_PATH = "/wallet/:" + WALLET_ID_PARAM + "/history";
 
   private final CryptocurrencyService service;
 
@@ -69,6 +74,7 @@ final class ApiController {
         ImmutableMap.<String, Handler<RoutingContext>>builder()
             .put(SUBMIT_TRANSACTION_PATH, this::submitTransaction)
             .put(GET_WALLET_PATH, this::getWallet)
+            .put(GET_WALLET_HISTORY_PATH, this::getWalletHistory)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -107,6 +113,16 @@ final class ApiController {
           .setStatusCode(HTTP_NOT_FOUND)
           .end();
     }
+  }
+
+  private void getWalletHistory(RoutingContext rc) {
+    PublicKey walletId =
+        getRequiredParameter(rc.request(), WALLET_ID_PARAM, PublicKey::fromHexString);
+    List<HistoryEntity> walletHistory = service.getWalletHistory(walletId);
+
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(CryptocurrencyTransactionGson.instance().toJson(walletHistory));
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,

@@ -19,11 +19,11 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
 
-import com.exonum.binding.crypto.KeyPair;
-import com.exonum.binding.crypto.PublicKey;
+import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.messages.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.google.protobuf.ByteString;
@@ -49,7 +49,7 @@ class CreateTransferTransactionUtils {
   static BinaryMessage createUnsignedMessage(long seed, PublicKey senderId,
       PublicKey recipientId, long amount) {
     return newCryptocurrencyTransactionBuilder(TransferTx.ID)
-        .setBody(TxMessagesProtos.TransferTx.newBuilder()
+        .setBody(TxMessageProtos.TransferTx.newBuilder()
             .setSeed(seed)
             .setFromWallet(fromPublicKey(senderId))
             .setToWallet(fromPublicKey(recipientId))
