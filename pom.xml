@@ -373,7 +373,7 @@
                 <id>generate-jacoco-it-report</id>
                 <phase>post-integration-test</phase>
                 <goals>
-                  <goal>report</goal>
+                  <goal>report-integration</goal>
                 </goals>
                 <configuration>
                   <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
