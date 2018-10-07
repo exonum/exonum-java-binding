@@ -94,9 +94,9 @@
     <junit.jupiter.version>5.3.1</junit.jupiter.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
     <protobuf.version>3.6.1</protobuf.version>
-    <mockito-core.version>2.22.0</mockito-core.version>
+    <mockito-core.version>2.23.0</mockito-core.version>
     <guava.version>26.0-jre</guava.version>
-    <vertx.version>3.5.3</vertx.version>
+    <vertx.version>3.5.4</vertx.version>
     <equalsverifier.version>3.0</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
@@ -161,7 +161,7 @@
              <dependency>
                <groupId>com.puppycrawl.tools</groupId>
                <artifactId>checkstyle</artifactId>
-               <version>8.12</version>
+               <version>8.13</version>
              </dependency>
            </dependencies>
          </plugin>
