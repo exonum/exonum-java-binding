@@ -23,16 +23,16 @@ import static com.exonum.binding.common.serialization.StandardSerializersTest.ro
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class VarInt32SerializerTest {
 
   private Serializer<Integer> serializer = VarInt32Serializer.INSTANCE;
 
   @ParameterizedTest
-  @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE})
+  @MethodSource("values")
   void roundTrip(Integer value) {
     roundTripTest(value, serializer);
   }
@@ -41,6 +41,12 @@ class VarInt32SerializerTest {
   @MethodSource("invalidVarInts")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
+  }
+
+  private static IntStream values() {
+    return IntStream.range(0, 32)
+        .map(value -> 1 << value)
+        .flatMap(value -> IntStream.of(-value, value - 1, value, value + 1));
   }
 
   private static List<byte[]> invalidVarInts() {

@@ -64,7 +64,7 @@ enum VarInt64Serializer implements Serializer<Long> {
       int y;
       if ((y = serializedValue[pos++]) >= 0) {
         return (long) y;
-      } else if (serializedValue.length - pos < VARINT64_MAX_BYTES - serializedValue.length - 1) {
+      } else if (serializedValue.length - pos < serializedValue.length - 1) {
         break fastpath;
       } else if ((y ^= (serializedValue[pos++] << 7)) < 0) {
         x = y ^ (~0 << 7);

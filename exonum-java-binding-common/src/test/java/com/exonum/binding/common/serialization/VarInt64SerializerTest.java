@@ -23,27 +23,33 @@ import static com.exonum.binding.common.serialization.StandardSerializersTest.ro
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.stream.LongStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class VarInt64SerializerTest {
 
   private Serializer<Long> serializer = VarInt64Serializer.INSTANCE;
 
   @ParameterizedTest
-  @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE})
+  @MethodSource("values")
   void roundTrip(Long value) {
     roundTripTest(value, serializer);
   }
 
   @ParameterizedTest
-  @MethodSource("invalidVarInts")
+  @MethodSource("invalidValues")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }
 
-  private static List<byte[]> invalidVarInts() {
+  private static LongStream values() {
+    return LongStream.range(0, 64)
+        .map(value -> 1L << value)
+        .flatMap(value -> LongStream.of(-value, value - 1, value, value + 1));
+  }
+
+  private static List<byte[]> invalidValues() {
     return ImmutableList.of(
         Bytes.bytes(),
         Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)

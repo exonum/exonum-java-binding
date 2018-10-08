@@ -63,7 +63,7 @@ enum VarInt32Serializer implements Serializer<Integer> {
       int x;
       if ((x = serializedValue[pos++]) >= 0) {
         return x;
-      } else if (serializedValue.length - pos < VARINT32_MAX_BYTES - serializedValue.length - 1) {
+      } else if (serializedValue.length - pos < serializedValue.length - 1) {
         break fastpath;
       } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
         x ^= (~0 << 7);
