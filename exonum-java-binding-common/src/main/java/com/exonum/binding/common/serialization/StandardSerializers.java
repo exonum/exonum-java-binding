@@ -51,7 +51,7 @@ public final class StandardSerializers {
   /**
    * Returns a serializer of integers using variable length encoding in little-endian byte order.
    */
-  public static Serializer<Integer> varint32() {
+  public static Serializer<Integer> varInt32() {
     return VarInt32Serializer.INSTANCE;
   }
 
@@ -65,7 +65,7 @@ public final class StandardSerializers {
   /**
    * Returns a serializer of longs using variable length encoding in little-endian byte order.
    */
-  public static Serializer<Long> varint64() {
+  public static Serializer<Long> varInt64() {
     return VarInt64Serializer.INSTANCE;
   }
 

@@ -25,7 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   allowing to pass Protocol Buffer messages directly instead of using
   `StandardSerializers#protobuf`. (#505)
 - `StandardSerializers` now supports `bool`, `fixed32`, `fixed64`, `float` and `double` 
-  primitive types, `PrivateKey`, `PublicKey` and `bytes` serialization (#514)  
+  primitive types, `PrivateKey`, `PublicKey` and `bytes` serialization (#514)
+- `StandardSerializers` now supports `varInt32' and `varInt64` serialization (#523)    
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
