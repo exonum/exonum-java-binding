@@ -18,6 +18,7 @@
 package com.exonum.binding.common.serialization;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Arrays.copyOf;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -37,7 +38,7 @@ enum VarInt64Serializer implements Serializer<Long> {
       while (true) {
         if ((val & ~0x7FL) == 0) {
           buffer.put((byte) val);
-          return buffer.array();
+          return copyOf(buffer.array(), buffer.position());
         } else {
           buffer.put((byte) (((int) val & 0x7F) | 0x80));
           val >>>= 7;
@@ -57,27 +58,27 @@ enum VarInt64Serializer implements Serializer<Long> {
 
     fastpath:
     {
-      int tempPos = 0;
+      int pos = 0;
 
       long x;
       int y;
-      if ((y = serializedValue[tempPos++]) >= 0) {
+      if ((y = serializedValue[pos++]) >= 0) {
         return (long) y;
-      } else if (serializedValue.length - tempPos < 9) {
+      } else if (serializedValue.length - pos < VARINT64_MAX_BYTES - serializedValue.length - 1) {
         break fastpath;
-      } else if ((y ^= (serializedValue[tempPos++] << 7)) < 0) {
+      } else if ((y ^= (serializedValue[pos++] << 7)) < 0) {
         x = y ^ (~0 << 7);
-      } else if ((y ^= (serializedValue[tempPos++] << 14)) >= 0) {
+      } else if ((y ^= (serializedValue[pos++] << 14)) >= 0) {
         x = y ^ ((~0 << 7) ^ (~0 << 14));
-      } else if ((y ^= (serializedValue[tempPos++] << 21)) < 0) {
+      } else if ((y ^= (serializedValue[pos++] << 21)) < 0) {
         x = y ^ ((~0 << 7) ^ (~0 << 14) ^ (~0 << 21));
-      } else if ((x = y ^ ((long) serializedValue[tempPos++] << 28)) >= 0L) {
+      } else if ((x = y ^ ((long) serializedValue[pos++] << 28)) >= 0L) {
         x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28);
-      } else if ((x ^= ((long) serializedValue[tempPos++] << 35)) < 0L) {
+      } else if ((x ^= ((long) serializedValue[pos++] << 35)) < 0L) {
         x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35);
-      } else if ((x ^= ((long) serializedValue[tempPos++] << 42)) >= 0L) {
+      } else if ((x ^= ((long) serializedValue[pos++] << 42)) >= 0L) {
         x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35) ^ (~0L << 42);
-      } else if ((x ^= ((long) serializedValue[tempPos++] << 49)) < 0L) {
+      } else if ((x ^= ((long) serializedValue[pos++] << 49)) < 0L) {
         x ^=
             (~0L << 7)
                 ^ (~0L << 14)
@@ -87,7 +88,7 @@ enum VarInt64Serializer implements Serializer<Long> {
                 ^ (~0L << 42)
                 ^ (~0L << 49);
       } else {
-        x ^= ((long) serializedValue[tempPos++] << 56);
+        x ^= ((long) serializedValue[pos++] << 56);
         x ^=
             (~0L << 7)
                 ^ (~0L << 14)
@@ -98,7 +99,7 @@ enum VarInt64Serializer implements Serializer<Long> {
                 ^ (~0L << 49)
                 ^ (~0L << 56);
         if (x < 0L) {
-          if (serializedValue[tempPos++] < 0L) {
+          if (serializedValue[pos++] < 0L) {
             break fastpath; // Will throw malformedVarint()
           }
         }

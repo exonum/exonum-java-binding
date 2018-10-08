@@ -18,6 +18,7 @@
 package com.exonum.binding.common.serialization;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Arrays.copyOf;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -37,7 +38,7 @@ enum VarInt32Serializer implements Serializer<Integer> {
       while (true) {
         if ((val & ~0x7F) == 0) {
           buffer.put((byte) val);
-          return buffer.array();
+          return copyOf(buffer.array(), buffer.position());
         } else {
           buffer.put((byte) ((val & 0x7F) | 0x80));
           val >>>= 7;
@@ -62,7 +63,7 @@ enum VarInt32Serializer implements Serializer<Integer> {
       int x;
       if ((x = serializedValue[pos++]) >= 0) {
         return x;
-      } else if (serializedValue.length - pos < 9) {
+      } else if (serializedValue.length - pos < VARINT32_MAX_BYTES - serializedValue.length - 1) {
         break fastpath;
       } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
         x ^= (~0 << 7);
