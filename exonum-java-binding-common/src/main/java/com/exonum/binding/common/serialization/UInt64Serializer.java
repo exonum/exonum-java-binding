@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-enum VarInt64Serializer implements Serializer<Long> {
+enum UInt64Serializer implements Serializer<Long> {
   INSTANCE;
 
   private static final int VARINT64_MAX_BYTES = 10;
@@ -108,4 +108,5 @@ enum VarInt64Serializer implements Serializer<Long> {
     }
     throw new AssertionError("Malformed value: " + Arrays.toString(serializedValue));
   }
+
 }

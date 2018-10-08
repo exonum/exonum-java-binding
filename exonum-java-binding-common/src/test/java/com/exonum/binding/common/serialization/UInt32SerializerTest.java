@@ -27,9 +27,9 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class VarInt32SerializerTest {
+class UInt32SerializerTest {
 
-  private Serializer<Integer> serializer = VarInt32Serializer.INSTANCE;
+  private Serializer<Integer> serializer = UInt32Serializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("values")

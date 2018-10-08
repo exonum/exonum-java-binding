@@ -54,7 +54,7 @@ public final class StandardSerializers {
    * than {@link StandardSerializers#fixed32()}.
    */
   public static Serializer<Integer> varInt32() {
-    return VarInt32Serializer.INSTANCE;
+    return UInt32Serializer.INSTANCE;
   }
 
   /**
@@ -70,7 +70,7 @@ public final class StandardSerializers {
    * than {@link StandardSerializers#fixed64()}.
    */
   public static Serializer<Long> varInt64() {
-    return VarInt64Serializer.INSTANCE;
+    return UInt64Serializer.INSTANCE;
   }
 
   /**
@@ -134,4 +134,5 @@ public final class StandardSerializers {
 
   private StandardSerializers() {
   }
+
 }

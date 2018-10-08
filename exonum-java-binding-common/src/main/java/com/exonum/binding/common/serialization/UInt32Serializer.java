@@ -25,10 +25,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-enum VarInt32Serializer implements Serializer<Integer> {
+enum UInt32Serializer implements Serializer<Integer> {
   INSTANCE;
 
-  private static final int VARINT32_MAX_BYTES = 10;
+  private static final int VARINT32_MAX_BYTES = 5;
 
   @Override
   public byte[] toBytes(Integer value) {
