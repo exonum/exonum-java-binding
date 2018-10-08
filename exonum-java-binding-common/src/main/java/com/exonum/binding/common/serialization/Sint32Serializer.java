@@ -17,10 +17,10 @@
 
 package com.exonum.binding.common.serialization;
 
-enum  SInt32Serializer implements Serializer<Integer> {
+enum Sint32Serializer implements Serializer<Integer> {
   INSTANCE;
 
-  private static final UInt32Serializer WRITER = UInt32Serializer.INSTANCE;
+  private static final Uint32Serializer WRITER = Uint32Serializer.INSTANCE;
 
   @Override
   public byte[] toBytes(Integer value) {
