@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `StandardSerializers#protobuf`. (#505)
 - `StandardSerializers` now supports `bool`, `fixed32`, `fixed64`, `float` and `double` 
   primitive types, `PrivateKey`, `PublicKey` and `bytes` serialization (#514)
-- `StandardSerializers` now supports `varInt32' and `varInt64` serialization (#523)
+- `StandardSerializers` now supports `uint32`, `sint32`, `uint64` and `sint64` serialization (#523)
     
 
 ### Changed
