@@ -12,13 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.proofs.map;
+package com.exonum.binding.common.serialization;
 
-/**
- * A proof that a map contains a mapping for some key.
- */
-public interface MapProof {
-  void accept(MapProofVisitor visitor);
+import com.exonum.binding.common.crypto.PublicKey;
+
+enum PublicKeySerializer implements Serializer<PublicKey> {
+  INSTANCE;
+
+  @Override
+  public byte[] toBytes(PublicKey value) {
+    return value.toBytes();
+  }
+
+  @Override
+  public PublicKey fromBytes(byte[] serializedValue) {
+    return PublicKey.fromBytes(serializedValue);
+  }
+
 }

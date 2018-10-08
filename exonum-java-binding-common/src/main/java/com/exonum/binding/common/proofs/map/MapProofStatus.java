@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map.flat;
-
-import com.exonum.binding.common.proofs.common.ProofStatus;
+package com.exonum.binding.common.proofs.map;
 
 /**
  * Possible statuses of a checked map proof.
  */
-public enum MapProofStatus implements ProofStatus {
+public enum ProofStatus {
   CORRECT("Proof has a valid structure"),
   NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
   INVALID_ORDER("Proof entries are placed in the wrong order"),
@@ -30,18 +28,13 @@ public enum MapProofStatus implements ProofStatus {
 
   final String description;
 
-  MapProofStatus(String description) {
+  ProofStatus(String description) {
     this.description = description;
   }
 
   @Override
-  public String getDescription() {
-    return description;
-  }
-
-  @Override
   public String toString() {
-    return "MapProofStatus{"
+    return "ProofStatus{"
         + "description='" + description + '\''
         + '}';
   }

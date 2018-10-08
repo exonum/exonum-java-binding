@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map.flat;
+package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
@@ -29,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.proofs.map.DbKey;
-import com.exonum.binding.common.proofs.map.DbKeyTestUtils;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;

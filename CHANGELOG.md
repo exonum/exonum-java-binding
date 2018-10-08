@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Static factory methods accepting protobuf messages to collections,
   allowing to pass Protocol Buffer messages directly instead of using
   `StandardSerializers#protobuf`. (#505)
+- `StandardSerializers` now supports `bool`, `fixed32`, `fixed64`, `float` and `double` 
+  primitive types, `PrivateKey`, `PublicKey` and `bytes` serialization (#514)  
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
@@ -42,6 +44,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - `Hashing#toHexString`. (#379)
+- Deprecated tree map proofs in preference to flat map proofs,
+  the only supported format by the Exonum storage. (#518)
 
 ## 0.2 - 2018-07-23
 

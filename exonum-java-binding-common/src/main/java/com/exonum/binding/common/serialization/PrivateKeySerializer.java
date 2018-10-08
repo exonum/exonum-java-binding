@@ -12,23 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.common.proofs.map;
+package com.exonum.binding.common.serialization;
 
-public interface MapProofVisitor {
+import com.exonum.binding.common.crypto.PrivateKey;
 
-  void visit(EqualValueAtRoot equalValueAtRoot);
+enum PrivateKeySerializer implements Serializer<PrivateKey> {
+  INSTANCE;
 
-  void visit(NonEqualValueAtRoot nonEqualValueAtRoot);
+  @Override
+  public byte[] toBytes(PrivateKey value) {
+    return value.toBytes();
+  }
 
-  void visit(EmptyMapProof emptyMap);
+  @Override
+  public PrivateKey fromBytes(byte[] serializedValue) {
+    return PrivateKey.fromBytes(serializedValue);
+  }
 
-  void visit(LeftMapProofBranch leftMapProofBranch);
-
-  void visit(RightMapProofBranch rightMapProofBranch);
-
-  void visit(MappingNotFoundProofBranch mappingNotFoundProofBranch);
-
-  void visit(LeafMapProofNode leafMapProofNode);
 }

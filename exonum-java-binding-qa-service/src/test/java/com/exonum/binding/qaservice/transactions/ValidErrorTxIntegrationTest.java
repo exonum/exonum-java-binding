@@ -37,9 +37,13 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ValidErrorTxIntegrationTest {
 
@@ -166,6 +170,26 @@ class ValidErrorTxIntegrationTest {
       assertTrue(schema.counters().isEmpty());
       assertTrue(schema.counterNames().isEmpty());
     }
+  }
+
+  @CsvSource({
+      "1, 0, Boom", // min error code value
+      "-1, 1, 'Longer error message'",
+      "9223372036854775807, 127,", // Max seed value, max error code value, null message
+  })
+  @ParameterizedTest
+  void info(long seed, byte errorCode, String errorMessage) {
+    Transaction tx = new ValidErrorTx(seed, errorCode, errorMessage);
+
+    String txInJson = tx.info();
+
+    Gson gson = QaTransactionGson.instance();
+
+    AnyTransaction<ValidErrorTx> txFromJson = gson.fromJson(txInJson,
+        new TypeToken<AnyTransaction<ValidErrorTx>>() {}.getType());
+
+    assertThat(txFromJson.message_id, equalTo(QaTransaction.VALID_ERROR.id()));
+    assertThat(txFromJson.body, equalTo(tx));
   }
 
   @Test
