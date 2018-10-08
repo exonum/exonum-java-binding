@@ -538,7 +538,7 @@ public class ProofMapIndexProxyIntegrationTest
   public void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       /*
-       Proof map should have the following structure:
+       Proof of this map will have the following structure:
                    <00xxxx>
                    /        \
            <00|00xx>          <00|10xx>
@@ -547,26 +547,26 @@ public class ProofMapIndexProxyIntegrationTest
       */
       List<MapEntry<HashCode, String>> entries = createMapEntries(
           Stream.of(
-              proofKeyFromPrefix("0000 01"),
-              proofKeyFromPrefix("0000 11"),
-              proofKeyFromPrefix("0010 00"),
-              proofKeyFromPrefix("0010 10")
+              proofKeyFromPrefix("0000|01"),
+              proofKeyFromPrefix("0000|11"),
+              proofKeyFromPrefix("0010|00"),
+              proofKeyFromPrefix("0010|10")
           )
       );
 
       putAll(map, entries);
 
       List<HashCode> proofKeys = Arrays.asList(
-          // Should be rejected on first level
-          proofKeyFromPrefix("0100 00"),
-          // Should be rejected on second level
-          proofKeyFromPrefix("0001"),
-          proofKeyFromPrefix("0011"),
-          // Should be rejected on third level
-          proofKeyFromPrefix("0000 00"),
-          proofKeyFromPrefix("0000 10"),
-          proofKeyFromPrefix("0010 01"),
-          proofKeyFromPrefix("0010 11")
+          // Should be rejected on root level
+          proofKeyFromPrefix("01|0000"),
+          // Should be rejected on intermediate level
+          proofKeyFromPrefix("00|01"),
+          proofKeyFromPrefix("00|11"),
+          // Should be rejected on leaf level
+          proofKeyFromPrefix("0000|00"),
+          proofKeyFromPrefix("0000|10"),
+          proofKeyFromPrefix("0010|01"),
+          proofKeyFromPrefix("0010|11")
       );
 
       assertThat(map, provesThatAbsent(proofKeys));
