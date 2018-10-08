@@ -61,26 +61,26 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
         && missingKeys.size() == expectedAbsentEntries;
   }
 
-  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry entry) {
-    Optional<String> entryValue = entry.getValue();
-    byte[] key = entry.getKey().asBytes();
+  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry expectedEntry) {
+    Optional<String> entryValue = expectedEntry.getValue();
+    byte[] expectedKey = expectedEntry.getKey().asBytes();
 
     if (entryValue.isPresent()) {
       List<MapEntry> presentEntries = checkedMapProof.getEntries();
-      byte[] value = entryValue.get().getBytes();
-      return checkPresentEntry(presentEntries, key, value);
+      byte[] expectedValue = entryValue.get().getBytes();
+      return checkPresentEntry(presentEntries, expectedKey, expectedValue);
     } else {
       List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
-      return checkAbsentEntry(missingKeys, key);
+      return checkAbsentEntry(missingKeys, expectedKey);
     }
   }
 
   private boolean checkPresentEntry(
-      List<MapEntry> presentEntries, byte[] entryKey, byte[] entryValue) {
+      List<MapEntry> presentEntries, byte[] expectedKey, byte[] expectedValue) {
     return presentEntries
         .stream()
-        .anyMatch(presentEntry -> Arrays.equals(entryKey, presentEntry.getKey())
-            && Arrays.equals(entryValue, presentEntry.getValue()));
+        .anyMatch(presentEntry -> Arrays.equals(expectedKey, presentEntry.getKey())
+            && Arrays.equals(expectedValue, presentEntry.getValue()));
   }
 
   private boolean checkAbsentEntry(List<byte[]> missingKeys, byte[] entryKey) {

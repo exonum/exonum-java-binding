@@ -20,6 +20,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.UncheckedMapProof;
@@ -31,13 +32,12 @@ import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
+import java.util.stream.Stream;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -220,8 +220,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
       byte[] dbKey = keySerializer.toBytes(key);
       return nativeGetProof(getNativeHandle(), dbKey);
     } else {
-      List<K> keys = new ArrayList<>(Arrays.asList(otherKeys));
-      keys.add(key);
+      List<K> keys = asList(key, otherKeys);
       return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
     }
   }
@@ -259,6 +258,11 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
+
+  static <T> List<T> asList(T element, T... otherElements) {
+    return Stream.concat(Stream.of(element), Stream.of(otherElements))
+        .collect(toList());
+  }
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.
