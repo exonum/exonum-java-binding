@@ -17,9 +17,14 @@
 
 package com.exonum.binding.common.serialization;
 
+import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
+import com.exonum.binding.test.Bytes;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class VarInt64SerializerTest {
@@ -30,6 +35,19 @@ class VarInt64SerializerTest {
   @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE})
   void roundTrip(Long value) {
     roundTripTest(value, serializer);
+  }
+
+  @ParameterizedTest
+  @MethodSource("invalidVarInts")
+  void deserializeInvalidValue(byte[] value) {
+    invalidBytesValueTest(value, serializer);
+  }
+
+  private static List<byte[]> invalidVarInts() {
+    return ImmutableList.of(
+        Bytes.bytes(),
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+    );
   }
 
 }

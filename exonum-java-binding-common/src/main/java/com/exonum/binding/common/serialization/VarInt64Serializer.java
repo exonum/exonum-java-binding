@@ -50,17 +50,14 @@ enum VarInt64Serializer implements Serializer<Long> {
 
   @Override
   public Long fromBytes(byte[] serializedValue) {
-    checkArgument(serializedValue.length > 0 && serializedValue.length <= VARINT64_MAX_BYTES,
-        "Expected an array of size in range (0, %s], but was %s",
+    checkArgument(serializedValue.length > 0, "Expected not empty array");
+    checkArgument(serializedValue.length <= VARINT64_MAX_BYTES,
+        "Expected an array of size less than %s, but was %s",
         VARINT64_MAX_BYTES, serializedValue.length);
 
     fastpath:
     {
       int tempPos = 0;
-
-      if (serializedValue.length == tempPos) {
-        break fastpath;
-      }
 
       long x;
       int y;

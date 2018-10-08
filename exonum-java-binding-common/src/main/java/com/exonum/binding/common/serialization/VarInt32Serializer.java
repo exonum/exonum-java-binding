@@ -50,16 +50,14 @@ enum VarInt32Serializer implements Serializer<Integer> {
 
   @Override
   public Integer fromBytes(byte[] serializedValue) {
-    checkArgument(serializedValue.length > 0 && serializedValue.length <= VARINT32_MAX_BYTES,
-        "Expected an array of size in range (0, %s], but was %s",
+    checkArgument(serializedValue.length > 0, "Expected not empty array");
+    checkArgument(serializedValue.length <= VARINT32_MAX_BYTES,
+        "Expected an array of size less than %s, but was %s",
         VARINT32_MAX_BYTES, serializedValue.length);
 
     fastpath:
     {
       int pos = 0;
-      if (serializedValue.length == pos) {
-        break fastpath;
-      }
 
       int x;
       if ((x = serializedValue[pos++]) >= 0) {
