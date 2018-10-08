@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map.flat;
+package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.DbKey;
