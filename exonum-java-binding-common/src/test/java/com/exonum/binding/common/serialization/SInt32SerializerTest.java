@@ -24,7 +24,6 @@ import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.IntStream;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -55,12 +54,6 @@ class SInt32SerializerTest {
         Bytes.bytes(),
         Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
     );
-  }
-
-  @Test
-  void name() {
-    byte[] bytes = serializer.toBytes((int) -Math.pow(2, 20)-1 );
-    System.out.println(bytes.length);
   }
 
 }
