@@ -78,19 +78,6 @@ class ListProofStructureValidatorTest {
   }
 
   @Test
-  void visit_IllegalProofOfSingletonTree() {
-    ListProofElement left = leafOf(V1);
-
-    // A proof for a list of size 1 must not contain branch nodes.
-    ListProofBranch root = new ListProofBranch(left, null);
-
-    validator = createListProofStructureValidator();
-    validator.visit(root);
-
-    assertThat(validator.check(), is(ListProofStatus.VALID));
-  }
-
-  @Test
   void visit_ProofLeftValue() {
     ListProof left = leafOf(V1);
     ListProof right = new ListProofHashNode(H2);
@@ -154,6 +141,17 @@ class ListProofStructureValidatorTest {
   }
 
   @Test
+  void visit_MaxAllowedDepth() {
+    int depth = ListProofStructureValidator.MAX_NODE_DEPTH;
+    ListProof root = generateRightLeaningProofTree(depth, leafOf(V1));
+
+    validator = createListProofStructureValidator();
+    root.accept(validator);
+
+    assertThat(validator.check(), is(ListProofStatus.VALID));
+  }
+
+  @Test
   void visit_UnbalancedElementNodeTooDeep() {
     int depth = ListProofStructureValidator.MAX_NODE_DEPTH + 1;
     ListProof root = generateRightLeaningProofTree(depth, leafOf(V1));
@@ -178,9 +176,31 @@ class ListProofStructureValidatorTest {
   @Test
   void visit_UnbalancedHashNodesOnlyLeafs() {
     ListProofBranch root = new ListProofBranch(
-        leafOf(V1),
+        new ListProofBranch(
+            leafOf(V1),
+            new ListProofHashNode(H1) // <-- left leaf is hash node
+        ),
+        new ListProofBranch(
+            new ListProofHashNode(H2), // <-- left leaf is hash node
+            new ListProofHashNode(H3)  // <-- right leaf is hash node
+        )
+    );
+
+    validator = createListProofStructureValidator();
+    validator.visit(root);
+
+    assertThat(validator.check(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
+  }
+
+  @Test
+  void visit_UnbalancedBranchHasOnlyHashNode() {
+    ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             new ListProofHashNode(H1), // <-- left leaf is hash node
+            null                 // <-- no right leaf
+        ),
+        new ListProofBranch(
+            leafOf(V1),                // <-- left leaf is element node
             new ListProofHashNode(H2)  // <-- right leaf is hash node
         )
     );

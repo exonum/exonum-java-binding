@@ -21,7 +21,6 @@ import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -29,6 +28,7 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
 class ListProofHashCodeCalculatorTest {
@@ -64,8 +64,7 @@ class ListProofHashCodeCalculatorTest {
     calculator.visit(root);
 
     //calculate expected root hash
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1),
-        Optional.of(getNodeHashCode(V2)));
+    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1,
         1L, V2)));
@@ -86,12 +85,9 @@ class ListProofHashCodeCalculatorTest {
     );
 
     //calculate expected root hash
-    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1),
-        Optional.of(getNodeHashCode(V2)));
-    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3),
-        Optional.of(getNodeHashCode(V4)));
-    HashCode expectedRootHash = getBranchHashCode(leftBranchHash,
-        Optional.of(rightBranchHash));
+    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
+    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), getNodeHashCode(V4));
+    HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
 
     calculator = createListProofCalculator();
     calculator.visit(root);
@@ -105,27 +101,12 @@ class ListProofHashCodeCalculatorTest {
   }
 
   @Test
-  void visit_FullProof2elementsHashMismatch() {
-    ListProofElement left = leafOf(V1);
-    ListProofElement right = leafOf(V2);
-    ListProofBranch root = new ListProofBranch(left, right);
-
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1),
-        Optional.of(getNodeHashCode(V2)));
-
-    calculator = createListProofCalculatorSha256HashingFunction();
-    calculator.visit(root);
-
-    assertNotEquals(expectedRootHash, calculator.getCalculatedRootHash());
-  }
-
-  @Test
   void visit_ProofLeftValue() {
     ListProof left = leafOf(V1);
     ListProof right = new ListProofHashNode(H2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), Optional.of(H2));
+    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), H2);
 
     calculator = createListProofCalculator();
     calculator.visit(root);
@@ -143,7 +124,7 @@ class ListProofHashCodeCalculatorTest {
     calculator = createListProofCalculator();
     calculator.visit(root);
 
-    HashCode expectedRootHash = getBranchHashCode(H1, Optional.of(getNodeHashCode(V2)));
+    HashCode expectedRootHash = getBranchHashCode(H1, getNodeHashCode(V2));
 
     assertThat(calculator.getElements(), equalTo(of(1L, V2)));
     assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
@@ -154,18 +135,27 @@ class ListProofHashCodeCalculatorTest {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             leafOf(V1),
-            null
+            leafOf(V2)
         ),
-        null
+        new ListProofBranch(
+            leafOf(V3),
+            new ListProofHashNode(H1)
+        )
     );
 
     calculator = createListProofCalculator();
     calculator.visit(root);
 
-    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), Optional.empty());
-    HashCode expectedRootHash = getBranchHashCode(leftBranchHash, Optional.empty());
+    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
+    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), H1);
+    HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
 
-    assertThat(calculator.getElements(), equalTo(of(0L, V1)));
+    assertThat(calculator.getElements(),
+        equalTo(of(
+            0L, V1,
+            1L, V2,
+            2L, V3))
+    );
     assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
   }
 
@@ -175,7 +165,8 @@ class ListProofHashCodeCalculatorTest {
         .hash();
   }
 
-  private HashCode getBranchHashCode(HashCode leftHash, Optional<HashCode> rightHash) {
+  private HashCode getBranchHashCode(HashCode leftHash, @Nullable HashCode rightHashSource) {
+    Optional<HashCode> rightHash = Optional.ofNullable(rightHashSource);
     return Hashing.defaultHashFunction().newHasher()
         .putObject(leftHash, hashCodeFunnel())
         .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
@@ -185,10 +176,6 @@ class ListProofHashCodeCalculatorTest {
 
   private ListProofRootHashCalculator<String> createListProofCalculator() {
     return new ListProofRootHashCalculator<>(StandardSerializers.string());
-  }
-
-  private ListProofRootHashCalculator<String> createListProofCalculatorSha256HashingFunction() {
-    return new ListProofRootHashCalculator<>(StandardSerializers.string(), Hashing.sha512());
   }
 
   private static ListProofElement leafOf(String element) {

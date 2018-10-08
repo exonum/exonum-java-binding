@@ -165,9 +165,10 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   private boolean hashNodesLimitExceeded(List<NodeInfo> branches) {
     return branches.stream()
         .anyMatch(
-            branch -> branch.getChildElementsTypes().size() == 2
+            branch -> branch.getChildElementsTypes().size() >= 1
                 && branch.getChildElementsTypes().stream()
-                .allMatch(nodeType -> nodeType.equals(NodeType.HASHNODE))
+                .allMatch(nodeType -> nodeType.equals(NodeType.HASHNODE)
+                    || nodeType.equals(NodeType.NONE))
         );
   }
 

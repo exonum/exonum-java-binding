@@ -69,5 +69,4 @@ public final class ListProofBranch implements ListProof {
     return Optional.ofNullable(right);
   }
 
-
 }

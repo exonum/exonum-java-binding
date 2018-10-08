@@ -55,11 +55,12 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
 
     ListProofStructureValidator validator = newProofStructureValidator();
     proof.accept(validator);
+    validator.check();
 
     ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
     proof.accept(calculator);
 
-    return validator.check().equals(ListProofStatus.VALID)
+    return validator.getProofStatus().equals(ListProofStatus.VALID)
         && elementsMatcher.matches(calculator.getElements())
         && list.getRootHash().equals(calculator.getCalculatedRootHash());
   }
@@ -74,11 +75,11 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
-    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
-    proof.accept(calculator);
 
     ListProofStructureValidator validator = newProofStructureValidator();
     proof.accept(validator);
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
+    proof.accept(calculator);
 
     if (!validator.check().equals(ListProofStatus.VALID)) {
       mismatchDescription.appendText("proof was not valid: ")
