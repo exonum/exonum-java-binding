@@ -277,6 +277,12 @@
            </dependencies>
          </plugin>
 
+         <plugin>
+           <groupId>org.codehaus.mojo</groupId>
+           <artifactId>tidy-maven-plugin</artifactId>
+           <version>1.1.0</version>
+         </plugin>
+
          <!-- Use newer version of the standard plugins by default. -->
          <plugin>
            <artifactId>maven-enforcer-plugin</artifactId>
@@ -415,6 +421,24 @@
                 </requireEnvironmentVariable>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checks that the POMs match the code convention:
+           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
+
+           Use `mvn tidy:pom` to fix any style issues -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check-pom-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
