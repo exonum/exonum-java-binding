@@ -57,4 +57,10 @@ class SInt32SerializerTest {
     );
   }
 
+  @Test
+  void name() {
+    byte[] bytes = serializer.toBytes((int) -Math.pow(2, 20)-1 );
+    System.out.println(bytes.length);
+  }
+
 }
