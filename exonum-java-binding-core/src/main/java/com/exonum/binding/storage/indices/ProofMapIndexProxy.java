@@ -220,9 +220,9 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
       byte[] dbKey = keySerializer.toBytes(key);
       return nativeGetProof(getNativeHandle(), dbKey);
     } else {
-      List<K> keyList = new ArrayList<>(Arrays.asList(otherKeys));
-      keyList.add(key);
-      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keyList));
+      List<K> keys = new ArrayList<>(Arrays.asList(otherKeys));
+      keys.add(key);
+      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
     }
   }
 

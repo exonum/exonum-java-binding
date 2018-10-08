@@ -17,14 +17,13 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
-import static com.exonum.binding.storage.indices.CheckedMapProofMultiMatcher.isValid;
+import static com.exonum.binding.storage.indices.CheckedMapProofMatcher.isValid;
 import static com.exonum.binding.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.storage.indices.MapTestEntry.absentEntry;
 import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
-import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesNoMappingFor;
-import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatContains;
-import static com.exonum.binding.storage.indices.ProofMapMultiContainsMatcher.provesThatCorrect;
-import static com.exonum.binding.storage.indices.ProofMapMultiContainsMatcher.provesThatPresent;
+import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatAbsent;
+import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatCorrect;
+import static com.exonum.binding.storage.indices.ProofMapContainsMatcher.provesThatPresent;
 import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkProofKey;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
@@ -239,9 +238,9 @@ public class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getProof_EmptyMap() {
+  public void getProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
-        (map) -> assertThat(map, provesNoMappingFor(PK1))
+        (map) -> assertThat(map, provesThatAbsent(PK1))
     );
   }
 
@@ -252,7 +251,7 @@ public class ProofMapIndexProxyIntegrationTest
       String value = V1;
       map.put(key, value);
 
-      assertThat(map, provesThatContains(key, value));
+      assertThat(map, provesThatPresent(key, value));
     });
   }
 
@@ -261,7 +260,7 @@ public class ProofMapIndexProxyIntegrationTest
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      assertThat(map, provesNoMappingFor(PK2));
+      assertThat(map, provesThatAbsent(PK2));
     });
   }
 
@@ -281,7 +280,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
       }
     });
   }
@@ -301,7 +300,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
       }
     });
   }
@@ -325,7 +324,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
       }
     });
   }
@@ -348,7 +347,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
       }
     });
   }
@@ -360,7 +359,7 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
       }
     });
   }
@@ -382,7 +381,7 @@ public class ProofMapIndexProxyIntegrationTest
       );
 
       for (HashCode key : otherKeys) {
-        assertThat(map, provesNoMappingFor(key));
+        assertThat(map, provesThatAbsent(key));
       }
     });
   }
@@ -398,35 +397,15 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatContains(e.getKey(), e.getValue()));
+        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
       }
     });
   }
 
   @Test
-  public void getMultiProof_EmptyMap() {
+  public void getMultiProof_EmptyMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createSnapshot, (map) ->
-            assertThat(map, provesThatCorrect(absentEntry(PK1), absentEntry(PK2))));
-  }
-
-  @Test
-  public void getMultiProof_SingletonMapContains() {
-    runTestWithView(database::createFork, (map) -> {
-      HashCode key = PK1;
-      String value = V1;
-      map.put(key, value);
-
-      assertThat(map, provesThatCorrect(presentEntry(key, value)));
-    });
-  }
-
-  @Test
-  public void getMultiProof_SingletonMapDoesNotContain() {
-    runTestWithView(database::createFork, (map) -> {
-      map.put(PK1, V1);
-
-      assertThat(map, provesThatCorrect(absentEntry(PK2)));
-    });
+            assertThat(map, provesThatAbsent(PK1, PK2)));
   }
 
   @Test
@@ -434,7 +413,7 @@ public class ProofMapIndexProxyIntegrationTest
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      assertThat(map, provesThatCorrect(absentEntry(PK2), absentEntry(PK3)));
+      assertThat(map, provesThatAbsent(PK2, PK3));
     });
   }
 
@@ -552,6 +531,45 @@ public class ProofMapIndexProxyIntegrationTest
       putAll(map, entries);
 
       assertThat(map, provesThatPresent(entries));
+    });
+  }
+
+  @Test
+  public void getMultiProof_FourEntryMap_DoesNotContain() {
+    runTestWithView(database::createFork, (map) -> {
+    /*
+     Proof map should have the following structure:
+                 <00xxxx>
+                 /        \
+         <00|00xx>          <00|10xx>
+        /         \        /         \
+     <0000|01>  <0000|11>  <0010|00>   <0010|10>
+    */
+      List<MapEntry<HashCode, String>> entries = createMapEntries(
+          Stream.of(
+              proofKeyFromPrefix("0000 01"),
+              proofKeyFromPrefix("0000 11"),
+              proofKeyFromPrefix("0010 00"),
+              proofKeyFromPrefix("0010 10")
+          )
+      );
+
+      putAll(map, entries);
+
+      List<HashCode> proofKeys = Arrays.asList(
+          // Should be rejected on first level
+          proofKeyFromPrefix("0100 00"),
+          // Should be rejected on second level
+          proofKeyFromPrefix("0001"),
+          proofKeyFromPrefix("0011"),
+          // Should be rejected on third level
+          proofKeyFromPrefix("0000 00"),
+          proofKeyFromPrefix("0000 10"),
+          proofKeyFromPrefix("0010 01"),
+          proofKeyFromPrefix("0010 11")
+      );
+
+      assertThat(map, provesThatAbsent(proofKeys));
     });
   }
 
@@ -737,6 +755,41 @@ public class ProofMapIndexProxyIntegrationTest
 
       assertThat(checkedProof, isValid(singletonList(presentEntry(PK1, V1))));
     });
+  }
+
+  /**
+   * Returns a new key with the given prefix.
+   *
+   * @param prefix a key prefix — from the least significant bit to the most significant,
+   *               i.e., "00 01" is 8, "10 00" is 1.
+   *               May contain spaces, underscores or bars (e.g., "00 01|01 11" and "11_10"
+   *               are valid strings).
+   */
+  private static HashCode proofKeyFromPrefix(String prefix) {
+    prefix = filterBitPrefix(prefix);
+    byte[] key = keyFromString(prefix);
+    return HashCode.fromBytes(key);
+  }
+
+  /** Replaces spaces that may be used to separate groups of binary digits. */
+  private static String filterBitPrefix(String prefix) {
+    String filtered = prefix.replaceAll("[ _|]", "");
+    // Check that the string is correct
+    assert filtered.matches("[01]*");
+    assert filtered.length() <= PROOF_MAP_KEY_SIZE;
+    return filtered;
+  }
+
+  /** Creates a 32-byte key from the bit prefix. */
+  private static byte[] keyFromString(String prefix) {
+    BitSet keyPrefixBits = new BitSet(prefix.length());
+    for (int i = 0; i < prefix.length(); i++) {
+      char bit = prefix.charAt(i);
+      if (bit == '1') {
+        keyPrefixBits.set(i);
+      }
+    }
+    return createPrefixed(keyPrefixBits.toByteArray(), PROOF_MAP_KEY_SIZE);
   }
 
   /**

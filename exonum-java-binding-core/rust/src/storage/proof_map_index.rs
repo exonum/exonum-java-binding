@@ -203,7 +203,10 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-fn convert_to_java_proof<'a>(env: &'a JNIEnv, proof: MapProof<Key, Value>) -> JniResult<JObject<'a>> {
+fn convert_to_java_proof<'a>(
+    env: &'a JNIEnv,
+    proof: MapProof<Key, Value>
+) -> JniResult<JObject<'a>> {
     let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
     let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
 
