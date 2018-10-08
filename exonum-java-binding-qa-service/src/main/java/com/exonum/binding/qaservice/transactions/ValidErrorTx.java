@@ -90,7 +90,7 @@ public final class ValidErrorTx implements Transaction {
 
   @Override
   public String info() {
-    return QaTransactionGson.instance().toJson(this);
+    return new QaTransactionGson().toJson(ID, this);
   }
 
   @Override
