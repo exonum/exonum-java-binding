@@ -45,8 +45,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
+import com.exonum.binding.common.proofs.map.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;

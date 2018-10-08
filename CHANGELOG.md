@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - `Hashing#toHexString`. (#379)
+- Deprecated tree map proofs in preference to flat map proofs,
+  the only supported format by the Exonum storage. (#518)
 
 ## 0.2 - 2018-07-23
 

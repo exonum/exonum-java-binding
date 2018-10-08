@@ -20,8 +20,8 @@ import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.flat.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
+import com.exonum.binding.common.proofs.map.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
