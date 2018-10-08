@@ -537,14 +537,14 @@ public class ProofMapIndexProxyIntegrationTest
   @Test
   public void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
-    /*
-     Proof map should have the following structure:
-                 <00xxxx>
-                 /        \
-         <00|00xx>          <00|10xx>
-        /         \        /         \
-     <0000|01>  <0000|11>  <0010|00>   <0010|10>
-    */
+      /*
+       Proof map should have the following structure:
+                   <00xxxx>
+                   /        \
+           <00|00xx>          <00|10xx>
+          /         \        /         \
+       <0000|01>  <0000|11>  <0010|00>   <0010|10>
+      */
       List<MapEntry<HashCode, String>> entries = createMapEntries(
           Stream.of(
               proofKeyFromPrefix("0000 01"),
