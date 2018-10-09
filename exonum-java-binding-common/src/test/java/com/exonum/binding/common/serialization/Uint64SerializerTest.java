@@ -27,9 +27,9 @@ import java.util.stream.LongStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class UInt64SerializerTest {
+class Uint64SerializerTest {
 
-  private Serializer<Long> serializer = UInt64Serializer.INSTANCE;
+  private Serializer<Long> serializer = Uint64Serializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("values")

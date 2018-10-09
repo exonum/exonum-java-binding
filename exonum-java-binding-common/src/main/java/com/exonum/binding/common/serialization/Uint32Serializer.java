@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-enum UInt32Serializer implements Serializer<Integer> {
+enum Uint32Serializer implements Serializer<Integer> {
   INSTANCE;
 
   private static final int VARINT32_MAX_BYTES = 5;
@@ -63,7 +63,7 @@ enum UInt32Serializer implements Serializer<Integer> {
       int x;
       if ((x = serializedValue[pos++]) >= 0) {
         return x;
-      } else if (serializedValue.length - pos < serializedValue.length - 1) {
+      } else if (pos > 1) {
         break fastpath;
       } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
         x ^= (~0 << 7);

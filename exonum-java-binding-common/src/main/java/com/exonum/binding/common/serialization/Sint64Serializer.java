@@ -17,10 +17,10 @@
 
 package com.exonum.binding.common.serialization;
 
-enum  SInt64Serializer implements Serializer<Long> {
+enum Sint64Serializer implements Serializer<Long> {
   INSTANCE;
 
-  private static final UInt64Serializer WRITER = UInt64Serializer.INSTANCE;
+  private static final Uint64Serializer WRITER = Uint64Serializer.INSTANCE;
 
   @Override
   public byte[] toBytes(Long value) {
