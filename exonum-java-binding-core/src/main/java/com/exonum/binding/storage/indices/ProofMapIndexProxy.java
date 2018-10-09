@@ -20,7 +20,6 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.UncheckedMapProof;
@@ -31,13 +30,13 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.google.common.collect.Lists;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
-import java.util.stream.Stream;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -219,7 +218,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     if (otherKeys.length == 0) {
       return getSingleKeyProof(key);
     } else {
-      List<K> keys = asList(key, otherKeys);
+      List<K> keys = Lists.asList(key, otherKeys);
       return getMultiKeyProof(keys);
     }
   }
@@ -242,12 +241,6 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     } else {
       return getMultiKeyProof(keys);
     }
-  }
-
-  @SafeVarargs // We do not modify the array
-  private static <T> List<T> asList(T element, T... otherElements) {
-    return Stream.concat(Stream.of(element), Stream.of(otherElements))
-        .collect(toList());
   }
 
   private UncheckedMapProof getSingleKeyProof(K key) {
