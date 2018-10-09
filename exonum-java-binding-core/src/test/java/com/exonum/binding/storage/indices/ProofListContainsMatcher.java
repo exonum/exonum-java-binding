@@ -22,7 +22,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.ListProof;
 import com.exonum.binding.common.proofs.list.ListProofRootHashCalculator;
-import com.exonum.binding.common.proofs.list.ListProofStatus;
 import com.exonum.binding.common.proofs.list.ListProofStructureValidator;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
@@ -53,14 +52,10 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
 
     ListProof proof = proofFunction.apply(list);
 
-    ListProofStructureValidator validator = newProofStructureValidator();
-    proof.accept(validator);
-    validator.check();
+    ListProofStructureValidator validator = newProofStructureValidator(proof);
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator(proof);
 
-    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
-    proof.accept(calculator);
-
-    return validator.getProofStatus().equals(ListProofStatus.VALID)
+    return validator.isValid()
         && elementsMatcher.matches(calculator.getElements())
         && list.getRootHash().equals(calculator.getCalculatedRootHash());
   }
@@ -76,12 +71,10 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
                                         Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
 
-    ListProofStructureValidator validator = newProofStructureValidator();
-    proof.accept(validator);
-    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator();
-    proof.accept(calculator);
+    ListProofStructureValidator validator = newProofStructureValidator(proof);
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator(proof);
 
-    if (!validator.check().equals(ListProofStatus.VALID)) {
+    if (!validator.isValid()) {
       mismatchDescription.appendText("proof was not valid: ")
           .appendValue(validator.getProofStatus().getDescription());
       return;
@@ -102,12 +95,12 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
   }
 
-  private ListProofStructureValidator newProofStructureValidator() {
-    return new ListProofStructureValidator();
+  private ListProofStructureValidator newProofStructureValidator(ListProof listProof) {
+    return new ListProofStructureValidator(listProof);
   }
 
-  private ListProofRootHashCalculator<String> newProofHashCodeCalculator() {
-    return new ListProofRootHashCalculator<>(StandardSerializers.string());
+  private ListProofRootHashCalculator<String> newProofHashCodeCalculator(ListProof listProof) {
+    return new ListProofRootHashCalculator<>(listProof, StandardSerializers.string());
   }
 
   /**

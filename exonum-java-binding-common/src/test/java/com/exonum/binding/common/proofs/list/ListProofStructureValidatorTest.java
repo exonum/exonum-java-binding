@@ -16,6 +16,7 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -40,10 +41,10 @@ class ListProofStructureValidatorTest {
   void visit_SingletonListProof() {
     ListProof root = leafOf(V1);
 
-    validator = createListProofStructureValidator();
+    validator = createListProofStructureValidator(root);
     root.accept(validator);
 
-    assertThat(validator.check(), is(ListProofStatus.VALID));
+    assertTrue(validator.isValid());
   }
 
   @Test
@@ -52,10 +53,9 @@ class ListProofStructureValidatorTest {
     ListProofElement right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.VALID));
+    assertTrue(validator.isValid());
   }
 
   @Test
@@ -71,10 +71,9 @@ class ListProofStructureValidatorTest {
         )
     );
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.VALID));
+    assertTrue(validator.isValid());
   }
 
   @Test
@@ -83,10 +82,9 @@ class ListProofStructureValidatorTest {
     ListProof right = new ListProofHashNode(H2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.VALID));
+    assertTrue(validator.isValid());
   }
 
   @Test
@@ -95,10 +93,9 @@ class ListProofStructureValidatorTest {
     ListProof right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.VALID));
+    assertTrue(validator.isValid());
   }
 
   @Test
@@ -106,10 +103,9 @@ class ListProofStructureValidatorTest {
     ListProof left = new ListProofHashNode(H1);
     ListProofBranch root = new ListProofBranch(left, null);
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_TREE_NO_ELEMENTS));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_TREE_NO_ELEMENTS));
   }
 
   @Test
@@ -120,10 +116,9 @@ class ListProofStructureValidatorTest {
         leafOf(V3) // <-- A value at the wrong depth.
     );
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_NODE_DEPTH));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_NODE_DEPTH));
   }
 
   @Test
@@ -134,10 +129,9 @@ class ListProofStructureValidatorTest {
             new ListProofHashNode(H3))
     );
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_NODE_DEPTH));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_NODE_DEPTH));
   }
 
   @Test
@@ -145,10 +139,9 @@ class ListProofStructureValidatorTest {
     int depth = ListProofStructureValidator.MAX_NODE_DEPTH;
     ListProof root = generateRightLeaningProofTree(depth, leafOf(V1));
 
-    validator = createListProofStructureValidator();
-    root.accept(validator);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.VALID));
+    assertTrue(validator.isValid());
   }
 
   @Test
@@ -156,10 +149,9 @@ class ListProofStructureValidatorTest {
     int depth = ListProofStructureValidator.MAX_NODE_DEPTH + 1;
     ListProof root = generateRightLeaningProofTree(depth, leafOf(V1));
 
-    validator = createListProofStructureValidator();
-    root.accept(validator);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_ELEMENT_NODE_DEPTH));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_ELEMENT_NODE_DEPTH));
   }
 
   @Test
@@ -167,10 +159,9 @@ class ListProofStructureValidatorTest {
     int depth = ListProofStructureValidator.MAX_NODE_DEPTH + 1;
     ListProof root = generateRightLeaningProofTree(depth, new ListProofHashNode(H2));
 
-    validator = createListProofStructureValidator();
-    root.accept(validator);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_HASH_NODE_DEPTH));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_HASH_NODE_DEPTH));
   }
 
   @Test
@@ -178,7 +169,7 @@ class ListProofStructureValidatorTest {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             leafOf(V1),
-            new ListProofHashNode(H1) // <-- left leaf is hash node
+            new ListProofHashNode(H1)
         ),
         new ListProofBranch(
             new ListProofHashNode(H2), // <-- left leaf is hash node
@@ -186,33 +177,31 @@ class ListProofStructureValidatorTest {
         )
     );
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
   }
 
   @Test
   void visit_UnbalancedBranchHasOnlyHashNode() {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
-            new ListProofHashNode(H1), // <-- left leaf is hash node
-            null                 // <-- no right leaf
+            leafOf(V1),
+            new ListProofHashNode(H1)
         ),
         new ListProofBranch(
-            leafOf(V1),                // <-- left leaf is element node
-            new ListProofHashNode(H2)  // <-- right leaf is hash node
+            new ListProofHashNode(H2), // <-- left leaf is hash node
+            null                 // <-- no right leaf
         )
     );
 
-    validator = createListProofStructureValidator();
-    validator.visit(root);
+    validator = createListProofStructureValidator(root);
 
-    assertThat(validator.check(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
   }
 
-  private ListProofStructureValidator createListProofStructureValidator() {
-    return new ListProofStructureValidator();
+  private ListProofStructureValidator createListProofStructureValidator(ListProof listProof) {
+    return new ListProofStructureValidator(listProof);
   }
 
   private static ListProofElement leafOf(String element) {

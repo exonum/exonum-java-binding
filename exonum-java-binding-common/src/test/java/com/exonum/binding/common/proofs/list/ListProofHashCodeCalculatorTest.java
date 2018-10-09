@@ -47,8 +47,7 @@ class ListProofHashCodeCalculatorTest {
   void visit_SingletonListProof() {
     ListProof root = leafOf(V1);
 
-    calculator = createListProofCalculator();
-    root.accept(calculator);
+    calculator = createListProofCalculator(root);
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1)));
     assertEquals(getNodeHashCode(V1), calculator.getCalculatedRootHash());
@@ -60,8 +59,7 @@ class ListProofHashCodeCalculatorTest {
     ListProofElement right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    calculator = createListProofCalculator();
-    calculator.visit(root);
+    calculator = createListProofCalculator(root);
 
     //calculate expected root hash
     HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
@@ -89,8 +87,7 @@ class ListProofHashCodeCalculatorTest {
     HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), getNodeHashCode(V4));
     HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
 
-    calculator = createListProofCalculator();
-    calculator.visit(root);
+    calculator = createListProofCalculator(root);
 
     assertThat(calculator.getElements(),
         equalTo(of(0L, V1,
@@ -108,8 +105,7 @@ class ListProofHashCodeCalculatorTest {
 
     HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), H2);
 
-    calculator = createListProofCalculator();
-    calculator.visit(root);
+    calculator = createListProofCalculator(root);
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1)));
     assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
@@ -121,8 +117,7 @@ class ListProofHashCodeCalculatorTest {
     ListProof right = leafOf(V2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    calculator = createListProofCalculator();
-    calculator.visit(root);
+    calculator = createListProofCalculator(root);
 
     HashCode expectedRootHash = getBranchHashCode(H1, getNodeHashCode(V2));
 
@@ -139,15 +134,14 @@ class ListProofHashCodeCalculatorTest {
         ),
         new ListProofBranch(
             leafOf(V3),
-            new ListProofHashNode(H1)
+            null
         )
     );
 
-    calculator = createListProofCalculator();
-    calculator.visit(root);
+    calculator = createListProofCalculator(root);
 
     HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
-    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), H1);
+    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), null);
     HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
 
     assertThat(calculator.getElements(),
@@ -174,8 +168,8 @@ class ListProofHashCodeCalculatorTest {
         .hash();
   }
 
-  private ListProofRootHashCalculator<String> createListProofCalculator() {
-    return new ListProofRootHashCalculator<>(StandardSerializers.string());
+  private ListProofRootHashCalculator<String> createListProofCalculator(ListProof listProof) {
+    return new ListProofRootHashCalculator<>(listProof, StandardSerializers.string());
   }
 
   private static ListProofElement leafOf(String element) {

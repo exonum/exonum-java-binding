@@ -16,8 +16,6 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.common.proofs.list.ListProofStructureValidator.NodeType;
-
 /**
  * Represents a proof that some elements exist in a ProofList at certain positions.
  */
@@ -31,10 +29,4 @@ public interface ListProof {
    * @param visitor a visitor to apply to this node
    */
   void accept(ListProofVisitor visitor);
-
-  /**
-   * Returns tree node type.
-   * {@link NodeType}
-   */
-  NodeType getNodeType();
 }

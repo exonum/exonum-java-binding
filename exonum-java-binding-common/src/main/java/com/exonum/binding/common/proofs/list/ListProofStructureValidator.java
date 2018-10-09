@@ -42,20 +42,23 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Creates a new ListProofStructureValidator.
    */
-  public ListProofStructureValidator() {
+  public ListProofStructureValidator(ListProof listProof) {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
     listProofElementsInfo = new ArrayList<>();
     listProofHashNodesInfo = new ArrayList<>();
+
+    listProof.accept(this);
+    this.check();
   }
 
   @Override
   public void visit(ListProofBranch branch) {
     int branchDepth = depth;
 
-    NodeType leftElementType = branch.getLeft().getNodeType();
-    NodeType rightElementType = branch.getRight().map(ListProof::getNodeType).orElse(NodeType.NONE);
+    NodeType leftElementType = getNodeType(branch.getLeft());
+    NodeType rightElementType = branch.getRight().map(this::getNodeType).orElse(NodeType.NONE);
     listProofBranchesInfo.add(
         new NodeInfo(branch, depth, Arrays.asList(leftElementType, rightElementType))
     );
@@ -89,35 +92,37 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   }
 
   /**
-   * Returns list proof check status.
+   * Performs list proof structure checks and assigns proofStatus based on results of this checks.
    */
-  public ProofStatus check() {
+  private void check() {
     if (exceedsMaxDepth(listProofElementsInfo)) {
       proofStatus = ListProofStatus.INVALID_ELEMENT_NODE_DEPTH;
-      return proofStatus;
-    }
-
-    if (exceedsMaxDepth(listProofHashNodesInfo)) {
+    } else if (exceedsMaxDepth(listProofHashNodesInfo)) {
       proofStatus = ListProofStatus.INVALID_HASH_NODE_DEPTH;
-      return proofStatus;
-    }
-
-    if (hasInvalidNodesDepth(listProofElementsInfo)) {
+    } else if (hasInvalidNodesDepth(listProofElementsInfo)) {
       proofStatus = ListProofStatus.INVALID_NODE_DEPTH;
-      return proofStatus;
-    }
-
-    if (hasNoElementNodes(listProofBranchesInfo, listProofElementsInfo)) {
+    } else if (hasNoElementNodes(listProofBranchesInfo, listProofElementsInfo)) {
       proofStatus = ListProofStatus.INVALID_TREE_NO_ELEMENTS;
-      return proofStatus;
-    }
-
-    if (hashNodesLimitExceeded(listProofBranchesInfo)) {
+    } else if (hashNodesLimitExceeded(listProofBranchesInfo)) {
       proofStatus = ListProofStatus.INVALID_HASH_NODES_COUNT;
-      return proofStatus;
     }
+  }
 
-    return proofStatus;
+  /**
+   * Returns tree node type based on node class type.
+   *
+   * @throws RuntimeException in case if node type is unknown.
+   */
+  private NodeType getNodeType(ListProof node) {
+    if (node instanceof ListProofBranch) {
+      return NodeType.BRANCH;
+    } else if (node instanceof ListProofElement) {
+      return NodeType.ELEMENT;
+    } else if (node instanceof ListProofHashNode) {
+      return NodeType.HASHNODE;
+    } else {
+      throw new RuntimeException("Unknown tree node type");
+    }
   }
 
   /**
@@ -164,21 +169,30 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    */
   private boolean hashNodesLimitExceeded(List<NodeInfo> branches) {
     return branches.stream()
-        .anyMatch(
-            branch -> branch.getChildElementsTypes().size() >= 1
-                && branch.getChildElementsTypes().stream()
-                .allMatch(nodeType -> nodeType.equals(NodeType.HASHNODE)
-                    || nodeType.equals(NodeType.NONE))
-        );
+        .anyMatch(this::invalidBranch);
+  }
+
+  private boolean invalidBranch(NodeInfo branch) {
+    List<NodeType> children = branch.getChildElementsTypes();
+    if (children.size() < 1) {
+      return true;
+    }
+    return children.stream()
+        .allMatch(nodeType -> (nodeType == NodeType.HASHNODE) || (nodeType == NodeType.NONE));
   }
 
   /**
    * Returns proof status.
-   *
-   * @return proof status
    */
   public ProofStatus getProofStatus() {
     return proofStatus;
+  }
+
+  /**
+   * Returns true if proof status is VALID, false otherwise.
+   */
+  public boolean isValid() {
+    return proofStatus == ListProofStatus.VALID;
   }
 
   @Override

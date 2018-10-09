@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.common.proofs.list.ListProofStructureValidator.NodeType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Optional;
@@ -32,8 +31,6 @@ public final class ListProofBranch implements ListProof {
 
   private final ListProof left;
 
-  private final NodeType nodeType = NodeType.BRANCH;
-
   @Nullable
   private final ListProof right;
 
@@ -45,11 +42,6 @@ public final class ListProofBranch implements ListProof {
   @Override
   public void accept(ListProofVisitor visitor) {
     visitor.visit(this);
-  }
-
-  @Override
-  public NodeType getNodeType() {
-    return nodeType;
   }
 
   /**
