@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
+    <artifactId>exonum-java-binding-parent</artifactId>
     <version>0.2</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
 
   <artifactId>exonum-java-binding-service-archetype</artifactId>
   <packaging>maven-archetype</packaging>
+
   <name>Exonum Service Maven Archetype: Quickstart</name>
   <description>
     Archetype for creating Exonum Service application.
@@ -22,13 +22,6 @@
   </properties>
 
   <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.archetype</groupId>
-        <artifactId>archetype-packaging</artifactId>
-        <version>${maven-archetype.version}</version>
-      </extension>
-    </extensions>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -50,6 +43,12 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.archetype</groupId>
+        <artifactId>archetype-packaging</artifactId>
+        <version>${maven-archetype.version}</version>
+      </extension>
+    </extensions>
   </build>
-
 </project>
