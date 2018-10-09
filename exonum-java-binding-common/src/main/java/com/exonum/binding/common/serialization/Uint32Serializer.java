@@ -58,43 +58,33 @@ enum Uint32Serializer implements Serializer<Integer> {
         VARINT32_MAX_BYTES, serializedValue.length);
 
     try {
-      fastpath:
-      {
-        int pos = 0;
+      int pos = 0;
 
-        int x;
-        if ((x = serializedValue[pos++]) >= 0) {
-          checkNoTailLeft(serializedValue, pos);
-          return x;
-        } else if (pos > 1) {
-          break fastpath;
-        } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
-          x ^= (~0 << 7);
-        } else if ((x ^= (serializedValue[pos++] << 14)) >= 0) {
-          x ^= (~0 << 7) ^ (~0 << 14);
-        } else if ((x ^= (serializedValue[pos++] << 21)) < 0) {
-          x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21);
-        } else {
-          int y = serializedValue[pos++];
-          x ^= y << 28;
-          x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21) ^ (~0 << 28);
-          if (y < 0
-              && serializedValue[pos++] < 0
-              && serializedValue[pos++] < 0
-              && serializedValue[pos++] < 0
-              && serializedValue[pos++] < 0
-              && serializedValue[pos++] < 0) {
-            break fastpath; // Will throw malformedVarint()
-          }
-        }
+      int x;
+      if ((x = serializedValue[pos++]) >= 0) {
         checkNoTailLeft(serializedValue, pos);
         return x;
+      } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
+        x ^= (~0 << 7);
+      } else if ((x ^= (serializedValue[pos++] << 14)) >= 0) {
+        x ^= (~0 << 7) ^ (~0 << 14);
+      } else if ((x ^= (serializedValue[pos++] << 21)) < 0) {
+        x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21);
+      } else {
+        int y = serializedValue[pos++];
+        x ^= y << 28;
+        x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21) ^ (~0 << 28);
+        if (y < 0) {
+          throw new IllegalArgumentException(
+              "Serialized value has wrong format " + Arrays.toString(serializedValue));
+        }
       }
+      checkNoTailLeft(serializedValue, pos);
+      return x;
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException(
           "Serialized value has wrong format " + Arrays.toString(serializedValue), e);
     }
-    throw new AssertionError("Malformed value: " + Arrays.toString(serializedValue));
   }
 
 }
