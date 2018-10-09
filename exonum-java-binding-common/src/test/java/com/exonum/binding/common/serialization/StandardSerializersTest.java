@@ -36,25 +36,26 @@ class StandardSerializersTest {
         .flatMap(value -> IntStream.of(-value, value - 1, value, value + 1));
   }
 
-  private static LongStream longValues() {
+  static LongStream longValues() {
     return LongStream.range(0, 64)
         .map(value -> 1L << value)
         .flatMap(value -> LongStream.of(-value, value - 1, value, value + 1));
   }
 
-  private static Stream<byte[]> invalidVarints32() {
+  static Stream<byte[]> invalidVarints32() {
     return concat(malformedVarints(), Stream.of(
         // Exceeding the maximum length valid varints
-        Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x06), //6 bytes
-        Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x01) //10 bytes
+        Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x06), // 6 bytes
+        Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x01) // 10 bytes
         )
     );
   }
 
-  private static Stream<byte[]> invalidVarints64() {
+  static Stream<byte[]> invalidVarints64() {
     return concat(malformedVarints(), Stream.of(
+        Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x04, 0x01), // A 6th byte is invalid
         // Exceeding the maximum length valid varints
-        Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x90, 0x01) //11 bytes
+        Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x90, 0x01) // 11 bytes
         )
     );
   }
@@ -73,12 +74,11 @@ class StandardSerializersTest {
         Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x84, 0x85),
 
         // # Correct first bytes, but unexpected "tail":
-        Bytes.bytes(0x01, 0x02), // A single byte varint + tail.
-        Bytes.bytes(0x01, 0x82), // A single byte varint + tail.
-        Bytes.bytes(0x01, 0x02, 0x03, 0x04, 0x85), // A single byte varint + 4-byte tail.
-        Bytes.bytes(0x80, 0x81, 0x02, 0x83, 0x84), // A valid 3 byte varint + 2-byte tail
-        Bytes.bytes(0x80, 0x81, 0x82, 0x03, 0x84), // A valid 4 byte varint, 5th byte is invalid
-        Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x04, 0x01) // Valid 5 byte varint, 6th byte is invalid
+        Bytes.bytes(0x01, 0x02), // A 1-byte tail
+        Bytes.bytes(0x01, 0x82), // A 1-byte tail
+        Bytes.bytes(0x01, 0x02, 0x03, 0x04, 0x85), // A 4-byte tail
+        Bytes.bytes(0x80, 0x81, 0x02, 0x83, 0x84), // A 2-byte tail
+        Bytes.bytes(0x80, 0x81, 0x82, 0x03, 0x84) // A 5th byte is invalid
     );
   }
 }

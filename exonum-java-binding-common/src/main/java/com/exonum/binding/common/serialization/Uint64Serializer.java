@@ -17,7 +17,7 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.exonum.binding.common.serialization.SerializationUtils.checkNoTailLeft;
+import static com.exonum.binding.common.serialization.SerializationUtils.checkLength;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.copyOf;
 
@@ -63,7 +63,7 @@ enum Uint64Serializer implements Serializer<Long> {
       long x;
       int y;
       if ((y = serializedValue[pos++]) >= 0) {
-        checkNoTailLeft(serializedValue, pos);
+        checkLength(serializedValue, pos);
         return (long) y;
       } else if ((y ^= (serializedValue[pos++] << 7)) < 0) {
         x = y ^ (~0 << 7);
@@ -100,7 +100,7 @@ enum Uint64Serializer implements Serializer<Long> {
               "Serialized value has wrong format " + Arrays.toString(serializedValue));
         }
       }
-      checkNoTailLeft(serializedValue, pos);
+      checkLength(serializedValue, pos);
       return x;
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException(
