@@ -20,7 +20,6 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.UncheckedMapProof;
@@ -31,13 +30,13 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.google.common.collect.Lists;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
-import java.util.stream.Stream;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -217,11 +216,10 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    */
   public UncheckedMapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
-      byte[] dbKey = keySerializer.toBytes(key);
-      return nativeGetProof(getNativeHandle(), dbKey);
+      return getSingleKeyProof(key);
     } else {
-      List<K> keys = asList(key, otherKeys);
-      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+      List<K> keys = Lists.asList(key, otherKeys);
+      return getMultiKeyProof(keys);
     }
   }
 
@@ -239,30 +237,33 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     if (keys.size() == 1) {
       K key = keys.iterator()
           .next();
-      byte[] dbKey = keySerializer.toBytes(key);
-      return nativeGetProof(getNativeHandle(), dbKey);
+      return getSingleKeyProof(key);
     } else {
-      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+      return getMultiKeyProof(keys);
     }
+  }
+
+  private UncheckedMapProof getSingleKeyProof(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    return nativeGetProof(getNativeHandle(), dbKey);
   }
 
   private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
 
-  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keyList) {
-    int arraySize = keyList.size() * PROOF_MAP_KEY_SIZE;
+  private UncheckedMapProof getMultiKeyProof(Collection<? extends K> keys) {
+    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+  }
+
+  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keys) {
+    int arraySize = keys.size() * PROOF_MAP_KEY_SIZE;
     ByteBuffer flattenedKeys = ByteBuffer.allocate(arraySize);
-    keyList.stream()
+    keys.stream()
         .map(keySerializer::toBytes)
         .forEach(flattenedKeys::put);
     return flattenedKeys.array();
   }
 
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
-
-  static <T> List<T> asList(T element, T... otherElements) {
-    return Stream.concat(Stream.of(element), Stream.of(otherElements))
-        .collect(toList());
-  }
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.

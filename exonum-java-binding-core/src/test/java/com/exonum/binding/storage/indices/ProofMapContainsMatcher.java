@@ -17,8 +17,8 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
-import static com.exonum.binding.storage.indices.ProofMapIndexProxy.asList;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Lists.asList;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
