@@ -17,7 +17,6 @@
 package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
-import static com.exonum.binding.storage.indices.ProofMapIndexProxy.asList;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
 
@@ -27,6 +26,7 @@ import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -147,5 +147,11 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
         .map(MapTestEntry::absentEntry)
         .collect(toList());
     return new ProofMapContainsMatcher(expectedEntries);
+  }
+
+  @SafeVarargs
+  private static <T> List<T> asList(T element, T... otherElements) {
+    return Stream.concat(Stream.of(element), Stream.of(otherElements))
+        .collect(toList());
   }
 }

@@ -217,11 +217,10 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    */
   public UncheckedMapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
-      byte[] dbKey = keySerializer.toBytes(key);
-      return nativeGetProof(getNativeHandle(), dbKey);
+      return getSingleKeyProof(key);
     } else {
       List<K> keys = asList(key, otherKeys);
-      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+      return getMultiKeyProof(keys);
     }
   }
 
@@ -239,30 +238,39 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     if (keys.size() == 1) {
       K key = keys.iterator()
           .next();
-      byte[] dbKey = keySerializer.toBytes(key);
-      return nativeGetProof(getNativeHandle(), dbKey);
+      return getSingleKeyProof(key);
     } else {
-      return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+      return getMultiKeyProof(keys);
     }
+  }
+
+  @SafeVarargs // We do not modify the array
+  private static <T> List<T> asList(T element, T... otherElements) {
+    return Stream.concat(Stream.of(element), Stream.of(otherElements))
+        .collect(toList());
+  }
+
+  private UncheckedMapProof getSingleKeyProof(K key) {
+    byte[] dbKey = keySerializer.toBytes(key);
+    return nativeGetProof(getNativeHandle(), dbKey);
   }
 
   private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
 
-  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keyList) {
-    int arraySize = keyList.size() * PROOF_MAP_KEY_SIZE;
+  private UncheckedMapProof getMultiKeyProof(Collection<? extends K> keys) {
+    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+  }
+
+  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keys) {
+    int arraySize = keys.size() * PROOF_MAP_KEY_SIZE;
     ByteBuffer flattenedKeys = ByteBuffer.allocate(arraySize);
-    keyList.stream()
+    keys.stream()
         .map(keySerializer::toBytes)
         .forEach(flattenedKeys::put);
     return flattenedKeys.array();
   }
 
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
-
-  static <T> List<T> asList(T element, T... otherElements) {
-    return Stream.concat(Stream.of(element), Stream.of(otherElements))
-        .collect(toList());
-  }
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.
