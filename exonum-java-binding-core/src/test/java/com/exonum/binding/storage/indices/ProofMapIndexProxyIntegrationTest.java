@@ -538,7 +538,7 @@ public class ProofMapIndexProxyIntegrationTest
   public void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       /*
-       Proof of this map will have the following structure:
+       This map will have the following structure:
                    <00xxxx>
                    /        \
            <00|00xx>          <00|10xx>
