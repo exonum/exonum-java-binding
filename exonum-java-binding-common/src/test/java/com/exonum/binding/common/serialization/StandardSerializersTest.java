@@ -44,7 +44,7 @@ class StandardSerializersTest {
 
   static Stream<byte[]> invalidVarints32() {
     return concat(malformedVarints(), Stream.of(
-        // Exceeding the maximum length valid varints
+        // Exceeding the maximum length valid varints:
         Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x06), // 6 bytes
         Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x01) // 10 bytes
         )
@@ -53,8 +53,11 @@ class StandardSerializersTest {
 
   static Stream<byte[]> invalidVarints64() {
     return concat(malformedVarints(), Stream.of(
+        // # MSB is set in the last byte, but there is the end of serialized value:
+        Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x84, 0x85),
+        // # Correct first bytes, but unexpected "tail":
         Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x04, 0x01), // A 6th byte is invalid
-        // Exceeding the maximum length valid varints
+        // Exceeding the maximum length valid varints:
         Bytes.bytes(0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x90, 0x01) // 11 bytes
         )
     );
@@ -71,7 +74,6 @@ class StandardSerializersTest {
         Bytes.bytes(0x80, 0x81, 0x82),
         Bytes.bytes(0x80, 0x81, 0x82, 0x83),
         Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x84),
-        Bytes.bytes(0x80, 0x81, 0x82, 0x83, 0x84, 0x85),
 
         // # Correct first bytes, but unexpected "tail":
         Bytes.bytes(0x01, 0x02), // A 1-byte tail
