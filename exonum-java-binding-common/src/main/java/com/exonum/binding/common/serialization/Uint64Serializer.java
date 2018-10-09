@@ -17,6 +17,7 @@
 
 package com.exonum.binding.common.serialization;
 
+import static com.exonum.binding.common.serialization.SerializationUtils.checkNoTailLeft;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.copyOf;
 
@@ -56,55 +57,60 @@ enum Uint64Serializer implements Serializer<Long> {
         "Expected an array of size less than %s, but was %s",
         VARINT64_MAX_BYTES, serializedValue.length);
 
-    fastpath:
-    {
-      int pos = 0;
+    try {
+      fastpath:
+      {
+        int pos = 0;
 
-      long x;
-      int y;
-      if ((y = serializedValue[pos++]) >= 0) {
-        return (long) y;
-      } else if (pos > 1) {
-        break fastpath;
-      } else if ((y ^= (serializedValue[pos++] << 7)) < 0) {
-        x = y ^ (~0 << 7);
-      } else if ((y ^= (serializedValue[pos++] << 14)) >= 0) {
-        x = y ^ ((~0 << 7) ^ (~0 << 14));
-      } else if ((y ^= (serializedValue[pos++] << 21)) < 0) {
-        x = y ^ ((~0 << 7) ^ (~0 << 14) ^ (~0 << 21));
-      } else if ((x = y ^ ((long) serializedValue[pos++] << 28)) >= 0L) {
-        x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28);
-      } else if ((x ^= ((long) serializedValue[pos++] << 35)) < 0L) {
-        x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35);
-      } else if ((x ^= ((long) serializedValue[pos++] << 42)) >= 0L) {
-        x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35) ^ (~0L << 42);
-      } else if ((x ^= ((long) serializedValue[pos++] << 49)) < 0L) {
-        x ^=
-            (~0L << 7)
-                ^ (~0L << 14)
-                ^ (~0L << 21)
-                ^ (~0L << 28)
-                ^ (~0L << 35)
-                ^ (~0L << 42)
-                ^ (~0L << 49);
-      } else {
-        x ^= ((long) serializedValue[pos++] << 56);
-        x ^=
-            (~0L << 7)
-                ^ (~0L << 14)
-                ^ (~0L << 21)
-                ^ (~0L << 28)
-                ^ (~0L << 35)
-                ^ (~0L << 42)
-                ^ (~0L << 49)
-                ^ (~0L << 56);
-        if (x < 0L) {
-          if (serializedValue[pos++] < 0L) {
-            break fastpath; // Will throw malformedVarint()
+        long x;
+        int y;
+        if ((y = serializedValue[pos++]) >= 0) {
+          checkNoTailLeft(serializedValue, pos);
+          return (long) y;
+        } else if (pos > 1) {
+          break fastpath;
+        } else if ((y ^= (serializedValue[pos++] << 7)) < 0) {
+          x = y ^ (~0 << 7);
+        } else if ((y ^= (serializedValue[pos++] << 14)) >= 0) {
+          x = y ^ ((~0 << 7) ^ (~0 << 14));
+        } else if ((y ^= (serializedValue[pos++] << 21)) < 0) {
+          x = y ^ ((~0 << 7) ^ (~0 << 14) ^ (~0 << 21));
+        } else if ((x = y ^ ((long) serializedValue[pos++] << 28)) >= 0L) {
+          x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28);
+        } else if ((x ^= ((long) serializedValue[pos++] << 35)) < 0L) {
+          x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35);
+        } else if ((x ^= ((long) serializedValue[pos++] << 42)) >= 0L) {
+          x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35) ^ (~0L << 42);
+        } else if ((x ^= ((long) serializedValue[pos++] << 49)) < 0L) {
+          x ^= (~0L << 7)
+              ^ (~0L << 14)
+              ^ (~0L << 21)
+              ^ (~0L << 28)
+              ^ (~0L << 35)
+              ^ (~0L << 42)
+              ^ (~0L << 49);
+        } else {
+          x ^= ((long) serializedValue[pos++] << 56);
+          x ^= (~0L << 7)
+              ^ (~0L << 14)
+              ^ (~0L << 21)
+              ^ (~0L << 28)
+              ^ (~0L << 35)
+              ^ (~0L << 42)
+              ^ (~0L << 49)
+              ^ (~0L << 56);
+          if (x < 0L) {
+            if (serializedValue[pos++] < 0L) {
+              break fastpath; // Will throw malformedVarint()
+            }
           }
         }
+        checkNoTailLeft(serializedValue, pos);
+        return x;
       }
-      return x;
+    } catch (ArrayIndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(
+          "Serialized value has wrong format " + Arrays.toString(serializedValue), e);
     }
     throw new AssertionError("Malformed value: " + Arrays.toString(serializedValue));
   }

@@ -17,6 +17,7 @@
 
 package com.exonum.binding.common.serialization;
 
+import static com.exonum.binding.common.serialization.SerializationUtils.checkNoTailLeft;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.copyOf;
 
@@ -56,35 +57,42 @@ enum Uint32Serializer implements Serializer<Integer> {
         "Expected an array of size less than %s, but was %s",
         VARINT32_MAX_BYTES, serializedValue.length);
 
-    fastpath:
-    {
-      int pos = 0;
+    try {
+      fastpath:
+      {
+        int pos = 0;
 
-      int x;
-      if ((x = serializedValue[pos++]) >= 0) {
-        return x;
-      } else if (pos > 1) {
-        break fastpath;
-      } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
-        x ^= (~0 << 7);
-      } else if ((x ^= (serializedValue[pos++] << 14)) >= 0) {
-        x ^= (~0 << 7) ^ (~0 << 14);
-      } else if ((x ^= (serializedValue[pos++] << 21)) < 0) {
-        x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21);
-      } else {
-        int y = serializedValue[pos++];
-        x ^= y << 28;
-        x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21) ^ (~0 << 28);
-        if (y < 0
-            && serializedValue[pos++] < 0
-            && serializedValue[pos++] < 0
-            && serializedValue[pos++] < 0
-            && serializedValue[pos++] < 0
-            && serializedValue[pos++] < 0) {
-          break fastpath; // Will throw malformedVarint()
+        int x;
+        if ((x = serializedValue[pos++]) >= 0) {
+          checkNoTailLeft(serializedValue, pos);
+          return x;
+        } else if (pos > 1) {
+          break fastpath;
+        } else if ((x ^= (serializedValue[pos++] << 7)) < 0) {
+          x ^= (~0 << 7);
+        } else if ((x ^= (serializedValue[pos++] << 14)) >= 0) {
+          x ^= (~0 << 7) ^ (~0 << 14);
+        } else if ((x ^= (serializedValue[pos++] << 21)) < 0) {
+          x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21);
+        } else {
+          int y = serializedValue[pos++];
+          x ^= y << 28;
+          x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21) ^ (~0 << 28);
+          if (y < 0
+              && serializedValue[pos++] < 0
+              && serializedValue[pos++] < 0
+              && serializedValue[pos++] < 0
+              && serializedValue[pos++] < 0
+              && serializedValue[pos++] < 0) {
+            break fastpath; // Will throw malformedVarint()
+          }
         }
+        checkNoTailLeft(serializedValue, pos);
+        return x;
       }
-      return x;
+    } catch (ArrayIndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(
+          "Serialized value has wrong format " + Arrays.toString(serializedValue), e);
     }
     throw new AssertionError("Malformed value: " + Arrays.toString(serializedValue));
   }

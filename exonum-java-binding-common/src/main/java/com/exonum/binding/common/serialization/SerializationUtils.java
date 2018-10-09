@@ -18,19 +18,32 @@
 package com.exonum.binding.common.serialization;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Arrays.copyOfRange;
+
+import java.util.Arrays;
 
 final class SerializationUtils {
 
   /**
-   * Performs check that serialized value has correct length.
+   * Performs check that bytes array has correct length.
    *
-   * @param array serialized value in bytes
+   * @param array bytes array
    * @param length expected length
    * @throws IllegalArgumentException thrown if length is incorrect
    */
   static void checkLength(byte[] array, int length) {
     checkArgument(array.length == length,
         "Expected an array of size %s, but was %s", length, array.length);
+  }
+
+  /**
+   * Performs check that the array has no bytes after the position.
+   *
+   * @throws IllegalArgumentException thrown if any bytes in the tail exist
+   */
+  static void checkNoTailLeft(byte[] array, int pos) {
+    checkArgument(pos == array.length, "Expected no tail left in the array, but was %s",
+        Arrays.toString(copyOfRange(array, pos, array.length)));
   }
 
   private SerializationUtils() {

@@ -20,10 +20,6 @@ package com.exonum.binding.common.serialization;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
-import com.exonum.binding.test.Bytes;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import java.util.stream.IntStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -32,28 +28,15 @@ class Uint32SerializerTest {
   private Serializer<Integer> serializer = Uint32Serializer.INSTANCE;
 
   @ParameterizedTest
-  @MethodSource("values")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#intValues")
   void roundTrip(Integer value) {
     roundTripTest(value, serializer);
   }
 
   @ParameterizedTest
-  @MethodSource("invalidVarInts")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#invalidVarints32")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
-  }
-
-  private static IntStream values() {
-    return IntStream.range(0, 32)
-        .map(value -> 1 << value)
-        .flatMap(value -> IntStream.of(-value, value - 1, value, value + 1));
-  }
-
-  private static List<byte[]> invalidVarInts() {
-    return ImmutableList.of(
-        Bytes.bytes(),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
-    );
   }
 
 }
