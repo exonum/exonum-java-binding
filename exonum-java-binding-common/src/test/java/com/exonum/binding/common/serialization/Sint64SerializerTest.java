@@ -20,15 +20,12 @@ package com.exonum.binding.common.serialization;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 
-import com.exonum.binding.test.Bytes;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class Fixed64SerializerTest {
+class Sint64SerializerTest {
 
-  private Serializer<Long> serializer = Fixed64Serializer.INSTANCE;
+  private Serializer<Long> serializer = Sint64Serializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#longValues")
@@ -37,20 +34,8 @@ class Fixed64SerializerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidLongs")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#invalidVarints64")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }
-
-  private static List<byte[]> invalidLongs() {
-    return ImmutableList.of(
-        Bytes.bytes(),
-        Bytes.bytes((byte) 0),
-        Bytes.bytes(1, 2, 3),
-        Bytes.bytes(1, 2, 3, 4),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9)
-    );
-  }
-
 }
