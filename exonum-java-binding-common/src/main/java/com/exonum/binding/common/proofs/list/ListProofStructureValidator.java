@@ -28,7 +28,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
 
   static int MAX_NODE_DEPTH = 63;
 
-  //TODO optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443.
+  // TODO: optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443
   private List<NodeInfo> listProofBranchesInfo;
 
   private List<NodeInfo> listProofElementsInfo;
@@ -92,7 +92,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   }
 
   /**
-   * Performs list proof structure checks and assigns proofStatus based on results of this checks.
+   * Performs list proof structure checks and assigns proofStatus based on results of these checks.
    */
   private void check() {
     if (exceedsMaxDepth(listProofElementsInfo)) {
@@ -121,7 +121,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
     } else if (node instanceof ListProofHashNode) {
       return NodeType.HASHNODE;
     } else {
-      throw new RuntimeException("Unknown tree node type");
+      throw new RuntimeException("Unknown tree node type: " + node);
     }
   }
 
@@ -162,7 +162,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   }
 
   /**
-   * Returns true if branch node contains 2 hash nodes.
+   * Returns true if child nodes of the branch node are not valid: contain hashes only.
    *
    * @param branches collection of branches info
    * @return true if branch contains only hash nodes.
@@ -206,7 +206,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Class used to store node info additional information.
    */
-  static class NodeInfo {
+  private static class NodeInfo {
     private ListProof node;
     private int depth;
     private List<NodeType> childElementsTypes;
@@ -237,7 +237,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Enum used to identify tree node type.
    */
-  enum NodeType {
+  private enum NodeType {
     BRANCH, ELEMENT, HASHNODE, NONE
   }
 }

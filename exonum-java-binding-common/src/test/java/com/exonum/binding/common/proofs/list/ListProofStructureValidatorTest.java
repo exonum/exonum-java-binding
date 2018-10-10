@@ -16,12 +16,14 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ListProofStructureValidatorTest {
@@ -198,6 +200,22 @@ class ListProofStructureValidatorTest {
     validator = createListProofStructureValidator(root);
 
     assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_HASH_NODES_COUNT));
+  }
+
+  @Test
+  @Disabled // Such check is not implemented yet: ECR-2490
+  void visit_InvalidBranchHasMissingRightElement() {
+    ListProofBranch root = new ListProofBranch(
+        new ListProofBranch(
+            leafOf(V1),
+            null // Having no child is not allowed here for a tree of height 2.
+        ),
+        new ListProofHashNode(H1)
+    );
+
+    validator = createListProofStructureValidator(root);
+
+    assertFalse(validator.isValid());
   }
 
   private ListProofStructureValidator createListProofStructureValidator(ListProof listProof) {
