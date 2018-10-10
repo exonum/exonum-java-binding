@@ -23,7 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 /**
  * Represents a hash of a Merkle sub-tree: a leaf node in proof trees.
  */
-public final class HashNode implements ListProof {
+public final class ListProofHashNode implements ListProof {
 
   private final HashCode hash;
 
@@ -31,11 +31,11 @@ public final class HashNode implements ListProof {
    * Creates a new hash node.
    */
   @SuppressWarnings("unused")  // native API
-  HashNode(byte[] hash) {
+  ListProofHashNode(byte[] hash) {
     this(HashCode.fromBytes(hash));
   }
 
-  public HashNode(HashCode hash) {
+  public ListProofHashNode(HashCode hash) {
     this.hash = checkNotNull(hash);
   }
 

@@ -18,7 +18,7 @@ package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
-import com.exonum.binding.common.proofs.map.ProofStatus;
+import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
 import java.util.Arrays;
@@ -40,8 +40,8 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
-    ProofStatus status = checkedMapProof.getStatus();
-    return status == ProofStatus.CORRECT
+    MapProofStatus status = checkedMapProof.getStatus();
+    return status == MapProofStatus.CORRECT
         && checkProofSize(checkedMapProof)
         && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
   }
@@ -100,8 +100,8 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    ProofStatus proofStatus = proof.getStatus();
-    if (proofStatus == ProofStatus.CORRECT) {
+    MapProofStatus proofStatus = proof.getStatus();
+    if (proofStatus == MapProofStatus.CORRECT) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).

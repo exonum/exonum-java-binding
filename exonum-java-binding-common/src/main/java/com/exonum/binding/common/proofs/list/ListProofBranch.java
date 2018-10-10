@@ -60,4 +60,5 @@ public final class ListProofBranch implements ListProof {
   public Optional<ListProof> getRight() {
     return Optional.ofNullable(right);
   }
+
 }
