@@ -24,8 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Static factory methods accepting protobuf messages to collections,
   allowing to pass Protocol Buffer messages directly instead of using
   `StandardSerializers#protobuf`. (#505)
-- `StandardSerializers` now supports `bool`, `fixed32`, `fixed64`, `float` and `double`
-  primitive types, `PrivateKey`, `PublicKey` and `bytes` serialization (#514)
+- `StandardSerializers` now supports `bool`, `fixed32`, `uint32`, `sint32`, 
+  `fixed64`, `uint64`, `sint64`, `float` and `double` primitive types, 
+  `PrivateKey`, `PublicKey` and `bytes` serialization. (#514, #523)
 - Multiproofs support in `ProofMapIndexProxy`. (#507)
 
 ### Changed
