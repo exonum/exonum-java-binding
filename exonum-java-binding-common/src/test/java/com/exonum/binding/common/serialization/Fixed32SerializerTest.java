@@ -25,14 +25,13 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class Fixed32SerializerTest {
 
   private Serializer<Integer> serializer = Fixed32Serializer.INSTANCE;
 
   @ParameterizedTest
-  @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE})
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#intValues")
   void roundTrip(Integer value) {
     roundTripTest(value, serializer);
   }

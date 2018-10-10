@@ -19,7 +19,7 @@ package com.exonum.binding.common.proofs.map;
 /**
  * Possible statuses of a checked map proof.
  */
-public enum ProofStatus {
+public enum MapProofStatus {
   CORRECT("Proof has a valid structure"),
   NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
   INVALID_ORDER("Proof entries are placed in the wrong order"),
@@ -28,13 +28,13 @@ public enum ProofStatus {
 
   final String description;
 
-  ProofStatus(String description) {
+  MapProofStatus(String description) {
     this.description = description;
   }
 
   @Override
   public String toString() {
-    return "ProofStatus{"
+    return "MapProofStatus{"
         + "description='" + description + '\''
         + '}';
   }

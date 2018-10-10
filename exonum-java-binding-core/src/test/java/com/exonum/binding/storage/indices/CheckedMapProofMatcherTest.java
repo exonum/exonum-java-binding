@@ -26,7 +26,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
-import com.exonum.binding.common.proofs.map.ProofStatus;
+import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
@@ -51,7 +51,7 @@ public class CheckedMapProofMatcherTest {
         CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
-        ProofStatus.DUPLICATE_PATH);
+        MapProofStatus.DUPLICATE_PATH);
 
     assertFalse(matcher.matchesSafely(proof));
   }
@@ -100,13 +100,13 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
-        ProofStatus.DUPLICATE_PATH);
+        MapProofStatus.DUPLICATE_PATH);
 
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
     assertThat(d.toString(), equalTo("was an invalid proof, status=<"
-        + ProofStatus.DUPLICATE_PATH + ">"));
+        + MapProofStatus.DUPLICATE_PATH + ">"));
   }
 
   // TODO: look into that

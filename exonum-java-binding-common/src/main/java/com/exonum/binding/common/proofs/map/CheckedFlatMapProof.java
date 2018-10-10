@@ -38,10 +38,10 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   private final HashCode rootHash;
 
-  private final ProofStatus status;
+  private final MapProofStatus status;
 
   private CheckedFlatMapProof(
-      ProofStatus status,
+      MapProofStatus status,
       HashCode rootHash,
       List<MapEntry> entries,
       List<ByteString> missingKeys) {
@@ -63,18 +63,18 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       HashCode rootHash,
       List<MapEntry> entries,
       List<ByteString> missingKeys) {
-    return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, missingKeys);
+    return new CheckedFlatMapProof(MapProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
 
   /**
    * Creates an invalid map proof.
    *
    * @param status the status explaining why the proof is not valid;
-   *     must not be {@link ProofStatus#CORRECT}
+   *     must not be {@link MapProofStatus#CORRECT}
    * @return a new checked proof
    */
-  public static CheckedFlatMapProof invalid(ProofStatus status) {
-    checkArgument(status != ProofStatus.CORRECT);
+  public static CheckedFlatMapProof invalid(MapProofStatus status) {
+    checkArgument(status != MapProofStatus.CORRECT);
     return new CheckedFlatMapProof(
         status, HashCode.fromInt(1), emptyList(), emptyList());
   }
@@ -117,7 +117,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public ProofStatus getStatus() {
+  public MapProofStatus getStatus() {
     return status;
   }
 
@@ -128,7 +128,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkValid() {
-    checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
+    checkState(status == MapProofStatus.CORRECT, "Proof is not valid: %s", status);
   }
 
   private void checkThatKeyIsRequested(ByteString key) {

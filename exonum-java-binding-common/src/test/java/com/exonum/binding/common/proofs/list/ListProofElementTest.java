@@ -29,25 +29,25 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.Test;
 
-class ProofListElementTest {
+class ListProofElementTest {
 
   // TODO: refactor, change this to ByteString
   private static final byte[] E1 = bytes("element 1");
 
-  private ProofListElement node;
+  private ListProofElement node;
 
   @Test
   void getElement() {
-    node = new ProofListElement(E1);
+    node = new ListProofElement(E1);
 
     assertThat(node.getElement(), equalTo(E1));
   }
 
   @Test
   void funnel() {
-    node = new ProofListElement(E1);
+    node = new ListProofElement(E1);
 
-    Funnel<ProofListElement> funnel = ProofListElement.funnel();
+    Funnel<ListProofElement> funnel = ListProofElement.funnel();
     assertNotNull(funnel);
 
     PrimitiveSink sink = mock(PrimitiveSink.class);

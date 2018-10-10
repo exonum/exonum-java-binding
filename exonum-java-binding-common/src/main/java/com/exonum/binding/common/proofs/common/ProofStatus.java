@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs.common;
 
-public interface ListProofVisitor {
+/**
+ * A status of collection proof verification.
+ */
+public interface ProofStatus {
 
-  void visit(ListProofBranch branch);
-
-  void visit(ListProofHashNode listProofHashNode);
-
-  void visit(ListProofElement value);
+  /**
+   * Returns the description of the proof verification result.
+   */
+  String getDescription();
 }

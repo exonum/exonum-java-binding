@@ -74,7 +74,7 @@ public interface CheckedMapProof {
   /**
    * Returns the status of this proof: whether it is structurally valid.
    */
-  ProofStatus getStatus();
+  MapProofStatus getStatus();
 
   /**
    * Checks that proof is correct and {@code expectedRootHash} is equal to the root hash.
