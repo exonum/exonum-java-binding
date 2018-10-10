@@ -18,7 +18,7 @@ package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.protobuf.ByteString;
-import java.util.List;
+import java.util.Set;
 
 /**
  * A checked map proof.
@@ -43,13 +43,13 @@ public interface CheckedMapProof {
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  List<MapEntry> getEntries();
+  Set<MapEntry> getEntries();
 
   /**
    * Get all keys that were requested, but did not appear in this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  List<ByteString> getMissingKeys();
+  Set<ByteString> getMissingKeys();
 
   /**
    * If this proof is valid, returns true if there is a given key in the proof;

@@ -19,12 +19,11 @@ package com.exonum.binding.common.proofs.map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.protobuf.ByteString;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -32,9 +31,9 @@ import java.util.stream.Stream;
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private final List<MapEntry> entries;
+  private final Set<MapEntry> entries;
 
-  private final List<ByteString> missingKeys;
+  private final Set<ByteString> missingKeys;
 
   private final HashCode rootHash;
 
@@ -43,8 +42,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   private CheckedFlatMapProof(
       MapProofStatus status,
       HashCode rootHash,
-      List<MapEntry> entries,
-      List<ByteString> missingKeys) {
+      Set<MapEntry> entries,
+      Set<ByteString> missingKeys) {
     this.status = checkNotNull(status);
     this.rootHash = checkNotNull(rootHash);
     this.entries = checkNotNull(entries);
@@ -61,8 +60,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
    */
   public static CheckedFlatMapProof correct(
       HashCode rootHash,
-      List<MapEntry> entries,
-      List<ByteString> missingKeys) {
+      Set<MapEntry> entries,
+      Set<ByteString> missingKeys) {
     return new CheckedFlatMapProof(MapProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
 
@@ -76,17 +75,17 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public static CheckedFlatMapProof invalid(MapProofStatus status) {
     checkArgument(status != MapProofStatus.CORRECT);
     return new CheckedFlatMapProof(
-        status, HashCode.fromInt(1), emptyList(), emptyList());
+        status, HashCode.fromInt(1), emptySet(), emptySet());
   }
 
   @Override
-  public List<MapEntry> getEntries() {
+  public Set<MapEntry> getEntries() {
     checkValid();
     return entries;
   }
 
   @Override
-  public List<ByteString> getMissingKeys() {
+  public Set<ByteString> getMissingKeys() {
     checkValid();
     return missingKeys;
   }

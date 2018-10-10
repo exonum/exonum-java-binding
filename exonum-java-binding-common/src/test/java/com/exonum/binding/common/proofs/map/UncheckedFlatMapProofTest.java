@@ -32,6 +32,7 @@ import com.exonum.binding.common.hash.Hashing;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class UncheckedFlatMapProofTest {
@@ -41,15 +42,6 @@ class UncheckedFlatMapProofTest {
   private static final ByteString THIRD_VALUE = ByteString.copyFromUtf8("oneMoreTestValue");
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
-
-  @Test
-  public void tempTest() {
-    int d = -1;
-    while (d != 0) {
-      d--;
-//      System.out.println("Hi there");
-    }
-  }
 
   @Test
   void mapProofShouldBeCorrect() {
@@ -101,7 +93,7 @@ class UncheckedFlatMapProofTest {
         new MapEntry(fourthKey, THIRD_VALUE)
     );
 
-    List<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
+    Set<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
 
     assertThat(
         actualCheckedEntriesList,

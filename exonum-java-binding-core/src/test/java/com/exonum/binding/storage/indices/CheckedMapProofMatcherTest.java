@@ -65,8 +65,8 @@ public class CheckedMapProofMatcherTest {
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
-        Collections.singletonList(entry),
-        Collections.singletonList(hashcodeToByteString(TEST_KEY2)));
+        Collections.singleton(entry),
+        Collections.singleton(hashcodeToByteString(TEST_KEY2)));
 
     assertThat(proof, matcher);
   }
@@ -85,8 +85,8 @@ public class CheckedMapProofMatcherTest {
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
-        Collections.singletonList(entry),
-        Collections.singletonList(hashcodeToByteString(absentKey)));
+        Collections.singleton(entry),
+        Collections.singleton(hashcodeToByteString(absentKey)));
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);

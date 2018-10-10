@@ -64,13 +64,11 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
     MapProofStatus status = checkedMapProof.getStatus();
-    List<MapEntry> presentEntries = checkedMapProof.getEntries();
-    List<ByteString> missingKeys = checkedMapProof.getMissingKeys();
+    Set<MapEntry> presentEntries = checkedMapProof.getEntries();
+    Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
     return status == MapProofStatus.CORRECT
-        // TODO: refactor (probably return Set from checked proof)
-        && presentEntriesMatcher.matches(new HashSet<>(presentEntries))
-        // TODO: refactor (probably return Set from checked proof)
-        && missingKeysMatcher.matches(new HashSet<>(missingKeys));
+        && presentEntriesMatcher.matches(presentEntries)
+        && missingKeysMatcher.matches(missingKeys);
   }
 
   @Override
