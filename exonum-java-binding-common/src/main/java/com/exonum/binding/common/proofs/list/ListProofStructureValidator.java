@@ -111,7 +111,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Returns tree node type based on node class type.
    *
-   * @throws RuntimeException in case if node type is unknown.
+   * @throws RuntimeException in case if node type is unknown
    */
   private NodeType getNodeType(ListProof node) {
     if (node instanceof ListProofBranch) {
