@@ -29,22 +29,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class UncheckedFlatMapProofTest {
 
-  private static final byte[] FIRST_VALUE = "testValue".getBytes();
-  private static final byte[] SECOND_VALUE = "anotherTestValue".getBytes();
-  private static final byte[] THIRD_VALUE = "oneMoreTestValue".getBytes();
+  private static final ByteString FIRST_VALUE = ByteString.copyFromUtf8("testValue");
+  private static final ByteString SECOND_VALUE = ByteString.copyFromUtf8("anotherTestValue");
+  private static final ByteString THIRD_VALUE = ByteString.copyFromUtf8("oneMoreTestValue");
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
 
   @Test
+  public void tempTest() {
+    int d = -1;
+    while (d != 0) {
+      d--;
+//      System.out.println("Hi there");
+    }
+  }
+
+  @Test
   void mapProofShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
-    byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
+    ByteString valueKey = DbKeyTestUtils.keyByteStringFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
 
     MapEntry leaf = createMapEntry(valueKey, FIRST_VALUE);
@@ -66,10 +76,10 @@ class UncheckedFlatMapProofTest {
 
   @Test
   void mapProofWithSeveralLeafsShouldBeCorrect() {
-    byte[] firstKey = DbKeyTestUtils.keyFromString("0011_0101");
-    byte[] secondKey = DbKeyTestUtils.keyFromString("0011_0110");
+    ByteString firstKey = DbKeyTestUtils.keyByteStringFromString("0011_0101");
+    ByteString secondKey = DbKeyTestUtils.keyByteStringFromString("0011_0110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
-    byte[] fourthKey = DbKeyTestUtils.keyFromString("1000_1101");
+    ByteString fourthKey = DbKeyTestUtils.keyByteStringFromString("1000_1101");
 
     List<MapEntry> leaves = Arrays.asList(
         createMapEntry(firstKey, FIRST_VALUE),
@@ -105,17 +115,16 @@ class UncheckedFlatMapProofTest {
     // If a user checks for key that wasn't required, an IllegalArgumentException is thrown
 
     assertThrows(IllegalArgumentException.class,
-        () -> checkedMapProof.containsKey("not required key".getBytes()));
-
+        () -> checkedMapProof.containsKey(ByteString.copyFromUtf8("not required key")));
   }
 
   @Test
   void mapProofWithOneElementShouldBeCorrect() {
-    byte[] key = DbKeyTestUtils.keyFromString("01");
-    byte[] value = FIRST_VALUE;
+    ByteString key = DbKeyTestUtils.keyByteStringFromString("01");
+    ByteString value = FIRST_VALUE;
     MapEntry mapEntry = createMapEntry(key, value);
 
-    HashCode valueHash = HASH_FUNCTION.hashBytes(value);
+    HashCode valueHash = HASH_FUNCTION.hashByteString(value);
     HashCode expectedRootHash = HASH_FUNCTION.newHasher()
         .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
         .putObject(valueHash, hashCodeFunnel())
@@ -164,7 +173,7 @@ class UncheckedFlatMapProofTest {
   @Test
   void mapProofWithAbsentKeyShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
-    byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
+    ByteString valueKey = DbKeyTestUtils.keyByteStringFromString("101110");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
 
     UncheckedMapProof uncheckedFlatMapProof =
@@ -262,7 +271,7 @@ class UncheckedFlatMapProofTest {
     return new MapProofEntry(dbKey, HashCode.fromBytes(dbKey.getKeySlice()));
   }
 
-  private static MapEntry createMapEntry(byte[] key, byte[] value) {
+  private static MapEntry createMapEntry(ByteString key, ByteString value) {
     return new MapEntry(key, value);
   }
 }

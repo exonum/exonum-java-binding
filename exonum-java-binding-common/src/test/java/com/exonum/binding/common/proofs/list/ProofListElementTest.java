@@ -26,10 +26,12 @@ import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
+import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.Test;
 
 class ProofListElementTest {
 
+  // TODO: refactor, change this to ByteString
   private static final byte[] E1 = bytes("element 1");
 
   private ProofListElement node;

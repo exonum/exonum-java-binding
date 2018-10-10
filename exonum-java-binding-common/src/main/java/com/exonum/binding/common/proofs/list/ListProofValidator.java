@@ -138,7 +138,8 @@ public final class ListProofValidator<E> implements ListProofVisitor {
 
     isBalanced &= (depth == expectedLeafDepth);
     if (isBalanced) {
-      E element = serializer.fromBytes(value.getElement());
+      byte[] valueByteArray = value.getElement().toByteArray();
+      E element = serializer.fromBytes(valueByteArray);
       elements.put(index, element);
       hash = hashFunction.hashObject(value, ProofListElement.funnel());
     }

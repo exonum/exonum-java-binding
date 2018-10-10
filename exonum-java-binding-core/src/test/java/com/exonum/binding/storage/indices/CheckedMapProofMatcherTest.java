@@ -28,6 +28,7 @@ import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.ProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,7 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
         Collections.singletonList(entry),
-        Collections.singletonList(TEST_KEY2.asBytes()));
+        Collections.singletonList(hashcodeToByteString(TEST_KEY2)));
 
     assertThat(proof, matcher);
   }
@@ -85,7 +86,7 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
         Collections.singletonList(entry),
-        Collections.singletonList(absentKey.asBytes()));
+        Collections.singletonList(hashcodeToByteString(absentKey)));
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
@@ -106,5 +107,10 @@ public class CheckedMapProofMatcherTest {
     matcher.describeMismatchSafely(proof, d);
     assertThat(d.toString(), equalTo("was an invalid proof, status=<"
         + ProofStatus.DUPLICATE_PATH + ">"));
+  }
+
+  // TODO: look into that
+  private ByteString hashcodeToByteString(HashCode hashCode) {
+    return ByteString.copyFrom(hashCode.asBytes());
   }
 }

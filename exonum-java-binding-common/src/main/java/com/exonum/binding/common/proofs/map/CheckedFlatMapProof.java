@@ -22,8 +22,9 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 
 import com.exonum.binding.common.hash.HashCode;
-import java.util.Arrays;
+import com.google.protobuf.ByteString;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -33,7 +34,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   private final List<MapEntry> entries;
 
-  private final List<byte[]> missingKeys;
+  private final List<ByteString> missingKeys;
 
   private final HashCode rootHash;
 
@@ -43,7 +44,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       ProofStatus status,
       HashCode rootHash,
       List<MapEntry> entries,
-      List<byte[]> missingKeys) {
+      List<ByteString> missingKeys) {
     this.status = checkNotNull(status);
     this.rootHash = checkNotNull(rootHash);
     this.entries = checkNotNull(entries);
@@ -61,7 +62,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public static CheckedFlatMapProof correct(
       HashCode rootHash,
       List<MapEntry> entries,
-      List<byte[]> missingKeys) {
+      List<ByteString> missingKeys) {
     return new CheckedFlatMapProof(ProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
 
@@ -85,16 +86,16 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public List<byte[]> getMissingKeys() {
+  public List<ByteString> getMissingKeys() {
     checkValid();
     return missingKeys;
   }
 
   @Override
-  public boolean containsKey(byte[] key) {
+  public boolean containsKey(ByteString key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    return entries.stream().anyMatch(entry -> Arrays.equals(entry.getKey(), key));
+    return entries.stream().anyMatch(entry -> entry.getKey().equals(key));
   }
 
   @Override
@@ -104,12 +105,12 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public byte[] get(byte[] key) {
+  public ByteString get(ByteString key) {
     checkValid();
     checkThatKeyIsRequested(key);
     return entries
         .stream()
-        .filter(entry -> Arrays.equals(entry.getKey(), key))
+        .filter(entry -> entry.getKey().equals(key))
         .map(MapEntry::getValue)
         .findFirst()
         .orElse(null);
@@ -130,11 +131,11 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     checkState(status == ProofStatus.CORRECT, "Proof is not valid: %s", status);
   }
 
-  private void checkThatKeyIsRequested(byte[] key) {
+  private void checkThatKeyIsRequested(ByteString key) {
     Stream.concat(
         entries.stream().map(MapEntry::getKey),
         missingKeys.stream())
-        .filter(entryKey -> Arrays.equals(entryKey, key))
+        .filter(entryKey -> entryKey.equals(key))
         .findFirst()
         .orElseThrow(
             () -> new IllegalArgumentException("Key that wasn't among requested keys was checked"));

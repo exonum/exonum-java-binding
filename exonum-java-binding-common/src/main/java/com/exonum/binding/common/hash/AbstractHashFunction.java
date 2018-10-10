@@ -32,6 +32,7 @@ package com.exonum.binding.common.hash;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 
+import com.google.protobuf.ByteString;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -68,6 +69,11 @@ abstract class AbstractHashFunction implements HashFunction {
   @Override
   public HashCode hashBytes(byte[] input) {
     return hashBytes(input, 0, input.length);
+  }
+
+  @Override
+  public HashCode hashByteString(ByteString input) {
+    return hashBytes(input.toByteArray());
   }
 
   @Override

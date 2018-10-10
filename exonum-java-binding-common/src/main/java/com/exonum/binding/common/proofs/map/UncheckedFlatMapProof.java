@@ -23,6 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.proofs.map.DbKey.Type;
+import com.google.protobuf.ByteString;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -44,7 +46,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private final List<MapEntry> entries;
 
-  private final List<byte[]> missingKeys;
+  private final List<ByteString> missingKeys;
 
   UncheckedFlatMapProof(
       List<MapProofEntry> proof,
@@ -52,7 +54,10 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       List<byte[]> missingKeys) {
     this.proof = proof;
     this.entries = entries;
-    this.missingKeys = missingKeys;
+    // TODO: maybe change and create ByteString in native
+    this.missingKeys = missingKeys.stream()
+        .map(ByteString::copyFrom)
+        .collect(Collectors.toList());
   }
 
   @SuppressWarnings("unused") // Native API
@@ -245,7 +250,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static HashCode getSingleEntryRootHash(MapEntry entry) {
     DbKey dbKey = DbKey.newLeafKey(entry.getKey());
-    HashCode valueHash = HASH_FUNCTION.hashBytes(entry.getValue());
+    HashCode valueHash = HASH_FUNCTION.hashByteString(entry.getValue());
     return getSingleEntryRootHash(dbKey, valueHash);
   }
 
@@ -258,7 +263,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getMapEntryHash(MapEntry entry) {
-    return HASH_FUNCTION.hashBytes(entry.getValue());
+    return HASH_FUNCTION.hashByteString(entry.getValue());
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {

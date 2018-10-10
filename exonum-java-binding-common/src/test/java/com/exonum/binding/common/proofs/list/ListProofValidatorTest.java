@@ -33,6 +33,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.google.protobuf.ByteString;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -314,6 +315,7 @@ class ListProofValidatorTest {
 
   private static ProofListElement leafOf(String element) {
     byte[] dbElement = bytesOf(element);
+    // TODO: refactor
     return new ProofListElement(dbElement);
   }
 

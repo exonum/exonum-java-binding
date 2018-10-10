@@ -18,13 +18,14 @@ package com.exonum.binding.common.proofs.list;
 
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
+import com.google.protobuf.ByteString;
 
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
  */
 public final class ProofListElement implements ListProof {
 
-  private final byte[] element;
+  private final ByteString element;
 
   /**
    * Creates a new ProofListElement.
@@ -32,8 +33,10 @@ public final class ProofListElement implements ListProof {
    * @param element an element of the list
    * @throws NullPointerException if the element is null
    */
+  // TODO: maybe use ByteString
   public ProofListElement(byte[] element) {
-    this.element = element.clone();
+    // TODO: will the NPE be thrown?
+    this.element = ByteString.copyFrom(element);
   }
 
   @Override
@@ -44,8 +47,8 @@ public final class ProofListElement implements ListProof {
   /**
    * Returns the value of the element.
    */
-  public byte[] getElement() {
-    return element.clone();
+  public ByteString getElement() {
+    return ByteString.copyFrom(element.toByteArray());
   }
 
   public static Funnel<ProofListElement> funnel() {
@@ -56,7 +59,7 @@ public final class ProofListElement implements ListProof {
     INSTANCE {
       @Override
       public void funnel(ProofListElement from, PrimitiveSink into) {
-        into.putBytes(from.element);
+        into.putBytes(from.element.toByteArray());
       }
     }
   }

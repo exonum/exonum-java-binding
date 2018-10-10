@@ -21,12 +21,17 @@ import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.ProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsEqual;
 
 class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
@@ -34,60 +39,82 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   private final List<MapTestEntry> entries;
 
-  private CheckedMapProofMatcher(List<MapTestEntry> entries) {
+  private final Matcher<Set<ByteString>> missingKeysMatcher;
+  private final Matcher<Set<MapEntry>> presentEntriesMatcher;
+
+  private CheckedMapProofMatcher(List<MapTestEntry> entries)
+  {
     this.entries = entries;
+    Set<MapEntry> expectedEntries = entries.stream()
+        .filter(e -> e.getValue().isPresent())
+        // TODO: refactor
+        .map(e ->
+            new MapEntry(ByteString.copyFrom(e.getKey().asBytes()),
+                ByteString.copyFromUtf8(e.getValue().get())))
+        .collect(Collectors.toSet());
+    Set<ByteString> expectedMissingKeys = entries.stream()
+        .filter(e -> !e.getValue().isPresent())
+        // TODO: refactor
+        .map(e -> ByteString.copyFrom(e.getKey().asBytes()))
+        .collect(Collectors.toSet());
+    this.presentEntriesMatcher = IsEqual.equalTo(expectedEntries);
+    this.missingKeysMatcher = IsEqual.equalTo(expectedMissingKeys);
   }
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
     ProofStatus status = checkedMapProof.getStatus();
-    return status == ProofStatus.CORRECT
-        && checkProofSize(checkedMapProof)
-        && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
-  }
-
-  private boolean checkProofSize(CheckedMapProof checkedMapProof) {
     List<MapEntry> presentEntries = checkedMapProof.getEntries();
-    List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
-    long expectedPresentEntries = entries
-        .stream()
-        .filter(e -> e.getValue().isPresent())
-        .count();
-    long expectedAbsentEntries = entries
-        .stream()
-        .filter(e -> !e.getValue().isPresent())
-        .count();
-    return presentEntries.size() == expectedPresentEntries
-        && missingKeys.size() == expectedAbsentEntries;
+    List<ByteString> missingKeys = checkedMapProof.getMissingKeys();
+    return status == ProofStatus.CORRECT
+        // TODO: refactor (probably return Set from checked proof)
+        && presentEntriesMatcher.matches(new HashSet<>(presentEntries))
+        // TODO: refactor (probably return Set from checked proof)
+        && missingKeysMatcher.matches(new HashSet<>(missingKeys));
   }
 
-  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry expectedEntry) {
-    Optional<String> entryValue = expectedEntry.getValue();
-    byte[] expectedKey = expectedEntry.getKey().asBytes();
-
-    if (entryValue.isPresent()) {
-      List<MapEntry> presentEntries = checkedMapProof.getEntries();
-      byte[] expectedValue = entryValue.get().getBytes();
-      return checkPresentEntry(presentEntries, expectedKey, expectedValue);
-    } else {
-      List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
-      return checkAbsentEntry(missingKeys, expectedKey);
-    }
-  }
-
-  private boolean checkPresentEntry(
-      List<MapEntry> presentEntries, byte[] expectedKey, byte[] expectedValue) {
-    return presentEntries
-        .stream()
-        .anyMatch(presentEntry -> Arrays.equals(expectedKey, presentEntry.getKey())
-            && Arrays.equals(expectedValue, presentEntry.getValue()));
-  }
-
-  private boolean checkAbsentEntry(List<byte[]> missingKeys, byte[] entryKey) {
-    return missingKeys
-        .stream()
-        .anyMatch(missingEntry -> Arrays.equals(entryKey, missingEntry));
-  }
+//  private boolean checkProofSize(CheckedMapProof checkedMapProof) {
+//    List<MapEntry> presentEntries = checkedMapProof.getEntries();
+//    List<ByteString> missingKeys = checkedMapProof.getMissingKeys();
+//    long expectedPresentEntries = entries
+//        .stream()
+//        .filter(e -> e.getValue().isPresent())
+//        .count();
+//    long expectedAbsentEntries = entries
+//        .stream()
+//        .filter(e -> !e.getValue().isPresent())
+//        .count();
+//    return presentEntries.size() == expectedPresentEntries
+//        && missingKeys.size() == expectedAbsentEntries;
+//  }
+//
+//  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry expectedEntry) {
+//    Optional<String> entryValue = expectedEntry.getValue();
+//    byte[] expectedKey = expectedEntry.getKey().asBytes();
+//
+//    if (entryValue.isPresent()) {
+//      List<MapEntry> presentEntries = checkedMapProof.getEntries();
+//      byte[] expectedValue = entryValue.get().getBytes();
+//      return checkPresentEntry(presentEntries, expectedKey, expectedValue);
+//    } else {
+//      List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
+//      return checkAbsentEntry(missingKeys, expectedKey);
+//    }
+//  }
+//
+//  private boolean checkPresentEntry(
+//      List<MapEntry> presentEntries, byte[] expectedKey, byte[] expectedValue) {
+//    return presentEntries
+//        .stream()
+//        .anyMatch(presentEntry -> Arrays.equals(expectedKey, presentEntry.getKey())
+//            && Arrays.equals(expectedValue, presentEntry.getValue()));
+//  }
+//
+//  private boolean checkAbsentEntry(List<byte[]> missingKeys, byte[] entryKey) {
+//    return missingKeys
+//        .stream()
+//        .anyMatch(missingEntry -> Arrays.equals(entryKey, missingEntry));
+//  }
 
   @Override
   public void describeTo(Description description) {
@@ -110,6 +137,8 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .collect(Collectors.joining(", ", "[", "]"));
 
       String missingKeys = proof.getMissingKeys().stream()
+          // TODO: refactor
+          .map(ByteString::toByteArray)
           .map(HEX_ENCODING::encode)
           .collect(Collectors.joining(", ", "[", "]"));
 
@@ -123,8 +152,10 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   }
 
   private static String formatMapEntry(MapEntry e) {
-    String key = HEX_ENCODING.encode(e.getKey());
-    String value = StandardSerializers.string().fromBytes(e.getValue());
+    // TODO: refactor
+    String key = HEX_ENCODING.encode(e.getKey().toByteArray());
+    // TODO: refactor
+    String value = StandardSerializers.string().fromBytes(e.getValue().toByteArray());
     return String.format("(%s -> %s)", key, value);
   }
 

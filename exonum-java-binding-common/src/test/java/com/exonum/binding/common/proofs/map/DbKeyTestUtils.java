@@ -18,6 +18,7 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.test.Bytes.createPrefixed;
 
+import com.google.protobuf.ByteString;
 import java.util.BitSet;
 
 public class DbKeyTestUtils {
@@ -58,6 +59,12 @@ public class DbKeyTestUtils {
     assert filtered.matches("[01]*");
     assert filtered.length() <= DbKey.KEY_SIZE_BITS;
     return filtered;
+  }
+
+  /** Creates a 32-byte ByteString key from the bit prefix. */
+  public static ByteString keyByteStringFromString(String prefix) {
+    byte[] key = keyFromString(prefix);
+    return ByteString.copyFrom(key);
   }
 
   /** Creates a 32-byte key from the bit prefix. */

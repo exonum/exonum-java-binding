@@ -19,6 +19,7 @@ package com.exonum.binding.common.proofs.map;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.primitives.UnsignedBytes;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.BitSet;
 
@@ -149,6 +150,13 @@ public final class DbKey implements Comparable<DbKey> {
   public static DbKey newLeafKey(byte[] keySlice) {
     checkArgument(keySlice.length == KEY_SIZE);
     return new DbKey(Type.LEAF, keySlice, KEY_SIZE_BITS);
+  }
+
+  /**
+   * Given key as a ByteString, returns new leaf DbKey.
+   */
+  public static DbKey newLeafKey(ByteString key) {
+    return newLeafKey(key.toByteArray());
   }
 
   /**

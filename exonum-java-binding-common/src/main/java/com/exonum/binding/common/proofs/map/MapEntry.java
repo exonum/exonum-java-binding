@@ -16,15 +16,15 @@
 
 package com.exonum.binding.common.proofs.map;
 
-import java.util.Arrays;
+import com.google.protobuf.ByteString;
 
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
  */
 public class MapEntry {
-  private final byte[] key;
+  private final ByteString key;
 
-  private final byte[] value;
+  private final ByteString value;
 
   /**
    * Creates a new entry in a flat map proof corresponding to a leaf node.
@@ -32,17 +32,29 @@ public class MapEntry {
    * @param value a value mapped to the key
    */
   public MapEntry(byte[] key, byte[] value) {
+    // TODO: maybe use ByteString in constructor
+    this.key = ByteString.copyFrom(key);
+    this.value = ByteString.copyFrom(value);
+  }
+
+  // TODO: probably remove one constructor
+  /**
+   * Creates a new entry in a flat map proof corresponding to a leaf node.
+   * @param key a node key
+   * @param value a value mapped to the key
+   */
+  public MapEntry(ByteString key, ByteString value) {
     this.key = key;
     this.value = value;
   }
 
   /** Returns the key in this entry. */
-  public byte[] getKey() {
+  public ByteString getKey() {
     return key;
   }
 
   /** Returns the value in this entry. */
-  public byte[] getValue() {
+  public ByteString getValue() {
     return value;
   }
 
@@ -55,11 +67,11 @@ public class MapEntry {
       return false;
     }
     MapEntry that = (MapEntry) o;
-    return Arrays.equals(key, that.key) && Arrays.equals(value, that.value);
+    return key.equals(that.key) && value.equals(that.value);
   }
 
   @Override
   public int hashCode() {
-    return Arrays.hashCode(key) ^ Arrays.hashCode(value);
+    return key.hashCode() ^ value.hashCode();
   }
 }
