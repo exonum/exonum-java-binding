@@ -42,7 +42,7 @@ public enum ListProofStatus implements ProofStatus {
 
   @Override
   public String toString() {
-    return "MapProofStatus{"
+    return "ListProofStatus{"
         + "description='" + description + '\''
         + '}';
   }
