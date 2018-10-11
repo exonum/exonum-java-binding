@@ -24,11 +24,11 @@ import java.util.List;
 /**
  * A validator that checks list proofs internal structure.
  */
-final class ListProofStructureValidator implements ListProofVisitor {
+public final class ListProofStructureValidator implements ListProofVisitor {
 
   static int MAX_NODE_DEPTH = 63;
 
-  //TODO optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443.
+  // TODO: optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443
   private List<NodeInfo> listProofBranchesInfo;
 
   private List<NodeInfo> listProofElementsInfo;
@@ -42,22 +42,23 @@ final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Creates a new ListProofStructureValidator.
    */
-  ListProofStructureValidator() {
+  public ListProofStructureValidator(ListProof listProof) {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
     listProofElementsInfo = new ArrayList<>();
     listProofHashNodesInfo = new ArrayList<>();
+
+    listProof.accept(this);
+    this.check();
   }
 
   @Override
   public void visit(ListProofBranch branch) {
     int branchDepth = depth;
 
-    NodeType leftElementType = branch.getLeft().getNodeType();
-    NodeType rightElementType = branch.getRight()
-        .map(ListProofNode::getNodeType)
-        .orElse(NodeType.NONE);
+    NodeType leftElementType = getNodeType(branch.getLeft());
+    NodeType rightElementType = branch.getRight().map(this::getNodeType).orElse(NodeType.NONE);
     listProofBranchesInfo.add(
         new NodeInfo(branch, depth, Arrays.asList(leftElementType, rightElementType))
     );
@@ -91,35 +92,37 @@ final class ListProofStructureValidator implements ListProofVisitor {
   }
 
   /**
-   * Returns list proof check status.
+   * Performs list proof structure checks and assigns proofStatus based on results of these checks.
    */
-  public ProofStatus check() {
+  private void check() {
     if (exceedsMaxDepth(listProofElementsInfo)) {
       proofStatus = ListProofStatus.INVALID_ELEMENT_NODE_DEPTH;
-      return proofStatus;
-    }
-
-    if (exceedsMaxDepth(listProofHashNodesInfo)) {
+    } else if (exceedsMaxDepth(listProofHashNodesInfo)) {
       proofStatus = ListProofStatus.INVALID_HASH_NODE_DEPTH;
-      return proofStatus;
-    }
-
-    if (hasInvalidNodesDepth(listProofElementsInfo)) {
+    } else if (hasInvalidNodesDepth(listProofElementsInfo)) {
       proofStatus = ListProofStatus.INVALID_NODE_DEPTH;
-      return proofStatus;
-    }
-
-    if (hasNoElementNodes(listProofBranchesInfo, listProofElementsInfo)) {
+    } else if (hasNoElementNodes(listProofBranchesInfo, listProofElementsInfo)) {
       proofStatus = ListProofStatus.INVALID_TREE_NO_ELEMENTS;
-      return proofStatus;
-    }
-
-    if (hashNodesLimitExceeded(listProofBranchesInfo)) {
+    } else if (hashNodesLimitExceeded(listProofBranchesInfo)) {
       proofStatus = ListProofStatus.INVALID_HASH_NODES_COUNT;
-      return proofStatus;
     }
+  }
 
-    return proofStatus;
+  /**
+   * Returns tree node type based on node class type.
+   *
+   * @throws RuntimeException in case if node type is unknown
+   */
+  private NodeType getNodeType(ListProof node) {
+    if (node instanceof ListProofBranch) {
+      return NodeType.BRANCH;
+    } else if (node instanceof ListProofElement) {
+      return NodeType.ELEMENT;
+    } else if (node instanceof ListProofHashNode) {
+      return NodeType.HASHNODE;
+    } else {
+      throw new RuntimeException("Unknown tree node type: " + node);
+    }
   }
 
   /**
@@ -159,27 +162,37 @@ final class ListProofStructureValidator implements ListProofVisitor {
   }
 
   /**
-   * Returns true if branch node contains 2 hash nodes.
+   * Returns true if child nodes of the branch node are not valid: contain hashes only.
    *
    * @param branches collection of branches info
    * @return true if branch contains only hash nodes.
    */
   private boolean hashNodesLimitExceeded(List<NodeInfo> branches) {
     return branches.stream()
-        .anyMatch(
-            branch -> branch.getChildElementsTypes().size() == 2
-                && branch.getChildElementsTypes().stream()
-                .allMatch(nodeType -> nodeType.equals(NodeType.HASHNODE))
-        );
+        .anyMatch(this::invalidBranch);
+  }
+
+  private boolean invalidBranch(NodeInfo branch) {
+    List<NodeType> children = branch.getChildElementsTypes();
+    if (children.size() < 1) {
+      return true;
+    }
+    return children.stream()
+        .allMatch(nodeType -> (nodeType == NodeType.HASHNODE) || (nodeType == NodeType.NONE));
   }
 
   /**
    * Returns proof status.
-   *
-   * @return proof status
    */
-  ProofStatus getProofStatus() {
+  public ProofStatus getProofStatus() {
     return proofStatus;
+  }
+
+  /**
+   * Returns true if proof status is VALID, false otherwise.
+   */
+  public boolean isValid() {
+    return proofStatus == ListProofStatus.VALID;
   }
 
   @Override
@@ -193,22 +206,22 @@ final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Class used to store node info additional information.
    */
-  static class NodeInfo {
-    private ListProofNode node;
+  private static class NodeInfo {
+    private ListProof node;
     private int depth;
     private List<NodeType> childElementsTypes;
 
-    NodeInfo(ListProofNode node, int depth) {
+    NodeInfo(ListProof node, int depth) {
       this.node = node;
       this.depth = depth;
     }
 
-    NodeInfo(ListProofNode node, int depth, List<NodeType> childElementsTypes) {
+    NodeInfo(ListProof node, int depth, List<NodeType> childElementsTypes) {
       this(node, depth);
       this.childElementsTypes = childElementsTypes;
     }
 
-    ListProofNode getNode() {
+    ListProof getNode() {
       return node;
     }
 
@@ -224,7 +237,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Enum used to identify tree node type.
    */
-  enum NodeType {
+  private enum NodeType {
     BRANCH, ELEMENT, HASHNODE, NONE
   }
 }

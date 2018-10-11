@@ -16,11 +16,13 @@
 
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.flat.UncheckedMapProof;
+import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -28,7 +30,11 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.google.common.collect.Lists;
+import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.LongSupplier;
 
@@ -199,19 +205,65 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private native byte[] nativeGet(long nativeHandle, byte[] key);
 
   /**
-   * Returns a proof that there is a value mapped to the specified key or
-   * that there is no such mapping.
+   * Returns a proof that there are values mapped to the specified keys or that there are no such
+   * mappings.
    *
    * @param key a proof map key which might be mapped to some value, must be 32-byte long
-   * @throws IllegalStateException  if this map is not valid
-   * @throws IllegalArgumentException if the size of the key is not 32 bytes
+   * @param otherKeys other proof map keys which might be mapped to some values, each must be
+   *                  32-byte long
+   * @throws IllegalStateException if this map is not valid
+   * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
    */
-  public UncheckedMapProof getProof(K key) {
+  public UncheckedMapProof getProof(K key, K... otherKeys) {
+    if (otherKeys.length == 0) {
+      return getSingleKeyProof(key);
+    } else {
+      List<K> keys = Lists.asList(key, otherKeys);
+      return getMultiKeyProof(keys);
+    }
+  }
+
+  /**
+   * Returns a proof that there are values mapped to the specified keys or that there are no such
+   * mappings.
+   *
+   * @param keys proof map keys which might be mapped to some values, each must be 32-byte long
+   * @throws IllegalStateException if this map is not valid
+   * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes
+   *                                  or keys collection is empty
+   */
+  public UncheckedMapProof getProof(Collection<? extends K> keys) {
+    checkArgument(!keys.isEmpty(), "Keys collection should not be empty");
+    if (keys.size() == 1) {
+      K key = keys.iterator()
+          .next();
+      return getSingleKeyProof(key);
+    } else {
+      return getMultiKeyProof(keys);
+    }
+  }
+
+  private UncheckedMapProof getSingleKeyProof(K key) {
     byte[] dbKey = keySerializer.toBytes(key);
     return nativeGetProof(getNativeHandle(), dbKey);
   }
 
   private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
+
+  private UncheckedMapProof getMultiKeyProof(Collection<? extends K> keys) {
+    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+  }
+
+  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keys) {
+    int arraySize = keys.size() * PROOF_MAP_KEY_SIZE;
+    ByteBuffer flattenedKeys = ByteBuffer.allocate(arraySize);
+    keys.stream()
+        .map(keySerializer::toBytes)
+        .forEach(flattenedKeys::put);
+    return flattenedKeys.array();
+  }
+
+  private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
 
   /**
    * Returns the root hash of the underlying Merkle-Patricia tree.

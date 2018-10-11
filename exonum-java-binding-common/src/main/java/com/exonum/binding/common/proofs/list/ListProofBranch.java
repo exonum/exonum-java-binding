@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.common.proofs.list.ListProofStructureValidator.NodeType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Optional;
@@ -47,11 +46,6 @@ public final class ListProofBranch implements ListProofNode {
     visitor.visit(this);
   }
 
-  @Override
-  public NodeType getNodeType() {
-    return nodeType;
-  }
-
   /**
    * Returns the left child in the proof tree.
    */
@@ -68,6 +62,5 @@ public final class ListProofBranch implements ListProofNode {
   public Optional<ListProofNode> getRight() {
     return Optional.ofNullable(right);
   }
-
 
 }

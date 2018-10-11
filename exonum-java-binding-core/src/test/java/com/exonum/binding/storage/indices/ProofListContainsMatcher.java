@@ -20,10 +20,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import com.exonum.binding.common.proofs.list.CheckedListProof;
-import com.exonum.binding.common.proofs.list.ListProofNode;
-import com.exonum.binding.common.proofs.list.ListProofStatus;
-import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
+import com.exonum.binding.common.proofs.list.ListProof;
+import com.exonum.binding.common.proofs.list.ListProofRootHashCalculator;
+import com.exonum.binding.common.proofs.list.ListProofStructureValidator;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
@@ -36,11 +35,10 @@ import org.hamcrest.TypeSafeMatcher;
 
 class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<String>> {
 
-  private final Function<ProofListIndexProxy<String>, ListProofNode> proofFunction;
+  private final Function<ProofListIndexProxy<String>, ListProof> proofFunction;
   private final Matcher<Map<Long, String>> elementsMatcher;
 
-  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>,
-                                   ListProofNode> proofFunction,
+  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>, ListProof> proofFunction,
                                    Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
     this.elementsMatcher = equalTo(expectedProofElements);
@@ -52,12 +50,14 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       return false;
     }
 
-    ListProofNode proof = proofFunction.apply(list);
-    CheckedListProof checkedProof = newCheckedListProof(proof);
+    ListProof proof = proofFunction.apply(list);
 
-    return checkedProof.getStatus().equals(ListProofStatus.VALID)
-        && elementsMatcher.matches(checkedProof.getElements())
-        && list.getRootHash().equals(checkedProof.getRootHash());
+    ListProofStructureValidator validator = newProofStructureValidator(proof);
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator(proof);
+
+    return validator.isValid()
+        && elementsMatcher.matches(calculator.getElements())
+        && list.getRootHash().equals(calculator.getCalculatedRootHash());
   }
 
   @Override
@@ -69,32 +69,38 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   @Override
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
-    ListProofNode proof = proofFunction.apply(list);
-    CheckedListProof checkedProof = newCheckedListProof(proof);
+    ListProof proof = proofFunction.apply(list);
 
-    if (!checkedProof.getStatus().equals(ListProofStatus.VALID)) {
+    ListProofStructureValidator validator = newProofStructureValidator(proof);
+    ListProofRootHashCalculator<String> calculator = newProofHashCodeCalculator(proof);
+
+    if (!validator.isValid()) {
       mismatchDescription.appendText("proof was not valid: ")
-          .appendValue(checkedProof.getStatus().getDescription());
+          .appendValue(validator.getProofStatus().getDescription());
       return;
     }
 
-    if (!list.getRootHash().equals(checkedProof.getRootHash())) {
+    if (!list.getRootHash().equals(calculator.getCalculatedRootHash())) {
       mismatchDescription.appendText("calculated root hash doesn't match: ")
-          .appendValue(checkedProof.getRootHash())
+          .appendValue(calculator.getCalculatedRootHash())
           .appendText("expected root hash: ")
           .appendValue(list.getRootHash());
       return;
     }
 
-    if (!elementsMatcher.matches(checkedProof.getElements())) {
-      mismatchDescription.appendText("valid proof: ").appendValue(checkedProof)
+    if (!elementsMatcher.matches(calculator.getElements())) {
+      mismatchDescription.appendText("valid proof: ").appendValue(validator)
           .appendText(", elements mismatch: ");
-      elementsMatcher.describeMismatch(checkedProof.getElements(), mismatchDescription);
+      elementsMatcher.describeMismatch(calculator.getElements(), mismatchDescription);
     }
   }
 
-  private CheckedListProof newCheckedListProof(ListProofNode listProofNode) {
-    return new UncheckedListProofAdapter<>(listProofNode, StandardSerializers.string()).check();
+  private ListProofStructureValidator newProofStructureValidator(ListProof listProof) {
+    return new ListProofStructureValidator(listProof);
+  }
+
+  private ListProofRootHashCalculator<String> newProofHashCodeCalculator(ListProof listProof) {
+    return new ListProofRootHashCalculator<>(listProof, StandardSerializers.string());
   }
 
   /**
@@ -110,7 +116,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy<String>, ListProofNode> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
         (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction,
@@ -135,7 +141,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
     long to = from + expectedValues.size();
-    Function<ProofListIndexProxy<String>, ListProofNode> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
         (list) -> list.getRangeProof(from, to);
 
     Map<Long, String> expectedProofElements = new TreeMap<>();

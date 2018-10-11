@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.exonum.binding</groupId>
@@ -12,18 +12,16 @@
     The Exonum Java Binding library.
   </description>
   <url>https://github.com/exonum/exonum-java-binding</url>
-
+  <organization>
+    <name>Exonum</name>
+    <url>https://exonum.com/</url>
+  </organization>
   <licenses>
     <license>
       <name>The Apache License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
-
-  <organization>
-    <name>Exonum</name>
-    <url>https://exonum.com/</url>
-  </organization>
 
   <developers>
     <developer>
@@ -51,13 +49,27 @@
     </developer>
   </developers>
 
+  <modules>
+    <module>exonum-java-binding-bom</module>
+    <module>exonum-java-testing</module>
+    <module>exonum-java-binding-common</module>
+    <module>exonum-java-binding-core</module>
+    <module>exonum-java-binding-fakes</module>
+    <module>exonum-java-binding-qa-service</module>
+    <module>exonum-java-binding-cryptocurrency-demo</module>
+    <module>exonum-java-binding-service-archetype</module>
+  </modules>
+
   <scm>
     <connection>scm:git:https://github.com/exonum/exonum-java-binding.git</connection>
     <developerConnection>scm:git:git@github.com:/exonum/exonum-java-binding.git</developerConnection>
     <url>https://github.com/exonum/exonum-java-binding</url>
     <tag>HEAD</tag>
   </scm>
-
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/exonum/exonum-java-binding/issues</url>
+  </issueManagement>
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -68,11 +80,6 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-
-  <issueManagement>
-    <system>github</system>
-    <url>https://github.com/exonum/exonum-java-binding/issues</url>
-  </issueManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,9 +101,9 @@
     <junit.jupiter.version>5.3.1</junit.jupiter.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
     <protobuf.version>3.6.1</protobuf.version>
-    <mockito-core.version>2.22.0</mockito-core.version>
+    <mockito-core.version>2.23.0</mockito-core.version>
     <guava.version>26.0-jre</guava.version>
-    <vertx.version>3.5.3</vertx.version>
+    <vertx.version>3.5.4</vertx.version>
     <equalsverifier.version>3.0</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
@@ -106,10 +113,118 @@
 
          See ECR-942. -->
     <project.skipJavaITs>false</project.skipJavaITs>
+    <!-- Default values of properties set by Jacoco when coverage is enabled.
+         Passed to the JVM running tests. -->
+    <jacoco.args></jacoco.args>
+    <jacoco.it.args></jacoco.it.args>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${log4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>java-hamcrest</artifactId>
+        <version>${hamcrest.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>nl.jqno.equalsverifier</groupId>
+        <artifactId>equalsverifier</artifactId>
+        <version>${equalsverifier.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito2</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava-testlib</artifactId>
+        <version>${guava.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <!-- Shared test dependencies of all sub-modules. -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>java-hamcrest</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
-     <pluginManagement>
+    <pluginManagement>
        <plugins>
          <plugin>
            <groupId>org.apache.maven.plugins</groupId>
@@ -157,9 +272,15 @@
              <dependency>
                <groupId>com.puppycrawl.tools</groupId>
                <artifactId>checkstyle</artifactId>
-               <version>8.12</version>
+               <version>8.13</version>
              </dependency>
            </dependencies>
+         </plugin>
+
+         <plugin>
+           <groupId>org.codehaus.mojo</groupId>
+           <artifactId>tidy-maven-plugin</artifactId>
+           <version>1.1.0</version>
          </plugin>
 
          <!-- Use newer version of the standard plugins by default. -->
@@ -264,7 +385,6 @@
          </plugin>
        </plugins>
      </pluginManagement>
-
     <plugins>
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -304,6 +424,24 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- Checks that the POMs match the code convention:
+           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
+
+           Use `mvn tidy:pom` to fix any style issues -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check-pom-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -316,6 +454,8 @@
       <id>ci-build</id>
       <properties>
         <checkstyle.severity>error</checkstyle.severity>
+        <jacoco.args>${argLine}</jacoco.args>
+        <jacoco.it.args>${itCoverageAgent}</jacoco.it.args>
       </properties>
 
       <build>
@@ -367,7 +507,7 @@
                 <id>generate-jacoco-it-report</id>
                 <phase>post-integration-test</phase>
                 <goals>
-                  <goal>report</goal>
+                  <goal>report-integration</goal>
                 </goals>
                 <configuration>
                   <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
@@ -452,120 +592,4 @@
       </properties>
     </profile>
   </profiles>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>${junit.jupiter.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
-        <scope>compile</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-bom</artifactId>
-        <version>${log4j.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>${protobuf.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.hamcrest</groupId>
-        <artifactId>java-hamcrest</artifactId>
-        <version>${hamcrest.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>nl.jqno.equalsverifier</groupId>
-        <artifactId>equalsverifier</artifactId>
-        <version>${equalsverifier.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${mockito-core.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-junit-jupiter</artifactId>
-        <version>${mockito-core.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-module-junit4</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito2</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava-testlib</artifactId>
-        <version>${guava.version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <!-- Shared test dependencies of all sub-modules. -->
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <modules>
-    <module>exonum-java-binding-bom</module>
-    <module>exonum-java-testing</module>
-    <module>exonum-java-binding-common</module>
-    <module>exonum-java-binding-core</module>
-    <module>exonum-java-binding-fakes</module>
-    <module>exonum-java-binding-qa-service</module>
-    <module>exonum-java-binding-cryptocurrency-demo</module>
-    <module>exonum-java-binding-service-archetype</module>
-  </modules>
 </project>

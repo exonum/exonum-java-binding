@@ -35,7 +35,7 @@ import java.util.TreeMap;
  *
  * @param <E> the type of elements in the corresponding list
  */
-final class ListProofRootHashCalculator<E> implements ListProofVisitor {
+public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -52,18 +52,21 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @param serializer a serializer of list elements
    */
-  ListProofRootHashCalculator(Serializer<E> serializer) {
-    this(serializer, Hashing.defaultHashFunction());
+  public ListProofRootHashCalculator(ListProof listProof, Serializer<E> serializer) {
+    this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
   // to easily inject a mock of a calculatedRootHash function.
   @VisibleForTesting
-  ListProofRootHashCalculator(Serializer<E> serializer, HashFunction hashFunction) {
+  ListProofRootHashCalculator(ListProof listProof, Serializer<E> serializer,
+      HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
     elements = new TreeMap<>();
     index = 0;
     calculatedRootHash = null;
+
+    listProof.accept(this);
   }
 
   @Override
@@ -111,7 +114,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
   /**
    * Returns a collection of list entries: index-element pairs, ordered by indices.
    */
-  NavigableMap<Long, E> getElements() {
+  public NavigableMap<Long, E> getElements() {
     return elements;
   }
 
@@ -120,7 +123,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @return hash code
    */
-  HashCode getCalculatedRootHash() {
+  public HashCode getCalculatedRootHash() {
     return calculatedRootHash;
   }
 
