@@ -27,9 +27,6 @@ pub struct ServiceProxy {
     name: String,
 }
 
-// `ServiceProxy` is immutable, so it can be safely used in different threads.
-unsafe impl Sync for ServiceProxy {}
-
 impl fmt::Debug for ServiceProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "ServiceProxy(id={},name={})", self.id, self.name)
