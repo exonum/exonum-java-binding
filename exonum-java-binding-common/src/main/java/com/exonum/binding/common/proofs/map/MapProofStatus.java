@@ -16,10 +16,12 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import com.exonum.binding.common.proofs.common.ProofStatus;
+
 /**
  * Possible statuses of a checked map proof.
  */
-public enum MapProofStatus {
+public enum MapProofStatus implements ProofStatus {
   CORRECT("Proof has a valid structure"),
   NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
   INVALID_ORDER("Proof entries are placed in the wrong order"),
@@ -30,6 +32,11 @@ public enum MapProofStatus {
 
   MapProofStatus(String description) {
     this.description = description;
+  }
+
+  @Override
+  public String getDescription() {
+    return this.description;
   }
 
   @Override
