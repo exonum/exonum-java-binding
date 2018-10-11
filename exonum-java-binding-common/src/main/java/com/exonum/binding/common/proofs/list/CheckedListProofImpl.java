@@ -40,7 +40,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
    * @param elements proof elements collection
    * @param proofStatus a status of proof verification
    */
-  public CheckedListProofImpl(HashCode calculatedRootHash,
+  CheckedListProofImpl(HashCode calculatedRootHash,
       NavigableMap<Long, E> elements, ProofStatus proofStatus) {
     this.calculatedRootHash = checkNotNull(calculatedRootHash);
     this.elements = checkNotNull(elements);

@@ -42,7 +42,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Creates a new ListProofStructureValidator.
    */
-  public ListProofStructureValidator(ListProof listProof) {
+  public ListProofStructureValidator(ListProofNode listProof) {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
@@ -113,7 +113,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    *
    * @throws RuntimeException in case if node type is unknown
    */
-  private NodeType getNodeType(ListProof node) {
+  private NodeType getNodeType(ListProofNode node) {
     if (node instanceof ListProofBranch) {
       return NodeType.BRANCH;
     } else if (node instanceof ListProofElement) {
@@ -207,21 +207,21 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    * Class used to store node info additional information.
    */
   private static class NodeInfo {
-    private ListProof node;
+    private ListProofNode node;
     private int depth;
     private List<NodeType> childElementsTypes;
 
-    NodeInfo(ListProof node, int depth) {
+    NodeInfo(ListProofNode node, int depth) {
       this.node = node;
       this.depth = depth;
     }
 
-    NodeInfo(ListProof node, int depth, List<NodeType> childElementsTypes) {
+    NodeInfo(ListProofNode node, int depth, List<NodeType> childElementsTypes) {
       this(node, depth);
       this.childElementsTypes = childElementsTypes;
     }
 
-    ListProof getNode() {
+    ListProofNode getNode() {
       return node;
     }
 

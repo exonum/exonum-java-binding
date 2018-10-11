@@ -31,8 +31,6 @@ public final class ListProofBranch implements ListProofNode {
 
   private final ListProofNode left;
 
-  private final NodeType nodeType = NodeType.BRANCH;
-
   @Nullable
   private final ListProofNode right;
 

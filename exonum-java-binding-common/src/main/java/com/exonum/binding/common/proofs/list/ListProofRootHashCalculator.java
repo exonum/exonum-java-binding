@@ -52,13 +52,13 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @param serializer a serializer of list elements
    */
-  public ListProofRootHashCalculator(ListProof listProof, Serializer<E> serializer) {
+  public ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
   // to easily inject a mock of a calculatedRootHash function.
   @VisibleForTesting
-  ListProofRootHashCalculator(ListProof listProof, Serializer<E> serializer,
+  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
       HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);

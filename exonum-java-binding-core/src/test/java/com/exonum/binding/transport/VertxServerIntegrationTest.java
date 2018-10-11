@@ -159,16 +159,6 @@ public class VertxServerIntegrationTest {
   }
 
   /**
-   * Returns random available local port.
-   */
-  private int findFreePort() throws IOException {
-    try (ServerSocket socket = new ServerSocket(0)) {
-      socket.setReuseAddress(true);
-      return socket.getLocalPort();
-    }
-  }
-
-  /**
    * A blocking server stop, so that asynchronous exceptions are not hidden.
    */
   private void blockingStop() throws InterruptedException, ExecutionException, TimeoutException {
