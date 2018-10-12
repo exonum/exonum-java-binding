@@ -16,43 +16,36 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.common.ProofStatus;
+import com.exonum.binding.common.proofs.common.CheckedProof;
 import java.util.NavigableMap;
 
 /**
- * A checked list proof.
- * In case of incorrect proof all methods (except for getStatus and compareWithRootHash)
- * throw IllegalStateException.
+ * A proof that some elements exist in a proof list.
  * Example usage:
  * <pre><code>
  * byte[] key = "The key for which I want a proved value".getBytes();
  * HashCode expectedRootHash = // get a known root hash from block proof //
- * UncheckedListProof proof = requestProofForKey(key);
- * // Convert to checked
+ * UncheckedListProof proof = new UncheckedListProofAdapter(proof, serializer);
+ * // Check the proof
  * CheckedListProof checkedProof = proof.check();
  * // Check the root hash
- * if (checkedProof.getRootHash().equals(expectedRootHash)) {
- *   // Get and use the value(s)
+ * if (checkedProof.isValid()) {
+ *   if (checkedProof.getRootHash().equals(expectedRootHash)) {
+ *   // Get and use elements
  *   NavigableMap value = checked.getElements();
+ *   }
  * }
  * </code></pre>
  */
-public interface CheckedListProof {
+public interface CheckedListProof<E> extends CheckedProof {
   /**
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  NavigableMap getElements();
-
-  /**
-   * Return a hash of a proof root node.
-   * @throws IllegalStateException if the proof is not valid
-   */
-  HashCode getRootHash();
+  NavigableMap<Long, E> getElements();
 
   /**
    * Returns the status of this proof: whether it is structurally valid.
    */
-  ProofStatus getStatus();
+  ListProofStatus getProofStatus();
 }

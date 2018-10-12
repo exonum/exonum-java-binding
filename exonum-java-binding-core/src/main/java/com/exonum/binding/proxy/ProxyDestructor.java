@@ -18,6 +18,7 @@ package com.exonum.binding.proxy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Optional;
 import java.util.function.LongConsumer;
@@ -106,5 +107,15 @@ public final class ProxyDestructor implements CleanAction<Class<?>> {
   @Override
   public Optional<Class<?>> resourceType() {
     return Optional.of(proxyClass);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("nativeHandle", nativeHandle)
+        .add("cleanFunction", cleanFunction)
+        .add("proxyClass", proxyClass)
+        .add("destroyed", destroyed)
+        .toString();
   }
 }

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import com.exonum.binding.common.proofs.common.ProofStatus;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.List;
 /**
  * A validator that checks list proofs internal structure.
  */
-public final class ListProofStructureValidator implements ListProofVisitor {
+final class ListProofStructureValidator implements ListProofVisitor {
 
   static int MAX_NODE_DEPTH = 63;
 
@@ -37,12 +36,12 @@ public final class ListProofStructureValidator implements ListProofVisitor {
 
   private int depth;
 
-  private ProofStatus proofStatus;
+  private ListProofStatus proofStatus;
 
   /**
    * Creates a new ListProofStructureValidator.
    */
-  public ListProofStructureValidator(ListProofNode listProof) {
+  ListProofStructureValidator(ListProofNode listProof) {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
@@ -184,7 +183,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Returns proof status.
    */
-  public ProofStatus getProofStatus() {
+  public ListProofStatus getProofStatus() {
     return proofStatus;
   }
 

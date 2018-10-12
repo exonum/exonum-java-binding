@@ -116,8 +116,13 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public MapProofStatus getStatus() {
+  public MapProofStatus getProofStatus() {
     return status;
+  }
+
+  @Override
+  public boolean isValid() {
+    return status == MapProofStatus.CORRECT;
   }
 
   @Override

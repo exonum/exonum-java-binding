@@ -24,6 +24,7 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Various utilities for testing ListProof verification {@link ListProofNode}s.
@@ -42,7 +43,7 @@ final class ListProofUtils {
   }
 
   /**
-   * Returns string bytes. Standard string serialized is used.
+   * Returns string bytes. Standard string serializer is used.
    */
   static byte[] bytesOf(String element) {
     return StandardSerializers.string().toBytes(element);
@@ -66,13 +67,15 @@ final class ListProofUtils {
     return root;
   }
 
+
   static HashCode getNodeHashCode(String v1) {
     return Hashing.defaultHashFunction().newHasher()
         .putString(v1, StandardCharsets.UTF_8)
         .hash();
   }
 
-  static HashCode getBranchHashCode(HashCode leftHash, Optional<HashCode> rightHash) {
+  static HashCode getBranchHashCode(HashCode leftHash, @Nullable HashCode rightHashSource) {
+    Optional<HashCode> rightHash = Optional.ofNullable(rightHashSource);
     return Hashing.defaultHashFunction().newHasher()
         .putObject(leftHash, hashCodeFunnel())
         .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->

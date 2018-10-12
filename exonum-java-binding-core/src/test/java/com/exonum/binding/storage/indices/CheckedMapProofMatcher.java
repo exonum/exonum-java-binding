@@ -40,7 +40,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
-    MapProofStatus status = checkedMapProof.getStatus();
+    MapProofStatus status = checkedMapProof.getProofStatus();
     return status == MapProofStatus.CORRECT
         && checkProofSize(checkedMapProof)
         && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
@@ -100,7 +100,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    MapProofStatus proofStatus = proof.getStatus();
+    MapProofStatus proofStatus = proof.getProofStatus();
     if (proofStatus == MapProofStatus.CORRECT) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as

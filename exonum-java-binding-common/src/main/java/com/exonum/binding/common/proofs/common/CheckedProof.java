@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs.common;
+
+import com.exonum.binding.common.hash.HashCode;
 
 /**
- * Interface is used to get a checked list proof.
+ * Common interface for CheckedProof operations.
  */
-public interface UncheckedListProof {
+public interface CheckedProof {
 
   /**
-   * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
+   * Returns a status of proof verification.
    */
-  CheckedListProof check();
+  ProofStatus getProofStatus();
+
+  /**
+   * Returns the calculated root hash of the proof.
+   * Must be equal to the Merkle root hash of the collection, providing this proof.
+   * @throws IllegalStateException if the proof is not valid
+   */
+  HashCode getRootHash();
+
+  /**
+   * Returns true if List Proof status is VALID {@link ProofStatus}, false otherwise.
+   */
+  boolean isValid();
 }

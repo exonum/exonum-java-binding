@@ -41,11 +41,11 @@ class UncheckedListProofAdapterTest {
     ListProofNode right = new ListProofHashNode(H1);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    UncheckedListProofAdapter<String> uncheckedProof = getUncheckedProof(root);
+    UncheckedListProofAdapter<String> uncheckedProof = createUncheckedProof(root);
 
     CheckedListProof checkedProof = uncheckedProof.check();
 
-    assertThat(checkedProof.getStatus(), is(ListProofStatus.VALID));
+    assertThat(checkedProof.getProofStatus(), is(ListProofStatus.VALID));
     assertThat(checkedProof.getElements(), equalTo(of(0L, V1)));
     assertThat(checkedProof.getRootHash(), notNullValue());
   }
@@ -56,17 +56,17 @@ class UncheckedListProofAdapterTest {
     ListProofNode right = new ListProofHashNode(H2);
     ListProofBranch root = new ListProofBranch(left, right);
 
-    UncheckedListProofAdapter<String> uncheckedProof = getUncheckedProof(root);
+    UncheckedListProofAdapter<String> uncheckedProof = createUncheckedProof(root);
 
     CheckedListProof checkedProof = uncheckedProof.check();
 
-    assertThat(checkedProof.getStatus(), is(ListProofStatus.INVALID_TREE_NO_ELEMENTS));
+    assertThat(checkedProof.getProofStatus(), is(ListProofStatus.INVALID_TREE_NO_ELEMENTS));
 
     assertThrows(IllegalStateException.class, checkedProof::getElements);
     assertThrows(IllegalStateException.class, checkedProof::getRootHash);
   }
 
-  private UncheckedListProofAdapter<String> getUncheckedProof(ListProofBranch root) {
+  private UncheckedListProofAdapter<String> createUncheckedProof(ListProofBranch root) {
     return new UncheckedListProofAdapter<>(root, StandardSerializers.string());
   }
 }

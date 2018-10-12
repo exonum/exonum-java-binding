@@ -16,19 +16,16 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getBranchHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getNodeHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
 class ListProofHashCodeCalculatorTest {
@@ -153,31 +150,8 @@ class ListProofHashCodeCalculatorTest {
     assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
   }
 
-  private HashCode getNodeHashCode(String v1) {
-    return Hashing.defaultHashFunction().newHasher()
-        .putString(v1, StandardCharsets.UTF_8)
-        .hash();
-  }
-
-  private HashCode getBranchHashCode(HashCode leftHash, @Nullable HashCode rightHashSource) {
-    Optional<HashCode> rightHash = Optional.ofNullable(rightHashSource);
-    return Hashing.defaultHashFunction().newHasher()
-        .putObject(leftHash, hashCodeFunnel())
-        .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
-            from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
-        .hash();
-  }
 
   private ListProofRootHashCalculator<String> createListProofCalculator(ListProofNode listProof) {
     return new ListProofRootHashCalculator<>(listProof, StandardSerializers.string());
-  }
-
-  private static ListProofElement leafOf(String element) {
-    byte[] dbElement = bytesOf(element);
-    return new ListProofElement(dbElement);
-  }
-
-  private static byte[] bytesOf(String element) {
-    return StandardSerializers.string().toBytes(element);
   }
 }

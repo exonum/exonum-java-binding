@@ -20,11 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.common.ProofStatus;
 import java.util.NavigableMap;
 
 /**
- * Checked List Proof which includes list proof verification results.
+ * A checked list proof which includes list proof verification results.
  */
 public class CheckedListProofImpl<E> implements CheckedListProof {
 
@@ -32,7 +31,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
 
   private final NavigableMap<Long, E> elements;
 
-  private final ProofStatus proofStatus;
+  private final ListProofStatus proofStatus;
 
   /**
    * Creates checked list proof.
@@ -41,7 +40,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
    * @param proofStatus a status of proof verification
    */
   CheckedListProofImpl(HashCode calculatedRootHash,
-      NavigableMap<Long, E> elements, ProofStatus proofStatus) {
+      NavigableMap<Long, E> elements, ListProofStatus proofStatus) {
     this.calculatedRootHash = checkNotNull(calculatedRootHash);
     this.elements = checkNotNull(elements);
     this.proofStatus = checkNotNull(proofStatus);
@@ -60,8 +59,13 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
   }
 
   @Override
-  public ProofStatus getStatus() {
+  public ListProofStatus getProofStatus() {
     return proofStatus;
+  }
+
+  @Override
+  public boolean isValid() {
+    return proofStatus == ListProofStatus.VALID;
   }
 
   private void checkValid() {

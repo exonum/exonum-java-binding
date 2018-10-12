@@ -16,13 +16,14 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static com.exonum.binding.common.proofs.list.ListProofUtils.generateRightLeaningProofTree;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -219,27 +220,5 @@ class ListProofStructureValidatorTest {
 
   private ListProofStructureValidator createListProofStructureValidator(ListProofNode listProof) {
     return new ListProofStructureValidator(listProof);
-  }
-
-  private static ListProofElement leafOf(String element) {
-    byte[] dbElement = bytesOf(element);
-    return new ListProofElement(dbElement);
-  }
-
-  private static byte[] bytesOf(String element) {
-    return StandardSerializers.string().toBytes(element);
-  }
-
-  private ListProofNode generateRightLeaningProofTree(int depth, ListProofNode leafNode) {
-    ListProofNode root = null;
-    ListProofNode left = leafNode;
-    int d = depth;
-    while (d != 0) {
-      ListProofNode right = new ListProofHashNode(H1);
-      root = new ListProofBranch(left, right);
-      left = root;
-      d--;
-    }
-    return root;
   }
 }

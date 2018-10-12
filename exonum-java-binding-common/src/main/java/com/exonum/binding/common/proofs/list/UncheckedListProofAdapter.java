@@ -17,7 +17,6 @@
 package com.exonum.binding.common.proofs.list;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.common.ProofStatus;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.common.base.Preconditions;
 
@@ -31,7 +30,7 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
   private final ListProofRootHashCalculator<E> listProofRootHashCalculator;
 
   /**
-   * Creates UncheckedListProofAdapter for convenient usage of LispProof interfaces.
+   * Creates UncheckedListProofAdapter for convenient usage of ListProof interfaces.
    *
    * <p>UncheckedListProofAdapter check() method will return CheckedListProof containing results of
    * list proof verification.
@@ -49,7 +48,7 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
   @Override
   public CheckedListProof check() {
-    ProofStatus structureCheckStatus = listProofStructureValidator.getProofStatus();
+    ListProofStatus structureCheckStatus = listProofStructureValidator.getProofStatus();
     HashCode calculatedRootHash = listProofRootHashCalculator.getCalculatedRootHash();
 
     return new CheckedListProofImpl<>(
