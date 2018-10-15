@@ -22,10 +22,7 @@ import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hamcrest.Description;
@@ -42,21 +39,10 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   private final Matcher<Set<ByteString>> missingKeysMatcher;
   private final Matcher<Set<MapEntry>> presentEntriesMatcher;
 
-  private CheckedMapProofMatcher(List<MapTestEntry> entries)
-  {
+  private CheckedMapProofMatcher(List<MapTestEntry> entries) {
     this.entries = entries;
-    Set<MapEntry> expectedEntries = entries.stream()
-        .filter(e -> e.getValue().isPresent())
-        // TODO: refactor
-        .map(e ->
-            new MapEntry(ByteString.copyFrom(e.getKey().asBytes()),
-                ByteString.copyFromUtf8(e.getValue().get())))
-        .collect(Collectors.toSet());
-    Set<ByteString> expectedMissingKeys = entries.stream()
-        .filter(e -> !e.getValue().isPresent())
-        // TODO: refactor
-        .map(e -> ByteString.copyFrom(e.getKey().asBytes()))
-        .collect(Collectors.toSet());
+    Set<MapEntry> expectedEntries = getExpectedEntries();
+    Set<ByteString> expectedMissingKeys = getExpectedMissingKeys();
     this.presentEntriesMatcher = IsEqual.equalTo(expectedEntries);
     this.missingKeysMatcher = IsEqual.equalTo(expectedMissingKeys);
   }
@@ -92,9 +78,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .collect(Collectors.joining(", ", "[", "]"));
 
       String missingKeys = proof.getMissingKeys().stream()
-          // TODO: refactor
-          .map(ByteString::toByteArray)
-          .map(HEX_ENCODING::encode)
+          .map(CheckedMapProofMatcher::hexEncodeByteString)
           .collect(Collectors.joining(", ", "[", "]"));
 
       description.appendText("a valid proof, entries=").appendText(entries)
@@ -106,10 +90,22 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     }
   }
 
+  private Set<MapEntry> getExpectedEntries() {
+    return entries.stream()
+        .filter(e -> e.getValue().isPresent())
+        .map(e -> new MapEntry(e.getKey().asBytes(), e.getValue().get().getBytes()))
+        .collect(Collectors.toSet());
+  }
+
+  private Set<ByteString> getExpectedMissingKeys() {
+    return entries.stream()
+        .filter(e -> !e.getValue().isPresent())
+        .map(e -> ByteString.copyFrom(e.getKey().asBytes()))
+        .collect(Collectors.toSet());
+  }
+
   private static String formatMapEntry(MapEntry e) {
-    // TODO: refactor
-    String key = HEX_ENCODING.encode(e.getKey().toByteArray());
-    // TODO: refactor
+    String key = hexEncodeByteString(e.getKey());
     String value = StandardSerializers.string().fromBytes(e.getValue().toByteArray());
     return String.format("(%s -> %s)", key, value);
   }
@@ -119,6 +115,10 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     return e.getValue()
         .map(value -> String.format("(%s -> %s)", key, value))
         .orElse(key);
+  }
+
+  private static String hexEncodeByteString(ByteString byteString) {
+    return HEX_ENCODING.encode(byteString.toByteArray());
   }
 
   /**

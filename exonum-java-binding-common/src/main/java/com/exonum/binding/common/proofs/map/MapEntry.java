@@ -32,12 +32,10 @@ public class MapEntry {
    * @param value a value mapped to the key
    */
   public MapEntry(byte[] key, byte[] value) {
-    // TODO: maybe use ByteString in constructor
     this.key = ByteString.copyFrom(key);
     this.value = ByteString.copyFrom(value);
   }
 
-  // TODO: probably remove one constructor
   /**
    * Creates a new entry in a flat map proof corresponding to a leaf node.
    * @param key a node key

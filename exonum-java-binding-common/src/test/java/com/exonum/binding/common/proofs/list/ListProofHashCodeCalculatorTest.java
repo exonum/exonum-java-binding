@@ -26,6 +26,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.google.protobuf.ByteString;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -173,11 +174,7 @@ class ListProofHashCodeCalculatorTest {
   }
 
   private static ListProofElement leafOf(String element) {
-    byte[] dbElement = bytesOf(element);
+    ByteString dbElement = ByteString.copyFromUtf8(element);
     return new ListProofElement(dbElement);
-  }
-
-  private static byte[] bytesOf(String element) {
-    return StandardSerializers.string().toBytes(element);
   }
 }

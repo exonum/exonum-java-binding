@@ -93,7 +93,6 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
         "Error: already an element by such index in the map: i=" + index
             + ", e=" + elements.get(index);
 
-    // TODO: refactor
     E element = serializer.fromBytes(value.getElement().toByteArray());
     elements.put(index, element);
     calculatedRootHash = hashFunction.hashObject(value, ListProofElement.funnel());

@@ -16,6 +16,8 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.google.protobuf.ByteString;
@@ -33,10 +35,8 @@ public final class ListProofElement implements ListProof {
    * @param element an element of the list
    * @throws NullPointerException if the element is null
    */
-  // TODO: maybe use ByteString
-  public ListProofElement(byte[] element) {
-    // TODO: will the NPE be thrown?
-    this.element = ByteString.copyFrom(element);
+  ListProofElement(ByteString element) {
+    this.element = checkNotNull(element);
   }
 
   @Override
@@ -48,7 +48,7 @@ public final class ListProofElement implements ListProof {
    * Returns the value of the element.
    */
   public ByteString getElement() {
-    return ByteString.copyFrom(element.toByteArray());
+    return element;
   }
 
   public static Funnel<ListProofElement> funnel() {
@@ -59,6 +59,7 @@ public final class ListProofElement implements ListProof {
     INSTANCE {
       @Override
       public void funnel(ListProofElement from, PrimitiveSink into) {
+        // TODO: implement putByteString?
         into.putBytes(from.element.toByteArray());
       }
     }

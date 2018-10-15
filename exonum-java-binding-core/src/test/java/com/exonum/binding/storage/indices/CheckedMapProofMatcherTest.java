@@ -61,7 +61,7 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
     MapEntry entry =
-        new MapEntry(TEST_KEY1.asBytes(), StandardSerializers.string().toBytes(TEST_VALUE));
+        new MapEntry(hashcodeToByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
@@ -80,8 +80,8 @@ public class CheckedMapProofMatcherTest {
         Arrays.asList(presentEntry(presentKey, expectedValue), absentEntry(absentKey));
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
-    byte[] actualValue = StandardSerializers.string().toBytes("hello");
-    MapEntry entry = new MapEntry(presentKey.asBytes(), actualValue);
+    ByteString actualValue = ByteString.copyFromUtf8("hello");
+    MapEntry entry = new MapEntry(hashcodeToByteString(presentKey), actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
@@ -109,7 +109,6 @@ public class CheckedMapProofMatcherTest {
         + MapProofStatus.DUPLICATE_PATH + ">"));
   }
 
-  // TODO: look into that
   private ByteString hashcodeToByteString(HashCode hashCode) {
     return ByteString.copyFrom(hashCode.asBytes());
   }
