@@ -29,6 +29,19 @@ public final class ListProofElement implements ListProof {
 
   private final ByteString element;
 
+
+  /**
+   * Creates a new ListProofElement.
+   *
+   * @param element an element of the list
+   * @throws NullPointerException if the element is null
+   */
+  // TODO: create ByteString in native
+  @SuppressWarnings("unused")  // Native API
+  ListProofElement(byte[] element) {
+    this.element = ByteString.copyFrom(element);
+  }
+
   /**
    * Creates a new ListProofElement.
    *
