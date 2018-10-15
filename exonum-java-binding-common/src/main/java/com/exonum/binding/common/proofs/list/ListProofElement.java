@@ -59,7 +59,6 @@ public final class ListProofElement implements ListProof {
     INSTANCE {
       @Override
       public void funnel(ListProofElement from, PrimitiveSink into) {
-        // TODO: implement putByteString?
         into.putBytes(from.element.toByteArray());
       }
     }
