@@ -27,7 +27,6 @@ import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.MapProofStatus;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.Collections;
