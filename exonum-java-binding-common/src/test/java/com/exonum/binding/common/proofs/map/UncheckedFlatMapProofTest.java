@@ -19,6 +19,7 @@ package com.exonum.binding.common.proofs.map;
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,7 +62,7 @@ class UncheckedFlatMapProofTest {
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     MapEntry expectedEntry = new MapEntry(valueKey, FIRST_VALUE);
-    assertThat(checkedMapProof.getEntries(), equalTo(singletonList(expectedEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(singleton(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(valueKey));
     assertThat(checkedMapProof.get(valueKey), equalTo(FIRST_VALUE));
   }
@@ -132,7 +133,7 @@ class UncheckedFlatMapProofTest {
     assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
     assertTrue(checkedMapProof.compareWithRootHash(expectedRootHash));
 
-    assertThat(checkedMapProof.getEntries(), equalTo(singletonList(mapEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(singleton(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));
     assertThat(checkedMapProof.get(key), equalTo(value));
   }
