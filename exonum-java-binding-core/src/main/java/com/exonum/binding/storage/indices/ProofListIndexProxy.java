@@ -23,6 +23,8 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkPosit
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.list.ListProofNode;
+import com.exonum.binding.common.proofs.list.UncheckedListProof;
+import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -155,9 +157,11 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @throws IndexOutOfBoundsException if the index is invalid
    * @throws IllegalStateException if this list is not valid
    */
-  public ListProofNode getProof(long index) {
+  public UncheckedListProof getProof(long index) {
     checkElementIndex(index, size());
-    return nativeGetProof(getNativeHandle(), index);
+
+    ListProofNode listProofNode = nativeGetProof(getNativeHandle(), index);
+    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
   }
 
   private native ListProofNode nativeGetProof(long nativeHandle, long index);
@@ -170,10 +174,13 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @throws IndexOutOfBoundsException if the range is not valid
    * @throws IllegalStateException if this list is not valid
    */
-  public ListProofNode getRangeProof(long from, long to) {
+  public UncheckedListProof getRangeProof(long from, long to) {
     long size = size();
-    return nativeGetRangeProof(getNativeHandle(), checkElementIndex(from, size),
+    ListProofNode listProofNode = nativeGetRangeProof(getNativeHandle(),
+        checkElementIndex(from, size),
         checkPositionIndex(to, size));
+
+    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
   }
 
   private native ListProofNode nativeGetRangeProof(long nativeHandle, long from, long to);

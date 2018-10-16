@@ -21,9 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.CheckedListProof;
-import com.exonum.binding.common.proofs.list.ListProofNode;
-import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.proofs.list.UncheckedListProof;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +33,11 @@ import org.hamcrest.TypeSafeMatcher;
 
 class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<String>> {
 
-  private final Function<ProofListIndexProxy<String>, ListProofNode> proofFunction;
+  private final Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction;
   private final Matcher<Map<Long, String>> elementsMatcher;
 
   private ProofListContainsMatcher(Function<ProofListIndexProxy<String>,
-                                   ListProofNode> proofFunction,
+                                   UncheckedListProof> proofFunction,
                                    Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
     this.elementsMatcher = equalTo(expectedProofElements);
@@ -51,9 +49,8 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       return false;
     }
 
-    ListProofNode proof = proofFunction.apply(list);
-
-    CheckedListProof checkedProof = newCheckedListProof(proof);
+    UncheckedListProof proof = proofFunction.apply(list);
+    CheckedListProof checkedProof = proof.check();
 
     return checkedProof.isValid()
         && elementsMatcher.matches(checkedProof.getElements())
@@ -69,9 +66,8 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   @Override
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
-    ListProofNode proof = proofFunction.apply(list);
-
-    CheckedListProof checkedProof = newCheckedListProof(proof);
+    UncheckedListProof proof = proofFunction.apply(list);
+    CheckedListProof checkedProof = proof.check();
 
     if (!checkedProof.isValid()) {
       mismatchDescription.appendText("proof was not valid: ")
@@ -94,10 +90,6 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
   }
 
-  private CheckedListProof newCheckedListProof(ListProofNode listProof) {
-    return new UncheckedListProofAdapter<>(listProof, StandardSerializers.string()).check();
-  }
-
   /**
    * Creates a matcher for a proof list that will match iff the list contains the specified value
    * at the specified position and provides a <em>valid</em> cryptographic proof of that.
@@ -111,7 +103,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy<String>, ListProofNode> proofFunction =
+    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
         (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction,
@@ -136,7 +128,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
     long to = from + expectedValues.size();
-    Function<ProofListIndexProxy<String>, ListProofNode> proofFunction =
+    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
         (list) -> list.getRangeProof(from, to);
 
     Map<Long, String> expectedProofElements = new TreeMap<>();
