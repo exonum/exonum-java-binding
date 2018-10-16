@@ -26,6 +26,7 @@ if (typeof explorerRoot === 'undefined') {
 app.use(express.static(__dirname + '/'))
 
 // Activate proxy
+app.use('/api/explorer', proxy({ target: explorerRoot, changeOrigin: true }))
 app.use('/api', proxy({ target: apiRoot, changeOrigin: true }))
 
 // Single Page Application entry point

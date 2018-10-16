@@ -18,7 +18,7 @@ TransferTransactionProtobuf.add(new Field('recipientId', 3, 'bytes'))
 TransferTransactionProtobuf.add(new Field('amount', 4, 'int64'))
 
 // add types to protobuf root
-var root = new Root()
+const root = new Root()
 root.define('CreateTransactionProtobuf').add(CreateTransactionProtobuf)
 root.define('TransferTransactionProtobuf').add(TransferTransactionProtobuf)
 
@@ -30,7 +30,7 @@ const SERVICE_ID = 42
 const TX_TRANSFER_ID = 2
 const TX_WALLET_ID = 1
 const SIGNATURE_LENGTH = 64
-const PAYLOD_SIZE_OFFSET = 6
+const PAYLOAD_SIZE_OFFSET = 6
 const PER_PAGE = 10
 const MAX_VALUE = 2147483647
 
@@ -86,11 +86,24 @@ function createHeader (messageId) {
   })
 }
 
-const appendBuffer = function (buffer1, buffer2) {
+const appendBuffer = (buffer1, buffer2) => {
   const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength)
   tmp.set(new Uint8Array(buffer1), 0)
   tmp.set(new Uint8Array(buffer2), buffer1.byteLength)
   return tmp
+}
+
+const buildMessage = (header, body, keyPair) => {
+  const unsignedMessage = appendBuffer(new Uint8Array(header), body)
+
+  // calculate payload and insert it into buffer
+  Exonum.Uint32.serialize(unsignedMessage.length + SIGNATURE_LENGTH, unsignedMessage, PAYLOAD_SIZE_OFFSET)
+
+  // calculate signature
+  const signature = Exonum.sign(keyPair.secretKey, unsignedMessage)
+
+  // append signature to the message
+  return appendBuffer(unsignedMessage, Exonum.hexadecimalToUint8Array(signature))
 }
 
 module.exports = {
@@ -106,49 +119,32 @@ module.exports = {
 
       createWallet (keyPair, balance) {
         // serialize and append message header
-        let buffer = createHeader(TX_WALLET_ID)
-        let data = {
+        const header = createHeader(TX_WALLET_ID)
+
+        // serialize and append message body
+        const data = {
           ownerPublicKey: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
           initialBalance: balance
         }
-
-        // serialize and append message body
         const body = CreateTransactionProtobuf.encode(data).finish()
-        const bufferWithBody = appendBuffer(new Uint8Array(buffer), body)
 
-        // calculate payload and insert it into buffer
-        Exonum.Uint32.serialize(bufferWithBody.length + SIGNATURE_LENGTH, bufferWithBody, PAYLOD_SIZE_OFFSET)
-
-        // append signature
-        const signature = Exonum.sign(keyPair.secretKey, bufferWithBody)
-        const signBuffer = appendBuffer(bufferWithBody, Exonum.hexadecimalToUint8Array(signature))
-
-        return axios.post(TX_URL, signBuffer)
+        return axios.post(TX_URL, buildMessage(header, body, keyPair))
       },
 
       transfer (keyPair, receiver, amountToTransfer, seed) {
         // serialize and append message header
-        let buffer = createHeader(TX_TRANSFER_ID)
+        const header = createHeader(TX_TRANSFER_ID)
 
+        // serialize and append message body
         const data = {
           seed: seed,
           senderId: Exonum.hexadecimalToUint8Array(keyPair.publicKey),
           recipientId: Exonum.hexadecimalToUint8Array(receiver),
           amount: amountToTransfer
         }
-
-        // serialize and append message body
         const body = TransferTransactionProtobuf.encode(data).finish()
-        const bufferWithBody = appendBuffer(new Uint8Array(buffer), body)
 
-        // calculate payload and insert it into buffer
-        Exonum.Uint32.serialize(bufferWithBody.length + SIGNATURE_LENGTH, bufferWithBody, PAYLOD_SIZE_OFFSET)
-
-        // append signature
-        const signature = Exonum.sign(keyPair.secretKey, bufferWithBody)
-        const signBuffer = appendBuffer(bufferWithBody, Exonum.hexadecimalToUint8Array(signature))
-
-        return axios.post(TX_URL, signBuffer)
+        return axios.post(TX_URL, buildMessage(header, body, keyPair))
           .then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
