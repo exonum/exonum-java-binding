@@ -150,7 +150,6 @@ class ListProofHashCodeCalculatorTest {
     assertEquals(expectedRootHash, calculator.getCalculatedRootHash());
   }
 
-
   private ListProofRootHashCalculator<String> createListProofCalculator(ListProofNode listProof) {
     return new ListProofRootHashCalculator<>(listProof, StandardSerializers.string());
   }

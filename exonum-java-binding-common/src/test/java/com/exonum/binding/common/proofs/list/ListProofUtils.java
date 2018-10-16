@@ -67,7 +67,6 @@ final class ListProofUtils {
     return root;
   }
 
-
   static HashCode getNodeHashCode(String v1) {
     return Hashing.defaultHashFunction().newHasher()
         .putString(v1, StandardCharsets.UTF_8)

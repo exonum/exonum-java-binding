@@ -114,7 +114,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
   /**
    * Returns a collection of list entries: index-element pairs, ordered by indices.
    */
-  public NavigableMap<Long, E> getElements() {
+  NavigableMap<Long, E> getElements() {
     return elements;
   }
 
@@ -123,7 +123,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @return hash code
    */
-  public HashCode getCalculatedRootHash() {
+  HashCode getCalculatedRootHash() {
     return calculatedRootHash;
   }
 

@@ -17,9 +17,13 @@
 package com.exonum.binding.common.proofs.common;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.list.CheckedListProof;
+import com.exonum.binding.common.proofs.map.CheckedMapProof;
 
 /**
- * Common interface for CheckedProof operations.
+ * A checked proof is a result of proof verification operation.
+ * If it is valid, the proof contents may be accessed. See {@link CheckedListProof}
+ * and {@link CheckedMapProof} for available contents description.
  */
 public interface CheckedProof {
 
@@ -36,7 +40,8 @@ public interface CheckedProof {
   HashCode getRootHash();
 
   /**
-   * Returns true if List Proof status is VALID {@link ProofStatus}, false otherwise.
+   * Returns true if Proof status is valid {@link ProofStatus}, false otherwise.
+   * Details about Proof validity could be obtained through {@link #getProofStatus()}.
    */
   boolean isValid();
 }

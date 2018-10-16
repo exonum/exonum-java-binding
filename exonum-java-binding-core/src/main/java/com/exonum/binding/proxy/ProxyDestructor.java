@@ -112,8 +112,6 @@ public final class ProxyDestructor implements CleanAction<Class<?>> {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("nativeHandle", nativeHandle)
-        .add("cleanFunction", cleanFunction)
         .add("proxyClass", proxyClass)
         .add("destroyed", destroyed)
         .toString();

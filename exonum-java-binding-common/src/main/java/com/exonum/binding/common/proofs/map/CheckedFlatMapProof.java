@@ -132,7 +132,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkValid() {
-    checkState(status == MapProofStatus.CORRECT, "Proof is not valid: %s", status);
+    checkState(isValid(), "Proof is not valid: %s", status);
   }
 
   private void checkThatKeyIsRequested(byte[] key) {
