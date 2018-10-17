@@ -25,7 +25,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
-import com.exonum.binding.cryptocurrency.transactions.JsonBinaryMessageConverter;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
@@ -35,6 +34,7 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -59,13 +59,10 @@ final class ApiController {
   private static final String GET_WALLET_HISTORY_PATH = "/wallet/:" + WALLET_ID_PARAM + "/history";
 
   private final CryptocurrencyService service;
-  private final JsonBinaryMessageConverter jsonBinaryMessageConverter;
 
   @Inject
-  ApiController(CryptocurrencyService service,
-      JsonBinaryMessageConverter jsonBinaryMessageConverter) {
+  ApiController(CryptocurrencyService service) {
     this.service = service;
-    this.jsonBinaryMessageConverter = jsonBinaryMessageConverter;
   }
 
   void mountApi(Router router) {
@@ -86,9 +83,8 @@ final class ApiController {
   }
 
   private void submitTransaction(RoutingContext rc) {
-    // Convert the message in JSON to a binary transaction message.
-    String messageJson = rc.getBodyAsString();
-    BinaryMessage message = jsonBinaryMessageConverter.toMessage(messageJson);
+    Buffer buffer = rc.getBody();
+    BinaryMessage message = BinaryMessage.fromBytes(buffer.getBytes());
 
     // Create a transaction for the given binary message.
     Transaction tx = service.convertToTransaction(message);
