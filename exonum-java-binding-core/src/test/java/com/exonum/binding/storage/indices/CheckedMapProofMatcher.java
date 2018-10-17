@@ -16,6 +16,8 @@
 
 package com.exonum.binding.storage.indices;
 
+import static java.util.stream.Collectors.toSet;
+
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.MapProofStatus;
@@ -97,14 +99,14 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     return entries.stream()
         .filter(e -> e.getValue().isPresent())
         .map(e -> new MapEntry(e.getKey().asBytes(), e.getValue().get().getBytes()))
-        .collect(Collectors.toSet());
+        .collect(toSet());
   }
 
   private Set<ByteString> getExpectedMissingKeys() {
     return entries.stream()
         .filter(e -> !e.getValue().isPresent())
         .map(e -> ByteString.copyFrom(e.getKey().asBytes()))
-        .collect(Collectors.toSet());
+        .collect(toSet());
   }
 
   private static String formatMapEntry(MapEntry e) {

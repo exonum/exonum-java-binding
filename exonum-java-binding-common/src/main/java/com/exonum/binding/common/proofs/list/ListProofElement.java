@@ -29,7 +29,6 @@ public final class ListProofElement implements ListProof {
 
   private final ByteString element;
 
-
   /**
    * Creates a new ListProofElement.
    *

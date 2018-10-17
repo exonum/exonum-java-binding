@@ -16,16 +16,17 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 class MapEntryTest {
 
-  // TODO: this test fails
   @Test
   void verifyEquals() {
-    EqualsVerifier
-        .forClass(MapEntry.class)
+    EqualsVerifier.forClass(MapEntry.class)
+        .withPrefabValues(
+            ByteString.class, ByteString.copyFromUtf8("a"), ByteString.copyFromUtf8("b"))
         .verify();
   }
 

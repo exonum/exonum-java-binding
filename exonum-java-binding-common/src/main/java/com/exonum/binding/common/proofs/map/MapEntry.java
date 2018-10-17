@@ -22,7 +22,7 @@ import java.util.Objects;
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
  */
-public class MapEntry {
+public final class MapEntry {
   private final ByteString key;
 
   private final ByteString value;
@@ -66,7 +66,7 @@ public class MapEntry {
       return false;
     }
     MapEntry that = (MapEntry) o;
-    return key.equals(that.key) && value.equals(that.value);
+    return Objects.equals(key, that.key) && Objects.equals(value, that.value);
   }
 
   @Override
