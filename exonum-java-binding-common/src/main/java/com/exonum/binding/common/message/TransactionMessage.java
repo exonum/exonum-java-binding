@@ -40,7 +40,6 @@ public interface TransactionMessage {
 
   int AUTHOR_PUBLIC_KEY_SIZE = 32;
   int SIGNATURE_SIZE = 64;
-  int MAX_PAYLOAD_SIZE = Integer.MAX_VALUE - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
 
   /**
    * Returns a public key of the Transaction Message's author.
@@ -88,16 +87,14 @@ public interface TransactionMessage {
    * Creates Transaction Message from the given bytes array.
    */
   static TransactionMessage fromBytes(byte[] bytes) {
-    // TODO: will be implemented in the next PR. ECR-2377
-    throw new UnsupportedOperationException("Not Implemented yet");
+    return BinaryTransactionMessage.fromBuffer(ByteBuffer.wrap(bytes));
   }
 
   /**
    * Creates Transaction Message from the given bytes buffer.
    */
   static TransactionMessage fromBuffer(ByteBuffer buffer) {
-    // TODO: will be implemented in the next PR. ECR-2377
-    throw new UnsupportedOperationException("Not Implemented yet");
+    return BinaryTransactionMessage.fromBuffer(buffer);
   }
 
   /**
@@ -119,13 +116,10 @@ public interface TransactionMessage {
     }
 
     public Builder payload(byte[] payload) {
-      checkNotNull(payload);
       return payload(ByteBuffer.wrap(payload));
     }
 
     public Builder payload(ByteBuffer payload) {
-      checkNotNull(payload);
-      checkArgument(payload.limit() <= MAX_PAYLOAD_SIZE);
       this.payload = payload.duplicate().order(ByteOrder.LITTLE_ENDIAN);
       return this;
     }
@@ -146,12 +140,13 @@ public interface TransactionMessage {
       buffer.putShort(transactionId);
       buffer.put(payload);
 
-      byte[] unsignedMessage = new byte[buffer.position()];
+      buffer.position(0);
+      byte[] unsignedMessage = new byte[PAYLOAD_OFFSET + payload.limit()];
       buffer.get(unsignedMessage);
       byte[] signature = crypto.signMessage(unsignedMessage, keys.getPrivateKey());
       buffer.put(signature);
 
-      return new BinaryTransactionMessage(buffer, payload.limit());
+      return new BinaryTransactionMessage(buffer);
     }
 
     private Builder() {

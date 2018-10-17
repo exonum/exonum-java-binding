@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `fixed64`, `uint64`, `sint64`, `float` and `double` primitive types, 
   `PrivateKey`, `PublicKey` and `bytes` serialization. (#514, #523)
 - Multiproofs support in `ProofMapIndexProxy`. (#507)
+- Transaction Message support. (#534)
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 

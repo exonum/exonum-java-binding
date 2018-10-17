@@ -21,19 +21,19 @@ import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
  * Binary implementation of the {@link TransactionMessage} class.
  */
-public class BinaryTransactionMessage implements TransactionMessage {
+public final class BinaryTransactionMessage implements TransactionMessage {
   private final ByteBuffer rawTransaction;
-  private final int payloadSize;
 
-  BinaryTransactionMessage(ByteBuffer rawTransaction, int payloadSize) {
+  BinaryTransactionMessage(ByteBuffer rawTransaction) {
     this.rawTransaction = rawTransaction.duplicate().order(ByteOrder.LITTLE_ENDIAN);
-    this.payloadSize = payloadSize;
+    this.rawTransaction.position(0);
   }
 
   @Override
@@ -55,6 +55,7 @@ public class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] getPayload() {
+    int payloadSize = rawTransaction.limit() - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
     byte[] payload = new byte[payloadSize];
     rawTransaction.get(payload, PAYLOAD_OFFSET, payloadSize);
     return payload;
@@ -68,6 +69,7 @@ public class BinaryTransactionMessage implements TransactionMessage {
   @Override
   public byte[] getSignature() {
     byte[] signature = new byte[SIGNATURE_SIZE];
+    int payloadSize = rawTransaction.limit() - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
     int offset = PAYLOAD_OFFSET + payloadSize;
     rawTransaction.get(signature, offset, SIGNATURE_SIZE);
     return signature;
@@ -78,4 +80,24 @@ public class BinaryTransactionMessage implements TransactionMessage {
     return rawTransaction.duplicate().array();
   }
 
+  public static BinaryTransactionMessage fromBuffer(ByteBuffer buffer) {
+    return new BinaryTransactionMessage(buffer);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    BinaryTransactionMessage that = (BinaryTransactionMessage) o;
+    return Objects.equal(rawTransaction, that.rawTransaction);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(rawTransaction);
+  }
 }
