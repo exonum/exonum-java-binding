@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Move `proofs` package to `com.exonum.binding.common` package. (#469)
   - Move `serialization` package to `com.exonum.binding.common` package. (#469)
 - Replace tree proof with flat proof in `ProofMapIndexProxy`. (#478)
+- Use `ByteString` instead of `byte[]` in `CheckedMapProof` interface. (#532)
 
 ### Removed
 - `Hashing#toHexString`. (#379)
