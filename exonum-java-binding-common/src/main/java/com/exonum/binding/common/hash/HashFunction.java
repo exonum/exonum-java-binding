@@ -179,7 +179,7 @@ public interface HashFunction {
   HashCode hashBytes(byte[] input);
 
   /**
-   * Shortcut for {@code newHasher().putBytes(input.toByteArray).hash()}. The implementation
+   * Shortcut for {@code newHasher().putBytes(input.toByteArray()).hash()}. The implementation
    * <i>might</i> perform better than its longhand equivalent, but should not perform worse.
    */
   HashCode hashByteString(ByteString input);

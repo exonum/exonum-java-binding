@@ -36,7 +36,6 @@ public final class ListProofElement implements ListProof {
    * @param element an element of the list
    * @throws NullPointerException if the element is null
    */
-  // TODO: create ByteString in native
   @SuppressWarnings("unused")  // Native API
   ListProofElement(byte[] element) {
     this.element = ByteString.copyFrom(element);
@@ -48,7 +47,7 @@ public final class ListProofElement implements ListProof {
    * @param element an element of the list
    * @throws NullPointerException if the element is null
    */
-  ListProofElement(ByteString element) {
+  public ListProofElement(ByteString element) {
     this.element = checkNotNull(element);
   }
 

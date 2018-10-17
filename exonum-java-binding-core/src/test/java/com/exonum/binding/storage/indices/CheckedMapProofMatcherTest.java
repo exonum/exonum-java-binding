@@ -60,12 +60,12 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
     MapEntry entry =
-        new MapEntry(hashcodeToByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
+        new MapEntry(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
         Collections.singleton(entry),
-        Collections.singleton(hashcodeToByteString(TEST_KEY2)));
+        Collections.singleton(toByteString(TEST_KEY2)));
 
     assertThat(proof, matcher);
   }
@@ -80,12 +80,12 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
     ByteString actualValue = ByteString.copyFromUtf8("hello");
-    MapEntry entry = new MapEntry(hashcodeToByteString(presentKey), actualValue);
+    MapEntry entry = new MapEntry(toByteString(presentKey), actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
         Collections.singleton(entry),
-        Collections.singleton(hashcodeToByteString(absentKey)));
+        Collections.singleton(toByteString(absentKey)));
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
@@ -108,7 +108,7 @@ public class CheckedMapProofMatcherTest {
         + MapProofStatus.DUPLICATE_PATH + ">"));
   }
 
-  private ByteString hashcodeToByteString(HashCode hashCode) {
+  private static ByteString toByteString(HashCode hashCode) {
     return ByteString.copyFrom(hashCode.asBytes());
   }
 }

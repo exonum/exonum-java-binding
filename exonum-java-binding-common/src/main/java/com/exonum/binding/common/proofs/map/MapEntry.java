@@ -17,6 +17,7 @@
 package com.exonum.binding.common.proofs.map;
 
 import com.google.protobuf.ByteString;
+import java.util.Objects;
 
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
@@ -70,6 +71,6 @@ public class MapEntry {
 
   @Override
   public int hashCode() {
-    return key.hashCode() ^ value.hashCode();
+    return Objects.hash(key, value);
   }
 }

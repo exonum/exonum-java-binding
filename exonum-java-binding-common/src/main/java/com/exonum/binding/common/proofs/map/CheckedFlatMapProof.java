@@ -23,15 +23,16 @@ import static java.util.Collections.emptySet;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.protobuf.ByteString;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * A checked flat map proof, which does not include any intermediate nodes.
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private final Set<MapEntry> entries;
+  private final Map<ByteString, ByteString> entries;
 
   private final Set<ByteString> missingKeys;
 
@@ -46,7 +47,9 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       Set<ByteString> missingKeys) {
     this.status = checkNotNull(status);
     this.rootHash = checkNotNull(rootHash);
-    this.entries = checkNotNull(entries);
+    // TODO: checkNotNull(entries). Move to another method?
+    this.entries = entries.stream()
+        .collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
     this.missingKeys = checkNotNull(missingKeys);
   }
 
@@ -81,7 +84,10 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   @Override
   public Set<MapEntry> getEntries() {
     checkValid();
-    return entries;
+    return entries.entrySet()
+        .stream()
+        .map(e -> new MapEntry(e.getKey(), e.getValue()))
+        .collect(Collectors.toSet());
   }
 
   @Override
@@ -94,7 +100,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public boolean containsKey(ByteString key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    return entries.stream().anyMatch(entry -> entry.getKey().equals(key));
+    return entries.containsKey(key);
   }
 
   @Override
@@ -107,12 +113,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public ByteString get(ByteString key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    return entries
-        .stream()
-        .filter(entry -> entry.getKey().equals(key))
-        .map(MapEntry::getValue)
-        .findFirst()
-        .orElse(null);
+    return entries.get(key);
   }
 
   @Override
@@ -131,12 +132,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkThatKeyIsRequested(ByteString key) {
-    Stream.concat(
-        entries.stream().map(MapEntry::getKey),
-        missingKeys.stream())
-        .filter(entryKey -> entryKey.equals(key))
-        .findFirst()
-        .orElseThrow(
-            () -> new IllegalArgumentException("Key that wasn't among requested keys was checked"));
+    checkArgument(entries.containsKey(key) || missingKeys.contains(key),
+        "Key that wasn't among requested keys was checked");
   }
 }
