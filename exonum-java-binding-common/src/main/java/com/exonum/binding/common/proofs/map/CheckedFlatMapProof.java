@@ -27,7 +27,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.google.protobuf.ByteString;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A checked flat map proof, which does not include any intermediate nodes.
