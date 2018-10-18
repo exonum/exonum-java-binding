@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,11 +25,12 @@ import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
+import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.Test;
 
 class ListProofElementTest {
 
-  private static final byte[] E1 = bytes("element 1");
+  private static final ByteString E1 = ByteString.copyFromUtf8("element 1");
 
   private ListProofElement node;
 
@@ -51,6 +51,6 @@ class ListProofElementTest {
     PrimitiveSink sink = mock(PrimitiveSink.class);
     funnel.funnel(node, sink);
 
-    verify(sink).putBytes(eq(E1));
+    verify(sink).putBytes(eq(E1.toByteArray()));
   }
 }

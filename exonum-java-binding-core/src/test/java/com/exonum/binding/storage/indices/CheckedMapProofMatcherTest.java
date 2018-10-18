@@ -27,7 +27,7 @@ import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.MapProofStatus;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -60,12 +60,12 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
     MapEntry entry =
-        new MapEntry(TEST_KEY1.asBytes(), StandardSerializers.string().toBytes(TEST_VALUE));
+        new MapEntry(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
-        Collections.singletonList(entry),
-        Collections.singletonList(TEST_KEY2.asBytes()));
+        Collections.singleton(entry),
+        Collections.singleton(toByteString(TEST_KEY2)));
 
     assertThat(proof, matcher);
   }
@@ -79,13 +79,13 @@ public class CheckedMapProofMatcherTest {
         Arrays.asList(presentEntry(presentKey, expectedValue), absentEntry(absentKey));
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
-    byte[] actualValue = StandardSerializers.string().toBytes("hello");
-    MapEntry entry = new MapEntry(presentKey.asBytes(), actualValue);
+    ByteString actualValue = ByteString.copyFromUtf8("hello");
+    MapEntry entry = new MapEntry(toByteString(presentKey), actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
-        Collections.singletonList(entry),
-        Collections.singletonList(absentKey.asBytes()));
+        Collections.singleton(entry),
+        Collections.singleton(toByteString(absentKey)));
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
@@ -106,5 +106,9 @@ public class CheckedMapProofMatcherTest {
     matcher.describeMismatchSafely(proof, d);
     assertThat(d.toString(), equalTo("was an invalid proof, status=<"
         + MapProofStatus.DUPLICATE_PATH + ">"));
+  }
+
+  private static ByteString toByteString(HashCode hashCode) {
+    return ByteString.copyFrom(hashCode.asBytes());
   }
 }

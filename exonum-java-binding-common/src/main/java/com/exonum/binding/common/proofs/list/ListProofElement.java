@@ -16,15 +16,18 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
+import com.google.protobuf.ByteString;
 
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
  */
 public final class ListProofElement implements ListProofNode {
 
-  private final byte[] element;
+  private final ByteString element;
 
   /**
    * Creates a new ListProofElement.
@@ -32,8 +35,19 @@ public final class ListProofElement implements ListProofNode {
    * @param element an element of the list
    * @throws NullPointerException if the element is null
    */
-  public ListProofElement(byte[] element) {
-    this.element = element.clone();
+  @SuppressWarnings("unused")  // Native API
+  ListProofElement(byte[] element) {
+    this.element = ByteString.copyFrom(element);
+  }
+
+  /**
+   * Creates a new ListProofElement.
+   *
+   * @param element an element of the list
+   * @throws NullPointerException if the element is null
+   */
+  public ListProofElement(ByteString element) {
+    this.element = checkNotNull(element);
   }
 
   @Override
@@ -44,8 +58,8 @@ public final class ListProofElement implements ListProofNode {
   /**
    * Returns the value of the element.
    */
-  public byte[] getElement() {
-    return element.clone();
+  public ByteString getElement() {
+    return element;
   }
 
   public static Funnel<ListProofElement> funnel() {
@@ -56,7 +70,7 @@ public final class ListProofElement implements ListProofNode {
     INSTANCE {
       @Override
       public void funnel(ListProofElement from, PrimitiveSink into) {
-        into.putBytes(from.element);
+        into.putBytes(from.element.toByteArray());
       }
     }
   }

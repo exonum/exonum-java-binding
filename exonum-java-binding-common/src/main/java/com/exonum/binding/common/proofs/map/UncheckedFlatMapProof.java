@@ -18,19 +18,23 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.proofs.map.DbKey.Type;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.ByteString;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -44,7 +48,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private final List<MapEntry> entries;
 
-  private final List<byte[]> missingKeys;
+  private final List<ByteString> missingKeys;
 
   UncheckedFlatMapProof(
       List<MapProofEntry> proof,
@@ -52,7 +56,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       List<byte[]> missingKeys) {
     this.proof = proof;
     this.entries = entries;
-    this.missingKeys = missingKeys;
+    this.missingKeys = missingKeys.stream()
+        .map(ByteString::copyFrom)
+        .collect(toList());
   }
 
   @SuppressWarnings("unused") // Native API
@@ -142,8 +148,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private CheckedMapProof checkEmptyProof() {
-    return CheckedFlatMapProof.correct(
-        getEmptyProofListHash(), Collections.emptyList(), missingKeys);
+    return CheckedFlatMapProof.correct(getEmptyProofListHash(), emptySet(), toSet(missingKeys));
   }
 
   private boolean isSingletonProof() {
@@ -159,13 +164,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         return CheckedFlatMapProof.invalid(MapProofStatus.NON_TERMINAL_NODE);
       } else {
         HashCode rootHash = getSingleEntryRootHash(entry);
-        return CheckedFlatMapProof.correct(rootHash, entries, missingKeys);
+        return CheckedFlatMapProof.correct(rootHash, toSet(entries), toSet(missingKeys));
       }
     } else {
       // The proof consists of a single leaf with a required key
       MapEntry entry = entries.get(0);
       HashCode rootHash = getSingleEntryRootHash(entry);
-      return CheckedFlatMapProof.correct(rootHash, entries, missingKeys);
+      return CheckedFlatMapProof.correct(rootHash, toSet(entries), toSet(missingKeys));
     }
   }
 
@@ -190,7 +195,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     while (contour.size() > 1) {
       lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
     }
-    return CheckedFlatMapProof.correct(contour.peek().getHash(), entries, missingKeys);
+    return CheckedFlatMapProof.correct(
+        contour.peek().getHash(), toSet(entries), toSet(missingKeys));
   }
 
   /**
@@ -246,7 +252,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static HashCode getSingleEntryRootHash(MapEntry entry) {
     DbKey dbKey = DbKey.newLeafKey(entry.getKey());
-    HashCode valueHash = HASH_FUNCTION.hashBytes(entry.getValue());
+    HashCode valueHash = HASH_FUNCTION.hashByteString(entry.getValue());
     return getSingleEntryRootHash(dbKey, valueHash);
   }
 
@@ -259,7 +265,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getMapEntryHash(MapEntry entry) {
-    return HASH_FUNCTION.hashBytes(entry.getValue());
+    return HASH_FUNCTION.hashByteString(entry.getValue());
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
@@ -270,5 +276,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .putObject(leftChild.getDbKey(), dbKeyFunnel())
         .putObject(rightChild.getDbKey(), dbKeyFunnel())
         .hash();
+  }
+
+  private <T> Set<T> toSet(List<T> list) {
+    return ImmutableSet.copyOf(list);
   }
 }
