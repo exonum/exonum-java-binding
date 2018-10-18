@@ -20,7 +20,7 @@ package com.exonum.binding.common.message;
 /**
  * Message types used in Exonum framework.
  */
-public enum MessageType {
+enum MessageType {
   TRANSACTION(0x00, 0x00),
   STATUS(0x00, 0x01),
   CONNECT(0x00, 0x02),
@@ -48,21 +48,21 @@ public enum MessageType {
   /**
    * Represents message class byte value.
    */
-  public byte cls() {
+  byte cls() {
     return cls;
   }
 
   /**
    * Represents message tag byte value.
    */
-  public byte tag() {
+  byte tag() {
     return tag;
   }
 
   /**
    * Represents message class and tag bytes value.
    */
-  public byte[] bytes() {
+  byte[] bytes() {
     return new byte[]{cls, tag};
   }
 

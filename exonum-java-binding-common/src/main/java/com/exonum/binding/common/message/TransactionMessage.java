@@ -42,12 +42,12 @@ public interface TransactionMessage {
   int SIGNATURE_SIZE = 64;
 
   /**
-   * Returns a public key of the Transaction Message's author.
+   * Returns a public key of the author of the transaction message.
    */
   PublicKey getAuthor();
 
   /**
-   * Returns service id of the Transaction Message.
+   * Returns the identifier of the service this message belongs.
    */
   short getServiceId();
 

@@ -17,7 +17,7 @@
 
 package com.exonum.binding.common.message;
 
-import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
+import static com.exonum.binding.common.hash.Hashing.sha256;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -32,8 +32,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
   private final ByteBuffer rawTransaction;
 
   private BinaryTransactionMessage(ByteBuffer rawTransaction) {
-    this.rawTransaction = rawTransaction.duplicate().order(ByteOrder.LITTLE_ENDIAN);
-    this.rawTransaction.position(0);
+    this.rawTransaction = rawTransaction.slice().order(ByteOrder.LITTLE_ENDIAN);
   }
 
   @Override
@@ -63,7 +62,9 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public HashCode hash() {
-    return defaultHashFunction().hashBytes(rawTransaction.array());
+    return sha256().newHasher()
+        .putBytes(rawTransaction.duplicate())
+        .hash();
   }
 
   @Override
@@ -77,7 +78,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] toBytes() {
-    return rawTransaction.duplicate().array();
+    return rawTransaction.slice().array();
   }
 
   public static BinaryTransactionMessage fromBuffer(ByteBuffer buffer) {
