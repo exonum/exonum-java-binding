@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Move `proofs` package to `com.exonum.binding.common` package. (#469)
   - Move `serialization` package to `com.exonum.binding.common` package. (#469)
 - Replace tree proof with flat proof in `ProofMapIndexProxy`. (#478)
+- `ProofListIndexProxy#getProof` and `ProofListIndexProxy#getRangeProof` to return
+  `UncheckedListProof` instead of `ListProof`. The latter is renamed into `ListProofNode`
+  and may be accessed through `UncheckedListProof#getRootProofNode` (#516)
 
 ### Removed
 - `Hashing#toHexString`. (#379)

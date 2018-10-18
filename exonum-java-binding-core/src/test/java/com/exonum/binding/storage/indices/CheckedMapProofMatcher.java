@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toSet;
 
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
-import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
@@ -51,15 +50,13 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
-    MapProofStatus status = checkedMapProof.getStatus();
-    if (status == MapProofStatus.CORRECT) {
-      Set<MapEntry> presentEntries = checkedMapProof.getEntries();
-      Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
-      return presentEntriesMatcher.matches(presentEntries)
-          && missingKeysMatcher.matches(missingKeys);
-    } else {
+    if (!checkedMapProof.isValid()) {
       return false;
     }
+    Set<MapEntry> presentEntries = checkedMapProof.getEntries();
+    Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
+    return presentEntriesMatcher.matches(presentEntries)
+        && missingKeysMatcher.matches(missingKeys);
   }
 
   @Override
@@ -73,8 +70,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    MapProofStatus proofStatus = proof.getStatus();
-    if (proofStatus == MapProofStatus.CORRECT) {
+    if (proof.isValid()) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
@@ -91,7 +87,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .appendText(", Merkle root=").appendValue(proof.getRootHash());
     } else {
       description.appendText("an invalid proof, status=")
-          .appendValue(proofStatus);
+          .appendValue(proof.getProofStatus());
     }
   }
 

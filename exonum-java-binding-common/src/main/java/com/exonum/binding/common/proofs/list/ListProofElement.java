@@ -25,7 +25,7 @@ import com.google.protobuf.ByteString;
 /**
  * Represents an element of a proof list: a leaf node in a list proof tree.
  */
-public final class ListProofElement implements ListProof {
+public final class ListProofElement implements ListProofNode {
 
   private final ByteString element;
 

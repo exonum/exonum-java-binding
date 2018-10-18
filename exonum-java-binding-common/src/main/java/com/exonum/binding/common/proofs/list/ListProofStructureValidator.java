@@ -16,33 +16,33 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import com.exonum.binding.common.proofs.common.ProofStatus;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * A validator that checks list proofs internal structure.
  */
-public final class ListProofStructureValidator implements ListProofVisitor {
+final class ListProofStructureValidator implements ListProofVisitor {
 
-  static int MAX_NODE_DEPTH = 63;
+  static final int MAX_NODE_DEPTH = 63;
 
   // TODO: optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443
-  private List<NodeInfo> listProofBranchesInfo;
+  private final List<NodeInfo> listProofBranchesInfo;
 
-  private List<NodeInfo> listProofElementsInfo;
+  private final List<NodeInfo> listProofElementsInfo;
 
-  private List<NodeInfo> listProofHashNodesInfo;
+  private final List<NodeInfo> listProofHashNodesInfo;
 
   private int depth;
 
-  private ProofStatus proofStatus;
+  private ListProofStatus proofStatus;
 
   /**
    * Creates a new ListProofStructureValidator.
    */
-  public ListProofStructureValidator(ListProof listProof) {
+  ListProofStructureValidator(ListProofNode listProof) {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
@@ -113,7 +113,7 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    *
    * @throws RuntimeException in case if node type is unknown
    */
-  private NodeType getNodeType(ListProof node) {
+  private NodeType getNodeType(ListProofNode node) {
     if (node instanceof ListProofBranch) {
       return NodeType.BRANCH;
     } else if (node instanceof ListProofElement) {
@@ -184,14 +184,14 @@ public final class ListProofStructureValidator implements ListProofVisitor {
   /**
    * Returns proof status.
    */
-  public ProofStatus getProofStatus() {
+  ListProofStatus getProofStatus() {
     return proofStatus;
   }
 
   /**
    * Returns true if proof status is VALID, false otherwise.
    */
-  public boolean isValid() {
+  boolean isValid() {
     return proofStatus == ListProofStatus.VALID;
   }
 
@@ -207,21 +207,21 @@ public final class ListProofStructureValidator implements ListProofVisitor {
    * Class used to store node info additional information.
    */
   private static class NodeInfo {
-    private ListProof node;
-    private int depth;
-    private List<NodeType> childElementsTypes;
+    private final ListProofNode node;
+    private final int depth;
+    private final List<NodeType> childElementsTypes;
 
-    NodeInfo(ListProof node, int depth) {
-      this.node = node;
-      this.depth = depth;
+    NodeInfo(ListProofNode node, int depth) {
+      this(node, depth, Collections.emptyList());
     }
 
-    NodeInfo(ListProof node, int depth, List<NodeType> childElementsTypes) {
-      this(node, depth);
+    NodeInfo(ListProofNode node, int depth, List<NodeType> childElementsTypes) {
+      this.node = node;
+      this.depth = depth;
       this.childElementsTypes = childElementsTypes;
     }
 
-    ListProof getNode() {
+    ListProofNode getNode() {
       return node;
     }
 

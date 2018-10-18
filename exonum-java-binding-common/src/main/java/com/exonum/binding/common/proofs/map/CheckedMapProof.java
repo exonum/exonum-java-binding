@@ -17,6 +17,7 @@
 package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.common.CheckedProof;
 import com.google.protobuf.ByteString;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ import java.util.Set;
  * }
  * </code></pre>
  */
-public interface CheckedMapProof {
+public interface CheckedMapProof extends CheckedProof {
   /**
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
@@ -59,12 +60,6 @@ public interface CheckedMapProof {
   boolean containsKey(ByteString key);
 
   /**
-   * Return a hash of a proof root node.
-   * @throws IllegalStateException if the proof is not valid
-   */
-  HashCode getRootHash();
-
-  /**
    * If this proof is valid, returns the value corresponding to the specified key
    * or null if there is no such key in the proof.
    * @throws IllegalStateException if the proof is not valid
@@ -74,7 +69,8 @@ public interface CheckedMapProof {
   /**
    * Returns the status of this proof: whether it is structurally valid.
    */
-  MapProofStatus getStatus();
+  @Override
+  MapProofStatus getProofStatus();
 
   /**
    * Checks that proof is correct and {@code expectedRootHash} is equal to the root hash.
