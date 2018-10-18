@@ -26,4 +26,9 @@ public interface UncheckedListProof {
    * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
    */
   CheckedListProof check();
+
+  /**
+   * Returns raw source proof of this UncheckedListProof.
+   */
+  ListProofNode getRootProofNode();
 }

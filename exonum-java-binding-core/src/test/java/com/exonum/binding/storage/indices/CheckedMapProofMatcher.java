@@ -18,7 +18,6 @@ package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
-import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
 import java.util.Arrays;
@@ -40,8 +39,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
-    MapProofStatus status = checkedMapProof.getProofStatus();
-    return status == MapProofStatus.CORRECT
+    return checkedMapProof.isValid()
         && checkProofSize(checkedMapProof)
         && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
   }
@@ -100,8 +98,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    MapProofStatus proofStatus = proof.getProofStatus();
-    if (proofStatus == MapProofStatus.CORRECT) {
+    if (proof.isValid()) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
@@ -118,7 +115,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .appendText(", Merkle root=").appendValue(proof.getRootHash());
     } else {
       description.appendText("an invalid proof, status=")
-          .appendValue(proofStatus);
+          .appendValue(proof.getProofStatus());
     }
   }
 

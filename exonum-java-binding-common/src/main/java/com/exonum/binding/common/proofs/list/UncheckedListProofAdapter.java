@@ -25,6 +25,8 @@ import com.google.common.base.Preconditions;
  */
 public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
+  private final ListProofNode rootProofNode;
+
   private final ListProofStructureValidator listProofStructureValidator;
 
   private final ListProofRootHashCalculator<E> listProofRootHashCalculator;
@@ -32,18 +34,19 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
   /**
    * Creates UncheckedListProofAdapter for convenient usage of ListProof interfaces.
    *
-   * <p>UncheckedListProofAdapter check() method will return CheckedListProof containing results of
-   * list proof verification.
+   * <p>UncheckedListProofAdapter {@link #check()} method will return CheckedListProof containing
+   * results of list proof verification.
    *
-   * @param listProofNode source list proof
+   * @param rootProofNode source list proof
    * @param serializer proof elements serializer
    */
-  public UncheckedListProofAdapter(ListProofNode listProofNode, Serializer<E> serializer) {
-    Preconditions.checkNotNull(listProofNode, "ListProof node must be not null");
+  public UncheckedListProofAdapter(ListProofNode rootProofNode, Serializer<E> serializer) {
+    Preconditions.checkNotNull(rootProofNode, "ListProof node must be not null");
     Preconditions.checkNotNull(serializer, "Serializer must be not null");
 
-    this.listProofStructureValidator = new ListProofStructureValidator(listProofNode);
-    this.listProofRootHashCalculator = new ListProofRootHashCalculator<>(listProofNode, serializer);
+    this.rootProofNode = rootProofNode;
+    this.listProofStructureValidator = new ListProofStructureValidator(rootProofNode);
+    this.listProofRootHashCalculator = new ListProofRootHashCalculator<>(rootProofNode, serializer);
   }
 
   @Override
@@ -53,5 +56,10 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
     return new CheckedListProofImpl<>(
         calculatedRootHash, listProofRootHashCalculator.getElements(), structureCheckStatus);
+  }
+
+  @Override
+  public ListProofNode getRootProofNode() {
+    return rootProofNode;
   }
 }

@@ -25,13 +25,14 @@ import java.util.NavigableMap;
 /**
  * A checked list proof includes list proof verification results.
  *
- * <p>If it is correct {@link #isValid()} you may access:
+ * <p>If it is {@linkplain #isValid() correct} you may access:
  * <ul>
  *   <li>a calculated Merkle root hash
  *   <li>proof elements
  * </ul>
- * If the proof is not valid, you may get the verification status using getStatus
- * {@link #getProofStatus()}
+ * If the proof is not valid, you may get the verification status using
+ * {@link #getProofStatus()} with description of why the proof is not
+ * valid.
  */
 public class CheckedListProofImpl<E> implements CheckedListProof {
 

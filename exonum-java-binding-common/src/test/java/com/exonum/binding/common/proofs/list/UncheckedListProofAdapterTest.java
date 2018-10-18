@@ -45,6 +45,7 @@ class UncheckedListProofAdapterTest {
 
     CheckedListProof checkedProof = uncheckedProof.check();
 
+    assertThat(uncheckedProof.getRootProofNode(), equalTo(root));
     assertThat(checkedProof.getProofStatus(), is(ListProofStatus.VALID));
     assertThat(checkedProof.getElements(), equalTo(of(0L, V1)));
     assertThat(checkedProof.getRootHash(), notNullValue());

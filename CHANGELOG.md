@@ -28,8 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `fixed64`, `uint64`, `sint64`, `float` and `double` primitive types, 
   `PrivateKey`, `PublicKey` and `bytes` serialization. (#514, #523)
 - Multiproofs support in `ProofMapIndexProxy`. (#507)
-- `CheckedListProof`, `UncheckedListProof` proof interfaces and implementations. 
-  `CheckedProof` common interface. (#516)
+- `ProofListIndexProxy#getProof` and `ProofListIndexProxy#getRangeProof` to return
+  `UncheckedListProof` instead of `ListProof`. The latter is renamed into `ListProofNode`
+  and may be accessed through `UncheckedListProof#getRootProofNode` (#516)
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
@@ -45,8 +46,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Move `proofs` package to `com.exonum.binding.common` package. (#469)
   - Move `serialization` package to `com.exonum.binding.common` package. (#469)
 - Replace tree proof with flat proof in `ProofMapIndexProxy`. (#478)
-- `ListProofValidator` separated to `ListProofStructureValidator` 
-  and `ListProofRootHashCodeCalculator`. (#506)
 
 ### Removed
 - `Hashing#toHexString`. (#379)

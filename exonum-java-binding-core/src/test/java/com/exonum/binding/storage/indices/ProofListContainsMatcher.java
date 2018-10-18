@@ -36,9 +36,9 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   private final Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction;
   private final Matcher<Map<Long, String>> elementsMatcher;
 
-  private ProofListContainsMatcher(Function<ProofListIndexProxy<String>,
-                                   UncheckedListProof> proofFunction,
-                                   Map<Long, String> expectedProofElements) {
+  private ProofListContainsMatcher(
+      Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction,
+      Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
     this.elementsMatcher = equalTo(expectedProofElements);
   }

@@ -40,8 +40,8 @@ public interface CheckedProof {
   HashCode getRootHash();
 
   /**
-   * Returns true if Proof status is valid {@link ProofStatus}, false otherwise.
-   * Details about Proof validity could be obtained through {@link #getProofStatus()}.
+   * Returns true if proof status is valid, false otherwise.
+   * Details about the proof verification status could be obtained via {@link #getProofStatus()}.
    */
   boolean isValid();
 }
