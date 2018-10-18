@@ -19,21 +19,23 @@ package com.exonum.binding.common.proofs.map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import com.exonum.binding.common.hash.HashCode;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
+import com.google.protobuf.ByteString;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A checked flat map proof, which does not include any intermediate nodes.
  */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
-  private final List<MapEntry> entries;
+  private final Map<ByteString, ByteString> entries;
 
-  private final List<byte[]> missingKeys;
+  private final Set<ByteString> missingKeys;
 
   private final HashCode rootHash;
 
@@ -42,11 +44,12 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   private CheckedFlatMapProof(
       MapProofStatus status,
       HashCode rootHash,
-      List<MapEntry> entries,
-      List<byte[]> missingKeys) {
+      Set<MapEntry> entries,
+      Set<ByteString> missingKeys) {
     this.status = checkNotNull(status);
     this.rootHash = checkNotNull(rootHash);
-    this.entries = checkNotNull(entries);
+    this.entries = entries.stream()
+        .collect(toMap(MapEntry::getKey, MapEntry::getValue));
     this.missingKeys = checkNotNull(missingKeys);
   }
 
@@ -60,8 +63,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
    */
   public static CheckedFlatMapProof correct(
       HashCode rootHash,
-      List<MapEntry> entries,
-      List<byte[]> missingKeys) {
+      Set<MapEntry> entries,
+      Set<ByteString> missingKeys) {
     return new CheckedFlatMapProof(MapProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
 
@@ -75,26 +78,29 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   public static CheckedFlatMapProof invalid(MapProofStatus status) {
     checkArgument(status != MapProofStatus.CORRECT);
     return new CheckedFlatMapProof(
-        status, HashCode.fromInt(1), emptyList(), emptyList());
+        status, HashCode.fromInt(1), emptySet(), emptySet());
   }
 
   @Override
-  public List<MapEntry> getEntries() {
+  public Set<MapEntry> getEntries() {
     checkValid();
-    return entries;
+    return entries.entrySet()
+        .stream()
+        .map(e -> new MapEntry(e.getKey(), e.getValue()))
+        .collect(toSet());
   }
 
   @Override
-  public List<byte[]> getMissingKeys() {
+  public Set<ByteString> getMissingKeys() {
     checkValid();
     return missingKeys;
   }
 
   @Override
-  public boolean containsKey(byte[] key) {
+  public boolean containsKey(ByteString key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    return entries.stream().anyMatch(entry -> Arrays.equals(entry.getKey(), key));
+    return entries.containsKey(key);
   }
 
   @Override
@@ -104,20 +110,20 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public byte[] get(byte[] key) {
+  public ByteString get(ByteString key) {
     checkValid();
     checkThatKeyIsRequested(key);
-    return entries
-        .stream()
-        .filter(entry -> Arrays.equals(entry.getKey(), key))
-        .map(MapEntry::getValue)
-        .findFirst()
-        .orElse(null);
+    return entries.get(key);
   }
 
   @Override
-  public MapProofStatus getStatus() {
+  public MapProofStatus getProofStatus() {
     return status;
+  }
+
+  @Override
+  public boolean isValid() {
+    return status == MapProofStatus.CORRECT;
   }
 
   @Override
@@ -127,16 +133,11 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkValid() {
-    checkState(status == MapProofStatus.CORRECT, "Proof is not valid: %s", status);
+    checkState(isValid(), "Proof is not valid: %s", status);
   }
 
-  private void checkThatKeyIsRequested(byte[] key) {
-    Stream.concat(
-        entries.stream().map(MapEntry::getKey),
-        missingKeys.stream())
-        .filter(entryKey -> Arrays.equals(entryKey, key))
-        .findFirst()
-        .orElseThrow(
-            () -> new IllegalArgumentException("Key that wasn't among requested keys was checked"));
+  private void checkThatKeyIsRequested(ByteString key) {
+    checkArgument(entries.containsKey(key) || missingKeys.contains(key),
+        "Key (%s) that wasn't among requested keys was checked", key);
   }
 }

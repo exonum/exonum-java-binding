@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
-- Flat map proofs support. (#250)
+- Flat map proofs support, including multiproofs — proofs for several
+  entries at once. (#250, #507, #532)
 - Wallet transactions history support to the cryptocurrency-demo. (#481)
 - A deterministic `Serializer` of any protobuf message — `StandardSerializers#protobuf`. (#493)
 - Static factory methods accepting protobuf messages to collections,
@@ -44,6 +45,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Move `proofs` package to `com.exonum.binding.common` package. (#469)
   - Move `serialization` package to `com.exonum.binding.common` package. (#469)
 - Replace tree proof with flat proof in `ProofMapIndexProxy`. (#478)
+- `ProofListIndexProxy#getProof` and `ProofListIndexProxy#getRangeProof` to return
+  `UncheckedListProof` instead of `ListProof`. The latter is renamed into `ListProofNode`
+  and may be accessed through `UncheckedListProof#getRootProofNode` (#516)
 
 ### Removed
 - `Hashing#toHexString`. (#379)

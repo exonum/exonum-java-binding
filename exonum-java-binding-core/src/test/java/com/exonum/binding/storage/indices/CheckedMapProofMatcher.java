@@ -16,17 +16,20 @@
 
 package com.exonum.binding.storage.indices;
 
+import static java.util.stream.Collectors.toSet;
+
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapEntry;
-import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
-import java.util.Arrays;
+import com.google.protobuf.ByteString;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsEqual;
 
 class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
@@ -34,59 +37,26 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   private final List<MapTestEntry> entries;
 
+  private final Matcher<Set<ByteString>> missingKeysMatcher;
+  private final Matcher<Set<MapEntry>> presentEntriesMatcher;
+
   private CheckedMapProofMatcher(List<MapTestEntry> entries) {
     this.entries = entries;
+    Set<MapEntry> expectedEntries = getExpectedEntries();
+    Set<ByteString> expectedMissingKeys = getExpectedMissingKeys();
+    this.presentEntriesMatcher = IsEqual.equalTo(expectedEntries);
+    this.missingKeysMatcher = IsEqual.equalTo(expectedMissingKeys);
   }
 
   @Override
   protected boolean matchesSafely(CheckedMapProof checkedMapProof) {
-    MapProofStatus status = checkedMapProof.getStatus();
-    return status == MapProofStatus.CORRECT
-        && checkProofSize(checkedMapProof)
-        && entries.stream().allMatch(e -> checkEntry(checkedMapProof, e));
-  }
-
-  private boolean checkProofSize(CheckedMapProof checkedMapProof) {
-    List<MapEntry> presentEntries = checkedMapProof.getEntries();
-    List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
-    long expectedPresentEntries = entries
-        .stream()
-        .filter(e -> e.getValue().isPresent())
-        .count();
-    long expectedAbsentEntries = entries
-        .stream()
-        .filter(e -> !e.getValue().isPresent())
-        .count();
-    return presentEntries.size() == expectedPresentEntries
-        && missingKeys.size() == expectedAbsentEntries;
-  }
-
-  private boolean checkEntry(CheckedMapProof checkedMapProof, MapTestEntry expectedEntry) {
-    Optional<String> entryValue = expectedEntry.getValue();
-    byte[] expectedKey = expectedEntry.getKey().asBytes();
-
-    if (entryValue.isPresent()) {
-      List<MapEntry> presentEntries = checkedMapProof.getEntries();
-      byte[] expectedValue = entryValue.get().getBytes();
-      return checkPresentEntry(presentEntries, expectedKey, expectedValue);
-    } else {
-      List<byte[]> missingKeys = checkedMapProof.getMissingKeys();
-      return checkAbsentEntry(missingKeys, expectedKey);
+    if (!checkedMapProof.isValid()) {
+      return false;
     }
-  }
-
-  private boolean checkPresentEntry(
-      List<MapEntry> presentEntries, byte[] expectedKey, byte[] expectedValue) {
-    return presentEntries
-        .stream()
-        .anyMatch(presentEntry -> Arrays.equals(expectedKey, presentEntry.getKey())
-            && Arrays.equals(expectedValue, presentEntry.getValue()));
-  }
-
-  private boolean checkAbsentEntry(List<byte[]> missingKeys, byte[] entryKey) {
-    return missingKeys
-        .stream()
-        .anyMatch(missingEntry -> Arrays.equals(entryKey, missingEntry));
+    Set<MapEntry> presentEntries = checkedMapProof.getEntries();
+    Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
+    return presentEntriesMatcher.matches(presentEntries)
+        && missingKeysMatcher.matches(missingKeys);
   }
 
   @Override
@@ -100,8 +70,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   @Override
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
-    MapProofStatus proofStatus = proof.getStatus();
-    if (proofStatus == MapProofStatus.CORRECT) {
+    if (proof.isValid()) {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
@@ -110,7 +79,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .collect(Collectors.joining(", ", "[", "]"));
 
       String missingKeys = proof.getMissingKeys().stream()
-          .map(HEX_ENCODING::encode)
+          .map(CheckedMapProofMatcher::hexEncodeByteString)
           .collect(Collectors.joining(", ", "[", "]"));
 
       description.appendText("a valid proof, entries=").appendText(entries)
@@ -118,13 +87,27 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
           .appendText(", Merkle root=").appendValue(proof.getRootHash());
     } else {
       description.appendText("an invalid proof, status=")
-          .appendValue(proofStatus);
+          .appendValue(proof.getProofStatus());
     }
   }
 
+  private Set<MapEntry> getExpectedEntries() {
+    return entries.stream()
+        .filter(e -> e.getValue().isPresent())
+        .map(e -> new MapEntry(e.getKey().asBytes(), e.getValue().get().getBytes()))
+        .collect(toSet());
+  }
+
+  private Set<ByteString> getExpectedMissingKeys() {
+    return entries.stream()
+        .filter(e -> !e.getValue().isPresent())
+        .map(e -> ByteString.copyFrom(e.getKey().asBytes()))
+        .collect(toSet());
+  }
+
   private static String formatMapEntry(MapEntry e) {
-    String key = HEX_ENCODING.encode(e.getKey());
-    String value = StandardSerializers.string().fromBytes(e.getValue());
+    String key = hexEncodeByteString(e.getKey());
+    String value = StandardSerializers.string().fromBytes(e.getValue().toByteArray());
     return String.format("(%s -> %s)", key, value);
   }
 
@@ -133,6 +116,10 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     return e.getValue()
         .map(value -> String.format("(%s -> %s)", key, value))
         .orElse(key);
+  }
+
+  private static String hexEncodeByteString(ByteString byteString) {
+    return HEX_ENCODING.encode(byteString.toByteArray());
   }
 
   /**

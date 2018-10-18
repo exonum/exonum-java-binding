@@ -35,7 +35,7 @@ import java.util.TreeMap;
  *
  * @param <E> the type of elements in the corresponding list
  */
-public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
+final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -52,13 +52,13 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @param serializer a serializer of list elements
    */
-  public ListProofRootHashCalculator(ListProof listProof, Serializer<E> serializer) {
+  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
   // to easily inject a mock of a calculatedRootHash function.
   @VisibleForTesting
-  ListProofRootHashCalculator(ListProof listProof, Serializer<E> serializer,
+  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
       HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
@@ -93,7 +93,7 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
         "Error: already an element by such index in the map: i=" + index
             + ", e=" + elements.get(index);
 
-    E element = serializer.fromBytes(value.getElement());
+    E element = serializer.fromBytes(value.getElement().toByteArray());
     elements.put(index, element);
     calculatedRootHash = hashFunction.hashObject(value, ListProofElement.funnel());
   }
@@ -114,7 +114,7 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
   /**
    * Returns a collection of list entries: index-element pairs, ordered by indices.
    */
-  public NavigableMap<Long, E> getElements() {
+  NavigableMap<Long, E> getElements() {
     return elements;
   }
 
@@ -123,7 +123,7 @@ public final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @return hash code
    */
-  public HashCode getCalculatedRootHash() {
+  HashCode getCalculatedRootHash() {
     return calculatedRootHash;
   }
 

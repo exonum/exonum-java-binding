@@ -17,16 +17,18 @@
 package com.exonum.binding.common.proofs.list;
 
 /**
- * Represents a proof that some elements exist in a ProofList at certain positions.
+ * A proof that some elements exist in a proof list. You must
+ * {@link #check} its structure and root hash before accessing the elements.
  */
-public interface ListProof {
+public interface UncheckedListProof {
 
   /**
-   * Applies the visitor to this proof node.
-   *
-   * <p>Most implementations simply call {@code visitor.visit(this);}
-   *
-   * @param visitor a visitor to apply to this node
+   * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
    */
-  void accept(ListProofVisitor visitor);
+  CheckedListProof check();
+
+  /**
+   * Returns raw source proof of this UncheckedListProof.
+   */
+  ListProofNode getRootProofNode();
 }

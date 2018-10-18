@@ -19,6 +19,7 @@ package com.exonum.binding.common.proofs.map;
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,22 +30,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class UncheckedFlatMapProofTest {
 
-  private static final byte[] FIRST_VALUE = "testValue".getBytes();
-  private static final byte[] SECOND_VALUE = "anotherTestValue".getBytes();
-  private static final byte[] THIRD_VALUE = "oneMoreTestValue".getBytes();
+  private static final ByteString FIRST_VALUE = ByteString.copyFromUtf8("testValue");
+  private static final ByteString SECOND_VALUE = ByteString.copyFromUtf8("anotherTestValue");
+  private static final ByteString THIRD_VALUE = ByteString.copyFromUtf8("oneMoreTestValue");
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
 
   @Test
   void mapProofShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
-    byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
+    ByteString valueKey = DbKeyTestUtils.keyByteStringFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
 
     MapEntry leaf = createMapEntry(valueKey, FIRST_VALUE);
@@ -59,17 +62,17 @@ class UncheckedFlatMapProofTest {
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     MapEntry expectedEntry = new MapEntry(valueKey, FIRST_VALUE);
-    assertThat(checkedMapProof.getEntries(), equalTo(singletonList(expectedEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(singleton(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(valueKey));
     assertThat(checkedMapProof.get(valueKey), equalTo(FIRST_VALUE));
   }
 
   @Test
   void mapProofWithSeveralLeafsShouldBeCorrect() {
-    byte[] firstKey = DbKeyTestUtils.keyFromString("0011_0101");
-    byte[] secondKey = DbKeyTestUtils.keyFromString("0011_0110");
+    ByteString firstKey = DbKeyTestUtils.keyByteStringFromString("0011_0101");
+    ByteString secondKey = DbKeyTestUtils.keyByteStringFromString("0011_0110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
-    byte[] fourthKey = DbKeyTestUtils.keyFromString("1000_1101");
+    ByteString fourthKey = DbKeyTestUtils.keyByteStringFromString("1000_1101");
 
     List<MapEntry> leaves = Arrays.asList(
         createMapEntry(firstKey, FIRST_VALUE),
@@ -91,7 +94,7 @@ class UncheckedFlatMapProofTest {
         new MapEntry(fourthKey, THIRD_VALUE)
     );
 
-    List<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
+    Set<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
 
     assertThat(
         actualCheckedEntriesList,
@@ -105,17 +108,16 @@ class UncheckedFlatMapProofTest {
     // If a user checks for key that wasn't required, an IllegalArgumentException is thrown
 
     assertThrows(IllegalArgumentException.class,
-        () -> checkedMapProof.containsKey("not required key".getBytes()));
-
+        () -> checkedMapProof.containsKey(ByteString.copyFromUtf8("not required key")));
   }
 
   @Test
   void mapProofWithOneElementShouldBeCorrect() {
-    byte[] key = DbKeyTestUtils.keyFromString("01");
-    byte[] value = FIRST_VALUE;
+    ByteString key = DbKeyTestUtils.keyByteStringFromString("01");
+    ByteString value = FIRST_VALUE;
     MapEntry mapEntry = createMapEntry(key, value);
 
-    HashCode valueHash = HASH_FUNCTION.hashBytes(value);
+    HashCode valueHash = HASH_FUNCTION.hashByteString(value);
     HashCode expectedRootHash = HASH_FUNCTION.newHasher()
         .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
         .putObject(valueHash, hashCodeFunnel())
@@ -131,7 +133,7 @@ class UncheckedFlatMapProofTest {
     assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
     assertTrue(checkedMapProof.compareWithRootHash(expectedRootHash));
 
-    assertThat(checkedMapProof.getEntries(), equalTo(singletonList(mapEntry)));
+    assertThat(checkedMapProof.getEntries(), equalTo(singleton(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));
     assertThat(checkedMapProof.get(key), equalTo(value));
   }
@@ -148,7 +150,7 @@ class UncheckedFlatMapProofTest {
         new UncheckedFlatMapProof(entries, emptyList(), emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.DUPLICATE_PATH));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.DUPLICATE_PATH));
   }
 
   @Test
@@ -158,13 +160,13 @@ class UncheckedFlatMapProofTest {
             emptyList(), emptyList(), emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.CORRECT));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
   }
 
   @Test
   void mapProofWithAbsentKeyShouldBeCorrect() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
-    byte[] valueKey = DbKeyTestUtils.keyFromString("101110");
+    ByteString valueKey = DbKeyTestUtils.keyByteStringFromString("101110");
     byte[] absentKey = DbKeyTestUtils.keyFromString("101111");
 
     UncheckedMapProof uncheckedFlatMapProof =
@@ -174,7 +176,7 @@ class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.CORRECT));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
   }
 
   @Test
@@ -189,7 +191,7 @@ class UncheckedFlatMapProofTest {
             emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.INVALID_ORDER));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.INVALID_ORDER));
   }
 
   @Test
@@ -204,7 +206,7 @@ class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.NON_TERMINAL_NODE));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.NON_TERMINAL_NODE));
   }
 
   @Test
@@ -219,7 +221,7 @@ class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.CORRECT));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
   }
 
   @Test
@@ -237,7 +239,7 @@ class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.EMBEDDED_PATH));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.EMBEDDED_PATH));
   }
 
   @Test
@@ -255,14 +257,14 @@ class UncheckedFlatMapProofTest {
             singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
-    assertThat(checkedMapProof.getStatus(), equalTo(MapProofStatus.EMBEDDED_PATH));
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.EMBEDDED_PATH));
   }
 
   private static MapProofEntry createMapProofEntry(DbKey dbKey) {
     return new MapProofEntry(dbKey, HashCode.fromBytes(dbKey.getKeySlice()));
   }
 
-  private static MapEntry createMapEntry(byte[] key, byte[] value) {
+  private static MapEntry createMapEntry(ByteString key, ByteString value) {
     return new MapEntry(key, value);
   }
 }
