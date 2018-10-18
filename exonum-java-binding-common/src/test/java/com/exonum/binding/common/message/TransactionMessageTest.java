@@ -70,6 +70,19 @@ class TransactionMessageTest {
             .sign(KEYS, CRYPTO));
   }
 
+  @Test
+  void invalidKeyLengthTest() {
+    KeyPair keys = KeyPair
+        .createKeyPair(Bytes.bytes(0x00, 0x01), Bytes.bytes(0x00, 0x01, 0x02, 0x03));
+
+    assertThrows(IllegalArgumentException.class,
+        () -> TransactionMessage.builder()
+            .serviceId((short) 0)
+            .transactionId((short) 1)
+            .payload(Bytes.bytes())
+            .sign(keys, CRYPTO)
+    );
+  }
 
   @ParameterizedTest
   @MethodSource("source")
@@ -82,14 +95,14 @@ class TransactionMessageTest {
   private static List<TransactionMessage> source() {
     return ImmutableList.of(
         TransactionMessage.builder()
-            .serviceId((short) 1)
+            .serviceId((short) 0)
             .transactionId((short) 1)
             .payload(Bytes.bytes())
             .sign(KEYS, CRYPTO),
         TransactionMessage.builder()
             .serviceId(Short.MIN_VALUE)
             .transactionId(Short.MAX_VALUE)
-            .payload(Bytes.bytes())
+            .payload(Bytes.bytes("test content"))
             .sign(KEYS, CRYPTO)
     );
   }

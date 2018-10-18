@@ -105,25 +105,43 @@ public interface TransactionMessage {
     private Short transactionId;
     private ByteBuffer payload;
 
+    /**
+     * Sets service id to the transaction message.
+     */
     public Builder serviceId(short serviceId) {
       this.serviceId = serviceId;
       return this;
     }
 
+    /**
+     * Sets transaction id to the transaction message.
+     */
     public Builder transactionId(short transactionId) {
       this.transactionId = transactionId;
       return this;
     }
 
+    /**
+     * Sets payload to the transaction message.
+     */
     public Builder payload(byte[] payload) {
       return payload(ByteBuffer.wrap(payload));
     }
 
+    /**
+     * Sets payload to the transaction message.
+     */
     public Builder payload(ByteBuffer payload) {
       this.payload = payload.duplicate().order(ByteOrder.LITTLE_ENDIAN);
       return this;
     }
 
+    /**
+     * Signs and creates an instance of the transaction message.
+     *
+     * @throws NullPointerException if serviceId or transactionId or payload haven't set
+     * @throws IllegalArgumentException if public key has wrong size
+     */
     public TransactionMessage sign(KeyPair keys, CryptoFunction crypto) {
       checkNotNull(serviceId);
       checkNotNull(transactionId);
