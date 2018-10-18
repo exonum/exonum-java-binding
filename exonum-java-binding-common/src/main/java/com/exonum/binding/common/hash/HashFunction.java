@@ -30,6 +30,7 @@
 package com.exonum.binding.common.hash;
 
 import com.google.common.primitives.Ints;
+import com.google.protobuf.ByteString;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -176,6 +177,12 @@ public interface HashFunction {
    * perform better than its longhand equivalent, but should not perform worse.
    */
   HashCode hashBytes(byte[] input);
+
+  /**
+   * Shortcut for {@code newHasher().putBytes(input.toByteArray()).hash()}. The implementation
+   * <i>might</i> perform better than its longhand equivalent, but should not perform worse.
+   */
+  HashCode hashByteString(ByteString input);
 
   /**
    * Shortcut for {@code newHasher().putBytes(input, off, len).hash()}. The implementation

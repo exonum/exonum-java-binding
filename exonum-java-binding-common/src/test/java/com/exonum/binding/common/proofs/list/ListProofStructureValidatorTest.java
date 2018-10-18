@@ -22,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -223,12 +223,8 @@ class ListProofStructureValidatorTest {
   }
 
   private static ListProofElement leafOf(String element) {
-    byte[] dbElement = bytesOf(element);
+    ByteString dbElement = ByteString.copyFromUtf8(element);
     return new ListProofElement(dbElement);
-  }
-
-  private static byte[] bytesOf(String element) {
-    return StandardSerializers.string().toBytes(element);
   }
 
   private ListProof generateRightLeaningProofTree(int depth, ListProof leafNode) {

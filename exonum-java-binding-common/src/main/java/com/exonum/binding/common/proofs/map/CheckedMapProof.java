@@ -17,7 +17,8 @@
 package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.hash.HashCode;
-import java.util.List;
+import com.google.protobuf.ByteString;
+import java.util.Set;
 
 /**
  * A checked map proof.
@@ -25,7 +26,7 @@ import java.util.List;
  * throw IllegalStateException.
  * Example usage:
  * <pre><code>
- * byte[] key = "The key for which I want a proved value".getBytes();
+ * ByteString key = "The key for which I want a proved value".getBytes();
  * HashCode expectedRootHash = // get a known root hash from block proof //
  * UncheckedMapProof proof = requestProofForKey(key);
  * // Convert to checked
@@ -33,7 +34,7 @@ import java.util.List;
  * // Check the root hash
  * if (checkedProof.compareWithRootHash(expectedRootHash)) {
  *   // Get and use the value(s)
- *   byte[] value = checked.get(key);
+ *   ByteString value = checked.get(key);
  * }
  * </code></pre>
  */
@@ -42,20 +43,20 @@ public interface CheckedMapProof {
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  List<MapEntry> getEntries();
+  Set<MapEntry> getEntries();
 
   /**
    * Get all keys that were requested, but did not appear in this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  List<byte[]> getMissingKeys();
+  Set<ByteString> getMissingKeys();
 
   /**
    * If this proof is valid, returns true if there is a given key in the proof;
    * false — if there is no such key.
    * @throws IllegalStateException if the proof is not valid
    */
-  boolean containsKey(byte[] key);
+  boolean containsKey(ByteString key);
 
   /**
    * Return a hash of a proof root node.
@@ -68,7 +69,7 @@ public interface CheckedMapProof {
    * or null if there is no such key in the proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  byte[] get(byte[] key);
+  ByteString get(ByteString key);
 
   /**
    * Returns the status of this proof: whether it is structurally valid.

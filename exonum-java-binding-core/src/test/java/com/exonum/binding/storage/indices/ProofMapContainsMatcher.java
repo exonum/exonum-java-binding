@@ -32,7 +32,6 @@ import org.hamcrest.TypeSafeMatcher;
 
 class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCode, String>> {
 
-
   private final List<MapTestEntry> entries;
 
   private final CheckedMapProofMatcher mapProofMatcher;
