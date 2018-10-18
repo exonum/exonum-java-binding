@@ -22,6 +22,9 @@ use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 const CLASS_TRANSACTION_EXCEPTION: &str =
     "com/exonum/binding/transaction/TransactionExecutionException";
 
+static CACHED_METHODS: ::std::sync::Once = ::std::sync::Once::new();
+static mut CACHED_EXECUTE: Option<::jni::objects::JMethodID> = None;
+
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
 pub struct TransactionProxy {
@@ -42,6 +45,20 @@ impl fmt::Debug for TransactionProxy {
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
     pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawMessage) -> Self {
+        CACHED_METHODS.call_once(|| {
+            exec.with_attached(|env| {
+                unsafe {
+                    let cached_execute = env.get_method_id(
+                        "com/exonum/binding/service/adapters/UserTransactionAdapter",
+                        "execute",
+                        "(J)V"
+                    ).unwrap();
+                    let raw = cached_execute.into_inner();
+                    CACHED_EXECUTE = Some(raw.into());
+                }
+                Ok(())
+            });
+        });
         TransactionProxy {
             exec,
             transaction,
@@ -93,13 +110,13 @@ impl Transaction for TransactionProxy {
     fn execute(&self, fork: &mut Fork) -> ExecutionResult {
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let view_handle = to_handle(View::from_ref_fork(fork));
-            let res = env
-                .call_method(
-                    self.transaction.as_obj(),
-                    "execute",
-                    "(J)V",
-                    &[JValue::from(view_handle)],
-                ).and_then(JValue::v);
+            let res = unsafe {
+                env.call_method_unsafe(
+                self.transaction.as_obj(),
+                CACHED_EXECUTE.unwrap(),
+                ::jni::signature::JavaType::Primitive(::jni::signature::Primitive::Void),
+                &[JValue::from(view_handle)]
+            ).and_then(JValue::v) };
             Ok(check_transaction_execution_result(env, res))
         });
         unwrap_jni(res)
