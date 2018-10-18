@@ -48,11 +48,12 @@ impl TransactionProxy {
         CACHED_METHODS.call_once(|| {
             exec.with_attached(|env| {
                 unsafe {
-                    let cached_execute = env.get_method_id(
-                        "com/exonum/binding/service/adapters/UserTransactionAdapter",
-                        "execute",
-                        "(J)V"
-                    ).unwrap();
+                    let cached_execute = env
+                        .get_method_id(
+                            "com/exonum/binding/service/adapters/UserTransactionAdapter",
+                            "execute",
+                            "(J)V",
+                        ).unwrap();
                     let raw = cached_execute.into_inner();
                     CACHED_EXECUTE = Some(raw.into());
                 }
@@ -112,11 +113,12 @@ impl Transaction for TransactionProxy {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let res = unsafe {
                 env.call_method_unsafe(
-                self.transaction.as_obj(),
-                CACHED_EXECUTE.unwrap(),
-                ::jni::signature::JavaType::Primitive(::jni::signature::Primitive::Void),
-                &[JValue::from(view_handle)]
-            ).and_then(JValue::v) };
+                    self.transaction.as_obj(),
+                    CACHED_EXECUTE.unwrap(),
+                    ::jni::signature::JavaType::Primitive(::jni::signature::Primitive::Void),
+                    &[JValue::from(view_handle)],
+                ).and_then(JValue::v)
+            };
             Ok(check_transaction_execution_result(env, res))
         });
         unwrap_jni(res)
