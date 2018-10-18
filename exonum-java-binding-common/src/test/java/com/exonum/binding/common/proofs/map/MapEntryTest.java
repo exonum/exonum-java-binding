@@ -16,11 +16,18 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 class MapEntryTest {
+
+  @Test
+  void constructorRejectsNulls() {
+    new NullPointerTester()
+        .testAllPublicConstructors(MapEntry.class);
+  }
 
   @Test
   void verifyEquals() {

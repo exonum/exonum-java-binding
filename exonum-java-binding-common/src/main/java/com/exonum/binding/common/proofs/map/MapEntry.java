@@ -16,6 +16,8 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.protobuf.ByteString;
 import java.util.Objects;
 
@@ -43,8 +45,8 @@ public final class MapEntry {
    * @param value a value mapped to the key
    */
   public MapEntry(ByteString key, ByteString value) {
-    this.key = key;
-    this.value = value;
+    this.key = checkNotNull(key, "key");
+    this.value = checkNotNull(value, "value");
   }
 
   /** Returns the key in this entry. */
