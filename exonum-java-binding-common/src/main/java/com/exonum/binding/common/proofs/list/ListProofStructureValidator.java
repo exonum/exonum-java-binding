@@ -18,6 +18,7 @@ package com.exonum.binding.common.proofs.list;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,14 +26,14 @@ import java.util.List;
  */
 final class ListProofStructureValidator implements ListProofVisitor {
 
-  static int MAX_NODE_DEPTH = 63;
+  static final int MAX_NODE_DEPTH = 63;
 
   // TODO: optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443
-  private List<NodeInfo> listProofBranchesInfo;
+  private final List<NodeInfo> listProofBranchesInfo;
 
-  private List<NodeInfo> listProofElementsInfo;
+  private final List<NodeInfo> listProofElementsInfo;
 
-  private List<NodeInfo> listProofHashNodesInfo;
+  private final List<NodeInfo> listProofHashNodesInfo;
 
   private int depth;
 
@@ -206,17 +207,17 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * Class used to store node info additional information.
    */
   private static class NodeInfo {
-    private ListProofNode node;
-    private int depth;
-    private List<NodeType> childElementsTypes;
+    private final ListProofNode node;
+    private final int depth;
+    private final List<NodeType> childElementsTypes;
 
     NodeInfo(ListProofNode node, int depth) {
-      this.node = node;
-      this.depth = depth;
+      this(node, depth, Collections.emptyList());
     }
 
     NodeInfo(ListProofNode node, int depth, List<NodeType> childElementsTypes) {
-      this(node, depth);
+      this.node = node;
+      this.depth = depth;
       this.childElementsTypes = childElementsTypes;
     }
 
