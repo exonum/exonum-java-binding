@@ -17,7 +17,8 @@
 
 package com.exonum.binding.common.message;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
@@ -89,7 +90,7 @@ class TransactionMessageTest {
   void roundTripTest(TransactionMessage message) {
     byte[] bytes = message.toBytes();
     TransactionMessage actualMessage = TransactionMessage.fromBytes(bytes);
-    assertThat(actualMessage).isEqualTo(message);
+    assertThat(actualMessage, is(message));
   }
 
   private static List<TransactionMessage> source() {

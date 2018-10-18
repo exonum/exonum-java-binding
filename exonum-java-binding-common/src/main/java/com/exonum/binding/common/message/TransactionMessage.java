@@ -164,7 +164,7 @@ public interface TransactionMessage {
       byte[] signature = crypto.signMessage(unsignedMessage, keys.getPrivateKey());
       buffer.put(signature);
 
-      return new BinaryTransactionMessage(buffer);
+      return BinaryTransactionMessage.fromBuffer(buffer);
     }
 
     private Builder() {

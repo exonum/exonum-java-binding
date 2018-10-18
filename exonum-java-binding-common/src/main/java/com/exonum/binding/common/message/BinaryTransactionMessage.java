@@ -31,7 +31,7 @@ import java.nio.ByteOrder;
 public final class BinaryTransactionMessage implements TransactionMessage {
   private final ByteBuffer rawTransaction;
 
-  BinaryTransactionMessage(ByteBuffer rawTransaction) {
+  private BinaryTransactionMessage(ByteBuffer rawTransaction) {
     this.rawTransaction = rawTransaction.duplicate().order(ByteOrder.LITTLE_ENDIAN);
     this.rawTransaction.position(0);
   }
@@ -63,7 +63,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public HashCode hash() {
-    return defaultHashFunction().hashBytes(toBytes());
+    return defaultHashFunction().hashBytes(rawTransaction.array());
   }
 
   @Override
