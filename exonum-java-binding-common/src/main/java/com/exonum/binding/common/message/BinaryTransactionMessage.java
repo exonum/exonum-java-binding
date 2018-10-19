@@ -18,12 +18,14 @@
 package com.exonum.binding.common.message;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.util.Arrays.copyOf;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * Binary implementation of the {@link TransactionMessage} class.
@@ -31,14 +33,15 @@ import java.nio.ByteOrder;
 public final class BinaryTransactionMessage implements TransactionMessage {
   private final ByteBuffer rawTransaction;
 
-  private BinaryTransactionMessage(ByteBuffer rawTransaction) {
-    this.rawTransaction = rawTransaction.slice().order(ByteOrder.LITTLE_ENDIAN);
+  BinaryTransactionMessage(byte[] bytes) {
+    this.rawTransaction = ByteBuffer.wrap(copyOf(bytes, bytes.length)).order(LITTLE_ENDIAN);
   }
 
   @Override
   public PublicKey getAuthor() {
     byte[] key = new byte[AUTHOR_PUBLIC_KEY_SIZE];
-    rawTransaction.get(key, AUTHOR_PUBLIC_KEY_OFFSET, AUTHOR_PUBLIC_KEY_SIZE);
+    rawTransaction.position(AUTHOR_PUBLIC_KEY_OFFSET);
+    rawTransaction.get(key);
     return PublicKey.fromBytes(key);
   }
 
@@ -56,7 +59,8 @@ public final class BinaryTransactionMessage implements TransactionMessage {
   public byte[] getPayload() {
     int payloadSize = rawTransaction.limit() - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
     byte[] payload = new byte[payloadSize];
-    rawTransaction.get(payload, PAYLOAD_OFFSET, payloadSize);
+    rawTransaction.position(PAYLOAD_OFFSET);
+    rawTransaction.get(payload);
     return payload;
   }
 
@@ -69,20 +73,22 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] getSignature() {
-    byte[] signature = new byte[SIGNATURE_SIZE];
     int payloadSize = rawTransaction.limit() - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
-    int offset = PAYLOAD_OFFSET + payloadSize;
-    rawTransaction.get(signature, offset, SIGNATURE_SIZE);
+    rawTransaction.position(PAYLOAD_OFFSET + payloadSize);
+    byte[] signature = new byte[SIGNATURE_SIZE];
+    rawTransaction.get(signature);
     return signature;
   }
 
   @Override
   public byte[] toBytes() {
-    return rawTransaction.slice().array();
+    byte[] bytes = rawTransaction.array();
+    return copyOf(bytes, bytes.length);
   }
 
-  public static BinaryTransactionMessage fromBuffer(ByteBuffer buffer) {
-    return new BinaryTransactionMessage(buffer);
+  @Override
+  public int size() {
+    return rawTransaction.limit();
   }
 
   @Override
@@ -101,4 +107,10 @@ public final class BinaryTransactionMessage implements TransactionMessage {
   public int hashCode() {
     return Objects.hashCode(rawTransaction);
   }
+
+  @Override
+  public String toString() {
+    return Arrays.toString(rawTransaction.array());
+  }
+
 }

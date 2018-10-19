@@ -18,9 +18,9 @@
 package com.exonum.binding.common.message;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -47,58 +47,69 @@ public interface TransactionMessage {
   PublicKey getAuthor();
 
   /**
-   * Returns the identifier of the service this message belongs.
+   * Returns the identifier of the service this message belongs to.
    */
   short getServiceId();
 
   /**
-   * Returns transaction id of the Transaction Message.
+   * Returns transaction identifier which is unique within the service.
    */
   short getTransactionId();
 
   /**
-   * Returns payload of the Transaction Message.
+   * Returns the transaction message body.
    */
   byte[] getPayload();
 
   /**
-   * Returns Transaction Message hash.
+   * Returns the transaction message hash.
    */
   HashCode hash();
 
   /**
-   * Returns Transaction Message signature.
+   * Returns the <a href="https://ed25519.cr.yp.to/">Ed25519</a> signature
+   * over this binary message.
+   *
+   * <p>The signature is <strong>not</strong> guaranteed to be valid and must be verified against
+   * the signer’s public key.
+   *
+   * @see CryptoFunctions#ed25519()
    */
   byte[] getSignature();
 
   /**
-   * Returns Transaction Message in binary format.
+   * Returns the transaction message in binary format.
    */
   byte[] toBytes();
 
   /**
-   * Returns the Builder for the Transaction Message.
+   * Returns the transaction message size in bytes.
+   */
+  int size();
+
+  /**
+   * Create a new builder for the transaction message.
    */
   static Builder builder() {
     return new Builder();
   }
 
   /**
-   * Creates Transaction Message from the given bytes array.
+   * Creates the transaction message from the given bytes array.
    */
   static TransactionMessage fromBytes(byte[] bytes) {
-    return BinaryTransactionMessage.fromBuffer(ByteBuffer.wrap(bytes));
+    return new BinaryTransactionMessage(bytes);
   }
 
   /**
-   * Creates Transaction Message from the given bytes buffer.
+   * Creates the transaction message from the given bytes buffer.
    */
   static TransactionMessage fromBuffer(ByteBuffer buffer) {
-    return BinaryTransactionMessage.fromBuffer(buffer);
+    return new BinaryTransactionMessage(buffer.array());
   }
 
   /**
-   * Transaction Message Builder class.
+   * Builder for the binary transaction message.
    */
   class Builder {
     private Short serviceId;
@@ -106,7 +117,7 @@ public interface TransactionMessage {
     private ByteBuffer payload;
 
     /**
-     * Sets service id to the transaction message.
+     * Sets service identifier to the transaction message.
      */
     public Builder serviceId(short serviceId) {
       this.serviceId = serviceId;
@@ -114,7 +125,7 @@ public interface TransactionMessage {
     }
 
     /**
-     * Sets transaction id to the transaction message.
+     * Sets transaction identifier to the transaction message.
      */
     public Builder transactionId(short transactionId) {
       this.transactionId = transactionId;
@@ -137,15 +148,17 @@ public interface TransactionMessage {
     }
 
     /**
-     * Signs and creates an instance of the transaction message.
+     * Signs the message, creating a new signed binary transaction message.
      *
+     * @param keys key pair with private and public keys. Public key is used as an author key of the
+     *        message and private key is used for signing the message.
+     * @param crypto a cryptographic function to use
+     * @return a new signed binary transaction message
      * @throws NullPointerException if serviceId or transactionId or payload haven't set
      * @throws IllegalArgumentException if public key has wrong size
      */
     public TransactionMessage sign(KeyPair keys, CryptoFunction crypto) {
-      checkNotNull(serviceId);
-      checkNotNull(transactionId);
-      checkNotNull(payload);
+      checkRequiredFieldsSet();
       PublicKey authorPublicKey = keys.getPublicKey();
       checkArgument(authorPublicKey.size() == AUTHOR_PUBLIC_KEY_SIZE);
 
@@ -164,7 +177,19 @@ public interface TransactionMessage {
       byte[] signature = crypto.signMessage(unsignedMessage, keys.getPrivateKey());
       buffer.put(signature);
 
-      return BinaryTransactionMessage.fromBuffer(buffer);
+      return new BinaryTransactionMessage(buffer.array());
+    }
+
+    private void checkRequiredFieldsSet() {
+      String undefinedFields = "";
+      undefinedFields = serviceId == null ? undefinedFields + " serviceId" : undefinedFields;
+      undefinedFields =
+          transactionId == null ? undefinedFields + " transactionId" : undefinedFields;
+      undefinedFields = payload == null ? undefinedFields + " payload" : undefinedFields;
+      if (!undefinedFields.isEmpty()) {
+        throw new IllegalStateException(
+            "Next field(s) are required but weren't set: " + undefinedFields);
+      }
     }
 
     private Builder() {
