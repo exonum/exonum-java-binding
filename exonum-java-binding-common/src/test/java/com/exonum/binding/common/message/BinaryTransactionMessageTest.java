@@ -90,6 +90,7 @@ class BinaryTransactionMessageTest {
   void roundTripTest(TransactionMessage message) {
     byte[] bytes = message.toBytes();
     TransactionMessage actualMessage = TransactionMessage.fromBytes(bytes);
+
     assertThat(actualMessage, is(message));
   }
 
