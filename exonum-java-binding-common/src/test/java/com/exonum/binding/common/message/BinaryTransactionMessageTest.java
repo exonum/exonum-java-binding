@@ -57,7 +57,7 @@ class BinaryTransactionMessageTest {
         .sign(KEYS, CRYPTO);
 
     // mutate input parameter
-    mutableIn[0] = 0x10;
+    ThreadLocalRandom.current().nextBytes(mutableIn);
     assertThat(message.getPayload(), not(mutableIn));
 
     // mutate output parameters
