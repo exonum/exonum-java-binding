@@ -17,9 +17,11 @@
 
 package com.exonum.binding.common.message;
 
+import static com.exonum.binding.common.message.TransactionMessage.MIN_MESSAGE_SIZE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
@@ -74,6 +76,13 @@ class BinaryTransactionMessageTest {
     assertThat(message.getAuthor().toBytes(), not(mutableAuthor));
     assertThat(message.getSignature(), not(mutableSignature));
     assertThat(message.toBytes(), not(mutableMessage));
+  }
+
+  @Test
+  void invalidBytesArrayTest() {
+    byte[] messageBytes = Bytes.randomBytes(MIN_MESSAGE_SIZE - 1);
+
+    assertThrows(IllegalArgumentException.class, () -> new BinaryTransactionMessage(messageBytes));
   }
 
   @ParameterizedTest

@@ -40,6 +40,7 @@ public interface TransactionMessage {
 
   int AUTHOR_PUBLIC_KEY_SIZE = 32;
   int SIGNATURE_SIZE = 64;
+  int MIN_MESSAGE_SIZE = PAYLOAD_OFFSET + SIGNATURE_SIZE;
 
   /**
    * Returns a public key of the author of the transaction message.
@@ -163,7 +164,7 @@ public interface TransactionMessage {
       checkArgument(authorPublicKey.size() == AUTHOR_PUBLIC_KEY_SIZE);
 
       ByteBuffer buffer = ByteBuffer
-          .allocate(PAYLOAD_OFFSET + payload.limit() + SIGNATURE_SIZE)
+          .allocate(MIN_MESSAGE_SIZE + payload.limit())
           .order(ByteOrder.LITTLE_ENDIAN);
       buffer.put(authorPublicKey.toBytes());
       buffer.put(MessageType.TRANSACTION.bytes());

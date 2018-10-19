@@ -18,6 +18,7 @@
 package com.exonum.binding.common.message;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.copyOf;
 
@@ -34,6 +35,8 @@ public final class BinaryTransactionMessage implements TransactionMessage {
   private final ByteBuffer rawTransaction;
 
   BinaryTransactionMessage(byte[] bytes) {
+    checkArgument(MIN_MESSAGE_SIZE <= bytes.length,
+        "Expected an array of size at least %s, but was %s", MIN_MESSAGE_SIZE, bytes.length);
     this.rawTransaction = ByteBuffer.wrap(copyOf(bytes, bytes.length)).order(LITTLE_ENDIAN);
   }
 
@@ -57,7 +60,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] getPayload() {
-    int payloadSize = rawTransaction.limit() - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
+    int payloadSize = rawTransaction.limit() - MIN_MESSAGE_SIZE;
     byte[] payload = new byte[payloadSize];
     rawTransaction.position(PAYLOAD_OFFSET);
     rawTransaction.get(payload);
@@ -73,7 +76,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] getSignature() {
-    int payloadSize = rawTransaction.limit() - (PAYLOAD_OFFSET + SIGNATURE_SIZE);
+    int payloadSize = rawTransaction.limit() - MIN_MESSAGE_SIZE;
     rawTransaction.position(PAYLOAD_OFFSET + payloadSize);
     byte[] signature = new byte[SIGNATURE_SIZE];
     rawTransaction.get(signature);

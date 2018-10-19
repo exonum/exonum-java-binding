@@ -18,6 +18,7 @@
 package com.exonum.binding.common.message;
 
 import static com.exonum.binding.common.message.TransactionMessage.AUTHOR_PUBLIC_KEY_SIZE;
+import static com.exonum.binding.common.message.TransactionMessage.MIN_MESSAGE_SIZE;
 import static com.exonum.binding.common.message.TransactionMessage.SIGNATURE_SIZE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -62,7 +63,7 @@ class TransactionMessageBuilderTest {
     assertThat(message.getPayload(), is(payload));
     assertThat(message.getAuthor(), is(keys.getPublicKey()));
     assertThat(message.getSignature(), is(signature));
-    int expectedSize = TransactionMessage.PAYLOAD_OFFSET + payload.length + SIGNATURE_SIZE;
+    int expectedSize = MIN_MESSAGE_SIZE + payload.length;
     assertThat(message.size(), is(expectedSize));
   }
 
