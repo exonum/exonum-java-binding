@@ -94,10 +94,10 @@ class UncheckedFlatMapProofTest {
         new MapEntry(fourthKey, THIRD_VALUE)
     );
 
-    Set<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
+    Set<MapEntry> actualCheckedEntriesSet = checkedMapProof.getEntries();
 
     assertThat(
-        actualCheckedEntriesList,
+        actualCheckedEntriesSet,
         containsInAnyOrder(expectedEntriesList.toArray()));
 
     assertTrue(checkedMapProof.containsKey(firstKey));

@@ -57,8 +57,8 @@ public class CheckedFlatMapProof implements CheckedMapProof {
    * Creates a valid map proof.
    *
    * @param rootHash the Merkle root hash calculated by the validator
-   * @param entries the list of entries that are proved to be in the map
-   * @param missingKeys the list of keys that are proved <em>not</em> to be in the map
+   * @param entries the set of entries that are proved to be in the map
+   * @param missingKeys the set of keys that are proved <em>not</em> to be in the map
    * @return a new checked proof
    */
   public static CheckedFlatMapProof correct(
