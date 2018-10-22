@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.map;
+package com.exonum.binding.common.collect;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.ByteString;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-class MapEntryTest {
+public final class MapEntryInternal {
+  final byte[] key;
+  final byte[] value;
 
-  @Test
-  void constructorRejectsNulls() {
-    new NullPointerTester()
-        .testAllPublicConstructors(MapEntry.class);
+  @SuppressWarnings("unused")  // native API
+  public MapEntryInternal(byte[] key, byte[] value) {
+    this.key = checkNotNull(key, "Storage key is null");
+    this.value = checkNotNull(value, "Storage value is null");
   }
-
-  @Test
-  void verifyEquals() {
-    EqualsVerifier.forClass(MapEntry.class)
-        .withPrefabValues(
-            ByteString.class, ByteString.copyFromUtf8("a"), ByteString.copyFromUtf8("b"))
-        .verify();
-  }
-
 }

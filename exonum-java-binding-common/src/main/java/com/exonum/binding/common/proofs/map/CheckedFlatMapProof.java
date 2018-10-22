@@ -44,12 +44,12 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   private CheckedFlatMapProof(
       MapProofStatus status,
       HashCode rootHash,
-      Set<MapEntry> entries,
+      Set<ByteStringMapEntry> entries,
       Set<ByteString> missingKeys) {
     this.status = checkNotNull(status);
     this.rootHash = checkNotNull(rootHash);
     this.entries = entries.stream()
-        .collect(toMap(MapEntry::getKey, MapEntry::getValue));
+        .collect(toMap(ByteStringMapEntry::getKey, ByteStringMapEntry::getValue));
     this.missingKeys = checkNotNull(missingKeys);
   }
 
@@ -63,7 +63,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
    */
   public static CheckedFlatMapProof correct(
       HashCode rootHash,
-      Set<MapEntry> entries,
+      Set<ByteStringMapEntry> entries,
       Set<ByteString> missingKeys) {
     return new CheckedFlatMapProof(MapProofStatus.CORRECT, rootHash, entries, missingKeys);
   }
@@ -82,11 +82,11 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public Set<MapEntry> getEntries() {
+  public Set<ByteStringMapEntry> getEntries() {
     checkValid();
     return entries.entrySet()
         .stream()
-        .map(e -> new MapEntry(e.getKey(), e.getValue()))
+        .map(e -> com.exonum.binding.common.collect.MapEntry.valueOf(e.getKey(), e.getValue()))
         .collect(toSet());
   }
 

@@ -18,8 +18,9 @@ package com.exonum.binding.storage.indices;
 
 import static java.util.stream.Collectors.toSet;
 
+import com.exonum.binding.common.collect.MapEntry;
+import com.exonum.binding.common.proofs.map.ByteStringMapEntry;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
@@ -38,11 +39,11 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   private final List<MapTestEntry> entries;
 
   private final Matcher<Set<ByteString>> missingKeysMatcher;
-  private final Matcher<Set<MapEntry>> presentEntriesMatcher;
+  private final Matcher<Set<ByteStringMapEntry>> presentEntriesMatcher;
 
   private CheckedMapProofMatcher(List<MapTestEntry> entries) {
     this.entries = entries;
-    Set<MapEntry> expectedEntries = getExpectedEntries();
+    Set<ByteStringMapEntry> expectedEntries = getExpectedEntries();
     Set<ByteString> expectedMissingKeys = getExpectedMissingKeys();
     this.presentEntriesMatcher = IsEqual.equalTo(expectedEntries);
     this.missingKeysMatcher = IsEqual.equalTo(expectedMissingKeys);
@@ -53,7 +54,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     if (!checkedMapProof.isValid()) {
       return false;
     }
-    Set<MapEntry> presentEntries = checkedMapProof.getEntries();
+    Set<ByteStringMapEntry> presentEntries = checkedMapProof.getEntries();
     Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
     return presentEntriesMatcher.matches(presentEntries)
         && missingKeysMatcher.matches(missingKeys);
@@ -71,7 +72,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
     if (proof.isValid()) {
-      // We convert entries to string manually here instead of using MapEntry#toString
+      // We convert entries to string manually here instead of using ByteStringMapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
       String entries = proof.getEntries().stream()
@@ -91,10 +92,10 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     }
   }
 
-  private Set<MapEntry> getExpectedEntries() {
+  private Set<ByteStringMapEntry> getExpectedEntries() {
     return entries.stream()
         .filter(e -> e.getValue().isPresent())
-        .map(e -> new MapEntry(e.getKey().asBytes(), e.getValue().get().getBytes()))
+        .map(e -> MapEntry.valueOf(e.getKey().asBytes(), e.getValue().get().getBytes()))
         .collect(toSet());
   }
 
@@ -105,7 +106,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
         .collect(toSet());
   }
 
-  private static String formatMapEntry(MapEntry e) {
+  private static String formatMapEntry(ByteStringMapEntry e) {
     String key = hexEncodeByteString(e.getKey());
     String value = StandardSerializers.string().fromBytes(e.getValue().toByteArray());
     return String.format("(%s -> %s)", key, value);

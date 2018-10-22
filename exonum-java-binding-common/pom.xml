@@ -23,6 +23,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <lazysodium-java.version>3.3.0</lazysodium-java.version>
+    <auto-value.version>1.6.2</auto-value.version>
   </properties>
 
   <dependencies>
@@ -43,6 +44,19 @@
       <!-- Optional for it is only needed for protobuf serializers support — if you don't
            use them, you don't need the protobuf. -->
       <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value-annotations</artifactId>
+      <version>${auto-value.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>1.6.2</version>
+      <scope>provided</scope>
     </dependency>
 
     <!--JUnit5-->

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.indices;
+package com.exonum.binding.common.collect;
 
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.auto.value.AutoValue;
@@ -29,23 +29,20 @@ import com.google.auto.value.AutoValue;
  * @param <V> the value type
  */
 @AutoValue
-public abstract class MapEntry<K, V> {
+public abstract class GenericMapEntry<K, V> implements MapEntry<K, V> {
 
-  /** Returns the key in this entry. */
-  public abstract K getKey();
-
-  /** Returns the value in this entry. */
-  public abstract V getValue();
-
-  static <K, V> MapEntry<K, V> fromInternal(MapEntryInternal e,
-                                            Serializer<K> keySerializer,
-                                            Serializer<V> valueSerializer) {
+  /**
+   * Creates GenericMapEntry from provided {@link MapEntryInternal} and key, value serializers.
+   */
+  public static <K, V> GenericMapEntry<K, V> fromInternal(MapEntryInternal e,
+      Serializer<K> keySerializer,
+      Serializer<V> valueSerializer) {
     K key = keySerializer.fromBytes(e.key);
     V value = valueSerializer.fromBytes(e.value);
     return from(key, value);
   }
 
-  static <K, V> MapEntry<K, V> from(K key, V value) {
-    return new AutoValue_MapEntry<>(key, value);
+  private static <K, V> GenericMapEntry<K, V> from(K key, V value) {
+    return new com.exonum.binding.common.collect.AutoValue_GenericMapEntry<>(key, value);
   }
 }

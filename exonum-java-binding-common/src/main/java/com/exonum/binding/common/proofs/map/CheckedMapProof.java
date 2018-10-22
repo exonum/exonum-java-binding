@@ -44,7 +44,7 @@ public interface CheckedMapProof extends CheckedProof {
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  Set<MapEntry> getEntries();
+  Set<ByteStringMapEntry> getEntries();
 
   /**
    * Get all keys that were requested, but did not appear in this proof.

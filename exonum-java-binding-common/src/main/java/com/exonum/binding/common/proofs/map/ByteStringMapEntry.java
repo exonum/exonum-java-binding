@@ -18,13 +18,14 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.google.protobuf.ByteString;
 import java.util.Objects;
 
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
  */
-public final class MapEntry {
+public final class ByteStringMapEntry implements MapEntry<ByteString, ByteString> {
   private final ByteString key;
 
   private final ByteString value;
@@ -34,7 +35,7 @@ public final class MapEntry {
    * @param key a node key
    * @param value a value mapped to the key
    */
-  public MapEntry(byte[] key, byte[] value) {
+  public ByteStringMapEntry(byte[] key, byte[] value) {
     this.key = ByteString.copyFrom(key);
     this.value = ByteString.copyFrom(value);
   }
@@ -44,7 +45,7 @@ public final class MapEntry {
    * @param key a node key
    * @param value a value mapped to the key
    */
-  public MapEntry(ByteString key, ByteString value) {
+  public ByteStringMapEntry(ByteString key, ByteString value) {
     this.key = checkNotNull(key, "key");
     this.value = checkNotNull(value, "value");
   }
@@ -67,7 +68,7 @@ public final class MapEntry {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    MapEntry that = (MapEntry) o;
+    ByteStringMapEntry that = (ByteStringMapEntry) o;
     return Objects.equals(key, that.key) && Objects.equals(value, that.value);
   }
 

@@ -19,6 +19,9 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.common.collect.GenericMapEntry;
+import com.exonum.binding.common.collect.MapEntry;
+import com.exonum.binding.common.collect.MapEntryInternal;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -236,7 +239,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
         this::nativeEntriesIterFree,
         dbView,
         modCounter,
-        (entry) -> MapEntry.fromInternal(entry, keySerializer, valueSerializer)
+        (entry) -> GenericMapEntry.fromInternal(entry, keySerializer, valueSerializer)
     );
   }
 
