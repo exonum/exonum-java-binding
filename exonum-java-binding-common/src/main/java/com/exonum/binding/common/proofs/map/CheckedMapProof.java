@@ -33,7 +33,7 @@ import java.util.Set;
  * // Convert to checked
  * CheckedMapProof checkedProof = proof.check();
  * // Check the root hash
- * if (checkedProof.isValid() && checkedProof.compareWithRootHash(expectedRootHash)) {
+ * if (checkedProof.isValid() && checkedProof.getRootHash().equals(expectedRootHash)) {
  *   // Get and use the value(s)
  *   ByteString value = checked.get(key);
  * }
@@ -71,10 +71,4 @@ public interface CheckedMapProof extends CheckedProof {
    */
   @Override
   MapProofStatus getProofStatus();
-
-  /**
-   * Checks that proof is correct and {@code expectedRootHash} is equal to the root hash.
-   * @throws IllegalStateException if the proof is not valid
-   */
-  boolean compareWithRootHash(HashCode expectedRootHash);
 }

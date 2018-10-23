@@ -126,12 +126,6 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     return status == MapProofStatus.CORRECT;
   }
 
-  @Override
-  public boolean compareWithRootHash(HashCode expectedRootHash) {
-    checkValid();
-    return rootHash.equals(expectedRootHash);
-  }
-
   private void checkValid() {
     checkState(isValid(), "Proof is not valid: %s", status);
   }
