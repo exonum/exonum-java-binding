@@ -23,17 +23,14 @@ import java.util.NavigableMap;
  * A proof that some elements exist in a proof list.
  * Example usage:
  * <pre><code>
- * byte[] key = "The key for which I want a proved value".getBytes();
  * HashCode expectedRootHash = // get a known root hash from block proof //
- * UncheckedListProof proof = new UncheckedListProofAdapter(proof, serializer);
+ * UncheckedListProof proof = new UncheckedListProofAdapter(rootProofNode, serializer);
  * // Check the proof
  * CheckedListProof checkedProof = proof.check();
  * // Check the root hash
- * if (checkedProof.isValid()) {
- *   if (checkedProof.getRootHash().equals(expectedRootHash)) {
+ * if (checkedProof.isValid() && checkedProof.getRootHash().equals(expectedRootHash)) {
  *   // Get and use elements
- *   NavigableMap value = checked.getElements();
- *   }
+ *   NavigableMap value = checkedProof.getElements();
  * }
  * </code></pre>
  */
