@@ -15,8 +15,8 @@ You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
   * [JDK 1.8+](http://jdk.java.net/10/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
-  * [Rust 1.26.2](https://www.rust-lang.org/).
-    To install specific Rust version, use `rustup install 1.26.2` command.
+  * [Rust 1.27.2](https://www.rust-lang.org/).
+    To install specific Rust version, use `rustup install 1.27.2` command.
   * The [system dependencies](https://exonum.com/doc/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
 
