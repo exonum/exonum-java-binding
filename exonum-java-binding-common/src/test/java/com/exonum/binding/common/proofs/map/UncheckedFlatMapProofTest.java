@@ -56,8 +56,7 @@ class UncheckedFlatMapProofTest {
         createMapProofEntry(thirdDbKey)
     );
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(
-            branches, singletonList(leaf), emptyList());
+        new UncheckedFlatMapProof(branches, singletonList(leaf), emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
@@ -88,17 +87,9 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    List<MapEntry> expectedEntriesList = Arrays.asList(
-        new MapEntry(firstKey, FIRST_VALUE),
-        new MapEntry(secondKey, SECOND_VALUE),
-        new MapEntry(fourthKey, THIRD_VALUE)
-    );
+    Set<MapEntry> actualCheckedEntries = checkedMapProof.getEntries();
 
-    Set<MapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
-
-    assertThat(
-        actualCheckedEntriesList,
-        containsInAnyOrder(expectedEntriesList.toArray()));
+    assertThat(actualCheckedEntries, containsInAnyOrder(leaves.toArray()));
 
     assertTrue(checkedMapProof.containsKey(firstKey));
     assertThat(checkedMapProof.get(firstKey), equalTo(FIRST_VALUE));
@@ -131,7 +122,6 @@ class UncheckedFlatMapProofTest {
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
-    assertTrue(checkedMapProof.compareWithRootHash(expectedRootHash));
 
     assertThat(checkedMapProof.getEntries(), equalTo(singleton(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));
@@ -156,8 +146,7 @@ class UncheckedFlatMapProofTest {
   @Test
   void mapProofWithoutEntriesShouldBeCorrect() {
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(
-            emptyList(), emptyList(), emptyList());
+        new UncheckedFlatMapProof(emptyList(), emptyList(), emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
