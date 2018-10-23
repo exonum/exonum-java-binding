@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.proofs.map;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.common.CheckedProof;
 import com.google.protobuf.ByteString;
 import java.util.Set;
