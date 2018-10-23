@@ -29,7 +29,6 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,24 +56,28 @@ class BinaryTransactionMessageTest {
         .sign(KEYS, CRYPTO);
 
     // mutate input parameter
-    ThreadLocalRandom.current().nextBytes(mutableIn);
+    mutate(mutableIn);
     assertThat(message.getPayload(), not(mutableIn));
 
     // mutate output parameters
     byte[] mutablePayload = message.getPayload();
-    byte[] mutableAuthor = message.getAuthor().toBytes();
-    byte[] mutableSignature = message.getSignature();
-    byte[] mutableHash = message.hash().asBytes();
-    byte[] mutableMessage = message.toBytes();
-    ThreadLocalRandom.current().nextBytes(mutablePayload);
-    ThreadLocalRandom.current().nextBytes(mutableAuthor);
-    ThreadLocalRandom.current().nextBytes(mutableSignature);
-    ThreadLocalRandom.current().nextBytes(mutableHash);
-    ThreadLocalRandom.current().nextBytes(mutableMessage);
-
+    mutate(mutablePayload);
     assertThat(message.getPayload(), not(mutablePayload));
+
+    byte[] mutableAuthor = message.getAuthor().toBytes();
+    mutate(mutableAuthor);
     assertThat(message.getAuthor().toBytes(), not(mutableAuthor));
+
+    byte[] mutableSignature = message.getSignature();
+    mutate(mutableSignature);
     assertThat(message.getSignature(), not(mutableSignature));
+
+    byte[] mutableHash = message.hash().asBytes();
+    mutate(mutableHash);
+    assertThat(message.hash().asBytes(), not(mutableHash));
+
+    byte[] mutableMessage = message.toBytes();
+    mutate(mutableMessage);
     assertThat(message.toBytes(), not(mutableMessage));
   }
 
@@ -107,6 +110,12 @@ class BinaryTransactionMessageTest {
             .payload(Bytes.bytes("test content"))
             .sign(KEYS, CRYPTO)
     );
+  }
+
+  private static void mutate(byte[] array) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = (byte) ~array[i];
+    }
   }
 
 }

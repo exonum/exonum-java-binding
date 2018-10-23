@@ -108,6 +108,7 @@ public final class Bytes {
    *
    * @param size a size of the new array
    * @return a new array that contains random bytes
+   * @throws IllegalArgumentException in case the size is negative
    */
   public static byte[] randomBytes(int size) {
     checkArgument(0 <= size, "Size is negative: %s", size);
@@ -116,6 +117,5 @@ public final class Bytes {
     return array;
   }
 
-  private Bytes() {
-  }
+  private Bytes() {}
 }

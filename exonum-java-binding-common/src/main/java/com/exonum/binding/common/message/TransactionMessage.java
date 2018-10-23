@@ -155,7 +155,7 @@ public interface TransactionMessage {
      *        message and private key is used for signing the message.
      * @param crypto a cryptographic function to use
      * @return a new signed binary transaction message
-     * @throws NullPointerException if serviceId or transactionId or payload haven't set
+     * @throws NullPointerException if serviceId or transactionId or payload weren't set
      * @throws IllegalArgumentException if public key has wrong size
      */
     public TransactionMessage sign(KeyPair keys, CryptoFunction crypto) {
@@ -189,7 +189,7 @@ public interface TransactionMessage {
       undefinedFields = payload == null ? undefinedFields + " payload" : undefinedFields;
       if (!undefinedFields.isEmpty()) {
         throw new IllegalStateException(
-            "Next field(s) are required but weren't set: " + undefinedFields);
+            "Following field(s) are required but weren't set: " + undefinedFields);
       }
     }
 

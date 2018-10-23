@@ -41,10 +41,12 @@ import org.mockito.Mockito;
 
 class TransactionMessageBuilderTest {
 
+  private static final short SERVICE_ID = 1;
+  private static final short TRANSACTION_ID = 2;
+  private static final CryptoFunction CRYPTO = CryptoFunctions.ed25519();
+
   @Test
   void messageBuilderTest() {
-    short serviceId = 1;
-    short transactionId = 2;
     byte[] payload = Bytes.randomBytes(100);
     byte[] publicKey = Bytes.randomBytes(AUTHOR_PUBLIC_KEY_SIZE);
     KeyPair keys = KeyPair.createKeyPair(Bytes.bytes(0x00), publicKey);
@@ -53,13 +55,13 @@ class TransactionMessageBuilderTest {
     when(cryptoFunction.signMessage(any(), eq(keys.getPrivateKey()))).thenReturn(signature);
 
     TransactionMessage message = TransactionMessage.builder()
-        .serviceId(serviceId)
-        .transactionId(transactionId)
+        .serviceId(SERVICE_ID)
+        .transactionId(TRANSACTION_ID)
         .payload(payload)
         .sign(keys, cryptoFunction);
 
-    assertThat(message.getServiceId(), is(serviceId));
-    assertThat(message.getTransactionId(), is(transactionId));
+    assertThat(message.getServiceId(), is(SERVICE_ID));
+    assertThat(message.getTransactionId(), is(TRANSACTION_ID));
     assertThat(message.getPayload(), is(payload));
     assertThat(message.getAuthor(), is(keys.getPublicKey()));
     assertThat(message.getSignature(), is(signature));
@@ -74,48 +76,45 @@ class TransactionMessageBuilderTest {
 
     assertThrows(IllegalArgumentException.class,
         () -> TransactionMessage.builder()
-            .serviceId((short) 0)
-            .transactionId((short) 1)
+            .serviceId(SERVICE_ID)
+            .transactionId(TRANSACTION_ID)
             .payload(Bytes.bytes())
-            .sign(keys, CryptoFunctions.ed25519())
+            .sign(keys, CRYPTO)
     );
   }
 
   @ParameterizedTest
   @MethodSource("notProperlyFilledMessagesSource")
-  void noProperlyFilledMessagesTest(Executable message) {
+  void notProperlyFilledMessagesTest(Executable message) {
     assertThrows(IllegalStateException.class, message);
   }
 
   private static List<Executable> notProperlyFilledMessagesSource() {
-    short serviceId = 1;
-    short transactionId = 1;
     byte[] payload = Bytes.bytes();
-    CryptoFunction crypto = CryptoFunctions.ed25519();
-    KeyPair keyPair = crypto.generateKeyPair();
+    KeyPair keyPair = CRYPTO.generateKeyPair();
 
     return ImmutableList.of(
         () -> TransactionMessage.builder()
-            .serviceId(serviceId)
-            .sign(keyPair, crypto),
+            .serviceId(SERVICE_ID)
+            .sign(keyPair, CRYPTO),
         () -> TransactionMessage.builder()
-            .serviceId(serviceId)
-            .transactionId(transactionId)
-            .sign(keyPair, crypto),
+            .serviceId(SERVICE_ID)
+            .transactionId(TRANSACTION_ID)
+            .sign(keyPair, CRYPTO),
         () -> TransactionMessage.builder()
-            .transactionId(transactionId)
-            .sign(keyPair, crypto),
+            .transactionId(TRANSACTION_ID)
+            .sign(keyPair, CRYPTO),
         () -> TransactionMessage.builder()
-            .serviceId(serviceId)
+            .serviceId(SERVICE_ID)
             .payload(payload)
-            .sign(keyPair, crypto),
+            .sign(keyPair, CRYPTO),
         () -> TransactionMessage.builder()
-            .transactionId(transactionId)
+            .transactionId(TRANSACTION_ID)
             .payload(payload)
-            .sign(keyPair, crypto),
+            .sign(keyPair, CRYPTO),
         () -> TransactionMessage.builder()
             .payload(payload)
-            .sign(keyPair, crypto)
+            .sign(keyPair, CRYPTO)
     );
   }
 
