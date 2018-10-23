@@ -23,9 +23,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.storage.serialization.Serializer;
+import com.exonum.binding.common.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 
 /**

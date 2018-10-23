@@ -16,75 +16,135 @@
 
 package com.exonum.binding.storage.indices;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Lists.asList;
+import static java.util.stream.Collectors.toList;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.storage.proofs.map.MapProof;
-import com.exonum.binding.storage.proofs.map.MapProofValidator;
-import com.exonum.binding.storage.serialization.StandardSerializers;
-import javax.annotation.Nullable;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.proofs.map.CheckedMapProof;
+import com.exonum.binding.common.proofs.map.UncheckedMapProof;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCode, String>> {
 
-  private final HashCode key;
-  private final MapProofValidatorMatcher proofValidatorMatcher;
+  private final List<MapTestEntry> entries;
 
-  private ProofMapContainsMatcher(HashCode key, @Nullable String expectedValue) {
-    this.key = key;
-    proofValidatorMatcher = MapProofValidatorMatcher.isValid(key, expectedValue);
+  private final CheckedMapProofMatcher mapProofMatcher;
+
+  private ProofMapContainsMatcher(List<MapTestEntry> entries) {
+    this.entries = entries;
+    mapProofMatcher = CheckedMapProofMatcher.isValid(this.entries);
   }
 
   @Override
   protected boolean matchesSafely(ProofMapIndexProxy<HashCode, String> map) {
-    MapProofValidator validator = checkProof(map);
+    CheckedMapProof checkedProof = checkProof(map);
+    HashCode expectedRootHash = map.getRootHash();
 
-    return proofValidatorMatcher.matches(validator);
+    return mapProofMatcher.matches(checkedProof)
+        && checkedProof.getRootHash().equals(expectedRootHash);
   }
 
   @Override
   public void describeTo(Description description) {
     description.appendText("proof map providing ")
-        .appendDescriptionOf(proofValidatorMatcher);
+        .appendDescriptionOf(mapProofMatcher);
   }
 
   @Override
   protected void describeMismatchSafely(ProofMapIndexProxy<HashCode, String> map,
-                                        Description mismatchDescription) {
-    MapProofValidator validator = checkProof(map);
-    proofValidatorMatcher.describeMismatch(validator, mismatchDescription);
+      Description mismatchDescription) {
+    mismatchDescription.appendText("was a proof map with Merkle root=")
+        .appendValue(map.getRootHash())
+        .appendText(" providing a proof that ");
+    CheckedMapProof checkedProof = checkProof(map);
+    mapProofMatcher.describeMismatch(checkedProof, mismatchDescription);
   }
 
-  private MapProofValidator checkProof(ProofMapIndexProxy<HashCode, String> map) {
-    MapProof proof = map.getProof(key);
+  private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {
+    Collection<HashCode> keys = entries.stream()
+        .map(MapTestEntry::getKey)
+        .collect(toList());
+
+    UncheckedMapProof proof = map.getProof(keys);
     assert proof != null : "The proof must not be null";
-    HashCode rootHash = map.getRootHash();
-    MapProofValidator<String> validator = new MapProofValidator<>(rootHash, key.asBytes(),
-        StandardSerializers.string());
 
-    proof.accept(validator);
-    return validator;
+    return proof.check();
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof
-   * that it maps the specified value to the specified key.
-   *
-   * @param key a key to request proof for
-   * @param value an expected value mapped to the key
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that
+   * present entries are in the map and absent keys are missing from the map.
+   * @param entry expected present or absent map entry
+   * @param entries other expected present or absent map entries
    */
-  static ProofMapContainsMatcher provesThatContains(HashCode key, String value) {
-    return new ProofMapContainsMatcher(key, checkNotNull(value));
+  static ProofMapContainsMatcher provesThatCorrect(
+      MapTestEntry entry, MapTestEntry... entries) {
+    List<MapTestEntry> expectedEntries = asList(entry, entries);
+    return new ProofMapContainsMatcher(expectedEntries);
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof
-   * that it does not map any value to the specified key.
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all
+   * the entries that are expected to be present are contained in the map.
    *
-   * @param key a key to request proof for
+   * @param expectedPresentEntries expected collection of present map entries
    */
-  static ProofMapContainsMatcher provesNoMappingFor(HashCode key) {
-    return new ProofMapContainsMatcher(key, null);
+  static ProofMapContainsMatcher provesThatPresent(
+      Collection<MapEntry<HashCode, String>> expectedPresentEntries) {
+    checkArgument(
+        !expectedPresentEntries.isEmpty(), "Expected entries collection shouldn't be empty");
+    List<MapTestEntry> expectedEntries = expectedPresentEntries.stream()
+        .map(e -> presentEntry(e.getKey(), e.getValue()))
+        .collect(toList());
+    return new ProofMapContainsMatcher(expectedEntries);
+  }
+
+  /**
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that the
+   * entry that is expected to be present is contained in the map.
+   *
+   * @param expectedKey key of expected present map entry
+   * @param expectedValue value of expected present map entry
+   */
+  static ProofMapContainsMatcher provesThatPresent(HashCode expectedKey, String expectedValue) {
+    List<MapTestEntry> expectedEntry =
+        Collections.singletonList(presentEntry(expectedKey, expectedValue));
+    return new ProofMapContainsMatcher(expectedEntry);
+  }
+
+  /**
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all
+   * the entries that are expected to be absent are not contained in the map.
+   *
+   * @param expectedAbsentEntries expected collection of absent map entries
+   */
+  static ProofMapContainsMatcher provesThatAbsent(Collection<HashCode> expectedAbsentEntries) {
+    checkArgument(
+        !expectedAbsentEntries.isEmpty(), "Expected entries collection shouldn't be empty");
+    List<MapTestEntry> expectedEntries = expectedAbsentEntries.stream()
+        .map(MapTestEntry::absentEntry)
+        .collect(toList());
+    return new ProofMapContainsMatcher(expectedEntries);
+  }
+
+  /**
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all the
+   * entries that are expected to be absent are not contained in the map.
+   *
+   * @param absentEntry expected absent map entry
+   * @param absentEntries other expected absent map entries
+   */
+  static ProofMapContainsMatcher provesThatAbsent(HashCode absentEntry, HashCode... absentEntries) {
+    List<HashCode> entries = asList(absentEntry, absentEntries);
+    List<MapTestEntry> expectedEntries = entries.stream()
+        .map(MapTestEntry::absentEntry)
+        .collect(toList());
+    return new ProofMapContainsMatcher(expectedEntries);
   }
 }

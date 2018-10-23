@@ -22,8 +22,8 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;

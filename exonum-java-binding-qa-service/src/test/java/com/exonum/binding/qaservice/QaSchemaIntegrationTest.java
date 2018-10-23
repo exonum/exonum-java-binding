@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;

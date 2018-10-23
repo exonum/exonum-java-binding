@@ -14,7 +14,7 @@ set -x
 if [ "$CHECK_RUST" = true ]
 then
     # Install cargo-audit if it's not already.
-    cargo-audit -V || cargo install cargo-audit --force
+    cargo audit --version || cargo install cargo-audit --force
     # Install nightly rust version and clippy.
     rustup toolchain install $RUST_NIGHTLY_VERSION
     cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
@@ -41,11 +41,18 @@ then
     cargo audit || true
 
     # Check silently for updates of Maven dependencies.
-    cd "${TRAVIS_BUILD_DIR}"
-    mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
+    # TODO Disabled until ECR-2252 is fixed.
+    #cd "${TRAVIS_BUILD_DIR}"
+    #mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
 
     echo 'Rust checks are completed.'
 else
     cd "${TRAVIS_BUILD_DIR}"
-    ./run_all_tests.sh
+
+    ./run_all_tests.sh;
+    # Linux builds currently skip some tests, so only OSX builds should update code coverage report.
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      # Upload the coverage report to coveralls
+      mvn org.eluder.coveralls:coveralls-maven-plugin:report
+    fi
 fi

@@ -6,10 +6,13 @@ This document describes how to configure and run an Exonum node with a Java serv
 Build an application following the instructions in [“How to Build”][how-to-build] section
 of the Contribution Guide.
 
-You should also have a ready-to-use Exonum Java service with prepared ServiceModule class.
-See [Java binding documentation](https://exonum.com/doc/get-started/java-binding/).
+You also need a ready-to-use Exonum Java service. You can use 
+[cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
+implementing your own Exonum service 
+in the [user guide](https://exonum.com/doc/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
+[cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding-cryptocurrency-demo
 
 ## How to Run an Exonum Node
 

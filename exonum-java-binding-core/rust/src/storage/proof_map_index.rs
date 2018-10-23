@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject};
+use jni::sys::{jboolean, jbyteArray, jobject, jsize};
 use jni::JNIEnv;
 
 use std::panic;
@@ -21,9 +21,10 @@ use std::ptr;
 
 use exonum::crypto::Hash;
 use exonum::storage::proof_map_index::{
-    ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath, PROOF_MAP_KEY_SIZE,
+    CheckedMapProof, MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
+    ProofPath, PROOF_MAP_KEY_SIZE,
 };
-use exonum::storage::{Fork, ProofMapIndex, Snapshot, StorageValue};
+use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 
 use storage::db::{Value, View, ViewRef};
 use utils::{self, Handle, PairIter};
@@ -32,14 +33,13 @@ use JniResult;
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
-const MAP_PROOF_ENTRY_BRANCH: &str =
-    "com/exonum/binding/storage/proofs/map/flat/MapProofEntryBranch";
-const MAP_PROOF_ENTRY_LEAF: &str = "com/exonum/binding/storage/proofs/map/flat/MapProofEntryLeaf";
-const MAP_PROOF_ENTRY: &str = "com/exonum/binding/storage/proofs/map/flat/MapProofEntry";
-const UNCHECKED_FLAT_MAP_PROOF: &str =
-    "com/exonum/binding/storage/proofs/map/flat/UncheckedFlatMapProof";
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
+const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
+const MAP_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapEntry";
+const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
 const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
-    "([Lcom/exonum/binding/storage/proofs/map/flat/MapProofEntry;)Lcom/exonum/binding/storage/proofs/map/flat/UncheckedFlatMapProof;";
+    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/proofs/map/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
+const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
@@ -47,8 +47,6 @@ enum IndexType {
 }
 
 type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
-
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
@@ -179,35 +177,70 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
             IndexType::ForkIndex(ref map) => map.get_proof(key),
         };
 
-        let unchecked_entries = proof.proof_unchecked();
-        let branches: Vec<_> = unchecked_entries
-            .into_iter()
-            .map(|(path, hash)| create_java_map_proof_entry_branch(&env, &path, &hash))
-            .collect::<JniResult<_>>()?;
-        let local_refs = 100 + 2 * branches.len();
-        env.ensure_local_capacity(local_refs as i32)?;
-
-        // TODO: avoid checking proofs (ECR-1802)
-        let checked_proof = proof.check().unwrap();
-        let leaves: Vec<_> = checked_proof
-            .all_entries()
-            .into_iter()
-            .map(|(key, optional_value)| {
-                if optional_value.is_none() {
-                    unimplemented!("Proofs for missing keys are not yet supported");
-                }
-                let path = ProofPath::new(key);
-                let value: Vec<u8> = optional_value.cloned().unwrap().into_bytes();
-                create_java_map_proof_entry_leaf(&env, &path, &value)
-            }).collect::<JniResult<_>>()?;
-        let array = create_java_array_map_proof_entry(&env, &leaves, &branches)?;
-        let unchecked_flat_map_proof = create_java_unchecked_flat_map_proof(&env, array)?;
-        Ok(unchecked_flat_map_proof.into_inner())
+        Ok(convert_to_java_proof(&env, proof)?.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-fn create_java_map_proof_entry_branch<'a>(
+/// Returns Java-proof object.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetMultiProof(
+    env: JNIEnv,
+    _: JObject,
+    map_handle: Handle,
+    keys: jbyteArray,
+) -> jobject {
+    let res = panic::catch_unwind(|| {
+        let keys = convert_to_keys(&env, keys)?;
+        let proof = match *utils::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref map) => map.get_multiproof(keys),
+            IndexType::ForkIndex(ref map) => map.get_multiproof(keys),
+        };
+
+        Ok(convert_to_java_proof(&env, proof)?.into_inner())
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+fn convert_to_java_proof<'a>(
+    env: &'a JNIEnv,
+    proof: MapProof<Key, Value>,
+) -> JniResult<JObject<'a>> {
+    let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
+    let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
+
+    // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
+    let checked_proof = proof.check().unwrap();
+    let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
+
+    create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)
+}
+
+fn create_java_proof_nodes<'a>(
+    env: &'a JNIEnv,
+    map_proof: &MapProof<Key, Value>,
+) -> JniResult<JObject<'a>> {
+    let proof_entries = map_proof.proof_unchecked();
+    let java_entries = env.new_object_array(
+        proof_entries.len() as jsize,
+        MAP_PROOF_ENTRY,
+        JObject::null(),
+    )?;
+    for (i, (proof_path, value_hash)) in proof_entries.iter().enumerate() {
+        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
+        //   consider using a single frame
+        env.with_local_frame(8, || {
+            let je = create_java_proof_node(env, &proof_path, &value_hash)?;
+            env.set_object_array_element(java_entries, i as jsize, je)?;
+            Ok(JObject::null())
+        })?;
+    }
+    Ok(java_entries.into())
+}
+
+/// Creates a proof node — a node in a proof contour that corresponds to a tree node
+/// that does not contain any of the requested keys.
+fn create_java_proof_node<'a>(
     env: &'a JNIEnv,
     proof_path: &ProofPath,
     hash: &Hash,
@@ -215,49 +248,63 @@ fn create_java_map_proof_entry_branch<'a>(
     let proof_path: JObject = env.byte_array_from_slice(proof_path.as_bytes())?.into();
     let hash: JObject = utils::convert_hash(env, hash)?.into();
     env.new_object(
-        MAP_PROOF_ENTRY_BRANCH,
+        MAP_PROOF_ENTRY,
         "([B[B)V",
         &[proof_path.into(), hash.into()],
     )
 }
 
-fn create_java_map_proof_entry_leaf<'a>(
+fn create_java_map_entries<'a>(
     env: &'a JNIEnv,
-    proof_path: &ProofPath,
-    value: &[u8],
+    checked_proof: &CheckedMapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
-    let proof_path: JObject = env.byte_array_from_slice(proof_path.as_bytes())?.into();
-    let value: JObject = env.byte_array_from_slice(value)?.into();
-    env.new_object(
-        MAP_PROOF_ENTRY_LEAF,
-        "([B[B)V",
-        &[proof_path.into(), value.into()],
-    )
+    let entries: Vec<(&Key, &Value)> = checked_proof.entries();
+    let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
+    for (i, (key, value)) in entries.iter().enumerate() {
+        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
+        //   consider using a single frame
+        env.with_local_frame(8, || {
+            let je = create_java_map_entry(env, key, value)?;
+            env.set_object_array_element(java_entries, i as jsize, je)?;
+            Ok(JObject::null())
+        })?;
+    }
+    Ok(java_entries.into())
 }
 
-fn create_java_array_map_proof_entry<'a, 'b: 'a>(
+#[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
+fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
+    let key: JObject = env.byte_array_from_slice(key)?.into();
+    let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
+    env.new_object(MAP_ENTRY, "([B[B)V", &[key.into(), value.into()])
+}
+
+fn create_java_missing_keys<'a>(
     env: &'a JNIEnv,
-    leaves: &'b [JObject],
-    branches: &'b [JObject],
+    map_proof: &MapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
-    let length = leaves.len() + branches.len();
-    let element_class = MAP_PROOF_ENTRY;
-    let array = env.new_object_array(length as i32, element_class, JObject::null())?;
-    for (index, entity) in branches.iter().chain(leaves.iter()).enumerate() {
-        env.set_object_array_element(array, index as i32, *entity)?;
+    let missing_keys = map_proof.missing_keys_unchecked();
+    let java_missing_keys =
+        env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
+    for (i, key) in missing_keys.iter().enumerate() {
+        let java_key = env.byte_array_from_slice(key.as_ref())?.into();
+        env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
+        env.delete_local_ref(java_key)?;
     }
-    Ok(array.into())
+    Ok(java_missing_keys.into())
 }
 
 fn create_java_unchecked_flat_map_proof<'a>(
     env: &'a JNIEnv,
-    entries: JObject,
+    proof_nodes: JObject,
+    map_entries: JObject,
+    missing_keys: JObject,
 ) -> JniResult<JObject<'a>> {
     let java_proof = env.call_static_method(
         UNCHECKED_FLAT_MAP_PROOF,
-        "fromUnsorted",
+        "fromNative",
         UNCHECKED_FLAT_MAP_PROOF_SIG,
-        &[entries.into()],
+        &[proof_nodes.into(), map_entries.into(), missing_keys.into()],
     )?;
     java_proof.l()
 }
@@ -536,4 +583,18 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     let mut key = Key::default();
     key.copy_from_slice(&bytes);
     Ok(key)
+}
+
+fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
+    let bytes = env.convert_byte_array(array)?;
+    assert_eq!(bytes.len() % PROOF_MAP_KEY_SIZE, 0);
+
+    let keys = bytes
+        .chunks(PROOF_MAP_KEY_SIZE)
+        .map(|bytes| {
+            let mut key = Key::default();
+            key.copy_from_slice(bytes);
+            key
+        }).collect();
+    Ok(keys)
 }

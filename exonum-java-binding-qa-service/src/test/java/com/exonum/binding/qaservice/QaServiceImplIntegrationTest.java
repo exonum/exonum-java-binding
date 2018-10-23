@@ -24,9 +24,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.exonum.binding.hash.HashCode;
-import com.exonum.binding.hash.Hashing;
-import com.exonum.binding.messages.Transaction;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
@@ -45,6 +44,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -85,7 +85,10 @@ class QaServiceImplIntegrationTest {
   private static ListAppender getCapturingLogAppender() {
     LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
     Configuration config = ctx.getConfiguration();
-    return (ListAppender) config.getAppenders().get("ListAppender");
+    ListAppender appender = (ListAppender) config.getAppenders().get("ListAppender");
+    // Clear the appender so that it doesn't contain entries from the previous tests.
+    appender.clear();
+    return appender;
   }
 
   @AfterEach

@@ -4,13 +4,14 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
-use java_bindings::jni::{JNIEnv, JavaVM};
-use java_bindings::utils::{
-    check_error_on_exception, get_and_clear_java_exception, get_class_name, get_exception_message,
-    panic_on_exception,
+use java_bindings::{
+    jni::{JNIEnv, JavaVM},
+    utils::{
+        check_error_on_exception, get_and_clear_java_exception, get_class_name,
+        get_exception_message, panic_on_exception,
+    },
+    JniErrorKind, JniExecutor, JniResult, MainExecutor,
 };
-use java_bindings::{JniErrorKind, JniExecutor, JniResult, MainExecutor};
-
 use std::sync::Arc;
 
 const ERROR_CLASS: &str = "java/lang/Error";

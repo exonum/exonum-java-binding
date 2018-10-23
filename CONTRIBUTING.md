@@ -49,8 +49,9 @@ The project is split into several modules. Here are the main ones:
   * [`core-native`](exonum-java-binding-core/rust) contains the glue code between Java and Rust.
   * [`app`](exonum-java-binding-core/rust/ejb-app) is an application that runs a node with Java 
   and Rust services.
-  * [`proofs`](exonum-java-proofs) provides classes to represent and verify 
-  [Exonum proofs](https://exonum.com/doc/get-started/design-overview/#proofs).
+  * [`common`](exonum-java-binding-common) provides common functionality to Exonum core
+  and light clients: [Exonum proofs](https://exonum.com/doc/get-started/design-overview/#proofs),
+  hashing and cryptographic operations, serialization support.
   * [`exonum-service-archetype`](exonum-java-binding-service-archetype) implements an archetype
   generating a template project of Exonum Java service. 
   <!-- TODO: a link to a getting started guide/generating a project -->

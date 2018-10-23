@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.messages.Message;
+import com.exonum.binding.common.message.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import org.junit.jupiter.api.Test;
 

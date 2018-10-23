@@ -18,13 +18,13 @@ package com.exonum.binding.qaservice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.hash.HashCode;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.storage.serialization.StandardSerializers;
 import java.util.Collections;
 import java.util.List;
 
@@ -57,7 +57,7 @@ public final class QaSchema implements Schema {
   public ProofMapIndexProxy<HashCode, Long> counters() {
     String name = fullIndexName("counters");
     return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
-        StandardSerializers.longs());
+        StandardSerializers.uint64());
   }
 
   /**
