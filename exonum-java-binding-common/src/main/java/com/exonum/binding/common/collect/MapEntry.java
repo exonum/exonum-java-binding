@@ -16,42 +16,31 @@
 
 package com.exonum.binding.common.collect;
 
-import com.exonum.binding.common.proofs.map.ByteStringMapEntry;
-import com.google.protobuf.ByteString;
+import com.google.auto.value.AutoValue;
 
 /**
- * MapEntry common interface which provides several factory methods for {@link ByteStringMapEntry}
- * and {@link GenericMapEntry} creation.
+ * A map entry: a key-value pair. This entry does not permit null keys and values.
+ *
+ * <p>A map entry contains <em>a copy</em> of the data in the corresponding map index.
+ * It does not reflect the changes made to the map since this entry had been created.
  *
  * @param <K> the key type
  * @param <V> the value type
  */
-public interface MapEntry<K, V> {
+@AutoValue
+public abstract class MapEntry<K, V> {
 
-  /**
-   * Creates {@link ByteStringMapEntry} from provided key and value in byte array format.
-   */
-  static ByteStringMapEntry valueOf(byte[] key, byte[] value) {
-    return new ByteStringMapEntry(key, value);
+  public static <K, V> MapEntry<K, V> valueOf(K key, V value) {
+    return new com.exonum.binding.common.collect.AutoValue_MapEntry<>(key, value);
   }
 
   /**
-   * Creates {@link ByteStringMapEntry} from provided {@link ByteString} key and value.
+   * Returns the key in this entry.
    */
-  static ByteStringMapEntry valueOf(ByteString key, ByteString value) {
-    return new ByteStringMapEntry(key, value);
-  }
+  public abstract K getKey();
 
   /**
-   * Creates {@link GenericMapEntry} from provided key and value.
+   * Returns the value in this entry.
    */
-  static <K, V> GenericMapEntry<K, V> valueOf(K key, V value) {
-    return new com.exonum.binding.common.collect.AutoValue_GenericMapEntry<>(key, value);
-  }
-
-  /** Returns the key in this entry. */
-  K getKey();
-
-  /** Returns the value in this entry. */
-  V getValue();
+  public abstract V getValue();
 }

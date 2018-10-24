@@ -33,12 +33,12 @@ use JniResult;
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/common/collect/MapEntryInternal";
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
-const MAP_ENTRY: &str = "com/exonum/binding/common/proofs/map/ByteStringMapEntry";
+const MAP_ENTRY: &str = "com/exonum/binding/common/collect/MapEntry";
 const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
 const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
-    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/proofs/map/ByteStringMapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
+    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/collect/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
 const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
@@ -276,7 +276,9 @@ fn create_java_map_entries<'a>(
 fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
     let key: JObject = env.byte_array_from_slice(key)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
-    env.new_object(MAP_ENTRY, "([B[B)V", &[key.into(), value.into()])
+    env.call_static_method(MAP_ENTRY, "valueOf",
+                           format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
+                           &[key.into(), value.into()])?.l()
 }
 
 fn create_java_missing_keys<'a>(

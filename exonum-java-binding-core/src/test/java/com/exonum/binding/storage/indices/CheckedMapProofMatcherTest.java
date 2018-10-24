@@ -24,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.ByteStringMapEntry;
 import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.proofs.map.MapProofStatus;
@@ -60,7 +59,7 @@ public class CheckedMapProofMatcherTest {
   public void matchesValidProof() {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
-    ByteStringMapEntry entry =
+    MapEntry<ByteString, ByteString> entry =
         MapEntry.valueOf(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
@@ -81,7 +80,8 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
     ByteString actualValue = ByteString.copyFromUtf8("hello");
-    ByteStringMapEntry entry = MapEntry.valueOf(toByteString(presentKey), actualValue);
+    MapEntry<ByteString, ByteString> entry = MapEntry.valueOf(toByteString(presentKey),
+        actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
@@ -101,7 +101,6 @@ public class CheckedMapProofMatcherTest {
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
         MapProofStatus.DUPLICATE_PATH);
-
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);

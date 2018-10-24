@@ -51,7 +51,7 @@ class UncheckedFlatMapProofTest {
     ByteString valueKey = DbKeyTestUtils.keyByteStringFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
 
-    ByteStringMapEntry leaf = createMapEntry(valueKey, FIRST_VALUE);
+    MapEntry<ByteString, ByteString> leaf = createMapEntry(valueKey, FIRST_VALUE);
     List<MapProofEntry> branches = Arrays.asList(
         createMapProofEntry(firstDbKey),
         createMapProofEntry(thirdDbKey)
@@ -62,7 +62,7 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    MapEntry expectedEntry = MapEntry.valueOf(valueKey, FIRST_VALUE);
+    MapEntry<ByteString, ByteString> expectedEntry = MapEntry.valueOf(valueKey, FIRST_VALUE);
     assertThat(checkedMapProof.getEntries(), equalTo(singleton(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(valueKey));
     assertThat(checkedMapProof.get(valueKey), equalTo(FIRST_VALUE));
@@ -75,7 +75,7 @@ class UncheckedFlatMapProofTest {
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
     ByteString fourthKey = DbKeyTestUtils.keyByteStringFromString("1000_1101");
 
-    List<ByteStringMapEntry> leaves = Arrays.asList(
+    List<MapEntry<ByteString, ByteString>> leaves = Arrays.asList(
         createMapEntry(firstKey, FIRST_VALUE),
         createMapEntry(secondKey, SECOND_VALUE),
         createMapEntry(fourthKey, THIRD_VALUE)
@@ -89,13 +89,13 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    List<ByteStringMapEntry> expectedEntriesList = Arrays.asList(
+    List<MapEntry> expectedEntriesList = Arrays.asList(
         MapEntry.valueOf(firstKey, FIRST_VALUE),
         MapEntry.valueOf(secondKey, SECOND_VALUE),
         MapEntry.valueOf(fourthKey, THIRD_VALUE)
     );
 
-    Set<ByteStringMapEntry> actualCheckedEntriesList = checkedMapProof.getEntries();
+    Set<MapEntry<ByteString, ByteString>> actualCheckedEntriesList = checkedMapProof.getEntries();
 
     assertThat(
         actualCheckedEntriesList,
@@ -116,7 +116,7 @@ class UncheckedFlatMapProofTest {
   void mapProofWithOneElementShouldBeCorrect() {
     ByteString key = DbKeyTestUtils.keyByteStringFromString("01");
     ByteString value = FIRST_VALUE;
-    ByteStringMapEntry mapEntry = createMapEntry(key, value);
+    MapEntry<ByteString, ByteString> mapEntry = createMapEntry(key, value);
 
     HashCode valueHash = HASH_FUNCTION.hashByteString(value);
     HashCode expectedRootHash = HASH_FUNCTION.newHasher()
@@ -265,7 +265,7 @@ class UncheckedFlatMapProofTest {
     return new MapProofEntry(dbKey, HashCode.fromBytes(dbKey.getKeySlice()));
   }
 
-  private static ByteStringMapEntry createMapEntry(ByteString key, ByteString value) {
+  private static MapEntry<ByteString, ByteString> createMapEntry(ByteString key, ByteString value) {
     return MapEntry.valueOf(key, value);
   }
 }

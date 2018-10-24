@@ -21,9 +21,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkIdInG
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.collect.GenericMapEntry;
 import com.exonum.binding.common.collect.MapEntry;
-import com.exonum.binding.common.collect.MapEntryInternal;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -332,7 +330,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
         this::nativeEntriesIterFree,
         dbView,
         modCounter,
-        (entry) -> GenericMapEntry.fromInternal(entry, keySerializer, valueSerializer)
+        (entry) -> entry.toMapEntry(entry, keySerializer, valueSerializer)
     );
   }
 

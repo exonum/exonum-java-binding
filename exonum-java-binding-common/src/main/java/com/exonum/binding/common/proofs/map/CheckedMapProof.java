@@ -16,6 +16,7 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.common.CheckedProof;
 import com.google.protobuf.ByteString;
@@ -44,7 +45,7 @@ public interface CheckedMapProof extends CheckedProof {
    * Get all leaf entries of this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  Set<ByteStringMapEntry> getEntries();
+  Set<MapEntry<ByteString, ByteString>> getEntries();
 
   /**
    * Get all keys that were requested, but did not appear in this proof.

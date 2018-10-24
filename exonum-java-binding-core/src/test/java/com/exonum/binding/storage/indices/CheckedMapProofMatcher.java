@@ -19,7 +19,6 @@ package com.exonum.binding.storage.indices;
 import static java.util.stream.Collectors.toSet;
 
 import com.exonum.binding.common.collect.MapEntry;
-import com.exonum.binding.common.proofs.map.ByteStringMapEntry;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.common.io.BaseEncoding;
@@ -38,12 +37,12 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   private final List<MapTestEntry> entries;
 
+  private final Matcher<Set<MapEntry<ByteString, ByteString>>> presentEntriesMatcher;
   private final Matcher<Set<ByteString>> missingKeysMatcher;
-  private final Matcher<Set<ByteStringMapEntry>> presentEntriesMatcher;
 
   private CheckedMapProofMatcher(List<MapTestEntry> entries) {
     this.entries = entries;
-    Set<ByteStringMapEntry> expectedEntries = getExpectedEntries();
+    Set<MapEntry<ByteString, ByteString>> expectedEntries = getExpectedEntries();
     Set<ByteString> expectedMissingKeys = getExpectedMissingKeys();
     this.presentEntriesMatcher = IsEqual.equalTo(expectedEntries);
     this.missingKeysMatcher = IsEqual.equalTo(expectedMissingKeys);
@@ -54,7 +53,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     if (!checkedMapProof.isValid()) {
       return false;
     }
-    Set<ByteStringMapEntry> presentEntries = checkedMapProof.getEntries();
+    Set<MapEntry<ByteString, ByteString>> presentEntries = checkedMapProof.getEntries();
     Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
     return presentEntriesMatcher.matches(presentEntries)
         && missingKeysMatcher.matches(missingKeys);
@@ -92,10 +91,14 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     }
   }
 
-  private Set<ByteStringMapEntry> getExpectedEntries() {
+  private Set<MapEntry<ByteString, ByteString>> getExpectedEntries() {
     return entries.stream()
         .filter(e -> e.getValue().isPresent())
-        .map(e -> MapEntry.valueOf(e.getKey().asBytes(), e.getValue().get().getBytes()))
+        .map(e ->
+            MapEntry.valueOf(
+                ByteString.copyFrom(e.getKey().asBytes()),
+                ByteString.copyFrom(e.getValue().get().getBytes()))
+        )
         .collect(toSet());
   }
 
@@ -106,7 +109,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
         .collect(toSet());
   }
 
-  private static String formatMapEntry(ByteStringMapEntry e) {
+  private static String formatMapEntry(MapEntry<ByteString, ByteString> e) {
     String key = hexEncodeByteString(e.getKey());
     String value = StandardSerializers.string().fromBytes(e.getValue().toByteArray());
     return String.format("(%s -> %s)", key, value);

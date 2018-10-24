@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.collect;
+package com.exonum.binding.storage.indices;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.exonum.binding.common.collect.MapEntry.valueOf;
+import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
+
+import com.exonum.binding.common.collect.MapEntry;
+import com.exonum.binding.common.serialization.Serializer;
 
 public final class MapEntryInternal {
   final byte[] key;
@@ -24,7 +28,15 @@ public final class MapEntryInternal {
 
   @SuppressWarnings("unused")  // native API
   public MapEntryInternal(byte[] key, byte[] value) {
-    this.key = checkNotNull(key, "Storage key is null");
-    this.value = checkNotNull(value, "Storage value is null");
+    this.key = checkStorageKey(key);
+    this.value = StoragePreconditions.checkStorageValue(value);
+  }
+
+  <V, K> MapEntry<K, V> toMapEntry(MapEntryInternal entry,
+      Serializer<K> keySerializer,
+      Serializer<V> valueSerializer) {
+    K key = keySerializer.fromBytes(entry.key);
+    V value = valueSerializer.fromBytes(entry.value);
+    return valueOf(key, value);
   }
 }
