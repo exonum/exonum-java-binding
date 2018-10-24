@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.common;
+package com.exonum.binding.common.proofs;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.list.CheckedListProof;

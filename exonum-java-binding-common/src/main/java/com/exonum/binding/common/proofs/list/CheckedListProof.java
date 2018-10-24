@@ -16,7 +16,7 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import com.exonum.binding.common.proofs.common.CheckedProof;
+import com.exonum.binding.common.proofs.CheckedProof;
 import java.util.NavigableMap;
 
 /**

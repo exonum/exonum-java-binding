@@ -16,7 +16,7 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import com.exonum.binding.common.proofs.common.ProofStatus;
+import com.exonum.binding.common.proofs.ProofStatus;
 
 /**
  * Possible statuses of a checked list proof.
