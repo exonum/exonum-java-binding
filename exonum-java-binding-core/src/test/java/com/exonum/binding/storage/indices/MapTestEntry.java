@@ -23,9 +23,9 @@ import java.util.Optional;
 
 class MapTestEntry {
 
-  private HashCode key;
+  private final HashCode key;
 
-  private String value;
+  private final String value;
 
   private MapTestEntry(HashCode key, String value) {
     this.key = key;
