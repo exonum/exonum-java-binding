@@ -55,7 +55,7 @@ enum Sint64Serializer implements Serializer<Long> {
    *     unsigned support.
    * @return A signed 64-bit integer.
    */
-  public static long decodeZigZag64(long n) {
+  private static long decodeZigZag64(long n) {
     return (n >>> 1) ^ -(n & 1);
   }
 

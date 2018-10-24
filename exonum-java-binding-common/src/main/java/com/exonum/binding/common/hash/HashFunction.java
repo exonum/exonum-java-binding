@@ -49,8 +49,8 @@ import java.nio.charset.Charset;
  *     sequences under the covers.
  *
  * <li><b>hash code:</b> each hash function always yields hash codes of the same fixed bit length
- *     (given by {@link #bits}). For example, {@link Hashing#sha1} produces a 160-bit number, while
- *     {@link Hashing#murmur3_32()} yields only 32 bits. Because a {@code long} value is clearly
+ *     (given by {@link #bits}). For example, {@link Hashing#sha256()} produces a 256-bit number,
+ *     while {@link Hashing#sha384()} )} yields 384 bits. Because a {@code long} value is clearly
  *     insufficient to hold all hash code values, this API represents a hash code as an instance of
  *     {@link HashCode}.
  *
