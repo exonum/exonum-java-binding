@@ -88,7 +88,7 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    Set<MapEntry> actualCheckedEntries = checkedMapProof.getEntries();
+    Set<MapEntry<ByteString, ByteString>> actualCheckedEntries = checkedMapProof.getEntries();
 
     assertThat(actualCheckedEntries, containsInAnyOrder(leaves.toArray()));
 
