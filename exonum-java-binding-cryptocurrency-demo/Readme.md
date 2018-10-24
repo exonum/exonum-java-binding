@@ -31,8 +31,6 @@ Be sure you installed necessary packages:
 Build the project:
 
 ```sh
-$ source test_profile
-
 $ mvn install
 
 $ cd exonum-java-binding-core/rust/ejb-app/
