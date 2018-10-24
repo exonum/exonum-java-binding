@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.common;
+package com.exonum.binding.common.proofs;
 
 /**
  * A status of collection proof verification.
