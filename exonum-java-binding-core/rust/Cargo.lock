@@ -416,11 +416,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "ejb-app"
-version = "0.3.0"
+version = "0.4.0-SNAPSHOT"
 dependencies = [
  "exonum-btc-anchoring 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-configuration 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "java_bindings 0.3.0",
+ "java_bindings 0.4.0-SNAPSHOT",
  "serde 1.0.79 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.79 (registry+https://github.com/rust-lang/crates.io-index)",
  "tempfile 3.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -893,11 +893,11 @@ dependencies = [
 
 [[package]]
 name = "integration_tests"
-version = "0.3.0"
+version = "0.4.0-SNAPSHOT"
 dependencies = [
  "exonum-testkit 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.21 (registry+https://github.com/rust-lang/crates.io-index)",
- "java_bindings 0.3.0",
+ "java_bindings 0.4.0-SNAPSHOT",
  "lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -954,7 +954,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "java_bindings"
-version = "0.3.0"
+version = "0.4.0-SNAPSHOT"
 dependencies = [
  "exonum 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
