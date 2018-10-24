@@ -53,14 +53,16 @@ class BytesTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {-1024, -1, 0, 1, 1024})
+  @ValueSource(ints = {0, 1, 1024})
   void randomBytesTest(int size) {
-    if (size < 0) {
-      assertThrows(IllegalArgumentException.class, () -> randomBytes(size));
-    } else {
-      byte[] bytes = randomBytes(size);
-      assertThat(bytes.length, equalTo(size));
-    }
+    byte[] bytes = randomBytes(size);
+    assertThat(bytes.length, equalTo(size));
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1024, -1})
+  void randomBytesInvalidSizeTest(int size) {
+    assertThrows(IllegalArgumentException.class, () -> randomBytes(size));
   }
 
 }
