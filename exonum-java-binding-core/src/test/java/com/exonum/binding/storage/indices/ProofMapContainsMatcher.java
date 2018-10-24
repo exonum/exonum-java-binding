@@ -48,7 +48,7 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
     HashCode expectedRootHash = map.getRootHash();
 
     return mapProofMatcher.matches(checkedProof)
-        && checkedProof.compareWithRootHash(expectedRootHash);
+        && checkedProof.getRootHash().equals(expectedRootHash);
   }
 
   @Override

@@ -17,7 +17,6 @@
 package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.collect.MapEntry;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.common.CheckedProof;
 import com.google.protobuf.ByteString;
 import java.util.Set;
@@ -34,7 +33,7 @@ import java.util.Set;
  * // Convert to checked
  * CheckedMapProof checkedProof = proof.check();
  * // Check the root hash
- * if (checkedProof.compareWithRootHash(expectedRootHash)) {
+ * if (checkedProof.isValid() && checkedProof.getRootHash().equals(expectedRootHash)) {
  *   // Get and use the value(s)
  *   ByteString value = checked.get(key);
  * }
@@ -72,10 +71,4 @@ public interface CheckedMapProof extends CheckedProof {
    */
   @Override
   MapProofStatus getProofStatus();
-
-  /**
-   * Checks that proof is correct and {@code expectedRootHash} is equal to the root hash.
-   * @throws IllegalStateException if the proof is not valid
-   */
-  boolean compareWithRootHash(HashCode expectedRootHash);
 }
