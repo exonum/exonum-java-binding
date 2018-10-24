@@ -17,17 +17,21 @@
 package com.exonum.binding.test;
 
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.randomBytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.primitives.UnsignedBytes;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class BytesTest {
 
   @Test
   void fromHex() {
-    assertThat(Bytes.fromHex("abcd01"), equalTo(new byte[] {UnsignedBytes.checkedCast(0xAB),
+    assertThat(Bytes.fromHex("abcd01"), equalTo(new byte[]{UnsignedBytes.checkedCast(0xAB),
         UnsignedBytes.checkedCast(0xCD), 0x01}));
   }
 
@@ -47,4 +51,16 @@ class BytesTest {
       assertThat(Bytes.toHexString(bytes(b)), equalTo(expected));
     }
   }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1024, -1, 0, 1, 1024})
+  void randomBytesTest(int size) {
+    if (size < 0) {
+      assertThrows(IllegalArgumentException.class, () -> randomBytes(size));
+    } else {
+      byte[] bytes = randomBytes(size);
+      assertThat(bytes.length, equalTo(size));
+    }
+  }
+
 }
