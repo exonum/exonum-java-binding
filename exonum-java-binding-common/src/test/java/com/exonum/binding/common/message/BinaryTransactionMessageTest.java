@@ -19,6 +19,7 @@ package com.exonum.binding.common.message;
 
 import static com.exonum.binding.common.message.TransactionMessage.MIN_MESSAGE_SIZE;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,10 +29,14 @@ import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
+import java.util.stream.Stream;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class BinaryTransactionMessageTest {
@@ -48,33 +53,25 @@ class BinaryTransactionMessageTest {
 
   @Test
   void immutabilityTest() {
-    byte[] mutableIn = Bytes.bytes(0x00, 0x01, 0x02);
+    byte[] mutableInputPayload = Bytes.bytes(0x00, 0x01, 0x02);
     TransactionMessage message = TransactionMessage.builder()
         .serviceId((short) 100)
         .transactionId((short) 200)
-        .payload(mutableIn)
+        .payload(mutableInputPayload)
         .sign(KEYS, CRYPTO);
 
     // mutate input parameter
-    mutate(mutableIn);
-    assertThat(message.getPayload(), not(mutableIn));
+    mutate(mutableInputPayload);
+    assertThat(message.getPayload(), not(mutableInputPayload));
 
     // mutate output parameters
     byte[] mutablePayload = message.getPayload();
     mutate(mutablePayload);
     assertThat(message.getPayload(), not(mutablePayload));
 
-    byte[] mutableAuthor = message.getAuthor().toBytes();
-    mutate(mutableAuthor);
-    assertThat(message.getAuthor().toBytes(), not(mutableAuthor));
-
     byte[] mutableSignature = message.getSignature();
     mutate(mutableSignature);
     assertThat(message.getSignature(), not(mutableSignature));
-
-    byte[] mutableHash = message.hash().asBytes();
-    mutate(mutableHash);
-    assertThat(message.hash().asBytes(), not(mutableHash));
 
     byte[] mutableMessage = message.toBytes();
     mutate(mutableMessage);
@@ -89,7 +86,7 @@ class BinaryTransactionMessageTest {
   }
 
   @ParameterizedTest
-  @MethodSource("source")
+  @MethodSource("transactionMessageSource")
   void roundTripTest(TransactionMessage message) {
     byte[] bytes = message.toBytes();
     TransactionMessage actualMessage = TransactionMessage.fromBytes(bytes);
@@ -97,7 +94,13 @@ class BinaryTransactionMessageTest {
     assertThat(actualMessage, is(message));
   }
 
-  private static List<TransactionMessage> source() {
+  @ParameterizedTest
+  @MethodSource("byteBufferSource")
+  void constructFromBufferTest(TransactionMessage expectedMessage, ByteBuffer buffer) {
+    assertThat(new BinaryTransactionMessage(buffer), equalTo(expectedMessage));
+  }
+
+  private static List<TransactionMessage> transactionMessageSource() {
     return ImmutableList.of(
         TransactionMessage.builder()
             .serviceId((short) 0)
@@ -110,6 +113,52 @@ class BinaryTransactionMessageTest {
             .payload(Bytes.bytes("test content"))
             .sign(KEYS, CRYPTO)
     );
+  }
+
+  private static Stream<Arguments> byteBufferSource() {
+    return transactionMessageSource().stream()
+        .flatMap(message ->
+            Stream.of(
+                toLittleEndianBuffer(message),
+                toReadOnlyBuffer(message),
+                toDirectBuffer(message),
+                toByteBufferWithCustomPositions(message)
+            )
+                .map(buffer -> Arguments.of(message, buffer))
+        );
+  }
+
+  private static ByteBuffer toLittleEndianBuffer(TransactionMessage message) {
+    return ByteBuffer
+        .wrap(message.toBytes())
+        .order(ByteOrder.LITTLE_ENDIAN);
+  }
+
+  private static ByteBuffer toReadOnlyBuffer(TransactionMessage message) {
+    return ByteBuffer
+        .wrap(message.toBytes())
+        .asReadOnlyBuffer();
+  }
+
+  private static ByteBuffer toDirectBuffer(TransactionMessage message) {
+    byte[] bytes = message.toBytes();
+    ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
+    buffer.put(bytes);
+    buffer.position(0);
+    return buffer;
+  }
+
+  private static ByteBuffer toByteBufferWithCustomPositions(TransactionMessage message) {
+    byte[] bytes = message.toBytes();
+    int position = bytes.length;
+    int limit = bytes.length * 2;
+    int capacity = bytes.length * 3;
+    ByteBuffer buffer = ByteBuffer.allocate(capacity);
+    buffer.position(position);
+    buffer.limit(limit);
+    buffer.put(bytes);
+    buffer.position(position);
+    return buffer;
   }
 
   private static void mutate(byte[] array) {

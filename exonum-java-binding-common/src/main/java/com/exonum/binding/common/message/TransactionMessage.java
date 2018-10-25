@@ -53,17 +53,17 @@ public interface TransactionMessage {
   short getServiceId();
 
   /**
-   * Returns transaction identifier which is unique within the service.
+   * Returns the transaction type identifier which is unique within the service.
    */
   short getTransactionId();
 
   /**
-   * Returns the transaction message body.
+   * Returns the payload containing the serialized transaction parameters.
    */
   byte[] getPayload();
 
   /**
-   * Returns the transaction message hash.
+   * Returns the SHA-256 hash of the binary message representation.
    */
   HashCode hash();
 
@@ -89,7 +89,7 @@ public interface TransactionMessage {
   int size();
 
   /**
-   * Create a new builder for the transaction message.
+   * Creates a new builder for the transaction message.
    */
   static Builder builder() {
     return new Builder();
@@ -106,7 +106,7 @@ public interface TransactionMessage {
    * Creates the transaction message from the given bytes buffer.
    */
   static TransactionMessage fromBuffer(ByteBuffer buffer) {
-    return new BinaryTransactionMessage(buffer.array());
+    return new BinaryTransactionMessage(buffer);
   }
 
   /**

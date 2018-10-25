@@ -29,15 +29,24 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * Binary implementation of the {@link TransactionMessage} class.
+ * Binary implementation of the {@link TransactionMessage} class. Immutable by design.
  */
 public final class BinaryTransactionMessage implements TransactionMessage {
+
   private final ByteBuffer rawTransaction;
 
   BinaryTransactionMessage(byte[] bytes) {
-    checkArgument(MIN_MESSAGE_SIZE <= bytes.length,
-        "Expected an array of size at least %s, but was %s", MIN_MESSAGE_SIZE, bytes.length);
-    this.rawTransaction = ByteBuffer.wrap(copyOf(bytes, bytes.length)).order(LITTLE_ENDIAN);
+    this(ByteBuffer.wrap(bytes));
+  }
+
+  BinaryTransactionMessage(ByteBuffer buffer) {
+    ByteBuffer slice = buffer.slice();
+    checkArgument(MIN_MESSAGE_SIZE <= slice.limit(),
+        "Transaction message requires at least %s bytes space, but was %s",
+        MIN_MESSAGE_SIZE, slice.limit());
+
+    this.rawTransaction = ByteBuffer.allocate(slice.limit()).order(LITTLE_ENDIAN);
+    this.rawTransaction.put(slice);
   }
 
   @Override
