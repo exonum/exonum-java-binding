@@ -32,6 +32,7 @@ import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
+import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -81,6 +82,26 @@ class TransactionMessageBuilderTest {
             .payload(Bytes.bytes())
             .sign(keys, CRYPTO)
     );
+  }
+
+  @Test
+  void payloadFromByteBufferWithCustomPositionAndLimitTest() {
+    int position = 3;
+    int capacity = 10;
+    byte[] payload = Bytes.bytes(0x00, 0x01);
+    ByteBuffer payloadBuffer = ByteBuffer.allocate(capacity);
+    payloadBuffer.position(position);
+    payloadBuffer.limit(position + payload.length);
+    payloadBuffer.put(payload);
+    payloadBuffer.position(position);
+
+    TransactionMessage message = TransactionMessage.builder()
+        .serviceId(SERVICE_ID)
+        .transactionId(TRANSACTION_ID)
+        .payload(payloadBuffer)
+        .sign(CRYPTO.generateKeyPair(), CRYPTO);
+
+    assertThat(message.getPayload(), is(payload));
   }
 
   @ParameterizedTest
