@@ -31,10 +31,8 @@ import com.google.auto.value.AutoValue;
 public abstract class MapEntry<K, V> {
 
   /**
-   * Creates new {@link MapEntry} from provided key and value.
+   * Creates new MapEntry from provided key and value.
    *
-   * @param key provided key
-   * @param value provided value
    * @return map entry
    */
   public static <K, V> MapEntry<K, V> valueOf(K key, V value) {
@@ -43,15 +41,11 @@ public abstract class MapEntry<K, V> {
 
   /**
    * Returns the key in this entry.
-   *
-   * @return a key
    */
   public abstract K getKey();
 
   /**
    * Returns the value in this entry.
-   *
-   * @return a value
    */
   public abstract V getValue();
 }
