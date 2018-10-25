@@ -276,9 +276,12 @@ fn create_java_map_entries<'a>(
 fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
     let key: JObject = env.byte_array_from_slice(key)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
-    env.call_static_method(MAP_ENTRY, "valueOf",
-                           format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
-                           &[key.into(), value.into()])?.l()
+    env.call_static_method(
+        MAP_ENTRY,
+        "valueOf",
+        format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
+        &[key.into(), value.into()],
+    )?.l()
 }
 
 fn create_java_missing_keys<'a>(
