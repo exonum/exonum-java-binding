@@ -22,7 +22,7 @@ import static com.exonum.binding.storage.indices.StoragePreconditions.checkStora
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.Serializer;
 
-public final class MapEntryInternal {
+final class MapEntryInternal {
   final byte[] key;
   final byte[] value;
 

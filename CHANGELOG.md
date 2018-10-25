@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+- `com.exonum.binding.storage.indices.MapEntry` renamed to `MapEntry` and moved to common 
+  module. `MapEntry` was generified. Usage of `MapEntry` was updated in FlatMapProof's.
+
+### Removed
+- `com.exonum.binding.common.proofs.map.MapEntry`
+
 ## [0.3] - TBA
 
 ### Added
@@ -50,14 +59,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `ProofListIndexProxy#getProof` and `ProofListIndexProxy#getRangeProof` to return
   `UncheckedListProof` instead of `ListProof`. The latter is renamed into `ListProofNode`
   and may be accessed through `UncheckedListProof#getRootProofNode` (#516)
-- `com.exonum.binding.storage.indices.MapEntry` renamed to `MapEntry` and moved to common 
-  module. `MapEntry` was generified. Usage of `MapEntry` was updated in FlatMapProof's.
 
 ### Removed
 - `Hashing#toHexString`. (#379)
 - Deprecated tree map proofs in preference to flat map proofs,
   the only supported format by the Exonum storage. (#518)
-- `com.exonum.binding.common.proofs.map.MapEntry`
 
 ## [0.2] - 2018-07-23
 

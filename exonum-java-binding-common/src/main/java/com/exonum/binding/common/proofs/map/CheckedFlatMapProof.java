@@ -87,7 +87,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
     checkValid();
     return entries.entrySet()
         .stream()
-        .map(e -> com.exonum.binding.common.collect.MapEntry.valueOf(e.getKey(), e.getValue()))
+        .map(e -> MapEntry.valueOf(e.getKey(), e.getValue()))
         .collect(toSet());
   }
 

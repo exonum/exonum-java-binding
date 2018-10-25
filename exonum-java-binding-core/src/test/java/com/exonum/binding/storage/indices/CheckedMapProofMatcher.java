@@ -71,7 +71,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
   protected void describeMismatchSafely(CheckedMapProof proof, Description description) {
     description.appendText("was ");
     if (proof.isValid()) {
-      // We convert entries to string manually here instead of using ByteStringMapEntry#toString
+      // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
       String entries = proof.getEntries().stream()

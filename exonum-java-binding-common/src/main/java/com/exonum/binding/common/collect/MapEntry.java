@@ -30,17 +30,28 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class MapEntry<K, V> {
 
+  /**
+   * Creates new {@link MapEntry} from provided key and value.
+   *
+   * @param key provided key
+   * @param value provided value
+   * @return map entry
+   */
   public static <K, V> MapEntry<K, V> valueOf(K key, V value) {
-    return new com.exonum.binding.common.collect.AutoValue_MapEntry<>(key, value);
+    return new AutoValue_MapEntry<>(key, value);
   }
 
   /**
    * Returns the key in this entry.
+   *
+   * @return a key
    */
   public abstract K getKey();
 
   /**
    * Returns the value in this entry.
+   *
+   * @return a value
    */
   public abstract V getValue();
 }
