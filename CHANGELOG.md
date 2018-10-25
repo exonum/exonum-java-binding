@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3] - TBA
+
 ### Added
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
@@ -57,7 +59,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the only supported format by the Exonum storage. (#518)
 - `com.exonum.binding.common.proofs.map.MapEntry`
 
-## 0.2 - 2018-07-23
+## [0.2] - 2018-07-23
 
 ### Added
 
@@ -93,7 +95,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `--ejb-debug` option — use the corresponding JVM flags, e.g.,
   `--ejb-jvm-args=Xcheck:jni`. (#342)
 
-## 0.1.2 - 2018-07-19
+## [0.1.2] - 2018-07-19
 
 Parent module and BOM module were released as they are required dependencies to define a Java service.
 
@@ -101,6 +103,7 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.2...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.3...HEAD
+[0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
 [0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2
 [0.1.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1...v0.1.2
