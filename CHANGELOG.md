@@ -15,12 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.3] - TBA
+## [0.3] - 2018-10-25
 
 ### Added
-- `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
-- `MapIndex.isEmpty()` method to check if MapIndex is empty.
-- Flat map proofs support, including multiproofs — proofs for several
+- `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code. (#401)
+- `MapIndex.isEmpty()` method to check if MapIndex is empty. (#445)
+- Flat map proofs support, including proofs of absence and multiproofs — proofs for several
   entries at once. (#250, #507, #532)
 - Wallet transactions history support to the cryptocurrency-demo. (#481)
 - `StandardSerializers` now supports `bool`, `fixed32`, `uint32`, `sint32`, 
@@ -59,33 +59,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.2] - 2018-07-23
 
 ### Added
-
 - Standard services may be enabled using specific `ejb_app_services.toml` file.
   It supports only `configuration` and `btc-anchoring` services at the moment.
 
   To enable services put `ejb_app_services.toml` file into EJB App's directory
-  with the following content: 
-
+  with the following content:
   ```toml
   services = ["configuration", "btc-anchoring"]
   ```
 
   Configuration service is enabled by default. (#338, #313)
- 
 - Added operations to get a message with and without signature 
-  (`BinaryMessage#getMessageNoSignature` and `BinaryMessage#getSignedMessage` respectively).
-  (#339)
-
+  (`BinaryMessage#getMessageNoSignature` and `BinaryMessage#getSignedMessage` respectively). (#339)
 - Added methods to sign transaction messages and verify their signatures. (#341)
-
 - Enabled passing extra arguments to the JVM from the command line.
   Use `--ejb-jvm-args` flag to specify an additional argument, e.g., 
   `--ejb-jvm-args=Xmx2g`. (#342)
 
 ### Changed
-
 - Prepended `/api` before the path to the REST API endpoints of a service. (#340)
-
 - `Message#getSignature` returns a byte array. (#339)
 
 ### Removed
