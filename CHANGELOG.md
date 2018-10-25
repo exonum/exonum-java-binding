@@ -18,11 +18,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 ### Changed
-- `com.exonum.binding.storage.indices.MapEntry` renamed to `MapEntry` and moved to common 
-  module. `MapEntry` was generified. Usage of `MapEntry` was updated in FlatMapProof's.
+- `com.exonum.binding.storage.indices.MapEntry` moved to package
+  `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
+  to use this implementation of `MapEntry`.
 
 ### Removed
-- `com.exonum.binding.common.proofs.map.MapEntry`
+- `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
+  `com.exonum.binding.common.collect`.
 
 ## [0.3] - TBA
 
