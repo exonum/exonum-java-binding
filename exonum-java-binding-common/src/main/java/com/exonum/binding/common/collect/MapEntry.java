@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.indices;
+package com.exonum.binding.common.collect;
 
-import com.exonum.binding.common.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
  *
  * <p>A map entry contains <em>a copy</em> of the data in the corresponding map index.
- * It does not reflect the changes made to the map since this entry had been created.
+ * Unlike {@link java.util.Map.Entry}, it does not reflect the changes made to the map
+ * since this entry had been created.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -31,21 +31,20 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class MapEntry<K, V> {
 
-  /** Returns the key in this entry. */
-  public abstract K getKey();
-
-  /** Returns the value in this entry. */
-  public abstract V getValue();
-
-  static <K, V> MapEntry<K, V> fromInternal(MapEntryInternal e,
-                                            Serializer<K> keySerializer,
-                                            Serializer<V> valueSerializer) {
-    K key = keySerializer.fromBytes(e.key);
-    V value = valueSerializer.fromBytes(e.value);
-    return from(key, value);
-  }
-
-  static <K, V> MapEntry<K, V> from(K key, V value) {
+  /**
+   * Creates a new MapEntry from the given key and value.
+   */
+  public static <K, V> MapEntry<K, V> valueOf(K key, V value) {
     return new AutoValue_MapEntry<>(key, value);
   }
+
+  /**
+   * Returns the key corresponding to this entry.
+   */
+  public abstract K getKey();
+
+  /**
+   * Returns the value corresponding to this entry.
+   */
+  public abstract V getValue();
 }

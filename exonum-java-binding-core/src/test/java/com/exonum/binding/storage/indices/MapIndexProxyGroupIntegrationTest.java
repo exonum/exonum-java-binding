@@ -19,6 +19,7 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 import com.google.common.collect.ImmutableMap;
@@ -90,11 +91,11 @@ public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable
                                                                           int prefixSize) {
     // A map id (= prefix in the current implementation)
     String mapId = idKeyPrototype.substring(0, prefixSize);
-    String userKey = idKeyPrototype.substring(prefixSize, idKeyPrototype.length());
+    String userKey = idKeyPrototype.substring(prefixSize);
     assert (mapId + userKey).equals(idKeyPrototype);
     // Make a value that includes the unique user key.
     String value = "value for key='" + userKey + "'";
-    return MapEntry.from(mapId, MapEntry.from(userKey, value));
+    return MapEntry.valueOf(mapId, MapEntry.valueOf(userKey, value));
   }
 
   @Override
