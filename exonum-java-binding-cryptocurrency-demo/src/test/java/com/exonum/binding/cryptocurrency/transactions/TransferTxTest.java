@@ -44,10 +44,8 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -216,12 +214,11 @@ class TransferTxTest {
     String info = tx.info();
 
     // Check the transaction parameters in JSON
-    Gson gson = CryptocurrencyTransactionGson.instance();
+    TxMessage<TransferTx> txParameters = CryptocurrencyTransactionGson.instance()
+        .fromJson(info, new TypeToken<TxMessage<TransferTx>>() {
+        }.getType());
 
-    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {
-    }.getType());
-
-    assertThat(txParameters, equalTo(tx));
+    assertThat(txParameters.body, equalTo(tx));
   }
 
   @Test

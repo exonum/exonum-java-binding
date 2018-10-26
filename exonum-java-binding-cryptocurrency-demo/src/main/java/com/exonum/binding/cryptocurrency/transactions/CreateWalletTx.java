@@ -24,6 +24,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
@@ -98,7 +99,8 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
 
   @Override
   public String info() {
-    return CryptocurrencyTransactionGson.instance().toJson(this);
+    return CryptocurrencyTransactionGson.instance().toJson(
+        new TxMessage<>(CryptocurrencyService.ID, CreateWalletTx.ID, this));
   }
 
   @Override

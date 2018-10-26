@@ -22,6 +22,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.HistoryEntity.Builder;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -112,7 +113,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public String info() {
-    return CryptocurrencyTransactionGson.instance().toJson(this);
+    return CryptocurrencyTransactionGson.instance().toJson(
+        new TxMessage<>(CryptocurrencyService.ID, TransferTx.ID, this));
   }
 
   @Override

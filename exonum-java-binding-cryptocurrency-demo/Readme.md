@@ -31,7 +31,7 @@ Be sure you installed necessary packages:
 Build the project:
 
 ```sh
-$ source test_profile
+$ source tests_profile
 
 $ mvn install
 

@@ -41,6 +41,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -155,11 +156,11 @@ class CreateWalletTxTest {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     String info = tx.info();
+    TxMessage<CreateWalletTx> txParams = CryptocurrencyTransactionGson.instance()
+        .fromJson(info, new TypeToken<TxMessage<CreateWalletTx>>() {
+        }.getType());
 
-    CreateWalletTx txParams = CryptocurrencyTransactionGson.instance()
-        .fromJson(info, CreateWalletTx.class);
-
-    assertThat(txParams, equalTo(tx));
+    assertThat(txParams.body, equalTo(tx));
   }
 
   @Test
