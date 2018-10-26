@@ -18,11 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.3] - TBA <!-- somewhere next week -->
 
 ### Added
-- `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code. (#401)
-- `MapIndex.isEmpty()` method to check if MapIndex is empty. (#445)
 - Flat map proofs support, including proofs of absence and multiproofs — proofs for several
   entries at once. (#250, #507, #532)
-- Wallet transactions history support to the cryptocurrency-demo. (#481)
 - `StandardSerializers` now supports `bool`, `fixed32`, `uint32`, `sint32`, 
   `fixed64`, `uint64`, `sint64`, `float` and `double` primitive types, 
   `PrivateKey`, `PublicKey` and `byte[]` serialization. (#514, #523)
@@ -30,12 +27,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Static factory methods accepting protobuf messages to collections,
   allowing to pass Protocol Buffer messages directly instead of using
   `StandardSerializers#protobuf`. (#505)
+- `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code. (#401)
+- `MapIndex.isEmpty()` method to check if MapIndex is empty. (#445)
+- Wallet transactions history support to the cryptocurrency-demo. (#481)
 
 ### Changed
-- `Transaction#execute` can throw `TransactionExecutionException` to roll back 
+-  `Transaction#execute` can throw `TransactionExecutionException` to roll back 
   any changes to the database. The exception includes an error code and an optional 
   description which the framework saves to the storage for later retrieval. (#392)
-- `ListProofValidator` returns an instance of `NavigableMap` instead of `Map`. (#457)
 - Refactor `exonum-java-proofs` module to `exonum-java-binding-common` module 
   with `com.exonum.binding.common` root package so that more functionality
   is available to client applications with no dependency on `exonum-java-binding-core` (#459)
@@ -50,6 +49,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `ProofListIndexProxy#getProof` and `ProofListIndexProxy#getRangeProof` to return
   `UncheckedListProof` instead of `ListProof`. The latter is renamed into `ListProofNode`
   and may be accessed through `UncheckedListProof#getRootProofNode` (#516)
+- `ListProofValidator` returns an instance of `NavigableMap` instead of `Map`. (#457)
 
 ### Removed
 - `Hashing#toHexString`. (#379)
