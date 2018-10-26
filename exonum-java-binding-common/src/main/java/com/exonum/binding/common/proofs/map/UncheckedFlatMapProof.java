@@ -21,6 +21,7 @@ import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
@@ -46,13 +47,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private final List<MapProofEntry> proof;
 
-  private final List<MapEntry> entries;
+  private final List<MapEntry<ByteString, ByteString>> entries;
 
   private final List<ByteString> missingKeys;
 
   UncheckedFlatMapProof(
       List<MapProofEntry> proof,
-      List<MapEntry> entries,
+      List<MapEntry<ByteString, ByteString>> entries,
       List<byte[]> missingKeys) {
     this.proof = proof;
     this.entries = entries;
@@ -64,10 +65,16 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   @SuppressWarnings("unused") // Native API
   static UncheckedFlatMapProof fromNative(
       MapProofEntry[] proofList,
-      MapEntry[] entries,
+      MapEntry<byte[], byte[]>[] entries,
       byte[][] missingKeys) {
     List<MapProofEntry> proof = Arrays.asList(proofList);
-    List<MapEntry> entriesList = Arrays.asList(entries);
+    List<MapEntry<ByteString, ByteString>> entriesList = Arrays.stream(entries)
+        .map(
+            e -> MapEntry.valueOf(
+                ByteString.copyFrom(e.getKey()),
+                ByteString.copyFrom(e.getValue()))
+        )
+        .collect(toList());
     List<byte[]> missingKeysList = Arrays.asList(missingKeys);
     return new UncheckedFlatMapProof(proof, entriesList, missingKeysList);
   }
@@ -168,7 +175,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       }
     } else {
       // The proof consists of a single leaf with a required key
-      MapEntry entry = entries.get(0);
+      MapEntry<ByteString, ByteString> entry = entries.get(0);
       HashCode rootHash = getSingleEntryRootHash(entry);
       return CheckedFlatMapProof.correct(rootHash, toSet(entries), toSet(missingKeys));
     }
@@ -250,7 +257,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return getSingleEntryRootHash(entry.getDbKey(), entry.getHash());
   }
 
-  private static HashCode getSingleEntryRootHash(MapEntry entry) {
+  private static HashCode getSingleEntryRootHash(MapEntry<ByteString, ByteString> entry) {
     DbKey dbKey = DbKey.newLeafKey(entry.getKey());
     HashCode valueHash = HASH_FUNCTION.hashByteString(entry.getValue());
     return getSingleEntryRootHash(dbKey, valueHash);
@@ -264,7 +271,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .hash();
   }
 
-  private static HashCode getMapEntryHash(MapEntry entry) {
+  private static HashCode getMapEntryHash(MapEntry<ByteString, ByteString> entry) {
     return HASH_FUNCTION.hashByteString(entry.getValue());
   }
 
