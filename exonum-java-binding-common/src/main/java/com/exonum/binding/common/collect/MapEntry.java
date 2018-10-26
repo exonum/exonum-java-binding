@@ -39,7 +39,7 @@ public abstract class MapEntry<K, V> {
   }
 
   /**
-   * Returns the key in this entry.
+   * Returns the key corresponding to this entry.
    */
   public abstract K getKey();
 
