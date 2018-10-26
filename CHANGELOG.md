@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Support of new transaction message format added in Exonum 0.10. (#534)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
@@ -41,7 +42,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Static factory methods accepting protobuf messages to collections,
   allowing to pass Protocol Buffer messages directly instead of using
   `StandardSerializers#protobuf`. (#505)
-- Transaction Message support. (#534)
 
 ### Changed
 - `Transaction#execute` can throw `TransactionExecutionException` to roll back 
