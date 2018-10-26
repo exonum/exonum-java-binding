@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.3] - 2018-10-25
+## [0.3] - TBA <!-- somewhere next week -->
 
 ### Added
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code. (#401)
