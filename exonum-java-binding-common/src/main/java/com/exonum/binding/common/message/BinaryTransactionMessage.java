@@ -31,7 +31,7 @@ import java.util.Arrays;
 /**
  * Binary implementation of the {@link TransactionMessage} class. Immutable by design.
  */
-public final class BinaryTransactionMessage implements TransactionMessage {
+final class BinaryTransactionMessage implements TransactionMessage {
 
   private final int messageSize;
   private final ByteBuffer rawTransaction;
