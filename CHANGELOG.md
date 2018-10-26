@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Wallet transactions history support to the cryptocurrency-demo. (#481)
 
 ### Changed
--  `Transaction#execute` can throw `TransactionExecutionException` to roll back 
+- `Transaction#execute` can throw `TransactionExecutionException` to roll back 
   any changes to the database. The exception includes an error code and an optional 
   description which the framework saves to the storage for later retrieval. (#392)
 - Refactor `exonum-java-proofs` module to `exonum-java-binding-common` module 
