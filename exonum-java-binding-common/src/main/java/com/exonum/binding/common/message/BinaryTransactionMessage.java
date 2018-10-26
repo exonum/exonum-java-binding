@@ -33,6 +33,7 @@ import java.util.Arrays;
  */
 public final class BinaryTransactionMessage implements TransactionMessage {
 
+  private final int messageSize;
   private final ByteBuffer rawTransaction;
 
   BinaryTransactionMessage(byte[] bytes) {
@@ -41,11 +42,12 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   BinaryTransactionMessage(ByteBuffer buffer) {
     ByteBuffer slice = buffer.slice();
-    checkArgument(MIN_MESSAGE_SIZE <= slice.limit(),
-        "Transaction message requires at least %s bytes space, but was %s",
-        MIN_MESSAGE_SIZE, slice.limit());
+    messageSize = slice.remaining();
+    checkArgument(MIN_MESSAGE_SIZE <= messageSize,
+        "Transaction message must be at least %s bytes, but was %s",
+        MIN_MESSAGE_SIZE, messageSize);
 
-    this.rawTransaction = ByteBuffer.allocate(slice.limit()).order(LITTLE_ENDIAN);
+    this.rawTransaction = ByteBuffer.allocate(messageSize).order(LITTLE_ENDIAN);
     this.rawTransaction.put(slice);
   }
 
@@ -69,7 +71,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] getPayload() {
-    int payloadSize = rawTransaction.limit() - MIN_MESSAGE_SIZE;
+    int payloadSize = messageSize - MIN_MESSAGE_SIZE;
     byte[] payload = new byte[payloadSize];
     rawTransaction.position(PAYLOAD_OFFSET);
     rawTransaction.get(payload);
@@ -85,7 +87,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public byte[] getSignature() {
-    int payloadSize = rawTransaction.limit() - MIN_MESSAGE_SIZE;
+    int payloadSize = messageSize - MIN_MESSAGE_SIZE;
     rawTransaction.position(PAYLOAD_OFFSET + payloadSize);
     byte[] signature = new byte[SIGNATURE_SIZE];
     rawTransaction.get(signature);
@@ -100,7 +102,7 @@ public final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public int size() {
-    return rawTransaction.limit();
+    return messageSize;
   }
 
   @Override
