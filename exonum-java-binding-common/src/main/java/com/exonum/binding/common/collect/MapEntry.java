@@ -44,7 +44,7 @@ public abstract class MapEntry<K, V> {
   public abstract K getKey();
 
   /**
-   * Returns the value in this entry.
+   * Returns the value corresponding to this entry.
    */
   public abstract V getValue();
 }
