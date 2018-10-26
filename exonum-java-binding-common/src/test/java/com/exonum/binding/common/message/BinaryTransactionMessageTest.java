@@ -50,6 +50,7 @@ class BinaryTransactionMessageTest {
   void equalsTest() {
     EqualsVerifier
         .forClass(BinaryTransactionMessage.class)
+        .withIgnoredFields("messageSize")
         .verify();
   }
 

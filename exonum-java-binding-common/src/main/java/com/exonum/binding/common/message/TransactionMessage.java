@@ -163,8 +163,9 @@ public interface TransactionMessage {
       PublicKey authorPublicKey = keys.getPublicKey();
       checkArgument(authorPublicKey.size() == AUTHOR_PUBLIC_KEY_SIZE);
 
+      int payloadSize = payload.remaining();
       ByteBuffer buffer = ByteBuffer
-          .allocate(MIN_MESSAGE_SIZE + payload.limit())
+          .allocate(MIN_MESSAGE_SIZE + payloadSize)
           .order(ByteOrder.LITTLE_ENDIAN);
       buffer.put(authorPublicKey.toBytes());
       buffer.put(MessageType.TRANSACTION.bytes());
@@ -173,7 +174,7 @@ public interface TransactionMessage {
       buffer.put(payload);
 
       buffer.rewind();
-      byte[] unsignedMessage = new byte[PAYLOAD_OFFSET + payload.limit()];
+      byte[] unsignedMessage = new byte[PAYLOAD_OFFSET + payloadSize];
       buffer.get(unsignedMessage);
       byte[] signature = crypto.signMessage(unsignedMessage, keys.getPrivateKey());
       buffer.put(signature);
