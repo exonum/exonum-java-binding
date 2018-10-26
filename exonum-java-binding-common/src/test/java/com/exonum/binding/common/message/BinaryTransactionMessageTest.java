@@ -17,6 +17,7 @@
 
 package com.exonum.binding.common.message;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.message.TransactionMessage.MIN_MESSAGE_SIZE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;
 import java.nio.ByteBuffer;
@@ -92,6 +94,23 @@ class BinaryTransactionMessageTest {
     TransactionMessage actualMessage = TransactionMessage.fromBytes(bytes);
 
     assertThat(actualMessage, is(message));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionMessageSource")
+  void hashTest(TransactionMessage message) {
+    HashCode hash = sha256().hashBytes(message.toBytes());
+
+    assertThat(message.hash(), is(hash));
+
+    // check that hash doesn't depend on internal state of the message
+    // By changing the position within the internal BB
+    message.getPayload();
+    assertThat(message.hash(), is(hash));
+    message.getAuthor();
+    assertThat(message.hash(), is(hash));
+    message.getSignature();
+    assertThat(message.hash(), is(hash));
   }
 
   @ParameterizedTest
