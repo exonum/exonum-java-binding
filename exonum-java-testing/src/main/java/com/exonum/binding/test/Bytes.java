@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class Bytes {
 
@@ -57,6 +58,7 @@ public final class Bytes {
 
   /**
    * Converts a string to a sequence of bytes using UTF-8 charset.
+   *
    * @param s a string to convert.
    * @return a string as bytes in UTF-8.
    */
@@ -66,6 +68,7 @@ public final class Bytes {
 
   /**
    * Converts a hex representation of bytes into a byte array.
+   *
    * @param hex a string containing a hex string with lower-case letters
    * @return a byte array corresponding to this string
    */
@@ -98,6 +101,20 @@ public final class Bytes {
     byte[] key = new byte[size];
     System.arraycopy(prefixBytes, 0, key, 0, prefixBytes.length);
     return key;
+  }
+
+  /**
+   * Creates a new array with random bytes of the given size.
+   *
+   * @param size a size of the new array
+   * @return a new array that contains random bytes
+   * @throws IllegalArgumentException in case the size is negative
+   */
+  public static byte[] randomBytes(int size) {
+    checkArgument(0 <= size, "Size is negative: %s", size);
+    byte[] array = new byte[size];
+    ThreadLocalRandom.current().nextBytes(array);
+    return array;
   }
 
   private Bytes() {}
