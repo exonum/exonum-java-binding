@@ -59,7 +59,7 @@ with a few additional parameters.
 #### Generate Template Config
 
 ```$sh
-$ ejb-app generate-template testnet/common.toml
+$ cargo run -- generate-template testnet/common.toml
 ```
 
 #### Generate Node Private and Public Configs
@@ -68,7 +68,7 @@ $ ejb-app generate-template testnet/common.toml
 - `--ejb-libpath` for a path to Java bindings native libraries.
 
 ```$sh
-$ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+$ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
     --ejb-classpath $EJB_CLASSPATH \
     --ejb-libpath $EJB_LIBPATH \
     --peer-address 127.0.0.1:5400
@@ -82,7 +82,7 @@ There are two specific parameters here:
   Java Binding does not use Exonum Core ports directly.
 
 ```$sh
-$ ejb-app finalize testnet/sec.toml testnet/node.toml \
+$ cargo run -- finalize testnet/sec.toml testnet/node.toml \
     --ejb-module-name 'com.<company-name>.<project-name>.ServiceModule' \
     --ejb-port 6000 \
     --public-configs testnet/pub.toml
@@ -91,5 +91,5 @@ $ ejb-app finalize testnet/sec.toml testnet/node.toml \
 ### Step 3. Run Configured Node
 
 ```$sh
-$ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+$ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
 ```

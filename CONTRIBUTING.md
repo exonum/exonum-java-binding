@@ -34,7 +34,7 @@ $ mvn install
 Run:
 ```$sh
 $ cd exonum-java-binding-core/rust/ejb-app
-$ cargo install --debug --force
+$ cargo build
 ```
 
 ## Modules
