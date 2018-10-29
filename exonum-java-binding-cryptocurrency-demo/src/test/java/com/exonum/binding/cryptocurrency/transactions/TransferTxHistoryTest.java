@@ -50,8 +50,8 @@ class TransferTxHistoryTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.firstOwnerKey;
-  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.secondOwnerKey;
+  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
 
   @Test
   void transfersHistoryBetweenTwoAccountsTest() throws CloseFailuresException {

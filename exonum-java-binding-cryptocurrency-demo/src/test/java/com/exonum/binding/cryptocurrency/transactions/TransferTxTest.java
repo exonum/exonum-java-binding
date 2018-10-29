@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.crypto.CryptoUtils.byteArrayToHex;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createSignedMessage;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createUnsignedMessage;
@@ -44,6 +45,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
@@ -57,19 +59,19 @@ class TransferTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
+  private static final PublicKey FROM_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
 
-  private static final PublicKey toKey = PredefinedOwnerKeys.secondOwnerKey;
+  private static final PublicKey TO_KEY = PredefinedOwnerKeys.SECOND_OWNER_KEY;
 
   @Test
   void fromMessage() {
     long seed = 1;
     long amount = 50L;
-    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);
+    BinaryMessage m = createUnsignedMessage(seed, FROM_KEY, TO_KEY, amount);
 
     TransferTx tx = TransferTx.fromMessage(m);
 
-    assertThat(tx, equalTo(withMockMessage(seed, fromKey, toKey, amount)));
+    assertThat(tx, equalTo(withMockMessage(seed, FROM_KEY, TO_KEY, amount)));
   }
 
   @Test
@@ -78,7 +80,7 @@ class TransferTxTest {
     long amount = 50L;
     KeyPair senderKeyPair = CRYPTO_FUNCTION.generateKeyPair();
 
-    BinaryMessage m = createSignedMessage(seed, senderKeyPair, toKey, amount);
+    BinaryMessage m = createSignedMessage(seed, senderKeyPair, TO_KEY, amount);
 
     TransferTx tx = TransferTx.fromMessage(m);
 
@@ -91,7 +93,7 @@ class TransferTxTest {
     long amount = 50L;
 
     // A message that is not signed does not have a proper cryptographic signature.
-    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, amount);
+    BinaryMessage m = createUnsignedMessage(seed, FROM_KEY, TO_KEY, amount);
 
     TransferTx tx = TransferTx.fromMessage(m);
 
@@ -106,36 +108,36 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransfer() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
-      createWallet(view, fromKey, initialBalance);
-      createWallet(view, toKey, initialBalance);
+      createWallet(view, FROM_KEY, initialBalance);
+      createWallet(view, TO_KEY, initialBalance);
 
       // Create and execute the transaction
       long seed = 1L;
       long transferSum = 40L;
-      TransferTx tx = withMockMessage(seed, fromKey, toKey, transferSum);
+      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferSum);
       tx.execute(view);
 
       // Check that wallets have correct balances
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
       long expectedFromValue = initialBalance - transferSum;
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(expectedFromValue));
+      assertThat(wallets.get(FROM_KEY).getBalance(), equalTo(expectedFromValue));
       long expectedToValue = initialBalance + transferSum;
-      assertThat(wallets.get(toKey).getBalance(), equalTo(expectedToValue));
+      assertThat(wallets.get(TO_KEY).getBalance(), equalTo(expectedToValue));
       // Check history
       HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
           .setSeed(seed)
-          .setWalletFrom(fromKey)
-          .setWalletTo(toKey)
+          .setWalletFrom(FROM_KEY)
+          .setWalletTo(TO_KEY)
           .setAmount(transferSum)
           .setTransactionHash(tx.hash())
           .build();
-      assertThat(schema.walletHistory(fromKey), hasItem(expectedEntity));
-      assertThat(schema.walletHistory(toKey), hasItem(expectedEntity));
+      assertThat(schema.walletHistory(FROM_KEY), hasItem(expectedEntity));
+      assertThat(schema.walletHistory(TO_KEY), hasItem(expectedEntity));
     }
   }
 
@@ -143,22 +145,22 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransferToTheSameWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
       long initialBalance = 100L;
-      createWallet(view, fromKey, initialBalance);
+      createWallet(view, FROM_KEY, initialBalance);
 
       // Create and execute the transaction
       long seed = 1L;
       long transferSum = 40L;
-      TransferTx tx = withMockMessage(seed, fromKey, fromKey, transferSum);
+      TransferTx tx = withMockMessage(seed, FROM_KEY, FROM_KEY, transferSum);
       tx.execute(view);
 
       // Check that the balance of the wallet remains the same
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
+      assertThat(wallets.get(FROM_KEY).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -166,23 +168,23 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeNoSuchFromWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create source wallet with the given initial balance
       long initialBalance = 50L;
-      createWallet(view, fromKey, initialBalance);
+      createWallet(view, FROM_KEY, initialBalance);
 
       long seed = 1L;
 
       long transferValue = 50L;
-      TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
+      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferValue);
       // Execute the transaction that attempts to transfer to an unknown wallet
       tx.execute(view);
 
-      // Check that balance of fromKey is unchanged
+      // Check that balance of FROM_KEY is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
+      assertThat(wallets.get(FROM_KEY).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -190,38 +192,40 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeNoSuchToWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       // Create and execute the transaction that attempts to transfer from unknown wallet
       long initialBalance = 100L;
-      createWallet(view, toKey, initialBalance);
+      createWallet(view, TO_KEY, initialBalance);
       long transferValue = 50L;
       long seed = 1L;
-      TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
+      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferValue);
       tx.execute(view);
 
-      // Check that balance of toKey is unchanged
+      // Check that balance of TO_KEY is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(toKey).getBalance(), equalTo(initialBalance));
+      assertThat(wallets.get(TO_KEY).getBalance(), equalTo(initialBalance));
     }
   }
 
   @Test
   void info() {
     long seed = Long.MAX_VALUE - 1L;
-    TransferTx tx = withMockMessage(seed, fromKey, toKey, 50L);
+    TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, 50L);
 
     String info = tx.info();
 
     // Check the transaction parameters in JSON
-    TxMessage<TransferTx> txParameters = CryptocurrencyTransactionGson.instance()
-        .fromJson(info, new TypeToken<TxMessage<TransferTx>>() {
+    TransactionJsonMessage<TransferTx> txParameters = CryptocurrencyTransactionGson.instance()
+        .fromJson(info, new TypeToken<TransactionJsonMessage<TransferTx>>() {
         }.getType());
 
     assertThat(txParameters.getServiceId(), equalTo(CryptocurrencyService.ID));
     assertThat(txParameters.getMessageId(), equalTo(TransferTx.ID));
     assertThat(txParameters.getBody(), equalTo(tx));
+    assertThat(txParameters.getSignature(),
+        equalTo(byteArrayToHex(tx.getMessage().getSignature())));
   }
 
   @Test
@@ -238,6 +242,7 @@ class TransferTxTest {
     // and put it here, replacing `mock(BinaryMessage.class)`.
     BinaryMessage message = mock(BinaryMessage.class);
     lenient().when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
+    lenient().when(message.getSignature()).thenReturn(Bytes.bytes(0x00, 0x01, 0x02));
     return new TransferTx(message, seed, senderId, recipientId, amount);
   }
 }

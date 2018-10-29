@@ -70,7 +70,7 @@ class ApiControllerTest {
 
   private static final short CREATE_WALLET_TX_ID = 1;
 
-  private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
+  private static final PublicKey fromKey = PredefinedOwnerKeys.FIRST_OWNER_KEY;
 
   private CryptocurrencyService service;
 

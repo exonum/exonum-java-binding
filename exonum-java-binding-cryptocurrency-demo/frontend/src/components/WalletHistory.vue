@@ -14,18 +14,18 @@
           </thead>
           <tbody>
             <tr v-for="item in history" :key="item.seed">
-              <td :class="{'text-success':item.walletFrom === keyPair.publicKey}">
-                {{ item.walletFrom | slice }}
+              <td :class="{'text-success':item.wallet_from === keyPair.publicKey}">
+                {{ item.wallet_from | slice }}
               </td>
-              <td :class="{'text-success':item.walletTo === keyPair.publicKey}">
-                {{ item.walletTo | slice }}
+              <td :class="{'text-success':item.wallet_to === keyPair.publicKey}">
+                {{ item.wallet_to | slice }}
               </td>
-              <td :class="[item.walletFrom === keyPair.publicKey ? 'text-danger': 'text-success']">
-                {{ item.walletFrom === keyPair.publicKey ? '-' : '+' }}{{ item.amount }}$
+              <td :class="[item.wallet_from === keyPair.publicKey ? 'text-danger': 'text-success']">
+                {{ item.wallet_from === keyPair.publicKey ? '-' : '+' }}{{ item.amount }}$
               </td>
               <td>
-                <router-link :to="{ name: 'transaction', params: { hash: item.transactionHash } }">
-                  {{ item.transactionHash | slice }}
+                <router-link :to="{ name: 'transaction', params: { hash: item.transaction_hash } }">
+                  {{ item.transaction_hash | slice }}
                 </router-link>
               </td>
             </tr>
@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
+  import {mapState} from 'vuex'
 
   module.exports = {
     name: 'walletHistory',

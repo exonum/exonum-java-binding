@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CryptocurrencyService extends Service {
+  byte PROTOCOL_VERSION = 0;
   short ID = 42;
   String NAME = "cryptocurrency-demo-service";
 

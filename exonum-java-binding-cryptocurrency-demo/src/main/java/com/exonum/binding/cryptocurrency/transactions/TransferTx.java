@@ -16,6 +16,8 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.crypto.CryptoUtils.byteArrayToHex;
+import static com.exonum.binding.cryptocurrency.CryptocurrencyService.PROTOCOL_VERSION;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
@@ -113,8 +115,15 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public String info() {
-    return CryptocurrencyTransactionGson.instance().toJson(
-        new TxMessage<>(CryptocurrencyService.ID, TransferTx.ID, this));
+    TransactionJsonMessage<TransferTx> msg = TransactionJsonMessage.<TransferTx>builder()
+        .protocolVersion(PROTOCOL_VERSION)
+        .serviceId(CryptocurrencyService.ID)
+        .messageId(TransferTx.ID)
+        .body(this)
+        .signature(byteArrayToHex(getMessage().getSignature()))
+        .build();
+
+    return CryptocurrencyTransactionGson.instance().toJson(msg);
   }
 
   @Override

@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.crypto.CryptoUtils.byteArrayToHex;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createSignedMessage;
@@ -25,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.crypto.KeyPair;
@@ -40,6 +42,7 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
@@ -52,7 +55,7 @@ class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.firstOwnerKey;
+  private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
 
   @Test
   void fromMessage() {
@@ -157,13 +160,14 @@ class CreateWalletTxTest {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     String info = tx.info();
-    TxMessage<CreateWalletTx> txParams = CryptocurrencyTransactionGson.instance()
-        .fromJson(info, new TypeToken<TxMessage<CreateWalletTx>>() {
+    TransactionJsonMessage<CreateWalletTx> txParams = CryptocurrencyTransactionGson.instance()
+        .fromJson(info, new TypeToken<TransactionJsonMessage<CreateWalletTx>>() {
         }.getType());
 
     assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
     assertThat(txParams.getMessageId(), equalTo(CreateWalletTx.ID));
     assertThat(txParams.getBody(), equalTo(tx));
+    assertThat(txParams.getSignature(), equalTo(byteArrayToHex(tx.getMessage().getSignature())));
   }
 
   @Test
@@ -174,8 +178,8 @@ class CreateWalletTxTest {
   }
 
   private static CreateWalletTx withMockMessage(PublicKey ownerKey, long initialBalance) {
-    // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
-    // and put it here, replacing `mock(BinaryMessage.class)`.
-    return new CreateWalletTx(mock(BinaryMessage.class), ownerKey, initialBalance);
+    BinaryMessage message = mock(BinaryMessage.class);
+    lenient().when(message.getSignature()).thenReturn(Bytes.bytes(0x00, 0x01, 0x02));
+    return new CreateWalletTx(message, ownerKey, initialBalance);
   }
 }

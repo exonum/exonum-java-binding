@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,24 +23,23 @@ package com.exonum.binding.cryptocurrency.transactions;
  *
  * @param <BodyT> a type of object that is transferred as the message body
  */
-@SuppressWarnings("unused")  // Fields are set through reflection by GSON.
 final class TransactionJsonMessage<BodyT> {
-  private byte protocol_version;
-  private short service_id;
-  private short message_id;
+  private byte protocolVersion;
+  private short serviceId;
+  private short messageId;
   private BodyT body;
   private String signature;
 
   byte getProtocolVersion() {
-    return protocol_version;
+    return protocolVersion;
   }
 
   short getServiceId() {
-    return service_id;
+    return serviceId;
   }
 
   short getMessageId() {
-    return message_id;
+    return messageId;
   }
 
   BodyT getBody() {
@@ -52,5 +51,55 @@ final class TransactionJsonMessage<BodyT> {
    */
   String getSignature() {
     return signature;
+  }
+
+  static <T> TransactionJsonMessageBuilder<T> builder() {
+    return new TransactionJsonMessageBuilder<>();
+  }
+
+  static final class TransactionJsonMessageBuilder<BodyT> {
+    private byte protocolVersion;
+    private short serviceId;
+    private short messageId;
+    private BodyT body;
+    private String signature;
+
+    private TransactionJsonMessageBuilder() {
+    }
+
+    TransactionJsonMessageBuilder<BodyT> protocolVersion(byte protocolVersion) {
+      this.protocolVersion = protocolVersion;
+      return this;
+    }
+
+    TransactionJsonMessageBuilder<BodyT> serviceId(short serviceId) {
+      this.serviceId = serviceId;
+      return this;
+    }
+
+    TransactionJsonMessageBuilder<BodyT> messageId(short messageId) {
+      this.messageId = messageId;
+      return this;
+    }
+
+    TransactionJsonMessageBuilder<BodyT> body(BodyT body) {
+      this.body = body;
+      return this;
+    }
+
+    TransactionJsonMessageBuilder<BodyT> signature(String signature) {
+      this.signature = signature;
+      return this;
+    }
+
+    TransactionJsonMessage<BodyT> build() {
+      TransactionJsonMessage<BodyT> message = new TransactionJsonMessage<>();
+      message.body = this.body;
+      message.protocolVersion = this.protocolVersion;
+      message.serviceId = this.serviceId;
+      message.signature = this.signature;
+      message.messageId = this.messageId;
+      return message;
+    }
   }
 }

@@ -17,6 +17,8 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.common.crypto.CryptoUtils.byteArrayToHex;
+import static com.exonum.binding.cryptocurrency.CryptocurrencyService.PROTOCOL_VERSION;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -99,8 +101,15 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
 
   @Override
   public String info() {
-    return CryptocurrencyTransactionGson.instance().toJson(
-        new TxMessage<>(CryptocurrencyService.ID, CreateWalletTx.ID, this));
+    TransactionJsonMessage<CreateWalletTx> msg = TransactionJsonMessage.<CreateWalletTx>builder()
+        .protocolVersion(PROTOCOL_VERSION)
+        .serviceId(CryptocurrencyService.ID)
+        .messageId(CreateWalletTx.ID)
+        .body(this)
+        .signature(byteArrayToHex(getMessage().getSignature()))
+        .build();
+
+    return CryptocurrencyTransactionGson.instance().toJson(msg);
   }
 
   @Override
