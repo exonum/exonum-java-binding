@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 This release brings:
 - Support of flat map proofs, the new compact proof format for `ProofMap`,
   supporting several keys.
-- Built-in serializers of Java primitive types, some Exonum library types, 
+- Built-in serializers of Java primitive types, some Exonum library types 
   and protobuf messages.
 - Ability to report the transaction execution result as an exception with 
   extra information accessible by a client: `TransactionExecutionException`.
@@ -53,15 +53,15 @@ The release is based on Exonum 0.8.
   any changes to the database. The exception includes an error code and an optional 
   description which the framework saves to the storage for later retrieval.
   Any other exception is considered as an unexpected error (panic in Rust terms). (#392)
-- Refactor `exonum-java-proofs` module to `exonum-java-binding-common` module 
+- Refactored `exonum-java-proofs` module to `exonum-java-binding-common` module 
   with `com.exonum.binding.common` root package so that more functionality
   is available to client applications with no dependency on `exonum-java-binding-core` (#459)
-  - Move `crypto` package to `exonum-java-binding-common` module. (#467)
-  - Move `hash` package to `exonum-java-binding-common` module. (#469)
-  - Move `Transaction`-related classes to the new `com.exonum.binding.transaction` package. (#469)
-  - Move `messages` package to `message` package in `exonum-java-binding-common` module. (#469)
-  - Move `proofs` package to `com.exonum.binding.common` package. (#469)
-  - Move `serialization` package to `com.exonum.binding.common` package. (#469)
+  - Moved `crypto` package to `exonum-java-binding-common` module. (#467)
+  - Moved `hash` package to `exonum-java-binding-common` module. (#469)
+  - Moved `Transaction`-related classes to the new `com.exonum.binding.transaction` package. (#469)
+  - Moved `messages` package to `message` package in `exonum-java-binding-common` module. (#469)
+  - Moved `proofs` package to `com.exonum.binding.common` package. (#469)
+  - Moved `serialization` package to `com.exonum.binding.common` package. (#469)
 - `ProofMapIndexProxy#getProof` to return a flat `UncheckedMapProof` 
   instead of tree-like `MapProof`, which is a more efficient format in terms of space. (#478)
 - `ProofListIndexProxy#getProof` and `ProofListIndexProxy#getRangeProof` to return
