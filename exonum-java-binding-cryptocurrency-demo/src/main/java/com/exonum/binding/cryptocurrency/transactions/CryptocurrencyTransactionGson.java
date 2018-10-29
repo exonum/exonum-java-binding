@@ -18,6 +18,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -38,6 +39,7 @@ public final class CryptocurrencyTransactionGson {
           .registerTypeHierarchyAdapter(HashCode.class, new HashCodeSerializer())
           .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
           .setLongSerializationPolicy(LongSerializationPolicy.STRING)
+          .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
           .create();
 
   /** Returns a configured instance of Gson. */

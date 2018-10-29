@@ -33,7 +33,7 @@ class TransactionJsonMessageTest {
         + "\"service_id\": 2, "
         + "\"message_id\": 3, "
         + "\"body\": {"
-        + "  \"ownerPublicKey\": \"ab\""
+        + "  \"owner_public_key\": \"ab\""
         + "}, "
         + "\"signature\": \"cd\""
         + " }";
@@ -45,7 +45,7 @@ class TransactionJsonMessageTest {
     assertThat(tx.getProtocolVersion()).isEqualTo((byte) 1);
     assertThat(tx.getServiceId()).isEqualTo((short) 2);
     assertThat(tx.getMessageId()).isEqualTo((short) 3);
-    assertThat(tx.getBody()).isEqualTo(ImmutableMap.of("ownerPublicKey", "ab"));
+    assertThat(tx.getBody()).isEqualTo(ImmutableMap.of("owner_public_key", "ab"));
     assertThat(tx.getSignature()).isEqualTo("cd");
   }
 }

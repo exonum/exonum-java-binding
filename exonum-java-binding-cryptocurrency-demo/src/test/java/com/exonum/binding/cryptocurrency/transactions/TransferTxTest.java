@@ -33,6 +33,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -218,7 +219,9 @@ class TransferTxTest {
         .fromJson(info, new TypeToken<TxMessage<TransferTx>>() {
         }.getType());
 
-    assertThat(txParameters.body, equalTo(tx));
+    assertThat(txParameters.getServiceId(), equalTo(CryptocurrencyService.ID));
+    assertThat(txParameters.getMessageId(), equalTo(TransferTx.ID));
+    assertThat(txParameters.getBody(), equalTo(tx));
   }
 
   @Test

@@ -31,6 +31,7 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.proxy.Cleaner;
@@ -108,7 +109,7 @@ class CreateWalletTxTest {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       tx.execute(view);
 
@@ -125,7 +126,7 @@ class CreateWalletTxTest {
   @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       Long initialBalance = DEFAULT_BALANCE;
 
@@ -160,7 +161,9 @@ class CreateWalletTxTest {
         .fromJson(info, new TypeToken<TxMessage<CreateWalletTx>>() {
         }.getType());
 
-    assertThat(txParams.body, equalTo(tx));
+    assertThat(txParams.getServiceId(), equalTo(CryptocurrencyService.ID));
+    assertThat(txParams.getMessageId(), equalTo(CreateWalletTx.ID));
+    assertThat(txParams.getBody(), equalTo(tx));
   }
 
   @Test

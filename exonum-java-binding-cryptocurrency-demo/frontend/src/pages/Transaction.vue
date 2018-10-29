@@ -67,13 +67,13 @@
               <li class="list-group-item">
                 <div class="row">
                   <div class="col-sm-3"><strong>Service ID:</strong></div>
-                  <div class="col-sm-9">{{ transaction.service_id }}</div>
+                  <div class="col-sm-9">{{ transaction.serviceId }}</div>
                 </div>
               </li>
               <li class="list-group-item">
                 <div class="row">
                   <div class="col-sm-3"><strong>Message ID:</strong></div>
-                  <div class="col-sm-9">{{ transaction.message_id }}</div>
+                  <div class="col-sm-9">{{ transaction.messageId }}</div>
                 </div>
               </li>
               <li class="list-group-item">
