@@ -17,12 +17,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.3] - 2018-10-30
 
+### Highlights
+
+This release brings:
+- Support of flat map proofs, the new compact proof format for `ProofMap`,
+  supporting several keys.
+- Built-in serializers of Java primitive types, some Exonum library types, 
+  and protobuf messages.
+- Ability to report the transaction execution result as an exception with 
+  extra information accessible by a client: `TransactionExecutionException`.
+- A separate module `exonum-java-binding-common` that can be used in _client_
+  applications to create transaction messages, check proofs, serialize/deserialize data,
+  perform cryptographic operations.
+- Various fixes and improvements.
+
+The release is based on Exonum 0.8.
+
 ### Added
 - Flat map proofs support, including proofs of absence and multiproofs — proofs for several
   entries at once. (#250, #507, #532)
-- `StandardSerializers` now supports `bool`, `fixed32`, `uint32`, `sint32`, 
-  `fixed64`, `uint64`, `sint64`, `float` and `double` primitive types, 
-  `PrivateKey`, `PublicKey` and `byte[]` serialization. (#514, #523)
+- [`StandardSerializers`](https://exonum.com/doc/api/java-binding-common/0.3/com/exonum/binding/common/serialization/StandardSerializers.html)
+  now supports `bool`, `fixed32`, `uint32`, `sint32`, `fixed64`, `uint64`, `sint64`, `float` 
+  and `double` primitive types, `PrivateKey`, `PublicKey` and `byte[]` serialization. (#514, #523)
 - A deterministic `Serializer` of any protobuf message — `StandardSerializers#protobuf`. (#493)
 - Static factory methods accepting protobuf messages to collections,
   allowing to pass Protocol Buffer messages directly instead of using
@@ -32,9 +48,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Wallet transactions history support to the cryptocurrency-demo. (#481)
 
 ### Changed
-- `Transaction#execute` can throw `TransactionExecutionException` to roll back 
+- [`Transaction#execute`](https://exonum.com/doc/api/java-binding-core/0.3/com/exonum/binding/transaction/Transaction.html#execute-com.exonum.binding.storage.database.Fork-)
+  can throw `TransactionExecutionException` to roll back 
   any changes to the database. The exception includes an error code and an optional 
-  description which the framework saves to the storage for later retrieval. (#392)
+  description which the framework saves to the storage for later retrieval.
+  Any other exception is considered as an unexpected error (panic in Rust terms). (#392)
 - Refactor `exonum-java-proofs` module to `exonum-java-binding-common` module 
   with `com.exonum.binding.common` root package so that more functionality
   is available to client applications with no dependency on `exonum-java-binding-core` (#459)
