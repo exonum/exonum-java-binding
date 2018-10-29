@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.3] - TBA <!-- somewhere next week -->
+## [0.3] - 2018-10-30
 
 ### Added
 - Flat map proofs support, including proofs of absence and multiproofs — proofs for several
