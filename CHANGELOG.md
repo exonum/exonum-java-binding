@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Support of new transaction message format added in Exonum 0.10. (#534)
+
+### Changed
+- `com.exonum.binding.storage.indices.MapEntry` moved to package
+  `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
+  to use this implementation of `MapEntry`.
+
+### Removed
+- `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
+  `com.exonum.binding.common.collect`.
+
+## [0.3] - TBA
+
+### Added
 - `Message.Builder#setBody(byte[])` to avoid `ByteBuffer.wrap` in the client code.
 - `MapIndex.isEmpty()` method to check if MapIndex is empty.
 - Flat map proofs support, including multiproofs — proofs for several
@@ -54,7 +68,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Deprecated tree map proofs in preference to flat map proofs,
   the only supported format by the Exonum storage. (#518)
 
-## 0.2 - 2018-07-23
+## [0.2] - 2018-07-23
 
 ### Added
 
@@ -90,7 +104,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `--ejb-debug` option — use the corresponding JVM flags, e.g.,
   `--ejb-jvm-args=Xcheck:jni`. (#342)
 
-## 0.1.2 - 2018-07-19
+## [0.1.2] - 2018-07-19
 
 Parent module and BOM module were released as they are required dependencies to define a Java service.
 
@@ -98,6 +112,7 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.2...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.3...HEAD
+[0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
 [0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2
 [0.1.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1...v0.1.2

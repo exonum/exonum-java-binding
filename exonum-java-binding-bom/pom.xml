@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.2</version>
+    <version>0.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>exonum-java-binding-bom</artifactId>
-  <version>0.2</version>
+  <version>0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding: Bill of Materials</name>

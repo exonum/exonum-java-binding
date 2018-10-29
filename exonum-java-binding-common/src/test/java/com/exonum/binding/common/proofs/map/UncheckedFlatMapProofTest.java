@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
@@ -50,7 +51,7 @@ class UncheckedFlatMapProofTest {
     ByteString valueKey = DbKeyTestUtils.keyByteStringFromString("101110");
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
 
-    MapEntry leaf = createMapEntry(valueKey, FIRST_VALUE);
+    MapEntry<ByteString, ByteString> leaf = createMapEntry(valueKey, FIRST_VALUE);
     List<MapProofEntry> branches = Arrays.asList(
         createMapProofEntry(firstDbKey),
         createMapProofEntry(thirdDbKey)
@@ -60,7 +61,7 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    MapEntry expectedEntry = new MapEntry(valueKey, FIRST_VALUE);
+    MapEntry<ByteString, ByteString> expectedEntry = MapEntry.valueOf(valueKey, FIRST_VALUE);
     assertThat(checkedMapProof.getEntries(), equalTo(singleton(expectedEntry)));
     assertTrue(checkedMapProof.containsKey(valueKey));
     assertThat(checkedMapProof.get(valueKey), equalTo(FIRST_VALUE));
@@ -73,7 +74,7 @@ class UncheckedFlatMapProofTest {
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
     ByteString fourthKey = DbKeyTestUtils.keyByteStringFromString("1000_1101");
 
-    List<MapEntry> leaves = Arrays.asList(
+    List<MapEntry<ByteString, ByteString>> leaves = Arrays.asList(
         createMapEntry(firstKey, FIRST_VALUE),
         createMapEntry(secondKey, SECOND_VALUE),
         createMapEntry(fourthKey, THIRD_VALUE)
@@ -87,7 +88,7 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    Set<MapEntry> actualCheckedEntries = checkedMapProof.getEntries();
+    Set<MapEntry<ByteString, ByteString>> actualCheckedEntries = checkedMapProof.getEntries();
 
     assertThat(actualCheckedEntries, containsInAnyOrder(leaves.toArray()));
 
@@ -106,7 +107,7 @@ class UncheckedFlatMapProofTest {
   void mapProofWithOneElementShouldBeCorrect() {
     ByteString key = DbKeyTestUtils.keyByteStringFromString("01");
     ByteString value = FIRST_VALUE;
-    MapEntry mapEntry = createMapEntry(key, value);
+    MapEntry<ByteString, ByteString> mapEntry = createMapEntry(key, value);
 
     HashCode valueHash = HASH_FUNCTION.hashByteString(value);
     HashCode expectedRootHash = HASH_FUNCTION.newHasher()
@@ -253,7 +254,7 @@ class UncheckedFlatMapProofTest {
     return new MapProofEntry(dbKey, HashCode.fromBytes(dbKey.getKeySlice()));
   }
 
-  private static MapEntry createMapEntry(ByteString key, ByteString value) {
-    return new MapEntry(key, value);
+  private static MapEntry<ByteString, ByteString> createMapEntry(ByteString key, ByteString value) {
+    return MapEntry.valueOf(key, value);
   }
 }
