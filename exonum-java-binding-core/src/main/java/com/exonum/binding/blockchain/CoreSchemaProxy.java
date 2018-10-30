@@ -92,7 +92,7 @@ final class CoreSchemaProxy {
 
   private static native byte[] nativeGetLastBlock(long nativeHandle);
 
-  private final class CoreCollection {
+  private static final class CoreCollection {
     private static final String BLOCK_TRANSACTIONS = "block_transactions";
     private static final String ALL_BLOCK_HASHES = "block_hashes_by_height";
   }
