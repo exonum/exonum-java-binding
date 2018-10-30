@@ -3,13 +3,13 @@ use exonum::{
     storage::{Fork, Snapshot, StorageValue},
 };
 use jni::{
-    JNIEnv,
     objects::JClass,
     sys::{jbyteArray, jlong},
+    JNIEnv,
 };
+use std::{panic, ptr};
 use storage::db::{View, ViewRef};
 use utils::{self, Handle};
-use std::{panic, ptr};
 
 type CoreSchema<T> = Schema<T>;
 
@@ -54,7 +54,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
 ) -> jlong {
     let res = panic::catch_unwind(|| {
         let val: u64 = match utils::cast_handle::<SchemaType>(schema_handle) {
-            SchemaType::SnapshotSchema(schema)  => schema.height().into(),
+            SchemaType::SnapshotSchema(schema) => schema.height().into(),
             SchemaType::ForkSchema(schema) => schema.height().into(),
         };
         Ok(val as jlong)
@@ -71,7 +71,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let val = match utils::cast_handle::<SchemaType>(schema_handle) {
-            SchemaType::SnapshotSchema(schema)  => schema.last_block(),
+            SchemaType::SnapshotSchema(schema) => schema.last_block(),
             SchemaType::ForkSchema(schema) => schema.last_block(),
         };
         env.byte_array_from_slice(&val.into_bytes())
