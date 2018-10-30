@@ -72,7 +72,7 @@ final class CoreSchemaProxy {
    */
   ListIndex<HashCode> getAllBlockHashes() {
     return ListIndexProxy.newInstance(
-        CoreCollection.ALL_BLOCK_HASHES, dbView, StandardSerializers.hash());
+        CoreIndex.ALL_BLOCK_HASHES, dbView, StandardSerializers.hash());
   }
 
   /**
@@ -81,7 +81,7 @@ final class CoreSchemaProxy {
   ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     byte[] id = fixed64().toBytes(height);
     return ProofListIndexProxy.newInGroupUnsafe(
-        CoreCollection.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
+        CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
   }
 
   private static native long nativeCreate(long viewNativeHandle);
@@ -92,7 +92,10 @@ final class CoreSchemaProxy {
 
   private static native byte[] nativeGetLastBlock(long nativeHandle);
 
-  private static final class CoreCollection {
+  /**
+   * Mapping for Exonum core indexes by name.
+   */
+  private static final class CoreIndex {
     private static final String BLOCK_TRANSACTIONS = "block_transactions";
     private static final String ALL_BLOCK_HASHES = "block_hashes_by_height";
   }
