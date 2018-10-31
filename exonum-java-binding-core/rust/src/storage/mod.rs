@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod core_schema;
 mod db;
 mod entry;
 mod key_set_index;
@@ -22,6 +23,7 @@ mod proof_list_index;
 mod proof_map_index;
 mod value_set_index;
 
+pub use self::core_schema::*;
 pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
 pub(crate) use self::db::View;
 pub use self::entry::*;
