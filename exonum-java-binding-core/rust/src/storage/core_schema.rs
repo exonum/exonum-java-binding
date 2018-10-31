@@ -59,7 +59,8 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
     utils::drop_handle::<SchemaType>(&env, schema_handle);
 }
 
-/// Returns the height of the latest committed block or -1 if the "genesis block" was not created.
+/// Returns the height of the latest committed block. Throws `java.lang.RuntimeException` if the
+/// "genesis block" has not been created yet.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeGetHeight(
     env: JNIEnv,
@@ -73,10 +74,11 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
         };
         Ok(val as jlong)
     });
-    utils::unwrap_exc_or(&env, res, -1)
+    utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns the latest committed block or NULL if the "genesis block" was not created.
+/// Returns the latest committed block. Throws `java.lang.RuntimeException` if the "genesis block"
+/// has not been created yet.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeGetLastBlock(
     env: JNIEnv,
