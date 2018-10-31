@@ -14,13 +14,15 @@
           </thead>
           <tbody>
             <tr v-for="item in history" :key="item.seed">
-              <td class="{'text-success':item.walletFrom === keyPair.publicKey}">
+              <td :class="{'text-success':item.walletFrom === keyPair.publicKey}">
                 {{ item.walletFrom | slice }}
               </td>
-              <td class="{'text-success':item.walletTo === keyPair.publicKey}">
+              <td :class="{'text-success':item.walletTo === keyPair.publicKey}">
                 {{ item.walletTo | slice }}
               </td>
-              <td>{{ item.amount }}$</td>
+              <td :class="[item.walletFrom === keyPair.publicKey ? 'text-danger': 'text-success']">
+                {{ item.walletFrom === keyPair.publicKey ? '-' : '+' }}{{ item.amount }}$
+              </td>
               <td>
                 <router-link :to="{ name: 'transaction', params: { hash: item.transactionHash } }">
                   {{ item.transactionHash | slice }}

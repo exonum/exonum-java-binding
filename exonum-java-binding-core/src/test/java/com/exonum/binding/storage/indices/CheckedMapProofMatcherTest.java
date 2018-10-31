@@ -22,10 +22,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
@@ -59,8 +59,8 @@ public class CheckedMapProofMatcherTest {
   public void matchesValidProof() {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
-    MapEntry entry =
-        new MapEntry(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
+    MapEntry<ByteString, ByteString> entry =
+        MapEntry.valueOf(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
@@ -80,7 +80,8 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
     ByteString actualValue = ByteString.copyFromUtf8("hello");
-    MapEntry entry = new MapEntry(toByteString(presentKey), actualValue);
+    MapEntry<ByteString, ByteString> entry = MapEntry.valueOf(toByteString(presentKey),
+        actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
@@ -100,7 +101,6 @@ public class CheckedMapProofMatcherTest {
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
         MapProofStatus.DUPLICATE_PATH);
-
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);

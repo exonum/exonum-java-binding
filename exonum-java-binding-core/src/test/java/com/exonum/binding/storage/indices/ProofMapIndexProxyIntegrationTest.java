@@ -43,6 +43,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
@@ -866,7 +867,7 @@ public class ProofMapIndexProxyIntegrationTest
     Stream<HashCode> keys = proofKeys.distinct();
     Stream<String> roundRobinValues = IntStream.range(0, Integer.MAX_VALUE)
         .mapToObj(i -> values.get(i % values.size()));
-    return Streams.zip(keys, roundRobinValues, MapEntry::from)
+    return Streams.zip(keys, roundRobinValues, MapEntry::valueOf)
         .collect(Collectors.toList());
   }
 
@@ -886,13 +887,13 @@ public class ProofMapIndexProxyIntegrationTest
     BitSet keyBits = new BitSet(numKeyBits);
     int numEntries = numKeyBits + 1;
     List<MapEntry<HashCode, String>> entries = new ArrayList<>(numEntries);
-    entries.add(MapEntry.from(HashCode.fromBytes(new byte[PROOF_MAP_KEY_SIZE]), V1));
+    entries.add(MapEntry.valueOf(HashCode.fromBytes(new byte[PROOF_MAP_KEY_SIZE]), V1));
 
     for (int i = 0; i < numKeyBits; i++) {
       keyBits.set(i);
       byte[] key = createPrefixed(keyBits.toByteArray(), PROOF_MAP_KEY_SIZE);
       String value = values.get(i % values.size());
-      entries.add(MapEntry.from(HashCode.fromBytes(key), value));
+      entries.add(MapEntry.valueOf(HashCode.fromBytes(key), value));
       keyBits.clear(i);
       assert keyBits.length() == 0;
     }

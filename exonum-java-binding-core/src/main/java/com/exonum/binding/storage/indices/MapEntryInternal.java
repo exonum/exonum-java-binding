@@ -16,8 +16,12 @@
 
 package com.exonum.binding.storage.indices;
 
+import static com.exonum.binding.common.collect.MapEntry.valueOf;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageKey;
 import static com.exonum.binding.storage.indices.StoragePreconditions.checkStorageValue;
+
+import com.exonum.binding.common.collect.MapEntry;
+import com.exonum.binding.common.serialization.Serializer;
 
 final class MapEntryInternal {
   final byte[] key;
@@ -27,5 +31,13 @@ final class MapEntryInternal {
   MapEntryInternal(byte[] key, byte[] value) {
     this.key = checkStorageKey(key);
     this.value = checkStorageValue(value);
+  }
+
+  <V, K> MapEntry<K, V> toMapEntry(MapEntryInternal entry,
+      Serializer<K> keySerializer,
+      Serializer<V> valueSerializer) {
+    K key = keySerializer.fromBytes(entry.key);
+    V value = valueSerializer.fromBytes(entry.value);
+    return valueOf(key, value);
   }
 }

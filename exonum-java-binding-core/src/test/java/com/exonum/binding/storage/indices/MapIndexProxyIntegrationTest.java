@@ -30,6 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -265,7 +266,7 @@ public class MapIndexProxyIntegrationTest
           .boxed()
           .map(size -> prefix(fullKey, size));
       Stream<String> values = TestStorageItems.values.stream();
-      List<MapEntry<String, String>> entries = Streams.zip(keys, values, MapEntry::from)
+      List<MapEntry<String, String>> entries = Streams.zip(keys, values, MapEntry::valueOf)
           .collect(Collectors.toList());
 
       // Shuffle so that we don't add in a certain order.
@@ -525,7 +526,7 @@ public class MapIndexProxyIntegrationTest
     for (int i = 0; i < numOfEntries; i++) {
       String key = Character.toString((char) ('a' + i));
       String value = "v" + (i + 1);
-      l.add(MapEntry.from(key, value));
+      l.add(MapEntry.valueOf(key, value));
     }
     return l;
   }

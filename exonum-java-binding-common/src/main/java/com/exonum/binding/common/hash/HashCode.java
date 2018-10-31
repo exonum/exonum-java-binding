@@ -35,7 +35,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
-import com.google.common.primitives.UnsignedInts;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.Serializable;
 import javax.annotation.Nullable;
@@ -165,7 +164,7 @@ public abstract class HashCode {
 
     @Override
     public long padToLong() {
-      return UnsignedInts.toLong(hash);
+      return Integer.toUnsignedLong(hash);
     }
 
     @Override
