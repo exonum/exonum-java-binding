@@ -70,7 +70,7 @@ public final class Blockchain {
    * Returns a proof list of transaction hashes within the block by the given height.
    *
    * @param height block height starting from 0
-   * @throws IllegalArgumentException if the height parameter is negative
+   * @throws IllegalArgumentException if the height is negative
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
