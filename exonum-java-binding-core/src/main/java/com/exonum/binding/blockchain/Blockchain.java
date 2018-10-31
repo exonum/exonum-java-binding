@@ -47,8 +47,8 @@ public final class Blockchain {
 
   /**
    * Returns the height of the latest committed block in the blockchain.
-   * Height is a number of blocks in the blockchain starting from 0.
-   * Zero block is the "genesis block" (first, initial block in the blockchain).
+   * Height is a number of blocks in the blockchain starting from {@code h = 0} zero block,
+   * which is the "genesis block" (first, initial block in the blockchain).
    *
    * @throws RuntimeException if the "genesis block" was not created
    */
