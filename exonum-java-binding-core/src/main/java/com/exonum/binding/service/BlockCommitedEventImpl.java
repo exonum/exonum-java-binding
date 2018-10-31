@@ -25,6 +25,12 @@ public class BlockCommitedEventImpl implements BlockCommittedEvent {
   private long height;
   private Snapshot snapshot;
 
+  /**
+   * Creates a new block commited event.
+   * @param snapshot a snapshot of the blockchain state
+   * @param validatorId a validator id. Negative if this node is not a validator
+   * @param height the current blockchain height
+   */
   public BlockCommitedEventImpl(Snapshot snapshot, int validatorId, long height) {
     this.validatorId = validatorId;
     this.height = height;
