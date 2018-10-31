@@ -24,7 +24,6 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
-import javax.annotation.Generated;
 
 /**
  * Auto-generated superclass of {@link Message.Builder}, derived from the API of {@link Message}.
@@ -33,7 +32,6 @@ import javax.annotation.Generated;
  * It's checked in and modified because ByteBuffers and byte arrays are mutable objects and need to
  * be copied (see {@link Value#getBody()} & {@link Value#getSignature}).
  */
-@Generated("org.inferred.freebuilder.processor.CodeGenerator")
 abstract class Message_Builder2 {
   
   /** Creates a new builder using {@code value} as a template. */
