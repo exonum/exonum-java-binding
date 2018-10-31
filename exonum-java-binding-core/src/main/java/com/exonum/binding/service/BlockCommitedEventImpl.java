@@ -44,7 +44,7 @@ public class BlockCommitedEventImpl implements BlockCommittedEvent {
 
   @Override
   public Optional<Integer> getValidatorId() {
-    return validatorId > 0 ? Optional.of(validatorId) : Optional.empty();
+    return Optional.of(validatorId).filter(v -> v > 0);
   }
 
   @Override

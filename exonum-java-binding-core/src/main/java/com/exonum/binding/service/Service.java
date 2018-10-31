@@ -120,7 +120,8 @@ public interface Service {
   void createPublicApiHandlers(Node node, Router router);
 
   /**
-   * Handles block commit event. This handler is invoked for each service after commit of the block.
+   * Handles block commit event. This handler is a callback method which is invoked by
+   * the blockchain after each block commit.
    * For example, a service can create one or more transactions if a specific condition
    * has occurred.
    * @param event the current node state on which the blockchain is running
