@@ -118,4 +118,12 @@ public interface Service {
    * @param router a router responsible for handling requests to this service
    */
   void createPublicApiHandlers(Node node, Router router);
+
+  /**
+   * Handles block commit event. This handler is invoked for each service after commit of the block.
+   * For example, a service can create one or more transactions if a specific condition
+   * has occurred.
+   * @param event the current node state on which the blockchain is running
+   */
+  default void afterCommit(BlockCommittedEvent event) {}
 }
