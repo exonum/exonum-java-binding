@@ -24,8 +24,9 @@ import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * Provides read-only access to the blockchain state
- * and informational indexes maintained by Exonum core.
+ * Provides read-only access to the blockchain state that is maintained by Exonum core:
+ * blocks, transaction messages, execution results. Please refer to the
+ * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">doc</a> for details.
  */
 public final class Blockchain {
 
@@ -45,7 +46,9 @@ public final class Blockchain {
   }
 
   /**
-   * Returns the height of the latest committed block.
+   * Returns the height of the latest committed block in the blockchain.
+   * Height is a number of blocks in the blockchain starting from 0.
+   * Zero block is the "genesis block" (first, initial block in the blockchain).
    *
    * @throws RuntimeException if the "genesis block" was not created
    */
@@ -54,15 +57,20 @@ public final class Blockchain {
   }
 
   /**
-   * Returns an list index containing a block hash for every block height
-   * (represented by list index id).
+   * Returns a list of all block hashes, indexed by the block height.
+   * For example, the "genesis block" will be at index 0,
+   * the block at height {@code h = 10} — at index **10**.
+   * The last committed block will be at height {@code h = getAllBlockHashes().size() - 1}.
    */
   public ListIndex<HashCode> getAllBlockHashes() {
     return schema.getAllBlockHashes();
   }
 
   /**
-   * Returns an proof list index containing block hashes for the given height.
+   * Returns a proof list of transaction hashes within the block by the given height.
+   *
+   * @param height block height starting from 0
+   * @throws IllegalArgumentException if the height parameter is negative
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);

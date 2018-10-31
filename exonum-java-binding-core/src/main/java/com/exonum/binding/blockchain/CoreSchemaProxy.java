@@ -18,6 +18,7 @@
 package com.exonum.binding.blockchain;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.fixed64;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -47,8 +48,8 @@ final class CoreSchemaProxy {
    * Constructs a schema proxy for a given dbView.
    */
   static CoreSchemaProxy newInstance(View dbView) {
-    long nativeCreate = nativeCreate(dbView.getViewNativeHandle());
-    NativeHandle nativeHandle = new NativeHandle(nativeCreate);
+    long nativePointer = nativeCreate(dbView.getViewNativeHandle());
+    NativeHandle nativeHandle = new NativeHandle(nativePointer);
 
     Cleaner cleaner = dbView.getCleaner();
     ProxyDestructor.newRegistered(cleaner, nativeHandle, CoreSchemaProxy.class,
@@ -79,6 +80,7 @@ final class CoreSchemaProxy {
    * Returns an proof list index containing block hashes for the given height.
    */
   ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
+    checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
     byte[] id = fixed64().toBytes(height);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
@@ -90,14 +92,19 @@ final class CoreSchemaProxy {
 
   private static native long nativeGetHeight(long nativeHandle);
 
+  /**
+   * Returns the latest committed block or NULL if the "genesis block" was not created.
+   */
+  @SuppressWarnings("unused") // Will be done in the next task
   private static native byte[] nativeGetLastBlock(long nativeHandle);
 
   /**
    * Mapping for Exonum core indexes by name.
    */
   private static final class CoreIndex {
-    private static final String BLOCK_TRANSACTIONS = "block_transactions";
-    private static final String ALL_BLOCK_HASHES = "block_hashes_by_height";
+    private static final String PREFIX = "core.";
+    private static final String BLOCK_TRANSACTIONS = PREFIX + "block_transactions";
+    private static final String ALL_BLOCK_HASHES = PREFIX + "block_hashes_by_height";
   }
 
 }

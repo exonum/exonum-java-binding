@@ -28,15 +28,16 @@ import com.exonum.binding.util.LibraryLoader;
 import org.junit.Ignore;
 import org.junit.Test;
 
+// Ignored because these tests are waiting for native part implementation
+@Ignore
+@RequiresNativeLibrary
 public class CoreSchemaProxyIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  @Ignore
   @Test
-  @RequiresNativeLibrary
   public void heightTest() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -48,9 +49,7 @@ public class CoreSchemaProxyIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
-  @RequiresNativeLibrary
   public void getAllBlockHashesTest() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -61,9 +60,7 @@ public class CoreSchemaProxyIntegrationTest {
     }
   }
 
-  @Ignore
   @Test
-  @RequiresNativeLibrary
   public void getBlockTransactionsTest() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
