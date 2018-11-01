@@ -86,6 +86,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
+    <javac.version>9+181-r4173-1</javac.version>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
@@ -103,6 +104,7 @@
     <protobuf.version>3.6.1</protobuf.version>
     <mockito-core.version>2.23.0</mockito-core.version>
     <guava.version>27.0-jre</guava.version>
+    <error-prone.version>2.3.2</error-prone.version>
     <vertx.version>3.5.4</vertx.version>
     <equalsverifier.version>3.0.1</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
@@ -134,6 +136,12 @@
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.errorprone</groupId>
+        <artifactId>error_prone_core</artifactId>
+        <version>${error-prone.version}</version>
       </dependency>
 
       <dependency>
@@ -234,6 +242,17 @@
              <showWarnings>true</showWarnings>
              <source>${java.compiler.source}</source>
              <target>${java.compiler.target}</target>
+             <compilerArgs>
+               <arg>-XDcompilePolicy=simple</arg>
+               <arg>-Xplugin:ErrorProne</arg>
+             </compilerArgs>
+             <annotationProcessorPaths>
+               <path>
+                 <groupId>com.google.errorprone</groupId>
+                 <artifactId>error_prone_core</artifactId>
+                 <version>${error-prone.version}</version>
+               </path>
+             </annotationProcessorPaths>
            </configuration>
          </plugin>
 
@@ -590,6 +609,28 @@
       <properties>
         <project.skipJavaITs>true</project.skipJavaITs>
       </properties>
+    </profile>
+
+    <!-- Profile automatically activates in 1.8 JDK, used by error-prone -->
+    <profile>
+      <id>jdk8</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <fork>true</fork>
+              <compilerArgs combine.children="append">
+                <arg>-J-Xbootclasspath/p:${settings.localRepository}/com/google/errorprone/javac/${javac.version}/javac-${javac.version}.jar</arg>
+              </compilerArgs>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
