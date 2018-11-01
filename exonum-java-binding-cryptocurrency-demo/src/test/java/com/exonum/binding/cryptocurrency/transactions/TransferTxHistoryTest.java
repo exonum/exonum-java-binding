@@ -34,7 +34,6 @@ import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -54,7 +53,7 @@ class TransferTxHistoryTest {
   private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.secondOwnerKey;
 
   @Test
-  void transfersHistoryBetweenTwoAccountsTest() throws CloseFailuresException {
+  void transfersHistoryBetweenTwoAccountsTest() throws Exception {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);

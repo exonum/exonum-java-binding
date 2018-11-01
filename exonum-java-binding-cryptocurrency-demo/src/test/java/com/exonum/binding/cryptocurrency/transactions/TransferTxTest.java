@@ -20,10 +20,15 @@ import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createSignedMessage;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createUnsignedMessage;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.RECEIVER_SAME_AS_SENDER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -45,6 +50,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -105,7 +111,7 @@ class TransferTxTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeTransfer() throws CloseFailuresException {
+  void executeTransfer() throws Exception {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -154,7 +160,9 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 40L;
       TransferTx tx = withMockMessage(seed, fromKey, fromKey, transferSum);
-      tx.execute(view);
+      TransactionExecutionException e = assertThrows(
+          TransactionExecutionException.class, () -> tx.execute(view));
+      assertThat(e.getErrorCode(), equalTo(RECEIVER_SAME_AS_SENDER.errorCode));
 
       // Check that the balance of the wallet remains the same
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -178,7 +186,9 @@ class TransferTxTest {
       long transferValue = 50L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
       // Execute the transaction that attempts to transfer to an unknown wallet
-      tx.execute(view);
+      TransactionExecutionException e = assertThrows(
+          TransactionExecutionException.class, () -> tx.execute(view));
+      assertThat(e.getErrorCode(), equalTo(UNKNOWN_SENDER.errorCode));
 
       // Check that balance of fromKey is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -199,8 +209,37 @@ class TransferTxTest {
       long transferValue = 50L;
       long seed = 1L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
-      tx.execute(view);
+      TransactionExecutionException e = assertThrows(
+          TransactionExecutionException.class, () -> tx.execute(view));
+      assertThat(e.getErrorCode(), equalTo(UNKNOWN_RECEIVER.errorCode));
 
+      // Check that balance of toKey is unchanged
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+      assertThat(wallets.get(toKey).getBalance(), equalTo(initialBalance));
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void executeInsufficientFunds() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
+
+      // Create and execute the transaction that attempts to transfer from unknown wallet
+      long initialBalance = 100L;
+      createWallet(view, toKey, initialBalance);
+
+      long seed = 1L;
+      long transferValue = initialBalance + 50L;
+      TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
+
+      TransactionExecutionException e = assertThrows(
+          TransactionExecutionException.class, () -> tx.execute(view));
+      assertThat(e.getErrorCode(), equalTo(INSUFFICIENT_FUNDS.errorCode));
+
+      // Fixme: Isn't that irrelevant with exceptions?
       // Check that balance of toKey is unchanged
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
