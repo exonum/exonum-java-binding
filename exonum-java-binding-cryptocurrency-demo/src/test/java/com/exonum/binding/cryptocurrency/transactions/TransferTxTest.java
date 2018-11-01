@@ -21,9 +21,11 @@ import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTrans
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createUnsignedMessage;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.RECEIVER_SAME_AS_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,6 +59,8 @@ import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TransferTxTest {
 
@@ -77,6 +81,39 @@ class TransferTxTest {
     TransferTx tx = TransferTx.fromMessage(m);
 
     assertThat(tx, equalTo(withMockMessage(seed, fromKey, toKey, amount)));
+  }
+
+  @Test
+  void fromMessageRejectsSameSenderAndReceiver() {
+    long seed = 1;
+    long amount = 50L;
+    BinaryMessage m = createUnsignedMessage(seed, fromKey, fromKey, amount);
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> TransferTx.fromMessage(m));
+
+    assertThat(e.getMessage(), allOf(
+        containsStringIgnoringCase("same sender and receiver"),
+        containsStringIgnoringCase(fromKey.toString())));
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {
+      Long.MIN_VALUE,
+      -100,
+      -1,
+      0
+  })
+  void fromMessageRejectsNonPositiveBalance(long transferAmount) {
+    long seed = 1;
+    BinaryMessage m = createUnsignedMessage(seed, fromKey, toKey, transferAmount);
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> TransferTx.fromMessage(m));
+
+    assertThat(e.getMessage(), allOf(
+        containsStringIgnoringCase("transfer amount"),
+        containsString(Long.toString(transferAmount))));
   }
 
   @Test
@@ -143,31 +180,6 @@ class TransferTxTest {
           .build();
       assertThat(schema.walletHistory(fromKey), hasItem(expectedEntity));
       assertThat(schema.walletHistory(toKey), hasItem(expectedEntity));
-    }
-  }
-
-  @Test
-  @RequiresNativeLibrary
-  void executeTransferToTheSameWallet() throws CloseFailuresException {
-    try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
-
-      long initialBalance = 100L;
-      createWallet(view, fromKey, initialBalance);
-
-      // Create and execute the transaction
-      long seed = 1L;
-      long transferSum = 40L;
-      TransferTx tx = withMockMessage(seed, fromKey, fromKey, transferSum);
-      TransactionExecutionException e = assertThrows(
-          TransactionExecutionException.class, () -> tx.execute(view));
-      assertThat(e.getErrorCode(), equalTo(RECEIVER_SAME_AS_SENDER.errorCode));
-
-      // Check that the balance of the wallet remains the same
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
     }
   }
 

@@ -18,10 +18,9 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 enum TransactionError {
   WALLET_ALREADY_EXISTS(0),
-  RECEIVER_SAME_AS_SENDER(1),
-  UNKNOWN_RECEIVER(2),
-  UNKNOWN_SENDER(3),
-  INSUFFICIENT_FUNDS(4);
+  UNKNOWN_RECEIVER(1),
+  UNKNOWN_SENDER(2),
+  INSUFFICIENT_FUNDS(3);
 
   final byte errorCode;
 

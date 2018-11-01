@@ -18,10 +18,10 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.RECEIVER_SAME_AS_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
@@ -54,6 +54,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   @VisibleForTesting
   TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet, long sum) {
     super(message);
+    checkArgument(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
+    checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
     this.seed = seed;
     this.fromWallet = fromWallet;
     this.toWallet = toWallet;
@@ -92,8 +94,6 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public void execute(Fork view) throws TransactionExecutionException {
-    checkExecution(!fromWallet.equals(toWallet), RECEIVER_SAME_AS_SENDER.errorCode);
-
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
