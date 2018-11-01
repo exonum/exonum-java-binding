@@ -5,7 +5,7 @@ extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests;
 use java_bindings::{
-    jni::{JNIEnv, JavaVM},
+    jni::{objects::JThrowable, JNIEnv, JavaVM},
     utils::{
         check_error_on_exception, get_and_clear_java_exception, get_class_name,
         get_exception_message, panic_on_exception,
@@ -176,8 +176,8 @@ fn get_and_clear_java_exception_if_no_exception_occurred() {
 }
 
 fn throw(env: &JNIEnv, exception_class: &str) -> JniResult<()> {
-    // FIXME throw an exception without a stub message https://jira.bf.local/browse/ECR-1998
-    env.throw((exception_class, ""))?;
+    let ex: JThrowable = env.new_object(exception_class, "()V", &[])?.into();
+    env.throw(ex)?;
     Err(JniErrorKind::JavaException.into())
 }
 
