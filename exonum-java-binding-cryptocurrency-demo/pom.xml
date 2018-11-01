@@ -36,25 +36,21 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-binding-core</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -180,6 +176,20 @@
             <id>generate-classpath-file</id>
             <goals>
               <goal>build-classpath</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
             </goals>
           </execution>
         </executions>
