@@ -24,9 +24,8 @@ import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * Provides read-only access to the blockchain state that is maintained by Exonum core:
- * blocks, transaction messages, execution results. Please refer to the
- * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">doc</a> for details.
+ * Provides an access to the blockchain::Schema in the Rust API:
+ * blocks, transaction messages, execution results.
  */
 public final class Blockchain {
 
@@ -47,8 +46,10 @@ public final class Blockchain {
 
   /**
    * Returns the height of the latest committed block in the blockchain.
-   * Height is a number of blocks in the blockchain starting from {@code h = 0} zero block,
-   * which is the "genesis block" (first, initial block in the blockchain).
+   * The height can be considered as a count of blocks in the blockchain,
+   * where the first block has height {@code h = 0}. For example,
+   * the "genesis block" (first, initial block in the blockchain) has height {@code h = 0}.
+   * The latest committed block has height {@code h = getAllBlockHashes().size() - 1}.
    *
    * @throws RuntimeException if the "genesis block" was not created
    */
@@ -59,7 +60,7 @@ public final class Blockchain {
   /**
    * Returns a list of all block hashes, indexed by the block height.
    * For example, the "genesis block" will be at index 0,
-   * the block at height {@code h = 10} — at index **10**.
+   * the block at height {@code h = 10} — at index 10.
    * The last committed block will be at height {@code h = getAllBlockHashes().size() - 1}.
    */
   public ListIndex<HashCode> getAllBlockHashes() {
@@ -67,9 +68,11 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a proof list of transaction hashes within the block by the given height.
+   * Returns a proof list of transaction hashes committed in the block at the given height.
    *
    * @param height block height starting from 0
+   * @return a proof list of transaction hashes committed in the block.
+   *        Or an empty list if the block at the given height doesn't exist
    * @throws IllegalArgumentException if the height is negative
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {

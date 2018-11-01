@@ -31,8 +31,9 @@ import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 
 /**
- * A proxy for informational schema maintained by Exonum core.
- * It provides read-only access to all indexes and blockchain information described in the schema.
+ * A proxy class for the blockchain::Schema struct maintained by Exonum core.
+ * Please refer to the
+ * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">doc</a> for details.
  */
 final class CoreSchemaProxy {
 
@@ -93,9 +94,11 @@ final class CoreSchemaProxy {
   private static native long nativeGetHeight(long nativeHandle);
 
   /**
-   * Returns the latest committed block or NULL if the "genesis block" was not created.
+   * Returns the latest committed block.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
    */
-  @SuppressWarnings("unused") // Will be done in the next task
+  @SuppressWarnings("unused") //TODO: Will be done in the next task
   private static native byte[] nativeGetLastBlock(long nativeHandle);
 
   /**

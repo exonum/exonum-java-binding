@@ -25,11 +25,8 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.Ignore;
 import org.junit.Test;
 
-// Ignored because these tests are waiting for native part implementation
-@Ignore
 @RequiresNativeLibrary
 public class CoreSchemaProxyIntegrationTest {
 
@@ -37,15 +34,14 @@ public class CoreSchemaProxyIntegrationTest {
     LibraryLoader.load();
   }
 
-  @Test
-  public void heightTest() throws CloseFailuresException {
+  @Test(expected = RuntimeException.class)
+  public void getHeightBeforeGenesisBlockTest() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      long height = 0L;
-      assertThat(schema.getHeight()).isEqualTo(height);
+      schema.getHeight();
     }
   }
 
