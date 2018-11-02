@@ -119,6 +119,11 @@
          Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
+
+    <!-- Intentionally left empty, may be overrided from command line.
+         See README.md and http://errorprone.info/docs/flags for more. -->
+    <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
+    <java.compiler.errorprone.patchChecks>MissingOverride,DeadException</java.compiler.errorprone.patchChecks>
   </properties>
 
   <dependencyManagement>
@@ -142,6 +147,7 @@
         <groupId>com.google.errorprone</groupId>
         <artifactId>error_prone_core</artifactId>
         <version>${error-prone.version}</version>
+        <scope>compile</scope>
       </dependency>
 
       <dependency>
@@ -244,7 +250,7 @@
              <target>${java.compiler.target}</target>
              <compilerArgs>
                <arg>-XDcompilePolicy=simple</arg>
-               <arg>-Xplugin:ErrorProne</arg>
+               <arg>-Xplugin:ErrorProne ${java.compiler.errorprone.flag}</arg>
              </compilerArgs>
              <annotationProcessorPaths>
                <path>
