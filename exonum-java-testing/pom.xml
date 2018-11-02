@@ -45,10 +45,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration combine.self="override">
-          <source>${java.compiler.source}</source>
-          <target>${java.compiler.target}</target>
-        </configuration>
       </plugin>
 
       <plugin>
