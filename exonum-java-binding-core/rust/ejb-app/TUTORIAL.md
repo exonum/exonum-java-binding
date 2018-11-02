@@ -56,6 +56,9 @@ its dependencies and pass it instead.
 EJB App configuration is pretty similar to configuration of any other Exonum service,
 with a few additional parameters.
 
+**Note:** using `cargo run` command requires working from the `ejb-app` directory.
+This would be fixed in the future EJB versions.
+
 #### Generate Template Config
 
 ```$sh
