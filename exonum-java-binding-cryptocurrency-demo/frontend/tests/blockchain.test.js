@@ -36,11 +36,11 @@ mock.onPost('/api/cryptocurrency-demo-service/submit-transaction').replyOnce(con
   if (dataHex === transferFundsTX) return [200, '1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127']
 })
 
-mock.onGet('/api/explorer/v1/transactions/1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
+mock.onGet('/api/explorer/v1/transactions?hash=1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
   'type': 'in-pool'
 })
 
-mock.onGet('/api/explorer/v1/transactions/1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
+mock.onGet('/api/explorer/v1/transactions?hash=1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
   'type': 'committed'
 })
 
