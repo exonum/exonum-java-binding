@@ -34,6 +34,7 @@ import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
 /**
@@ -152,7 +153,11 @@ public class UserServiceAdapter {
 
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#afterCommit")) {
       Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
-      BlockCommittedEvent event = new BlockCommitedEventImpl(snapshot, validatorId, height);
+      OptionalInt optionalValidatorId = validatorId >= 0
+          ? OptionalInt.of(validatorId)
+          : OptionalInt.empty();
+      BlockCommittedEvent event =
+          BlockCommitedEventImpl.valueOf(snapshot, optionalValidatorId, height);
       service.afterCommit(event);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);

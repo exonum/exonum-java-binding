@@ -17,39 +17,31 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.storage.database.Snapshot;
-import java.util.Optional;
+import com.google.auto.value.AutoValue;
+import java.util.OptionalInt;
 
-public class BlockCommitedEventImpl implements BlockCommittedEvent {
-
-  private int validatorId;
-  private long height;
-  private Snapshot snapshot;
+@AutoValue
+public abstract class BlockCommitedEventImpl implements BlockCommittedEvent {
 
   /**
    * Creates a new block commited event.
+   *
    * @param snapshot a snapshot of the blockchain state
-   * @param validatorId a validator id. Negative if this node is not a validator
+   * @param validatorId a validator id. {@code OptionalInt.empty()} if this node is not a validator
    * @param height the current blockchain height
    */
-  public BlockCommitedEventImpl(Snapshot snapshot, int validatorId, long height) {
-    this.validatorId = validatorId;
-    this.height = height;
-    this.snapshot = snapshot;
+  public static BlockCommitedEventImpl valueOf(
+      Snapshot snapshot, OptionalInt validatorId, long height) {
+    return new AutoValue_BlockCommitedEventImpl(snapshot, validatorId, height);
   }
 
   @Override
-  public Snapshot getSnapshot() {
-    return snapshot;
-  }
+  abstract public Snapshot getSnapshot();
 
   @Override
-  public Optional<Integer> getValidatorId() {
-    return Optional.of(validatorId).filter(v -> v > 0);
-  }
+  abstract public OptionalInt getValidatorId();
 
   @Override
-  public long getHeight() {
-    return height;
-  }
+  abstract public long getHeight();
 
 }
