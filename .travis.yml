@@ -4,7 +4,7 @@ os:
 dist: trusty
 jdk:
   - openjdk8
-  - openjdk10
+  - openjdk11
 sudo: false
 
 # Build only the following branches/tags pushed to the repository:
@@ -47,11 +47,11 @@ matrix:
       env: CHECK_RUST=false
   # Exclude Rust code checks with JDK 10
   exclude:
-    - jdk: openjdk10
+    - jdk: openjdk11
       env: CHECK_RUST=true
   # See ECR-1734
   allow_failures:
-    - jdk: openjdk10
+    - jdk: openjdk11
   # Report the result of JDK 8 build as it is ready.
   fast_finish: true
 
