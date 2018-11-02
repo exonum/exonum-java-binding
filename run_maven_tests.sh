@@ -16,4 +16,5 @@ source tests_profile
 # See build definitions of the modules for more.
 mvn install \
   --activate-profiles ci-build \
-  -Drust.compiler.version="${RUST_COMPILER_VERSION}"
+  -Drust.compiler.version="${RUST_COMPILER_VERSION}" \
+  -X
