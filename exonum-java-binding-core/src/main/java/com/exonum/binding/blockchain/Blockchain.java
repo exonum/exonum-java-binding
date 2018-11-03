@@ -24,8 +24,10 @@ import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * Provides an access to the blockchain::Schema in the Rust API:
- * blocks, transaction messages, execution results.
+ * Provides read-only access to the subset of
+ * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
+ * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
+ * results.
  */
 public final class Blockchain {
 
