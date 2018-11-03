@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Support of new transaction message format added in Exonum 0.10. (#534)
-- Support of core schema API (#548, #549)
+- Support of core schema API. (#548, #549)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
