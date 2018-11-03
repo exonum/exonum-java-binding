@@ -1,5 +1,5 @@
 use exonum::blockchain::Service;
-use exonum::helpers::fabric::{CommandExtension, Context, ServiceFactory};
+use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
 use jni::{self, JavaVM};
 
 use std::env;
@@ -116,12 +116,16 @@ pub fn panic_if_java_options() {
 pub struct JavaServiceFactory;
 
 impl ServiceFactory for JavaServiceFactory {
+    fn service_name(&self) -> &str {
+        "JAVA_SERVICE_FACTORY"
+    }
+
     fn command(&mut self, command: &str) -> Option<Box<CommandExtension>> {
         use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
         match command {
-            v if v == fabric::GenerateNodeConfig::name() => Some(Box::new(GenerateNodeConfig)),
-            v if v == fabric::Finalize::name() => Some(Box::new(Finalize)),
+            v if v == fabric::GenerateNodeConfig.name() => Some(Box::new(GenerateNodeConfig)),
+            v if v == fabric::Finalize.name() => Some(Box::new(Finalize)),
             _ => None,
         }
     }

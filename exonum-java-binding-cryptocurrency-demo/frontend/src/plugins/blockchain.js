@@ -60,7 +60,7 @@ function waitForAcceptance (publicKey, hash) {
 
   return (function makeAttempt () {
     // find transaction in a explorer
-    return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => {
+    return axios.get(`/api/explorer/v1/transactions?hash=${hash}`).then(response => {
       if (response.data.type !== 'committed') {
         if (--attempt > 0) {
           return new Promise(resolve => {
@@ -156,11 +156,11 @@ module.exports = {
       },
 
       getBlock (height) {
-        return axios.get(`/api/explorer/v1/blocks/${height}`).then(response => response.data)
+        return axios.get(`/api/explorer/v1/block?height=${height}`).then(response => response.data)
       },
 
       getTransaction (hash) {
-        return axios.get(`/api/explorer/v1/transactions/${hash}`).then(response => {
+        return axios.get(`/api/explorer/v1/transactions?hash=${hash}`).then(response => {
           return response.data
         })
       },

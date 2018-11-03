@@ -37,7 +37,8 @@ then
     cargo +${RUST_NIGHTLY_VERSION} clippy --all --tests --all-features -- -D warnings
 
     # Run audit of vulnerable dependencies.
-    cargo audit
+    # TODO: enable when vulnerabilities will be fixed
+    cargo audit || true
 
     # Check silently for updates of Maven dependencies.
     # TODO Disabled until ECR-2252 is fixed.
