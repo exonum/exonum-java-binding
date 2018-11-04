@@ -36,12 +36,12 @@ public abstract class BlockCommittedEventImpl implements BlockCommittedEvent {
   }
 
   @Override
-  abstract public Snapshot getSnapshot();
+  public abstract Snapshot getSnapshot();
 
   @Override
-  abstract public OptionalInt getValidatorId();
+  public abstract OptionalInt getValidatorId();
 
   @Override
-  abstract public long getHeight();
+  public abstract long getHeight();
 
 }
