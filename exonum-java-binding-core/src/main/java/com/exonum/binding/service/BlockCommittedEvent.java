@@ -41,7 +41,7 @@ public interface BlockCommittedEvent {
 
   /**
    * Returns the current database snapshot. It is immutable and represents the database state
-   * as of the block at the current height {@link #getHeight()}.
+   * as of the block at the current {@linkplain #getHeight() height}.
    */
   Snapshot getSnapshot();
 }

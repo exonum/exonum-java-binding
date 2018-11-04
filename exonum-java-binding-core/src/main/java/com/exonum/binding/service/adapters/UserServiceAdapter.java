@@ -23,7 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.service.BlockCommitedEventImpl;
+import com.exonum.binding.service.BlockCommittedEventImpl;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
@@ -157,7 +157,7 @@ public class UserServiceAdapter {
           ? OptionalInt.of(validatorId)
           : OptionalInt.empty();
       BlockCommittedEvent event =
-          BlockCommitedEventImpl.valueOf(snapshot, optionalValidatorId, height);
+          BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
       service.afterCommit(event);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);

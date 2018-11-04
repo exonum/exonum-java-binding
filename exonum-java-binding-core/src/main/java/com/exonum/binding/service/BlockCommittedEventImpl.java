@@ -21,18 +21,18 @@ import com.google.auto.value.AutoValue;
 import java.util.OptionalInt;
 
 @AutoValue
-public abstract class BlockCommitedEventImpl implements BlockCommittedEvent {
+public abstract class BlockCommittedEventImpl implements BlockCommittedEvent {
 
   /**
-   * Creates a new block commited event.
+   * Creates a new block committed event.
    *
    * @param snapshot a snapshot of the blockchain state
    * @param validatorId a validator id. {@code OptionalInt.empty()} if this node is not a validator
    * @param height the current blockchain height
    */
-  public static BlockCommitedEventImpl valueOf(
+  public static BlockCommittedEventImpl valueOf(
       Snapshot snapshot, OptionalInt validatorId, long height) {
-    return new AutoValue_BlockCommitedEventImpl(snapshot, validatorId, height);
+    return new AutoValue_BlockCommittedEventImpl(snapshot, validatorId, height);
   }
 
   @Override
