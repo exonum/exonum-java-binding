@@ -120,10 +120,9 @@
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
 
-    <!-- Intentionally left empty, may be overrided from command line.
-         See README.md and http://errorprone.info/docs/flags for more. -->
-    <java.compiler.errorprone.flag></java.compiler.errorprone.flag>
-    <java.compiler.errorprone.patchChecks>MissingOverride,DeadException</java.compiler.errorprone.patchChecks>
+    <!-- Intentionally left empty, may be overridden from command line.
+         See CONTRIBUTING.md and http://errorprone.info/docs/flags for more. -->
+    <errorprone.flag></errorprone.flag>
   </properties>
 
   <dependencyManagement>
@@ -250,7 +249,7 @@
              <target>${java.compiler.target}</target>
              <compilerArgs>
                <arg>-XDcompilePolicy=simple</arg>
-               <arg>-Xplugin:ErrorProne ${java.compiler.errorprone.flag}</arg>
+               <arg>-Xplugin:ErrorProne ${errorprone.flag}</arg>
              </compilerArgs>
              <annotationProcessorPaths>
                <path>
