@@ -19,9 +19,10 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.storage.indices.TestStorageItems.K9;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
@@ -32,20 +33,15 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class KeySetIndexProxyIntegrationTest
+class KeySetIndexProxyIntegrationTest
     extends BaseIndexProxyTestable<KeySetIndexProxy<String>> {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private static final String KEY_SET_NAME = "test_key_set";
 
   @Test
-  public void addSingleElement() {
+  void addSingleElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
       assertTrue(set.contains(K1));
@@ -53,7 +49,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void addMultipleElements() {
+  void addMultipleElements() {
     runTestWithView(database::createFork, (set) -> {
       List<String> keys = TestStorageItems.keys.subList(0, 3);
       keys.forEach(set::add);
@@ -64,27 +60,24 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void addFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.add(K1);
-    });
+  void addFailsIfSnapshot() {
+    runTestWithView(database::createSnapshot,
+        (set) -> assertThrows(UnsupportedOperationException.class, () -> set.add(K1)));
   }
 
   @Test
-  public void clearEmptyHasNoEffect() {
+  void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, KeySetIndexProxy::clear);
   }
 
   @Test
-  public void clearNonEmptyRemovesAllElements() {
+  void clearNonEmptyRemovesAllElements() {
     runTestWithView(database::createFork, (set) -> {
       List<String> keys = TestStorageItems.keys.subList(0, 3);
 
       keys.forEach(set::add);
 
       set.clear();
-
       keys.forEach(
           (k) -> assertFalse(set.contains(k))
       );
@@ -92,20 +85,18 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.clear();
-    });
+  void clearFailsIfSnapshot() {
+    runTestWithView(database::createSnapshot,
+        (set) -> assertThrows(UnsupportedOperationException.class, set::clear));
   }
 
   @Test
-  public void doesNotContainElementsWhenEmpty() {
+  void doesNotContainElementsWhenEmpty() {
     runTestWithView(database::createSnapshot, (set) -> assertFalse(set.contains(K1)));
   }
 
   @Test
-  public void testIterator() {
+  void testIterator() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.keys;
 
@@ -121,7 +112,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removesAddedElement() {
+  void removesAddedElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
 
@@ -132,7 +123,7 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeNotPresentElementDoesNothing() {
+  void removeNotPresentElementDoesNothing() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
 
@@ -144,11 +135,9 @@ public class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.remove(K1);
-    });
+  void removeFailsIfSnapshot() {
+    runTestWithView(database::createSnapshot,
+        (set) -> assertThrows(UnsupportedOperationException.class, () -> set.remove(K1)));
   }
 
   /**
@@ -159,7 +148,7 @@ public class KeySetIndexProxyIntegrationTest
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      Consumer<KeySetIndexProxy<String>> keySetTest) {
+      Consumer<KeySetIndexProxy<String>> keySetTest) {
     runTestWithView(viewFactory, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
 
@@ -171,7 +160,7 @@ public class KeySetIndexProxyIntegrationTest
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      BiConsumer<View, KeySetIndexProxy<String>> keySetTest) {
+      BiConsumer<View, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         KEY_SET_NAME,

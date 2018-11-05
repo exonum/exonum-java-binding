@@ -21,9 +21,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,26 +35,21 @@ import java.util.Set;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class AbstractCloseableNativeProxyTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class AbstractCloseableNativeProxyTest {
 
   NativeProxyFake proxy;
 
   @Test
-  public void closeShallCallDispose() {
+  void closeShallCallDispose() {
     proxy = new NativeProxyFake(1L, true);
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(1));
   }
 
   @Test
-  public void closeShallCallDisposeOnce() {
+  void closeShallCallDisposeOnce() {
     proxy = new NativeProxyFake(1L, true);
     proxy.close();
     proxy.close();
@@ -61,58 +57,57 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void closeShallNotDisposeInvalidHandle() {
+  void closeShallNotDisposeInvalidHandle() {
     proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(0));
   }
 
   @Test
-  public void closeShallNotDisposeNotOwningHandle() {
+  void closeShallNotDisposeNotOwningHandle() {
     proxy = new NativeProxyFake(1L, false);
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(0));
   }
 
   @Test
-  public void closeShallThrowIfReferencedObjectInvalid() {
+  void closeShallThrowIfReferencedObjectInvalid() {
     NativeProxyFake reference = makeProxy(2L);
     proxy = new NativeProxyFake(1L, true, reference);
 
     reference.close();
 
-    expectedException.expect(IllegalStateException.class);
-    proxy.close();
+    assertThrows(IllegalStateException.class, () -> proxy.close());
   }
 
   @Test
-  public void shallBeValidOnceCreated() {
+  void shallBeValidOnceCreated() {
     proxy = new NativeProxyFake(1L, true);
     assertTrue(proxy.isValidHandle());
   }
 
   @Test
-  public void shallNotBeValidOnceClosed() {
+  void shallNotBeValidOnceClosed() {
     proxy = new NativeProxyFake(1L, true);
     proxy.close();
     assertFalse(proxy.isValidHandle());
   }
 
   @Test
-  public void notOwningShallNotBeValidOnceClosed() {
+  void notOwningShallNotBeValidOnceClosed() {
     proxy = new NativeProxyFake(1L, false);
     proxy.close();
     assertFalse(proxy.isValidHandle());
   }
 
   @Test
-  public void shallNotBeValidIfInvalidHandle() {
+  void shallNotBeValidIfInvalidHandle() {
     proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
     assertFalse(proxy.isValidHandle());
   }
 
   @Test
-  public void getNativeHandle() {
+  void getNativeHandle() {
     long expectedNativeHandle = 0x1FL;
 
     proxy = new NativeProxyFake(expectedNativeHandle, true);
@@ -121,28 +116,29 @@ public class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  public void getNativeHandle_ShallFailIfProxyIsClosed() {
+  void getNativeHandle_ShallFailIfProxyIsClosed() {
     long nativeHandle = 0x1FL;
 
     proxy = new NativeProxyFake(nativeHandle, true);
     proxy.close();
 
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();  // boom
+
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
+    // boom
   }
 
   @Test
-  public void getNativeHandle_ShallFailIfInvalid() {
+  void getNativeHandle_ShallFailIfInvalid() {
     long invalidHandle = 0x0L;
 
     proxy = new NativeProxyFake(invalidHandle, true);
 
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();  // boom
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
+    // boom
   }
 
   @Test
-  public void getNativeHandle_DirectlyReferencedInvalid1() {
+  void getNativeHandle_DirectlyReferencedInvalid1() {
     long nativeHandle = 1L;
     NativeProxyFake referenced = makeProxy(20L);
     // o--x
@@ -153,13 +149,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.close();
 
     assertThat(proxy, hasInvalidReferences(referenced));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_DirectlyReferencedInvalid2() {
+  void getNativeHandle_DirectlyReferencedInvalid2() {
     long nativeHandle = 1L;
     NativeProxyFake referenced = new NativeProxyFake(20L, true, makeProxy(30L));
     // o--x--o
@@ -170,13 +164,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.close();
 
     assertThat(proxy, hasInvalidReferences(referenced));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_IndirectlyReferencedInvalid1() {
+  void getNativeHandle_IndirectlyReferencedInvalid1() {
     long nativeHandle = 1L;
     NativeProxyFake referenced = makeProxy(30L);
     // o--o--x
@@ -188,13 +180,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.close();
 
     assertThat(proxy, hasInvalidReferences(referenced));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_DirectlyMultiReferenced0() {
+  void getNativeHandle_DirectlyMultiReferenced0() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -210,13 +200,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.get(0).close();
 
     assertThat(proxy, hasInvalidReferences(referenced.get(0)));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_DirectMultiReferenced1() {
+  void getNativeHandle_DirectMultiReferenced1() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -232,13 +220,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.get(1).close();
 
     assertThat(proxy, hasInvalidReferences(referenced.get(1)));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_DirectMultiReferenced2() {
+  void getNativeHandle_DirectMultiReferenced2() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -254,13 +240,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.get(2).close();
 
     assertThat(proxy, hasInvalidReferences(referenced.get(2)));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_DirectMultiReferencedAll() {
+  void getNativeHandle_DirectMultiReferencedAll() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced = asList(makeProxy(20L),
         makeProxy(21L),
@@ -276,13 +260,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced.forEach(CloseableNativeProxy::close);
 
     assertThat(proxy, hasInvalidReferences(referenced));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_DiamondReferenced() {
+  void getNativeHandle_DiamondReferenced() {
     long nativeHandle = 1L;
 
     AbstractCloseableNativeProxy referenced3 = makeProxy(30L);
@@ -299,13 +281,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced3.close();
 
     assertThat(proxy, hasInvalidReferences(referenced3));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_ChainReferenced() {
+  void getNativeHandle_ChainReferenced() {
     long nativeHandle = 1L;
 
     AbstractCloseableNativeProxy referenced4 = makeProxy(40L);
@@ -321,13 +301,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced4.close();
 
     assertThat(proxy, hasInvalidReferences(referenced4));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_ChainReferencedAllInvalid() {
+  void getNativeHandle_ChainReferencedAllInvalid() {
     // o->x->x->x
     List<AbstractCloseableNativeProxy> transitivelyReferenced = new ArrayList<>();
     NativeProxyFake proxy = null;
@@ -351,13 +329,11 @@ public class AbstractCloseableNativeProxyTest {
     }
 
     assertThat(proxy, hasInvalidReferences(transitivelyReferenced));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, proxy::getNativeHandle);
   }
 
   @Test
-  public void getNativeHandle_InDirectMultiReferenced1() {
+  void getNativeHandle_InDirectMultiReferenced1() {
     long nativeHandle = 1L;
     List<AbstractCloseableNativeProxy> referenced3 = asList(makeProxy(30L),
         makeProxy(31L),
@@ -374,13 +350,11 @@ public class AbstractCloseableNativeProxyTest {
     referenced3.get(1).close();
 
     assertThat(proxy, hasInvalidReferences(referenced3.get(1)));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   @Test
-  public void getNativeHandle_MultipleReferences() {
+  void getNativeHandle_MultipleReferences() {
     long nativeHandle = 1L;
     AbstractCloseableNativeProxy referenced2 = makeProxy(21L);
     //  /¯o
@@ -395,9 +369,7 @@ public class AbstractCloseableNativeProxyTest {
     referenced2.close();
 
     assertThat(proxy, hasInvalidReferences(referenced2));
-
-    expectedException.expect(IllegalStateException.class);
-    proxy.getNativeHandle();
+    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
   }
 
   private Matcher<AbstractCloseableNativeProxy> hasInvalidReferences(
@@ -424,7 +396,7 @@ public class AbstractCloseableNativeProxyTest {
 
       @Override
       protected void describeMismatchSafely(AbstractCloseableNativeProxy item,
-                                            Description mismatchDescription) {
+          Description mismatchDescription) {
         mismatchDescription.appendText("was a proxy with invalid references: ")
             .appendValue(item.getInvalidReferences());
       }
@@ -449,12 +421,12 @@ public class AbstractCloseableNativeProxyTest {
     }
 
     NativeProxyFake(long nativeHandle, boolean dispose,
-                    AbstractCloseableNativeProxy referenced) {
+        AbstractCloseableNativeProxy referenced) {
       this(nativeHandle, dispose, singleton(referenced));
     }
 
     NativeProxyFake(long nativeHandle, boolean dispose,
-                    Collection<AbstractCloseableNativeProxy> referenced) {
+        Collection<AbstractCloseableNativeProxy> referenced) {
       super(nativeHandle, dispose, referenced);
       this.nativeHandle = nativeHandle;
       timesDisposed = 0;

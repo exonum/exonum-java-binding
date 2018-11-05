@@ -22,27 +22,28 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import com.exonum.binding.proxy.Cleaner;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
+@ExtendWith(MockitoExtension.class)
 @PrepareForTest({
     Views.class,
 })
-@Ignore  // Won't run on Java 10 till Powermock is updated [ECR-1614]
-public class SnapshotTest {
+@Disabled
+// Won't run on Java 10 till Powermock is updated [ECR-1614]
+class SnapshotTest {
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     mockStatic(Views.class);
   }
 
   @Test
-  public void destroy_NotOwning() throws Exception {
+  void destroy_NotOwning() throws Exception {
     try (Cleaner cleaner = new Cleaner()) {
       Snapshot.newInstance(0x0A, false, cleaner);
     }
@@ -52,7 +53,7 @@ public class SnapshotTest {
   }
 
   @Test
-  public void destroy_Owning() throws Exception {
+  void destroy_Owning() throws Exception {
     int nativeHandle = 0x0A;
 
     try (Cleaner cleaner = new Cleaner()) {

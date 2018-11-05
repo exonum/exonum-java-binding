@@ -19,9 +19,11 @@ package com.exonum.binding.service.adapters;
 import static com.exonum.binding.test.Bytes.bytes;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -42,20 +44,15 @@ import io.vertx.ext.web.impl.RouterImpl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UserServiceAdapterTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class UserServiceAdapterTest {
 
   @Mock
   private Service service;
@@ -70,13 +67,12 @@ public class UserServiceAdapterTest {
   private UserServiceAdapter serviceAdapter;
 
   @Test
-  public void convertTransaction_ThrowsIfNull() {
-    expectedException.expect(NullPointerException.class);
-    serviceAdapter.convertTransaction(null);
+  void convertTransaction_ThrowsIfNull() {
+    assertThrows(NullPointerException.class, () -> serviceAdapter.convertTransaction(null));
   }
 
   @Test
-  public void convertTransaction() {
+  void convertTransaction() {
     short serviceId = (short) 0xA103;
     Transaction expectedTransaction = mock(Transaction.class);
     when(service.getId()).thenReturn(serviceId);
@@ -93,7 +89,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void convertTransaction_InvalidServiceImplReturningNull() {
+  void convertTransaction_InvalidServiceImplReturningNull() {
     short serviceId = (short) 0xA103;
     when(service.getId()).thenReturn(serviceId);
     when(service.convertToTransaction(any(BinaryMessage.class)))
@@ -104,10 +100,10 @@ public class UserServiceAdapterTest {
         .getSignedMessage()
         .array();
 
-    expectedException.expectMessage("Invalid service implementation: "
-        + "Service#convertToTransaction must never return null.");
-    expectedException.expect(NullPointerException.class);
-    serviceAdapter.convertTransaction(message);
+    NullPointerException thrown = assertThrows(NullPointerException.class,
+        () -> serviceAdapter.convertTransaction(message));
+    assertThat(thrown.getLocalizedMessage(), containsString("Invalid service implementation: "
+        + "Service#convertToTransaction must never return null."));
   }
 
   /**
@@ -121,7 +117,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_EmptyList() {
+  void getStateHashes_EmptyList() {
     long snapshotHandle = 0x0A;
     Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
@@ -136,7 +132,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_SingletonList() {
+  void getStateHashes_SingletonList() {
     long snapshotHandle = 0x0A;
     Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
@@ -153,7 +149,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_MultipleHashesList() {
+  void getStateHashes_MultipleHashesList() {
     long snapshotHandle = 0x0A;
     Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
@@ -177,7 +173,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_ClosesCleaner() {
+  void getStateHashes_ClosesCleaner() {
     long snapshotHandle = 0x0A;
     byte[][] ignored = serviceAdapter.getStateHashes(snapshotHandle);
 
@@ -190,7 +186,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void initialize_ClosesCleaner() {
+  void initialize_ClosesCleaner() {
     long forkHandle = 0x0A;
     String ignored = serviceAdapter.initialize(forkHandle);
 
@@ -203,7 +199,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void mountPublicApiHandler() {
+  void mountPublicApiHandler() {
     Router router = mock(RouterImpl.class);
     when(server.createRouter())
         .thenReturn(router);
@@ -217,10 +213,9 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void mountPublicApiHandler_FailsOnSubsequentCalls() {
+  void mountPublicApiHandler_FailsOnSubsequentCalls() {
     serviceAdapter.mountPublicApiHandler(0x0A);
 
-    expectedException.expect(IllegalStateException.class);
-    serviceAdapter.mountPublicApiHandler(0x0B);
+    assertThrows(IllegalStateException.class, () -> serviceAdapter.mountPublicApiHandler(0x0B));
   }
 }

@@ -20,21 +20,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DefaultCleanActionTest {
+class DefaultCleanActionTest {
 
   @Test
-  public void resourceTypeEmptyByDefault() {
+  void resourceTypeEmptyByDefault() {
     // Cast lambda to CleanAction.
-    CleanAction<?> a = () -> { };
+    CleanAction<?> a = () -> {
+    };
 
     // Check the resource type.
     assertThat(a.resourceType()).isEmpty();
   }
 
   @Test
-  public void from() {
+  void from() {
     Runnable r = mock(Runnable.class);
     String expectedResourceType = "Native proxy";
 

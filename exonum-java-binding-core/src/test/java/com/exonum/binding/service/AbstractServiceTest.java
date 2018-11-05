@@ -16,41 +16,37 @@
 
 package com.exonum.binding.service;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import io.vertx.ext.web.Router;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class AbstractServiceTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class AbstractServiceTest {
 
   @Test
-  public void constructorDiscardsEmptyName() {
-    expectedException.expect(IllegalArgumentException.class);
-    new ServiceUnderTest((short) 1, "", mock(TransactionConverter.class));
+  void constructorDiscardsEmptyName() {
+    assertThrows(IllegalArgumentException.class,
+        () -> new ServiceUnderTest((short) 1, "", mock(TransactionConverter.class)));
   }
 
   @Test
-  public void constructorDiscardsNullName() {
-    expectedException.expect(NullPointerException.class);
-    new ServiceUnderTest((short) 1, null, mock(TransactionConverter.class));
+  void constructorDiscardsNullName() {
+    assertThrows(NullPointerException.class,
+        () -> new ServiceUnderTest((short) 1, null, mock(TransactionConverter.class)));
   }
 
   @Test
-  public void constructorDiscardsNullConverter() {
-    expectedException.expect(NullPointerException.class);
-    new ServiceUnderTest((short) 1, "service#1", null);
+  void constructorDiscardsNullConverter() {
+    assertThrows(NullPointerException.class,
+        () -> new ServiceUnderTest((short) 1, "service#1", null));
   }
 
   @Test
-  public void getStateHashes_EmptySchema() {
+  void getStateHashes_EmptySchema() {
     Service service = new ServiceUnderTest((short) 1, "s1", mock(TransactionConverter.class));
     assertTrue(service.getStateHashes(mock(Snapshot.class)).isEmpty());
   }
@@ -58,7 +54,7 @@ public class AbstractServiceTest {
   static class ServiceUnderTest extends AbstractService {
 
     ServiceUnderTest(short id, String name,
-                     TransactionConverter transactionConverter) {
+        TransactionConverter transactionConverter) {
       super(id, name, transactionConverter);
     }
 
@@ -68,6 +64,7 @@ public class AbstractServiceTest {
     }
 
     @Override
-    public void createPublicApiHandlers(Node node, Router router) {}
+    public void createPublicApiHandlers(Node node, Router router) {
+    }
   }
 }

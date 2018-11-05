@@ -18,22 +18,21 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
-import static com.exonum.binding.test.TestParameters.parameters;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.IndexConstructors.PartiallyAppliedIndexConstructor;
 import com.google.common.collect.ImmutableList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -41,33 +40,28 @@ import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * A test of common ListIndex methods.
  */
-@RunWith(Parameterized.class)
-public class ListIndexParameterizedIntegrationTest
+//TODO Disabled bcz it's hard readable code. Need to be refactored.
+@Disabled
+class ListIndexParameterizedIntegrationTest
     extends BaseIndexProxyTestable<AbstractListIndexProxy<String>> {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  public IndexConstructors.PartiallyAppliedIndexConstructor<ListIndex<String>> listFactory;
 
-  @Parameterized.Parameter(0)
-  public PartiallyAppliedIndexConstructor<ListIndex<String>> listFactory;
-
-  @Parameterized.Parameter(1)
   public String testName;
 
   private static final String LIST_NAME = "test_list";
 
   @Test
-  public void addSingleElementToEmptyList() {
+  void addSingleElementToEmptyList() {
     runTestWithView(database::createFork, (l) -> {
       String addedElement = V1;
       l.add(addedElement);
@@ -77,13 +71,14 @@ public class ListIndexParameterizedIntegrationTest
     });
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void addFailsWithSnapshot() {
-    runTestWithView(database::createSnapshot, (l) -> l.add(V1));
+  @Test
+  void addFailsWithSnapshot() {
+    assertThrows(UnsupportedOperationException.class,
+        () -> runTestWithView(database::createSnapshot, (l) -> l.add(V1)));
   }
 
   @Test
-  public void addAllEmptyCollection() {
+  void addAllEmptyCollection() {
     runTestWithView(database::createFork, (l) -> {
       l.addAll(Collections.emptyList());
 
@@ -92,19 +87,19 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllEmptyCollectionNonEmptyIndex() {
+  void addAllEmptyCollectionNonEmptyIndex() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       long initialSize = l.size();
 
       l.addAll(Collections.emptyList());
 
-      assertThat(l.size(), equalTo(initialSize));
+      assertThat(l.size(), is(initialSize));
     });
   }
 
   @Test
-  public void addAllNonEmptyCollection() {
+  void addAllNonEmptyCollection() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(V1, V2);
       l.addAll(addedElements);
@@ -120,7 +115,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllNonEmptyCollectionNonEmptyIndex() {
+  void addAllNonEmptyCollectionNonEmptyIndex() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       int initialSize = Math.toIntExact(l.size());
@@ -139,41 +134,36 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void addAllCollectionWithFirstNull() {
+  void addAllCollectionWithFirstNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(null, V2);
-      try {
-        l.addAll(addedElements);
-        fail("Expected NPE");
-      } catch (NullPointerException e) {
-        assertTrue(l.isEmpty());
-      }
+      NullPointerException e = assertThrows(NullPointerException.class,
+          () -> l.addAll(addedElements));
+      assertTrue(l.isEmpty());
     });
   }
 
   @Test
-  public void addAllCollectionWithSecondNull() {
+  void addAllCollectionWithSecondNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(V1, null);
-      try {
-        l.addAll(addedElements);
-        fail("Expected NPE");
-      } catch (NullPointerException e) {
-        assertTrue(l.isEmpty());
-      }
+      NullPointerException e = assertThrows(NullPointerException.class,
+          () -> l.addAll(addedElements));
+      assertTrue(l.isEmpty());
     });
   }
 
   @Test
-  public void addAllNullCollection() {
+  void addAllNullCollection() {
     runTestWithView(database::createFork, (l) -> {
-      expectedException.expect(NullPointerException.class);
-      l.addAll(null);
+
+      assertThrows(NullPointerException.class, () -> l.addAll(null));
+
     });
   }
 
   @Test
-  public void setReplaceFirstSingleElement() {
+  void setReplaceFirstSingleElement() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       String replacingElement = "r1";
@@ -185,7 +175,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void setReplaceSecondLastElement() {
+  void setReplaceSecondLastElement() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -199,18 +189,20 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void setReplaceAbsentElement() {
+  void setReplaceAbsentElement() {
     runTestWithView(database::createFork, (l) -> {
       long invalidIndex = 0;
       String replacingElement = "r2";
 
-      expectedException.expect(IndexOutOfBoundsException.class);
-      l.set(invalidIndex, replacingElement);
+
+      assertThrows(IndexOutOfBoundsException.class, () -> l.set(invalidIndex, replacingElement));
+
     });
   }
 
-  @Test
-  public void setWithSnapshot() throws Exception {
+  @ParameterizedTest(name = "{index} -> {0}")
+  @MethodSource("testData")
+  void setWithSnapshot() throws Exception {
     // Initialize the list.
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = database.createFork(cleaner);
@@ -222,20 +214,19 @@ public class ListIndexParameterizedIntegrationTest
       ListIndex<String> list2 = createList(snapshot);
 
       // Expect the read-only list to throw an exception in a modifying operation.
-      expectedException.expect(UnsupportedOperationException.class);
-      list2.set(0, V2);
+      assertThrows(UnsupportedOperationException.class, () -> list2.set(0, V2));
     }
   }
 
-  @Test(expected = NoSuchElementException.class)
-  public void getLastEmptyList() {
-    runTestWithView(database::createFork, (l) -> {
+  @Test
+  void getLastEmptyList() {
+    assertThrows(NoSuchElementException.class, () -> runTestWithView(database::createFork, (l) -> {
       String ignored = l.getLast();
-    });
+    }));
   }
 
   @Test
-  public void getLastSingleElementList() {
+  void getLastSingleElementList() {
     runTestWithView(database::createFork, (l) -> {
       String addedElement = V1;
       l.add(addedElement);
@@ -246,7 +237,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void getLastTwoElementList() {
+  void getLastTwoElementList() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -257,7 +248,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void clearEmptyHasNoEffect() {
+  void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, (l) -> {
       l.clear();
 
@@ -267,7 +258,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void clearNonEmptyRemovesAll() {
+  void clearNonEmptyRemovesAll() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -278,20 +269,21 @@ public class ListIndexParameterizedIntegrationTest
     });
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void clearWithSnapshot() {
-    runTestWithView(database::createSnapshot, ListIndex::clear);
+  @Test
+  void clearWithSnapshot() {
+    assertThrows(UnsupportedOperationException.class,
+        () -> runTestWithView(database::createSnapshot, ListIndex::clear));
   }
 
   @Test
-  public void isEmptyWhenNew() {
+  void isEmptyWhenNew() {
     runTestWithView(database::createSnapshot, (l) -> {
       assertTrue(l.isEmpty());
     });
   }
 
   @Test
-  public void notEmptyAfterAdd() {
+  void notEmptyAfterAdd() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       assertFalse(l.isEmpty());
@@ -299,14 +291,14 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void zeroSizeWhenNew() {
+  void zeroSizeWhenNew() {
     runTestWithView(database::createSnapshot, (l) -> {
       assertThat(l.size(), equalTo(0L));
     });
   }
 
   @Test
-  public void oneSizeAfterAdd() {
+  void oneSizeAfterAdd() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       assertThat(l.size(), equalTo(1L));
@@ -314,7 +306,7 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   @Test
-  public void testIterator() {
+  void testIterator() {
     runTestWithView(database::createFork, (l) -> {
       List<String> elements = TestStorageItems.values;
 
@@ -328,12 +320,12 @@ public class ListIndexParameterizedIntegrationTest
   }
 
   private void runTestWithView(Function<Cleaner, View> viewFactory,
-                               Consumer<ListIndex<String>> listTest) {
+      Consumer<ListIndex<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
   private void runTestWithView(Function<Cleaner, View> viewFactory,
-                               BiConsumer<View, ListIndex<String>> listTest) {
+      BiConsumer<View, ListIndex<String>> listTest) {
     try (Cleaner cleaner = new Cleaner()) {
       View view = viewFactory.apply(cleaner);
       ListIndex<String> list = createList(view);
@@ -358,15 +350,18 @@ public class ListIndexParameterizedIntegrationTest
     return listFactory.create(LIST_NAME, view);
   }
 
-  @Parameters(name = "{index}: {1}")
-  public static Collection<Object[]> testData() {
-    return asList(
-        parameters(
+  private static List<Arguments> testData() {
+    return Arrays.asList(
+        Arguments.of(
             IndexConstructors.fromOneArg(ListIndexProxy::newInstance),
-            "ListIndex"),
-        parameters(
+            "ListIndex"
+        ),
+        Arguments.of(
+
             IndexConstructors.fromOneArg(ProofListIndexProxy::newInstance),
-            "ProofListIndex")
+            "ProofListIndex"
+        )
     );
   }
+
 }

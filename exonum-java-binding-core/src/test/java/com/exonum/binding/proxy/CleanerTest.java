@@ -17,7 +17,7 @@
 package com.exonum.binding.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -27,83 +27,69 @@ import com.exonum.binding.testutils.LoggingTestUtils;
 import com.google.common.testing.NullPointerTester;
 import java.util.List;
 import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
-public class CleanerTest {
+class CleanerTest {
 
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
+  private static ListAppender logAppender;
 
-  private ListAppender logAppender;
+  private static Cleaner context;
 
-  private Cleaner context;
-
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     logAppender = LoggingTestUtils.getCapturingLogAppender();
 
     context = new Cleaner();
   }
 
-  @After
-  public void tearDown() {
+  @AfterEach
+  void tearDown() {
     logAppender.clear();
   }
 
   @Test
-  public void testRejectsNull() {
+  void testRejectsNull() {
     NullPointerTester tester = new NullPointerTester();
     tester.testAllPublicInstanceMethods(context);
   }
 
   @Test
-  public void addActionToClosedExecutesAction() throws CloseFailuresException {
+  void addActionToClosedExecutesAction() throws CloseFailuresException {
     context.close();
 
     CleanAction action = mock(CleanAction.class);
 
-    try {
-      context.add(action);
-      fail("closed context ^ must throw");
-    } catch (IllegalStateException e) {
-      assertThat(e.getMessage()).startsWith("Cannot register a clean action");
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> context.add(action));
+    assertThat(e.getMessage()).startsWith("Cannot register a clean action");
 
-      // Verify that the action was executed once.
-      verify(action).clean();
-    }
+    // Verify that the action was executed once.
+    verify(action).clean();
   }
 
   @Test
-  public void addThrowingActionExceptionIncludesSuppressed() throws CloseFailuresException {
+  void addThrowingActionExceptionIncludesSuppressed() throws CloseFailuresException {
     context.close();
 
     // Create a throwing action.
     CleanAction action = mock(CleanAction.class);
     doThrow(RuntimeException.class).when(action).clean();
 
-    try {
-      context.add(action);
-      fail("closed context ^ must throw");
-    } catch (IllegalStateException e) {
-      // Check the suppressed exceptions are properly initialized.
-      Throwable[] suppressed = e.getSuppressed();
-      assertThat(suppressed).hasSize(1);
-      assertThat(suppressed[0]).isInstanceOf(RuntimeException.class);
-    }
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> context.add(action));
+    Throwable[] suppressed = e.getSuppressed();
+    assertThat(suppressed).hasSize(1);
+    assertThat(suppressed[0]).isInstanceOf(RuntimeException.class);
   }
 
   @Test
-  public void closeEmptyNoExceptions() throws CloseFailuresException {
+  void closeEmptyNoExceptions() throws CloseFailuresException {
     context.close();
   }
 
   @Test
-  public void closeOneAction() throws CloseFailuresException {
+  void closeOneAction() throws CloseFailuresException {
     CleanAction action = mock(CleanAction.class);
 
     context.add(action);
@@ -114,29 +100,26 @@ public class CleanerTest {
   }
 
   @Test
-  public void closeOneActionLogsFailures() {
+  void closeOneActionLogsFailures() {
     CleanAction action = mock(CleanAction.class);
     doThrow(RuntimeException.class).when(action).clean();
 
     context.add(action);
 
-    try {
-      context.close();
-      fail("context.close() must throw");
-    } catch (CloseFailuresException expected) {
-      List<String> logEvents = logAppender.getMessages();
+    CloseFailuresException expected = assertThrows(CloseFailuresException.class,
+        () -> context.close());
+    List<String> logEvents = logAppender.getMessages();
 
-      assertThat(logEvents).hasSize(1);
+    assertThat(logEvents).hasSize(1);
 
-      assertThat(logEvents.get(0))
-          .contains("ERROR")
-          .contains("Exception occurred when this context (" + context
-              + ") attempted to perform a clean operation (" + action);
-    }
+    assertThat(logEvents.get(0))
+        .contains("ERROR")
+        .contains("Exception occurred when this context (" + context
+            + ") attempted to perform a clean operation (" + action);
   }
 
   @Test
-  public void closeMultipleActions() throws CloseFailuresException {
+  void closeMultipleActions() throws CloseFailuresException {
     CleanAction a1 = mock(CleanAction.class);
     CleanAction a2 = mock(CleanAction.class);
 
@@ -152,7 +135,7 @@ public class CleanerTest {
   }
 
   @Test
-  public void closeMultipleActionsWhenFirstToBeClosedFails() {
+  void closeMultipleActionsWhenFirstToBeClosedFails() {
     CleanAction a1 = mock(CleanAction.class);
     CleanAction a2 = mock(CleanAction.class);
     doThrow(RuntimeException.class).when(a2).clean();
@@ -160,24 +143,19 @@ public class CleanerTest {
     context.add(a1);
     context.add(a2);
 
-    try {
-      context.close();
-      fail("Context must report that it failed to close a2");
-    } catch (CloseFailuresException e) {
-      // Verify that a1 was closed.
-      verify(a1).clean();
+    CloseFailuresException e = assertThrows(CloseFailuresException.class, () -> context.close());
+    verify(a1).clean();
 
-      // Check the error message.
-      assertThat(e).hasMessageStartingWith("1 exception(s) occurred when closing this context");
-      // Check suppressed exceptions.
-      Throwable[] suppressedExceptions = e.getSuppressed();
-      assertThat(suppressedExceptions).hasSize(1);
-      assertThat(suppressedExceptions[0]).isInstanceOf(RuntimeException.class);
-    }
+    // Check the error message.
+    assertThat(e).hasMessageStartingWith("1 exception(s) occurred when closing this context");
+    // Check suppressed exceptions.
+    Throwable[] suppressedExceptions = e.getSuppressed();
+    assertThat(suppressedExceptions).hasSize(1);
+    assertThat(suppressedExceptions[0]).isInstanceOf(RuntimeException.class);
   }
 
   @Test
-  public void closeIsIdempotent() throws CloseFailuresException {
+  void closeIsIdempotent() throws CloseFailuresException {
     CleanAction action = mock(CleanAction.class);
 
     context.add(action);
@@ -192,7 +170,7 @@ public class CleanerTest {
   }
 
   @Test
-  public void toStringIncludesContextInformation() {
+  void toStringIncludesContextInformation() {
     String r = context.toString();
 
     assertThat(r).contains("hash");
@@ -201,7 +179,7 @@ public class CleanerTest {
   }
 
   @Test
-  public void toStringWithDescriptionIncludesContextInformation() {
+  void toStringWithDescriptionIncludesContextInformation() {
     String description = "Transaction#execute";
     context = new Cleaner(description);
 
@@ -211,7 +189,7 @@ public class CleanerTest {
   }
 
   @Test
-  public void numRegisteredActions() {
+  void numRegisteredActions() {
     int numActions = 3;
 
     for (int numAdded = 0; numAdded < numActions; numAdded++) {
@@ -227,7 +205,7 @@ public class CleanerTest {
   }
 
   @Test
-  public void numRegisteredActionsZeroAfterClose() throws CloseFailuresException {
+  void numRegisteredActionsZeroAfterClose() throws CloseFailuresException {
     CleanAction a = mock(CleanAction.class);
     context.add(a);
 
