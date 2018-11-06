@@ -16,6 +16,8 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +36,7 @@ import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
+import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.NodeFake;
 import com.exonum.binding.service.Schema;
@@ -134,20 +137,17 @@ class QaServiceImplIntegrationTest {
       Optional<String> initialConfiguration = service.initialize(view);
 
       // Check the configuration.
-      assertThat(initialConfiguration)
-          .hasValue(QaServiceImpl.INITIAL_SERVICE_CONFIGURATION);
+      assertThat(initialConfiguration).hasValue(INITIAL_SERVICE_CONFIGURATION);
 
-      // Check the changes made to the database.
+      // Check that the initial counter was created.
       QaSchema schema = new QaSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      String counterName = "default";
-      HashCode counterId = Hashing.sha256()
-          .hashString(counterName, UTF_8);
+      HashCode counterId = Hashing.sha256().hashString(INITIAL_COUNTER_NAME, UTF_8);
 
       assertThat(counters.get(counterId)).isEqualTo(0L);
-      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+      assertThat(counterNames.get(counterId)).isEqualTo(INITIAL_COUNTER_NAME);
     }
   }
 
@@ -270,6 +270,28 @@ class QaServiceImplIntegrationTest {
     assertThrows(IllegalStateException.class,
         () -> service.getValue(HashCode.fromInt(1))
     );
+  }
+
+  @Test
+  void afterCommit() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
+      service.initialize(view);
+
+      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+      service.afterCommit(event);
+
+      // Check that the initial counter was updated.
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+
+      HashCode counterId = Hashing.sha256().hashString(INITIAL_COUNTER_NAME, UTF_8);
+
+      assertThat(counters.get(counterId)).isEqualTo(1L);
+      assertThat(counterNames.get(counterId)).isEqualTo(INITIAL_COUNTER_NAME);
+    }
   }
 
   private void setServiceNode(Node node) {
