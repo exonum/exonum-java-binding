@@ -128,7 +128,7 @@ public interface Service {
    * implementations of this method must not perform any blocking or long-running operations.
    *
    * <p>Any exceptions in this method will be swallowed and will not affect the processing of
-   * transactions/blocks.
+   * transactions or blocks.
    *
    * @param event the read-only context allowing to access the blockchain state as of that committed
    *     block
