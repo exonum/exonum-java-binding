@@ -32,31 +32,19 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.google.common.collect.ImmutableList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * A test of common ListIndex methods.
+ * Base class for common ListIndex tests.
  */
-//TODO Disabled bcz it's hard readable code. Need to be refactored.
-@Disabled
-class ListIndexParameterizedIntegrationTest
+abstract class BaseListIndexIntegrationTest
     extends BaseIndexProxyTestable<AbstractListIndexProxy<String>> {
-
-  public IndexConstructors.PartiallyAppliedIndexConstructor<ListIndex<String>> listFactory;
-
-  public String testName;
 
   private static final String LIST_NAME = "test_list";
 
@@ -200,18 +188,17 @@ class ListIndexParameterizedIntegrationTest
     });
   }
 
-  @ParameterizedTest(name = "{index} -> {0}")
-  @MethodSource("testData")
+  @Test
   void setWithSnapshot() throws Exception {
     // Initialize the list.
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = database.createFork(cleaner);
-      ListIndex<String> list1 = createList(fork);
+      ListIndex<String> list1 = this.create(LIST_NAME, fork);
       list1.add(V1);
       database.merge(fork);
 
       Snapshot snapshot = database.createSnapshot(cleaner);
-      ListIndex<String> list2 = createList(snapshot);
+      ListIndex<String> list2 = this.create(LIST_NAME, snapshot);
 
       // Expect the read-only list to throw an exception in a modifying operation.
       assertThrows(UnsupportedOperationException.class, () -> list2.set(0, V2));
@@ -321,47 +308,13 @@ class ListIndexParameterizedIntegrationTest
 
   private void runTestWithView(Function<Cleaner, View> viewFactory,
       Consumer<ListIndex<String>> listTest) {
-    runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
-  }
-
-  private void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, ListIndex<String>> listTest) {
     try (Cleaner cleaner = new Cleaner()) {
       View view = viewFactory.apply(cleaner);
-      ListIndex<String> list = createList(view);
+      ListIndex<String> list = this.create(LIST_NAME, view);
 
-      listTest.accept(view, list);
+      listTest.accept(list);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
     }
   }
-
-  @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
-    return (AbstractListIndexProxy<String>) listFactory.create(name, view);
-  }
-
-  @Override
-  Object getAnyElement(AbstractListIndexProxy<String> index) {
-    return index.get(0L);
-  }
-
-  private ListIndex<String> createList(View view) {
-    return listFactory.create(LIST_NAME, view);
-  }
-
-  private static List<Arguments> testData() {
-    return Arrays.asList(
-        Arguments.of(
-            IndexConstructors.fromOneArg(ListIndexProxy::newInstance),
-            "ListIndex"
-        ),
-        Arguments.of(
-
-            IndexConstructors.fromOneArg(ProofListIndexProxy::newInstance),
-            "ProofListIndex"
-        )
-    );
-  }
-
 }
