@@ -34,9 +34,9 @@ import org.mockito.InOrder;
 
 class CleanerTest {
 
-  private static ListAppender logAppender;
+  private ListAppender logAppender;
 
-  private static Cleaner context;
+  private Cleaner context;
 
   @BeforeEach
   void setUp() {
@@ -52,6 +52,7 @@ class CleanerTest {
 
   @Test
   void testRejectsNull() {
+    //TODO Consider rewriting this test to get rid of JUnit4 dependency through Guava Testing.
     NullPointerTester tester = new NullPointerTester();
     tester.testAllPublicInstanceMethods(context);
   }

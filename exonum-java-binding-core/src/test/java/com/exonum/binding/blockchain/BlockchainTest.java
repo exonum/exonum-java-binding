@@ -24,26 +24,26 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BlockchainTest {
+@ExtendWith(MockitoExtension.class)
+class BlockchainTest {
 
   private Blockchain blockchain;
   @Mock
   private CoreSchemaProxy mockSchema;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     blockchain = new Blockchain(mockSchema);
   }
 
   @Test
-  public void getHeight() {
+  void getHeight() {
     long height = 30L;
     when(mockSchema.getHeight()).thenReturn(height);
 
@@ -51,7 +51,7 @@ public class BlockchainTest {
   }
 
   @Test
-  public void getAllBlockHashes() {
+  void getAllBlockHashes() {
     ListIndexProxy mockListIndex = mock(ListIndexProxy.class);
     when(mockSchema.getAllBlockHashes()).thenReturn(mockListIndex);
 
@@ -59,7 +59,7 @@ public class BlockchainTest {
   }
 
   @Test
-  public void getBlockTransactions() {
+  void getBlockTransactions() {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
     when(mockSchema.getBlockTransactions(anyLong())).thenReturn(mockListIndex);
 

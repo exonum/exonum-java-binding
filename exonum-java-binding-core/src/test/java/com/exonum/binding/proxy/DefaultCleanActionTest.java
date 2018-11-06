@@ -27,8 +27,7 @@ class DefaultCleanActionTest {
   @Test
   void resourceTypeEmptyByDefault() {
     // Cast lambda to CleanAction.
-    CleanAction<?> a = () -> {
-    };
+    CleanAction<?> a = () -> { };
 
     // Check the resource type.
     assertThat(a.resourceType()).isEmpty();
