@@ -35,6 +35,7 @@ import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.common.message.Message;
 import com.exonum.binding.common.message.TemplateMessage;
 import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.Transaction;
@@ -43,6 +44,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,8 +65,16 @@ class UserServiceAdapterTest {
   @Mock
   private ViewFactory viewFactory;
 
+  @Mock
+  private Snapshot snapshot;
+
   @InjectMocks
   private UserServiceAdapter serviceAdapter;
+
+  private static final short SERVICE_ID = (short) 0xA103;
+  private static final long SNAPSHOT_HANDLE = 0x0A;
+  private static final long HEIGHT = 1;
+  private static final int VALIDATOR_ID = 1;
 
   @Test
   void convertTransaction_ThrowsIfNull() {
@@ -73,13 +83,12 @@ class UserServiceAdapterTest {
 
   @Test
   void convertTransaction() {
-    short serviceId = (short) 0xA103;
     Transaction expectedTransaction = mock(Transaction.class);
-    when(service.getId()).thenReturn(serviceId);
+    when(service.getId()).thenReturn(SERVICE_ID);
     when(service.convertToTransaction(any(BinaryMessage.class)))
         .thenReturn(expectedTransaction);
 
-    byte[] message = getServiceMessage(serviceId)
+    byte[] message = getServiceMessage(SERVICE_ID)
         .getSignedMessage()
         .array();
 
@@ -90,13 +99,12 @@ class UserServiceAdapterTest {
 
   @Test
   void convertTransaction_InvalidServiceImplReturningNull() {
-    short serviceId = (short) 0xA103;
-    when(service.getId()).thenReturn(serviceId);
+    when(service.getId()).thenReturn(SERVICE_ID);
     when(service.convertToTransaction(any(BinaryMessage.class)))
         // Such service impl. is not valid
         .thenReturn(null);
 
-    byte[] message = getServiceMessage(serviceId)
+    byte[] message = getServiceMessage(SERVICE_ID)
         .getSignedMessage()
         .array();
 
@@ -118,31 +126,27 @@ class UserServiceAdapterTest {
 
   @Test
   void getStateHashes_EmptyList() {
-    long snapshotHandle = 0x0A;
-    Snapshot s = mock(Snapshot.class);
-    when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
-        .thenReturn(s);
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
 
-    when(service.getStateHashes(s))
+    when(service.getStateHashes(snapshot))
         .thenReturn(emptyList());
 
-    byte[][] hashes = serviceAdapter.getStateHashes(snapshotHandle);
+    byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
     assertThat(hashes.length, equalTo(0));
   }
 
   @Test
   void getStateHashes_SingletonList() {
-    long snapshotHandle = 0x0A;
-    Snapshot s = mock(Snapshot.class);
-    when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
-        .thenReturn(s);
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
 
     byte[] h1 = bytes("hash1");
-    when(service.getStateHashes(s))
+    when(service.getStateHashes(snapshot))
         .thenReturn(singletonList(HashCode.fromBytes(h1)));
 
-    byte[][] hashes = serviceAdapter.getStateHashes(snapshotHandle);
+    byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
     assertThat(hashes.length, equalTo(1));
     assertThat(hashes[0], equalTo(h1));
@@ -150,10 +154,8 @@ class UserServiceAdapterTest {
 
   @Test
   void getStateHashes_MultipleHashesList() {
-    long snapshotHandle = 0x0A;
-    Snapshot s = mock(Snapshot.class);
-    when(viewFactory.createSnapshot(eq(snapshotHandle), any(Cleaner.class)))
-        .thenReturn(s);
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
 
     byte[][] hashes = {
         bytes("hash1"),
@@ -164,21 +166,20 @@ class UserServiceAdapterTest {
         .map(HashCode::fromBytes)
         .collect(Collectors.toList());
 
-    when(service.getStateHashes(s))
+    when(service.getStateHashes(snapshot))
         .thenReturn(hashesFromService);
 
-    byte[][] actualHashes = serviceAdapter.getStateHashes(snapshotHandle);
+    byte[][] actualHashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
     assertThat(actualHashes, equalTo(hashes));
   }
 
   @Test
   void getStateHashes_ClosesCleaner() {
-    long snapshotHandle = 0x0A;
-    byte[][] ignored = serviceAdapter.getStateHashes(snapshotHandle);
+    byte[][] ignored = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
-    verify(viewFactory).createSnapshot(eq(snapshotHandle), ac.capture());
+    verify(viewFactory).createSnapshot(eq(SNAPSHOT_HANDLE), ac.capture());
 
     Cleaner cleaner = ac.getValue();
 
@@ -217,5 +218,52 @@ class UserServiceAdapterTest {
     serviceAdapter.mountPublicApiHandler(0x0A);
 
     assertThrows(IllegalStateException.class, () -> serviceAdapter.mountPublicApiHandler(0x0B));
+  }
+
+  @Test
+  void afterCommit_ValidatorNode() {
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
+    serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
+
+    ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
+    verify(service).afterCommit(ac.capture());
+
+    BlockCommittedEvent event = ac.getValue();
+
+    assertThat(event.getHeight(), equalTo(HEIGHT));
+    assertThat(event.getValidatorId(), equalTo(OptionalInt.of(VALIDATOR_ID)));
+    assertThat(event.getSnapshot(), equalTo(snapshot));
+  }
+
+  @Test
+  public void afterCommit_AuditorNode() {
+    // For auditor nodes (which do not have validatorId) negative validatorId is passed
+    int validatorId = -1;
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
+    serviceAdapter.afterCommit(SNAPSHOT_HANDLE, validatorId, HEIGHT);
+
+    ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
+    verify(service).afterCommit(ac.capture());
+
+    BlockCommittedEvent event = ac.getValue();
+
+    assertThat(event.getHeight(), equalTo(HEIGHT));
+    assertThat(event.getValidatorId(), equalTo(OptionalInt.empty()));
+  }
+
+  @Test
+  public void afterCommit_ClosesCleaner() {
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
+    serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
+
+    ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
+    verify(viewFactory).createSnapshot(eq(SNAPSHOT_HANDLE), ac.capture());
+
+    Cleaner cleaner = ac.getValue();
+
+    assertTrue(cleaner.isClosed());
   }
 }
