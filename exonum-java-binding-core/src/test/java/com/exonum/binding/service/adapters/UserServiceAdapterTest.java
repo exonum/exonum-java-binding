@@ -68,6 +68,9 @@ public class UserServiceAdapterTest {
   @Mock
   private ViewFactory viewFactory;
 
+  @Mock
+  private Snapshot snapshot;
+
   @InjectMocks
   private UserServiceAdapter serviceAdapter;
 
@@ -127,11 +130,10 @@ public class UserServiceAdapterTest {
 
   @Test
   public void getStateHashes_EmptyList() {
-    Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
-        .thenReturn(s);
+        .thenReturn(snapshot);
 
-    when(service.getStateHashes(s))
+    when(service.getStateHashes(snapshot))
         .thenReturn(emptyList());
 
     byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
@@ -141,12 +143,11 @@ public class UserServiceAdapterTest {
 
   @Test
   public void getStateHashes_SingletonList() {
-    Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
-        .thenReturn(s);
+        .thenReturn(snapshot);
 
     byte[] h1 = bytes("hash1");
-    when(service.getStateHashes(s))
+    when(service.getStateHashes(snapshot))
         .thenReturn(singletonList(HashCode.fromBytes(h1)));
 
     byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
@@ -157,9 +158,8 @@ public class UserServiceAdapterTest {
 
   @Test
   public void getStateHashes_MultipleHashesList() {
-    Snapshot s = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
-        .thenReturn(s);
+        .thenReturn(snapshot);
 
     byte[][] hashes = {
         bytes("hash1"),
@@ -170,7 +170,7 @@ public class UserServiceAdapterTest {
         .map(HashCode::fromBytes)
         .collect(Collectors.toList());
 
-    when(service.getStateHashes(s))
+    when(service.getStateHashes(snapshot))
         .thenReturn(hashesFromService);
 
     byte[][] actualHashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
@@ -227,7 +227,6 @@ public class UserServiceAdapterTest {
 
   @Test
   public void afterCommit_ValidatorNode() {
-    Snapshot snapshot = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
@@ -239,13 +238,13 @@ public class UserServiceAdapterTest {
 
     assertThat(event.getHeight(), equalTo(HEIGHT));
     assertThat(event.getValidatorId(), equalTo(OptionalInt.of(VALIDATOR_ID)));
+    assertThat(event.getSnapshot(), equalTo(snapshot));
   }
 
   @Test
   public void afterCommit_AuditorNode() {
     // For auditor nodes (which do not have validatorId) negative validatorId is passed
     int validatorId = -1;
-    Snapshot snapshot = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, validatorId, HEIGHT);
@@ -261,7 +260,6 @@ public class UserServiceAdapterTest {
 
   @Test
   public void afterCommit_ClosesCleaner() {
-    Snapshot snapshot = mock(Snapshot.class);
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
