@@ -68,7 +68,10 @@ final class QaServiceImpl extends AbstractService implements QaService {
   static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
 
   @VisibleForTesting
-  static final String INITIAL_COUNTER_NAME = "initial_counter";
+  static final String DEFAULT_COUNTER_NAME = "default";
+
+  @VisibleForTesting
+  static final String AFTER_COMMIT_COUNTER_NAME = "after_commit_counter";
 
   @Nullable
   private Node node;
@@ -94,8 +97,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   public Optional<String> initialize(Fork fork) {
-    // Add an initial counter to the blockchain.
-    new CreateCounterTx(INITIAL_COUNTER_NAME)
+    // Add a default counter to the blockchain.
+    new CreateCounterTx(DEFAULT_COUNTER_NAME)
+        .execute(fork);
+
+    // Add an afterCommit counter that will be incremented after each block commited event.
+    new CreateCounterTx(AFTER_COMMIT_COUNTER_NAME)
         .execute(fork);
 
     return Optional.of(INITIAL_SERVICE_CONFIGURATION);
@@ -178,7 +185,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   public void afterCommit(BlockCommittedEvent event) {
     long seed = 1L;
     HashCode counterId = Hashing.sha256()
-        .hashString(INITIAL_COUNTER_NAME, StandardCharsets.UTF_8);
+        .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
     submitIncrementCounter(seed, counterId);
   }
 

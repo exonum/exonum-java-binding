@@ -16,7 +16,8 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,15 +140,18 @@ class QaServiceImplIntegrationTest {
       // Check the configuration.
       assertThat(initialConfiguration).hasValue(INITIAL_SERVICE_CONFIGURATION);
 
-      // Check that the initial counter was created.
+      // Check that both the default and afterCommit counters were created.
       QaSchema schema = new QaSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode counterId = Hashing.sha256().hashString(INITIAL_COUNTER_NAME, UTF_8);
+      HashCode defaultCounterId = Hashing.sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
+      HashCode afterCommitCounterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
-      assertThat(counters.get(counterId)).isEqualTo(0L);
-      assertThat(counterNames.get(counterId)).isEqualTo(INITIAL_COUNTER_NAME);
+      assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
+      assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
+      assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
+      assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
     }
   }
 
@@ -287,10 +291,10 @@ class QaServiceImplIntegrationTest {
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode counterId = Hashing.sha256().hashString(INITIAL_COUNTER_NAME, UTF_8);
+      HashCode counterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
       assertThat(counters.get(counterId)).isEqualTo(1L);
-      assertThat(counterNames.get(counterId)).isEqualTo(INITIAL_COUNTER_NAME);
+      assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
     }
   }
 
