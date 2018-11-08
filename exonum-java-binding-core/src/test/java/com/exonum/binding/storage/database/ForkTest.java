@@ -27,17 +27,14 @@ import com.exonum.binding.proxy.Cleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@ExtendWith(MockitoExtension.class)
 @PrepareForTest({
     Views.class,
     ViewModificationCounter.class,
 })
 @Disabled
-// Won't run on Java 10 till Powermock is updated [ECR-1614]
+// TODO Won't run on Java 10 till Powermock is updated [ECR-1614].
 class ForkTest {
 
   private Fork fork;

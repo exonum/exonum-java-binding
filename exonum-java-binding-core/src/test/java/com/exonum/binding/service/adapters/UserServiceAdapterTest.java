@@ -237,7 +237,7 @@ class UserServiceAdapterTest {
   }
 
   @Test
-  public void afterCommit_AuditorNode() {
+  void afterCommit_AuditorNode() {
     // For auditor nodes (which do not have validatorId) negative validatorId is passed
     int validatorId = -1;
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
@@ -254,7 +254,7 @@ class UserServiceAdapterTest {
   }
 
   @Test
-  public void afterCommit_ClosesCleaner() {
+  void afterCommit_ClosesCleaner() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
