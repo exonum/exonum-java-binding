@@ -69,4 +69,12 @@ public class NativeHandleTest {
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
   }
+
+  @Test
+  public void toStringHexRepresentation() {
+    long handle = 0x11L;
+    nativeHandle = new NativeHandle(handle);
+
+    assertThat(nativeHandle.toString()).contains(Long.toHexString(handle).toUpperCase());
+  }
 }
