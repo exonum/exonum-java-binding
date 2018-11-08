@@ -23,6 +23,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.service.BlockCommittedEvent;
+import com.exonum.binding.service.BlockCommittedEventImpl;
 import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
@@ -32,6 +34,7 @@ import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
 /**
@@ -137,6 +140,28 @@ public class UserServiceAdapter {
     Router router = server.createRouter();
     service.createPublicApiHandlers(node, router);
     server.mountSubRouter(serviceApiPath(), router);
+  }
+
+  /**
+   * Handles block commited event. This handler is invoked after commit of the block.
+   * @param snapshotHandle a handle to a native snapshot object
+   * @param validatorId a validator id. Negative if this node is not a validator
+   * @param height the current blockchain height
+   */
+  public void afterCommit(long snapshotHandle, int validatorId, long height) {
+    assert snapshotHandle != 0;
+
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#afterCommit")) {
+      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
+      OptionalInt optionalValidatorId = validatorId >= 0
+          ? OptionalInt.of(validatorId)
+          : OptionalInt.empty();
+      BlockCommittedEvent event =
+          BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
+      service.afterCommit(event);
+    } catch (CloseFailuresException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private String serviceApiPath() {

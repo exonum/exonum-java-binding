@@ -19,6 +19,7 @@ package com.exonum.binding.fakes.services.service;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.AbstractService;
+import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
@@ -42,10 +43,22 @@ public final class TestService extends AbstractService {
 
   private final SchemaFactory<TestSchema> schemaFactory;
 
+  private long blockchainHeight;
+
+  private int validatorId;
+
   @Inject
   public TestService(SchemaFactory<TestSchema> schemaFactory) {
     super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, schemaFactory));
     this.schemaFactory = schemaFactory;
+  }
+
+  public long getBlockchainHeight() {
+    return blockchainHeight;
+  }
+
+  public int getValidatorId() {
+    return validatorId;
   }
 
   @Override
@@ -62,6 +75,12 @@ public final class TestService extends AbstractService {
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
     return Optional.of(INITIAL_CONFIGURATION);
+  }
+
+  @Override
+  public void afterCommit(BlockCommittedEvent event) {
+    blockchainHeight = event.getHeight();
+    validatorId = event.getValidatorId().orElse(-1);
   }
 
   @Override
