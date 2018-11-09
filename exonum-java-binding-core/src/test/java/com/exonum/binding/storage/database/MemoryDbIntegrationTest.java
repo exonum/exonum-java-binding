@@ -19,9 +19,9 @@ package com.exonum.binding.storage.database;
 import static com.exonum.binding.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
@@ -32,22 +32,22 @@ import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.TestStorageItems;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class MemoryDbIntegrationTest {
+class MemoryDbIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
   @Test
-  public void databaseMustClosePromptly() {
+  void databaseMustClosePromptly() {
     MemoryDb database = MemoryDb.newInstance();
     database.close();  // No exceptions.
   }
 
   @Test
-  public void getSnapshotShallCreateNonNullSnapshot() throws Exception {
+  void getSnapshotShallCreateNonNullSnapshot() throws Exception {
     try (MemoryDb database = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = database.createSnapshot(cleaner);
@@ -56,7 +56,7 @@ public class MemoryDbIntegrationTest {
   }
 
   @Test
-  public void getForkShallCreateNonNullFork() throws Exception {
+  void getForkShallCreateNonNullFork() throws Exception {
     try (MemoryDb database = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork fork = database.createFork(cleaner);
@@ -65,7 +65,7 @@ public class MemoryDbIntegrationTest {
   }
 
   @Test
-  public void merge_singleList() throws Exception {
+  void merge_singleList() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String listName = "list";
@@ -87,7 +87,7 @@ public class MemoryDbIntegrationTest {
   }
 
   @Test
-  public void merge_twoIndices() throws Exception {
+  void merge_twoIndices() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String listName = "list";
@@ -119,7 +119,7 @@ public class MemoryDbIntegrationTest {
   }
 
   @Test
-  public void merge_multipleForks() throws Exception {
+  void merge_multipleForks() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String listName = "list";
