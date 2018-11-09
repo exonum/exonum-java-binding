@@ -21,6 +21,7 @@ use jni::{
     sys::{jbyteArray, jlong, jstring},
     JNIEnv,
 };
+use serde_json;
 use std::{panic, ptr};
 use storage::db::{View, ViewRef};
 use utils::{self, Handle};
@@ -108,8 +109,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
             SchemaType::SnapshotSchema(schema) => schema.actual_configuration(),
             SchemaType::ForkSchema(schema) => schema.actual_configuration(),
         };
-        serde_json::to_value(val)
-            .and_then(|v| serde_json::to_string(&v))
+        serde_json::to_string(&val)
             .map(|s| env.new_string(s))
             .unwrap()
             .map(|js| js.into_inner())
