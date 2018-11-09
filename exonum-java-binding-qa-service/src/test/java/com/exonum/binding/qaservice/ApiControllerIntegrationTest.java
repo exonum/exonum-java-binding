@@ -16,9 +16,9 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -353,7 +353,7 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getHeight()).thenReturn(height);
 
-    get(BLOCKCHAIN_HEIGHT)
+    get(BLOCKCHAIN_HEIGHT_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -371,7 +371,7 @@ class ApiControllerIntegrationTest {
   void getHeight_throwsException(VertxTestContext context) {
     when(qaService.getHeight()).thenThrow(new RuntimeException());
 
-    get(BLOCKCHAIN_HEIGHT)
+    get(BLOCKCHAIN_HEIGHT_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_BAD_REQUEST);
@@ -386,7 +386,7 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getAllBlockHashes()).thenReturn(blockHashes);
 
-    get(BLOCKCHAIN_ALL_BLOCK_HASHES)
+    get(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -408,7 +408,7 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getBlockTransactions(anyLong())).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS.replace(":blockHeight", "123"))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH.replace(":blockHeight", "123"))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);

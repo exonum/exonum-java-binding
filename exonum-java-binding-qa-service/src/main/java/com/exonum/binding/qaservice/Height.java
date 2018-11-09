@@ -20,6 +20,9 @@ package com.exonum.binding.qaservice;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
+/**
+ * DTO class for JSON view.
+ */
 final class Height {
   private final long height;
 

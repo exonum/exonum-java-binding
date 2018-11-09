@@ -63,12 +63,12 @@ final class ApiController {
 
   private static final String BLOCKCHAIN_ROOT = "/blockchain";
   @VisibleForTesting
-  static final String BLOCKCHAIN_HEIGHT = BLOCKCHAIN_ROOT + "/height";
+  static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
   @VisibleForTesting
-  static final String BLOCKCHAIN_ALL_BLOCK_HASHES = BLOCKCHAIN_ROOT + "/block";
+  static final String BLOCKCHAIN_ALL_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
   private static final String BLOCK_HEIGHT_PARAM = "blockHeight";
   @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS = BLOCKCHAIN_ROOT + "/block/:"
+  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH = BLOCKCHAIN_ROOT + "/block/:"
       + BLOCK_HEIGHT_PARAM + "/transactions";
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
@@ -97,9 +97,9 @@ final class ApiController {
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
-            .put(BLOCKCHAIN_HEIGHT, this::getHeight)
-            .put(BLOCKCHAIN_ALL_BLOCK_HASHES, this::getAllBlockHashes)
-            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS, this::getBlockTransactions)
+            .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
+            .put(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH, this::getAllBlockHashes)
+            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH, this::getBlockTransactions)
             .build();
 
     handlers.forEach((path, handler) ->
