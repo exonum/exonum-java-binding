@@ -94,17 +94,17 @@
     <assertj.version>3.11.1</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
-    <guice.version>4.2.0</guice.version>
+    <guice.version>4.2.2</guice.version>
     <log4j.version>2.11.1</log4j.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
     <junit.jupiter.version>5.3.1</junit.jupiter.version>
-    <powermock.version>2.0.0-beta.5</powermock.version>
+    <powermock.version>2.0.0-RC.1</powermock.version>
     <protobuf.version>3.6.1</protobuf.version>
     <mockito-core.version>2.23.0</mockito-core.version>
-    <guava.version>26.0-jre</guava.version>
+    <guava.version>27.0-jre</guava.version>
     <vertx.version>3.5.4</vertx.version>
-    <equalsverifier.version>3.0</equalsverifier.version>
+    <equalsverifier.version>3.0.2</equalsverifier.version>
     <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
          during the build. Sub-modules define to which tests this flag applies depending
          on where the native library is used.
@@ -272,7 +272,7 @@
              <dependency>
                <groupId>com.puppycrawl.tools</groupId>
                <artifactId>checkstyle</artifactId>
-               <version>8.13</version>
+               <version>8.14</version>
              </dependency>
            </dependencies>
          </plugin>
@@ -291,12 +291,12 @@
 
          <plugin>
            <artifactId>maven-surefire-plugin</artifactId>
-           <version>2.22.0</version>
+           <version>2.22.1</version>
          </plugin>
 
          <plugin>
            <artifactId>maven-failsafe-plugin</artifactId>
-           <version>2.22.0</version>
+           <version>2.22.1</version>
          </plugin>
 
          <plugin>
@@ -331,7 +331,7 @@
          <plugin>
            <groupId>com.github.spotbugs</groupId>
            <artifactId>spotbugs-maven-plugin</artifactId>
-           <version>3.1.6</version>
+           <version>3.1.7</version>
          </plugin>
 
          <plugin>

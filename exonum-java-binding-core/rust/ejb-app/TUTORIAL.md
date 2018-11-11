@@ -34,7 +34,7 @@ You can use the following script for this purpose:
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
 LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
-RUST_LIB_PATH="$(rustup run 1.26.2 rustc --print sysroot)/lib"
+RUST_LIB_PATH="$(rustup run 1.27.2 rustc --print sysroot)/lib"
 
 export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 
@@ -56,10 +56,13 @@ its dependencies and pass it instead.
 EJB App configuration is pretty similar to configuration of any other Exonum service,
 with a few additional parameters.
 
+**Note:** using `cargo run` command requires working from the `ejb-app` directory.
+This would be fixed in the future EJB versions.
+
 #### Generate Template Config
 
 ```$sh
-$ ejb-app generate-template testnet/common.toml
+$ cargo run -- generate-template testnet/common.toml
 ```
 
 #### Generate Node Private and Public Configs
@@ -68,7 +71,7 @@ $ ejb-app generate-template testnet/common.toml
 - `--ejb-libpath` for a path to Java bindings native libraries.
 
 ```$sh
-$ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+$ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
     --ejb-classpath $EJB_CLASSPATH \
     --ejb-libpath $EJB_LIBPATH \
     --peer-address 127.0.0.1:5400
@@ -82,7 +85,7 @@ There are two specific parameters here:
   Java Binding does not use Exonum Core ports directly.
 
 ```$sh
-$ ejb-app finalize testnet/sec.toml testnet/node.toml \
+$ cargo run -- finalize testnet/sec.toml testnet/node.toml \
     --ejb-module-name 'com.<company-name>.<project-name>.ServiceModule' \
     --ejb-port 6000 \
     --public-configs testnet/pub.toml
@@ -91,5 +94,5 @@ $ ejb-app finalize testnet/sec.toml testnet/node.toml \
 ### Step 3. Run Configured Node
 
 ```$sh
-$ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+$ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
 ```
