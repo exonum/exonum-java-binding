@@ -21,12 +21,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FrequencyStatsFormatterTest {
+class FrequencyStatsFormatterTest {
 
   @Test
-  public void itemsFrequencyNoItems() {
+  void itemsFrequencyNoItems() {
     Collection<?> c = Collections.emptyList();
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, Object::getClass);
@@ -35,7 +35,7 @@ public class FrequencyStatsFormatterTest {
   }
 
   @Test
-  public void itemsFrequencyOneItem() {
+  void itemsFrequencyOneItem() {
     Collection<Boolean> c = ImmutableList.of(true);
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, Boolean::booleanValue);
@@ -44,7 +44,7 @@ public class FrequencyStatsFormatterTest {
   }
 
   @Test
-  public void itemsFrequencySeveralItemsSameCategory() {
+  void itemsFrequencySeveralItemsSameCategory() {
     Collection<Boolean> c = ImmutableList.of(true, true);
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, Boolean::booleanValue);
@@ -53,7 +53,7 @@ public class FrequencyStatsFormatterTest {
   }
 
   @Test
-  public void itemsFrequencyMoreTrue() {
+  void itemsFrequencyMoreTrue() {
     Collection<Boolean> c = ImmutableList.of(true, true, false);
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, Boolean::booleanValue);
@@ -62,7 +62,7 @@ public class FrequencyStatsFormatterTest {
   }
 
   @Test
-  public void itemsFrequencyMoreFalse() {
+  void itemsFrequencyMoreFalse() {
     Collection<Boolean> c = ImmutableList.of(false, false, true);
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, Boolean::booleanValue);
@@ -71,7 +71,7 @@ public class FrequencyStatsFormatterTest {
   }
 
   @Test
-  public void itemsFrequencySeveralElementsSameFrequency() {
+  void itemsFrequencySeveralElementsSameFrequency() {
     Collection<Boolean> c = ImmutableList.of(false, false, true, true);
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, Boolean::booleanValue);
@@ -80,7 +80,7 @@ public class FrequencyStatsFormatterTest {
   }
 
   @Test
-  public void itemsFrequency() {
+  void itemsFrequency() {
     Collection<String> c = ImmutableList.of("aa", "bb", "cc", "a", "c", "");
 
     String s = FrequencyStatsFormatter.itemsFrequency(c, String::length);

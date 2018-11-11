@@ -24,27 +24,25 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.exonum.binding.proxy.Cleaner;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest({
     Views.class,
     ViewModificationCounter.class,
 })
-@Ignore  // Won't run on Java 10 till Powermock is updated [ECR-1614]
-public class ForkTest {
+@Disabled
+// TODO Won't run on Java 10 till Powermock is updated [ECR-1614].
+class ForkTest {
 
   private Fork fork;
 
   private ViewModificationCounter modCounter;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     mockStatic(Views.class);
     mockStatic(ViewModificationCounter.class);
     modCounter = mock(ViewModificationCounter.class);
@@ -52,7 +50,7 @@ public class ForkTest {
   }
 
   @Test
-  public void disposeInternal_OwningProxy() throws Exception {
+  void disposeInternal_OwningProxy() throws Exception {
     int nativeHandle = 0x0A;
     try (Cleaner cleaner = new Cleaner()) {
       fork = Fork.newInstance(nativeHandle, true, cleaner);
@@ -65,7 +63,7 @@ public class ForkTest {
   }
 
   @Test
-  public void disposeInternal_NotOwningProxy() throws Exception {
+  void disposeInternal_NotOwningProxy() throws Exception {
     int nativeHandle = 0x0A;
 
     try (Cleaner cleaner = new Cleaner()) {

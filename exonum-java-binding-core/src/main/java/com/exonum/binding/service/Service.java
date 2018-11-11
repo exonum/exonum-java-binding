@@ -118,4 +118,20 @@ public interface Service {
    * @param router a router responsible for handling requests to this service
    */
   void createPublicApiHandlers(Node node, Router router);
+
+  /**
+   * Handles read-only block commit event. This handler is an optional callback method which is
+   * invoked by the blockchain after each block commit. For example, a service can create one or
+   * more transactions if a specific condition has occurred.
+   *
+   * <p>This method is invoked synchronously from the thread that commits the block, therefore,
+   * implementations of this method must not perform any blocking or long-running operations.
+   *
+   * <p>Any exceptions in this method will be swallowed and will not affect the processing of
+   * transactions or blocks.
+   *
+   * @param event the read-only context allowing to access the blockchain state as of that committed
+   *     block
+   */
+  default void afterCommit(BlockCommittedEvent event) {}
 }

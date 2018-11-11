@@ -20,9 +20,10 @@ import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V9;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -37,20 +38,15 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class ValueSetIndexProxyIntegrationTest
+class ValueSetIndexProxyIntegrationTest
     extends BaseIndexProxyTestable<ValueSetIndexProxy<String>> {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private static final String VALUE_SET_NAME = "test_value_set";
 
   @Test
-  public void addSingleElement() {
+  void addSingleElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
       assertTrue(set.contains(V1));
@@ -58,20 +54,18 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void addFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.add(V1);
-    });
+  void addFailsIfSnapshot() {
+    runTestWithView(database::createSnapshot,
+        (set) -> assertThrows(UnsupportedOperationException.class, () -> set.add(V1)));
   }
 
   @Test
-  public void clearEmptyHasNoEffect() {
+  void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, ValueSetIndexProxy::clear);
   }
 
   @Test
-  public void clearNonEmptyRemovesAllElements() {
+  void clearNonEmptyRemovesAllElements() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values.subList(0, 3);
 
@@ -86,20 +80,18 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.clear();
-    });
+  void clearFailsIfSnapshot() {
+    runTestWithView(database::createSnapshot,
+        (set) -> assertThrows(UnsupportedOperationException.class, () -> set.clear()));
   }
 
   @Test
-  public void doesNotContainElementsWhenEmpty() {
+  void doesNotContainElementsWhenEmpty() {
     runTestWithView(database::createSnapshot, (set) -> assertFalse(set.contains(V2)));
   }
 
   @Test
-  public void doesNotContainAbsentElement() {
+  void doesNotContainAbsentElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -108,7 +100,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainElementsByHashWhenEmpty() {
+  void doesNotContainElementsByHashWhenEmpty() {
     runTestWithView(database::createSnapshot, (set) -> {
       HashCode valueHash = getHashOf(V2);
       assertFalse(set.containsByHash(valueHash));
@@ -116,7 +108,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void containsByHash() {
+  void containsByHash() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -126,7 +118,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void doesNotContainAbsentElementsByHash() {
+  void doesNotContainAbsentElementsByHash() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -136,7 +128,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void testHashesIter() {
+  void testHashesIter() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values;
 
@@ -153,7 +145,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void testIterator() {
+  void testIterator() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values;
 
@@ -182,7 +174,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removesAddedElement() {
+  void removesAddedElement() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -193,7 +185,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeAbsentElementDoesNothing() {
+  void removeAbsentElementDoesNothing() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -205,15 +197,16 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsIfSnapshot() {
+  void removeFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.remove(V1);
+
+      assertThrows(UnsupportedOperationException.class, () -> set.remove(V1));
+
     });
   }
 
   @Test
-  public void removesAddedElementByHash() {
+  void removesAddedElementByHash() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -227,7 +220,7 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeAbsentElementByHashDoesNothing() {
+  void removeAbsentElementByHashDoesNothing() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
 
@@ -241,10 +234,11 @@ public class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeByHashFailsIfSnapshot() {
+  void removeByHashFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      set.removeByHash(getHashOf(V1));
+
+      assertThrows(UnsupportedOperationException.class, () -> set.removeByHash(getHashOf(V1)));
+
     });
   }
 
@@ -256,7 +250,7 @@ public class ValueSetIndexProxyIntegrationTest
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      Consumer<ValueSetIndexProxy<String>> valueSetTest) {
+      Consumer<ValueSetIndexProxy<String>> valueSetTest) {
     runTestWithView(viewFactory,
         (view, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
     );
@@ -270,7 +264,7 @@ public class ValueSetIndexProxyIntegrationTest
    * @param valueSetTest a test to run. Receives the created view and the set as arguments.
    */
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      BiConsumer<View, ValueSetIndexProxy<String>> valueSetTest) {
+      BiConsumer<View, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         VALUE_SET_NAME,
