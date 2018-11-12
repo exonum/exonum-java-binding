@@ -19,7 +19,7 @@ package com.exonum.binding.storage.indices;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 
-public class ListIndexProxyGroupIntegrationTest extends BaseListIndexProxyGroupTestable {
+class ListIndexProxyGroupIntegrationTest extends BaseListIndexProxyGroupTestable {
 
   @Override
   ListIndex<String> createInGroup(byte[] id, View view) {

@@ -17,22 +17,19 @@
 package com.exonum.binding.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class NativeHandleTest {
+
+class NativeHandleTest {
 
   private NativeHandle nativeHandle;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Test
-  public void getIfValid() {
+  void getIfValid() {
     long handle = 0x11L;
     nativeHandle = new NativeHandle(handle);
 
@@ -41,18 +38,16 @@ public class NativeHandleTest {
   }
 
   @Test
-  public void getInvalid() {
+  void getInvalid() {
     long handle = NativeHandle.INVALID_NATIVE_HANDLE;
     nativeHandle = new NativeHandle(handle);
 
     assertFalse(nativeHandle.isValid());
-
-    expectedException.expect(IllegalStateException.class);
-    nativeHandle.get();
+    assertThrows(IllegalStateException.class, () -> nativeHandle.get());
   }
 
   @Test
-  public void close() {
+  void close() {
     long handle = 0x11L;
     nativeHandle = new NativeHandle(handle);
 
@@ -61,7 +56,7 @@ public class NativeHandleTest {
   }
 
   @Test
-  public void closeMultipleTimes() {
+  void closeMultipleTimes() {
     long handle = 0x11L;
     nativeHandle = new NativeHandle(handle);
 

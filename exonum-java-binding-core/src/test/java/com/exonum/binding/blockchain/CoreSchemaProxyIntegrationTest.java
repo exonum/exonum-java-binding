@@ -18,6 +18,7 @@
 package com.exonum.binding.blockchain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -25,30 +26,29 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
-public class CoreSchemaProxyIntegrationTest {
+class CoreSchemaProxyIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  @Test(expected = RuntimeException.class)
-  public void getHeightBeforeGenesisBlockTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
+  @Test
+  void getHeightBeforeGenesisBlockTest() {
+    MemoryDb db = MemoryDb.newInstance();
+    Cleaner cleaner = new Cleaner();
+    Snapshot view = db.createSnapshot(cleaner);
 
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      schema.getHeight();
-    }
+    CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+    assertThrows(RuntimeException.class, schema::getHeight);
   }
 
   @Test
-  public void getAllBlockHashesTest() throws CloseFailuresException {
+  void getAllBlockHashesTest() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
+         Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
@@ -57,9 +57,9 @@ public class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
-  public void getBlockTransactionsTest() throws CloseFailuresException {
+  void getBlockTransactionsTest() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
+         Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
