@@ -16,33 +16,26 @@
 
 package com.exonum.binding.storage.indices;
 
-import static com.exonum.binding.test.TestParameters.parameters;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.runners.Parameterized.Parameter;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
-public class RustIterAdapterParameterizedTest {
+class RustIterAdapterParameterizedTest {
 
-  @Parameter(0) public List<Integer> underlyingList;
-
-  RustIterAdapter<Integer> iterAdapter;
-
-  @Test
-  public void iteratorMustIncludeAllTheItemsFromTheList() {
+  @ParameterizedTest(name = "{index} -> {0}")
+  @MethodSource("testData")
+  void iteratorMustIncludeAllTheItemsFromTheList(List<Integer> underlyingList) {
     // Create an adapter under test, converting a list to rustIter.
-    iterAdapter = new RustIterAdapter<>(
+    RustIterAdapter<Integer> iterAdapter = new RustIterAdapter<>(
         rustIterMockFromIterable(underlyingList));
 
     // Use an adapter as Iterator to collect all items in a list
@@ -56,14 +49,13 @@ public class RustIterAdapterParameterizedTest {
     return new RustIterTestFake(iterable);
   }
 
-  @Parameters
-  public static Collection<Object[]> testData() {
-    return asList(
-        parameters(emptyList()),
-        parameters(singletonList(1)),
-        parameters(asList(1, 2)),
-        parameters(asList(1, 2, 3)),
-        parameters(asList(1, 2, 3, 4, 5))
+  private static List<Arguments> testData() {
+    return Arrays.asList(
+        Arguments.of(emptyList()),
+        Arguments.of(singletonList(1)),
+        Arguments.of(asList(1, 2)),
+        Arguments.of(asList(1, 2, 3)),
+        Arguments.of(asList(1, 2, 3, 4, 5))
     );
   }
 }

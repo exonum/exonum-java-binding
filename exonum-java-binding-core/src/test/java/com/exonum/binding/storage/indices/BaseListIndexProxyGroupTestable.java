@@ -29,12 +29,12 @@ import com.google.common.collect.ListMultimap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
 
   @Test
-  public void listsInGroupMustBeIndependent() {
+  void listsInGroupMustBeIndependent() {
     View view = db.createFork(cleaner);
 
     // Values to be put in lists, indexed by a list identifier
@@ -80,7 +80,9 @@ abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
     return elementsById;
   }
 
-  /** Creates a list-under-test in some group with the given id. */
+  /**
+   * Creates a list-under-test in some group with the given id.
+   */
   abstract ListIndex<String> createInGroup(byte[] id, View view);
 
   private static <E> List<E> getAllValuesFrom(ListIndex<E> list) {

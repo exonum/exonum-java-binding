@@ -20,8 +20,8 @@ import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,14 +35,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@RunWith(MockitoJUnitRunner.class)
-public class LoggingInterceptorTest {
+class LoggingInterceptorTest {
 
   private static final String EXCEPTION_MESSAGE = "Some exception";
 
@@ -50,29 +47,25 @@ public class LoggingInterceptorTest {
 
   private UserServiceAdapter serviceAdapter;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     appender = LoggingTestUtils.getCapturingLogAppender();
 
     Injector injector = Guice.createInjector(new TestModule());
     serviceAdapter = injector.getInstance(UserServiceAdapter.class);
   }
 
-  @After
-  public void tearDown() {
+  @AfterEach
+  void tearDown() {
     appender.clear();
   }
 
   @Test
-  public void logInterceptedException() {
-    try {
-      serviceAdapter.getId();
-      fail("getId() must throw");
-    } catch (Throwable throwable) {
-      assertThat(throwable, instanceOf(OutOfMemoryError.class));
-      assertThat(throwable.getMessage(), equalTo(EXCEPTION_MESSAGE));
-      assertThat(appender.getMessages().size(), equalTo(1));
-    }
+  void logInterceptedException() {
+    Throwable throwable = assertThrows(Throwable.class, () -> serviceAdapter.getId());
+    assertThat(throwable, instanceOf(OutOfMemoryError.class));
+    assertThat(throwable.getMessage(), equalTo(EXCEPTION_MESSAGE));
+    assertThat(appender.getMessages().size(), equalTo(1));
   }
 
   static class TestModule extends AbstractModule {

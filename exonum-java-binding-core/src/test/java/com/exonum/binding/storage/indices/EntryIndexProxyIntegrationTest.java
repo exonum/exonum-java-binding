@@ -18,10 +18,11 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
@@ -30,20 +31,15 @@ import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class EntryIndexProxyIntegrationTest
+class EntryIndexProxyIntegrationTest
     extends BaseIndexProxyTestable<EntryIndexProxy<String>> {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private static final String ENTRY_NAME = "test_entry";
 
   @Test
-  public void setValue() {
+  void setValue() {
     runTestWithView(database::createFork, (e) -> {
       e.set(V1);
 
@@ -53,7 +49,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void setOverwritesPreviousValue() {
+  void setOverwritesPreviousValue() {
     runTestWithView(database::createFork, (e) -> {
       e.set(V1);
       e.set(V2);
@@ -64,28 +60,27 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void setFailsWithSnapshot() {
+  void setFailsWithSnapshot() {
     runTestWithView(database::createSnapshot, (e) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      e.set(V1);
+
+      assertThrows(UnsupportedOperationException.class, () -> e.set(V1));
+
     });
   }
 
   @Test
-  public void isNotInitiallyPresent() {
+  void isNotInitiallyPresent() {
     runTestWithView(database::createSnapshot, (e) -> assertFalse(e.isPresent()));
   }
 
   @Test
-  public void getFailsIfNotPresent() {
-    runTestWithView(database::createSnapshot, (e) -> {
-      expectedException.expect(NoSuchElementException.class);
-      e.get();
-    });
+  void getFailsIfNotPresent() {
+    runTestWithView(database::createSnapshot,
+        (e) -> assertThrows(NoSuchElementException.class, e::get));
   }
 
   @Test
-  public void removeIfNoValue() {
+  void removeIfNoValue() {
     runTestWithView(database::createFork, (e) -> {
       assertFalse(e.isPresent());
       e.remove();
@@ -94,7 +89,7 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeValue() {
+  void removeValue() {
     runTestWithView(database::createFork, (e) -> {
       e.set(V1);
       e.remove();
@@ -103,20 +98,18 @@ public class EntryIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeFailsWithSnapshot() {
-    runTestWithView(database::createSnapshot, (e) -> {
-      expectedException.expect(UnsupportedOperationException.class);
-      e.remove();
-    });
+  void removeFailsWithSnapshot() {
+    runTestWithView(database::createSnapshot,
+        (e) -> assertThrows(UnsupportedOperationException.class, e::remove));
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      Consumer<EntryIndexProxy<String>> entryTest) {
+      Consumer<EntryIndexProxy<String>> entryTest) {
     runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      BiConsumer<View, EntryIndexProxy<String>> entryTest) {
+      BiConsumer<View, EntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         ENTRY_NAME,

@@ -16,15 +16,22 @@
 
 package com.exonum.binding.storage.indices;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 
-class ProofListIndexProxyGroupIntegrationTest
-    extends BaseListIndexProxyGroupTestable {
+/**
+ * A test of common ProofListIndex methods.
+ */
+class ProofListIndexIntegrationTest
+    extends BaseListIndexIntegrationTest {
 
   @Override
-  ListIndex<String> createInGroup(byte[] id, View view) {
-    return ProofListIndexProxy.newInGroupUnsafe("proof_list_group_IT", id, view,
-        StandardSerializers.string());
+  AbstractListIndexProxy<String> create(String name, View view) {
+    return IndexConstructors.fromOneArg(ProofListIndexProxy::newInstance).create(name, view);
   }
+
+  @Override
+  Object getAnyElement(AbstractListIndexProxy<String> index) {
+    return index.get(0L);
+  }
+
 }
