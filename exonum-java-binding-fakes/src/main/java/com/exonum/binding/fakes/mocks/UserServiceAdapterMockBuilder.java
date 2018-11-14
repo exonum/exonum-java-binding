@@ -18,6 +18,7 @@ package com.exonum.binding.fakes.mocks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -77,6 +78,11 @@ public final class UserServiceAdapterMockBuilder {
   public void initialGlobalConfigThrowing(Class<? extends Throwable> exceptionType) {
     when(service.initialize(anyLong()))
         .thenThrow(exceptionType);
+  }
+
+  public void afterCommitHandlerThrowing(Class<? extends Throwable> exceptionType) {
+    doThrow(exceptionType)
+        .when(service).afterCommit(anyLong(), anyInt(), anyLong());
   }
 
   public void mountPublicApiHandlerThrowing(Class<? extends Throwable> exceptionType) {

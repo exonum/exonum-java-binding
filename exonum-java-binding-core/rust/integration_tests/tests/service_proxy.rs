@@ -1,8 +1,10 @@
+extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
+use exonum_testkit::TestKitBuilder;
 use integration_tests::mock::service::ServiceMockBuilder;
 use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
 use integration_tests::test_service::{
@@ -193,4 +195,34 @@ fn service_can_modify_db_on_initialize() {
         .get(&key)
         .expect("Failed to find the entry created in the test service");
     assert_eq!(INITIAL_ENTRY_VALUE, value);
+}
+
+#[test]
+#[should_panic(expected = "Java exception: java.lang.RuntimeException")]
+fn after_commit_throwing() {
+
+    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+        .id(1)
+        .name("test")
+        .state_hashes(&[hash(&[1, 2, 3])])
+        .after_commit_throwing(EXCEPTION_CLASS) // TODO: think about changing to some custom exception that is not called from regular code
+        .build();
+
+    // It turned out that it is MUCH easier to use testkit in order to trigger the after_commit()
+    // callback than calling it by hands providing manually constructed ServiceContext entity.
+    let mut testkit = TestKitBuilder::validator()
+        .with_service(service.clone())
+        .create();
+
+    testkit.create_block();
+}
+
+#[test]
+fn after_commit_validator() {
+    unimplemented!()
+}
+
+#[test]
+fn after_commit_auditor() {
+    unimplemented!()
 }

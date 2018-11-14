@@ -148,6 +148,20 @@ impl ServiceMockBuilder {
         self
     }
 
+    pub fn after_commit_throwing(self, exception_class: &str) -> Self {
+        unwrap_jni(self.exec.with_attached(|env| {
+            let exception = env.find_class(exception_class)?;
+            env.call_method(
+                self.builder.as_obj(),
+                "afterCommitHandlerThrowing",
+                "(Ljava/lang/Class;)V",
+                &[JValue::from(JObject::from(exception.into_inner()))],
+            )?;
+            Ok(())
+        }));
+        self
+    }
+
     pub fn build(self) -> ServiceProxy {
         let (executor, service) = unwrap_jni(self.exec.clone().with_attached(|env| {
             let value = env.call_method(
