@@ -29,6 +29,7 @@ lazy_static! {
 }
 
 const EXCEPTION_CLASS: &str = "java/lang/RuntimeException";
+const TEST_EXCEPTION_CLASS: &str = "com/exonum/binding/fakes/mocks/TestException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 const TEST_CONFIG_JSON: &str = r#""test config""#;
@@ -198,14 +199,14 @@ fn service_can_modify_db_on_initialize() {
 }
 
 #[test]
-#[should_panic(expected = "Java exception: java.lang.RuntimeException")]
+#[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
 fn after_commit_throwing() {
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .id(1)
         .name("test")
         .state_hashes(&[hash(&[1, 2, 3])])
-        .after_commit_throwing(EXCEPTION_CLASS) // TODO: think about changing to some custom exception that is not called from regular code
+        .after_commit_throwing(TEST_EXCEPTION_CLASS)
         .build();
 
     // It turned out that it is MUCH easier to use testkit in order to trigger the after_commit()
