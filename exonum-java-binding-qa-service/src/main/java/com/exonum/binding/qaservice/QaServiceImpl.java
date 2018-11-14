@@ -18,6 +18,8 @@ package com.exonum.binding.qaservice;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
@@ -163,6 +165,28 @@ final class QaServiceImpl extends AbstractService implements QaService {
       String name = counterNames.get(counterId);
       Long value = counters.get(counterId);
       return Optional.of(new Counter(name, value));
+    });
+  }
+
+  @Override
+  public long getHeight() {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+
+      return blockchain.getHeight();
+    });
+  }
+
+  @Override
+  public StoredConfiguration getActualConfiguration() {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+
+      return blockchain.getActualConfiguration();
     });
   }
 

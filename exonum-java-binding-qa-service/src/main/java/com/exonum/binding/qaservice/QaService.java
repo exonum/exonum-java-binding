@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Service;
 import java.util.Optional;
@@ -44,4 +45,8 @@ public interface QaService extends Service {
   HashCode submitUnknownTx();
 
   Optional<Counter> getValue(HashCode counterId);
+
+  long getHeight();
+
+  StoredConfiguration getActualConfiguration();
 }

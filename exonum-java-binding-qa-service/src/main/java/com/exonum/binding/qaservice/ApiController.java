@@ -22,7 +22,9 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
@@ -57,6 +59,10 @@ final class ApiController {
   static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
   @VisibleForTesting
   static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
+  @VisibleForTesting
+  static final String GET_HEIGHT_PATH = "/height";
+  @VisibleForTesting
+  static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
   private static final String COUNTER_ID_PARAM = "counterId";
   private static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
 
@@ -86,6 +92,8 @@ final class ApiController {
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
+            .put(GET_HEIGHT_PATH, this::getHeight)
+            .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -158,6 +166,21 @@ final class ApiController {
           .setStatusCode(HTTP_NOT_FOUND)
           .end();
     }
+  }
+
+  private void getHeight(RoutingContext rc) {
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(Long.toString(service.getHeight()));
+  }
+
+  private void getActualConfiguration(RoutingContext rc) {
+    StoredConfiguration configuration = service.getActualConfiguration();
+    String json = new StoredConfigurationGsonSerializer().toJson(configuration);
+
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(json);
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {

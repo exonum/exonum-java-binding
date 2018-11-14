@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of core schema API. (#548, #549)
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
+- Support of actual configuration retrieval in core schema API. (#)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package

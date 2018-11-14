@@ -24,6 +24,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <lazysodium-java.version>3.3.0</lazysodium-java.version>
     <auto-value.version>1.6.2</auto-value.version>
+    <auto-value-gson.version>0.8.0</auto-value-gson.version>
+    <javapoet.version>1.11.1</javapoet.version>
   </properties>
 
   <dependencies>
@@ -55,8 +57,29 @@
     <dependency>
       <groupId>com.google.auto.value</groupId>
       <artifactId>auto-value</artifactId>
-      <version>1.6.2</version>
+      <version>${auto-value.version}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.ryanharter.auto.value</groupId>
+      <artifactId>auto-value-gson-annotations</artifactId>
+      <version>${auto-value-gson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.ryanharter.auto.value</groupId>
+      <artifactId>auto-value-gson</artifactId>
+      <version>${auto-value-gson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup</groupId>
+      <artifactId>javapoet</artifactId>
+      <version>${javapoet.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <!--JUnit5-->
@@ -116,6 +139,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+        </configuration>
       </plugin>
 
       <plugin>

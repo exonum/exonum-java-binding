@@ -16,6 +16,8 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.GET_HEIGHT_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -30,8 +32,12 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.configuration.ConsensusConfig;
+import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
@@ -49,6 +55,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
@@ -338,6 +345,60 @@ class ApiControllerIntegrationTest {
     assertThat(m.get("k1")).isEqualTo("v1");
     assertThat(m.get("k2")).isEqualTo("v2");
     assertThat(m.get("k3")).isEqualTo("v3");
+  }
+
+  @Test
+  void getHeight(VertxTestContext context) {
+    long height = 1L;
+    when(qaService.getHeight()).thenReturn(height);
+
+    get(GET_HEIGHT_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
+              () -> assertThat(Long.valueOf(response.bodyAsString())).isEqualTo(height));
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getActualConfiguration(VertxTestContext context) {
+    StoredConfiguration configuration = createConfiguration();
+    when(qaService.getActualConfiguration()).thenReturn(configuration);
+
+    get(GET_ACTUAL_CONFIGURATION_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
+              () -> {
+                String body = response.bodyAsString();
+                StoredConfiguration storedConfiguration = new StoredConfigurationGsonSerializer()
+                    .fromJson(body);
+
+                assertThat(storedConfiguration).isEqualTo(configuration);
+              });
+          context.completeNow();
+        })));
+  }
+
+  private StoredConfiguration createConfiguration() {
+    return StoredConfiguration.create(
+        HashCode.fromString("11"),
+        1,
+        Collections.singletonList(
+            ValidatorKey.create(HashCode.fromString("22"),
+                HashCode.fromString("33"))
+        ),
+        ConsensusConfig.create(
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8)
+    );
   }
 
   private HttpRequest<Buffer> post(String requestPath) {
