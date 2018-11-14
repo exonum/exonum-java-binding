@@ -125,6 +125,14 @@
       <artifactId>equalsverifier</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- Needed to fix @Generated annotation java 8 - 11 issue -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>${javax-annotation-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <repositories>
