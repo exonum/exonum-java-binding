@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -211,11 +212,11 @@ class QaServiceImplIntegrationTest {
   @Test
   void submitUnknownTx() throws Exception {
     setServiceNode(node);
-    
+
     HashCode txHash = service.submitUnknownTx();
-    
+
     Transaction expectedTx = new UnknownTx();
-    
+
     assertThat(txHash).isEqualTo(expectedTx.hash());
     verify(node).submitTransaction(any(UnknownTx.class));
   }
@@ -270,6 +271,25 @@ class QaServiceImplIntegrationTest {
     assertThrows(IllegalStateException.class,
         () -> service.getValue(HashCode.fromInt(1))
     );
+  }
+
+  @Test
+  void getHeightBeforeInit() {
+    assertThrows(IllegalStateException.class,
+        () -> service.getHeight());
+  }
+
+  @Test
+  void getActualConfigurationBeforeInit() {
+    assertThrows(IllegalStateException.class,
+        () -> service.getActualConfiguration());
+  }
+
+  @Test
+  void getActualConfiguration() {
+    setServiceNode(node);
+
+    assertNull(service.getActualConfiguration());
   }
 
   private void setServiceNode(Node node) {

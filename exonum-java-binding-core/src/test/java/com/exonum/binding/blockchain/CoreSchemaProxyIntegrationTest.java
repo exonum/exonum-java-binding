@@ -26,6 +26,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -37,35 +38,34 @@ class CoreSchemaProxyIntegrationTest {
 
   @Test
   void getHeightBeforeGenesisBlockTest() {
-    MemoryDb db = MemoryDb.newInstance();
-    Cleaner cleaner = new Cleaner();
-    Snapshot view = db.createSnapshot(cleaner);
-
-    CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-    assertThrows(RuntimeException.class, schema::getHeight);
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getHeight));
   }
 
   @Test
-  void getAllBlockHashesTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      assertThat(schema.getAllBlockHashes()).isEmpty();
-    }
+  void getAllBlockHashesTest() {
+    assertSchema((schema) -> assertThat(schema.getAllBlockHashes()).isEmpty());
   }
 
   @Test
-  void getBlockTransactionsTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+  void getBlockTransactionsTest() {
+    assertSchema((schema) -> {
       long height = 0L;
       assertThat(schema.getBlockTransactions(height)).isEmpty();
-    }
+    });
   }
 
+  @Test
+  void getActiveConfigurationBeforeGenesisBlock() {
+    assertSchema((schema) ->
+        assertThrows(RuntimeException.class, schema::getActualConfiguration));
+  }
+
+  private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
+    try (MemoryDb db = MemoryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+      assertion.accept(CoreSchemaProxy.newInstance(view));
+    } catch (CloseFailuresException e) {
+      System.out.println("Error: " + e.getLocalizedMessage());
+    }
+  }
 }
