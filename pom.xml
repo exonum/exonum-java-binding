@@ -222,6 +222,13 @@
       <artifactId>java-hamcrest</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- Needed to fix @Generated annotation java 8 - 11 issue, Javadoc generation with JDK 9 -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>${javax-annotation-api.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
