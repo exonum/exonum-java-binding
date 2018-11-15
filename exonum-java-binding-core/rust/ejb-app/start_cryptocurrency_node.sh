@@ -47,7 +47,7 @@ EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-RUST_LIB_DIR="$(rustup run 1.26.2 rustc --print sysroot)/lib"
+RUST_LIB_DIR="$(rustup run 1.27.2 rustc --print sysroot)/lib"
 echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
 
 export LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$JVM_LIB_PATH"
@@ -58,20 +58,20 @@ rm -rf testnet
 mkdir testnet
 
 header "GENERATE COMMON CONFIG"
-ejb-app generate-template --validators-count=1 testnet/common.toml
+cargo run -- generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
-ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
  --ejb-classpath $EJB_CLASSPATH \
  --ejb-libpath $EJB_LIBPATH \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-ejb-app finalize testnet/sec.toml testnet/node.toml \
+cargo run -- finalize testnet/sec.toml testnet/node.toml \
  --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule' \
  --ejb-port 6000 \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"
-ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000

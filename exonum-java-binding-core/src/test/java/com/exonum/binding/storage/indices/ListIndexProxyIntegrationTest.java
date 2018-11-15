@@ -19,8 +19,9 @@ package com.exonum.binding.storage.indices;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Database;
@@ -31,53 +32,50 @@ import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Contains tests of ListIndexProxy methods that are not present in {@link ListIndex} interface.
  */
-public class ListIndexProxyIntegrationTest {
+class ListIndexProxyIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-
   private Database database;
 
   private static final String LIST_NAME = "test_list";
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     database = MemoryDb.newInstance();
   }
 
-  @After
-  public void tearDown() {
+  @AfterEach
+  void tearDown() {
     database.close();
   }
 
-  @Test(expected = NoSuchElementException.class)
-  public void removeLastEmptyList() {
-    runTestWithView(database::createFork, (l) -> {
+  @Test
+  void removeLastEmptyList() {
+    assertThrows(NoSuchElementException.class, () -> runTestWithView(database::createFork, (l) -> {
       String ignored = l.removeLast();
-    });
-  }
-
-  @Test(expected = UnsupportedOperationException.class)
-  public void removeLastWithSnapshot() {
-    runTestWithView(database::createSnapshot, (l) -> {
-      String ignored = l.removeLast();
-    });
+    }));
   }
 
   @Test
-  public void removeLastSingleElementList() {
+  void removeLastWithSnapshot() {
+    assertThrows(UnsupportedOperationException.class,
+        () -> runTestWithView(database::createSnapshot, (l) -> {
+          String ignored = l.removeLast();
+        }));
+  }
+
+  @Test
+  void removeLastSingleElementList() {
     runTestWithView(database::createFork, (l) -> {
       String addedElement = V1;
       l.add(addedElement);
@@ -89,7 +87,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void removeLastTwoElementList() {
+  void removeLastTwoElementList() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -102,7 +100,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateNonEmptyToZero() {
+  void truncateNonEmptyToZero() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.truncate(0);
@@ -113,7 +111,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToSameSize() {
+  void truncateToSameSize() {
     runTestWithView(database::createFork, (l) -> {
       long newSize = 1;
       l.add(V1);
@@ -124,7 +122,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToSmallerSize() {
+  void truncateToSmallerSize() {
     runTestWithView(database::createFork, (l) -> {
       long newSize = 1;
       l.add(V1);
@@ -136,7 +134,7 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToGreaterSizeHasNoEffect() {
+  void truncateToGreaterSizeHasNoEffect() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
       l.add(V2);
@@ -149,28 +147,32 @@ public class ListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void truncateToNegativeSizeThrows() {
+  void truncateToNegativeSizeThrows() {
     runTestWithView(database::createFork, (l) -> {
       l.add(V1);
 
-      expectedException.expect(IllegalArgumentException.class);
-      long invalidSize = -1;
-      l.truncate(invalidSize);
+
+      assertThrows(IllegalArgumentException.class, () -> {
+        long invalidSize = -1;
+        l.truncate(invalidSize);
+      });
+
     });
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void truncateWithSnapshot() {
-    runTestWithView(database::createSnapshot, (l) -> l.truncate(0L));
+  @Test
+  void truncateWithSnapshot() {
+    assertThrows(UnsupportedOperationException.class,
+        () -> runTestWithView(database::createSnapshot, (l) -> l.truncate(0L)));
   }
 
   private void runTestWithView(Function<Cleaner, View> viewFactory,
-                               Consumer<ListIndexProxy<String>> listTest) {
+      Consumer<ListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
   private void runTestWithView(Function<Cleaner, View> viewFactory,
-                               BiConsumer<View, ListIndexProxy<String>> listTest) {
+      BiConsumer<View, ListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,

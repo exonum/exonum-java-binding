@@ -22,9 +22,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 final class SerializationUtils {
 
   /**
-   * Performs check that serialized value has correct length.
+   * Performs check that bytes array has correct length.
    *
-   * @param array serialized value in bytes
+   * @param array bytes array
    * @param length expected length
    * @throws IllegalArgumentException thrown if length is incorrect
    */

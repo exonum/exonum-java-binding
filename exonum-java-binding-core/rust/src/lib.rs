@@ -25,7 +25,6 @@
 
 pub extern crate exonum;
 extern crate failure;
-pub extern crate iron;
 pub extern crate jni;
 extern crate toml;
 #[macro_use]

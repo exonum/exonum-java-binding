@@ -1,6 +1,6 @@
 [package]
 name = "integration_tests"
-version = "0.2.0"
+version = "0.4.0-SNAPSHOT"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 publish = false
 workspace = ".."
@@ -13,6 +13,6 @@ crate-type = ["dylib"]
 [dependencies]
 futures = "0.1.14"
 java_bindings = { path = "..", features = ["invocation"] }
-exonum-testkit = "0.8.0"
+exonum-testkit = "0.9"
 lazy_static = "1.1.0"
 rand = "0.5"

@@ -17,10 +17,12 @@
 package com.exonum.binding.service;
 
 import static com.exonum.binding.common.message.TemplateMessage.TEMPLATE_MESSAGE;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
@@ -36,17 +38,12 @@ import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class ServiceBootstrapIntegrationTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class ServiceBootstrapIntegrationTest {
 
   @Test
-  public void startService() {
+  void startService() {
     UserServiceAdapter service = ServiceBootstrap.startService(
         UserModule.class.getCanonicalName(), 0);
 
@@ -70,13 +67,14 @@ public class ServiceBootstrapIntegrationTest {
   }
 
   @Test
-  public void startServiceNotModule() {
+  void startServiceNotModule() {
     String invalidModuleName = Object.class.getCanonicalName();
 
-    expectedException.expectMessage("class java.lang.Object is not a sub-class "
-        + "of com.google.inject.Module");
-    expectedException.expect(IllegalArgumentException.class);
-    ServiceBootstrap.startService(invalidModuleName, 0);
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> ServiceBootstrap.startService(invalidModuleName, 0));
+    assertThat(thrown.getLocalizedMessage(),
+        containsString("class java.lang.Object is not a sub-class "
+            + "of com.google.inject.Module"));
   }
 }
 

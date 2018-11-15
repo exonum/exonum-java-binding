@@ -31,14 +31,14 @@ import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
+class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
   private static final String GROUP_NAME = "value_set_IT";
 
   @Test
-  public void setsInGroupMustBeIndependent() {
+  void setsInGroupMustBeIndependent() {
     View view = db.createFork(cleaner);
 
     // Values to be put in sets, indexed by a set identifier.

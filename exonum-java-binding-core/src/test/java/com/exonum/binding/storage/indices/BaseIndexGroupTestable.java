@@ -21,8 +21,8 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 abstract class BaseIndexGroupTestable {
 
@@ -30,22 +30,24 @@ abstract class BaseIndexGroupTestable {
     LibraryLoader.load();
   }
 
-  /** A default cleaner for a test case. */
+  /**
+   * A default cleaner for a test case.
+   */
   Cleaner cleaner;
 
   MemoryDb db;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     db = MemoryDb.newInstance();
     cleaner = new Cleaner();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     Stream.of(cleaner, db)
         .filter(Objects::nonNull)
-        .forEach(o -> close(o));
+        .forEach(BaseIndexGroupTestable::close);
   }
 
   private static void close(AutoCloseable o) {

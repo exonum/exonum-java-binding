@@ -16,6 +16,7 @@
 
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.storage.database.Fork;
 import java.util.Iterator;
 import java.util.Map;

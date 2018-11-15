@@ -43,16 +43,57 @@ public final class StandardSerializers {
 
   /**
    * Returns a serializer of integers as four bytes in little-endian byte order.
+   * More efficient than {@link StandardSerializers#uint32()}
+   * if values are often greater than {@code 2^28}.
    */
   public static Serializer<Integer> fixed32() {
     return Fixed32Serializer.INSTANCE;
   }
 
   /**
+   * Returns a serializer of unsigned integers using variable length encoding.
+   * These more efficiently encodes values for the range {@code [0; 2^21-1]}
+   * than {@link StandardSerializers#fixed32()}.
+   */
+  public static Serializer<Integer> uint32() {
+    return Uint32Serializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of signed integers using variable length encoding.
+   * These more efficiently encodes values for the range {@code [-2^20; 2^20-1]}
+   * than {@link StandardSerializers#fixed32()}.
+   * If your values are strictly non-negative, consider using {@link StandardSerializers#uint32()}.
+   */
+  public static Serializer<Integer> sint32() {
+    return Sint32Serializer.INSTANCE;
+  }
+
+  /**
    * Returns a serializer of longs as eight bytes in little-endian byte order.
+   * More efficient than {@link StandardSerializers#uint32()}
+   * if values are often greater than {@code 2^56}.
    */
   public static Serializer<Long> fixed64() {
     return Fixed64Serializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of unsigned longs using variable length encoding.
+   * These more efficiently encodes values for the range {@code [0; 2^49-1]}
+   * than {@link StandardSerializers#fixed64()}.
+   */
+  public static Serializer<Long> uint64() {
+    return Uint64Serializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of signed longs using variable length encoding.
+   * These more efficiently encodes values for the range {@code [-2^48; 2^48-1]}
+   * than {@link StandardSerializers#fixed64()}.
+   */
+  public static Serializer<Long> sint64() {
+    return Sint64Serializer.INSTANCE;
   }
 
   /**
@@ -105,7 +146,7 @@ public final class StandardSerializers {
    *
    * @param messageType the class of a protobuf message
    * @param <MessageT> the type of a message; must have a public static
-   *        {@code #parseFrom(byte[])} method — as any auto-generated protobuf message does
+   * {@code #parseFrom(byte[])} method — as any auto-generated protobuf message does
    * @throws IllegalArgumentException if {@code MessageT} does not contain the static
    *        factory method {@code #parseFrom(byte[])}
    */
@@ -116,4 +157,5 @@ public final class StandardSerializers {
 
   private StandardSerializers() {
   }
+
 }
