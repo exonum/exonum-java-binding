@@ -26,6 +26,9 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 
+/**
+ * {@link HashCode} string serializer.
+ */
 public class HashCodeStringSerializer
     implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
 

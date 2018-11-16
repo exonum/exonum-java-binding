@@ -20,9 +20,12 @@ import com.google.auto.value.AutoValue;
 import com.google.gson.annotations.SerializedName;
 import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 
+/**
+ * Blockchain Consensus algorithm parameters.
+ */
 @AutoValue
 @GenerateTypeAdapter
-public abstract class ConsensusConfig {
+public abstract class Consensus {
   @SerializedName("round_timeout")
   public abstract long roundTimeout();
 
@@ -47,10 +50,10 @@ public abstract class ConsensusConfig {
   @SerializedName("propose_timeout_threshold")
   public abstract long proposeTimeoutThreshold();
 
-  public static ConsensusConfig create(long roundTimeout, long statusTimeout, long peersTimeout,
+  public static Consensus create(long roundTimeout, long statusTimeout, long peersTimeout,
       long txsBlockLimit, long maxMessageLen, long minProposeTimeout, long maxProposeTimeout,
       long proposeTimeoutThreshold) {
-    return new AutoValue_ConsensusConfig(roundTimeout, statusTimeout, peersTimeout, txsBlockLimit,
+    return new AutoValue_Consensus(roundTimeout, statusTimeout, peersTimeout, txsBlockLimit,
         maxMessageLen, minProposeTimeout, maxProposeTimeout, proposeTimeoutThreshold);
   }
 }

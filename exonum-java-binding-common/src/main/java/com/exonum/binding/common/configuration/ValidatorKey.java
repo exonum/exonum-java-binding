@@ -21,6 +21,13 @@ import com.google.auto.value.AutoValue;
 import com.google.gson.annotations.SerializedName;
 import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 
+/**
+ * Represents validators’ public keys as hex strings.
+ * <ul>
+ *   <li>consensus_key - validator’s public key for use with consensus messages</li>
+ *   <li>service_key - validator’s public key for use with service transactions</li>
+ * </ul>
+ */
 @AutoValue
 @GenerateTypeAdapter
 public abstract class ValidatorKey {

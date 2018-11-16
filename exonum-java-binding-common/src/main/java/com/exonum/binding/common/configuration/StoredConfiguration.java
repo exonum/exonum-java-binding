@@ -22,6 +22,10 @@ import com.google.gson.annotations.SerializedName;
 import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 import java.util.List;
 
+/**
+ * Represents a blockchain configuration which is a a set of parameters that determine
+ * the network access parameters of a node and behavior of the node while operating in the network.
+ */
 @AutoValue
 @GenerateTypeAdapter
 public abstract class StoredConfiguration {
@@ -34,14 +38,14 @@ public abstract class StoredConfiguration {
   @SerializedName("validator_keys")
   public abstract List<ValidatorKey> validatorKeys();
 
-  @SerializedName("consensus_config")
-  public abstract ConsensusConfig consensusConfig();
+  @SerializedName("consensus")
+  public abstract Consensus consensus();
 
-  //TODO add majorityCount, services fields
+  //TODO add majorityCount, services fields (https://jira.bf.local/browse/ECR-2683)
 
   public static StoredConfiguration create(HashCode previousCfgHash, long actualFrom,
-      List<ValidatorKey> validatorKeys, ConsensusConfig consensusConfig) {
+      List<ValidatorKey> validatorKeys, Consensus consensus) {
     return new AutoValue_StoredConfiguration(previousCfgHash, actualFrom, validatorKeys,
-        consensusConfig);
+        consensus);
   }
 }
