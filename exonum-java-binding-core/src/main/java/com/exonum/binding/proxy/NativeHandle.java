@@ -18,6 +18,8 @@ package com.exonum.binding.proxy;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * An implementation-specific handle to the native object. Once closed, can no longer be accessed.
  */
@@ -71,4 +73,10 @@ public final class NativeHandle implements AutoCloseable {
     nativeHandle = INVALID_NATIVE_HANDLE;
   }
 
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("pointer", Long.toHexString(nativeHandle).toUpperCase())
+        .toString();
+  }
 }
