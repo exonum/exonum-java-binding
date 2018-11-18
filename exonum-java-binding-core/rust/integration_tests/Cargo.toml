@@ -16,3 +16,5 @@ java_bindings = { path = "..", features = ["invocation"] }
 exonum-testkit = "0.9"
 lazy_static = "1.1.0"
 rand = "0.5"
+serde = "1.0"
+serde_derive = "1.0"

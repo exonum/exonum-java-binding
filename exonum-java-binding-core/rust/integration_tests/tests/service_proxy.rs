@@ -3,25 +3,43 @@ extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate serde_derive;
+
+use std::{
+    panic::{AssertUnwindSafe, catch_unwind},
+    sync::Arc,
+};
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::mock::service::ServiceMockBuilder;
-use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
-use integration_tests::test_service::{
-    create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
+
+use integration_tests::{
+    mock::{
+        service::ServiceMockBuilder,
+        transaction::{create_mock_transaction, INFO_VALUE}
+    },
+    test_service::{
+        create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
+    },
+    vm::create_vm_for_tests_with_fake_classes,
 };
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::exonum::blockchain::Service;
-use java_bindings::exonum::crypto::hash;
-use java_bindings::exonum::encoding::Error as MessageError;
-use java_bindings::exonum::messages::RawTransaction;
-use java_bindings::exonum::storage::{Database, MemoryDB};
-use java_bindings::jni::JavaVM;
-use java_bindings::serde_json::Value;
-use java_bindings::utils::any_to_string;
-use java_bindings::MainExecutor;
-use std::panic::{catch_unwind, AssertUnwindSafe};
-use std::sync::Arc;
+use java_bindings::{
+    exonum::{
+        blockchain::Service,
+        crypto::hash,
+        encoding::Error as MessageError,
+        messages::RawTransaction,
+        storage::{Database, MemoryDB},
+    },
+    jni::{
+        JavaVM,
+        objects::JObject,
+    },
+    JniExecutor,
+    MainExecutor,
+    serde_json::{from_str, Value},
+    utils::{any_to_string, convert_to_string, unwrap_jni},
+};
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
@@ -201,10 +219,7 @@ fn service_can_modify_db_on_initialize() {
 #[test]
 #[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
 fn after_commit_throwing() {
-
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .id(1)
-        .name("test")
         .state_hashes(&[hash(&[1, 2, 3])])
         .after_commit_throwing(TEST_EXCEPTION_CLASS)
         .build();
@@ -220,10 +235,74 @@ fn after_commit_throwing() {
 
 #[test]
 fn after_commit_validator() {
-    unimplemented!()
+    let (builder, interactor) = ServiceMockBuilder::new(EXECUTOR.clone())
+        .state_hashes(&[hash(&[1, 2, 3])])
+        .get_mock_interaction_after_commit();
+
+    let service = builder.build();
+    let mut testkit = TestKitBuilder::validator()
+        .with_service(service.clone())
+        .create();
+
+    testkit.create_block();
+    testkit.create_block();
+
+    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
+    let res_iter: Vec<AfterCommitArgs> = from_str(&result).unwrap();
+
+    assert_eq!(res_iter.len(), 2);
+
+    let item: &AfterCommitArgs = res_iter.get(0).unwrap();
+    assert!(item.handle > 0);
+    assert_eq!(item.validator, 0);
+    assert_eq!(item.height, 1);
+
+    let item: &AfterCommitArgs = res_iter.get(1).unwrap();
+    assert!(item.handle > 0);
+    assert_eq!(item.validator, 0);
+    assert_eq!(item.height, 2);
 }
 
 #[test]
 fn after_commit_auditor() {
-    unimplemented!()
+    let (builder, interactor) = ServiceMockBuilder::new(EXECUTOR.clone())
+        .state_hashes(&[hash(&[1, 2, 3])])
+        .get_mock_interaction_after_commit();
+
+    let service = builder.build();
+    let mut testkit = TestKitBuilder::auditor()
+        .with_service(service.clone())
+        .create();
+
+    testkit.create_block();
+
+    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
+    let res_iter: Vec<AfterCommitArgs> = from_str(&result).unwrap();
+
+    assert_eq!(res_iter.len(), 1);
+
+    let item: &AfterCommitArgs = res_iter.get(0).unwrap();
+    assert!(item.handle > 0);
+    assert_eq!(item.validator, -1);
+    assert_eq!(item.height, 1);
+}
+
+// Helper methods that gets the JSON representation of interaction with mock
+fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {
+    let res = unwrap_jni(exec.with_attached(|env| {
+        env.call_method(
+            obj,
+            "getInteractions",
+            "()Ljava/lang/String;",
+            &[]
+        )?.l().and_then(|obj|convert_to_string(env, obj))
+    }));
+    res
+}
+
+#[derive(Serialize, Deserialize)]
+struct AfterCommitArgs {
+    handle: i64,
+    validator: i32,
+    height: i64,
 }
