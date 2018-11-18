@@ -164,12 +164,13 @@ impl ServiceMockBuilder {
 
     pub fn get_mock_interaction_after_commit(self) -> (Self, GlobalRef) {
         let obj = unwrap_jni(self.exec.with_attached(|env| {
-            let mock_interaction: JObject = env.call_method(
-                self.builder.as_obj(),
-                "getMockInteractionAfterCommit",
-                "()Lcom/exonum/binding/fakes/mocks/MockInteraction;",
-                &[],
-            )?.l()?;
+            let mock_interaction: JObject = env
+                .call_method(
+                    self.builder.as_obj(),
+                    "getMockInteractionAfterCommit",
+                    "()Lcom/exonum/binding/fakes/mocks/MockInteraction;",
+                    &[],
+                )?.l()?;
             Ok(env.new_global_ref(mock_interaction)?)
         }));
         (self, obj)

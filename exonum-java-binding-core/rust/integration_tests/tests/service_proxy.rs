@@ -7,7 +7,7 @@ extern crate lazy_static;
 extern crate serde_derive;
 
 use std::{
-    panic::{AssertUnwindSafe, catch_unwind},
+    panic::{catch_unwind, AssertUnwindSafe},
     sync::Arc,
 };
 
@@ -16,11 +16,9 @@ use exonum_testkit::TestKitBuilder;
 use integration_tests::{
     mock::{
         service::ServiceMockBuilder,
-        transaction::{create_mock_transaction, INFO_VALUE}
+        transaction::{create_mock_transaction, INFO_VALUE},
     },
-    test_service::{
-        create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
-    },
+    test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE},
     vm::create_vm_for_tests_with_fake_classes,
 };
 use java_bindings::{
@@ -31,14 +29,10 @@ use java_bindings::{
         messages::RawTransaction,
         storage::{Database, MemoryDB},
     },
-    jni::{
-        JavaVM,
-        objects::JObject,
-    },
-    JniExecutor,
-    MainExecutor,
+    jni::{objects::JObject, JavaVM},
     serde_json::{from_str, Value},
     utils::{any_to_string, convert_to_string, unwrap_jni},
+    JniExecutor, MainExecutor,
 };
 
 lazy_static! {
@@ -290,12 +284,9 @@ fn after_commit_auditor() {
 // Helper methods that gets the JSON representation of interaction with mock
 fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {
     let res = unwrap_jni(exec.with_attached(|env| {
-        env.call_method(
-            obj,
-            "getInteractions",
-            "()Ljava/lang/String;",
-            &[]
-        )?.l().and_then(|obj|convert_to_string(env, obj))
+        env.call_method(obj, "getInteractions", "()Ljava/lang/String;", &[])?
+            .l()
+            .and_then(|obj| convert_to_string(env, obj))
     }));
     res
 }
