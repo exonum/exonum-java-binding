@@ -1,11 +1,12 @@
 package com.exonum.binding.fakes.mocks;
 
 import com.google.gson.Gson;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * Helper class to make testing callbacks from native code easier. It allows simple tracking of
@@ -65,7 +66,7 @@ public class MockInteraction {
    * Returns list of all interactions (arguments values) with particular method of mocked object
    * in form of JSON string.
    *
-   * Example: "[{"handle":4635874800,"height":1},{"handle":4635875424,"height":2}]"
+   * <p>Example: "[{"handle":4635874800,"height":1},{"handle":4635875424,"height":2}]"</p>
    *
    * @return Result of interactions with mocked object.
    */

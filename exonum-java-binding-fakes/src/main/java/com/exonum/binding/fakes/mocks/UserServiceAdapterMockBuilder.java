@@ -86,6 +86,12 @@ public final class UserServiceAdapterMockBuilder {
         .when(service).afterCommit(anyLong(), anyInt(), anyLong());
   }
 
+  /**
+   * Creates the {@link MockInteraction} instance for testing the UserServiceAdapter#after_commit()
+   * method.
+   *
+   * @return MockInteraction instance
+   */
   public MockInteraction getMockInteractionAfterCommit() {
     String[] args = {"handle", "validator", "height"};
     MockInteraction interaction = MockInteraction.createInteraction(args);
