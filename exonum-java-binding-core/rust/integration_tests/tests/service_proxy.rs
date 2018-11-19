@@ -30,7 +30,7 @@ use java_bindings::{
         storage::{Database, MemoryDB},
     },
     jni::{objects::JObject, JavaVM},
-    serde_json::{from_str, Value},
+    serde_json,
     utils::{any_to_string, convert_to_string, unwrap_jni},
     JniExecutor, MainExecutor,
 };
@@ -48,7 +48,8 @@ const TEST_CONFIG_JSON: &str = r#""test config""#;
 const TEST_CONFIG_NOT_JSON: &str = r#"()"#;
 
 lazy_static! {
-    static ref TEST_CONFIG_VALUE: Value = Value::String("test config".to_string());
+    static ref TEST_CONFIG_VALUE: serde_json::Value =
+        serde_json::Value::String("test config".to_string());
 }
 
 #[test]
@@ -154,7 +155,7 @@ fn initialize_config_null() {
         .build();
 
     let config = service.initialize(&mut fork);
-    assert_eq!(config, Value::Null);
+    assert_eq!(config, serde_json::Value::Null);
 }
 
 #[test]
@@ -242,17 +243,17 @@ fn after_commit_validator() {
     testkit.create_block();
 
     let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
-    let res_iter: Vec<AfterCommitArgs> = from_str(&result).unwrap();
+    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
 
-    assert_eq!(res_iter.len(), 2);
+    assert_eq!(after_commit_args.len(), 2);
 
-    let item: &AfterCommitArgs = &res_iter[0];
-    assert!(item.handle > 0);
+    let item: &AfterCommitArgs = &after_commit_args[0];
+    assert_ne!(item.handle, 0);
     assert_eq!(item.validator, 0);
     assert_eq!(item.height, 1);
 
-    let item: &AfterCommitArgs = &res_iter[1];
-    assert!(item.handle > 0);
+    let item: &AfterCommitArgs = &after_commit_args[1];
+    assert_ne!(item.handle, 0);
     assert_eq!(item.validator, 0);
     assert_eq!(item.height, 2);
 }
@@ -271,17 +272,17 @@ fn after_commit_auditor() {
     testkit.create_block();
 
     let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
-    let res_iter: Vec<AfterCommitArgs> = from_str(&result).unwrap();
+    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
 
-    assert_eq!(res_iter.len(), 1);
+    assert_eq!(after_commit_args.len(), 1);
 
-    let item: &AfterCommitArgs = &res_iter[0];
-    assert!(item.handle > 0);
+    let item: &AfterCommitArgs = &after_commit_args[0];
+    assert_ne!(item.handle, 0);
     assert_eq!(item.validator, -1);
     assert_eq!(item.height, 1);
 }
 
-// Helper methods that gets the JSON representation of interaction with mock
+// Helper methods. Gets the JSON representation of interaction with mock.
 fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {
     unwrap_jni(exec.with_attached(|env| {
         env.call_method(obj, "getInteractions", "()Ljava/lang/String;", &[])?

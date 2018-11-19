@@ -15,18 +15,17 @@ import org.mockito.stubbing.Answer;
  */
 public class MockInteraction {
   private final String[] arguments;
-  private final List<String> interactions;
+  private final List<String> interactions = new ArrayList<>();
 
   private MockInteraction(String[] arguments) {
     this.arguments = arguments;
-    interactions = new ArrayList<>();
   }
 
   /**
-   * Creates new instange of {@link MockInteraction} configured with expected names of arguments for
+   * Creates new instance of {@link MockInteraction} configured with expected names of arguments for
    * a mocked method.
    *
-   * @param expectedArguments Names of expected arguments for a mocked method in their right order.
+   * @param expectedArguments names of expected arguments for a mocked method in their right order
    * @return New and configured instance of {@link MockInteraction}
    */
   public static MockInteraction createInteraction(String[] expectedArguments) {
@@ -68,11 +67,11 @@ public class MockInteraction {
    *
    * <p>Example: "[{"handle":4635874800,"height":1},{"handle":4635875424,"height":2}]"</p>
    *
-   * @return Result of interactions with mocked object.
+   * @return Result of interactions with mocked object
    */
   public String getInteractions() {
     // We don't use Gson here because we need custom serialization for strings and it is simpler
-    // to do it by hands
+    // to do it manually
     StringBuilder sb = new StringBuilder();
     sb.append('[');
     for (int i = 0; i < interactions.size() ; i++) {
