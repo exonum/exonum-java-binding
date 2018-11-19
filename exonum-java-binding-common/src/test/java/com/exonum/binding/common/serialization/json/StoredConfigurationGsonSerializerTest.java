@@ -14,36 +14,48 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization;
+package com.exonum.binding.common.serialization.json;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.configuration.Consensus;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.hash.HashCode;
-import java.util.Collections;
+import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import org.junit.jupiter.api.Test;
 
 class StoredConfigurationGsonSerializerTest {
 
-  private StoredConfigurationGsonSerializer serializer = new StoredConfigurationGsonSerializer();
-
   @Test
   void roundTripTest() {
     StoredConfiguration configuration = createConfiguration();
-    StoredConfiguration restoredConfiguration = serializer
-        .fromJson(serializer.toJson(configuration));
+    StoredConfiguration restoredConfiguration = StoredConfigurationGsonSerializer
+        .fromJson(StoredConfigurationGsonSerializer.toJson(configuration));
 
     assertThat(restoredConfiguration, equalTo(configuration));
+  }
+
+  @Test
+  void nullPointerException() {
+    StoredConfiguration configuration = null;
+    String jsonConfiguration = null;
+
+    assertThrows(NullPointerException.class,
+        () -> StoredConfigurationGsonSerializer.toJson(configuration));
+
+    assertThrows(NullPointerException.class,
+        () -> StoredConfigurationGsonSerializer.fromJson(jsonConfiguration));
   }
 
   private StoredConfiguration createConfiguration() {
     return StoredConfiguration.create(
         HashCode.fromString("11"),
         1,
-        Collections.singletonList(
+        singletonList(
             ValidatorKey.create(HashCode.fromString("22"), HashCode.fromString("33"))
         ),
         Consensus.create(

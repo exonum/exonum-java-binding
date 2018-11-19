@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization;
+package com.exonum.binding.common.serialization.json;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.gson.JsonDeserializationContext;
@@ -27,19 +29,24 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 
 /**
- * {@link HashCode} string serializer.
+ * {@link HashCode} string serializer. Used to serialize/deserialize HashCode values from hex
+ * strings.
  */
-public class HashCodeStringSerializer
+public final class HashCodeStringSerializer
     implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
 
   @Override
   public JsonElement serialize(HashCode src, Type typeOfSrc, JsonSerializationContext context) {
+    checkNotNull(src, "HashCode value is null");
+
     return new JsonPrimitive(src.toString());
   }
 
   @Override
   public HashCode deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
+    checkNotNull(json, "HashCode json input is null");
+
     return HashCode.fromString(json.getAsString());
   }
 }

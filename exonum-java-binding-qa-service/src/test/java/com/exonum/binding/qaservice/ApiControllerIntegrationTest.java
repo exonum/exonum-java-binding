@@ -37,7 +37,7 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.serialization.StoredConfigurationGsonSerializer;
+import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
@@ -372,7 +372,7 @@ class ApiControllerIntegrationTest {
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
               () -> {
                 String body = response.bodyAsString();
-                StoredConfiguration storedConfiguration = new StoredConfigurationGsonSerializer()
+                StoredConfiguration storedConfiguration = StoredConfigurationGsonSerializer
                     .fromJson(body);
 
                 assertThat(storedConfiguration).isEqualTo(configuration);

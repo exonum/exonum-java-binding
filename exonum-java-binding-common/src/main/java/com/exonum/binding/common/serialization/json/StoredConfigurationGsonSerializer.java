@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization;
+package com.exonum.binding.common.serialization.json;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
@@ -28,10 +30,18 @@ import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
  */
 public final class StoredConfigurationGsonSerializer {
 
-  private static final Gson GSON = new GsonBuilder()
-      .registerTypeAdapter(HashCode.class, new HashCodeStringSerializer())
-      .registerTypeAdapterFactory(GenerateTypeAdapter.FACTORY)
-      .create();
+  static {
+    GSON = new GsonBuilder()
+        .registerTypeAdapter(HashCode.class, new HashCodeStringSerializer())
+        .registerTypeAdapterFactory(GenerateTypeAdapter.FACTORY)
+        .create();
+
+  }
+
+  private static final Gson GSON;
+
+  private StoredConfigurationGsonSerializer() {
+  }
 
   /**
    * Returns a configured instance of Gson.
@@ -45,7 +55,9 @@ public final class StoredConfigurationGsonSerializer {
    *
    * @return a JSON representation of StoredConfiguration object
    */
-  public String toJson(StoredConfiguration configuration) {
+  public static String toJson(StoredConfiguration configuration) {
+    checkNotNull(configuration, "Serialized configuration is null");
+
     return GSON.toJson(configuration);
   }
 
@@ -54,7 +66,9 @@ public final class StoredConfigurationGsonSerializer {
    *
    * @return an instance of StoredConfiguration
    */
-  public StoredConfiguration fromJson(String input) {
+  public static StoredConfiguration fromJson(String input) {
+    checkNotNull(input, "Deserialized configuration string input is null");
+
     return GSON.fromJson(input, StoredConfiguration.class);
   }
 }

@@ -19,6 +19,7 @@ package com.exonum.binding.blockchain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -66,6 +67,7 @@ class CoreSchemaProxyIntegrationTest {
       assertion.accept(CoreSchemaProxy.newInstance(view));
     } catch (CloseFailuresException e) {
       System.out.println("Error: " + e.getLocalizedMessage());
+      fail(e.getLocalizedMessage());
     }
   }
 }

@@ -23,7 +23,7 @@ import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 import java.util.List;
 
 /**
- * Represents a blockchain configuration which is a a set of parameters that determine
+ * Represents a blockchain configuration which is a set of values that determine
  * the network access parameters of a node and behavior of the node while operating in the network.
  */
 @AutoValue

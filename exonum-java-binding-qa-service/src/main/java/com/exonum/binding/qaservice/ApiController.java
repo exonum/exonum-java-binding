@@ -24,7 +24,7 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StoredConfigurationGsonSerializer;
+import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
@@ -176,7 +176,7 @@ final class ApiController {
 
   private void getActualConfiguration(RoutingContext rc) {
     StoredConfiguration configuration = service.getActualConfiguration();
-    String json = new StoredConfigurationGsonSerializer().toJson(configuration);
+    String json = StoredConfigurationGsonSerializer.toJson(configuration);
 
     rc.response()
         .putHeader("Content-Type", "application/json")

@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice.transactions;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.HashCodeStringSerializer;
+import com.exonum.binding.common.serialization.json.HashCodeStringSerializer;
 import com.exonum.binding.qaservice.PromoteToCore;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

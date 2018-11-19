@@ -22,13 +22,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.common.configuration.Consensus;
 import com.exonum.binding.common.configuration.StoredConfiguration;
-import com.exonum.binding.common.configuration.ValidatorKey;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
-import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,28 +69,9 @@ class BlockchainTest {
 
   @Test
   void getActualConfiguration() {
-    StoredConfiguration configuration = createConfiguration();
+    StoredConfiguration configuration = mock(StoredConfiguration.class);
     when(mockSchema.getActualConfiguration()).thenReturn(configuration);
 
     assertThat(blockchain.getActualConfiguration()).isEqualTo(configuration);
-  }
-
-  private StoredConfiguration createConfiguration() {
-    return StoredConfiguration.create(
-        HashCode.fromString("11"),
-        1,
-        Collections.singletonList(
-            ValidatorKey.create(HashCode.fromString("22"), HashCode.fromString("33"))
-        ),
-        Consensus.create(
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8)
-    );
   }
 }
