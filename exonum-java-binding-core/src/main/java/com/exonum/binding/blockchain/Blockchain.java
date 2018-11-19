@@ -18,10 +18,14 @@
 package com.exonum.binding.blockchain;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
+import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Provides read-only access to the subset of
@@ -79,6 +83,107 @@ public final class Blockchain {
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
+  }
+
+  /**
+   * Returns a proof list of transaction hashes committed in the block with given id.
+   *
+   * @param blockId id of the block
+   * @return a proof list of transaction hashes committed in the block.
+   *        Or an empty list if the block with given id doesn't exist
+   */
+   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
+     MapIndex<HashCode, Block> blocks = schema.getBlocks();
+     Block block = blocks.get(blockId);
+     return getBlockTransactions(block.getHeight());
+   }
+
+  /**
+   * Returns a proof list of transaction hashes committed in the given block.
+   *
+   * @param block block of which list of transaction hashes should be returned
+   * @return a proof list of transaction hashes committed in the block.
+   *        Or an empty list if the block with given id doesn't exist
+   */
+  public ProofListIndexProxy<HashCode> getBlockTransactions(Block block) {
+    return getBlockTransactions(block.getHeight());
+  }
+
+  /**
+   * Returns a table that represents a map with a key-value pair of a
+   * transaction hash and transaction message.
+   * @return a map with a key-value pair of a transaction hash and transaction message
+   */
+   public MapIndex<HashCode, TransactionMessage> getTxMessages() {
+     return schema.getTxMessages();
+   }
+
+  /**
+   * Returns a table that represents a map with a key-value pair of a transaction
+   * hash and execution result.
+   * @return a map with a key-value pair of a transaction hash and execution result
+   */
+  public ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
+    return schema.getTxResults();
+  }
+
+  /**
+   * Returns a transaction execution result for given message hash.
+   * @param messageHash a message hash
+   * @return a transaction execution result
+   */
+  public TransactionResult getTxResult(HashCode messageHash) {
+    ProofMapIndexProxy<HashCode, TransactionResult> txResults = getTxResults();
+    return txResults.get(messageHash);
+  }
+
+  /**
+   * Returns a table that keeps the transaction position inside the block for every transaction
+   * hash.
+   * @return a map with transaction position for every transaction hash
+   */
+  public MapIndex<HashCode, TransactionLocation> getTxLocations() {
+    return schema.getTxLocations();
+  }
+
+  /**
+   * Return transaction position inside the block for given message hash.
+   * @param messageHash message hash
+   * @return transaction position inside the block
+   */
+  public TransactionLocation getTxLocation(HashCode messageHash) {
+    MapIndex<HashCode, TransactionLocation> txLocations = getTxLocations();
+    return txLocations.get(messageHash);
+  }
+
+  /**
+   * Returns a table that stores a block object for every block height.
+   * @return a map with block object for every block hash
+   */
+  public MapIndex<HashCode, Block> getBlocks() {
+    return schema.getBlocks();
+  }
+
+  // TODO: javadoc and implementation
+  public ListIndex<Block> getBlocksByHeight() {
+    throw new NotImplementedException();
+  }
+
+  /**
+   * Returns a block object for given block hash.
+   * @return a block object
+   */
+  public Block getBlock(HashCode blockHash) {
+    MapIndex<HashCode, Block> blocks = getBlocks();
+    return blocks.get(blockHash);
+  }
+
+  /**
+   * Returns the latest committed block.
+   * @return a block object
+   */
+  public Block getLastBlock() {
+    return schema.getLastBlock();
   }
 
 }

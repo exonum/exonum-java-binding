@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.blockchain";
+option java_outer_classname = "BlockProtos";
+
+message Block {
+  int32 proposerId = 1;
+  int64 height = 2;
+  int32 numTransactions = 3;
+  bytes previousBlockHash = 4;
+  bytes txRootHash = 5;
+  bytes stateHash = 6;
+}

@@ -68,4 +68,61 @@ class CoreSchemaProxyIntegrationTest {
     }
   }
 
+  @Test
+  void getBlocksTest() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+      assertThat(schema.getBlocks().isEmpty()).isTrue();
+    }
+  }
+
+  @Test
+  void getLastBlockTest() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+      // TODO: implement
+      System.out.println("Last block:");
+      System.out.println(schema.getLastBlock());
+//      assertThat(schema.getLastBlock());
+    }
+  }
+
+  @Test
+  void getTxMessagesTest() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+      assertThat(schema.getTxMessages().isEmpty()).isTrue();
+    }
+  }
+
+  @Test
+  void getTxResultsTest() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+      assertThat(schema.getTxResults().isEmpty()).isTrue();
+    }
+  }
+
+  @Test
+  void getTxLocationsTest() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+
+      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+      assertThat(schema.getTxLocations().isEmpty()).isTrue();
+    }
+  }
 }
