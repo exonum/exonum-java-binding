@@ -19,9 +19,11 @@ package com.exonum.binding.service.adapters;
 import static com.exonum.binding.test.Bytes.bytes;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -44,20 +46,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UserServiceAdapterTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class UserServiceAdapterTest {
 
   @Mock
   private Service service;
@@ -80,13 +77,12 @@ public class UserServiceAdapterTest {
   private static final int VALIDATOR_ID = 1;
 
   @Test
-  public void convertTransaction_ThrowsIfNull() {
-    expectedException.expect(NullPointerException.class);
-    serviceAdapter.convertTransaction(null);
+  void convertTransaction_ThrowsIfNull() {
+    assertThrows(NullPointerException.class, () -> serviceAdapter.convertTransaction(null));
   }
 
   @Test
-  public void convertTransaction() {
+  void convertTransaction() {
     Transaction expectedTransaction = mock(Transaction.class);
     when(service.getId()).thenReturn(SERVICE_ID);
     when(service.convertToTransaction(any(BinaryMessage.class)))
@@ -102,7 +98,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void convertTransaction_InvalidServiceImplReturningNull() {
+  void convertTransaction_InvalidServiceImplReturningNull() {
     when(service.getId()).thenReturn(SERVICE_ID);
     when(service.convertToTransaction(any(BinaryMessage.class)))
         // Such service impl. is not valid
@@ -112,10 +108,10 @@ public class UserServiceAdapterTest {
         .getSignedMessage()
         .array();
 
-    expectedException.expectMessage("Invalid service implementation: "
-        + "Service#convertToTransaction must never return null.");
-    expectedException.expect(NullPointerException.class);
-    serviceAdapter.convertTransaction(message);
+    NullPointerException thrown = assertThrows(NullPointerException.class,
+        () -> serviceAdapter.convertTransaction(message));
+    assertThat(thrown.getLocalizedMessage(), containsString("Invalid service implementation: "
+        + "Service#convertToTransaction must never return null."));
   }
 
   /**
@@ -129,7 +125,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_EmptyList() {
+  void getStateHashes_EmptyList() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
 
@@ -142,7 +138,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_SingletonList() {
+  void getStateHashes_SingletonList() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
 
@@ -157,7 +153,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_MultipleHashesList() {
+  void getStateHashes_MultipleHashesList() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
 
@@ -179,7 +175,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void getStateHashes_ClosesCleaner() {
+  void getStateHashes_ClosesCleaner() {
     byte[][] ignored = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
@@ -191,7 +187,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void initialize_ClosesCleaner() {
+  void initialize_ClosesCleaner() {
     long forkHandle = 0x0A;
     String ignored = serviceAdapter.initialize(forkHandle);
 
@@ -204,7 +200,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void mountPublicApiHandler() {
+  void mountPublicApiHandler() {
     Router router = mock(RouterImpl.class);
     when(server.createRouter())
         .thenReturn(router);
@@ -218,15 +214,14 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void mountPublicApiHandler_FailsOnSubsequentCalls() {
+  void mountPublicApiHandler_FailsOnSubsequentCalls() {
     serviceAdapter.mountPublicApiHandler(0x0A);
 
-    expectedException.expect(IllegalStateException.class);
-    serviceAdapter.mountPublicApiHandler(0x0B);
+    assertThrows(IllegalStateException.class, () -> serviceAdapter.mountPublicApiHandler(0x0B));
   }
 
   @Test
-  public void afterCommit_ValidatorNode() {
+  void afterCommit_ValidatorNode() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
@@ -242,7 +237,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void afterCommit_AuditorNode() {
+  void afterCommit_AuditorNode() {
     // For auditor nodes (which do not have validatorId) negative validatorId is passed
     int validatorId = -1;
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
@@ -259,7 +254,7 @@ public class UserServiceAdapterTest {
   }
 
   @Test
-  public void afterCommit_ClosesCleaner() {
+  void afterCommit_ClosesCleaner() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);

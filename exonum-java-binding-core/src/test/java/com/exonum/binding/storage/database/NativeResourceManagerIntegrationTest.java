@@ -16,38 +16,37 @@
 
 package com.exonum.binding.storage.database;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 /**
  * A couple of tests that verify that using an invalid handle from Java does not crash the VM,
  * but results in a descriptive RuntimeException.
  */
-public class NativeResourceManagerIntegrationTest {
+class NativeResourceManagerIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Test
-  public void nativeResourceManagerShallThrowIfUnknownHandle() {
+  void nativeResourceManagerShallThrowIfUnknownHandle() {
     long unknownNativeHandle = 0x110B;
 
-    expectedException.expect(RuntimeException.class);
-    expectedException.expectMessage("Invalid handle value: '110B'");
-    Views.nativeFree(unknownNativeHandle);
+
+    RuntimeException thrown = assertThrows(RuntimeException.class,
+        () -> Views.nativeFree(unknownNativeHandle));
+    assertThat(thrown).hasMessage("Invalid handle value: '110B'");
   }
 
   @Test
-  public void nativeResourceManagerShallThrowIfHandleUsedWithOtherType() throws Exception {
+  void nativeResourceManagerShallThrowIfHandleUsedWithOtherType() throws Exception {
     try (Database database = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork f = database.createFork(cleaner);
@@ -55,14 +54,14 @@ public class NativeResourceManagerIntegrationTest {
 
       // Try to use a handle to fork to access a memory db.
       MemoryDb db2 = new MemoryDb(viewNativeHandle);
-      expectedException.expect(RuntimeException.class);
-      expectedException.expectMessage("Wrong type id for");
-      db2.close();
+
+      RuntimeException thrown = assertThrows(RuntimeException.class, db2::close);
+      assertThat(thrown).hasMessageContaining("Wrong type id for");
     }
   }
 
   @Test
-  public void nativeResourceManagerShallThrowIfHandleUsedAfterFree() throws Exception {
+  void nativeResourceManagerShallThrowIfHandleUsedAfterFree() throws Exception {
     long snapshotNativeHandle = 0;
     try (Database database = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
@@ -76,10 +75,10 @@ public class NativeResourceManagerIntegrationTest {
     Cleaner cleaner = new Cleaner();
     Snapshot s = Snapshot.newInstance(snapshotNativeHandle, cleaner);
 
-    expectedException.expect(RuntimeException.class);
-    expectedException.expectMessage("Invalid handle value: '"
+    RuntimeException thrown = assertThrows(RuntimeException.class,
+        () -> ListIndexProxy.newInstance("foo", s, StandardSerializers.string()));
+    assertThat(thrown).hasMessageContaining("Invalid handle value: '"
         + handleToHex(snapshotNativeHandle));
-    ListIndexProxy.newInstance("foo", s, StandardSerializers.string());
     // No cleaner#close on purpose.
   }
 

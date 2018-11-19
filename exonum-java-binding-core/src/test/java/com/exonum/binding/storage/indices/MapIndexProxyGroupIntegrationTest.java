@@ -27,16 +27,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
+class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
 
   private static final String GROUP_NAME = "map_group_IT";
 
-  @Ignore("Fails until Lobster Nice is done, see the requirement #3")
+  @Disabled("Fails until Lobster Nice is done, see the requirement #3")
   @Test
-  public void mapsInGroupWithPrefixIdsAreIndependent() {
+  void mapsInGroupWithPrefixIdsAreIndependent() {
     View view = db.createFork(cleaner);
 
     // A string that will be sliced into pairs of an id and a user key that result
@@ -88,7 +88,7 @@ public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable
   }
 
   private static MapEntry<String, MapEntry<String, String>> idAndKeyValue(String idKeyPrototype,
-                                                                          int prefixSize) {
+      int prefixSize) {
     // A map id (= prefix in the current implementation)
     String mapId = idKeyPrototype.substring(0, prefixSize);
     String userKey = idKeyPrototype.substring(prefixSize);
@@ -101,12 +101,12 @@ public class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable
   @Override
   ImmutableMap<String, ImmutableMap<String, String>> getTestEntriesById() {
     return ImmutableMap.<String, ImmutableMap<String, String>>builder()
-            .put("1", ImmutableMap.of())
-            .put("2", ImmutableMap.of("K1", "V1"))
-            .put("3", ImmutableMap.of("K2", "V2", "K3", "V3"))
-            .put("4", ImmutableMap.of("K3", "V3", "K2", "V2"))
-            .put("5", ImmutableMap.of("K4", "V5", "K6", "V6", "K7", "V7"))
-            .build();
+        .put("1", ImmutableMap.of())
+        .put("2", ImmutableMap.of("K1", "V1"))
+        .put("3", ImmutableMap.of("K2", "V2", "K3", "V3"))
+        .put("4", ImmutableMap.of("K3", "V3", "K2", "V2"))
+        .put("5", ImmutableMap.of("K4", "V5", "K6", "V6", "K7", "V7"))
+        .build();
   }
 
   @Override

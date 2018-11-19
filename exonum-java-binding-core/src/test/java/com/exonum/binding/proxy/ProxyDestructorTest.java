@@ -17,22 +17,23 @@
 package com.exonum.binding.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.util.function.LongConsumer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ProxyDestructorTest {
+class ProxyDestructorTest {
 
   @Test
-  public void newRegistered() {
+  void newRegistered() {
     Cleaner cleaner = mock(Cleaner.class);
     NativeHandle handle = new NativeHandle(1L);
-    LongConsumer destructor = (nh) -> { };
+    LongConsumer destructor = (nh) -> {
+    };
 
     ProxyDestructor d = ProxyDestructor.newRegistered(cleaner, handle, CloseableNativeProxy.class,
         destructor);
@@ -45,7 +46,7 @@ public class ProxyDestructorTest {
   }
 
   @Test
-  public void clean() {
+  void clean() {
     long rawNativeHandle = 1L;
     NativeHandle handle = new NativeHandle(rawNativeHandle);
     LongConsumer destructor = mock(LongConsumer.class);
@@ -62,7 +63,7 @@ public class ProxyDestructorTest {
   }
 
   @Test
-  public void cleanIdempotent() {
+  void cleanIdempotent() {
     long rawNativeHandle = 1L;
     NativeHandle handle = spy(new NativeHandle(rawNativeHandle));
     LongConsumer destructor = mock(LongConsumer.class);
@@ -83,7 +84,7 @@ public class ProxyDestructorTest {
   }
 
   @Test
-  public void getResourceType() {
+  void getResourceType() {
     NativeHandle handle = new NativeHandle(1L);
     Class<?> proxyClass = CloseableNativeProxy.class;
     LongConsumer destructor = mock(LongConsumer.class);
