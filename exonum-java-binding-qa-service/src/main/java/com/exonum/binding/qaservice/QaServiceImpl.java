@@ -179,7 +179,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   /**
-   * Increments the initial counter so the number of times this method was invoked is stored in it.
+   * Increments the afterCommit counter so the number of times this method was invoked is stored
+   * in it.
    */
   @Override
   public void afterCommit(BlockCommittedEvent event) {

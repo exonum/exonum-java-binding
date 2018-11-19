@@ -282,6 +282,7 @@ class QaServiceImplIntegrationTest {
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       service.initialize(view);
+      setServiceNode(node);
 
       BlockCommittedEvent event = mock(BlockCommittedEvent.class);
       service.afterCommit(event);
