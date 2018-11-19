@@ -246,12 +246,12 @@ fn after_commit_validator() {
 
     assert_eq!(res_iter.len(), 2);
 
-    let item: &AfterCommitArgs = res_iter.get(0).unwrap();
+    let item: &AfterCommitArgs = &res_iter[0];
     assert!(item.handle > 0);
     assert_eq!(item.validator, 0);
     assert_eq!(item.height, 1);
 
-    let item: &AfterCommitArgs = res_iter.get(1).unwrap();
+    let item: &AfterCommitArgs = &res_iter[1];
     assert!(item.handle > 0);
     assert_eq!(item.validator, 0);
     assert_eq!(item.height, 2);
@@ -275,7 +275,7 @@ fn after_commit_auditor() {
 
     assert_eq!(res_iter.len(), 1);
 
-    let item: &AfterCommitArgs = res_iter.get(0).unwrap();
+    let item: &AfterCommitArgs = &res_iter[0];
     assert!(item.handle > 0);
     assert_eq!(item.validator, -1);
     assert_eq!(item.height, 1);
@@ -283,12 +283,11 @@ fn after_commit_auditor() {
 
 // Helper methods that gets the JSON representation of interaction with mock
 fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {
-    let res = unwrap_jni(exec.with_attached(|env| {
+    unwrap_jni(exec.with_attached(|env| {
         env.call_method(obj, "getInteractions", "()Ljava/lang/String;", &[])?
             .l()
             .and_then(|obj| convert_to_string(env, obj))
-    }));
-    res
+    }))
 }
 
 #[derive(Serialize, Deserialize)]
