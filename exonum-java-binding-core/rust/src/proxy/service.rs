@@ -153,7 +153,7 @@ impl Service for ServiceProxy {
     fn after_commit(&self, context: &ServiceContext) {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(context.snapshot()));
-            let validator_id = context.validator_id().map_or(-1, |id| id.0 as i32);
+            let validator_id = context.validator_id().map_or(-1, |id| i32::from(id.0));
             let height: u64 = context.height().into();
             panic_on_exception(
                 env,
