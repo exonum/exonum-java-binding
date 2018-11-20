@@ -30,6 +30,10 @@ final class Height {
     this.height = height;
   }
 
+  public long getHeight() {
+    return height;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
