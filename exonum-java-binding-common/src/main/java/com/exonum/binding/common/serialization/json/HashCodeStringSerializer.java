@@ -29,7 +29,7 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 
 /**
- * {@link HashCode} string serializer. Used to serialize/deserialize HashCode values from hex
+ * {@link HashCode} string serializer. Used to serialize/deserialize HashCode values from/to hex
  * strings.
  */
 public final class HashCodeStringSerializer
