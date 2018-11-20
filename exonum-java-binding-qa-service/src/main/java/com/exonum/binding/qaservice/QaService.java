@@ -46,7 +46,5 @@ public interface QaService extends Service {
 
   Optional<Counter> getValue(HashCode counterId);
 
-  long getHeight();
-
   StoredConfiguration getActualConfiguration();
 }

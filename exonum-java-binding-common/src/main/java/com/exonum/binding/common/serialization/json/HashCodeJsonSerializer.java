@@ -32,7 +32,7 @@ import java.lang.reflect.Type;
  * {@link HashCode} string serializer. Used to serialize/deserialize HashCode values from/to hex
  * strings.
  */
-public final class HashCodeStringSerializer
+public final class HashCodeJsonSerializer
     implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
 
   @Override

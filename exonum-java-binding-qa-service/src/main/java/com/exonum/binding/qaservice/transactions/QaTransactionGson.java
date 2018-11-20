@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice.transactions;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.json.HashCodeStringSerializer;
+import com.exonum.binding.common.serialization.json.HashCodeJsonSerializer;
 import com.exonum.binding.qaservice.PromoteToCore;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +31,7 @@ import com.google.gson.LongSerializationPolicy;
 public final class QaTransactionGson {
 
   private static final Gson GSON = new GsonBuilder()
-      .registerTypeHierarchyAdapter(HashCode.class, new HashCodeStringSerializer())
+      .registerTypeHierarchyAdapter(HashCode.class, new HashCodeJsonSerializer())
       .setLongSerializationPolicy(LongSerializationPolicy.STRING)
       .create();
 

@@ -30,17 +30,14 @@ import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
  */
 public final class StoredConfigurationGsonSerializer {
 
+  private static final Gson GSON;
+
   static {
     GSON = new GsonBuilder()
-        .registerTypeAdapter(HashCode.class, new HashCodeStringSerializer())
+        .registerTypeAdapter(HashCode.class, new HashCodeJsonSerializer())
         .registerTypeAdapterFactory(GenerateTypeAdapter.FACTORY)
         .create();
 
-  }
-
-  private static final Gson GSON;
-
-  private StoredConfigurationGsonSerializer() {
   }
 
   /**
@@ -54,6 +51,7 @@ public final class StoredConfigurationGsonSerializer {
    * Serializes instance of StoredConfiguration to its JSON representation.
    *
    * @return a JSON representation of StoredConfiguration object
+   * @throws NullPointerException if value is null
    */
   public static String toJson(StoredConfiguration configuration) {
     checkNotNull(configuration, "Serialized configuration is null");
@@ -65,10 +63,14 @@ public final class StoredConfigurationGsonSerializer {
    * Converts an instance of StoredConfiguration from its JSON representation.
    *
    * @return an instance of StoredConfiguration
+   * @throws NullPointerException if value is null
    */
   public static StoredConfiguration fromJson(String input) {
     checkNotNull(input, "Deserialized configuration string input is null");
 
     return GSON.fromJson(input, StoredConfiguration.class);
+  }
+
+  private StoredConfigurationGsonSerializer() {
   }
 }

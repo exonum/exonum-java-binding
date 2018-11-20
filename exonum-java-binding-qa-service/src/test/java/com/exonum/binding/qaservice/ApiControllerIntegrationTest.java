@@ -17,7 +17,6 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.GET_HEIGHT_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -345,20 +344,6 @@ class ApiControllerIntegrationTest {
     assertThat(m.get("k1")).isEqualTo("v1");
     assertThat(m.get("k2")).isEqualTo("v2");
     assertThat(m.get("k3")).isEqualTo("v3");
-  }
-
-  @Test
-  void getHeight(VertxTestContext context) {
-    long height = 1L;
-    when(qaService.getHeight()).thenReturn(height);
-
-    get(GET_HEIGHT_PATH)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertAll(
-              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
-              () -> assertThat(Long.valueOf(response.bodyAsString())).isEqualTo(height));
-          context.completeNow();
-        })));
   }
 
   @Test

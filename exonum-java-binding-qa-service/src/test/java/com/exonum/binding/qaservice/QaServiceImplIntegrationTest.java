@@ -274,12 +274,6 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
-  void getHeightBeforeInit() {
-    assertThrows(IllegalStateException.class,
-        () -> service.getHeight());
-  }
-
-  @Test
   void getActualConfigurationBeforeInit() {
     assertThrows(IllegalStateException.class,
         () -> service.getActualConfiguration());

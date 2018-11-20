@@ -169,17 +169,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public long getHeight() {
-    checkBlockchainInitialized();
-
-    return node.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-
-      return blockchain.getHeight();
-    });
-  }
-
-  @Override
   public StoredConfiguration getActualConfiguration() {
     checkBlockchainInitialized();
 

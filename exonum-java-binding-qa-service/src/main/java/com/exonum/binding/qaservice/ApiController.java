@@ -60,8 +60,6 @@ final class ApiController {
   @VisibleForTesting
   static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
   @VisibleForTesting
-  static final String GET_HEIGHT_PATH = "/height";
-  @VisibleForTesting
   static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
   private static final String COUNTER_ID_PARAM = "counterId";
   private static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
@@ -92,7 +90,6 @@ final class ApiController {
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
-            .put(GET_HEIGHT_PATH, this::getHeight)
             .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .build();
 
@@ -166,12 +163,6 @@ final class ApiController {
           .setStatusCode(HTTP_NOT_FOUND)
           .end();
     }
-  }
-
-  private void getHeight(RoutingContext rc) {
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(Long.toString(service.getHeight()));
   }
 
   private void getActualConfiguration(RoutingContext rc) {
