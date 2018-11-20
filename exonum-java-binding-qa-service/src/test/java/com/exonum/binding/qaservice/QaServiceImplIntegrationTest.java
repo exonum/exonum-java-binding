@@ -281,13 +281,13 @@ class QaServiceImplIntegrationTest {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      service.initialize(view);
       setServiceNode(node);
+      service.initialize(view);
 
       BlockCommittedEvent event = mock(BlockCommittedEvent.class);
       service.afterCommit(event);
 
-      // Check that the initial counter was updated.
+      // Check that the afterCommit counter was updated.
       QaSchema schema = new QaSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
