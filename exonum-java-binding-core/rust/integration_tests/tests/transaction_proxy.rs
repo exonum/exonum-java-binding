@@ -13,9 +13,10 @@ use integration_tests::{
 
 use java_bindings::{
     exonum::{
-        blockchain::{Transaction, TransactionError, TransactionErrorType},
+        blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
         encoding::serialize::json::ExonumJson,
-        storage::{Database, Entry, MemoryDB, Snapshot},
+        messages::{RawTransaction, ServiceTransaction, Message},
+        storage::{Database, Entry, MemoryDB, Snapshot, Fork},
     },
     jni::JavaVM,
     MainExecutor,
@@ -62,16 +63,19 @@ fn execute_valid_transaction() {
     {
         let mut fork = db.fork();
         let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-        valid_tx
-            .execute(&mut fork)
-            .map_err(TransactionError::from)
-            .unwrap_or_else(|err| {
-                panic!(
-                    "Execution error: {:?}; {}",
-                    err.error_type(),
-                    err.description().unwrap_or_default()
-                )
-            });
+        {
+            let tx_context = create_transaction_context(&mut fork);
+            valid_tx
+                .execute(tx_context)
+                .map_err(TransactionError::from)
+                .unwrap_or_else(|err| {
+                    panic!(
+                        "Execution error: {:?}; {}",
+                        err.error_type(),
+                        err.description().unwrap_or_default()
+                    )
+                });
+        }
         db.merge(fork.into_patch())
             .expect("Failed to merge transaction");
     }
@@ -87,7 +91,8 @@ fn execute_should_panic_if_java_error_occurred() {
     let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    panic_tx.execute(&mut fork).unwrap();
+    let tx_context = create_transaction_context(&mut fork);
+    panic_tx.execute(tx_context).unwrap();
 }
 
 #[test]
@@ -97,7 +102,8 @@ fn execute_should_panic_if_java_exception_occurred() {
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    panic_tx.execute(&mut fork).unwrap();
+    let tx_context = create_transaction_context(&mut fork);
+    panic_tx.execute(tx_context).unwrap();
 }
 
 #[test]
@@ -112,8 +118,9 @@ fn execute_should_return_err_if_tx_exec_exception_occurred() {
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
+    let tx_context = create_transaction_context(&mut fork);
     let err = invalid_tx
-        .execute(&mut fork)
+        .execute(tx_context)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
     assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
@@ -132,8 +139,9 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred() {
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
+    let tx_context = create_transaction_context(&mut fork);
     let err = invalid_tx
-        .execute(&mut fork)
+        .execute(tx_context)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
     assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
@@ -151,8 +159,9 @@ fn execute_should_return_err_if_tx_exec_exception_occurred_no_message() {
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
+    let tx_context = create_transaction_context(&mut fork);
     let err = invalid_tx
-        .execute(&mut fork)
+        .execute(tx_context)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
     assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
@@ -170,8 +179,9 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
+    let tx_context = create_transaction_context(&mut fork);
     let err = invalid_tx
-        .execute(&mut fork)
+        .execute(tx_context)
         .map_err(TransactionError::from)
         .expect_err("This transaction should be executed with an error!");
     assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
@@ -209,4 +219,11 @@ where
     V: AsRef<Snapshot + 'static>,
 {
     Entry::new(ENTRY_NAME, view)
+}
+
+fn create_transaction_context(fork: &mut Fork) -> TransactionContext {
+    let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![]);
+    let (pk, sk) = java_bindings::exonum::crypto::gen_keypair();
+    let signed_transaction = java_bindings::exonum::messages::Message::sign_transaction(service_transaction, 0, pk, &sk);
+    TransactionContext::new(fork, &signed_transaction)
 }

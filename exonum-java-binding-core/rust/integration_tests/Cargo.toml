@@ -11,8 +11,8 @@ crate-type = ["dylib"]
 [features]
 
 [dependencies]
-futures = "0.1.14"
+futures = "0.1"
 java_bindings = { path = "..", features = ["invocation"] }
-exonum-testkit = "0.9"
+exonum-testkit = { git = "https://github.com/vitvakatu/exonum", branch = "java_binding_separated_messages" }
 lazy_static = "1.1.0"
 rand = "0.5"

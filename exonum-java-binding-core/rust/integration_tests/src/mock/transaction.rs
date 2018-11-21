@@ -1,7 +1,7 @@
-use java_bindings::exonum::messages::{MessageBuffer, RawMessage};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
 use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
+use java_bindings::exonum::messages::{RawTransaction, ServiceTransaction};
 
 use super::NATIVE_FACADE_CLASS;
 
@@ -32,7 +32,7 @@ pub fn create_throwing_mock_transaction_proxy(
                     &[JValue::from(JObject::from(exception.into_inner()))],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
-            let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
+            let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
             Ok((java_tx_mock, raw))
         }).unwrap();
 
@@ -67,7 +67,7 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
                     ],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
-            let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
+            let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
             Ok((java_tx_mock, raw))
         }).unwrap();
 
@@ -81,7 +81,7 @@ pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> Tra
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalRef, RawMessage) {
+pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalRef, RawTransaction) {
     executor
         .with_attached(|env| {
             let value = env.new_string(ENTRY_VALUE)?;
@@ -101,7 +101,7 @@ pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalR
                     ],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
-            let raw = RawMessage::new(MessageBuffer::from_vec(vec![]));
+            let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
             Ok((java_tx_mock, raw))
         }).unwrap()
 }

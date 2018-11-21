@@ -258,7 +258,7 @@ fn create_java_map_entries<'a>(
     env: &'a JNIEnv,
     checked_proof: &CheckedMapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
-    let entries: Vec<(&Key, &Value)> = checked_proof.entries();
+    let entries: Vec<(&Key, &Value)> = checked_proof.entries().collect();
     let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
     for (i, (key, value)) in entries.iter().enumerate() {
         // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
@@ -288,7 +288,7 @@ fn create_java_missing_keys<'a>(
     env: &'a JNIEnv,
     map_proof: &MapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
-    let missing_keys = map_proof.missing_keys_unchecked();
+    let missing_keys = map_proof.missing_keys_unchecked().collect::<Vec<_>>();
     let java_missing_keys =
         env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
     for (i, key) in missing_keys.iter().enumerate() {

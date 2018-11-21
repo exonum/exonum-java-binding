@@ -1,8 +1,8 @@
 use exonum::api::ServiceApiBuilder;
 use exonum::blockchain::{Service, Transaction};
 use exonum::crypto::Hash;
+use exonum::messages::RawTransaction;
 use exonum::encoding::Error as MessageError;
-use exonum::messages::RawMessage;
 use exonum::storage::{Fork, Snapshot};
 use jni::objects::{GlobalRef, JObject, JValue};
 use serde_json;
@@ -95,9 +95,11 @@ impl Service for ServiceProxy {
         }))
     }
 
-    fn tx_from_raw(&self, raw: RawMessage) -> Result<Box<Transaction>, MessageError> {
+    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<Transaction>, MessageError> {
         unwrap_jni(self.exec.with_attached(|env| {
-            let transaction_message = JObject::from(env.byte_array_from_slice(raw.as_ref())?);
+            // FIXME: what to do with tx id?
+            let transaction_payload = raw.clone().service_transaction().into_raw_parts().1;
+            let transaction_message = JObject::from(env.byte_array_from_slice(&transaction_payload)?);
             let res = env.call_method(
                 self.service.as_obj(),
                 "convertTransaction",

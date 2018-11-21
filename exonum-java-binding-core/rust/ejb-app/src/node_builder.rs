@@ -1,4 +1,4 @@
-use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
+//use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
 use java_bindings::JavaServiceFactory;
@@ -25,10 +25,10 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
         CONFIGURATION_SERVICE.to_owned(),
         Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
     );
-    service_factories.insert(
+    /*service_factories.insert(
         BTC_ANCHORING_SERVICE.to_owned(),
         Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
-    );
+    );*/
     service_factories.insert(
         EJB_SERVICE.to_owned(),
         Box::new(JavaServiceFactory) as Box<ServiceFactory>,
@@ -73,7 +73,7 @@ pub fn create() -> fabric::NodeBuilder {
     builder
 }
 
-#[cfg(test)]
+/*#[cfg(test)]
 mod tests {
     use super::*;
     use std::io::Write;
@@ -146,4 +146,4 @@ mod tests {
             assert!(service_factories.get(service).is_some())
         }
     }
-}
+}*/

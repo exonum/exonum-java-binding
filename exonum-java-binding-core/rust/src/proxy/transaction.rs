@@ -1,13 +1,14 @@
-use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction};
+use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
 use exonum::encoding::serialize::json::ExonumJson;
 use exonum::encoding::serialize::WriteBufferWrapper;
 use exonum::encoding::Offset;
-use exonum::messages::{Message, RawMessage};
-use exonum::storage::Fork;
+use exonum::messages::RawTransaction;
+use exonum::messages::BinaryForm;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::JNIEnv;
 use serde_json;
 use serde_json::value::Value;
+use serde;
 
 use std::error::Error;
 use std::fmt;
@@ -27,7 +28,7 @@ const CLASS_TRANSACTION_EXCEPTION: &str =
 pub struct TransactionProxy {
     exec: MainExecutor,
     transaction: GlobalRef,
-    raw: RawMessage,
+    raw: RawTransaction,
 }
 
 // `TransactionProxy` is immutable, so it can be safely used in different threads.
@@ -41,7 +42,7 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawMessage) -> Self {
+    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawTransaction) -> Self {
         TransactionProxy {
             exec,
             transaction,
@@ -81,6 +82,14 @@ impl ExonumJson for TransactionProxy {
     }
 }
 
+impl serde::Serialize for TransactionProxy {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as serde::Serializer>::Ok, <S as serde::Serializer>::Error> where
+        S: serde::Serializer {
+        // FIXME: smth with error handling
+        serializer.serialize_bytes(&self.raw.encode().unwrap())
+    }
+}
+
 impl Transaction for TransactionProxy {
     fn verify(&self) -> bool {
         let res = self.exec.with_attached(|env: &JNIEnv| {
@@ -90,9 +99,9 @@ impl Transaction for TransactionProxy {
         unwrap_jni(res)
     }
 
-    fn execute(&self, fork: &mut Fork) -> ExecutionResult {
+    fn execute<'a>(&self, mut context: TransactionContext<'a>) -> ExecutionResult {
         let res = self.exec.with_attached(|env: &JNIEnv| {
-            let view_handle = to_handle(View::from_ref_fork(fork));
+            let view_handle = to_handle(View::from_ref_fork(context.fork()));
             let res = env
                 .call_method(
                     self.transaction.as_obj(),
@@ -103,19 +112,6 @@ impl Transaction for TransactionProxy {
             Ok(check_transaction_execution_result(env, res))
         });
         unwrap_jni(res)
-    }
-}
-
-impl Message for TransactionProxy {
-    fn from_raw(_raw: RawMessage) -> Result<Self, ::exonum::encoding::Error>
-    where
-        Self: Sized,
-    {
-        unimplemented!("Is not used in Java bindings")
-    }
-
-    fn raw(&self) -> &RawMessage {
-        &self.raw
     }
 }
 

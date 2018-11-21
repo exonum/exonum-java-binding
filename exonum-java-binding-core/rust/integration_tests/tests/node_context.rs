@@ -12,7 +12,7 @@ use integration_tests::mock::transaction::create_mock_transaction;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::exonum::blockchain::Blockchain;
 use java_bindings::exonum::crypto::gen_keypair;
-use java_bindings::exonum::messages::RawMessage;
+use java_bindings::exonum::messages::{RawTransaction, ServiceTransaction, BinaryForm};
 use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::MemoryDB;
 use java_bindings::jni::objects::JObject;
@@ -37,7 +37,7 @@ fn submit_valid_transaction() {
     let node_handle_guard = as_handle(&mut node);
     let node_handle = node_handle_guard.get();
     let (java_transaction, _raw_message) = create_mock_transaction(&EXECUTOR, true);
-    let marker_raw = RawMessage::from_vec(vec![1, 2, 3]);
+    let marker_raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![1, 2, 3])).encode().unwrap();
     let raw_message = marker_raw.clone();
     unwrap_jni(EXECUTOR.with_attached(move |env: &JNIEnv| {
         let submit = || {
@@ -50,6 +50,7 @@ fn submit_valid_transaction() {
                 *message,
                 0,
                 raw_message.len() as i32,
+                0,
             );
             let exception: JObject = env.exception_occurred()?.into();
             assert!(exception.is_null());
@@ -60,7 +61,7 @@ fn submit_valid_transaction() {
     }));
     let sent_message = app_rx.wait().next().unwrap().unwrap();
     match sent_message {
-        ExternalMessage::Transaction(sent) => assert_eq!(&marker_raw, sent.raw()),
+        ExternalMessage::Transaction(sent) => assert_eq!(&marker_raw, &sent.encode().unwrap()),
         _ => panic!("Message is not Transaction"),
     }
 }
@@ -74,10 +75,11 @@ fn submit_not_valid_transaction() {
     let (mut node, _app_rx) = create_node();
     let node_handle_guard = as_handle(&mut node);
     let node_handle = node_handle_guard.get();
-    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, false);
+    let (java_transaction, raw_transaction) = create_mock_transaction(&EXECUTOR, false);
     unwrap_jni(EXECUTOR.with_attached(|env: &JNIEnv| {
         let submit = || {
-            let message = message_from_raw(env, &raw_message)?;
+            let transaction_buffer = raw_transaction.service_transaction().into_raw_parts().1;
+            let message = message_from_raw(env, &transaction_buffer)?;
             Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
                 env.clone(),
                 jclass,
@@ -85,7 +87,8 @@ fn submit_not_valid_transaction() {
                 *java_transaction.as_obj(),
                 *message,
                 0,
-                raw_message.len() as i32,
+                transaction_buffer.len() as i32,
+                0,
             );
             let exception = get_and_clear_java_exception(&env);
             assert_eq!(
@@ -116,10 +119,8 @@ fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
     (node, app_rx)
 }
 
-fn message_from_raw<'e, R>(env: &'e JNIEnv<'e>, raw_message: R) -> JniResult<JObject<'e>>
-where
-    R: AsRef<[u8]>,
+fn message_from_raw<'e>(env: &'e JNIEnv<'e>, buffer: &[u8]) -> JniResult<JObject<'e>>
 {
-    env.byte_array_from_slice(raw_message.as_ref())
+    env.byte_array_from_slice(buffer)
         .map(JObject::from)
 }

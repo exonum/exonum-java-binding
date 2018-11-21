@@ -1,11 +1,14 @@
-use exonum::blockchain::{Blockchain, Transaction};
+use exonum::blockchain::{Blockchain};
 use exonum::crypto::PublicKey;
-use exonum::messages::RawMessage;
-use exonum::node::{ApiSender, TransactionSend};
+use exonum::node::{ApiSender};
+use exonum::messages::RawTransaction;
+use exonum::messages::ServiceTransaction;
+use exonum::messages::Message;
 use exonum::storage::Snapshot;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
+use failure;
 
 use std::error::Error;
 use std::{io, panic, ptr};
@@ -30,7 +33,7 @@ pub struct NodeContext {
     executor: MainExecutor,
     blockchain: Blockchain,
     public_key: PublicKey,
-    channel: ApiSender,
+    transaction_sender: ApiSender,
 }
 
 impl NodeContext {
@@ -39,13 +42,13 @@ impl NodeContext {
         executor: MainExecutor,
         blockchain: Blockchain,
         public_key: PublicKey,
-        channel: ApiSender,
+        transaction_sender: ApiSender,
     ) -> Self {
         NodeContext {
             executor,
             blockchain,
             public_key,
-            channel,
+            transaction_sender,
         }
     }
 
@@ -65,8 +68,11 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: Box<Transaction>) -> io::Result<()> {
-        self.channel.send(transaction)
+    pub fn submit(&self, transaction: RawTransaction) -> Result<(), failure::Error> {
+        let service_id = transaction.service_id();
+        // FIXME: using hidden service_keypair
+        let signed_transaction = Message::sign_transaction(transaction.service_transaction(), service_id, self.public_key, &self.blockchain.service_keypair.1);
+        self.transaction_sender.broadcast_transaction(signed_transaction)
     }
 }
 
@@ -87,6 +93,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     message: jbyteArray,
     offset: jint,
     size: jint,
+    service_id: jint,
 ) {
     let res = panic::catch_unwind(|| {
         assert!(offset >= 0, "Offset can't be negative");
@@ -98,20 +105,22 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
             || -> JniResult<()> {
                 let message = env.convert_byte_array(message)?;
                 let message = message[offset..offset + size].to_vec();
-                let message = RawMessage::from_vec(message);
+                let service_transaction = ServiceTransaction::from_raw_unchecked(0, message);
+                let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
                 let transaction = env.new_global_ref(transaction.into())?;
                 let exec = node.executor().clone();
-                let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
-                if let Err(err) = node.submit(Box::new(transaction)) {
+                if let Err(err) = node.submit(raw_transaction) {
                     let class;
-                    if err.kind() == io::ErrorKind::Other
+                    // FIXME: error handling
+                    /*if err.kind() == io::ErrorKind::Other
                         && err.description() == VERIFY_ERROR_MESSAGE
                     {
                         class = INVALID_TRANSACTION_EXCEPTION;
                     } else {
                         class = INTERNAL_SERVER_ERROR;
-                    };
-                    env.throw_new(class, err.description())?;
+                    };*/
+                    class = INTERNAL_SERVER_ERROR;
+                    env.throw_new(class, "Some desciption")?;
                 }
                 Ok(())
             }(),
