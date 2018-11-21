@@ -50,7 +50,7 @@ public final class HashCodeJsonSerializer
   /**
    * Deserialize HashCode from JsonElement.
    *
-   * @throws NullPointerException if HashCode value is null
+   * @throws NullPointerException if Json value is null
    */
   @Override
   public HashCode deserialize(JsonElement json, Type typeOfT,
