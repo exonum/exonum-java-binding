@@ -71,13 +71,19 @@
       <groupId>com.ryanharter.auto.value</groupId>
       <artifactId>auto-value-gson</artifactId>
       <version>${auto-value-gson.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.squareup</groupId>
       <artifactId>javapoet</artifactId>
       <version>${javapoet.version}</version>
-      <scope>compile</scope>
     </dependency>
 
     <!--JUnit5-->
