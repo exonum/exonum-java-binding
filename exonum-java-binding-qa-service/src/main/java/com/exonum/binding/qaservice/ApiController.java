@@ -38,6 +38,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -63,6 +64,16 @@ final class ApiController {
   static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
   private static final String COUNTER_ID_PARAM = "counterId";
   private static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
+
+  private static final String BLOCKCHAIN_ROOT = "/blockchain";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_ALL_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
+  private static final String BLOCK_HEIGHT_PARAM = "blockHeight";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH = BLOCKCHAIN_ROOT + "/block/:"
+      + BLOCK_HEIGHT_PARAM + "/transactions";
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
@@ -90,6 +101,9 @@ final class ApiController {
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
+            .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
+            .put(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH, this::getAllBlockHashes)
+            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH, this::getBlockTransactions)
             .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .build();
 
@@ -165,6 +179,39 @@ final class ApiController {
     }
   }
 
+  private void getHeight(RoutingContext rc) {
+    try {
+      Height height = service.getHeight();
+      Gson gson = QaTransactionGson.instance();
+      rc.response()
+          .putHeader("Content-Type", "application/json")
+          .end(gson.toJson(height));
+    } catch (RuntimeException ex) {
+      rc.response()
+          .setStatusCode(HTTP_BAD_REQUEST)
+          .end();
+    }
+  }
+
+  private void getAllBlockHashes(RoutingContext rc) {
+    List<HashCode> hashes = service.getAllBlockHashes();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(hashes));
+  }
+
+  private void getBlockTransactions(RoutingContext rc) {
+    Long height = getRequiredParameter(rc.request().params(), BLOCK_HEIGHT_PARAM,
+        Long::parseLong);
+
+    List<HashCode> hashes = service.getBlockTransactions(height);
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(hashes));
+  }
+
   private void getActualConfiguration(RoutingContext rc) {
     StoredConfiguration configuration = service.getActualConfiguration();
     String json = StoredConfigurationGsonSerializer.toJson(configuration);
@@ -179,12 +226,12 @@ final class ApiController {
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,
-                                            Function<String, T> converter) {
+      Function<String, T> converter) {
     return getRequiredParameter(request.params(), key, converter);
   }
 
   private static <T> T getRequiredParameter(MultiMap parameters, String key,
-                                            Function<String, T> converter) {
+      Function<String, T> converter) {
     checkArgument(parameters.contains(key), "No required key (%s) in request parameters: %s",
         key, parameters);
     String parameter = parameters.get(key);

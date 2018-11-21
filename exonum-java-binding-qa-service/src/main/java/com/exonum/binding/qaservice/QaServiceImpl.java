@@ -37,9 +37,12 @@ import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -165,6 +168,37 @@ final class QaServiceImpl extends AbstractService implements QaService {
       String name = counterNames.get(counterId);
       Long value = counters.get(counterId);
       return Optional.of(new Counter(name, value));
+    });
+  }
+
+  @Override
+  public Height getHeight() {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      long value = blockchain.getHeight();
+      return new Height(value);
+    });
+  }
+
+  @Override
+  public List<HashCode> getAllBlockHashes() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      ListIndex<HashCode> hashes = blockchain.getAllBlockHashes();
+
+      return Lists.newArrayList(hashes);
+    });
+  }
+
+  @Override
+  public List<HashCode> getBlockTransactions(long height) {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(height);
+
+      return Lists.newArrayList(hashes);
     });
   }
 
