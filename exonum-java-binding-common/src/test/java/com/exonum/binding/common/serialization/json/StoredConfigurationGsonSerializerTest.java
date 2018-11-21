@@ -21,11 +21,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.configuration.Consensus;
+import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import org.junit.jupiter.api.Test;
 
 class StoredConfigurationGsonSerializerTest {
@@ -58,7 +57,7 @@ class StoredConfigurationGsonSerializerTest {
         singletonList(
             ValidatorKey.create(HashCode.fromString("22"), HashCode.fromString("33"))
         ),
-        Consensus.create(
+        ConsensusConfiguration.create(
             1,
             2,
             3,

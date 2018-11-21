@@ -25,7 +25,7 @@ import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
  */
 @AutoValue
 @GenerateTypeAdapter
-public abstract class Consensus {
+public abstract class ConsensusConfiguration {
   @SerializedName("round_timeout")
   public abstract long roundTimeout();
 
@@ -36,10 +36,10 @@ public abstract class Consensus {
   public abstract long peersTimeout();
 
   @SerializedName("txs_block_limit")
-  public abstract long txsBlockLimit();
+  public abstract int txsBlockLimit();
 
   @SerializedName("max_message_len")
-  public abstract long maxMessageLen();
+  public abstract int maxMessageLen();
 
   @SerializedName("min_propose_timeout")
   public abstract long minProposeTimeout();
@@ -48,12 +48,16 @@ public abstract class Consensus {
   public abstract long maxProposeTimeout();
 
   @SerializedName("propose_timeout_threshold")
-  public abstract long proposeTimeoutThreshold();
+  public abstract int proposeTimeoutThreshold();
 
-  public static Consensus create(long roundTimeout, long statusTimeout, long peersTimeout,
-      long txsBlockLimit, long maxMessageLen, long minProposeTimeout, long maxProposeTimeout,
-      long proposeTimeoutThreshold) {
-    return new AutoValue_Consensus(roundTimeout, statusTimeout, peersTimeout, txsBlockLimit,
-        maxMessageLen, minProposeTimeout, maxProposeTimeout, proposeTimeoutThreshold);
+  /**
+   * Creates a new ConsensusConfiguration from the given parameters.
+   */
+  public static ConsensusConfiguration create(long roundTimeout, long statusTimeout,
+      long peersTimeout, int txsBlockLimit, int maxMessageLen, long minProposeTimeout,
+      long maxProposeTimeout, int proposeTimeoutThreshold) {
+    return new AutoValue_ConsensusConfiguration(roundTimeout, statusTimeout, peersTimeout,
+        txsBlockLimit,  maxMessageLen, minProposeTimeout, maxProposeTimeout,
+        proposeTimeoutThreshold);
   }
 }

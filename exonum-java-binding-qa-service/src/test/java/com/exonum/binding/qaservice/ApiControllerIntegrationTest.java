@@ -31,7 +31,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.common.configuration.Consensus;
+import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -374,7 +374,7 @@ class ApiControllerIntegrationTest {
             ValidatorKey.create(HashCode.fromString("22"),
                 HashCode.fromString("33"))
         ),
-        Consensus.create(
+        ConsensusConfiguration.create(
             1,
             2,
             3,

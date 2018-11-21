@@ -37,6 +37,9 @@ public abstract class ValidatorKey {
   @SerializedName("service_key")
   public abstract HashCode serviceKey();
 
+  /**
+   * Creates a new ValidatorKey from the given parameters.
+   */
   public static ValidatorKey create(HashCode consensusKey, HashCode serviceKey) {
     return new AutoValue_ValidatorKey(consensusKey, serviceKey);
   }

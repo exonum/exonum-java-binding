@@ -39,13 +39,16 @@ public abstract class StoredConfiguration {
   public abstract List<ValidatorKey> validatorKeys();
 
   @SerializedName("consensus")
-  public abstract Consensus consensus();
+  public abstract ConsensusConfiguration consensus();
 
   //TODO add majorityCount, services fields (https://jira.bf.local/browse/ECR-2683)
 
+  /**
+   * Creates a new StoredConfiguration from the given parameters.
+   */
   public static StoredConfiguration create(HashCode previousCfgHash, long actualFrom,
-      List<ValidatorKey> validatorKeys, Consensus consensus) {
+      List<ValidatorKey> validatorKeys, ConsensusConfiguration consensusConfiguration) {
     return new AutoValue_StoredConfiguration(previousCfgHash, actualFrom, validatorKeys,
-        consensus);
+        consensusConfiguration);
   }
 }
