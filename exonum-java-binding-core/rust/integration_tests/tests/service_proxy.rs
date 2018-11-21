@@ -215,6 +215,7 @@ fn service_can_modify_db_on_initialize() {
 #[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
 fn after_commit_throwing() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
+        // This is required for testkit to be able to create a block
         .state_hashes(&[hash(&[1, 2, 3])])
         .after_commit_throwing(TEST_EXCEPTION_CLASS)
         .build();
