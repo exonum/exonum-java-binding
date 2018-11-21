@@ -31,14 +31,14 @@ import java.lang.reflect.Type;
 /**
  * {@link HashCode} string serializer. Used to serialize/deserialize HashCode values from/to hex
  * strings.
+ *
+ * <p>All method arguments are non-null by default.
  */
 public final class HashCodeJsonSerializer
     implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
 
   /**
    * Serialize HashCode to JsonElement.
-   *
-   * @throws NullPointerException if HashCode value is null
    */
   @Override
   public JsonElement serialize(HashCode src, Type typeOfSrc, JsonSerializationContext context) {
@@ -49,8 +49,6 @@ public final class HashCodeJsonSerializer
 
   /**
    * Deserialize HashCode from JsonElement.
-   *
-   * @throws NullPointerException if Json value is null
    */
   @Override
   public HashCode deserialize(JsonElement json, Type typeOfT,

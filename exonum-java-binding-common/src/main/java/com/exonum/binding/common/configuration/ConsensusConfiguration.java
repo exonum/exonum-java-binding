@@ -26,6 +26,8 @@ import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 @AutoValue
 @GenerateTypeAdapter
 public abstract class ConsensusConfiguration {
+  //TODO update to "first_round_timeout" after exonum 0.1.0 release
+  //https://github.com/exonum/exonum/commit/b7c4bc471ddce70ec0de085cc82901271ec1544e
   @SerializedName("round_timeout")
   public abstract long roundTimeout();
 

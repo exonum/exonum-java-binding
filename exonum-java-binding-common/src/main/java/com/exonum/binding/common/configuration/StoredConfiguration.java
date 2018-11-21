@@ -25,6 +25,9 @@ import java.util.List;
 /**
  * Represents a blockchain configuration which is a set of values that determine
  * the network access parameters of a node and behavior of the node while operating in the network.
+ *
+ * <p>Services configuration parameters would be available after
+ * (https://jira.bf.local/browse/ECR-2683) would be implemented.
  */
 @AutoValue
 @GenerateTypeAdapter

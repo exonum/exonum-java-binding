@@ -66,7 +66,6 @@ class CoreSchemaProxyIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
       assertion.accept(CoreSchemaProxy.newInstance(view));
     } catch (CloseFailuresException e) {
-      System.out.println("Error: " + e.getLocalizedMessage());
       fail(e.getLocalizedMessage());
     }
   }
