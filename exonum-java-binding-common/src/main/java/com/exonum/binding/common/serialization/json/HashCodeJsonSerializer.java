@@ -35,6 +35,11 @@ import java.lang.reflect.Type;
 public final class HashCodeJsonSerializer
     implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
 
+  /**
+   * Serialize HashCode to JsonElement.
+   *
+   * @throws NullPointerException if HashCode value is null
+   */
   @Override
   public JsonElement serialize(HashCode src, Type typeOfSrc, JsonSerializationContext context) {
     checkNotNull(src, "HashCode value is null");
@@ -42,6 +47,11 @@ public final class HashCodeJsonSerializer
     return new JsonPrimitive(src.toString());
   }
 
+  /**
+   * Deserialize HashCode from JsonElement.
+   *
+   * @throws NullPointerException if HashCode value is null
+   */
   @Override
   public HashCode deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
