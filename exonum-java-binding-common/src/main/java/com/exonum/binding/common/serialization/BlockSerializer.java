@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.serialization;
 
+import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-enum BlockSerializer implements Serializer<Block> {
+public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
 
   @Override

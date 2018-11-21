@@ -20,11 +20,17 @@ package com.exonum.binding.blockchain;
 import static com.exonum.binding.common.serialization.StandardSerializers.fixed64;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.proofs.map.UncheckedMapProof;
+import com.exonum.binding.common.serialization.BlockSerializer;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.serialization.TransactionLocationSerializer;
+import com.exonum.binding.common.serialization.TransactionResultSerializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -49,6 +55,8 @@ final class CoreSchemaProxy {
   private final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
   private final Serializer<TransactionLocation> transactionLocationSerializer =
       TransactionLocationSerializer.INSTANCE;
+  private final Serializer<TransactionResult> transactionResultSerializer =
+      TransactionResultSerializer.INSTANCE;
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
     this.nativeHandle = nativeHandle;
@@ -131,9 +139,8 @@ final class CoreSchemaProxy {
    * @return a map with a key-value pair of a transaction hash and execution result
    */
   ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
-    // TODO: serializer
     return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
-        StandardSerializers.hash(), null);
+        StandardSerializers.hash(), transactionResultSerializer);
   }
 
   /**

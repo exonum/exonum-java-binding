@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.serialization;
 
-import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
+public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;
 
   @Override

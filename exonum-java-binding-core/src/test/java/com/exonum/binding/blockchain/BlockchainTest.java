@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
@@ -76,7 +79,7 @@ class BlockchainTest {
   void getBlockTransactionsByBlockId() {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
     MapIndex mockMapIndex = mock(MapIndex.class);
-    HashCode blockId = HashCode.fromString("foo");
+    HashCode blockId = HashCode.fromString("ab");
     Block mockBlock = mock(Block.class);
 
     when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
@@ -117,7 +120,7 @@ class BlockchainTest {
   @Test
   void getTxResult() {
     ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
-    HashCode messageHash = HashCode.fromString("foo");
+    HashCode messageHash = HashCode.fromString("ab");
     TransactionResult mockTxResult = mock(TransactionResult.class);
 
     when(mockMapIndex.get(messageHash)).thenReturn(mockTxResult);
@@ -137,7 +140,7 @@ class BlockchainTest {
   @Test
   void getTxLocation() {
     MapIndex mockMapIndex = mock(MapIndex.class);
-    HashCode messageHash = HashCode.fromString("foo");
+    HashCode messageHash = HashCode.fromString("ab");
     TransactionLocation mockTxLocation = mock(TransactionLocation.class);
 
     when(mockMapIndex.get(messageHash)).thenReturn(mockTxLocation);
@@ -162,7 +165,7 @@ class BlockchainTest {
   @Test
   void getBlock() {
     MapIndex mockMapIndex = mock(MapIndex.class);
-    HashCode blockHash = HashCode.fromString("foo");
+    HashCode blockHash = HashCode.fromString("ab");
     Block mockBlock = mock(Block.class);
 
     when(mockMapIndex.get(blockHash)).thenReturn(mockBlock);

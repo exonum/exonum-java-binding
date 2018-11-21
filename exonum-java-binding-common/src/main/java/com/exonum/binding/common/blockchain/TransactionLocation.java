@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.blockchain;
 
 import com.google.common.base.Objects;
 
 /**
  * Transaction position in a block.
  */
-class TransactionLocation {
+public class TransactionLocation {
 
   private long height;
   private long indexInBlock;
 
-  TransactionLocation(long height, long indexInBlock) {
+  public TransactionLocation(long height, long indexInBlock) {
     this.height = height;
     this.indexInBlock = indexInBlock;
   }

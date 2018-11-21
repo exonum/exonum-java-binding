@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.blockchain;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.common.base.Objects;
@@ -29,7 +29,7 @@ import com.google.common.base.Objects;
  * This structure only contains the amount of transactions and the transactions root hash as well as
  * other information, but not the transactions themselves.
  */
-class Block {
+public class Block {
 
   private short proposerId;
   private long height;
@@ -38,7 +38,7 @@ class Block {
   private HashCode txRootHash;
   private HashCode stateHash;
 
-  Block(short proposerId, long height, int numTransactions, HashCode previousBlockHash,
+  public Block(short proposerId, long height, int numTransactions, HashCode previousBlockHash,
       HashCode txRootHash, HashCode stateHash) {
     this.proposerId = proposerId;
     this.height = height;

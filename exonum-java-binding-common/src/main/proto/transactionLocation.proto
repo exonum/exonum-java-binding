@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.exonum.binding.blockchain";
+option java_package = "com.exonum.binding.common.serialization";
 option java_outer_classname = "TransactionLocationProtos";
 
 message TransactionLocation {
