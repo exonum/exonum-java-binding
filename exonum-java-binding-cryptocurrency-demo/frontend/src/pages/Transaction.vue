@@ -88,7 +88,7 @@
                 <div class="row">
                   <div class="col-sm-3"><strong>Body:</strong></div>
                   <div class="col-sm-9">
-                    <pre><code>{{ JSON.stringify(transaction.body, null, 2) }}</code></pre>
+                    <pre><code>{{ JSON.stringify(transaction, null, 2) }}</code></pre>
                   </div>
                 </div>
               </li>
