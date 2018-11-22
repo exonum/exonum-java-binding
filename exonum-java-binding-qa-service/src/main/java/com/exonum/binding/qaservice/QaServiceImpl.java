@@ -98,12 +98,10 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public Optional<String> initialize(Fork fork) {
     // Add a default counter to the blockchain.
-    new CreateCounterTx(DEFAULT_COUNTER_NAME)
-        .execute(fork);
+    createCounter(DEFAULT_COUNTER_NAME);
 
     // Add an afterCommit counter that will be incremented after each block commited event.
-    new CreateCounterTx(AFTER_COMMIT_COUNTER_NAME)
-        .execute(fork);
+    createCounter(AFTER_COMMIT_COUNTER_NAME);
 
     return Optional.of(INITIAL_SERVICE_CONFIGURATION);
   }
@@ -114,6 +112,18 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
     ApiController controller = new ApiController(this);
     controller.mountApi(router);
+  }
+
+  /**
+   * Increments the afterCommit counter so the number of times this method was invoked is stored
+   * in it.
+   */
+  @Override
+  public void afterCommit(BlockCommittedEvent event) {
+    long seed = 1L;
+    HashCode counterId = Hashing.sha256()
+        .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
+    submitIncrementCounter(seed, counterId);
   }
 
   @Override
@@ -178,18 +188,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
     });
   }
 
-  /**
-   * Increments the afterCommit counter so the number of times this method was invoked is stored
-   * in it.
-   */
-  @Override
-  public void afterCommit(BlockCommittedEvent event) {
-    long seed = 1L;
-    HashCode counterId = Hashing.sha256()
-        .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
-    submitIncrementCounter(seed, counterId);
-  }
-
   @SuppressWarnings("ConstantConditions") // Node is not null.
   private HashCode submitTransaction(Transaction tx) {
     checkBlockchainInitialized();
@@ -203,5 +201,9 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   private void checkBlockchainInitialized() {
     checkState(node != null, "Service has not been fully initialized yet");
+  }
+
+  private CreateCounterTx createCounter(String name) {
+    new CreateCounterTx(name).execute(fork);
   }
 }
