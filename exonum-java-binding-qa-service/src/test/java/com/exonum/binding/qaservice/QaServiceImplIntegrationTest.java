@@ -316,6 +316,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void getActualConfiguration() {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);

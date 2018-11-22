@@ -477,10 +477,9 @@
             <configuration>
               <!-- Generated files are excluded. -->
               <excludes>
-                <exclude>**/AutoValue_*</exclude>
+                <exclude>**/*AutoValue_*</exclude>
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
-                <exclude>**/*_GsonTypeAdapter*</exclude>
               </excludes>
             </configuration>
             <executions>
