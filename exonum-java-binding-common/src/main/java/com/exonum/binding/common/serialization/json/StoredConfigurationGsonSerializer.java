@@ -22,7 +22,6 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 
 /**
  * A converter of {@link com.exonum.binding.common.configuration.StoredConfiguration}
@@ -34,7 +33,7 @@ public final class StoredConfigurationGsonSerializer {
 
   private static final Gson GSON = new GsonBuilder()
       .registerTypeAdapter(HashCode.class, new HashCodeJsonSerializer())
-      .registerTypeAdapterFactory(GenerateTypeAdapter.FACTORY)
+      .registerTypeAdapterFactory(StoredConfigurationAdapterFactory.create())
       .create();
 
   /**

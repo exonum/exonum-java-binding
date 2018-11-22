@@ -18,7 +18,6 @@ package com.exonum.binding.qaservice;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -280,8 +279,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      assertThrows(RuntimeException.class, service::getHeight,
-          "An attempt to get the actual `height` during creating the genesis block");
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getHeight());
+      assertThat(t.getMessage()).contains("An attempt to get the actual `height` during creating"
+          + " the genesis block.");
     }
   }
 
@@ -317,9 +317,14 @@ class QaServiceImplIntegrationTest {
 
   @Test
   void getActualConfiguration() {
-    setServiceNode(node);
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
 
-    assertNull(service.getActualConfiguration());
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getActualConfiguration());
+      assertThat(t.getMessage()).contains("Couldn't not find any config for"
+          + " height 0, that means that genesis block was created incorrectly.");
+    }
   }
 
   private void setServiceNode(Node node) {

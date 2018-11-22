@@ -26,6 +26,7 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -60,7 +61,6 @@ import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -450,23 +450,30 @@ class ApiControllerIntegrationTest {
   }
 
   private StoredConfiguration createConfiguration() {
-    return StoredConfiguration.create(
-        HashCode.fromString("11"),
-        1,
-        Collections.singletonList(
-            ValidatorKey.create(HashCode.fromString("22"),
-                HashCode.fromString("33"))
-        ),
-        ConsensusConfiguration.create(
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8)
-    );
+    return StoredConfiguration.builder()
+        .previousCfgHash(HashCode.fromString("11"))
+        .actualFrom(1)
+        .validatorKeys(
+            singletonList(
+                ValidatorKey.builder()
+                    .consensusKey(HashCode.fromString("22"))
+                    .serviceKey(HashCode.fromString("33"))
+                    .build()
+            )
+        )
+        .consensusConfiguration(
+            ConsensusConfiguration.builder()
+                .roundTimeout(1)
+                .statusTimeout(2)
+                .peersTimeout(3)
+                .txsBlockLimit(4)
+                .maxMessageLen(5)
+                .minProposeTimeout(6)
+                .maxProposeTimeout(7)
+                .proposeTimeoutThreshold(8)
+                .build()
+        )
+        .build();
   }
 
   private HttpRequest<Buffer> post(String requestPath) {

@@ -18,29 +18,45 @@ package com.exonum.binding.common.configuration;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.auto.value.AutoValue;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.SerializedName;
-import com.ryanharter.auto.value.gson.GenerateTypeAdapter;
 
 /**
  * Public keys of validator nodes.
- * <ul>
- *   <li>consensus_key - validator’s public key for use with consensus messages</li>
- *   <li>service_key - validator’s public key for use with service transactions</li>
- * </ul>
  */
 @AutoValue
-@GenerateTypeAdapter
 public abstract class ValidatorKey {
+  /**
+   * Consensus key is used for messages related to the consensus algorithm.
+   */
   @SerializedName("consensus_key")
   public abstract HashCode consensusKey();
 
+  /**
+   * Service key is used for services, for example, the configuration updater service.
+   */
   @SerializedName("service_key")
   public abstract HashCode serviceKey();
 
   /**
-   * Creates a new ValidatorKey from the given parameters.
+   * Method used to automatically generate Gson type adapter through
+   * {@link com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory}.
    */
-  public static ValidatorKey create(HashCode consensusKey, HashCode serviceKey) {
-    return new AutoValue_ValidatorKey(consensusKey, serviceKey);
+  public static TypeAdapter<ValidatorKey> typeAdapter(Gson gson) {
+    return new AutoValue_ValidatorKey.GsonTypeAdapter(gson);
+  }
+
+  public static ValidatorKey.Builder builder() {
+    return new AutoValue_ValidatorKey.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder consensusKey(HashCode consensusKey);
+
+    public abstract Builder serviceKey(HashCode serviceKey);
+
+    public abstract ValidatorKey build();
   }
 }
