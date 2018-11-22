@@ -102,10 +102,10 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public Optional<String> initialize(Fork fork) {
     // Add a default counter to the blockchain.
-    createCounter(DEFAULT_COUNTER_NAME);
+    createCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block commited event.
-    createCounter(AFTER_COMMIT_COUNTER_NAME);
+    createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
 
     return Optional.of(INITIAL_SERVICE_CONFIGURATION);
   }
@@ -238,7 +238,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
     checkState(node != null, "Service has not been fully initialized yet");
   }
 
-  private CreateCounterTx createCounter(String name) {
+  private CreateCounterTx createCounter(String name, Fork fork) {
     new CreateCounterTx(name).execute(fork);
   }
 }
