@@ -477,7 +477,7 @@
             <configuration>
               <!-- Generated files are excluded. -->
               <excludes>
-                <exclude>**/*AutoValue_*</exclude>
+                <exclude>**/*AutoValue*</exclude>
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
               </excludes>
