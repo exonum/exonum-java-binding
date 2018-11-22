@@ -215,11 +215,11 @@ class QaServiceImplIntegrationTest {
   @Test
   void submitUnknownTx() throws Exception {
     setServiceNode(node);
-    
+
     HashCode txHash = service.submitUnknownTx();
-    
+
     Transaction expectedTx = new UnknownTx();
-    
+
     assertThat(txHash).isEqualTo(expectedTx.hash());
     verify(node).submitTransaction(any(UnknownTx.class));
   }
@@ -277,6 +277,43 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
+  void getHeight() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      assertThrows(RuntimeException.class, service::getHeight,
+          "An attempt to get the actual `height` during creating the genesis block");
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getAllBlockHashes() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      List<HashCode> hashes = service.getAllBlockHashes();
+      assertThat(hashes).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getBlockTransactions() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      List<HashCode> hashes = service.getBlockTransactions(0L);
+      assertThat(hashes).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
   void afterCommit() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
