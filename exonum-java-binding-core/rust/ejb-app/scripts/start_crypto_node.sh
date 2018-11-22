@@ -19,4 +19,4 @@ private_port=$((3100 + node_id))
 cargo run -- run \
     -c ../testnet/node_$node_id.toml \
     -d ../testnet/db/$node_id \
-    --public-api-address 0.0.0.O:${public_port}
+    --public-api-address 0.0.0.0:${public_port}
