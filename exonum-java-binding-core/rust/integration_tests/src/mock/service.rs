@@ -1,4 +1,4 @@
-use java_bindings::exonum::crypto::{Hash, hash};
+use java_bindings::exonum::crypto::{hash, Hash};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::jni::strings::JNIString;
 use java_bindings::jni::sys::jsize;

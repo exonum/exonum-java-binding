@@ -229,8 +229,8 @@ fn after_commit_throwing() {
 
 #[test]
 fn after_commit_validator() {
-    let (builder, interactor) = ServiceMockBuilder::new(EXECUTOR.clone())
-        .get_mock_interaction_after_commit();
+    let (builder, interactor) =
+        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
 
     let service = builder.build();
     let mut testkit = TestKitBuilder::validator()
@@ -258,8 +258,8 @@ fn after_commit_validator() {
 
 #[test]
 fn after_commit_auditor() {
-    let (builder, interactor) = ServiceMockBuilder::new(EXECUTOR.clone())
-        .get_mock_interaction_after_commit();
+    let (builder, interactor) =
+        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
 
     let service = builder.build();
     let mut testkit = TestKitBuilder::auditor()
