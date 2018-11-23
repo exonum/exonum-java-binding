@@ -17,7 +17,7 @@
 package com.exonum.binding.common.blockchain;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.google.common.base.Objects;
+import com.google.auto.value.AutoValue;
 
 /**
  * Exonum block header data structure.
@@ -29,100 +29,48 @@ import com.google.common.base.Objects;
  * This structure only contains the amount of transactions and the transactions root hash as well as
  * other information, but not the transactions themselves.
  */
-public class Block {
+@AutoValue
+public abstract class Block {
 
-  private short proposerId;
-  private long height;
-  private int numTransactions;
-  private HashCode previousBlockHash;
-  private HashCode txRootHash;
-  private HashCode stateHash;
-
-  public Block(short proposerId, long height, int numTransactions, HashCode previousBlockHash,
-      HashCode txRootHash, HashCode stateHash) {
-    this.proposerId = proposerId;
-    this.height = height;
-    this.numTransactions = numTransactions;
-    this.previousBlockHash = previousBlockHash;
-    this.txRootHash = txRootHash;
-    this.stateHash = stateHash;
+  public static Block valueOf(
+      short proposerId,
+      long height,
+      int numTransactions,
+      HashCode previousBlockHash,
+      HashCode txRootHash,
+      HashCode stateHash) {
+    return new AutoValue_Block(
+        proposerId, height, numTransactions, previousBlockHash, txRootHash, stateHash);
   }
 
   /**
    * Identifier of the leader node which has proposed the block.
    */
-  public short getProposerId() {
-    return proposerId;
-  }
+  public abstract short getProposerId();
 
   /**
    * Height of the block, which is also the number of this particular block in the blockchain.
    */
-  public long getHeight() {
-    return height;
-  }
+  public abstract long getHeight();
 
   /**
    * Number of transactions in this block.
    */
-  public int getNumTransactions() {
-    return numTransactions;
-  }
+  public abstract int getNumTransactions();
 
   /**
    * Hash link to the previous block in the blockchain.
    */
-  public HashCode getPreviousBlockHash() {
-    return previousBlockHash;
-  }
+  public abstract HashCode getPreviousBlockHash();
 
   /**
    * Root hash of the Merkle tree of transactions in this block.
    */
-  public HashCode getTxRootHash() {
-    return txRootHash;
-  }
+  public abstract HashCode getTxRootHash();
 
   /**
    * Hash of the blockchain state after applying transactions in the block.
    */
-  public HashCode getStateHash() {
-    return stateHash;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Block block = (Block) o;
-    return proposerId == block.proposerId &&
-        height == block.height &&
-        numTransactions == block.numTransactions &&
-        Objects.equal(previousBlockHash, block.previousBlockHash) &&
-        Objects.equal(txRootHash, block.txRootHash) &&
-        Objects.equal(stateHash, block.stateHash);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects
-        .hashCode(proposerId, height, numTransactions, previousBlockHash, txRootHash, stateHash);
-  }
-
-  @Override
-  public String toString() {
-    return "Block{" +
-        "proposerId=" + proposerId +
-        ", height=" + height +
-        ", numTransactions=" + numTransactions +
-        ", previousBlockHash=" + previousBlockHash +
-        ", txRootHash=" + txRootHash +
-        ", stateHash=" + stateHash +
-        '}';
-  }
+  public abstract HashCode getStateHash();
 
 }

@@ -35,13 +35,20 @@ class BlockSerializerTest {
 
   private static Stream<Block> testSource() {
     return Stream.of(
-        new Block(
+        Block.valueOf(
             (short) 1,
             1,
             1,
             HashCode.fromString("ab"),
             HashCode.fromString("bc"),
-            HashCode.fromString("cd")));
+            HashCode.fromString("cd")),
+        Block.valueOf(
+            (short) 1,
+            1,
+            1,
+            null,
+            null,
+            null));
   }
 
 }

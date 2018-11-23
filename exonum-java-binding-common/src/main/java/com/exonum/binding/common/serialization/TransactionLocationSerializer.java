@@ -34,16 +34,14 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
 
   @Override
   public TransactionLocation fromBytes(byte[] binaryTransactionLocation) {
-    TransactionLocation txLocation;
     try {
       TransactionLocationProtos.TransactionLocation copiedtxLocationProtos =
           TransactionLocationProtos.TransactionLocation.parseFrom(binaryTransactionLocation);
-      txLocation = new TransactionLocation(copiedtxLocationProtos.getHeight(),
+      return TransactionLocation.valueOf(copiedtxLocationProtos.getHeight(),
           copiedtxLocationProtos.getIndexInBlock());
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException("Unable to instantiate "
           + "TransactionLocationProtos.TransactionLocation instance from provided binary data", e);
     }
-    return txLocation;
   }
 }

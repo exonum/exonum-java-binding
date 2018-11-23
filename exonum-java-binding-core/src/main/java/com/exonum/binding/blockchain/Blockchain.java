@@ -160,15 +160,19 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a table that stores a block object for every block height.
+   * Returns a table that stores a block object for every block hash.
    * @return a map with block object for every block hash
    */
   public MapIndex<HashCode, Block> getBlocks() {
     return schema.getBlocks();
   }
 
-  // TODO: javadoc and implementation
+  /**
+   * Returns a list that keeps block hashes according to their corresponding height.
+   * @return a list of block hashes according to their height
+   */
   public ListIndex<Block> getBlocksByHeight() {
+    // TODO: implementation
     throw new NotImplementedException();
   }
 

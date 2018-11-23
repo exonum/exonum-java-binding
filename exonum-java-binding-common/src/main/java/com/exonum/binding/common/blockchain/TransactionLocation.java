@@ -16,59 +16,26 @@
 
 package com.exonum.binding.common.blockchain;
 
-import com.google.common.base.Objects;
+import com.google.auto.value.AutoValue;
 
 /**
- * Transaction position in a block.
+ * Transaction position in a block. Enumeration begins from 0.
  */
-public class TransactionLocation {
+@AutoValue
+public abstract class TransactionLocation {
 
-  private long height;
-  private long indexInBlock;
-
-  public TransactionLocation(long height, long indexInBlock) {
-    this.height = height;
-    this.indexInBlock = indexInBlock;
+  public static TransactionLocation valueOf(long height, long indexInBlock) {
+    return new AutoValue_TransactionLocation(height, indexInBlock);
   }
 
   /**
    * Height of the block where the transaction was included.
    */
-  public long getHeight() {
-    return height;
-  }
+  public abstract long getHeight();
 
   /**
    * Zero-based position of this transaction in the block.
    */
-  public long getIndexInBlock() {
-    return indexInBlock;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    TransactionLocation that = (TransactionLocation) o;
-    return height == that.height &&
-        indexInBlock == that.indexInBlock;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(height, indexInBlock);
-  }
-
-  @Override
-  public String toString() {
-    return "TransactionLocation{" +
-        "height=" + height +
-        ", indexInBlock=" + indexInBlock +
-        '}';
-  }
+  public abstract long getIndexInBlock();
 
 }

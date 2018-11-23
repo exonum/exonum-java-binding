@@ -39,27 +39,27 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @Override
   public Block fromBytes(byte[] binaryBlock) {
-    Block block;
     try {
       BlockProtos.Block copiedBlockProtos = BlockProtos.Block.parseFrom(binaryBlock);
-      block = new Block((short) copiedBlockProtos.getProposerId(),
+      return Block.valueOf((short) copiedBlockProtos.getProposerId(),
           copiedBlockProtos.getHeight(), copiedBlockProtos.getNumTransactions(),
-          toByteString(copiedBlockProtos.getPreviousBlockHash()),
-          toByteString(copiedBlockProtos.getTxRootHash()),
-          toByteString(copiedBlockProtos.getStateHash()));
+          toHashCode(copiedBlockProtos.getPreviousBlockHash()),
+          toHashCode(copiedBlockProtos.getTxRootHash()),
+          toHashCode(copiedBlockProtos.getStateHash()));
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
           "Unable to instantiate BlockProtos.Block instance from provided binary data", e);
     }
-    return block;
   }
 
   private static ByteString toByteString(HashCode hash) {
-    return ByteString.copyFrom(hash.asBytes());
+    byte[] bytes = StandardSerializers.hash().toBytes(hash);
+    return ByteString.copyFrom(bytes);
   }
 
-  private static HashCode toByteString(ByteString byteString) {
-    return HashCode.fromBytes(byteString.toByteArray());
+  private static HashCode toHashCode(ByteString byteString) {
+    byte[] bytes = byteString.toByteArray();
+    return StandardSerializers.hash().fromBytes(bytes);
   }
 
 }
