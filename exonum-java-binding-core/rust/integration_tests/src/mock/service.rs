@@ -1,4 +1,4 @@
-use java_bindings::exonum::crypto::Hash;
+use java_bindings::exonum::crypto::{Hash, hash};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::jni::strings::JNIString;
 use java_bindings::jni::sys::jsize;
@@ -11,6 +11,9 @@ use super::NATIVE_FACADE_CLASS;
 pub const SERVICE_ADAPTER_CLASS: &str = "com/exonum/binding/service/adapters/UserServiceAdapter";
 pub const SERVICE_MOCK_BUILDER_CLASS: &str =
     "com/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder";
+
+pub const SERVICE_DEFAULT_ID: u16 = 42;
+pub const SERVICE_DEFAULT_NAME: &str = "service 42";
 
 pub struct ServiceMockBuilder {
     exec: MainExecutor,
@@ -29,6 +32,9 @@ impl ServiceMockBuilder {
             env.new_global_ref(value.l()?)
         }));
         ServiceMockBuilder { exec, builder }
+            .id(SERVICE_DEFAULT_ID)
+            .name(SERVICE_DEFAULT_NAME)
+            .state_hashes(&[hash(&[1, 2, 3])])
     }
 
     pub fn id(self, id: u16) -> Self {

@@ -35,27 +35,9 @@ import com.exonum.binding.service.adapters.UserTransactionAdapter;
  * <p>You do not have to mock <em>any</em> methods: default values will be provided.
  */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Used in native code
-final class UserServiceAdapterMockBuilder {
+public final class UserServiceAdapterMockBuilder {
 
-  private final UserServiceAdapter service;
-
-  UserServiceAdapterMockBuilder() {
-    this.service = mock(UserServiceAdapter.class);
-
-    // Some default mocking that could be overridden later
-    initMocks();
-  }
-
-  private void initMocks() {
-    byte[] hash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
-    for (int i = 0; i < hash.length; i++) {
-      hash[i] = (byte) i;
-    }
-
-    id((short) 42);
-    name("mocked_service");
-    stateHashes(new byte[][]{hash});
-  }
+  private final UserServiceAdapter service = mock(UserServiceAdapter.class);
 
   // The builder methods below return «void» as the native code can't enjoy chaining.
   public void id(short id) {
