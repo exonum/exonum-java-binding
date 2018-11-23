@@ -114,6 +114,7 @@ public final class ProxyDestructor implements CleanAction<Class<?>> {
     return MoreObjects.toStringHelper(this)
         .add("proxyClass", proxyClass)
         .add("destroyed", destroyed)
+        .add("nativeHandle", nativeHandle)
         .toString();
   }
 }
