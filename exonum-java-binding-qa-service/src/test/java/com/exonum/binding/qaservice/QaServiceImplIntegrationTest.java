@@ -322,7 +322,6 @@ class QaServiceImplIntegrationTest {
       Fork fork = db.createFork(cleaner);
       setServiceNode(node);
       service.initialize(fork);
-      db.merge(fork);
 
       Snapshot snapshot = db.createSnapshot(cleaner);
       BlockCommittedEvent event = BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), 1L);
