@@ -36,7 +36,29 @@ import com.exonum.binding.service.adapters.UserTransactionAdapter;
 @SuppressWarnings({"unused", "WeakerAccess"}) // Used in native code
 public final class UserServiceAdapterMockBuilder {
 
-  private final UserServiceAdapter service = mock(UserServiceAdapter.class);
+  private final UserServiceAdapter service;
+
+  /**
+   * Default constructor.
+   */
+  public UserServiceAdapterMockBuilder() {
+    this.service = mock(UserServiceAdapter.class);
+
+    // Some default mocking that could be overridden later
+    init_mocks();
+  }
+
+  private void init_mocks() {
+    byte[] hash = new byte[32];
+    for (int i = 0; i < 32; i++) {
+      hash[i] = (byte) i;
+    }
+
+    when(service.getId()).thenReturn((short) 42);
+    when(service.getName()).thenReturn("mocked_service");
+    when(service.getStateHashes(anyLong()))
+            .thenReturn(new byte[][]{hash});
+  }
 
   // The builder methods below return «void» as the native code can't enjoy chaining.
   public void id(short id) {

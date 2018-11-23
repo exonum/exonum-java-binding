@@ -215,8 +215,6 @@ fn service_can_modify_db_on_initialize() {
 #[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
 fn after_commit_throwing() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        // This is required for testkit to be able to create a block
-        .state_hashes(&[hash(&[1, 2, 3])])
         .after_commit_throwing(TEST_EXCEPTION_CLASS)
         .build();
 
@@ -232,7 +230,6 @@ fn after_commit_throwing() {
 #[test]
 fn after_commit_validator() {
     let (builder, interactor) = ServiceMockBuilder::new(EXECUTOR.clone())
-        .state_hashes(&[hash(&[1, 2, 3])])
         .get_mock_interaction_after_commit();
 
     let service = builder.build();
@@ -262,7 +259,6 @@ fn after_commit_validator() {
 #[test]
 fn after_commit_auditor() {
     let (builder, interactor) = ServiceMockBuilder::new(EXECUTOR.clone())
-        .state_hashes(&[hash(&[1, 2, 3])])
         .get_mock_interaction_after_commit();
 
     let service = builder.build();
