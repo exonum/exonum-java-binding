@@ -23,6 +23,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,6 +39,7 @@ import com.exonum.binding.qaservice.transactions.InvalidTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.BlockCommittedEvent;
+import com.exonum.binding.service.BlockCommittedEventImpl;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.NodeFake;
 import com.exonum.binding.service.Schema;
@@ -56,6 +58,7 @@ import io.vertx.junit5.VertxExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -313,26 +316,19 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
-  @RequiresNativeLibrary
   void afterCommit() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+         Cleaner cleaner = new Cleaner()) {
+      Fork fork = db.createFork(cleaner);
       setServiceNode(node);
-      service.initialize(view);
+      service.initialize(fork);
+      db.merge(fork);
 
-      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      BlockCommittedEvent event = BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), 1L);
       service.afterCommit(event);
 
-      // Check that the afterCommit counter was updated.
-      QaSchema schema = new QaSchema(view);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-
-      HashCode counterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
-
-      assertThat(counters.get(counterId)).isEqualTo(1L);
-      assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
+      verify(service).submitIncrementCounter(anyLong(), any(HashCode.class));
     }
   }
 
