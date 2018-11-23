@@ -22,7 +22,11 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
@@ -37,6 +41,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -66,10 +71,35 @@ final class ApiController {
   static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
   @VisibleForTesting
   static final String BLOCKCHAIN_ALL_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/blocksByHeight";
+  private static final String BLOCK_ID_PARAM = "blockId";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/" + BLOCK_ID_PARAM;
+  @VisibleForTesting
+  static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
   private static final String BLOCK_HEIGHT_PARAM = "blockHeight";
   @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH = BLOCKCHAIN_ROOT + "/block/:"
-      + BLOCK_HEIGHT_PARAM + "/transactions";
+  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
+      + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT + "/block/:"
+      + BLOCK_ID_PARAM + "/transactionsByBlockId";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_TRANSACTION_RESULTS_PATH = BLOCKCHAIN_ROOT + "/txResults";
+  private static final String MESSAGE_HASH_PARAM = "messageHash";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_TRANSACTION_RESULT_PATH = BLOCKCHAIN_ROOT + "/txResult/:"
+      + MESSAGE_HASH_PARAM;
+  @VisibleForTesting
+  static final String BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH = BLOCKCHAIN_ROOT + "/txLocations";
+  @VisibleForTesting
+  static final String BLOCKCHAIN_TRANSACTION_LOCATION_PATH = BLOCKCHAIN_ROOT + "/txLocation/:"
+      + MESSAGE_HASH_PARAM;
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
@@ -99,7 +129,18 @@ final class ApiController {
             .put(GET_COUNTER_PATH, this::getCounter)
             .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
             .put(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH, this::getAllBlockHashes)
-            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH, this::getBlockTransactions)
+            .put(BLOCKCHAIN_BLOCKS_PATH, this::getBlocks)
+            .put(BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH, this::getBlocksByHeight)
+            .put(BLOCKCHAIN_BLOCK_PATH, this::getBlock)
+            .put(BLOCKCHAIN_LAST_BLOCK_PATH, this::getLastBlock)
+            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH, this::getBlockTransactionsByHeight)
+            .put(
+                BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH, this::getBlockTransactionsByBlockId)
+            .put(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH, this::getTransactionMessages)
+            .put(BLOCKCHAIN_TRANSACTION_RESULTS_PATH, this::getTransactionResults)
+            .put(BLOCKCHAIN_TRANSACTION_RESULT_PATH, this::getTransactionResult)
+            .put(BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH, this::getTransactionLocations)
+            .put(BLOCKCHAIN_TRANSACTION_LOCATION_PATH, this::getTransactionLocation)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -196,7 +237,42 @@ final class ApiController {
         .end(gson.toJson(hashes));
   }
 
-  private void getBlockTransactions(RoutingContext rc) {
+  private void getBlocks(RoutingContext rc) {
+    Map<HashCode, Block> blocks = service.getBlocks();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(blocks));
+  }
+
+  private void getBlocksByHeight(RoutingContext rc) {
+    List<Block> blocks = service.getBlocksByHeight();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(blocks));
+  }
+
+  private void getBlock(RoutingContext rc) {
+    HashCode blockId = getRequiredParameter(rc.request().params(), BLOCK_ID_PARAM,
+        HashCode::fromString);
+
+    Block block = service.getBlock(blockId);
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(block));
+  }
+
+  private void getLastBlock(RoutingContext rc) {
+    Block block = service.getLastBlock();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(block));
+  }
+
+  private void getBlockTransactionsByHeight(RoutingContext rc) {
     Long height = getRequiredParameter(rc.request().params(), BLOCK_HEIGHT_PARAM,
         Long::parseLong);
 
@@ -205,6 +281,64 @@ final class ApiController {
     rc.response()
         .putHeader("Content-Type", "application/json")
         .end(gson.toJson(hashes));
+  }
+
+  private void getBlockTransactionsByBlockId(RoutingContext rc) {
+    HashCode blockId = getRequiredParameter(rc.request().params(), BLOCK_ID_PARAM,
+        HashCode::fromString);
+
+    List<HashCode> hashes = service.getBlockTransactions(blockId);
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(hashes));
+  }
+
+  private void getTransactionMessages(RoutingContext rc) {
+    // TODO: TransactionMessage
+    Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(txMessages));
+  }
+
+  private void getTransactionResults(RoutingContext rc) {
+    Map<HashCode, TransactionResult> txResults = service.getTxResults();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(txResults));
+  }
+
+  private void getTransactionResult(RoutingContext rc) {
+    HashCode messageHash = getRequiredParameter(rc.request().params(), MESSAGE_HASH_PARAM,
+        HashCode::fromString);
+
+    TransactionResult txResult = service.getTxResult(messageHash);
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(txResult));
+  }
+
+  private void getTransactionLocations(RoutingContext rc) {
+    Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(txLocations));
+  }
+
+  private void getTransactionLocation(RoutingContext rc) {
+    HashCode messageHash = getRequiredParameter(rc.request().params(), MESSAGE_HASH_PARAM,
+        HashCode::fromString);
+
+    TransactionLocation txLocation = service.getTxLocation(messageHash);
+    Gson gson = QaTransactionGson.instance();
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(gson.toJson(txLocation));
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {

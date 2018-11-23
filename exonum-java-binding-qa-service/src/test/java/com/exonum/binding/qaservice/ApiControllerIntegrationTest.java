@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -408,7 +408,7 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getBlockTransactions(anyLong())).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH.replace(":blockHeight", "123"))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH.replace(":blockHeight", "123"))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);

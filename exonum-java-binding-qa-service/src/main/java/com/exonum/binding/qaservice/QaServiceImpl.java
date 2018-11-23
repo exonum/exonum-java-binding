@@ -19,7 +19,11 @@ package com.exonum.binding.qaservice;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
@@ -42,9 +46,11 @@ import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
@@ -198,6 +204,98 @@ final class QaServiceImpl extends AbstractService implements QaService {
       ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(height);
 
       return Lists.newArrayList(hashes);
+    });
+  }
+
+  @Override
+  public List<HashCode> getBlockTransactions(HashCode blockId) {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(blockId);
+
+      return Lists.newArrayList(hashes);
+    });
+  }
+
+  @Override
+  public Map<HashCode, TransactionMessage> getTxMessages() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
+
+      return Maps.toMap(txMessages.keys(), txMessages::get);
+    });
+  }
+
+  @Override
+  public Map<HashCode, TransactionResult> getTxResults() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      MapIndex<HashCode, TransactionResult> txResults = blockchain.getTxResults();
+
+      return Maps.toMap(txResults.keys(), txResults::get);
+    });
+  }
+
+  @Override
+  public TransactionResult getTxResult(HashCode messageHash) {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      return blockchain.getTxResult(messageHash);
+    });
+  }
+
+  @Override
+  public Map<HashCode, TransactionLocation> getTxLocations() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      MapIndex<HashCode, TransactionLocation> txLocations = blockchain.getTxLocations();
+
+      return Maps.toMap(txLocations.keys(), txLocations::get);
+    });
+  }
+
+  @Override
+  public TransactionLocation getTxLocation(HashCode messageHash) {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      return blockchain.getTxLocation(messageHash);
+    });
+  }
+
+  @Override
+  public Map<HashCode, Block> getBlocks() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      MapIndex<HashCode, Block> blocks = blockchain.getBlocks();
+
+      return Maps.toMap(blocks.keys(), blocks::get);
+    });
+  }
+
+  @Override
+  public List<Block> getBlocksByHeight() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      ListIndex<Block> blocks = blockchain.getBlocksByHeight();
+
+      return Lists.newArrayList(blocks);
+    });
+  }
+
+  @Override
+  public Block getBlock(HashCode blockHash) {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      return blockchain.getBlock(blockHash);
+    });
+  }
+
+  @Override
+  public Block getLastBlock() {
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      return blockchain.getLastBlock();
     });
   }
 
