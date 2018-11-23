@@ -12,9 +12,6 @@ pub const SERVICE_ADAPTER_CLASS: &str = "com/exonum/binding/service/adapters/Use
 pub const SERVICE_MOCK_BUILDER_CLASS: &str =
     "com/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder";
 
-pub const SERVICE_DEFAULT_ID: u16 = 42;
-pub const SERVICE_DEFAULT_NAME: &str = "service 42";
-
 pub struct ServiceMockBuilder {
     exec: MainExecutor,
     builder: GlobalRef,
@@ -32,8 +29,6 @@ impl ServiceMockBuilder {
             env.new_global_ref(value.l()?)
         }));
         ServiceMockBuilder { exec, builder }
-            .id(SERVICE_DEFAULT_ID)
-            .name(SERVICE_DEFAULT_NAME)
     }
 
     pub fn id(self, id: u16) -> Self {

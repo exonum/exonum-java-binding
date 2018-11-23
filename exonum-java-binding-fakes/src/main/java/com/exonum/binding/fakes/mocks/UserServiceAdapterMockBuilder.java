@@ -25,6 +25,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 
@@ -34,30 +35,26 @@ import com.exonum.binding.service.adapters.UserTransactionAdapter;
  * <p>You do not have to mock <em>any</em> methods: default values will be provided.
  */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Used in native code
-public final class UserServiceAdapterMockBuilder {
+final class UserServiceAdapterMockBuilder {
 
   private final UserServiceAdapter service;
 
-  /**
-   * Default constructor.
-   */
-  public UserServiceAdapterMockBuilder() {
+  UserServiceAdapterMockBuilder() {
     this.service = mock(UserServiceAdapter.class);
 
     // Some default mocking that could be overridden later
-    init_mocks();
+    initMocks();
   }
 
-  private void init_mocks() {
-    byte[] hash = new byte[32];
-    for (int i = 0; i < 32; i++) {
+  private void initMocks() {
+    byte[] hash = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES];
+    for (int i = 0; i < hash.length; i++) {
       hash[i] = (byte) i;
     }
 
-    when(service.getId()).thenReturn((short) 42);
-    when(service.getName()).thenReturn("mocked_service");
-    when(service.getStateHashes(anyLong()))
-            .thenReturn(new byte[][]{hash});
+    id((short) 42);
+    name("mocked_service");
+    stateHashes(new byte[][]{hash});
   }
 
   // The builder methods below return «void» as the native code can't enjoy chaining.
