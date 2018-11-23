@@ -17,19 +17,14 @@ public class MockInteraction {
   private final String[] arguments;
   private final List<String> interactions = new ArrayList<>();
 
-  private MockInteraction(String[] arguments) {
-    this.arguments = arguments;
-  }
-
   /**
    * Creates new instance of {@link MockInteraction} configured with expected names of arguments for
    * a mocked method.
    *
-   * @param expectedArguments names of expected arguments for a mocked method in their right order
-   * @return New and configured instance of {@link MockInteraction}
+   * @param arguments names of expected arguments for a mocked method in their right order
    */
-  public static MockInteraction createInteraction(String[] expectedArguments) {
-    return new MockInteraction(expectedArguments);
+  public MockInteraction(String[] arguments) {
+    this.arguments = arguments;
   }
 
   /**

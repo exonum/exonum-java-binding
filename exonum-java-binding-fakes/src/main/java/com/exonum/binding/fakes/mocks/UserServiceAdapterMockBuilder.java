@@ -94,7 +94,7 @@ public final class UserServiceAdapterMockBuilder {
    */
   public MockInteraction getMockInteractionAfterCommit() {
     String[] args = {"handle", "validator", "height"};
-    MockInteraction interaction = MockInteraction.createInteraction(args);
+    MockInteraction interaction = new MockInteraction(args);
     doAnswer(interaction.createAnswer()).when(service).afterCommit(anyLong(), anyInt(), anyLong());
     return interaction;
   }
