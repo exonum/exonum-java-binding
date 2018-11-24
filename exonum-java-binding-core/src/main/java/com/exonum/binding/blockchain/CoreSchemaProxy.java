@@ -106,7 +106,7 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a table that stores a block object for every block height.
+   * Returns a table that stores a block object for every block hash.
    * @return a map with block object for every block hash
    */
   MapIndex<HashCode, Block> getBlocks() {
@@ -117,6 +117,7 @@ final class CoreSchemaProxy {
   /**
    * Returns the latest committed block.
    * @return the latest committed block object
+   * @throws RuntimeException if the "genesis block" was not created
    */
   Block getLastBlock() {
     return blockSerializer.fromBytes(nativeGetLastBlock(nativeHandle.get()));
