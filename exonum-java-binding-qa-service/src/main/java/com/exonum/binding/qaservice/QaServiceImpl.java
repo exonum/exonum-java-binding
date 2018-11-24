@@ -49,7 +49,6 @@ import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,8 +79,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Nullable
   private Node node;
-
-  private final Random RANDOM = new Random(0);
 
   @Inject
   public QaServiceImpl(TransactionConverter transactionConverter) {
@@ -127,7 +124,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
    */
   @Override
   public void afterCommit(BlockCommittedEvent event) {
-    long seed = RANDOM.nextLong();
+    long seed = event.getHeight();
     HashCode counterId = Hashing.sha256()
         .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
     submitIncrementCounter(seed, counterId);

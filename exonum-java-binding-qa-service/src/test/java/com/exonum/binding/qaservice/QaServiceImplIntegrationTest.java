@@ -23,7 +23,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -316,7 +315,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
-  void afterCommit() throws CloseFailuresException {
+  void afterCommit() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
@@ -324,10 +323,16 @@ class QaServiceImplIntegrationTest {
       service.initialize(fork);
 
       Snapshot snapshot = db.createSnapshot(cleaner);
-      BlockCommittedEvent event = BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), 1L);
+      long height = 0L;
+      BlockCommittedEvent event =
+          BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), height);
       service.afterCommit(event);
 
-      verify(service).submitIncrementCounter(anyLong(), any(HashCode.class));
+      HashCode counterId = Hashing.sha256()
+          .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
+      Transaction expectedTx = new IncrementCounterTx(height, counterId);
+
+      verify(node).submitTransaction(eq(expectedTx));
     }
   }
 
