@@ -91,6 +91,17 @@ class BlockchainTest {
   }
 
   @Test
+  void getNonexistentBlockTransactionsByBlockId() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    HashCode blockId = HashCode.fromString("ab");
+
+    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+    when(mockMapIndex.get(blockId)).thenReturn(null);
+
+    assertThat(blockchain.getBlockTransactions(blockId)).isEqualTo(null);
+  }
+
+  @Test
   void getBlockTransactionsByBlock() {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
 

@@ -28,6 +28,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
+import javax.annotation.Nullable;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
@@ -93,13 +94,18 @@ public final class Blockchain {
    *
    * @param blockId id of the block
    * @return a proof list of transaction hashes committed in the block.
-   *        Or an empty list if the block with given id doesn't exist
+   *        Or null if the block with given id doesn't exist
    */
-   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
-     MapIndex<HashCode, Block> blocks = schema.getBlocks();
-     Block block = blocks.get(blockId);
-     return getBlockTransactions(block.getHeight());
-   }
+  @Nullable
+  public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
+    MapIndex<HashCode, Block> blocks = schema.getBlocks();
+    Block block = blocks.get(blockId);
+    if (block == null) {
+      return null;
+   } else {
+      return getBlockTransactions(block.getHeight());
+    }
+  }
 
   /**
    * Returns a proof list of transaction hashes committed in the given block.
