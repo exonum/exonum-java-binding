@@ -36,13 +36,14 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
-  void getHeightBeforeGenesisBlockTest() {
-    MemoryDb db = MemoryDb.newInstance();
-    Cleaner cleaner = new Cleaner();
-    Snapshot view = db.createSnapshot(cleaner);
+  void getHeightBeforeGenesisBlockTest() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
 
-    CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-    assertThrows(RuntimeException.class, schema::getHeight);
+      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+      assertThrows(RuntimeException.class, schema::getHeight);
+    }
   }
 
   @Test
