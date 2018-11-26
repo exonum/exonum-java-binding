@@ -16,6 +16,9 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +37,8 @@ import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
+import com.exonum.binding.service.BlockCommittedEvent;
+import com.exonum.binding.service.BlockCommittedEventImpl;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.NodeFake;
 import com.exonum.binding.service.Schema;
@@ -52,6 +57,7 @@ import io.vertx.junit5.VertxExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -134,20 +140,20 @@ class QaServiceImplIntegrationTest {
       Optional<String> initialConfiguration = service.initialize(view);
 
       // Check the configuration.
-      assertThat(initialConfiguration)
-          .hasValue(QaServiceImpl.INITIAL_SERVICE_CONFIGURATION);
+      assertThat(initialConfiguration).hasValue(INITIAL_SERVICE_CONFIGURATION);
 
-      // Check the changes made to the database.
+      // Check that both the default and afterCommit counters were created.
       QaSchema schema = new QaSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      String counterName = "default";
-      HashCode counterId = Hashing.sha256()
-          .hashString(counterName, UTF_8);
+      HashCode defaultCounterId = Hashing.sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
+      HashCode afterCommitCounterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
-      assertThat(counters.get(counterId)).isEqualTo(0L);
-      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+      assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
+      assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
+      assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
+      assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
     }
   }
 
@@ -305,6 +311,29 @@ class QaServiceImplIntegrationTest {
 
       List<HashCode> hashes = service.getBlockTransactions(0L);
       assertThat(hashes).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void afterCommit() throws Exception {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork fork = db.createFork(cleaner);
+      setServiceNode(node);
+      service.initialize(fork);
+
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      long height = 0L;
+      BlockCommittedEvent event =
+          BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), height);
+      service.afterCommit(event);
+
+      HashCode counterId = Hashing.sha256()
+          .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
+      Transaction expectedTx = new IncrementCounterTx(height, counterId);
+
+      verify(node).submitTransaction(eq(expectedTx));
     }
   }
 
