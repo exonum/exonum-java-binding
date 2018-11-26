@@ -315,6 +315,7 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
+  @RequiresNativeLibrary
   void afterCommit() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
