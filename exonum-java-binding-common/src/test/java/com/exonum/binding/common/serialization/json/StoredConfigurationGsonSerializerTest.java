@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import org.junit.jupiter.api.Test;
 
@@ -57,8 +58,8 @@ class StoredConfigurationGsonSerializerTest {
         .validatorKeys(
             singletonList(
                 ValidatorKey.builder()
-                    .consensusKey(HashCode.fromString("22"))
-                    .serviceKey(HashCode.fromString("33"))
+                    .consensusKey(PublicKey.fromHexString("22"))
+                    .serviceKey(PublicKey.fromHexString("33"))
                     .build()
             )
         )

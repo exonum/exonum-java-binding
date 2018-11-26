@@ -23,6 +23,9 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Blockchain Consensus algorithm parameters.
+ *
+ * <p>See <a href="https://exonum.com/doc/architecture/configuration/">Exonum configuration</a> for
+ * Consensus configuration details.
  */
 @AutoValue
 public abstract class ConsensusConfiguration {
@@ -82,8 +85,9 @@ public abstract class ConsensusConfiguration {
   public abstract int proposeTimeoutThreshold();
 
   /**
-   * Method used to automatically generate Gson type adapter through
-   * {@link com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory}.
+   * Provides a Gson type adapter for this class.
+   *
+   * @see com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory
    */
   public static TypeAdapter<ConsensusConfiguration> typeAdapter(Gson gson) {
     return new AutoValue_ConsensusConfiguration.GsonTypeAdapter(gson);

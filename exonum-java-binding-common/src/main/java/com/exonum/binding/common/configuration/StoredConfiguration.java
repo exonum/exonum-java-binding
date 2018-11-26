@@ -63,8 +63,9 @@ public abstract class StoredConfiguration {
   //TODO add majorityCount, services fields (https://jira.bf.local/browse/ECR-2683)
 
   /**
-   * Method used to automatically generate Gson type adapter through
-   * {@link com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory}.
+   * Provides a Gson type adapter for this class.
+   *
+   * @see com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory
    */
   public static TypeAdapter<StoredConfiguration> typeAdapter(Gson gson) {
     return new AutoValue_StoredConfiguration.GsonTypeAdapter(gson);

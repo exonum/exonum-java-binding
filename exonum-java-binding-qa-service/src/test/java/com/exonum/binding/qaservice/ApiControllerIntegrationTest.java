@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
@@ -456,8 +457,8 @@ class ApiControllerIntegrationTest {
         .validatorKeys(
             singletonList(
                 ValidatorKey.builder()
-                    .consensusKey(HashCode.fromString("22"))
-                    .serviceKey(HashCode.fromString("33"))
+                    .consensusKey(PublicKey.fromHexString("22"))
+                    .serviceKey(PublicKey.fromHexString("33"))
                     .build()
             )
         )
