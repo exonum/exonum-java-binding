@@ -18,7 +18,6 @@
 package com.exonum.binding.blockchain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,10 +59,11 @@ class BlockchainTest {
 
   @Test
   void getBlockTransactions() {
+    long height = 1L;
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-    when(mockSchema.getBlockTransactions(anyLong())).thenReturn(mockListIndex);
+    when(mockSchema.getBlockTransactions(height)).thenReturn(mockListIndex);
 
-    assertThat(blockchain.getBlockTransactions(1L)).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockTransactions(height)).isEqualTo(mockListIndex);
   }
 
 }
