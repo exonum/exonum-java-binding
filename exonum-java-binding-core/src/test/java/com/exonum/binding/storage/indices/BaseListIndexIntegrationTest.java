@@ -125,8 +125,7 @@ abstract class BaseListIndexIntegrationTest
   void addAllCollectionWithFirstNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(null, V2);
-      NullPointerException e = assertThrows(NullPointerException.class,
-          () -> l.addAll(addedElements));
+      assertThrows(NullPointerException.class, () -> l.addAll(addedElements));
       assertTrue(l.isEmpty());
     });
   }
@@ -135,8 +134,7 @@ abstract class BaseListIndexIntegrationTest
   void addAllCollectionWithSecondNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(V1, null);
-      NullPointerException e = assertThrows(NullPointerException.class,
-          () -> l.addAll(addedElements));
+      assertThrows(NullPointerException.class, () -> l.addAll(addedElements));
       assertTrue(l.isEmpty());
     });
   }
@@ -144,9 +142,7 @@ abstract class BaseListIndexIntegrationTest
   @Test
   void addAllNullCollection() {
     runTestWithView(database::createFork, (l) -> {
-
       assertThrows(NullPointerException.class, () -> l.addAll(null));
-
     });
   }
 
@@ -182,9 +178,7 @@ abstract class BaseListIndexIntegrationTest
       long invalidIndex = 0;
       String replacingElement = "r2";
 
-
       assertThrows(IndexOutOfBoundsException.class, () -> l.set(invalidIndex, replacingElement));
-
     });
   }
 
