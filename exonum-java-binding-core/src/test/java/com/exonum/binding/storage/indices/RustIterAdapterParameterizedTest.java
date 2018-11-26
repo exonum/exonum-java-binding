@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class RustIterAdapterParameterizedTest {
@@ -49,13 +48,13 @@ class RustIterAdapterParameterizedTest {
     return new RustIterTestFake(iterable);
   }
 
-  private static List<Arguments> testData() {
+  private static List<List<Integer>> testData() {
     return Arrays.asList(
-        Arguments.of(emptyList()),
-        Arguments.of(singletonList(1)),
-        Arguments.of(asList(1, 2)),
-        Arguments.of(asList(1, 2, 3)),
-        Arguments.of(asList(1, 2, 3, 4, 5))
+        emptyList(),
+        singletonList(1),
+        asList(1, 2),
+        asList(1, 2, 3),
+        asList(1, 2, 3, 4, 5)
     );
   }
 }
