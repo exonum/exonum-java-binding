@@ -1,5 +1,5 @@
 use exonum::api::ServiceApiBuilder;
-use exonum::blockchain::{Service, Transaction};
+use exonum::blockchain::{Service, ServiceContext, Transaction};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as MessageError;
 use exonum::messages::RawMessage;
@@ -148,6 +148,28 @@ impl Service for ServiceProxy {
                     )
                 }).unwrap(),
         }
+    }
+
+    fn after_commit(&self, context: &ServiceContext) {
+        unwrap_jni(self.exec.with_attached(|env| {
+            let view_handle = to_handle(View::from_ref_snapshot(context.snapshot()));
+            let validator_id = context.validator_id().map_or(-1, |id| i32::from(id.0));
+            let height: u64 = context.height().into();
+            panic_on_exception(
+                env,
+                env.call_method(
+                    self.service.as_obj(),
+                    "afterCommit",
+                    "(JIJ)V",
+                    &[
+                        JValue::from(view_handle),
+                        JValue::from(validator_id),
+                        JValue::from(height as i64),
+                    ],
+                ),
+            );
+            Ok(())
+        }));
     }
 
     fn wire_api(&self, builder: &mut ServiceApiBuilder) {
