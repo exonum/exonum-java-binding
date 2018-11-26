@@ -23,40 +23,30 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * Contains tests of ListIndexProxy methods that are not present in {@link ListIndex} interface.
  */
-class ListIndexProxyIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
-
-  private Database database;
+class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   private static final String LIST_NAME = "test_list";
 
-  @BeforeEach
-  void setUp() {
-    database = MemoryDb.newInstance();
+  @Override
+  ListIndexProxy<String> create(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
-  @AfterEach
-  void tearDown() {
-    database.close();
+  @Override
+  Object getAnyElement(AbstractListIndexProxy<String> index) {
+    return index.get(0L);
   }
 
   @Test

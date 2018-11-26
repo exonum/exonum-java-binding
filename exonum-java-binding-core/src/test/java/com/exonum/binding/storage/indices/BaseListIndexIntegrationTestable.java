@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Base class for common ListIndex tests.
  */
-abstract class BaseListIndexIntegrationTest
+abstract class BaseListIndexIntegrationTestable
     extends BaseIndexProxyTestable<AbstractListIndexProxy<String>> {
 
   private static final String LIST_NAME = "test_list";
