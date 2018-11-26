@@ -16,6 +16,7 @@
 
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 
 /**
@@ -25,8 +26,8 @@ class ListIndexIntegrationTest
     extends BaseListIndexIntegrationTest {
 
   @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
-    return IndexConstructors.fromOneArg(ListIndexProxy::newInstance).create(name, view);
+  ListIndexProxy<String> create(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
   @Override
