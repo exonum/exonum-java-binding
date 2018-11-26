@@ -61,17 +61,16 @@ class ListIndexProxyIntegrationTest {
 
   @Test
   void removeLastEmptyList() {
-    assertThrows(NoSuchElementException.class, () -> runTestWithView(database::createFork, (l) -> {
-      String ignored = l.removeLast();
-    }));
+    runTestWithView(database::createFork, (l) -> {
+      assertThrows(NoSuchElementException.class, l::removeLast);
+    });
   }
 
   @Test
   void removeLastWithSnapshot() {
-    assertThrows(UnsupportedOperationException.class,
-        () -> runTestWithView(database::createSnapshot, (l) -> {
-          String ignored = l.removeLast();
-        }));
+    runTestWithView(database::createSnapshot, (l) -> {
+      assertThrows(UnsupportedOperationException.class, l::removeLast);
+    });
   }
 
   @Test
@@ -162,8 +161,10 @@ class ListIndexProxyIntegrationTest {
 
   @Test
   void truncateWithSnapshot() {
-    assertThrows(UnsupportedOperationException.class,
-        () -> runTestWithView(database::createSnapshot, (l) -> l.truncate(0L)));
+    runTestWithView(database::createSnapshot, (l) -> {
+      assertThrows(UnsupportedOperationException.class,
+          () -> l.truncate(0L));
+    });
   }
 
   private void runTestWithView(Function<Cleaner, View> viewFactory,

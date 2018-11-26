@@ -201,9 +201,9 @@ abstract class BaseListIndexIntegrationTest
 
   @Test
   void getLastEmptyList() {
-    assertThrows(NoSuchElementException.class, () -> runTestWithView(database::createFork, (l) -> {
-      String ignored = l.getLast();
-    }));
+    runTestWithView(database::createFork, (l) -> {
+      assertThrows(NoSuchElementException.class, l::getLast);
+    });
   }
 
   @Test
@@ -252,8 +252,9 @@ abstract class BaseListIndexIntegrationTest
 
   @Test
   void clearWithSnapshot() {
-    assertThrows(UnsupportedOperationException.class,
-        () -> runTestWithView(database::createSnapshot, ListIndex::clear));
+    runTestWithView(database::createSnapshot, (list) -> {
+      assertThrows(UnsupportedOperationException.class, list::clear);
+    });
   }
 
   @Test
