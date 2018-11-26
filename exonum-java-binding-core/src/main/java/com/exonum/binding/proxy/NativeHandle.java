@@ -30,9 +30,12 @@ public final class NativeHandle implements AutoCloseable {
    */
   public static final long INVALID_NATIVE_HANDLE = 0L;
 
-  private long nativeHandle;
+  private final long nativeHandle;
+
+  private boolean isValid;
 
   public NativeHandle(long nativeHandle) {
+    this.isValid = true;
     this.nativeHandle = nativeHandle;
   }
 
@@ -66,11 +69,11 @@ public final class NativeHandle implements AutoCloseable {
    * Returns true if this native handle is valid.
    */
   final boolean isValid() {
-    return nativeHandle != INVALID_NATIVE_HANDLE;
+    return nativeHandle != INVALID_NATIVE_HANDLE && isValid;
   }
 
   private void invalidate() {
-    nativeHandle = INVALID_NATIVE_HANDLE;
+    isValid = false;
   }
 
   @Override

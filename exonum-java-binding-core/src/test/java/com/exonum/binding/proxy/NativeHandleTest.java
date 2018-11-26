@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-
 class NativeHandleTest {
 
   private NativeHandle nativeHandle;
@@ -42,7 +41,6 @@ class NativeHandleTest {
     long handle = NativeHandle.INVALID_NATIVE_HANDLE;
     nativeHandle = new NativeHandle(handle);
 
-    assertFalse(nativeHandle.isValid());
     assertThrows(IllegalStateException.class, () -> nativeHandle.get());
   }
 
@@ -53,6 +51,7 @@ class NativeHandleTest {
 
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
+    assertThat(nativeHandle.toString()).contains(convertHandle(handle));
   }
 
   @Test
@@ -63,13 +62,18 @@ class NativeHandleTest {
     nativeHandle.close();
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
+    assertThat(nativeHandle.toString()).contains(convertHandle(handle));
   }
 
   @Test
-  public void toStringHexRepresentation() {
+  void toStringHexRepresentation() {
     long handle = 0x11L;
     nativeHandle = new NativeHandle(handle);
 
-    assertThat(nativeHandle.toString()).contains(Long.toHexString(handle).toUpperCase());
+    assertThat(nativeHandle.toString()).contains(convertHandle(handle));
+  }
+
+  private CharSequence convertHandle(long handle) {
+    return Long.toHexString(handle).toUpperCase();
   }
 }
