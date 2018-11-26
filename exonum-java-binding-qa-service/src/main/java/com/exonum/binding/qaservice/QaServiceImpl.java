@@ -49,6 +49,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -203,6 +204,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
       Blockchain blockchain = Blockchain.newInstance(view);
       ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(height);
 
+      // TODO: same as in the next method
       return Lists.newArrayList(hashes);
     });
   }
@@ -213,7 +215,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
       Blockchain blockchain = Blockchain.newInstance(view);
       ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(blockId);
 
-      return Lists.newArrayList(hashes);
+      return hashes == null ? Collections.emptyList() : Lists.newArrayList(hashes);
     });
   }
 

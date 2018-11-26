@@ -17,8 +17,20 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_LAST_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCK_HEIGHT_PARAM;
+import static com.exonum.binding.qaservice.ApiController.BLOCK_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -27,6 +39,7 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -34,6 +47,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionResult.Type;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
@@ -56,6 +73,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
@@ -77,6 +95,9 @@ class ApiControllerIntegrationTest {
 
   private static final HashCode EXPECTED_TX_HASH = Hashing.sha256()
       .hashInt(1);
+
+  // TODO: maybe change
+  private static final String hashString = "ab";
 
   QaService qaService;
 
@@ -408,7 +429,7 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getBlockTransactions(anyLong())).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH.replace(":blockHeight", "123"))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, "123"))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -418,6 +439,243 @@ class ApiControllerIntegrationTest {
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(transactionHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlockTransactionsByBlockId(VertxTestContext context) {
+    List<HashCode> transactionHashes = Arrays
+        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    HashCode blockId = HashCode.fromString(hashString);
+    when(qaService.getBlockTransactions(blockId)).thenReturn(transactionHashes);
+
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH.replace(":" + BLOCK_ID_PARAM, hashString))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualHashes = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<List<HashCode>>() {
+              }.getType());
+          assertThat(actualHashes).isEqualTo(transactionHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxMessages(VertxTestContext context) {
+    // TODO
+//    List<TransactionMessage> transactionMessages = Arrays
+//        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+//
+//    when(qaService.getTxMessages()).thenReturn();
+//
+//    get(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH)
+//        .send(context.succeeding(response -> context.verify(() -> {
+//          assertThat(response.statusCode())
+//              .isEqualTo(HTTP_OK);
+//
+//          String body = response.bodyAsString();
+//          Object actualMessages = QaTransactionGson.instance()
+//              .fromJson(body, new TypeToken<List<TransactionMessage>>() {
+//              }.getType());
+//          assertThat(actualMessages).isEqualTo(transactionMessages);
+//
+//          context.completeNow();
+//        })));
+  }
+
+  @Test
+  void getTxResults(VertxTestContext context) {
+    Map<HashCode, TransactionResult> txResults = Arrays
+        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    when(qaService.getTxResults()).thenReturn(txResults);
+
+    get(BLOCKCHAIN_TRANSACTION_RESULTS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualTxResults = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<Map<HashCode, TransactionResult>>() {
+              }.getType());
+          assertThat(actualTxResults).isEqualTo(txResults);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxResult(VertxTestContext context) {
+    TransactionResult transactionResult = new TransactionResult(Type.SUCCESS, null);
+
+    HashCode messageHash = HashCode.fromString(hashString);
+    when(qaService.getTxResult(messageHash)).thenReturn(transactionResult);
+
+    get(BLOCKCHAIN_TRANSACTION_RESULT_PATH.replace(":" + MESSAGE_HASH_PARAM, hashString))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualResult = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<TransactionResult>() {
+              }.getType());
+          assertThat(actualResult).isEqualTo(transactionResult);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxLocations(VertxTestContext context) {
+    Map<HashCode, TransactionLocation> txLocations = Arrays
+        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    when(qaService.getTxLocations()).thenReturn(txLocations);
+
+    get(BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualTxLocations = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<List<TransactionLocation>>() {
+              }.getType());
+          assertThat(actualTxLocations).isEqualTo(txLocations);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxLocation(VertxTestContext context) {
+    TransactionLocation transactionLocation = TransactionLocation.valueOf(1L, 1L);
+
+    HashCode messageHash = HashCode.fromString(hashString);
+    when(qaService.getTxLocation(messageHash)).thenReturn(transactionLocation);
+
+    get(BLOCKCHAIN_TRANSACTION_LOCATION_PATH.replace(":" + MESSAGE_HASH_PARAM, hashString))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualLocation = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<TransactionLocation>() {
+              }.getType());
+          assertThat(actualLocation).isEqualTo(transactionLocation);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlocks(VertxTestContext context) {
+    Map<HashCode, Block> blocks = Arrays
+        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    when(qaService.getBlocks()).thenReturn(blocks);
+
+    get(BLOCKCHAIN_BLOCKS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlocks = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<Map<HashCode, Block>>() {
+              }.getType());
+          assertThat(actualBlocks).isEqualTo(blocks);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlocksByHeight(VertxTestContext context) {
+    List<Block> blocksByHeight = Arrays
+        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    when(qaService.getBlocksByHeight()).thenReturn(blocksByHeight);
+
+    get(BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlocks = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<List<Block>>() {
+              }.getType());
+          assertThat(actualBlocks).isEqualTo(blocksByHeight);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlock(VertxTestContext context) {
+    Block block =
+        Block.valueOf(
+            (short) 1,
+            1L,
+            1,
+            HashCode.fromString("ab"),
+            HashCode.fromString("ab"),
+            HashCode.fromString("ab"));
+
+    // TODO: in all places with any(HashCode.class) replace it with actual instance of HashCode and
+    // TODO: use it in replace method
+    HashCode blockId = HashCode.fromString(hashString);
+    when(qaService.getBlock(blockId)).thenReturn(block);
+
+    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_ID_PARAM, hashString))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlock = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<Block>() {
+              }.getType());
+          assertThat(actualBlock).isEqualTo(block);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getLastBlock(VertxTestContext context) {
+    Block block =
+        Block.valueOf(
+            (short) 1,
+            1L,
+            1,
+            HashCode.fromString("ab"),
+            HashCode.fromString("ab"),
+            HashCode.fromString("ab"));
+
+    when(qaService.getLastBlock()).thenReturn(block);
+
+    get(BLOCKCHAIN_LAST_BLOCK_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlock = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<Block>() {
+              }.getType());
+          assertThat(actualBlock).isEqualTo(block);
 
           context.completeNow();
         })));

@@ -24,8 +24,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
@@ -51,6 +55,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.junit5.VertxExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -298,13 +303,140 @@ class QaServiceImplIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void getBlockTransactions() {
+  void getBlockTransactionsByHeight() {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
 
       List<HashCode> hashes = service.getBlockTransactions(0L);
       assertThat(hashes).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getBlockTransactionsByBlockId() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      List<HashCode> hashes = service.getBlockTransactions(0L);
+      assertThat(hashes).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTxMessages() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
+      assertThat(txMessages).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTxResults() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      Map<HashCode, TransactionResult> txResults = service.getTxResults();
+      assertThat(txResults).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTxResult() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      // TODO
+      HashCode messageHash = HashCode.fromString("ab");
+      TransactionResult txResult = service.getTxResult(messageHash);
+//      assertThat(txResult).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTxLocations() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
+      assertThat(txLocations).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTxLocation() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      // TODO
+      HashCode messageHash = HashCode.fromString("ab");
+      TransactionLocation txLocation = service.getTxLocation(messageHash);
+//      assertThat(txResult).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getBlocks() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      Map<HashCode, Block> blocks = service.getBlocks();
+      assertThat(blocks).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getBlocksByHeight() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      List<Block> blocksByHeight = service.getBlocksByHeight();
+      assertThat(blocksByHeight).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getBlock() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      // TODO
+      HashCode blockId = HashCode.fromString("ab");
+      Block block = service.getBlock(blockId);
+//      assertThat(txResult).isEmpty();
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getLastBlock() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      // TODO
+      Block block = service.getLastBlock();
+//      assertThat(txResult).isEmpty();
     }
   }
 

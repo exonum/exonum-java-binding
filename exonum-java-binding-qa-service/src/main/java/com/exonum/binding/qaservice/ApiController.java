@@ -75,12 +75,14 @@ final class ApiController {
   static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
   @VisibleForTesting
   static final String BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/blocksByHeight";
-  private static final String BLOCK_ID_PARAM = "blockId";
+  @VisibleForTesting
+  static final String BLOCK_ID_PARAM = "blockId";
   @VisibleForTesting
   static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/" + BLOCK_ID_PARAM;
   @VisibleForTesting
   static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
-  private static final String BLOCK_HEIGHT_PARAM = "blockHeight";
+  @VisibleForTesting
+  static final String BLOCK_HEIGHT_PARAM = "blockHeight";
   @VisibleForTesting
   static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
       + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
@@ -91,7 +93,8 @@ final class ApiController {
   static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
   @VisibleForTesting
   static final String BLOCKCHAIN_TRANSACTION_RESULTS_PATH = BLOCKCHAIN_ROOT + "/txResults";
-  private static final String MESSAGE_HASH_PARAM = "messageHash";
+  @VisibleForTesting
+  static final String MESSAGE_HASH_PARAM = "messageHash";
   @VisibleForTesting
   static final String BLOCKCHAIN_TRANSACTION_RESULT_PATH = BLOCKCHAIN_ROOT + "/txResult/:"
       + MESSAGE_HASH_PARAM;
