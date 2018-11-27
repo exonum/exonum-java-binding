@@ -81,13 +81,12 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * Submits a transaction into the network.
    *
    * @param nodeHandle a native handle to the native node object
-   * @param transaction a transaction to submit
    * @param message an array containing the transaction message
    * @param offset an offset from which the message starts
    * @param size a size of the message in bytes
+   * @param serviceId an identifier of the service
    */
-  private static native void nativeSubmit(long nodeHandle, UserTransactionAdapter transaction,
-                                          byte[] message, int offset, int size)
+  private static native void nativeSubmit(long nodeHandle, byte[] message, int offset, int size, int serviceId)
       throws InvalidTransactionException, InternalServerError;
 
   /**

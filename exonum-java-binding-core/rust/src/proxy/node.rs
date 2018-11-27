@@ -87,16 +87,15 @@ impl NodeContext {
 /// Parameters:
 /// - `node_handle` - a native handle to the native node object
 /// - `transaction` - a transaction to submit
-/// - `message` - an array containing the transaction message
-/// - `offset` - an offset from which the message starts
-/// - `size` - a size of the message in bytes
+/// - `payload` - an array containing the transaction payload
+/// - `offset` - an offset from which the payload starts
+/// - `size` - a size of the payload in bytes
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
-    transaction: jobject,
-    message: jbyteArray,
+    payload: jbyteArray,
     offset: jint,
     size: jint,
     service_id: jint,
@@ -109,11 +108,10 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
         unwrap_jni_verbose(
             &env,
             || -> JniResult<()> {
-                let message = env.convert_byte_array(message)?;
-                let message = message[offset..offset + size].to_vec();
-                let service_transaction = ServiceTransaction::from_raw_unchecked(0, message);
+                let payload = env.convert_byte_array(payload)?;
+                let payload = payload[offset..offset + size].to_vec();
+                let service_transaction = ServiceTransaction::from_raw_unchecked(0, payload);
                 let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
-                let transaction = env.new_global_ref(transaction.into())?;
                 let exec = node.executor().clone();
                 if let Err(err) = node.submit(raw_transaction) {
                     let class;
