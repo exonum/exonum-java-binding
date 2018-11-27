@@ -108,15 +108,25 @@ impl Transaction for TransactionProxy {
         unwrap_jni(res)
     }
 
-    fn execute<'a>(&self, mut context: TransactionContext<'a>) -> ExecutionResult {
+    fn execute(&self, mut context: TransactionContext) -> ExecutionResult {
         let res = self.exec.with_attached(|env: &JNIEnv| {
+            let tx_hash = context.tx_hash();
+            let author_pk = context.author();
+
             let view_handle = to_handle(View::from_ref_fork(context.fork()));
+            let tx_hash = JObject::from(env.byte_array_from_slice(tx_hash.as_ref())?);
+            let author_pk = JObject::from(env.byte_array_from_slice(author_pk.as_ref())?);
+
             let res = env
                 .call_method(
                     self.transaction.as_obj(),
                     "execute",
                     "(J)V",
-                    &[JValue::from(view_handle)],
+                    &[
+                        JValue::from(view_handle),
+                        JObject::from(tx_hash),
+                        JObject::from(author_pk),
+                    ],
                 ).and_then(JValue::v);
             Ok(check_transaction_execution_result(env, res))
         });

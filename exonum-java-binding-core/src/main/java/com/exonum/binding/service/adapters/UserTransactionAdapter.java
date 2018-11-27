@@ -54,7 +54,7 @@ public final class UserTransactionAdapter {
     }
   }
 
-  public void execute(long forkNativeHandle) throws TransactionExecutionException {
+  public void execute(long forkNativeHandle, byte[] txHash, byte[] authorPK) throws TransactionExecutionException {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
