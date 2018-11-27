@@ -24,11 +24,14 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @RequiresNativeLibrary
+@ExtendWith(ViewTestExtension.class)
 class CoreSchemaProxyIntegrationTest {
 
   static {
@@ -57,15 +60,10 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      long height = 0L;
-      assertThat(schema.getBlockTransactions(height)).isEmpty();
-    }
+  void getBlockTransactionsTest(View view) {
+    CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+    long height = 0L;
+    assertThat(schema.getBlockTransactions(height)).isEmpty();
   }
 
 }
