@@ -124,8 +124,8 @@ impl Transaction for TransactionProxy {
                     "(J)V",
                     &[
                         JValue::from(view_handle),
-                        JObject::from(tx_hash),
-                        JObject::from(author_pk),
+                        JValue::from(tx_hash),
+                        JValue::from(author_pk),
                     ],
                 ).and_then(JValue::v);
             Ok(check_transaction_execution_result(env, res))
