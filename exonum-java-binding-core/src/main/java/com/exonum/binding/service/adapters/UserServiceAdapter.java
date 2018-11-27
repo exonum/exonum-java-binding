@@ -72,14 +72,16 @@ public class UserServiceAdapter {
    *
    * <p>The callee must handle the declared exceptions.
    *
-   * @param transactionMessage a transaction message to be converted
+   * @param serviceId an identifier of the service
+   * @param transactionId an identifier of the transaction
+   * @param payload a transaction payload
    * @return an executable transaction of this service
-   * @throws NullPointerException if transactionMessage is null, or a user service returns
+   * @throws NullPointerException if payload is null, or a user service returns
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  public UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
-    BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
+  public UserTransactionAdapter convertTransaction(int serviceId, int transactionId, byte[] payload) {
+    /*BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
     assert message.getServiceId() == getId() :
         "Message id is distinct from the service id";
 
@@ -88,7 +90,7 @@ public class UserServiceAdapter {
             + "Service#convertToTransaction must never return null.\n"
             + "Throw an exception if your service does not recognize this message id (%s)",
         message.getMessageType());
-    return new UserTransactionAdapter(transaction, viewFactory);
+    return new UserTransactionAdapter(transaction, viewFactory);*/
   }
 
   /**

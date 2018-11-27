@@ -95,17 +95,23 @@ impl Service for ServiceProxy {
         }))
     }
 
-    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<Transaction>, MessageError> {
+    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, MessageError> {
         unwrap_jni(self.exec.with_attached(|env| {
+            let raw_clone = raw.clone();
             // FIXME: what to do with tx id?
-            let transaction_payload = raw.clone().service_transaction().into_raw_parts().1;
-            let transaction_message =
-                JObject::from(env.byte_array_from_slice(&transaction_payload)?);
+            let service_id = raw.service_id();
+            let (tx_id, payload) = raw.service_transaction().into_raw_parts();
+            let payload = JObject::from(env.byte_array_from_slice(&payload)?);
+
             let res = env.call_method(
                 self.service.as_obj(),
                 "convertTransaction",
                 "([B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
-                &[JValue::from(transaction_message)],
+                &[
+                    JValue::from(service_id),
+                    JValue::from(tx_id),
+                    JValue::from(payload),
+                ],
             );
             // TODO consider whether `NullPointerException` should raise a panic:
             // [https://jira.bf.local/browse/ECR-944]
@@ -114,7 +120,7 @@ impl Service for ServiceProxy {
                     let java_transaction_proxy = TransactionProxy::from_global_ref(
                         self.exec.clone(),
                         env.new_global_ref(java_transaction.l()?)?,
-                        raw,
+                        raw_clone,
                     );
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
