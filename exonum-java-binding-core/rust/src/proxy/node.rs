@@ -96,20 +96,14 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     _: JClass,
     node_handle: Handle,
     payload: jbyteArray,
-    offset: jint,
-    size: jint,
     service_id: jint,
 ) {
     let res = panic::catch_unwind(|| {
-        assert!(offset >= 0, "Offset can't be negative");
-        assert!(size >= 0, "Size can't be negative");
-        let (offset, size) = (offset as usize, size as usize);
         let node = cast_handle::<NodeContext>(node_handle);
         unwrap_jni_verbose(
             &env,
             || -> JniResult<()> {
                 let payload = env.convert_byte_array(payload)?;
-                let payload = payload[offset..offset + size].to_vec();
                 let service_transaction = ServiceTransaction::from_raw_unchecked(0, payload);
                 let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
                 let exec = node.executor().clone();
