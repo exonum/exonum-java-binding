@@ -29,7 +29,8 @@ class NativeHandleTest {
 
   private static long HANDLE = 0x11L;
 
-  private static final String NATIVE_HANDLE = "11";
+  private static final String HANDLE_STRING_REPRESENTATION =
+      Long.toHexString(HANDLE).toUpperCase();
 
   @Test
   void getIfValid() {
@@ -53,7 +54,7 @@ class NativeHandleTest {
 
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
-    assertThat(nativeHandle.toString()).contains(NATIVE_HANDLE);
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 
   @Test
@@ -63,13 +64,13 @@ class NativeHandleTest {
     nativeHandle.close();
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
-    assertThat(nativeHandle.toString()).contains(NATIVE_HANDLE);
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 
   @Test
   void toStringHexRepresentation() {
     nativeHandle = new NativeHandle(HANDLE);
 
-    assertThat(nativeHandle.toString()).contains(NATIVE_HANDLE);
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 }
