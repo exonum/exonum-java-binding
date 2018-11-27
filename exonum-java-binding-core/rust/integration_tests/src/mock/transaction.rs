@@ -1,7 +1,7 @@
+use java_bindings::exonum::messages::{RawTransaction, ServiceTransaction};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::serde_json::Value;
 use java_bindings::{JniExecutor, MainExecutor, TransactionProxy};
-use java_bindings::exonum::messages::{RawTransaction, ServiceTransaction};
 
 use super::NATIVE_FACADE_CLASS;
 
@@ -81,7 +81,10 @@ pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> Tra
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction(executor: &MainExecutor, valid: bool) -> (GlobalRef, RawTransaction) {
+pub fn create_mock_transaction(
+    executor: &MainExecutor,
+    valid: bool,
+) -> (GlobalRef, RawTransaction) {
     executor
         .with_attached(|env| {
             let value = env.new_string(ENTRY_VALUE)?;

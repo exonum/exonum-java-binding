@@ -15,8 +15,8 @@ use java_bindings::{
     exonum::{
         blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
         encoding::serialize::json::ExonumJson,
-        messages::{RawTransaction, ServiceTransaction, Message},
-        storage::{Database, Entry, MemoryDB, Snapshot, Fork},
+        messages::{Message, RawTransaction, ServiceTransaction},
+        storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
     jni::JavaVM,
     MainExecutor,
@@ -224,6 +224,7 @@ where
 fn create_transaction_context(fork: &mut Fork) -> TransactionContext {
     let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![]);
     let (pk, sk) = java_bindings::exonum::crypto::gen_keypair();
-    let signed_transaction = java_bindings::exonum::messages::Message::sign_transaction(service_transaction, 0, pk, &sk);
+    let signed_transaction =
+        java_bindings::exonum::messages::Message::sign_transaction(service_transaction, 0, pk, &sk);
     TransactionContext::new(fork, &signed_transaction)
 }

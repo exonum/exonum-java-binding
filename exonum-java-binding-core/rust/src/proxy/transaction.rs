@@ -2,13 +2,13 @@ use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, Transacti
 use exonum::encoding::serialize::json::ExonumJson;
 use exonum::encoding::serialize::WriteBufferWrapper;
 use exonum::encoding::Offset;
-use exonum::messages::RawTransaction;
 use exonum::messages::BinaryForm;
+use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::JNIEnv;
+use serde;
 use serde_json;
 use serde_json::value::Value;
-use serde;
 
 use std::error::Error;
 use std::fmt;
@@ -42,7 +42,11 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawTransaction) -> Self {
+    pub fn from_global_ref(
+        exec: MainExecutor,
+        transaction: GlobalRef,
+        raw: RawTransaction,
+    ) -> Self {
         TransactionProxy {
             exec,
             transaction,
@@ -83,8 +87,13 @@ impl ExonumJson for TransactionProxy {
 }
 
 impl serde::Serialize for TransactionProxy {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as serde::Serializer>::Ok, <S as serde::Serializer>::Error> where
-        S: serde::Serializer {
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as serde::Serializer>::Ok, <S as serde::Serializer>::Error>
+    where
+        S: serde::Serializer,
+    {
         // FIXME: smth with error handling
         serializer.serialize_bytes(&self.raw.encode().unwrap())
     }

@@ -1,14 +1,14 @@
-use exonum::blockchain::{Blockchain};
+use exonum::blockchain::Blockchain;
 use exonum::crypto::PublicKey;
-use exonum::node::{ApiSender};
+use exonum::messages::Message;
 use exonum::messages::RawTransaction;
 use exonum::messages::ServiceTransaction;
-use exonum::messages::Message;
+use exonum::node::ApiSender;
 use exonum::storage::Snapshot;
+use failure;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
-use failure;
 
 use std::error::Error;
 use std::{io, panic, ptr};
@@ -71,8 +71,14 @@ impl NodeContext {
     pub fn submit(&self, transaction: RawTransaction) -> Result<(), failure::Error> {
         let service_id = transaction.service_id();
         // FIXME: using hidden service_keypair
-        let signed_transaction = Message::sign_transaction(transaction.service_transaction(), service_id, self.public_key, &self.blockchain.service_keypair.1);
-        self.transaction_sender.broadcast_transaction(signed_transaction)
+        let signed_transaction = Message::sign_transaction(
+            transaction.service_transaction(),
+            service_id,
+            self.public_key,
+            &self.blockchain.service_keypair.1,
+        );
+        self.transaction_sender
+            .broadcast_transaction(signed_transaction)
     }
 }
 
