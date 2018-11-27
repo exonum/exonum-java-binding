@@ -87,9 +87,6 @@ class CoreSchemaProxyIntegrationTest {
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
       // TODO: implement
-      System.out.println("Last block:");
-      System.out.println(schema.getLastBlock());
-//      assertThat(schema.getLastBlock());
     }
   }
 
