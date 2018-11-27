@@ -27,13 +27,16 @@ class NativeHandleTest {
 
   private NativeHandle nativeHandle;
 
+  private static long HANDLE = 0x11L;
+
+  private static final String NATIVE_HANDLE = "11";
+
   @Test
   void getIfValid() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
     assertTrue(nativeHandle.isValid());
-    assertThat(nativeHandle.get()).isEqualTo(handle);
+    assertThat(nativeHandle.get()).isEqualTo(HANDLE);
   }
 
   @Test
@@ -46,34 +49,27 @@ class NativeHandleTest {
 
   @Test
   void close() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
-    assertThat(nativeHandle.toString()).contains(convertHandle(handle));
+    assertThat(nativeHandle.toString()).contains(NATIVE_HANDLE);
   }
 
   @Test
   void closeMultipleTimes() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
     nativeHandle.close();
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
-    assertThat(nativeHandle.toString()).contains(convertHandle(handle));
+    assertThat(nativeHandle.toString()).contains(NATIVE_HANDLE);
   }
 
   @Test
   void toStringHexRepresentation() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
-    assertThat(nativeHandle.toString()).contains(convertHandle(handle));
-  }
-
-  private CharSequence convertHandle(long handle) {
-    return Long.toHexString(handle).toUpperCase();
+    assertThat(nativeHandle.toString()).contains(NATIVE_HANDLE);
   }
 }
