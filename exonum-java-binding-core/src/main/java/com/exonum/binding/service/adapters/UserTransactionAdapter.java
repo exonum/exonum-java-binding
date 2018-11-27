@@ -18,10 +18,14 @@ package com.exonum.binding.service.adapters;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.logging.log4j.LogManager;
@@ -54,13 +58,16 @@ public final class UserTransactionAdapter {
     }
   }
 
-  public void execute(long forkNativeHandle, byte[] txHash, byte[] authorPK) throws TransactionExecutionException {
+  public void execute(long forkNativeHandle, byte[] txHashBytes, byte[] authorPKBytes) throws TransactionExecutionException {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
       try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
-        Fork view = viewFactory.createFork(forkNativeHandle, cleaner);
-        transaction.execute(view);
+        Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
+        HashCode hash = HashCode.fromBytes(txHashBytes);
+        PublicKey authorPK = PublicKey.fromBytes(authorPKBytes);
+        TransactionContext context = new InternalTransactionContext(fork, hash, authorPK);
+        transaction.execute(context);
       }
 
     } catch (TransactionExecutionException e) {

@@ -17,6 +17,7 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import java.util.function.Function;
 
@@ -34,12 +35,12 @@ public interface Node {
    * <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
    *
-   * @param transaction a transaction to send
+   * @param rawTransaction a transaction to send
    * @throws InvalidTransactionException if the transaction is not valid
    * @throws InternalServerError if this node failed to process the transaction
    * @throws NullPointerException if the transaction is null
    */
-  void submitTransaction(Transaction transaction)
+  void submitTransaction(RawTransaction rawTransaction)
       throws InvalidTransactionException, InternalServerError;
 
   /**

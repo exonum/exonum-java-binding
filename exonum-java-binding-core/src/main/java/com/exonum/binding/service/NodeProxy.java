@@ -25,6 +25,7 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
@@ -58,35 +59,22 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public void submitTransaction(Transaction transaction)
+  public void submitTransaction(RawTransaction rawTransaction)
       throws InvalidTransactionException, InternalServerError {
-    BinaryMessage message = transaction.getMessage();
-    ByteBuffer messageBuffer = message.getSignedMessage();
+    byte[] payload = rawTransaction.getPayload();
+    int serviceId = (int)rawTransaction.getServiceId();
 
-    // Currently this method and the native code support only array-backed ByteBuffers.
-    checkArgument(messageBuffer.hasArray(),
-        "The byte buffer does not provide an array (it is either a direct or read-only). "
-            + "direct=%s, ro=%s", messageBuffer.isDirect(), messageBuffer.isReadOnly());
-
-    byte[] data = messageBuffer.array();
-    int offset = messageBuffer.arrayOffset();
-    int size = messageBuffer.remaining();
-
-    UserTransactionAdapter txAdapter = new UserTransactionAdapter(transaction, viewFactory);
-
-    nativeSubmit(getNativeHandle(), txAdapter, data, offset, size);
+    nativeSubmit(getNativeHandle(), payload, serviceId);
   }
 
   /**
    * Submits a transaction into the network.
    *
    * @param nodeHandle a native handle to the native node object
-   * @param message an array containing the transaction message
-   * @param offset an offset from which the message starts
-   * @param size a size of the message in bytes
+   * @param payload an array containing the transaction payload
    * @param serviceId an identifier of the service
    */
-  private static native void nativeSubmit(long nodeHandle, byte[] message, int offset, int size, int serviceId)
+  private static native void nativeSubmit(long nodeHandle, byte[] payload, int serviceId)
       throws InvalidTransactionException, InternalServerError;
 
   /**

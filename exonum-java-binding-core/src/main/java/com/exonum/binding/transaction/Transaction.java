@@ -47,7 +47,7 @@ public interface Transaction {
   /**
    * Execute the transaction, possibly modifying the blockchain state.
    *
-   * @param view a database view, which allows to modify the blockchain state
+   * @param context a transaction execution context, which allows to access transaction-related data.
    * @throws TransactionExecutionException if the transaction cannot be executed normally
    *     and has to be rolled back. The transaction will be committed as failed (status "error"),
    *     the error code with the optional description will be saved into the storage. The client
@@ -56,7 +56,7 @@ public interface Transaction {
    *     must not throw such exceptions. The transaction will be committed as failed
    *     (status "panic").
    */
-  void execute(Fork view) throws TransactionExecutionException;
+  void execute(TransactionContext context) throws TransactionExecutionException;
 
   /**
    * Returns some information about this transaction in JSON format.
