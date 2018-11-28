@@ -173,6 +173,8 @@ class ApiControllerTest {
 
     // Submit the message
     post(ApiController.SUBMIT_TRANSACTION_PATH)
+//        .putHeader("Content-Type", "application/octet-stream") // A proper content type.
+        .putHeader("Content-Type", "application/x-www-form-urlencoded") // <-- Will fail some tests!
         .sendBuffer(
             Buffer.buffer(txMessage.getSignedMessage().array()),
             context.succeeding(
