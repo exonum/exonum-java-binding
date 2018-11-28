@@ -25,7 +25,7 @@ import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.common.message.Message;
 import com.google.protobuf.ByteString;
 
-class CreateWalletTransactionUtils {
+public class CreateWalletTransactionUtils {
 
   static final long DEFAULT_BALANCE = 100L;
 
@@ -49,7 +49,7 @@ class CreateWalletTransactionUtils {
    * Creates new unsigned binary create wallet message using provided owner key and provided
    * balance.
    */
-  static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
+  public static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
     return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
         .setBody(TxMessageProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))

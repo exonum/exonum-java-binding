@@ -20,9 +20,11 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,9 +33,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils;
+import com.exonum.binding.cryptocurrency.transactions.CreateWalletTx;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
 import com.exonum.binding.service.InternalServerError;
@@ -53,10 +60,14 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -144,6 +155,80 @@ class ApiControllerTest {
 
                   context.completeNow();
                 })));
+  }
+
+  @ParameterizedTest
+  @MethodSource("variousValidTransactions2")
+  void submitVariousValidTransactionsUntilControllerFails(
+      BinaryMessage txMessage, VertxTestContext context) {
+
+    // Setup test
+    Transaction tx = CreateWalletTx.fromMessage(txMessage);
+    when(service.convertToTransaction(
+        any())) //argThat((actual) -> actual.getSignedMessage().equals(txMessage.getSignedMessage()))))
+        .thenReturn(tx);
+    HashCode messageHash = txMessage.hash();
+    when(service.submitTransaction(tx))
+        .thenReturn(messageHash);
+
+    // Submit the message
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .sendBuffer(
+            Buffer.buffer(txMessage.getSignedMessage().array()),
+            context.succeeding(
+                response -> context.verify(() -> {
+                  // Verify the test results (all must be OK)
+                  assertAll(
+                      () -> {
+                        // Check the response status
+                        int statusCode = response.statusCode();
+                        assertEquals(HTTP_OK, statusCode);
+                      },
+
+                      () -> {
+                        // Check the payload type
+                        String contentType = response.getHeader("Content-Type");
+                        assertEquals("text/plain", contentType);
+                      },
+
+                      () -> {
+                        // Check the response body
+                        String body = response.bodyAsString();
+                        assertEquals(messageHash.toString(), body);
+                      },
+
+                      () -> {
+                        // Verify that a proper transaction was submitted to the network
+                        verify(service).submitTransaction(eq(tx));
+                      }
+                  );
+
+                  context.completeNow();
+                })));
+  }
+
+  private static Stream<BinaryMessage> variousValidTransactions() {
+    KeyPair ownerKeyPair = CryptoFunctions.ed25519().generateKeyPair(
+        Hashing.sha256().hashString("seed", UTF_8).asBytes()
+    );
+    int balanceRangeStart = 100000;
+    int balanceRangeEnd = balanceRangeStart + 1024;
+
+    return IntStream.range(balanceRangeStart, balanceRangeEnd)
+        .mapToObj(balance -> CreateWalletTransactionUtils.createUnsignedMessage(
+            ownerKeyPair.getPublicKey(), balance))
+        .map(unsigned -> unsigned.sign(CryptoFunctions.ed25519(), ownerKeyPair.getPrivateKey()));
+  }
+
+  private static Stream<BinaryMessage> variousValidTransactions2() {
+    int numMessages = 16 * 1024;
+
+    return IntStream.range(0, numMessages)
+        // Each gets its own random key pair
+        .mapToObj(i -> CryptoFunctions.ed25519().generateKeyPair())
+        .map((ownerKeyPair) -> CreateWalletTransactionUtils.createUnsignedMessage(
+            ownerKeyPair.getPublicKey(), 100500)
+            .sign(CryptoFunctions.ed25519(), ownerKeyPair.getPrivateKey()));
   }
 
   @Test
