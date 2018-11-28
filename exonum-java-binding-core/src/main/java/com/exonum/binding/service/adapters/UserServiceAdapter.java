@@ -29,6 +29,7 @@ import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
@@ -81,16 +82,9 @@ public class UserServiceAdapter {
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
   public UserTransactionAdapter convertTransaction(int serviceId, int transactionId, byte[] payload) {
-    /*BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
-    assert message.getServiceId() == getId() :
-        "Message id is distinct from the service id";
-
-    Transaction transaction = service.convertToTransaction(message);
-    checkNotNull(transaction, "Invalid service implementation: "
-            + "Service#convertToTransaction must never return null.\n"
-            + "Throw an exception if your service does not recognize this message id (%s)",
-        message.getMessageType());
-    return new UserTransactionAdapter(transaction, viewFactory);*/
+    RawTransaction rawTransaction = new RawTransaction((short)serviceId, (short)transactionId, payload);
+    Transaction transaction = service.convertToTransaction(rawTransaction);
+    return new UserTransactionAdapter(transaction, viewFactory);
   }
 
   /**
