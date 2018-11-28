@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Service;
 import java.util.List;
@@ -51,4 +52,6 @@ public interface QaService extends Service {
   List<HashCode> getAllBlockHashes();
 
   List<HashCode> getBlockTransactions(long height);
+
+  StoredConfiguration getActualConfiguration();
 }
