@@ -57,13 +57,6 @@ class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  void closeShallNotDisposeInvalidHandle() {
-    proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
-    proxy.close();
-    assertThat(proxy.timesDisposed, equalTo(0));
-  }
-
-  @Test
   void closeShallNotDisposeNotOwningHandle() {
     proxy = new NativeProxyFake(1L, false);
     proxy.close();
@@ -101,12 +94,6 @@ class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  void shallNotBeValidIfInvalidHandle() {
-    proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
-    assertFalse(proxy.isValidHandle());
-  }
-
-  @Test
   void getNativeHandle() {
     long expectedNativeHandle = 0x1FL;
     proxy = new NativeProxyFake(expectedNativeHandle, true);
@@ -126,9 +113,8 @@ class AbstractCloseableNativeProxyTest {
   @Test
   void getNativeHandle_ShallFailIfInvalid() {
     long invalidHandle = 0x0L;
-    proxy = new NativeProxyFake(invalidHandle, true);
 
-    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
+    assertThrows(IllegalStateException.class, () -> new NativeProxyFake(invalidHandle, true));
   }
 
   @Test

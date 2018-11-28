@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 
 /**
- * An implementation-specific handle to the native object. Once closed, can no longer be accessed.
+ * An implementation-specific handle to the native object.
  */
 public final class NativeHandle implements AutoCloseable {
 
@@ -34,9 +34,16 @@ public final class NativeHandle implements AutoCloseable {
 
   private boolean isValid;
 
+  /**
+   * Creates new native handle. Validates it's state not allowing to create nullptr handle.
+   *
+   * @throws IllegalStateException if this native handle is invalid (nullptr)
+   */
   public NativeHandle(long nativeHandle) {
-    this.isValid = true;
     this.nativeHandle = nativeHandle;
+    this.isValid = true;
+
+    checkValid();
   }
 
   /**

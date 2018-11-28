@@ -43,9 +43,8 @@ class NativeHandleTest {
   @Test
   void getInvalid() {
     long handle = NativeHandle.INVALID_NATIVE_HANDLE;
-    nativeHandle = new NativeHandle(handle);
 
-    assertThrows(IllegalStateException.class, () -> nativeHandle.get());
+    assertThrows(IllegalStateException.class, () -> nativeHandle = new NativeHandle(handle));
   }
 
   @Test
