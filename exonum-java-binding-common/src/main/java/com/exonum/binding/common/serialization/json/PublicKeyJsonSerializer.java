@@ -39,6 +39,8 @@ public final class PublicKeyJsonSerializer
 
   /**
    * Serialize PublicKey to JsonElement.
+   *
+   * @throws NullPointerException in case of src is null
    */
   @Override
   public JsonElement serialize(PublicKey src, Type typeOfSrc, JsonSerializationContext context) {
@@ -49,6 +51,8 @@ public final class PublicKeyJsonSerializer
 
   /**
    * Deserialize PublicKey from JsonElement.
+   *
+   * @throws NullPointerException in case of src is null
    */
   @Override
   public PublicKey deserialize(JsonElement json, Type typeOfT,

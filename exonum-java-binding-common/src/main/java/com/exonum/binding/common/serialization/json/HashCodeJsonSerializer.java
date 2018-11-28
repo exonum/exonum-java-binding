@@ -39,6 +39,8 @@ public final class HashCodeJsonSerializer
 
   /**
    * Serialize HashCode to JsonElement.
+   *
+   * @throws NullPointerException in case of src is null
    */
   @Override
   public JsonElement serialize(HashCode src, Type typeOfSrc, JsonSerializationContext context) {
@@ -49,6 +51,8 @@ public final class HashCodeJsonSerializer
 
   /**
    * Deserialize HashCode from JsonElement.
+   *
+   * @throws NullPointerException in case of json element is null
    */
   @Override
   public HashCode deserialize(JsonElement json, Type typeOfT,
