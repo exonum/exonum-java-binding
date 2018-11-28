@@ -83,6 +83,9 @@ final class ApiController {
   }
 
   private void submitTransaction(RoutingContext rc) {
+    checkRequestContentType(rc, "application/octet-stream");
+
+    // Read the transaction message
     Buffer buffer = rc.getBody();
     BinaryMessage message = BinaryMessage.fromBytes(buffer.getBytes());
 
@@ -95,6 +98,14 @@ final class ApiController {
     rc.response()
         .putHeader("Content-Type", "text/plain")
         .end(String.valueOf(txHash));
+  }
+
+  private void checkRequestContentType(RoutingContext rc,
+      String expectedContentType) {
+    String contentType = rc.request().getHeader("Content-Type");
+
+    checkArgument(expectedContentType.equals(contentType), "Content-Type must be %s, but %s",
+        expectedContentType, contentType);
   }
 
   private void getWallet(RoutingContext rc) {
