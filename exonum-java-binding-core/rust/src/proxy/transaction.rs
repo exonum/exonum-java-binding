@@ -5,6 +5,7 @@ use exonum::encoding::Offset;
 use exonum::messages::{Message, RawMessage};
 use exonum::storage::Fork;
 use jni::objects::{GlobalRef, JObject, JValue};
+use jni::signature::{JavaType, Primitive};
 use jni::JNIEnv;
 use serde_json;
 use serde_json::value::Value;
@@ -15,15 +16,12 @@ use std::fmt;
 use storage::View;
 use utils::{
     check_error_on_exception, convert_to_string, describe_java_exception,
-    get_and_clear_java_exception, get_exception_message, panic_on_exception, to_handle, unwrap_jni,
+    get_and_clear_java_exception, get_exception_message, jni_cache, panic_on_exception, to_handle,
+    unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
-const CLASS_TRANSACTION_EXCEPTION: &str =
-    "com/exonum/binding/transaction/TransactionExecutionException";
-
-static CACHED_METHODS: ::std::sync::Once = ::std::sync::Once::new();
-static mut CACHED_EXECUTE: Option<::jni::objects::JMethodID> = None;
+const RETVAL_TYPE_STRING: &str = "java/lang/String";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -45,21 +43,6 @@ impl fmt::Debug for TransactionProxy {
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
     pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawMessage) -> Self {
-        CACHED_METHODS.call_once(|| {
-            exec.with_attached(|env| {
-                unsafe {
-                    let cached_execute = env
-                        .get_method_id(
-                            "com/exonum/binding/service/adapters/UserTransactionAdapter",
-                            "execute",
-                            "(J)V",
-                        ).unwrap();
-                    let raw = cached_execute.into_inner();
-                    CACHED_EXECUTE = Some(raw.into());
-                }
-                Ok(())
-            });
-        });
         TransactionProxy {
             exec,
             transaction,
@@ -84,12 +67,15 @@ impl ExonumJson for TransactionProxy {
 
     fn serialize_field(&self) -> Result<Value, Box<Error + Send + Sync>> {
         let res: Result<String, String> = unwrap_jni(self.exec.with_attached(|env| {
-            let res = env.call_method(
-                self.transaction.as_obj(),
-                "info",
-                "()Ljava/lang/String;",
-                &[],
-            );
+            let res = unsafe {
+                env.call_method_unsafe(
+                    self.transaction.as_obj(),
+                    jni_cache::get_uta_info(),
+                    JavaType::Object(RETVAL_TYPE_STRING.into()),
+                    &[],
+                )
+            };
+
             Ok(check_error_on_exception(env, res).map(|json_string| {
                 let obj = unwrap_jni(json_string.l());
                 unwrap_jni(convert_to_string(env, obj))
@@ -102,7 +88,14 @@ impl ExonumJson for TransactionProxy {
 impl Transaction for TransactionProxy {
     fn verify(&self) -> bool {
         let res = self.exec.with_attached(|env: &JNIEnv| {
-            let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
+            let res = unsafe {
+                env.call_method_unsafe(
+                    self.transaction.as_obj(),
+                    jni_cache::get_uta_verify(),
+                    JavaType::Primitive(Primitive::Boolean),
+                    &[],
+                )
+            };
             panic_on_exception(env, res).z()
         });
         unwrap_jni(res)
@@ -114,8 +107,8 @@ impl Transaction for TransactionProxy {
             let res = unsafe {
                 env.call_method_unsafe(
                     self.transaction.as_obj(),
-                    CACHED_EXECUTE.unwrap(),
-                    ::jni::signature::JavaType::Primitive(::jni::signature::Primitive::Void),
+                    jni_cache::get_uta_execute(),
+                    JavaType::Primitive(Primitive::Void),
                     &[JValue::from(view_handle)],
                 ).and_then(JValue::v)
             };
@@ -155,7 +148,7 @@ fn check_transaction_execution_result<T>(
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = unwrap_jni(get_exception_message(env, exception));
-            if !unwrap_jni(env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION)) {
+            if !unwrap_jni(env.is_instance_of(exception, &jni_cache::get_tee_class())) {
                 let panic_msg = describe_java_exception(env, exception);
                 panic!(panic_msg);
             }

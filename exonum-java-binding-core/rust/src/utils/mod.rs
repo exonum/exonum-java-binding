@@ -20,6 +20,7 @@ mod errors;
 mod exception;
 mod handle;
 mod jni;
+pub mod jni_cache;
 mod pair_iter;
 mod resource_manager;
 

@@ -1,17 +1,33 @@
 use jni::objects::JObject;
+use jni::signature::JavaType;
 use jni::JNIEnv;
 
 use utils::convert_to_string;
+use utils::jni_cache;
 use JniResult;
+
+const RETVAL_TYPE_STRING: &str = "java/lang/String";
+const RETVAL_TYPE_CLASS: &str = "java/lang/Class";
 
 /// Returns a class name of an object as a `String`.
 pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
-    let class_object = env
-        .call_method(object, "getClass", "()Ljava/lang/Class;", &[])?
-        .l()?;
-    let class_name = env
-        .call_method(class_object, "getName", "()Ljava/lang/String;", &[])?
-        .l()?;
+    let class_object = unsafe {
+        env.call_method_unsafe(
+            object,
+            jni_cache::get_object_get_class(),
+            JavaType::Object(RETVAL_TYPE_CLASS.into()),
+            &[],
+        )
+    }?.l()?;
+
+    let class_name = unsafe {
+        env.call_method_unsafe(
+            class_object,
+            jni_cache::get_class_get_name(),
+            JavaType::Object(RETVAL_TYPE_STRING.into()),
+            &[],
+        )
+    }?.l()?;
     convert_to_string(env, class_name)
 }
 
@@ -20,7 +36,14 @@ pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
 /// `exception` should extend `java.lang.Throwable` and be not null
 pub fn get_exception_message(env: &JNIEnv, exception: JObject) -> JniResult<Option<String>> {
     assert!(!exception.is_null(), "Invalid exception argument");
-    let message = env.call_method(exception, "getMessage", "()Ljava/lang/String;", &[])?;
+    let message = unsafe {
+        env.call_method_unsafe(
+            exception,
+            jni_cache::get_throwable_get_message(),
+            JavaType::Object(RETVAL_TYPE_STRING.into()),
+            &[],
+        )
+    }?;
     let message = message.l()?;
     if message.is_null() {
         return Ok(None);
