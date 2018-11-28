@@ -22,6 +22,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
@@ -78,7 +79,7 @@ public interface Service {
    * @throws IllegalArgumentException if the message is not a transaction of this service
    * @throws NullPointerException if message is null
    */
-  Transaction convertToTransaction(BinaryMessage message);
+  Transaction convertToTransaction(RawTransaction rawTransaction);
 
   /**
    * Returns a list of root hashes of all Merklized tables defined by this service,
