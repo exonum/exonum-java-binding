@@ -99,20 +99,20 @@ pub fn cache_methods(env: &JNIEnv) {
     }
 }
 
-// Helper method. Produces JMethodID for a particular class dealing with lifetime.
+// Helper method. Produces `JMethodID` for a particular class dealing with lifetime.
 fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMethodID<'static>> {
     env.get_method_id(class, name, sig)
-        // we need this line to deal with lifetime
+        // we need this line to erase lifetime in order to save underlying raw pointer in static
         .map(|mid| mid.into_inner().into())
         .ok()
 }
 
-/// Returns cached `JClass` for "java/lang/Error" as a GlobalRef
+/// Returns cached `JClass` for `java/lang/Error` as a `GlobalRef`
 pub fn get_error_class() -> GlobalRef {
     unsafe { CLASS_CACHED_ERROR.clone().unwrap() }
 }
 
-/// Returns cached `JClass` for "TransactionExecutionException" as a GlobalRef
+/// Returns cached `JClass` for `TransactionExecutionException` as a `GlobalRef`
 pub fn get_tee_class() -> GlobalRef {
     unsafe { CLASS_CACHED_TEE.clone().unwrap() }
 }
