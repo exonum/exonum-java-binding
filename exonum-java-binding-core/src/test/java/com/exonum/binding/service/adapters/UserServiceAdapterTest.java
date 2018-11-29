@@ -22,10 +22,12 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +40,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.testutils.LoggingTestUtils;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import io.vertx.ext.web.Router;
@@ -46,6 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.test.appender.ListAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -266,4 +270,19 @@ class UserServiceAdapterTest {
 
     assertTrue(cleaner.isClosed());
   }
+
+  @Test
+  void afterCommit_unexpectedException() {
+    ListAppender appender = LoggingTestUtils.getCapturingLogAppender();
+    appender.clear();
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class))).thenReturn(snapshot);
+    doThrow(NullPointerException.class).when(service).afterCommit(any(BlockCommittedEvent.class));
+
+    serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
+
+    List<String> logs = appender.getMessages();
+    assertThat(logs, hasSize(1));
+    assertThat(logs.get(0), containsString("Unexpected exception during after commit event"));
+  }
+
 }

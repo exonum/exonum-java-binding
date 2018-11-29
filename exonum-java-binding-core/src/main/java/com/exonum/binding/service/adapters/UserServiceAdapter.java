@@ -36,12 +36,16 @@ import io.vertx.ext.web.Router;
 import java.util.List;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An adapter of a user-facing interface {@link Service} to an interface with a native code.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
 public class UserServiceAdapter {
+
+  private static final Logger LOGGER = LogManager.getLogger(UserServiceAdapter.class);
 
   private static final String API_ROOT_PATH = "/api";
 
@@ -110,6 +114,7 @@ public class UserServiceAdapter {
           .map(HashCode::asBytes)
           .toArray(byte[][]::new);
     } catch (CloseFailuresException e) {
+      LOGGER.error("Failed to close resources during getStateHashes", e);
       throw new RuntimeException(e);
     }
   }
@@ -130,6 +135,7 @@ public class UserServiceAdapter {
       return service.initialize(fork)
           .orElse(null);
     } catch (CloseFailuresException e) {
+      LOGGER.error("Failed to close resources during initialize", e);
       throw new RuntimeException(e);
     }
   }
@@ -151,16 +157,25 @@ public class UserServiceAdapter {
   public void afterCommit(long snapshotHandle, int validatorId, long height) {
     assert snapshotHandle != 0;
 
+    BlockCommittedEvent event = null;
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#afterCommit")) {
       Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
       OptionalInt optionalValidatorId = validatorId >= 0
           ? OptionalInt.of(validatorId)
           : OptionalInt.empty();
-      BlockCommittedEvent event =
-          BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
-      service.afterCommit(event);
+      event = BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
+      doAfterCommit(event);
     } catch (CloseFailuresException e) {
+      LOGGER.error("Failed to close resources during after commit event {}", event, e);
       throw new RuntimeException(e);
+    }
+  }
+
+  private void doAfterCommit(BlockCommittedEvent event) {
+    try {
+      service.afterCommit(event);
+    } catch (Exception e) {
+      LOGGER.error("Unexpected exception during after commit event {}", event, e);
     }
   }
 
