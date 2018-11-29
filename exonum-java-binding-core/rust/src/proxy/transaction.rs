@@ -100,14 +100,6 @@ impl serde::Serialize for TransactionProxy {
 }
 
 impl Transaction for TransactionProxy {
-    fn verify(&self) -> bool {
-        let res = self.exec.with_attached(|env: &JNIEnv| {
-            let res = env.call_method(self.transaction.as_obj(), "isValid", "()Z", &[]);
-            panic_on_exception(env, res).z()
-        });
-        unwrap_jni(res)
-    }
-
     fn execute(&self, mut context: TransactionContext) -> ExecutionResult {
         let res = self.exec.with_attached(|env: &JNIEnv| {
             let tx_hash = context.tx_hash();
