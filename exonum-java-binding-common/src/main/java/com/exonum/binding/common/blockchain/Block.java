@@ -49,7 +49,7 @@ public abstract class Block {
   public abstract short getProposerId();
 
   /**
-   * Height of the block, which is also the number of this particular block in the blockchain.
+   * Height of the block, which also identifies the number of this particular block in the blockchain.
    */
   public abstract long getHeight();
 

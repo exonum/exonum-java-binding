@@ -106,8 +106,7 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a table that stores a block object for every block hash.
-   * @return a map with block object for every block hash
+   * Returns a map that stores a block object for every block hash.
    */
   MapIndex<HashCode, Block> getBlocks() {
     return MapIndexProxy.newInstance(
@@ -116,7 +115,6 @@ final class CoreSchemaProxy {
 
   /**
    * Returns the latest committed block.
-   * @return the latest committed block object
    * @throws RuntimeException if the "genesis block" was not created
    */
   Block getLastBlock() {
@@ -124,9 +122,7 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a table that represents a map with a key-value pair of a
-   * transaction hash and transaction message.
-   * @return a map with a key-value pair of a transaction hash and transaction message
+   * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
     // TODO: serializer
@@ -135,9 +131,7 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a table that represents a map with a key-value pair of a transaction
-   * hash and execution result.
-   * @return a map with a key-value pair of a transaction hash and execution result
+   * Returns a map with a key-value pair of a transaction hash and execution result.
    */
   ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
     return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
@@ -145,18 +139,12 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a table that keeps the block height and transaction position inside the block for every
+   * Returns a map that keeps the block height and transaction position inside the block for every
    * transaction hash.
-   * @return a map with transaction position for every transaction hash
    */
   MapIndex<HashCode, TransactionLocation> getTxLocations() {
     return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_LOCATIONS, dbView,
         StandardSerializers.hash(), transactionLocationSerializer);
-  }
-
-  @SuppressWarnings("unused") // TODO: should be implemented later
-  UncheckedMapProof getProofToServiceCollection(short serviceId, int collectionIndex) {
-    throw new NotImplementedException();
   }
 
   private static native long nativeCreate(long viewNativeHandle);

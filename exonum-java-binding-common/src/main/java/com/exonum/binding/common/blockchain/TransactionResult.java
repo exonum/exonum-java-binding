@@ -16,74 +16,42 @@
 
 package com.exonum.binding.common.blockchain;
 
-import com.google.common.base.Objects;
-import java.io.Serializable;
+import com.google.auto.value.AutoValue;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Returns a result of transaction execution. This result may be either a success, or an error,
  * if execution has failed. Errors consist of an error code and an optional description.
  */
-public class TransactionResult implements Serializable {
+@AutoValue
+public abstract class TransactionResult {
 
-  private Type type;
-  private TransactionError error;
-
-  public TransactionResult(Type type, TransactionError error) {
-    this.type = type;
-    this.error = error;
-  }
-
-  /**
-   * Return whether transaction was successful or not.
-   * @return true if transaction was successful, false otherwise
-   */
-  public boolean isSuccessful() {
-    return type == Type.SUCCESS;
+  public static TransactionResult valueOf(Type type, @Nullable TransactionError error) {
+    return new AutoValue_TransactionResult(type, Optional.ofNullable(error));
   }
 
   /**
    * Return type of the transaction.
    * @return {@code Type.SUCCESS} if transaction was successful
    *         {@code Type.ERROR} if there was an error during transaction execution
-   *         {@code Type.UNEXPECTED_ERROR} if there was an error during transaction execution
+   *         {@code Type.UNEXPECTED_ERROR} if there was an unexpected error during transaction
+   *         execution
    */
-  public Type getType() {
-    return type;
-  }
+  public abstract Type getType();
 
   /**
    * Return a transaction error object of transaction if its execution resulted in an error.
    * @return a transaction error object, or {@code Optional.empty()} if transaction was successful
    */
-  public Optional<TransactionError> getError() {
-    return Optional.ofNullable(error);
-  }
+  public abstract Optional<TransactionError> getError();
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    TransactionResult that = (TransactionResult) o;
-    return type == that.type &&
-        Objects.equal(error, that.error);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(type, error);
-  }
-
-  @Override
-  public String toString() {
-    return "TransactionResult{" +
-        "type=" + type +
-        ", error=" + error +
-        '}';
+  /**
+   * Return whether transaction was successful or not.
+   * @return true if transaction was successful, false otherwise
+   */
+  public boolean isSuccessful() {
+    return getType() == Type.SUCCESS;
   }
 
   public enum Type {

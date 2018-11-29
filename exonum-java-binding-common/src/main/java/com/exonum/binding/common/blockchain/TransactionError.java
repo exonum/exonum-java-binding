@@ -20,25 +20,25 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Objects;
 import java.io.Serializable;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Result of unsuccessful transaction execution.
  */
 @AutoValue
-public abstract class TransactionError implements Serializable {
+public abstract class TransactionError {
 
-  public static TransactionError valueOf(byte errorCode, String description) {
-    return new AutoValue_TransactionError(errorCode, description);
+  public static TransactionError valueOf(byte errorCode, @Nullable String description) {
+    return new AutoValue_TransactionError(errorCode, Optional.ofNullable(description));
   }
 
   /**
-   * Return an error code of a transaction error.
-   * @return an error code of a transaction error
+   * Returns an error code of a transaction error.
    */
   public abstract byte getErrorCode();
 
   /**
-   * Return an optional description of a transaction error.
+   * Returns an optional description of a transaction error.
    * @return a description of an error, or {@code Optional.empty()} otherwise
    */
   public abstract Optional<String> getDescription();

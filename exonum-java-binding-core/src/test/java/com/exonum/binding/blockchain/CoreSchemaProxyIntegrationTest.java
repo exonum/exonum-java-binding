@@ -19,6 +19,7 @@ package com.exonum.binding.blockchain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -76,7 +77,7 @@ class CoreSchemaProxyIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      assertThat(schema.getBlocks().isEmpty()).isTrue();
+      assertTrue(schema.getBlocks().isEmpty());
     }
   }
 
@@ -98,7 +99,7 @@ class CoreSchemaProxyIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      assertThat(schema.getTxMessages().isEmpty()).isTrue();
+      assertTrue(schema.getTxMessages().isEmpty());
     }
   }
 
@@ -109,7 +110,7 @@ class CoreSchemaProxyIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      assertThat(schema.getTxResults().isEmpty()).isTrue();
+      assertTrue(schema.getTxResults().isEmpty());
     }
   }
 
@@ -120,7 +121,7 @@ class CoreSchemaProxyIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
 
       CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      assertThat(schema.getTxLocations().isEmpty()).isTrue();
+      assertTrue(schema.getTxLocations().isEmpty());
     }
   }
 }
