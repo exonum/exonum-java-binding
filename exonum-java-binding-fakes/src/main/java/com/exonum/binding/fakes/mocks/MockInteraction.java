@@ -1,10 +1,11 @@
 package com.exonum.binding.fakes.mocks;
 
 import com.google.gson.Gson;
-
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -13,18 +14,21 @@ import org.mockito.stubbing.Answer;
  * interaction with a specific method of a mocked object and then return it (by calling
  * getInteractions() method from native side) as a JSON string.
  */
+@SuppressWarnings("unused") // Native API
 public class MockInteraction {
-  private final String[] arguments;
-  private final List<String> interactions = new ArrayList<>();
+  private static final Gson GSON = new Gson();
+
+  private final String[] argumentNames;
+  private final List<JsonElement> interactions = new ArrayList<>();
 
   /**
    * Creates new instance of {@link MockInteraction} configured with expected names of arguments for
    * a mocked method.
    *
-   * @param arguments names of expected arguments for a mocked method in their right order
+   * @param argumentNames names of expected arguments for a mocked method in their right order
    */
-  public MockInteraction(String[] arguments) {
-    this.arguments = arguments;
+  public MockInteraction(String[] argumentNames) {
+    this.argumentNames = argumentNames;
   }
 
   /**
@@ -33,25 +37,20 @@ public class MockInteraction {
   private class InteractionAnswer implements Answer {
 
     @Override
-    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-      Object[] args = invocationOnMock.getArguments();
-      int numArgs = args.length;
+    public Object answer(InvocationOnMock invocationOnMock) {
+      Object[] argValues = invocationOnMock.getArguments();
+      int numArgs = argValues.length;
 
-      assert numArgs == arguments.length;
+      assert numArgs == argumentNames.length;
 
-      Gson gson = new Gson();
-      StringBuilder sb = new StringBuilder();
-
-      // A piece of custom serialization. Our goal - a string in form of "{"name":value}".
-      sb.append('{');
+      Map<String, Object> arguments = new HashMap<>();
       for (int i = 0; i < numArgs; i++) {
-        sb.append(String.format("\"%s\":%s", arguments[i], gson.toJson(args[i])));
-        if (i < numArgs - 1) {
-          sb.append(',');
-        }
+        arguments.put(argumentNames[i], argValues[i]);
       }
-      sb.append('}');
-      interactions.add(sb.toString());
+
+      // Serialize to JSON immediately so that any later modifications to the passed objects
+      // do not affect the value.
+      interactions.add(GSON.toJsonTree(arguments));
       return null;
     }
   }
@@ -65,18 +64,7 @@ public class MockInteraction {
    * @return Result of interactions with mocked object
    */
   public String getInteractions() {
-    // We don't use Gson here because we need custom serialization for strings and it is simpler
-    // to do it manually
-    StringBuilder sb = new StringBuilder();
-    sb.append('[');
-    for (int i = 0; i < interactions.size() ; i++) {
-      sb.append(interactions.get(i));
-      if (i < interactions.size() - 1) {
-        sb.append(',');
-      }
-    }
-    sb.append(']');
-    return sb.toString();
+    return GSON.toJson(interactions);
   }
 
   public Answer createAnswer() {

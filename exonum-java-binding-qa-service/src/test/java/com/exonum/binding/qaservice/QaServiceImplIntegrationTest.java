@@ -285,8 +285,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      assertThrows(RuntimeException.class, service::getHeight,
-          "An attempt to get the actual `height` during creating the genesis block");
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getHeight());
+      assertThat(t.getMessage()).contains("An attempt to get the actual `height` during creating"
+          + " the genesis block.");
     }
   }
 
@@ -334,6 +335,25 @@ class QaServiceImplIntegrationTest {
       Transaction expectedTx = new IncrementCounterTx(height, counterId);
 
       verify(node).submitTransaction(eq(expectedTx));
+    }
+  }
+
+  @Test
+  void getActualConfigurationBeforeInit() {
+    assertThrows(IllegalStateException.class,
+        () -> service.getActualConfiguration());
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getActualConfiguration() {
+    try (MemoryDb db = MemoryDb.newInstance()) {
+      node = new NodeFake(db);
+      setServiceNode(node);
+
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getActualConfiguration());
+      assertThat(t.getMessage()).contains("Couldn't not find any config for"
+          + " height 0, that means that genesis block was created incorrectly.");
     }
   }
 
