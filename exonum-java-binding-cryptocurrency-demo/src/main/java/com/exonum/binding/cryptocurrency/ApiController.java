@@ -104,7 +104,7 @@ final class ApiController {
       String expectedContentType) {
     String contentType = rc.request().getHeader("Content-Type");
 
-    checkArgument(expectedContentType.equals(contentType), "Content-Type must be %s, but %s",
+    checkArgument(expectedContentType.equals(contentType), "Content-Type must be %s, but was %s",
         expectedContentType, contentType);
   }
 
