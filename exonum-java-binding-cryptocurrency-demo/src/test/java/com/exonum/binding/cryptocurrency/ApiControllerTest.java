@@ -164,6 +164,7 @@ class ApiControllerTest {
                   context.completeNow();
                 })));
   }
+
   @Test
   void submitTransactionOfIncorrectMessageSize(VertxTestContext context) {
     BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
