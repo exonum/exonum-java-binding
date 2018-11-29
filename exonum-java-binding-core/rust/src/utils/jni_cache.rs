@@ -99,7 +99,7 @@ pub fn cache_methods(env: &JNIEnv) {
     }
 }
 
-// Helper method. Produces `JMethodID` for a particular class dealing with lifetime.
+/// Helper method. Produces `JMethodID` for a particular class dealing with lifetime.
 fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMethodID<'static>> {
     env.get_method_id(class, name, sig)
         // we need this line to erase lifetime in order to save underlying raw pointer in static
