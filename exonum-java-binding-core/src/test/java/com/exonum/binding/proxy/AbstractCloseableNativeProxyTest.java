@@ -16,7 +16,6 @@
 
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test;
 
 class AbstractCloseableNativeProxyTest {
 
-  NativeProxyFake proxy;
+  private NativeProxyFake proxy;
 
   @Test
   void closeShallCallDispose() {
@@ -111,7 +110,7 @@ class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  void getNativeHandle_ShallFailIfInvalid() {
+  void createNativeHandle_ShallFailIfInvalid() {
     long invalidHandle = 0x0L;
 
     assertThrows(IllegalStateException.class, () -> new NativeProxyFake(invalidHandle, true));
