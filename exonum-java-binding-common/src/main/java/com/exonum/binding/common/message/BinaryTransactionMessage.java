@@ -49,6 +49,7 @@ final class BinaryTransactionMessage implements TransactionMessage {
 
     this.rawTransaction = ByteBuffer.allocate(messageSize).order(LITTLE_ENDIAN);
     this.rawTransaction.put(slice);
+    resetPosition();
   }
 
   @Override
@@ -56,6 +57,7 @@ final class BinaryTransactionMessage implements TransactionMessage {
     byte[] key = new byte[AUTHOR_PUBLIC_KEY_SIZE];
     rawTransaction.position(AUTHOR_PUBLIC_KEY_OFFSET);
     rawTransaction.get(key);
+    resetPosition();
     return PublicKey.fromBytes(key);
   }
 
@@ -75,6 +77,7 @@ final class BinaryTransactionMessage implements TransactionMessage {
     byte[] payload = new byte[payloadSize];
     rawTransaction.position(PAYLOAD_OFFSET);
     rawTransaction.get(payload);
+    resetPosition();
     return payload;
   }
 
@@ -91,6 +94,7 @@ final class BinaryTransactionMessage implements TransactionMessage {
     rawTransaction.position(PAYLOAD_OFFSET + payloadSize);
     byte[] signature = new byte[SIGNATURE_SIZE];
     rawTransaction.get(signature);
+    resetPosition();
     return signature;
   }
 
@@ -125,6 +129,10 @@ final class BinaryTransactionMessage implements TransactionMessage {
   @Override
   public String toString() {
     return Arrays.toString(rawTransaction.array());
+  }
+
+  private void resetPosition() {
+    rawTransaction.position(0);
   }
 
 }
