@@ -55,37 +55,6 @@ impl TransactionProxy {
     }
 }
 
-impl ExonumJson for TransactionProxy {
-    fn deserialize_field<B>(
-        _value: &Value,
-        _buffer: &mut B,
-        _from: Offset,
-        _to: Offset,
-    ) -> Result<(), Box<Error>>
-    where
-        Self: Sized,
-        B: WriteBufferWrapper,
-    {
-        unimplemented!("Is not used in Java bindings")
-    }
-
-    fn serialize_field(&self) -> Result<Value, Box<Error + Send + Sync>> {
-        let res: Result<String, String> = unwrap_jni(self.exec.with_attached(|env| {
-            let res = env.call_method(
-                self.transaction.as_obj(),
-                "info",
-                "()Ljava/lang/String;",
-                &[],
-            );
-            Ok(check_error_on_exception(env, res).map(|json_string| {
-                let obj = unwrap_jni(json_string.l());
-                unwrap_jni(convert_to_string(env, obj))
-            }))
-        }));
-        Ok(serde_json::from_str(&res?)?)
-    }
-}
-
 impl serde::Serialize for TransactionProxy {
     fn serialize<S>(
         &self,
