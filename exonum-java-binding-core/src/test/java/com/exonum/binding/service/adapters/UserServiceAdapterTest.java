@@ -269,7 +269,7 @@ class UserServiceAdapterTest {
   }
 
   @Test
-  void afterCommit_unexpectedException() {
+  void afterCommit_swallowUnexpectedException() {
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class))).thenReturn(snapshot);
     doThrow(NullPointerException.class).when(service).afterCommit(any(BlockCommittedEvent.class));
 
