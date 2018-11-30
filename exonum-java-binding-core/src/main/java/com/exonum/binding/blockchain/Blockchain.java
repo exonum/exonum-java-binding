@@ -17,6 +17,7 @@
 
 package com.exonum.binding.blockchain;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
@@ -79,6 +80,16 @@ public final class Blockchain {
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
+  }
+
+  /**
+   * Returns the configuration for the latest height of the blockchain, including services and their
+   * parameters.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
+   */
+  public StoredConfiguration getActualConfiguration() {
+    return schema.getActualConfiguration();
   }
 
 }
