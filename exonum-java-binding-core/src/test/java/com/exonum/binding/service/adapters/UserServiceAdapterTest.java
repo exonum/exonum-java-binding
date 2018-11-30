@@ -273,16 +273,12 @@ class UserServiceAdapterTest {
 
   @Test
   void afterCommit_unexpectedException() {
-    ListAppender appender = LoggingTestUtils.getCapturingLogAppender();
-    appender.clear();
     when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class))).thenReturn(snapshot);
     doThrow(NullPointerException.class).when(service).afterCommit(any(BlockCommittedEvent.class));
 
     serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
 
-    List<String> logs = appender.getMessages();
-    assertThat(logs, hasSize(1));
-    assertThat(logs.get(0), containsString("Unexpected exception during after commit event"));
+    verify(service).afterCommit(any(BlockCommittedEvent.class));
   }
 
 }

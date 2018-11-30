@@ -45,7 +45,7 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
 public class UserServiceAdapter {
 
-  private static final Logger LOGGER = LogManager.getLogger(UserServiceAdapter.class);
+  private static final Logger logger = LogManager.getLogger(UserServiceAdapter.class);
 
   private static final String API_ROOT_PATH = "/api";
 
@@ -114,7 +114,6 @@ public class UserServiceAdapter {
           .map(HashCode::asBytes)
           .toArray(byte[][]::new);
     } catch (CloseFailuresException e) {
-      LOGGER.error("Failed to close resources during getStateHashes", e);
       throw new RuntimeException(e);
     }
   }
@@ -135,7 +134,6 @@ public class UserServiceAdapter {
       return service.initialize(fork)
           .orElse(null);
     } catch (CloseFailuresException e) {
-      LOGGER.error("Failed to close resources during initialize", e);
       throw new RuntimeException(e);
     }
   }
@@ -157,16 +155,15 @@ public class UserServiceAdapter {
   public void afterCommit(long snapshotHandle, int validatorId, long height) {
     assert snapshotHandle != 0;
 
-    BlockCommittedEvent event = null;
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#afterCommit")) {
       Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
       OptionalInt optionalValidatorId = validatorId >= 0
           ? OptionalInt.of(validatorId)
           : OptionalInt.empty();
-      event = BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
+      BlockCommittedEvent event =
+          BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
       doAfterCommit(event);
     } catch (CloseFailuresException e) {
-      LOGGER.error("Failed to close resources during after commit event {}", event, e);
       throw new RuntimeException(e);
     }
   }
@@ -175,7 +172,8 @@ public class UserServiceAdapter {
     try {
       service.afterCommit(event);
     } catch (Exception e) {
-      LOGGER.error("Unexpected exception during after commit event {}", event, e);
+      // swallow the exception because it occurs in a user code and it should not be propagated
+      logger.warn("An exception in after commit handler of event {}", event, e);
     }
   }
 
