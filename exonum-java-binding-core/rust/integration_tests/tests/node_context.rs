@@ -52,9 +52,6 @@ fn submit_valid_transaction() {
                 jclass,
                 node_handle,
                 *java_transaction.as_obj(),
-                *message,
-                0,
-                raw_message.len() as i32,
                 0,
             );
             let exception: JObject = env.exception_occurred()?.into();
@@ -92,10 +89,7 @@ fn submit_not_valid_transaction() {
                 jclass,
                 node_handle,
                 *java_transaction.as_obj(),
-                *message,
-                0,
-                transaction_buffer.len() as i32,
-                0,
+                0
             );
             let exception = get_and_clear_java_exception(&env);
             assert_eq!(
