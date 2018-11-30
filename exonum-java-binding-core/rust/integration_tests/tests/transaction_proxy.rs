@@ -188,32 +188,6 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
     assert!(err.description().is_none());
 }
 
-#[test]
-fn json_serialize() {
-    let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-    assert_eq!(valid_tx.serialize_field().unwrap(), *INFO_VALUE);
-}
-
-#[test]
-#[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
-fn json_serialize_should_panic_if_java_error_occurred() {
-    let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
-    panic_tx.serialize_field().unwrap();
-}
-
-#[test]
-fn json_serialize_should_return_err_if_java_exception_occurred() {
-    let invalid_tx =
-        create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
-    let err = invalid_tx
-        .serialize_field()
-        .expect_err("This transaction should be serialized with an error!");
-    assert!(
-        err.description()
-            .starts_with("Java exception: java.lang.ArithmeticException",)
-    );
-}
-
 fn create_entry<V>(view: V) -> Entry<V, String>
 where
     V: AsRef<Snapshot + 'static>,
