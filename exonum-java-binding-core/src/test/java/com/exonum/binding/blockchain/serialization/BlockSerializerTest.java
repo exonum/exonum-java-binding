@@ -38,7 +38,6 @@ class BlockSerializerTest {
     assertThat(actual, equalTo(expected));
   }
 
-  // TODO: check if this test passes
   private static Stream<Block> testSource() {
     return Stream.of(
         Block.valueOf(
@@ -52,9 +51,9 @@ class BlockSerializerTest {
             Integer.MAX_VALUE,
             Long.MAX_VALUE,
             Integer.MAX_VALUE,
-            null,
-            null,
-            null));
+            HashCode.fromString("a0a0a0a0a0"),
+            HashCode.fromString("a0a0a0a0a0"),
+            HashCode.fromString("a0a0a0a0a0")));
   }
 
 }
