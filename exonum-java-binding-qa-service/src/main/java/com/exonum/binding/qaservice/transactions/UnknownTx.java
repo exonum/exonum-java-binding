@@ -16,11 +16,10 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.AbstractTransaction;
+import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import java.nio.ByteBuffer;
 
 /**
@@ -39,27 +38,15 @@ public final class UnknownTx extends AbstractTransaction {
   static final short ID = 9999;
 
   public UnknownTx() {
-    super(createMessage());
+    super(createRawTransaction());
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
+  public void execute(TransactionContext context) {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 
-  private static BinaryMessage createMessage() {
-    return new Message.Builder()
-        .setServiceId(QaService.ID)
-        .setMessageType(ID)
-        .setNetworkId((byte) 0)
-        .setVersion((byte) 0)
-        .setBody(ByteBuffer.allocate(0))
-        .setSignature(new byte[Message.SIGNATURE_SIZE])
-        .buildRaw();
+  private static RawTransaction createRawTransaction() {
+    return new RawTransaction(QaService.ID, ID, ByteBuffer.allocate(0).array());
   }
 }

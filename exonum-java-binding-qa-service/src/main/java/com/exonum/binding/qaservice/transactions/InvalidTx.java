@@ -16,19 +16,16 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
-import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import java.util.Collections;
 import java.util.Map;
 
 /**
- * An invalid transaction always returning false in {@link #isValid()}.
+ * An invalid transaction always returning false.
  */
 public final class InvalidTx implements Transaction {
 
@@ -37,23 +34,13 @@ public final class InvalidTx implements Transaction {
       .toJson(new AnyTransaction<Map>(ID, Collections.emptyMap()));
 
   @Override
-  public boolean isValid() {
-    return false;
-  }
-
-  @Override
-  public void execute(Fork view) {
+  public void execute(TransactionContext context) {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 
   @Override
-  public String info() {
-    return INVALID_TX_JSON;
-  }
-
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction getRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   static TransactionMessageConverter<InvalidTx> converter() {
@@ -66,20 +53,21 @@ public final class InvalidTx implements Transaction {
     static final int BODY_SIZE = 0;
 
     @Override
-    public InvalidTx fromMessage(Message txMessage) {
-      checkMessage(txMessage);
+    public InvalidTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkMessage(rawTransaction);
       return new InvalidTx();
     }
 
     @Override
-    public BinaryMessage toMessage(InvalidTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .buildRaw();
+    public RawTransaction toRawTransaction(InvalidTx transaction) {
+      return transaction.getRawTransaction();
     }
 
-    private void checkMessage(Message txMessage) {
-      checkTransaction(txMessage, ID);
-      checkMessageSize(txMessage, BODY_SIZE);
+    private void checkMessage(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
+
+      //TODO enable ?
+      //checkMessageSize(rawTransaction, BODY_SIZE);
     }
   }
 }

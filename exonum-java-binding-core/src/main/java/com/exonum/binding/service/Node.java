@@ -18,7 +18,6 @@ package com.exonum.binding.service;
 
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
 import java.util.function.Function;
 
 /**

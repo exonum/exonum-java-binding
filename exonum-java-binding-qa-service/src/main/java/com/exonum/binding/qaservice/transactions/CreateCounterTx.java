@@ -16,20 +16,18 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
@@ -50,13 +48,8 @@ public final class CreateCounterTx implements Transaction {
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
-    QaSchema schema = new QaSchema(view);
+  public void execute(TransactionContext context) {
+    QaSchema schema = new QaSchema(context.getFork());
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
@@ -72,13 +65,8 @@ public final class CreateCounterTx implements Transaction {
   }
 
   @Override
-  public String info() {
-    return new QaTransactionGson().toJson(ID, this);
-  }
-
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction getRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -106,9 +94,9 @@ public final class CreateCounterTx implements Transaction {
     INSTANCE;
 
     @Override
-    public CreateCounterTx fromMessage(Message txMessage) {
-      checkTransaction(txMessage, ID);
-      ByteBuffer rawBody = txMessage.getBody();
+    public CreateCounterTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
+      ByteBuffer rawBody = ByteBuffer.wrap(rawTransaction.getPayload());
       try {
         CreateCounterTxBody body = CreateCounterTxBody
             .parseFrom(rawBody);
@@ -121,10 +109,8 @@ public final class CreateCounterTx implements Transaction {
     }
 
     @Override
-    public BinaryMessage toMessage(CreateCounterTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .setBody(serializeBody(transaction))
-          .buildRaw();
+    public RawTransaction toRawTransaction(CreateCounterTx transaction) {
+      return transaction.getRawTransaction();
     }
   }
 

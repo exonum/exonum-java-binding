@@ -16,25 +16,37 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.configuration.ConsensusConfiguration;
+import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.configuration.ValidatorKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
+import com.google.gson.reflect.TypeToken;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -49,6 +61,8 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
@@ -338,6 +352,129 @@ class ApiControllerIntegrationTest {
     assertThat(m.get("k1")).isEqualTo("v1");
     assertThat(m.get("k2")).isEqualTo("v2");
     assertThat(m.get("k3")).isEqualTo("v3");
+  }
+
+  @Test
+  void getHeight(VertxTestContext context) {
+    Height height = new Height(10L);
+
+    when(qaService.getHeight()).thenReturn(height);
+
+    get(BLOCKCHAIN_HEIGHT_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Height actualHeight = QaTransactionGson.instance()
+              .fromJson(body, Height.class);
+          assertThat(actualHeight).isEqualTo(height);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getHeight_throwsException(VertxTestContext context) {
+    when(qaService.getHeight()).thenThrow(new RuntimeException());
+
+    get(BLOCKCHAIN_HEIGHT_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_BAD_REQUEST);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getAllBlockHashes(VertxTestContext context) {
+    List<HashCode> blockHashes = Arrays.asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    when(qaService.getAllBlockHashes()).thenReturn(blockHashes);
+
+    get(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualHashes = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<List<HashCode>>() {
+              }.getType());
+          assertThat(actualHashes).isEqualTo(blockHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlockTransactions(VertxTestContext context) {
+    List<HashCode> transactionHashes = Arrays
+        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+
+    when(qaService.getBlockTransactions(anyLong())).thenReturn(transactionHashes);
+
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH.replace(":blockHeight", "123"))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualHashes = QaTransactionGson.instance()
+              .fromJson(body, new TypeToken<List<HashCode>>() {
+              }.getType());
+          assertThat(actualHashes).isEqualTo(transactionHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getActualConfiguration(VertxTestContext context) {
+    StoredConfiguration configuration = createConfiguration();
+    when(qaService.getActualConfiguration()).thenReturn(configuration);
+
+    get(GET_ACTUAL_CONFIGURATION_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
+              () -> {
+                String body = response.bodyAsString();
+                StoredConfiguration storedConfiguration = StoredConfigurationGsonSerializer
+                    .fromJson(body);
+
+                assertThat(storedConfiguration).isEqualTo(configuration);
+              });
+          context.completeNow();
+        })));
+  }
+
+  private StoredConfiguration createConfiguration() {
+    return StoredConfiguration.builder()
+        .previousCfgHash(HashCode.fromString("11"))
+        .actualFrom(1)
+        .validatorKeys(
+            singletonList(
+                ValidatorKey.builder()
+                    .consensusKey(PublicKey.fromHexString("22"))
+                    .serviceKey(PublicKey.fromHexString("33"))
+                    .build()
+            )
+        )
+        .consensusConfiguration(
+            ConsensusConfiguration.builder()
+                .roundTimeout(1)
+                .statusTimeout(2)
+                .peersTimeout(3)
+                .txsBlockLimit(4)
+                .maxMessageLen(5)
+                .minProposeTimeout(6)
+                .maxProposeTimeout(7)
+                .proposeTimeoutThreshold(8)
+                .build()
+        )
+        .build();
   }
 
   private HttpRequest<Buffer> post(String requestPath) {

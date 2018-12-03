@@ -18,8 +18,8 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
+import com.exonum.binding.transaction.RawTransaction;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 final class TransactionPreconditions {
@@ -31,30 +31,30 @@ final class TransactionPreconditions {
   }
 
   @CanIgnoreReturnValue
-  static <MessageT extends Message> MessageT checkTransaction(
-      MessageT message, short expectedTxId) {
-    checkServiceId(message);
-    checkTransactionId(message, expectedTxId);
-    return message;
+  static <TransactionT extends RawTransaction> TransactionT checkTransaction(
+      TransactionT transaction, short expectedTxId) {
+    checkServiceId(transaction);
+    checkTransactionId(transaction, expectedTxId);
+    return transaction;
   }
 
-  static <MessageT extends Message> void checkServiceId(MessageT message) {
-    short serviceId = message.getServiceId();
+  static <TransactionT extends RawTransaction> void checkServiceId(TransactionT transaction) {
+    short serviceId = transaction.getServiceId();
     checkArgument(
         serviceId == SERVICE_ID,
         "This message (%s) does not belong to this service: wrong service ID (%s), must be %s",
-        message,
+        transaction,
         serviceId,
         SERVICE_ID);
   }
 
-  static <MessageT extends Message> void checkTransactionId(MessageT message,
+  static <TransactionT extends RawTransaction> void checkTransactionId(TransactionT transaction,
                                                             short expectedTxId) {
-    short txId = message.getMessageType();
+    short txId = transaction.getTransactionId();
     checkArgument(
         txId == expectedTxId,
         "This message (%s) has wrong transaction ID (%s), must be %s",
-        message,
+        transaction,
         txId,
         expectedTxId);
   }

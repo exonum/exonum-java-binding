@@ -17,8 +17,6 @@
 package com.exonum.binding.transaction;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.storage.database.Fork;
 
 /**
  * An Exonum transaction.
@@ -32,22 +30,10 @@ import com.exonum.binding.storage.database.Fork;
 public interface Transaction {
 
   /**
-   * Returns true if this transaction is valid: its data holds the invariants,
-   * it has a correct signature, etc.
-   *
-   * <p>This method is intended to check the <em>internal</em> consistency of a transaction.
-   * You shall <strong>not</strong> access any external objects in this method
-   * (e.g., files, network resources, databases).
-   *
-   * <p>If this method returns false, the transaction is considered incorrect,
-   * and Exonum discards it. Exonum never records invalid transactions into a blockchain.
-   */
-  boolean isValid();
-
-  /**
    * Execute the transaction, possibly modifying the blockchain state.
    *
-   * @param context a transaction execution context, which allows to access transaction-related data.
+   * @param context a transaction execution context, which allows to access transaction-related
+   *     data.
    * @throws TransactionExecutionException if the transaction cannot be executed normally
    *     and has to be rolled back. The transaction will be committed as failed (status "error"),
    *     the error code with the optional description will be saved into the storage. The client
@@ -59,23 +45,16 @@ public interface Transaction {
   void execute(TransactionContext context) throws TransactionExecutionException;
 
   /**
-   * Returns some information about this transaction in JSON format.
-   */
-  default String info() {
-    return "";
-  }
-
-  /**
    * Returns a hash of this transaction — a SHA-256 hash of the transaction message.
    *
-   * @implSpec Default implementation returns {@code getMessage().hash()}.
+   * @implSpec Default implementation returns {@code getRawTransaction().hash()}.
    */
   default HashCode hash() {
-    return getMessage().hash();
+    return getRawTransaction().hash();
   }
 
   /**
    * Returns this transaction as a binary Exonum message.
    */
-  BinaryMessage getMessage();
+  RawTransaction getRawTransaction();
 }

@@ -16,15 +16,13 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTxBody;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;
@@ -39,19 +37,14 @@ public final class ValidThrowingTx implements Transaction {
     this.seed = seed;
   }
 
-  @Override
-  public boolean isValid() {
-    return true;
-  }
-
   /**
    * First clears the indices of the service, then throws an exception.
    *
    * @throws IllegalStateException always
    */
   @Override
-  public void execute(Fork view) {
-    QaSchema schema = new QaSchema(view);
+  public void execute(TransactionContext context) {
+    QaSchema schema = new QaSchema(context.getFork());
 
     // Attempt to clear all service indices.
     schema.clearAll();
@@ -61,13 +54,8 @@ public final class ValidThrowingTx implements Transaction {
   }
 
   @Override
-  public String info() {
-    return new QaTransactionGson().toJson(ID, this);
-  }
-
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction getRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -95,11 +83,11 @@ public final class ValidThrowingTx implements Transaction {
     INSTANCE;
 
     @Override
-    public ValidThrowingTx fromMessage(Message message) {
-      checkMessage(message);
+    public ValidThrowingTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkRawTransaction(rawTransaction);
 
       try {
-        long seed = ValidThrowingTxBody.parseFrom(message.getBody())
+        long seed = ValidThrowingTxBody.parseFrom(rawTransaction.getPayload())
             .getSeed();
         return new ValidThrowingTx(seed);
       } catch (InvalidProtocolBufferException e) {
@@ -108,14 +96,12 @@ public final class ValidThrowingTx implements Transaction {
     }
 
     @Override
-    public BinaryMessage toMessage(ValidThrowingTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .setBody(serializeBody(transaction))
-          .buildRaw();
+    public RawTransaction toRawTransaction(ValidThrowingTx transaction) {
+      return transaction.getRawTransaction();
     }
 
-    private void checkMessage(Message txMessage) {
-      checkTransaction(txMessage, ID);
+    private void checkRawTransaction(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
     }
   }
 

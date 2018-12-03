@@ -16,8 +16,8 @@
 
 package ${groupId};
 
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.service.TransactionConverter;
 
 /**
@@ -27,7 +27,7 @@ import com.exonum.binding.service.TransactionConverter;
 public final class MyTransactionConverter implements TransactionConverter {
 
   @Override
-  public Transaction toTransaction(BinaryMessage message) {
+  public Transaction toTransaction(RawTransaction rawTransaction) {
     // TODO: implement transaction conversion
     throw new UnsupportedOperationException("Unimplemented");
   }

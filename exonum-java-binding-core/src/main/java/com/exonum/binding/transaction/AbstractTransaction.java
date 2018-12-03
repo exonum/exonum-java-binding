@@ -18,25 +18,23 @@ package com.exonum.binding.transaction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.common.message.BinaryMessage;
-
 /**
- * An abstract Exonum transaction. It includes a reference to a binary Exonum message
- * ({@link AbstractTransaction#message}, representing this transaction.
+ * An abstract Exonum transaction. It includes a reference to a raw Exonum transaction
+ * ({@link AbstractTransaction#rawTransaction}, representing this transaction.
  */
 public abstract class AbstractTransaction implements Transaction {
 
   /**
    * A binary Exonum message, representing this transaction.
    */
-  protected final transient BinaryMessage message;
+  protected final transient RawTransaction rawTransaction;
 
-  protected AbstractTransaction(BinaryMessage message) {
-    this.message = checkNotNull(message);
+  protected AbstractTransaction(RawTransaction rawTransaction) {
+    this.rawTransaction = checkNotNull(rawTransaction);
   }
 
   @Override
-  public BinaryMessage getMessage() {
-    return message;
+  public RawTransaction getRawTransaction() {
+    return rawTransaction;
   }
 }

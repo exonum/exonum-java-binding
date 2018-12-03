@@ -22,7 +22,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,7 +86,7 @@ public final class NodeFake implements Node {
    * @throws NullPointerException if the transaction is null
    */
   @Override
-  public void submitTransaction(Transaction transaction) {
+  public void submitTransaction(RawTransaction transaction) {
     checkNotNull(transaction);
   }
 

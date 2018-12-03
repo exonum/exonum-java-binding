@@ -5,9 +5,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 
 public interface TransactionContext {
-    public Fork getFork();
+  Fork getFork();
 
-    public HashCode getTransactionMessageHash();
+  HashCode getTransactionMessageHash();
 
-    public PublicKey getAuthorPK();
+  PublicKey getAuthorPk();
 }

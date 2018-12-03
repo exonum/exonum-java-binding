@@ -5,29 +5,35 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 
 public class InternalTransactionContext implements TransactionContext {
-    private Fork fork;
-    private HashCode hash;
-    private PublicKey authorPK;
+  private Fork fork;
+  private HashCode hash;
+  private PublicKey authorPk;
 
 
-    public InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPK) {
-        this.fork = fork;
-        this.hash = hash;
-        this.authorPK = authorPK;
-    }
+  /**
+   * Creates Internal Transaction Context.
+   * @param fork fork
+   * @param hash hash
+   * @param authorPk author private key
+   */
+  public InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk) {
+    this.fork = fork;
+    this.hash = hash;
+    this.authorPk = authorPk;
+  }
 
-    @Override
-    public Fork getFork() {
-        return fork;
-    }
+  @Override
+  public Fork getFork() {
+    return fork;
+  }
 
-    @Override
-    public HashCode getTransactionMessageHash() {
-        return hash;
-    }
+  @Override
+  public HashCode getTransactionMessageHash() {
+    return hash;
+  }
 
-    @Override
-    public PublicKey getAuthorPK() {
-        return authorPK;
-    }
+  @Override
+  public PublicKey getAuthorPk() {
+    return authorPk;
+  }
 }

@@ -49,24 +49,16 @@ public final class UserTransactionAdapter {
     this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
-  public boolean isValid() {
-    try {
-      return transaction.isValid();
-    } catch (Throwable e) {
-      logUnexpectedException(e);
-      throw e;
-    }
-  }
-
-  public void execute(long forkNativeHandle, byte[] txHashBytes, byte[] authorPKBytes) throws TransactionExecutionException {
+  public void execute(long forkNativeHandle, byte[] txHashBytes, byte[] authorPkBytes)
+      throws TransactionExecutionException {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
       try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
         Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
         HashCode hash = HashCode.fromBytes(txHashBytes);
-        PublicKey authorPK = PublicKey.fromBytes(authorPKBytes);
-        TransactionContext context = new InternalTransactionContext(fork, hash, authorPK);
+        PublicKey authorPk = PublicKey.fromBytes(authorPkBytes);
+        TransactionContext context = new InternalTransactionContext(fork, hash, authorPk);
         transaction.execute(context);
       }
 
@@ -77,15 +69,6 @@ public final class UserTransactionAdapter {
       logger.error("Failed to close some resources during transaction {} execution:",
           transaction, e);
       throw new RuntimeException(e);
-    } catch (Throwable e) {
-      logUnexpectedException(e);
-      throw e;
-    }
-  }
-
-  public String info() {
-    try {
-      return transaction.info();
     } catch (Throwable e) {
       logUnexpectedException(e);
       throw e;
