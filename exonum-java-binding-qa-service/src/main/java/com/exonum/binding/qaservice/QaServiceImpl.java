@@ -227,7 +227,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
       Blockchain blockchain = Blockchain.newInstance(view);
       ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(height);
 
-      // TODO: same as in the next method
       return Lists.newArrayList(hashes);
     });
   }
@@ -238,7 +237,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
       Blockchain blockchain = Blockchain.newInstance(view);
       ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(blockId);
 
-      return hashes == null ? Collections.emptyList() : Lists.newArrayList(hashes);
+      return Lists.newArrayList(hashes);
     });
   }
 
@@ -295,16 +294,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
       MapIndex<HashCode, Block> blocks = blockchain.getBlocks();
 
       return Maps.toMap(blocks.keys(), blocks::get);
-    });
-  }
-
-  @Override
-  public List<Block> getBlocksByHeight() {
-    return node.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      ListIndex<Block> blocks = blockchain.getBlocksByHeight();
-
-      return Lists.newArrayList(blocks);
     });
   }
 

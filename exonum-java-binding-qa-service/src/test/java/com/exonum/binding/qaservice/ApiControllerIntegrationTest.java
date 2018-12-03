@@ -17,7 +17,6 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
@@ -30,8 +29,8 @@ import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCK_HEIGHT_PARAM;
 import static com.exonum.binding.qaservice.ApiController.BLOCK_ID_PARAM;
-import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
 import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -41,7 +40,6 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -49,20 +47,22 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.common.configuration.ConsensusConfiguration;
-import com.exonum.binding.common.configuration.StoredConfiguration;
-import com.exonum.binding.common.configuration.ValidatorKey;
-import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.blockchain.TransactionResult.Type;
+import com.exonum.binding.common.configuration.ConsensusConfiguration;
+import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.configuration.ValidatorKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -103,7 +103,6 @@ class ApiControllerIntegrationTest {
   private static final HashCode EXPECTED_TX_HASH = Hashing.sha256()
       .hashInt(1);
 
-  // TODO: maybe change
   private static final String hashString = "ab";
 
   QaService qaService;
@@ -521,7 +520,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getTxResult(VertxTestContext context) {
-    TransactionResult transactionResult = new TransactionResult(Type.SUCCESS, null);
+    TransactionResult transactionResult = TransactionResult.valueOf(Type.SUCCESS, null, null);
 
     HashCode messageHash = HashCode.fromString(hashString);
     when(qaService.getTxResult(messageHash)).thenReturn(transactionResult);
@@ -602,28 +601,6 @@ class ApiControllerIntegrationTest {
               .fromJson(body, new TypeToken<Map<HashCode, Block>>() {
               }.getType());
           assertThat(actualBlocks).isEqualTo(blocks);
-
-          context.completeNow();
-        })));
-  }
-
-  @Test
-  void getBlocksByHeight(VertxTestContext context) {
-    List<Block> blocksByHeight = Arrays
-        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
-
-    when(qaService.getBlocksByHeight()).thenReturn(blocksByHeight);
-
-    get(BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode())
-              .isEqualTo(HTTP_OK);
-
-          String body = response.bodyAsString();
-          Object actualBlocks = QaTransactionGson.instance()
-              .fromJson(body, new TypeToken<List<Block>>() {
-              }.getType());
-          assertThat(actualBlocks).isEqualTo(blocksByHeight);
 
           context.completeNow();
         })));

@@ -452,18 +452,6 @@ class QaServiceImplIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void getBlocksByHeight() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
-      List<Block> blocksByHeight = service.getBlocksByHeight();
-      assertThat(blocksByHeight).isEmpty();
-    }
-  }
-
-  @Test
-  @RequiresNativeLibrary
   void getBlock() {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);

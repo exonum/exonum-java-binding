@@ -78,8 +78,6 @@ final class ApiController {
   @VisibleForTesting
   static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
   @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/blocksByHeight";
-  @VisibleForTesting
   static final String BLOCK_ID_PARAM = "blockId";
   @VisibleForTesting
   static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/" + BLOCK_ID_PARAM;
@@ -137,7 +135,6 @@ final class ApiController {
             .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
             .put(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH, this::getAllBlockHashes)
             .put(BLOCKCHAIN_BLOCKS_PATH, this::getBlocks)
-            .put(BLOCKCHAIN_BLOCKS_BY_HEIGHT_PATH, this::getBlocksByHeight)
             .put(BLOCKCHAIN_BLOCK_PATH, this::getBlock)
             .put(BLOCKCHAIN_LAST_BLOCK_PATH, this::getLastBlock)
             .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH, this::getBlockTransactionsByHeight)
@@ -247,14 +244,6 @@ final class ApiController {
 
   private void getBlocks(RoutingContext rc) {
     Map<HashCode, Block> blocks = service.getBlocks();
-    Gson gson = QaTransactionGson.instance();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(blocks));
-  }
-
-  private void getBlocksByHeight(RoutingContext rc) {
-    List<Block> blocks = service.getBlocksByHeight();
     Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
