@@ -40,7 +40,7 @@ public final class NativeHandle implements AutoCloseable {
    * @throws IllegalStateException if this native handle is invalid (nullptr)
    */
   public NativeHandle(long nativeHandle) {
-    checkState(nativeHandle != INVALID_NATIVE_HANDLE, "This handle is not valid: %s", this);
+    checkState(nativeHandle != INVALID_NATIVE_HANDLE, "This handle is not valid: %s", nativeHandle);
 
     this.nativeHandle = nativeHandle;
     this.isValid = true;
@@ -63,7 +63,7 @@ public final class NativeHandle implements AutoCloseable {
 
   @Override
   public void close() {
-    if (isValid) {
+    if (isValid()) {
       invalidate();
     }
   }

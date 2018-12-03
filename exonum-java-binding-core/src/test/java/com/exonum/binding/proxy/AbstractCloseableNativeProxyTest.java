@@ -110,7 +110,7 @@ class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  void createNativeHandle_ShallFailIfInvalid() {
+  void createProxy_ShallFailIfInvalidHandleProvided() {
     long invalidHandle = 0x0L;
 
     assertThrows(IllegalStateException.class, () -> new NativeProxyFake(invalidHandle, true));
