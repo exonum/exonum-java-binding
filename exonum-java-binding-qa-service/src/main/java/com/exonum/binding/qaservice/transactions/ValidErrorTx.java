@@ -16,16 +16,14 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidErrorTxBody;
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -73,13 +71,8 @@ public final class ValidErrorTx implements Transaction {
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) throws TransactionExecutionException {
-    QaSchema schema = new QaSchema(view);
+  public void execute(TransactionContext context) throws TransactionExecutionException {
+    QaSchema schema = new QaSchema(context.getFork());
 
     // Attempt to clear all service indices.
     schema.clearAll();
@@ -89,13 +82,8 @@ public final class ValidErrorTx implements Transaction {
   }
 
   @Override
-  public String info() {
-    return new QaTransactionGson().toJson(ID, this);
-  }
-
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction getRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -125,11 +113,11 @@ public final class ValidErrorTx implements Transaction {
     INSTANCE;
 
     @Override
-    public ValidErrorTx fromMessage(Message message) {
-      checkMessage(message);
+    public ValidErrorTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkRawTransaction(rawTransaction);
 
       // Unpack the message.
-      ByteBuffer rawBody = message.getBody();
+      ByteBuffer rawBody = ByteBuffer.wrap(rawTransaction.getPayload());
       try {
         ValidErrorTxBody body = ValidErrorTxBody.parseFrom(rawBody);
         long seed = body.getSeed();
@@ -144,14 +132,12 @@ public final class ValidErrorTx implements Transaction {
     }
 
     @Override
-    public BinaryMessage toMessage(ValidErrorTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .setBody(serializeBody(transaction))
-          .buildRaw();
+    public RawTransaction toRawTransaction(ValidErrorTx transaction) {
+      return transaction.getRawTransaction();
     }
 
-    private void checkMessage(Message message) {
-      checkTransaction(message, ID);
+    private void checkRawTransaction(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
     }
   }
 

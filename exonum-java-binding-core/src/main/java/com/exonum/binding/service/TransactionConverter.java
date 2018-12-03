@@ -17,7 +17,7 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.annotations.AutoGenerationCandidate;
-import com.exonum.binding.common.message.BinaryMessage;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 
 /**
@@ -32,11 +32,11 @@ public interface TransactionConverter {
   /**
    * Converts an Exonum transaction message to an executable transaction of some service.
    *
-   * @param message a transaction message (i.e., whose message type is a transaction)
+   * @param rawTransaction a raw transaction (i.e., whose message type is a transaction)
    * @return an executable transaction of some service
    * @throws IllegalArgumentException if the message is not a transaction,
-   *                                  or a transaction of an unknown service
+   *         or a transaction of an unknown service
    * @throws NullPointerException if message is null
    */
-  Transaction toTransaction(BinaryMessage message);
+  Transaction toTransaction(RawTransaction rawTransaction);
 }

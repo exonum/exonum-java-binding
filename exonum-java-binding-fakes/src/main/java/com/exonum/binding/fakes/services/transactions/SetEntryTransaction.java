@@ -19,15 +19,16 @@ package com.exonum.binding.fakes.services.transactions;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 
 /**
  * A transaction whose behaviour can be configured. It's not a mock: it writes a given value
- * into the database in its {@link #execute(Fork)}.
+ * into the database in its {@link #execute(TransactionContext)}.
  *
  * <p>Such transaction is supposed to be used in TransactionProxy integration tests.
  */
@@ -37,45 +38,31 @@ public final class SetEntryTransaction implements Transaction {
 
   private final boolean valid;
   private final String value;
-  private final String info;
 
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
-   * @param valid whether a transaction has to be valid (i.e., return true
-   *              in its {@link Transaction#isValid()} method)
+   * @param valid whether a transaction has to be valid
    * @param value a value to put into an entry {@link #ENTRY_NAME}
    * @param info a value to be returned as this transaction text representation
-   *     {@link Transaction#info()}
    */
   public SetEntryTransaction(boolean valid, String value, String info) {
     this.valid = valid;
     this.value = checkNotNull(value);
-    this.info = checkNotNull(info);
   }
 
   @Override
-  public boolean isValid() {
-    return valid;
-  }
-
-  @Override
-  public void execute(Fork view) {
+  public void execute(TransactionContext context) {
     checkState(valid, "Cannot execute an invalid transaction");
 
-    EntryIndexProxy<String> entry = createEntry(view);
+    EntryIndexProxy<String> entry = createEntry(context.getFork());
     entry.set(value);
   }
 
   @Override
-  public String info() {
-    return info;
-  }
-
-  @Override
-  public BinaryMessage getMessage() {
+  public RawTransaction getRawTransaction() {
     // Not needed for transaction ITs.
-    throw new UnsupportedOperationException("Transaction#getMessage is not implemented");
+    throw new UnsupportedOperationException("Transaction#getRawTransaction is not implemented");
   }
 
   private EntryIndexProxy<String> createEntry(Fork view) {

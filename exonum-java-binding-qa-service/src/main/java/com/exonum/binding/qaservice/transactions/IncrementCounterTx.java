@@ -16,19 +16,17 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -59,13 +57,8 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
-    QaSchema schema = new QaSchema(view);
+  public void execute(TransactionContext context) {
+    QaSchema schema = new QaSchema(context.getFork());
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
     // Increment the counter if there is such.
     if (counters.containsKey(counterId)) {
@@ -75,13 +68,8 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @Override
-  public String info() {
-    return new QaTransactionGson().toJson(ID, this);
-  }
-
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction getRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -110,11 +98,11 @@ public final class IncrementCounterTx implements Transaction {
     INSTANCE;
 
     @Override
-    public IncrementCounterTx fromMessage(Message message) {
-      checkMessage(message);
+    public IncrementCounterTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkMessage(rawTransaction);
 
       // Unpack the message.
-      ByteBuffer rawBody = message.getBody();
+      ByteBuffer rawBody = ByteBuffer.wrap(rawTransaction.getPayload());
       try {
         IncrementCounterTxBody body = IncrementCounterTxBody.parseFrom(rawBody);
         long seed = body.getSeed();
@@ -128,14 +116,12 @@ public final class IncrementCounterTx implements Transaction {
     }
 
     @Override
-    public BinaryMessage toMessage(IncrementCounterTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .setBody(serializeBody(transaction))
-          .buildRaw();
+    public RawTransaction toRawTransaction(IncrementCounterTx transaction) {
+      return transaction.getRawTransaction();
     }
 
-    private void checkMessage(Message message) {
-      checkTransaction(message, ID);
+    private void checkMessage(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
     }
   }
 

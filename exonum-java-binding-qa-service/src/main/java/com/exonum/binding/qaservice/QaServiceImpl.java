@@ -36,7 +36,10 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.transaction.InternalTransactionContext;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -90,8 +93,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<String> initialize(Fork fork) {
     // Add a default counter to the blockchain.
     String defaultCounterName = "default";
+
+    //TODO initialize HashCode and PublicKey ?
+    TransactionContext context = new InternalTransactionContext(fork, null, null);
+
     new CreateCounterTx(defaultCounterName)
-        .execute(fork);
+        .execute(context);
 
     return Optional.of(INITIAL_SERVICE_CONFIGURATION);
   }
@@ -107,44 +114,44 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public HashCode submitCreateCounter(String counterName) {
     CreateCounterTx tx = new CreateCounterTx(counterName);
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
   public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
     Transaction tx = new IncrementCounterTx(requestSeed, counterId);
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
   public HashCode submitInvalidTx() {
     Transaction tx = new InvalidTx();
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
   public HashCode submitInvalidThrowingTx() {
     Transaction tx = new InvalidThrowingTx();
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
     Transaction tx = new ValidThrowingTx(requestSeed);
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
   public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
       @Nullable String description) {
     Transaction tx = new ValidErrorTx(requestSeed, errorCode, description);
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
   public HashCode submitUnknownTx() {
     Transaction tx = new UnknownTx();
-    return submitTransaction(tx);
+    return submitTransaction(tx.getRawTransaction());
   }
 
   @Override
@@ -167,11 +174,11 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.
-  private HashCode submitTransaction(Transaction tx) {
+  private HashCode submitTransaction(RawTransaction rawTransaction) {
     checkBlockchainInitialized();
     try {
-      node.submitTransaction(tx);
-      return tx.hash();
+      node.submitTransaction(rawTransaction);
+      return rawTransaction.hash();
     } catch (InvalidTransactionException | InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }

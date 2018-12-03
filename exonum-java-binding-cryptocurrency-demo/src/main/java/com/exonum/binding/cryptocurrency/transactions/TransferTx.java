@@ -16,19 +16,18 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.HistoryEntity.Builder;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.AbstractTransaction;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -47,7 +46,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   private final long sum;
 
   @VisibleForTesting
-  TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet, long sum) {
+  TransferTx(RawTransaction message, long seed, PublicKey fromWallet, PublicKey toWallet,
+      long sum) {
     super(message);
     this.seed = seed;
     this.fromWallet = fromWallet;
@@ -58,19 +58,19 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   /**
    * Creates a new transfer transaction from the binary message.
    */
-  public static TransferTx fromMessage(BinaryMessage message) {
-    checkTransaction(message, ID);
+  public static TransferTx fromMessage(RawTransaction rawTransaction) {
+    checkTransaction(rawTransaction, ID);
 
     try {
       TxMessageProtos.TransferTx messageBody =
-          TxMessageProtos.TransferTx.parseFrom(message.getBody());
+          TxMessageProtos.TransferTx.parseFrom(rawTransaction.getPayload());
 
       long seed = messageBody.getSeed();
       PublicKey fromWallet = toPublicKey(messageBody.getFromWallet());
       PublicKey toWallet = toPublicKey(messageBody.getToWallet());
       long sum = messageBody.getSum();
 
-      return new TransferTx(message, seed, fromWallet, toWallet, sum);
+      return new TransferTx(rawTransaction, seed, fromWallet, toWallet, sum);
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException("Invalid TxMessageProtos.TransferTx buffer", e);
     }
@@ -81,13 +81,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   }
 
   @Override
-  public boolean isValid() {
-    return getMessage().verify(CRYPTO_FUNCTION, fromWallet);
-  }
-
-  @Override
-  public void execute(Fork view) {
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+  public void execute(TransactionContext context) {
+    CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
       Wallet from = wallets.get(fromWallet);
@@ -108,11 +103,6 @@ public final class TransferTx extends AbstractTransaction implements Transaction
       schema.walletHistory(fromWallet).add(historyEntity);
       schema.walletHistory(toWallet).add(historyEntity);
     }
-  }
-
-  @Override
-  public String info() {
-    return CryptocurrencyTransactionGson.instance().toJson(this);
   }
 
   @Override

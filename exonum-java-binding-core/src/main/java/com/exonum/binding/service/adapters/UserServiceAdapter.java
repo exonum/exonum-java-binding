@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.BlockCommittedEvent;
@@ -81,8 +80,10 @@ public class UserServiceAdapter {
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  public UserTransactionAdapter convertTransaction(int serviceId, int transactionId, byte[] payload) {
-    RawTransaction rawTransaction = new RawTransaction((short)serviceId, (short)transactionId, payload);
+  public UserTransactionAdapter convertTransaction(int serviceId, int transactionId,
+      byte[] payload) {
+    RawTransaction rawTransaction = new RawTransaction((short)serviceId, (short) transactionId,
+        payload);
     Transaction transaction = service.convertToTransaction(rawTransaction);
     return new UserTransactionAdapter(transaction, viewFactory);
   }

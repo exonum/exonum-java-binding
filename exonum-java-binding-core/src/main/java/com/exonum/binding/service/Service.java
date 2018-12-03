@@ -17,7 +17,6 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
@@ -72,9 +71,7 @@ public interface Service {
   /**
    * Converts an Exonum transaction message to an executable transaction of <em>this</em> service.
    *
-   * @param message a transaction message
-   *                (i.e., whose message type is a transaction and service id is set to the id of
-   *                this service)
+   * @param rawTransaction a raw transaction
    * @return an executable transaction
    * @throws IllegalArgumentException if the message is not a transaction of this service
    * @throws NullPointerException if message is null

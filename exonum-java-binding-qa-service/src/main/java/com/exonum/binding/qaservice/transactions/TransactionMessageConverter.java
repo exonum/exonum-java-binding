@@ -16,9 +16,8 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.PromoteToCore;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 
 /**
@@ -38,15 +37,15 @@ import com.exonum.binding.transaction.Transaction;
 interface TransactionMessageConverter<TransactionT extends Transaction> {
 
   /**
-   * Converts a message into an executable transaction.
+   * Converts a raw transaction into an executable transaction.
    */
-  TransactionT fromMessage(Message txMessage);
+  TransactionT fromRawTransaction(RawTransaction rawTransaction);
 
   /**
-   * Returns a message, representing the given transaction.
+   * Returns a raw transaction, representing the given transaction.
    *
    * <p>In a more general case, one will have to provide the signature, network id, etc.,
    * see class level comment.
    */
-  BinaryMessage toMessage(TransactionT transaction);
+  RawTransaction toRawTransaction(TransactionT transaction);
 }
