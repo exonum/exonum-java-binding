@@ -76,7 +76,7 @@ final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public HashCode hash() {
-    return sha256().hashBytes(rawTransaction.slice());
+    return sha256().hashBytes(rawTransaction.array());
   }
 
   @Override
