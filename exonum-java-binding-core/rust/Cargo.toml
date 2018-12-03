@@ -19,7 +19,7 @@ exonum = { git = "https://github.com/vitvakatu/exonum", branch = "java_binding_s
 failure = "0.1.1"
 toml = "0.4.6"
 jni = { version = "0.10.1", git = "https://github.com/alexander-irbis/jni-rs", branch = "clone-jnienv", features = ["invocation"] }
-lazy_static = "1.1.0"
+lazy_static = "1.2.0"
 log = "0.4.1"
 serde = "1.0"
 serde_derive = "1.0"
