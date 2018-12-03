@@ -17,6 +17,7 @@
 
 package com.exonum.binding.blockchain;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.storage.database.View;
@@ -168,6 +169,16 @@ public final class Blockchain {
    */
   public Block getLastBlock() {
     return schema.getLastBlock();
+  }
+
+  /**
+   * Returns the configuration for the latest height of the blockchain, including services and their
+   * parameters.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
+   */
+  public StoredConfiguration getActualConfiguration() {
+    return schema.getActualConfiguration();
   }
 
 }

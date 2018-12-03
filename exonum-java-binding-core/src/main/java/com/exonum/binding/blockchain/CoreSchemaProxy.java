@@ -23,10 +23,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.blockchain.serialization.TransactionLocationSerializer;
 import com.exonum.binding.blockchain.serialization.TransactionResultSerializer;
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -142,11 +144,24 @@ final class CoreSchemaProxy {
         StandardSerializers.hash(), transactionLocationSerializer);
   }
 
+  /**
+   * Returns the configuration for the latest height of the blockchain.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
+   */
+  StoredConfiguration getActualConfiguration() {
+    String rawConfiguration = nativeGetActualConfiguration(nativeHandle.get());
+
+    return StoredConfigurationGsonSerializer.fromJson(rawConfiguration);
+  }
+
   private static native long nativeCreate(long viewNativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 
   private static native long nativeGetHeight(long nativeHandle);
+
+  private static native String nativeGetActualConfiguration(long nativeHandle);
 
   /**
    * Returns the latest committed block.

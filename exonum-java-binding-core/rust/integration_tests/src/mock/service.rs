@@ -1,4 +1,4 @@
-use java_bindings::exonum::crypto::Hash;
+use java_bindings::exonum::crypto::{hash, Hash};
 use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::jni::strings::JNIString;
 use java_bindings::jni::sys::jsize;
@@ -34,6 +34,7 @@ impl ServiceMockBuilder {
         ServiceMockBuilder { exec, builder }
             .id(SERVICE_DEFAULT_ID)
             .name(SERVICE_DEFAULT_NAME)
+            .state_hashes(&[hash(&[1, 2, 3])])
     }
 
     pub fn id(self, id: u16) -> Self {
@@ -146,6 +147,34 @@ impl ServiceMockBuilder {
             Ok(())
         }));
         self
+    }
+
+    pub fn after_commit_throwing(self, exception_class: &str) -> Self {
+        unwrap_jni(self.exec.with_attached(|env| {
+            let exception = env.find_class(exception_class)?;
+            env.call_method(
+                self.builder.as_obj(),
+                "afterCommitHandlerThrowing",
+                "(Ljava/lang/Class;)V",
+                &[JValue::from(JObject::from(exception.into_inner()))],
+            )?;
+            Ok(())
+        }));
+        self
+    }
+
+    pub fn get_mock_interaction_after_commit(self) -> (Self, GlobalRef) {
+        let obj = unwrap_jni(self.exec.with_attached(|env| {
+            let mock_interaction: JObject = env
+                .call_method(
+                    self.builder.as_obj(),
+                    "getMockInteractionAfterCommit",
+                    "()Lcom/exonum/binding/fakes/mocks/MockInteraction;",
+                    &[],
+                )?.l()?;
+            Ok(env.new_global_ref(mock_interaction)?)
+        }));
+        (self, obj)
     }
 
     pub fn build(self) -> ServiceProxy {
