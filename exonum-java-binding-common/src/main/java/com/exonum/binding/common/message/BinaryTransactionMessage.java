@@ -49,15 +49,12 @@ final class BinaryTransactionMessage implements TransactionMessage {
 
     this.rawTransaction = ByteBuffer.allocate(messageSize).order(LITTLE_ENDIAN);
     this.rawTransaction.put(slice);
-    resetPosition();
+    rawTransaction.position(0);
   }
 
   @Override
   public PublicKey getAuthor() {
-    byte[] key = new byte[AUTHOR_PUBLIC_KEY_SIZE];
-    rawTransaction.position(AUTHOR_PUBLIC_KEY_OFFSET);
-    rawTransaction.get(key);
-    resetPosition();
+    byte[] key = getBytes(AUTHOR_PUBLIC_KEY_OFFSET, AUTHOR_PUBLIC_KEY_SIZE);
     return PublicKey.fromBytes(key);
   }
 
@@ -74,28 +71,18 @@ final class BinaryTransactionMessage implements TransactionMessage {
   @Override
   public byte[] getPayload() {
     int payloadSize = messageSize - MIN_MESSAGE_SIZE;
-    byte[] payload = new byte[payloadSize];
-    rawTransaction.position(PAYLOAD_OFFSET);
-    rawTransaction.get(payload);
-    resetPosition();
-    return payload;
+    return getBytes(PAYLOAD_OFFSET, payloadSize);
   }
 
   @Override
   public HashCode hash() {
-    HashCode hash = sha256().hashBytes(rawTransaction);
-    resetPosition();
-    return hash;
+    return sha256().hashBytes(rawTransaction.slice());
   }
 
   @Override
   public byte[] getSignature() {
     int payloadSize = messageSize - MIN_MESSAGE_SIZE;
-    rawTransaction.position(PAYLOAD_OFFSET + payloadSize);
-    byte[] signature = new byte[SIGNATURE_SIZE];
-    rawTransaction.get(signature);
-    resetPosition();
-    return signature;
+    return getBytes(PAYLOAD_OFFSET + payloadSize, SIGNATURE_SIZE);
   }
 
   @Override
@@ -131,8 +118,16 @@ final class BinaryTransactionMessage implements TransactionMessage {
     return Arrays.toString(rawTransaction.array());
   }
 
-  private void resetPosition() {
-    rawTransaction.position(0);
+  /**
+   * Returns bytes by slicing raw transaction to avoid changing it's position.
+   */
+  private byte[] getBytes(int startOffset, int size) {
+    byte[] bytes = new byte[size];
+    ByteBuffer slice = rawTransaction.slice();
+    slice.position(startOffset);
+    slice.get(bytes);
+
+    return bytes;
   }
 
 }
