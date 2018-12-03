@@ -77,7 +77,6 @@ final class BinaryTransactionMessage implements TransactionMessage {
   @Override
   public HashCode hash() {
     // We can't use BB directly for hashing because rawTransaction#position might be changed
-    // and it causes having different hashes for the same message.
     return sha256().hashBytes(rawTransaction.array());
   }
 
@@ -124,12 +123,12 @@ final class BinaryTransactionMessage implements TransactionMessage {
    * Returns bytes by slicing raw transaction to avoid changing it's position.
    */
   private byte[] getBytes(int startOffset, int size) {
-    byte[] bytes = new byte[size];
-    ByteBuffer slice = rawTransaction.slice();
-    slice.position(startOffset);
-    slice.get(bytes);
+    byte[] slice = new byte[size];
+    ByteBuffer buffer = rawTransaction.duplicate();
+    buffer.position(startOffset);
+    buffer.get(slice);
 
-    return bytes;
+    return slice;
   }
 
 }
