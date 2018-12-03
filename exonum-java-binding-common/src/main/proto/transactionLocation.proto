@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option java_package = "com.exonum.binding.common.serialization";
-option java_outer_classname = "TransactionLocationProtos";
-
-message TransactionLocation {
-  int64 height = 1;
-  int64 indexInBlock = 2;
-}

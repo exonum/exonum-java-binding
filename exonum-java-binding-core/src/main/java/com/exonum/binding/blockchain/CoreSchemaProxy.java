@@ -20,17 +20,13 @@ package com.exonum.binding.blockchain;
 import static com.exonum.binding.common.serialization.StandardSerializers.fixed64;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.blockchain.Block;
-import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.blockchain.serialization.BlockSerializer;
+import com.exonum.binding.blockchain.serialization.TransactionLocationSerializer;
+import com.exonum.binding.blockchain.serialization.TransactionResultSerializer;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.common.proofs.map.UncheckedMapProof;
-import com.exonum.binding.common.serialization.BlockSerializer;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.common.serialization.TransactionLocationSerializer;
-import com.exonum.binding.common.serialization.TransactionResultSerializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -41,7 +37,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * A proxy class for the blockchain::Schema struct maintained by Exonum core.

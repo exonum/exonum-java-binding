@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.blockchain;
+package com.exonum.binding.blockchain;
 
+import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -32,8 +34,10 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Block {
 
+  private final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
+
   public static Block valueOf(
-      short proposerId,
+      int proposerId,
       long height,
       int numTransactions,
       HashCode previousBlockHash,
@@ -46,10 +50,11 @@ public abstract class Block {
   /**
    * Identifier of the leader node which has proposed the block.
    */
-  public abstract short getProposerId();
+  public abstract int getProposerId();
 
   /**
-   * Height of the block, which also identifies the number of this particular block in the blockchain.
+   * Height of the block, which also identifies the number of this particular block in the
+   * blockchain.
    */
   public abstract long getHeight();
 
@@ -72,5 +77,12 @@ public abstract class Block {
    * Hash of the blockchain state after applying transactions in the block.
    */
   public abstract HashCode getStateHash();
+
+  /**
+   * Calculates a hash of this instance.
+   */
+  public HashCode getBlockHash() {
+    return HashCode.fromBytes(blockSerializer.toBytes(this));
+  }
 
 }

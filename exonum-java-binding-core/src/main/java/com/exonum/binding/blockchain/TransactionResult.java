@@ -14,37 +14,51 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.blockchain;
+package com.exonum.binding.blockchain;
 
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
  * Returns a result of transaction execution. This result may be either a success, or an error,
- * if execution has failed. Errors consist of an error code and an optional description.
+ * if execution has failed.
+ * Errors might be either service-defined or unexpected. Service-defined errors consist of an error
+ * code and an optional description. Unexpected errors consist of an optional description.
+ *
+ * @see TransactionExecutionException
  */
 @AutoValue
 public abstract class TransactionResult {
 
-  public static TransactionResult valueOf(Type type, @Nullable TransactionError error) {
-    return new AutoValue_TransactionResult(type, Optional.ofNullable(error));
+  public static TransactionResult valueOf(
+      Type type, @Nullable Integer errorCode, @Nullable String errorDescription) {
+    return new AutoValue_TransactionResult(
+        type, Optional.ofNullable(errorCode), Optional.ofNullable(errorDescription));
   }
 
   /**
    * Return type of the transaction.
    * @return {@code Type.SUCCESS} if transaction was successful
-   *         {@code Type.ERROR} if there was an error during transaction execution
+   *         {@code Type.ERROR} if there was a service-defined error during transaction execution
    *         {@code Type.UNEXPECTED_ERROR} if there was an unexpected error during transaction
    *         execution
    */
   public abstract Type getType();
 
   /**
-   * Return a transaction error object of transaction if its execution resulted in an error.
-   * @return a transaction error object, or {@code Optional.empty()} if transaction was successful
+   * Returns an error code of a transaction if its execution resulted in a service-defined error.
+   * @return a transaction error code in case of a service-defined error, or
+   * {@code Optional.empty()} otherwise
    */
-  public abstract Optional<TransactionError> getError();
+  public abstract Optional<Integer> getErrorCode();
+
+  /**
+   * Returns an optional description of a transaction if its execution resulted in an error.
+   * @return a description of an error, or {@code Optional.empty()} if transaction was successful
+   */
+  public abstract Optional<String> getErrorDescription();
 
   /**
    * Return whether transaction was successful or not.

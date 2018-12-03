@@ -17,9 +17,6 @@
 
 package com.exonum.binding.blockchain;
 
-import com.exonum.binding.common.blockchain.Block;
-import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.storage.database.View;
@@ -29,7 +26,6 @@ import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nullable;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Provides read-only access to the subset of
@@ -98,11 +94,7 @@ public final class Blockchain {
   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
     MapIndex<HashCode, Block> blocks = schema.getBlocks();
     Block block = blocks.get(blockId);
-    if (block == null) {
-      return null;
-   } else {
-      return getBlockTransactions(block.getHeight());
-    }
+    return getBlockTransactions(block.getHeight());
   }
 
   /**
@@ -161,14 +153,6 @@ public final class Blockchain {
    */
   public MapIndex<HashCode, Block> getBlocks() {
     return schema.getBlocks();
-  }
-
-  /**
-   * Returns a list that keeps block hashes according to their corresponding height.
-   */
-  public ListIndex<Block> getBlocksByHeight() {
-    // TODO: implementation
-    throw new NotImplementedException();
   }
 
   /**
