@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.blockchain;
+package com.exonum.binding.blockchain;
 
 import com.google.auto.value.AutoValue;
 
 /**
- * Transaction position in a block. Enumeration begins from 0.
+ * Transaction position in the blockchain. Enumeration begins from 0.
  */
 @AutoValue
 public abstract class TransactionLocation {
@@ -29,12 +29,13 @@ public abstract class TransactionLocation {
   }
 
   /**
-   * Height of the block where the transaction was included.
+   * Height of the block where the transaction was committed.
    */
   public abstract long getHeight();
 
   /**
-   * Zero-based position of this transaction in the block.
+   * Zero-based position of this transaction in the block. Transactions executed in the ascending
+   * order of these indices.
    */
   public abstract long getIndexInBlock();
 

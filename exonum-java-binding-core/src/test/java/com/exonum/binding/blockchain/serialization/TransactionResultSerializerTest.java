@@ -14,30 +14,36 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization;
+package com.exonum.binding.blockchain.serialization;
 
-import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.common.blockchain.TransactionError;
-import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.blockchain.TransactionResult.Type;
+import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.blockchain.TransactionResult.Type;
+import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionResultSerializerTest {
+
   private Serializer<TransactionResult> serializer = TransactionResultSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
-  void roundTrip(TransactionResult key) {
-    roundTripTest(key, serializer);
+  void roundTrip(TransactionResult expected) {
+    byte[] bytes = serializer.toBytes(expected);
+    TransactionResult actual = serializer.fromBytes(bytes);
+
+    assertThat(actual, equalTo(expected));
   }
 
   private static Stream<TransactionResult> testSource() {
     return Stream.of(
-        new TransactionResult(Type.SUCCESS, null),
-        new TransactionResult(Type.ERROR, new TransactionError((byte) 1, "Error description")),
-        new TransactionResult(Type.UNEXPECTED_ERROR, new TransactionError((byte) 1, null)));
+        TransactionResult.valueOf(Type.SUCCESS, null, null),
+        TransactionResult.valueOf(Type.ERROR, 1, "Error description"),
+        TransactionResult.valueOf(Type.UNEXPECTED_ERROR, null, ""));
   }
+
 }

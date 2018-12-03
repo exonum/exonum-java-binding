@@ -19,6 +19,7 @@ package com.exonum.binding.qaservice;
 import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
@@ -76,4 +77,6 @@ public interface QaService extends Service {
   Block getBlock(HashCode blockHash);
 
   Block getLastBlock();
+
+  StoredConfiguration getActualConfiguration();
 }

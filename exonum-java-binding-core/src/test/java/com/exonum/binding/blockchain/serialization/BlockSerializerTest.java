@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization;
+package com.exonum.binding.blockchain.serialization;
 
-import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,26 +31,29 @@ class BlockSerializerTest {
 
   @ParameterizedTest
   @MethodSource("testSource")
-  void roundTrip(Block key) {
-    roundTripTest(key, serializer);
+  void roundTrip(Block expected) {
+    byte[] bytes = serializer.toBytes(expected);
+    Block actual = serializer.fromBytes(bytes);
+
+    assertThat(actual, equalTo(expected));
   }
 
   private static Stream<Block> testSource() {
     return Stream.of(
         Block.valueOf(
-            (short) 1,
+            1,
             1,
             1,
             HashCode.fromString("ab"),
             HashCode.fromString("bc"),
             HashCode.fromString("cd")),
         Block.valueOf(
-            (short) 1,
-            1,
-            1,
-            null,
-            null,
-            null));
+            Integer.MAX_VALUE,
+            Long.MAX_VALUE,
+            Integer.MAX_VALUE,
+            HashCode.fromString("a0a0a0a0a0"),
+            HashCode.fromString("a0a0a0a0a0"),
+            HashCode.fromString("a0a0a0a0a0")));
   }
 
 }

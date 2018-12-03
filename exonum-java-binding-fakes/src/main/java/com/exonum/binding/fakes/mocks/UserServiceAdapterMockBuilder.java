@@ -18,7 +18,9 @@ package com.exonum.binding.fakes.mocks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -77,6 +79,24 @@ public final class UserServiceAdapterMockBuilder {
   public void initialGlobalConfigThrowing(Class<? extends Throwable> exceptionType) {
     when(service.initialize(anyLong()))
         .thenThrow(exceptionType);
+  }
+
+  public void afterCommitHandlerThrowing(Class<? extends Throwable> exceptionType) {
+    doThrow(exceptionType)
+        .when(service).afterCommit(anyLong(), anyInt(), anyLong());
+  }
+
+  /**
+   * Creates the {@link MockInteraction} instance for testing the UserServiceAdapter#after_commit()
+   * method.
+   *
+   * @return MockInteraction instance
+   */
+  public MockInteraction getMockInteractionAfterCommit() {
+    String[] args = {"handle", "validator", "height"};
+    MockInteraction interaction = new MockInteraction(args);
+    doAnswer(interaction.createAnswer()).when(service).afterCommit(anyLong(), anyInt(), anyLong());
+    return interaction;
   }
 
   public void mountPublicApiHandlerThrowing(Class<? extends Throwable> exceptionType) {

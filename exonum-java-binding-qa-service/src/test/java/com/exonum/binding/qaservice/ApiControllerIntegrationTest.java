@@ -31,12 +31,14 @@ import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_
 import static com.exonum.binding.qaservice.ApiController.BLOCK_HEIGHT_PARAM;
 import static com.exonum.binding.qaservice.ApiController.BLOCK_ID_PARAM;
 import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,12 +49,17 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.configuration.ConsensusConfiguration;
+import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.configuration.ValidatorKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.blockchain.TransactionResult.Type;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
@@ -679,6 +686,53 @@ class ApiControllerIntegrationTest {
 
           context.completeNow();
         })));
+  }
+
+  @Test
+  void getActualConfiguration(VertxTestContext context) {
+    StoredConfiguration configuration = createConfiguration();
+    when(qaService.getActualConfiguration()).thenReturn(configuration);
+
+    get(GET_ACTUAL_CONFIGURATION_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
+              () -> {
+                String body = response.bodyAsString();
+                StoredConfiguration storedConfiguration = StoredConfigurationGsonSerializer
+                    .fromJson(body);
+
+                assertThat(storedConfiguration).isEqualTo(configuration);
+              });
+          context.completeNow();
+        })));
+  }
+
+  private StoredConfiguration createConfiguration() {
+    return StoredConfiguration.builder()
+        .previousCfgHash(HashCode.fromString("11"))
+        .actualFrom(1)
+        .validatorKeys(
+            singletonList(
+                ValidatorKey.builder()
+                    .consensusKey(PublicKey.fromHexString("22"))
+                    .serviceKey(PublicKey.fromHexString("33"))
+                    .build()
+            )
+        )
+        .consensusConfiguration(
+            ConsensusConfiguration.builder()
+                .roundTimeout(1)
+                .statusTimeout(2)
+                .peersTimeout(3)
+                .txsBlockLimit(4)
+                .maxMessageLen(5)
+                .minProposeTimeout(6)
+                .maxProposeTimeout(7)
+                .proposeTimeoutThreshold(8)
+                .build()
+        )
+        .build();
   }
 
   private HttpRequest<Buffer> post(String requestPath) {

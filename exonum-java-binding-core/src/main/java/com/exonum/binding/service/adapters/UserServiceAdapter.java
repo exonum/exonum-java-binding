@@ -143,7 +143,7 @@ public class UserServiceAdapter {
   }
 
   /**
-   * Handles block commited event. This handler is invoked after commit of the block.
+   * Handles block committed event. This handler is invoked after commit of the block.
    * @param snapshotHandle a handle to a native snapshot object
    * @param validatorId a validator id. Negative if this node is not a validator
    * @param height the current blockchain height

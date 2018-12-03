@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization;
+package com.exonum.binding.blockchain.serialization;
 
-import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.blockchain.TransactionLocation;
+import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionLocationSerializerTest {
+
   private Serializer<TransactionLocation> serializer = TransactionLocationSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
-  void roundTrip(TransactionLocation key) {
-    roundTripTest(key, serializer);
+  void roundTrip(TransactionLocation expected) {
+    byte[] bytes = serializer.toBytes(expected);
+    TransactionLocation actual = serializer.fromBytes(bytes);
+
+    assertThat(actual, equalTo(expected));
   }
 
   private static Stream<TransactionLocation> testSource() {
     return Stream.of(
-        TransactionLocation.valueOf(Long.MIN_VALUE, Long.MIN_VALUE),
         TransactionLocation.valueOf(1, 1),
         TransactionLocation.valueOf(Long.MAX_VALUE, Long.MAX_VALUE));
   }
+
 }
