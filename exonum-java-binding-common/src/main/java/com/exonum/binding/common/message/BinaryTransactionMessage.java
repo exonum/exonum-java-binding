@@ -49,7 +49,7 @@ final class BinaryTransactionMessage implements TransactionMessage {
 
     this.rawTransaction = ByteBuffer.allocate(messageSize).order(LITTLE_ENDIAN);
     this.rawTransaction.put(slice);
-    rawTransaction.position(0);
+    this.rawTransaction.flip();
   }
 
   @Override
