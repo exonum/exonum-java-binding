@@ -74,7 +74,7 @@ class CoreSchemaProxyIntegrationTest {
   @Test
   void getTxMessagesTest() {
     // TODO: implement serializer in schema.getTxMessages()
-//    assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
+    // assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
   }
 
   @Test
