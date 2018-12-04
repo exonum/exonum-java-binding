@@ -85,6 +85,11 @@ public class UserServiceAdapter {
     RawTransaction rawTransaction = new RawTransaction((short)serviceId, (short) transactionId,
         payload);
     Transaction transaction = service.convertToTransaction(rawTransaction);
+    checkNotNull(transaction, "Invalid service implementation: "
+            + "Service#convertToTransaction must never return null.\n"
+            + "Throw an exception if your service does not recognize this message id (%s)",
+        transactionId);
+
     return new UserTransactionAdapter(transaction, viewFactory);
   }
 
