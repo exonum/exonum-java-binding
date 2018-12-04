@@ -16,8 +16,9 @@ use std::fmt;
 use storage::View;
 use utils::{
     check_error_on_exception, convert_to_string, describe_java_exception,
-    get_and_clear_java_exception, get_exception_message, jni_cache, panic_on_exception, to_handle,
-    unwrap_jni,
+    get_and_clear_java_exception, get_exception_message,
+    jni_cache::{classes_refs, transaction_adapter},
+    panic_on_exception, to_handle, unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
@@ -70,7 +71,7 @@ impl ExonumJson for TransactionProxy {
             let res = unsafe {
                 env.call_method_unsafe(
                     self.transaction.as_obj(),
-                    jni_cache::get_uta_info(),
+                    transaction_adapter::info_id(),
                     JavaType::Object(RETVAL_TYPE_STRING.into()),
                     &[],
                 )
@@ -91,7 +92,7 @@ impl Transaction for TransactionProxy {
             let res = unsafe {
                 env.call_method_unsafe(
                     self.transaction.as_obj(),
-                    jni_cache::get_uta_verify(),
+                    transaction_adapter::verify_id(),
                     JavaType::Primitive(Primitive::Boolean),
                     &[],
                 )
@@ -107,7 +108,7 @@ impl Transaction for TransactionProxy {
             let res = unsafe {
                 env.call_method_unsafe(
                     self.transaction.as_obj(),
-                    jni_cache::get_uta_execute(),
+                    transaction_adapter::execute_id(),
                     JavaType::Primitive(Primitive::Void),
                     &[JValue::from(view_handle)],
                 ).and_then(JValue::v)
@@ -148,7 +149,9 @@ fn check_transaction_execution_result<T>(
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = unwrap_jni(get_exception_message(env, exception));
-            if !unwrap_jni(env.is_instance_of(exception, &jni_cache::get_tee_class())) {
+            if !unwrap_jni(
+                env.is_instance_of(exception, &classes_refs::transaction_execution_exception()),
+            ) {
                 let panic_msg = describe_java_exception(env, exception);
                 panic!(panic_msg);
             }

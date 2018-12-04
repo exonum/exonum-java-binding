@@ -2,8 +2,10 @@ use jni::objects::JObject;
 use jni::signature::JavaType;
 use jni::JNIEnv;
 
-use utils::convert_to_string;
-use utils::jni_cache;
+use utils::{
+    convert_to_string,
+    jni_cache::{class, object, throwable},
+};
 use JniResult;
 
 const RETVAL_TYPE_STRING: &str = "java/lang/String";
@@ -14,7 +16,7 @@ pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
     let class_object = unsafe {
         env.call_method_unsafe(
             object,
-            jni_cache::get_object_get_class(),
+            object::get_class_id(),
             JavaType::Object(RETVAL_TYPE_CLASS.into()),
             &[],
         )
@@ -23,7 +25,7 @@ pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
     let class_name = unsafe {
         env.call_method_unsafe(
             class_object,
-            jni_cache::get_class_get_name(),
+            class::get_name_id(),
             JavaType::Object(RETVAL_TYPE_STRING.into()),
             &[],
         )
@@ -39,7 +41,7 @@ pub fn get_exception_message(env: &JNIEnv, exception: JObject) -> JniResult<Opti
     let message = unsafe {
         env.call_method_unsafe(
             exception,
-            jni_cache::get_throwable_get_message(),
+            throwable::get_message_id(),
             JavaType::Object(RETVAL_TYPE_STRING.into()),
             &[],
         )

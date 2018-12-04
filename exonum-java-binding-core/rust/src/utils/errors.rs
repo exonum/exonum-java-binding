@@ -3,7 +3,7 @@ use jni::JNIEnv;
 
 use std::cell::Cell;
 
-use utils::{get_class_name, get_exception_message, jni_cache};
+use utils::{get_class_name, get_exception_message, jni_cache::classes_refs};
 use {JniErrorKind, JniResult};
 
 /// Unwraps the result, returning its content.
@@ -37,7 +37,7 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> Result
             let message = describe_java_exception(env, exception);
             if unwrap_jni_verbose(
                 env,
-                env.is_instance_of(exception, &jni_cache::get_error_class()),
+                env.is_instance_of(exception, &classes_refs::java_lang_error()),
             ) {
                 panic!(message);
             }

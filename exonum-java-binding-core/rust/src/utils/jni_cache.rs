@@ -5,19 +5,19 @@ use jni::{
 };
 use std::os::raw::c_void;
 
-static mut OBJECT_CACHED_GET_CLASS: Option<JMethodID> = None;
-static mut CLASS_CACHED_GET_NAME: Option<JMethodID> = None;
-static mut THROWABLE_CACHED_GET_MESSAGE: Option<JMethodID> = None;
+static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
+static mut CLASS_GET_NAME: Option<JMethodID> = None;
+static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
 
-static mut UTA_CACHED_EXECUTE: Option<JMethodID> = None;
-static mut UTA_CACHED_INFO: Option<JMethodID> = None;
-static mut UTA_CACHED_VERIFY: Option<JMethodID> = None;
+static mut TRANSACTION_ADAPTER_EXECUTE: Option<JMethodID> = None;
+static mut TRANSACTION_ADAPTER_INFO: Option<JMethodID> = None;
+static mut TRANSACTION_ADAPTER_VERIFY: Option<JMethodID> = None;
 
-static mut USA_CACHED_STATE_HASHES: Option<JMethodID> = None;
-static mut USA_CACHED_CONVERT_TRANSACTION: Option<JMethodID> = None;
+static mut SERVICE_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
+static mut SERVICE_ADAPTER_CONVERT_TRANSACTION: Option<JMethodID> = None;
 
-static mut CLASS_CACHED_ERROR: Option<GlobalRef> = None;
-static mut CLASS_CACHED_TEE: Option<GlobalRef> = None;
+static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
+static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -31,50 +31,49 @@ pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {
 /// Caches all required classes and methods ids.
 pub fn cache_methods(env: &JNIEnv) {
     unsafe {
-        OBJECT_CACHED_GET_CLASS =
+        OBJECT_GET_CLASS =
             get_method_id(&env, "java/lang/Object", "getClass", "()Ljava/lang/Class;");
-        CLASS_CACHED_GET_NAME =
-            get_method_id(&env, "java/lang/Class", "getName", "()Ljava/lang/String;");
-        THROWABLE_CACHED_GET_MESSAGE = get_method_id(
+        CLASS_GET_NAME = get_method_id(&env, "java/lang/Class", "getName", "()Ljava/lang/String;");
+        THROWABLE_GET_MESSAGE = get_method_id(
             &env,
             "java/lang/Throwable",
             "getMessage",
             "()Ljava/lang/String;",
         );
-        UTA_CACHED_EXECUTE = get_method_id(
+        TRANSACTION_ADAPTER_EXECUTE = get_method_id(
             &env,
             "com/exonum/binding/service/adapters/UserTransactionAdapter",
             "execute",
             "(J)V",
         );
-        UTA_CACHED_INFO = get_method_id(
+        TRANSACTION_ADAPTER_INFO = get_method_id(
             &env,
             "com/exonum/binding/service/adapters/UserTransactionAdapter",
             "info",
             "()Ljava/lang/String;",
         );
-        UTA_CACHED_VERIFY = get_method_id(
+        TRANSACTION_ADAPTER_VERIFY = get_method_id(
             &env,
             "com/exonum/binding/service/adapters/UserTransactionAdapter",
             "isValid",
             "()Z",
         );
-        USA_CACHED_STATE_HASHES = get_method_id(
+        SERVICE_ADAPTER_STATE_HASHES = get_method_id(
             &env,
             "com/exonum/binding/service/adapters/UserServiceAdapter",
             "getStateHashes",
             "(J)[[B",
         );
-        USA_CACHED_CONVERT_TRANSACTION = get_method_id(
+        SERVICE_ADAPTER_CONVERT_TRANSACTION = get_method_id(
             &env,
             "com/exonum/binding/service/adapters/UserServiceAdapter",
             "convertTransaction",
             "([B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
         );
-        CLASS_CACHED_ERROR = env
+        JAVA_LANG_ERROR = env
             .new_global_ref(env.find_class("java/lang/Error").unwrap().into())
             .ok();
-        CLASS_CACHED_TEE = env
+        TRANSACTION_EXECUTION_EXCEPTION = env
             .new_global_ref(
                 env.find_class("com/exonum/binding/transaction/TransactionExecutionException")
                     .unwrap()
@@ -82,16 +81,16 @@ pub fn cache_methods(env: &JNIEnv) {
             ).ok();
 
         assert!(
-            OBJECT_CACHED_GET_CLASS.is_some()
-                && CLASS_CACHED_ERROR.is_some()
-                && THROWABLE_CACHED_GET_MESSAGE.is_some()
-                && UTA_CACHED_EXECUTE.is_some()
-                && UTA_CACHED_INFO.is_some()
-                && UTA_CACHED_VERIFY.is_some()
-                && USA_CACHED_STATE_HASHES.is_some()
-                && USA_CACHED_CONVERT_TRANSACTION.is_some()
-                && CLASS_CACHED_ERROR.is_some()
-                && CLASS_CACHED_TEE.is_some(),
+            OBJECT_GET_CLASS.is_some()
+                && JAVA_LANG_ERROR.is_some()
+                && THROWABLE_GET_MESSAGE.is_some()
+                && TRANSACTION_ADAPTER_EXECUTE.is_some()
+                && TRANSACTION_ADAPTER_INFO.is_some()
+                && TRANSACTION_ADAPTER_VERIFY.is_some()
+                && SERVICE_ADAPTER_STATE_HASHES.is_some()
+                && SERVICE_ADAPTER_CONVERT_TRANSACTION.is_some()
+                && JAVA_LANG_ERROR.is_some()
+                && TRANSACTION_EXECUTION_EXCEPTION.is_some(),
             "Error caching Java entities"
         );
 
@@ -99,7 +98,7 @@ pub fn cache_methods(env: &JNIEnv) {
     }
 }
 
-/// Helper method. Produces `JMethodID` for a particular class dealing with lifetime.
+/// Produces `JMethodID` for a particular class dealing with its lifetime.
 fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMethodID<'static>> {
     env.get_method_id(class, name, sig)
         // we need this line to erase lifetime in order to save underlying raw pointer in static
@@ -107,52 +106,82 @@ fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMe
         .ok()
 }
 
-/// Returns cached `JClass` for `java/lang/Error` as a `GlobalRef`
-pub fn get_error_class() -> GlobalRef {
-    unsafe { CLASS_CACHED_ERROR.clone().unwrap() }
+/// Refers to the cached methods of the `UserTransactionAdapter` class.
+pub mod transaction_adapter {
+    use super::*;
+
+    /// Returns cached `JMethodID` for `UserTransactionAdapter.execute()`.
+    pub fn execute_id() -> JMethodID<'static> {
+        unsafe { TRANSACTION_ADAPTER_EXECUTE.unwrap() }
+    }
+
+    /// Returns cached `JMethodID` for `UserTransactionAdapter.info()`.
+    pub fn info_id() -> JMethodID<'static> {
+        unsafe { TRANSACTION_ADAPTER_INFO.unwrap() }
+    }
+
+    /// Returns cached `JMethodID` for `UserTransactionAdapter.isValid()`.
+    pub fn verify_id() -> JMethodID<'static> {
+        unsafe { TRANSACTION_ADAPTER_VERIFY.unwrap() }
+    }
 }
 
-/// Returns cached `JClass` for `TransactionExecutionException` as a `GlobalRef`
-pub fn get_tee_class() -> GlobalRef {
-    unsafe { CLASS_CACHED_TEE.clone().unwrap() }
+/// Refers to the cached methods of the `UserServiceAdapter` class.
+pub mod service_adapter {
+    use super::*;
+
+    /// Returns cached `JMethodID` for `UserServiceAdapter.getStateHashes()`.
+    pub fn state_hashes_id() -> JMethodID<'static> {
+        unsafe { SERVICE_ADAPTER_STATE_HASHES.unwrap() }
+    }
+
+    /// Returns cached `JMethodID` for `UserServiceAdapter.convertTransaction()`.
+    pub fn convert_transaction_id() -> JMethodID<'static> {
+        unsafe { SERVICE_ADAPTER_CONVERT_TRANSACTION.unwrap() }
+    }
 }
 
-/// Returns cached `JMethodID` for `java.lang.Object.getClass()`
-pub fn get_object_get_class() -> JMethodID<'static> {
-    unsafe { OBJECT_CACHED_GET_CLASS.unwrap() }
+/// Refers to the cached methods of the `java.lang.Object` class.
+pub mod object {
+    use super::*;
+
+    /// Returns cached `JMethodID` for `java.lang.Object.getClass()`.
+    pub fn get_class_id() -> JMethodID<'static> {
+        unsafe { OBJECT_GET_CLASS.unwrap() }
+    }
 }
 
-/// Returns cached `JMethodID` for `java.lang.Class.getName()`
-pub fn get_class_get_name() -> JMethodID<'static> {
-    unsafe { CLASS_CACHED_GET_NAME.unwrap() }
+/// Refers to the cached methods of the `java.lang.Class` class.
+pub mod class {
+    use super::*;
+
+    /// Returns cached `JMethodID` for `java.lang.Class.getName()`.
+    pub fn get_name_id() -> JMethodID<'static> {
+        unsafe { CLASS_GET_NAME.unwrap() }
+    }
 }
 
-/// Returns cached `JMethodID` for `java.lang.Throwable.getMessage()`
-pub fn get_throwable_get_message() -> JMethodID<'static> {
-    unsafe { THROWABLE_CACHED_GET_MESSAGE.unwrap() }
+/// Refers to the cached methods of the `java.lang.Throwable` class.
+pub mod throwable {
+    use super::*;
+
+    /// Returns cached `JMethodID` for `java.lang.Throwable.getMessage()`.
+    pub fn get_message_id() -> JMethodID<'static> {
+        unsafe { THROWABLE_GET_MESSAGE.unwrap() }
+    }
 }
 
-/// Returns cached `JMethodID` for `UserTransactionAdapter.execute()`
-pub fn get_uta_execute() -> JMethodID<'static> {
-    unsafe { UTA_CACHED_EXECUTE.unwrap() }
-}
+/// Provides access to various cached classes.
+pub mod classes_refs {
+    use super::*;
 
-/// Returns cached `JMethodID` for `UserTransactionAdapter.info()`
-pub fn get_uta_info() -> JMethodID<'static> {
-    unsafe { UTA_CACHED_INFO.unwrap() }
-}
+    /// Returns cached `JClass` for `java/lang/Error` as a `GlobalRef`.
+    pub fn java_lang_error() -> GlobalRef {
+        unsafe { JAVA_LANG_ERROR.clone().unwrap() }
+    }
 
-/// Returns cached `JMethodID` for `UserTransactionAdapter.isValid()`
-pub fn get_uta_verify() -> JMethodID<'static> {
-    unsafe { UTA_CACHED_VERIFY.unwrap() }
-}
-
-/// Returns cached `JMethodID` for `UserServiceAdapter.getStateHashes()`
-pub fn get_usa_state_hashes() -> JMethodID<'static> {
-    unsafe { USA_CACHED_STATE_HASHES.unwrap() }
-}
-
-/// Returns cached `JMethodID` for `UserServiceAdapter.convertTransaction()`
-pub fn get_usa_convert_tx() -> JMethodID<'static> {
-    unsafe { USA_CACHED_CONVERT_TRANSACTION.unwrap() }
+    /// Returns cached `JClass` for `TransactionExecutionException` as a `GlobalRef`.
+    pub fn transaction_execution_exception() -> GlobalRef {
+        unsafe { TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
+    }
 }

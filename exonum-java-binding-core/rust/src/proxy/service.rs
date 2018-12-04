@@ -5,7 +5,7 @@ use exonum::encoding::Error as MessageError;
 use exonum::messages::RawMessage;
 use exonum::storage::{Fork, Snapshot};
 use jni::objects::{GlobalRef, JObject, JValue};
-use jni::signature::{JavaType, Primitive};
+use jni::signature::JavaType;
 use serde_json;
 use serde_json::value::Value;
 use std::fmt;
@@ -13,8 +13,8 @@ use std::fmt;
 use proxy::node::NodeContext;
 use storage::View;
 use utils::{
-    check_error_on_exception, convert_to_hash, convert_to_string, jni_cache, panic_on_exception,
-    to_handle, unwrap_jni,
+    check_error_on_exception, convert_to_hash, convert_to_string, jni_cache::service_adapter,
+    panic_on_exception, to_handle, unwrap_jni,
 };
 use {JniExecutor, MainExecutor, TransactionProxy};
 
@@ -78,10 +78,8 @@ impl Service for ServiceProxy {
             let java_service_hashes = panic_on_exception(env, unsafe {
                 env.call_method_unsafe(
                     self.service.as_obj(),
-                    jni_cache::get_usa_state_hashes(),
-                    JavaType::Array(Box::new(JavaType::Array(Box::new(JavaType::Primitive(
-                        Primitive::Byte,
-                    ))))),
+                    service_adapter::state_hashes_id(),
+                    JavaType::from_str("[[B").unwrap(),
                     &[JValue::from(view_handle)],
                 )
             });
@@ -102,7 +100,7 @@ impl Service for ServiceProxy {
             let res = unsafe {
                 env.call_method_unsafe(
                     self.service.as_obj(),
-                    jni_cache::get_usa_convert_tx(),
+                    service_adapter::convert_transaction_id(),
                     JavaType::Object(
                         "com/exonum/binding/service/adapters/UserTransactionAdapter".into(),
                     ),
