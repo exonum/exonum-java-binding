@@ -17,7 +17,6 @@
 
 package com.exonum.binding.blockchain;
 
-import static com.exonum.binding.common.serialization.StandardSerializers.fixed64;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
@@ -31,6 +30,8 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * A proxy class for the blockchain::Schema struct maintained by Exonum core.
@@ -84,7 +85,7 @@ final class CoreSchemaProxy {
    */
   ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
-    byte[] id = fixed64().toBytes(height);
+    byte[] id = toCoreKey(height);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
   }
@@ -115,6 +116,13 @@ final class CoreSchemaProxy {
    */
   @SuppressWarnings("unused") //TODO: Will be done in the next task
   private static native byte[] nativeGetLastBlock(long nativeHandle);
+
+  private byte[] toCoreKey(long value) {
+    return ByteBuffer.allocate(Long.BYTES)
+        .order(ByteOrder.BIG_ENDIAN)
+        .putLong(value)
+        .array();
+  }
 
   /**
    * Mapping for Exonum core indexes by name.
