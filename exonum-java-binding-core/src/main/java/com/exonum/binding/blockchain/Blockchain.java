@@ -112,9 +112,9 @@ public final class Blockchain {
    * Returns a map of transaction messages identified by their SHA-256 hashes. Both committed and
    * in-pool transactions are returned.
    */
-   public MapIndex<HashCode, TransactionMessage> getTxMessages() {
-     return schema.getTxMessages();
-   }
+  public MapIndex<HashCode, TransactionMessage> getTxMessages() {
+    return schema.getTxMessages();
+  }
 
   /**
    * Returns a map with a key-value pair of a transaction hash and execution result.

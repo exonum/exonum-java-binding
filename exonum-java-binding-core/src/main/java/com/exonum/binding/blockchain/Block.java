@@ -24,12 +24,12 @@ import com.google.auto.value.AutoValue;
 /**
  * Exonum block header data structure.
  *
- * A block is essentially a list of transactions, which is a result of the consensus algorithm
+ * <p>A block is essentially a list of transactions, which is a result of the consensus algorithm
  * (thus authenticated by the supermajority of validators) and is applied atomically to the
  * blockchain state.
  *
- * This structure only contains the amount of transactions and the transactions root hash as well as
- * other information, but not the transactions themselves.
+ * <p>This structure only contains the amount of transactions and the transactions root hash as well
+ * as other information, but not the transactions themselves.
  */
 @AutoValue
 public abstract class Block {

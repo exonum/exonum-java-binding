@@ -58,38 +58,32 @@ class CoreSchemaProxyIntegrationTest {
 
   @Test
   void getActiveConfigurationBeforeGenesisBlock() {
-    assertSchema((schema) ->
-        assertThrows(RuntimeException.class, schema::getActualConfiguration));
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getActualConfiguration));
   }
 
   @Test
   void getBlocksTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getBlocks().isEmpty()));
+    assertSchema((schema) -> assertTrue(schema.getBlocks().isEmpty()));
   }
 
   @Test
   void getLastBlockBeforeGenesisBlockTest() {
-    assertSchema((schema) ->
-      assertThrows(RuntimeException.class, schema::getLastBlock));
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getLastBlock));
   }
 
   @Test
   void getTxMessagesTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getTxMessages().isEmpty()));
+    assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
   }
 
   @Test
   void getTxResultsTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getTxResults().isEmpty()));
+    assertSchema((schema) -> assertTrue(schema.getTxResults().isEmpty()));
   }
 
   @Test
   void getTxLocationsTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getTxLocations().isEmpty()));
+    assertSchema((schema) -> assertTrue(schema.getTxLocations().isEmpty()));
   }
 
   private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
