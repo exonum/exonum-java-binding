@@ -33,26 +33,6 @@ lazy_static! {
 }
 
 #[test]
-fn verify_valid_transaction() {
-    let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-    assert_eq!(true, valid_tx.verify());
-}
-
-#[test]
-fn verify_invalid_transaction() {
-    let invalid_tx = create_mock_transaction_proxy(EXECUTOR.clone(), false);
-    assert_eq!(false, invalid_tx.verify());
-}
-
-#[test]
-#[should_panic(expected = "Java exception: java.lang.ArithmeticException")]
-fn verify_should_panic_if_java_exception_occured() {
-    let panic_tx =
-        create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
-    panic_tx.verify();
-}
-
-#[test]
 fn execute_valid_transaction() {
     let db = MemoryDB::new();
     {
