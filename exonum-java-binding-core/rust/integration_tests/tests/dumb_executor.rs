@@ -43,6 +43,8 @@ fn serialized_threads() {
 }
 
 #[test]
+// FIXME
+#[ignore]
 fn concurrent_threads() {
     const THREAD_NUM: usize = 8;
     test_concurrent_threads(&*EXECUTOR, THREAD_NUM)
