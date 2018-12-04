@@ -33,6 +33,7 @@ import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
@@ -83,16 +84,25 @@ public class UserServiceAdapter {
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
   public UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
-    BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
-    assert message.getServiceId() == getId() :
-        "Message id is distinct from the service id";
+    try {
+      BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
+      assert message.getServiceId() == getId() :
+          "Message id is distinct from the service id";
 
-    Transaction transaction = service.convertToTransaction(message);
-    checkNotNull(transaction, "Invalid service implementation: "
-            + "Service#convertToTransaction must never return null.\n"
-            + "Throw an exception if your service does not recognize this message id (%s)",
-        message.getMessageType());
-    return new UserTransactionAdapter(transaction, viewFactory);
+      Transaction transaction = service.convertToTransaction(message);
+      checkNotNull(transaction, "Invalid service implementation: "
+              + "Service#convertToTransaction must never return null.\n"
+              + "Throw an exception if your service does not recognize this message id (%s)",
+          message.getMessageType());
+      return new UserTransactionAdapter(transaction, viewFactory);
+    } catch (NullPointerException | IllegalArgumentException e) {
+      logger.warn("Failed to convert transaction {}", Arrays.toString(transactionMessage), e);
+      throw e;
+    } catch (Throwable e) {
+      logger.error("Unexpected exception occurs at convert transaction {}",
+          Arrays.toString(transactionMessage), e);
+      throw e;
+    }
   }
 
   /**
@@ -105,16 +115,22 @@ public class UserServiceAdapter {
    * @see Service#getStateHashes(Snapshot)
    */
   public byte[][] getStateHashes(long snapshotHandle) {
-    assert snapshotHandle != 0;
+    try {
+      assert snapshotHandle != 0;
 
-    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
-      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
-      List<HashCode> stateHashes = service.getStateHashes(snapshot);
-      return stateHashes.stream()
-          .map(HashCode::asBytes)
-          .toArray(byte[][]::new);
-    } catch (CloseFailuresException e) {
-      throw new RuntimeException(e);
+      try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
+        Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
+        List<HashCode> stateHashes = service.getStateHashes(snapshot);
+        return stateHashes.stream()
+            .map(HashCode::asBytes)
+            .toArray(byte[][]::new);
+      } catch (CloseFailuresException e) {
+        logger.warn("Failed to close some resources at getStateHashes", e);
+        throw new RuntimeException(e);
+      }
+    } catch (Throwable e) {
+      logger.error("Unexpected exception occurs at getStateHashes", e);
+      throw e;
     }
   }
 
@@ -128,22 +144,36 @@ public class UserServiceAdapter {
    * @see Service#initialize(Fork)
    */
   public @Nullable String initialize(long forkHandle) {
-    assert forkHandle != 0;
-    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
-      Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      return service.initialize(fork)
-          .orElse(null);
-    } catch (CloseFailuresException e) {
-      throw new RuntimeException(e);
+    try {
+      assert forkHandle != 0;
+      try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
+        Fork fork = viewFactory.createFork(forkHandle, cleaner);
+        return service.initialize(fork)
+            .orElse(null);
+      } catch (CloseFailuresException e) {
+        logger.warn("Failed to close some resources at initialize", e);
+        throw new RuntimeException(e);
+      }
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at initialize", e);
+      throw e;
     }
   }
 
   public void mountPublicApiHandler(long nodeNativeHandle) {
-    checkState(node == null, "There is a node already: are you calling this method twice?");
-    node = new NodeProxy(nodeNativeHandle, viewFactory);
-    Router router = server.createRouter();
-    service.createPublicApiHandlers(node, router);
-    server.mountSubRouter(serviceApiPath(), router);
+    try {
+      checkState(node == null, "There is a node already: are you calling this method twice?");
+      node = new NodeProxy(nodeNativeHandle, viewFactory);
+      Router router = server.createRouter();
+      service.createPublicApiHandlers(node, router);
+      server.mountSubRouter(serviceApiPath(), router);
+    } catch (IllegalStateException e) {
+      logger.warn(e);
+      throw e;
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at mountPublicApiHandler", e);
+      throw e;
+    }
   }
 
   /**
@@ -164,6 +194,7 @@ public class UserServiceAdapter {
           BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
       doAfterCommit(event);
     } catch (CloseFailuresException e) {
+      logger.warn("Failed to close some resources at afterCommit", e);
       throw new RuntimeException(e);
     }
   }
@@ -188,8 +219,13 @@ public class UserServiceAdapter {
    * <p>Releases any resources.
    */
   public void close() {
-    if (node != null) {
-      node.close();
+    try {
+      if (node != null) {
+        node.close();
+      }
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at close", e);
+      throw e;
     }
   }
 }
