@@ -18,6 +18,7 @@ package com.exonum.binding.common.serialization.json;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -87,9 +88,27 @@ class StoredConfigurationGsonSerializerTest {
         .fromJson(CONFIG_EXAMPLE);
 
     assertThat(configuration, notNullValue());
-    assertThat(configuration.previousCfgHash(), notNullValue());
+    assertThat(configuration.previousCfgHash(),
+        is(HashCode
+            .fromString("0000000000000000000000000000000000000000000000000000000000000000"))
+    );
+    assertThat(configuration.actualFrom(), is(0L));
+
     assertThat(configuration.consensusConfiguration(), notNullValue());
+    assertThat(configuration.consensusConfiguration().maxMessageLen(), is(1048576));
+    assertThat(configuration.consensusConfiguration().maxProposeTimeout(), is(200L));
+    assertThat(configuration.consensusConfiguration().minProposeTimeout(), is(10L));
+    assertThat(configuration.consensusConfiguration().peersTimeout(), is(10000L));
+    assertThat(configuration.consensusConfiguration().proposeTimeoutThreshold(), is(500));
+    assertThat(configuration.consensusConfiguration().roundTimeout(), is(3000L));
+    assertThat(configuration.consensusConfiguration().statusTimeout(), is(5000L));
+    assertThat(configuration.consensusConfiguration().txsBlockLimit(), is(1000));
+
     assertThat(configuration.validatorKeys(), notNullValue());
+    assertThat(configuration.validatorKeys().get(0).consensusKey(), is(PublicKey.fromHexString(
+        "43eb3be553c55b02b65e08c18bb060404b27e362ccf108cbad94ea097decbc0a")));
+    assertThat(configuration.validatorKeys().get(0).serviceKey(), is(PublicKey.fromHexString(
+        "79c1fcefcbfaeae43575ab0ef793c24aae7b39186244e6552c18b8f7d0b0de12")));
   }
 
   private StoredConfiguration createConfiguration() {
