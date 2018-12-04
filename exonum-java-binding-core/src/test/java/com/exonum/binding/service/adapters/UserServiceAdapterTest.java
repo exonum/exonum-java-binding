@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -266,4 +267,15 @@ class UserServiceAdapterTest {
 
     assertTrue(cleaner.isClosed());
   }
+
+  @Test
+  void afterCommit_swallowUnexpectedException() {
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class))).thenReturn(snapshot);
+    doThrow(NullPointerException.class).when(service).afterCommit(any(BlockCommittedEvent.class));
+
+    serviceAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
+
+    verify(service).afterCommit(any(BlockCommittedEvent.class));
+  }
+
 }

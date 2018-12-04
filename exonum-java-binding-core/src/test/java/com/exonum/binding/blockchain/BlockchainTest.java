@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,4 +67,11 @@ class BlockchainTest {
     assertThat(blockchain.getBlockTransactions(height)).isEqualTo(mockListIndex);
   }
 
+  @Test
+  void getActualConfiguration() {
+    StoredConfiguration configuration = mock(StoredConfiguration.class);
+    when(mockSchema.getActualConfiguration()).thenReturn(configuration);
+
+    assertThat(blockchain.getActualConfiguration()).isEqualTo(configuration);
+  }
 }

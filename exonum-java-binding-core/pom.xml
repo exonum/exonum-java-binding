@@ -27,7 +27,6 @@
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <auto-value.version>1.6.2</auto-value.version>
-    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
   </properties>
@@ -81,14 +80,6 @@
       <groupId>com.google.auto.value</groupId>
       <artifactId>auto-value</artifactId>
       <version>${auto-value.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!--It is needed for Javadoc generation with JDK 9-->
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <version>${javax-annotation-api.version}</version>
       <scope>provided</scope>
     </dependency>
 
