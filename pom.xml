@@ -224,6 +224,25 @@
       <scope>test</scope>
     </dependency>
 
+    <!--JUnit5-->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Needed to fix @Generated annotation java 8 - 11 issue, Javadoc generation with JDK 9 -->
     <dependency>
       <groupId>javax.annotation</groupId>

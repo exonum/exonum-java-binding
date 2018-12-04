@@ -30,10 +30,20 @@ public final class NativeHandle implements AutoCloseable {
    */
   public static final long INVALID_NATIVE_HANDLE = 0L;
 
-  private long nativeHandle;
+  private final long nativeHandle;
 
+  private boolean isValid;
+
+  /**
+   * Creates new native handle. Validates it's state not allowing to create nullptr handle.
+   *
+   * @throws IllegalStateException if this native handle is invalid (nullptr)
+   */
   public NativeHandle(long nativeHandle) {
+    checkState(nativeHandle != INVALID_NATIVE_HANDLE, "This handle is not valid: %s", nativeHandle);
+
     this.nativeHandle = nativeHandle;
+    this.isValid = true;
   }
 
   /**
@@ -59,18 +69,15 @@ public final class NativeHandle implements AutoCloseable {
   }
 
   private void checkValid() {
-    checkState(isValid(), "This handle is not valid: %s", this);
+    checkState(isValid, "This handle is not valid: %s", this);
   }
 
-  /**
-   * Returns true if this native handle is valid.
-   */
   final boolean isValid() {
-    return nativeHandle != INVALID_NATIVE_HANDLE;
+    return isValid;
   }
 
   private void invalidate() {
-    nativeHandle = INVALID_NATIVE_HANDLE;
+    isValid = false;
   }
 
   @Override
