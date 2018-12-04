@@ -11,11 +11,11 @@ use JniResult;
 const RETVAL_TYPE_STRING: &str = "java/lang/String";
 const RETVAL_TYPE_CLASS: &str = "java/lang/Class";
 
-/// Returns a class name of an object as a `String`.
-pub fn get_class_name(env: &JNIEnv, object: JObject) -> JniResult<String> {
+/// Returns a class name of an obj as a `String`.
+pub fn get_class_name(env: &JNIEnv, obj: JObject) -> JniResult<String> {
     let class_object = unsafe {
         env.call_method_unsafe(
-            object,
+            obj,
             object::get_class_id(),
             JavaType::Object(RETVAL_TYPE_CLASS.into()),
             &[],
