@@ -98,7 +98,6 @@ impl Service for ServiceProxy {
     fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, MessageError> {
         unwrap_jni(self.exec.with_attached(|env| {
             let raw_clone = raw.clone();
-            // FIXME: what to do with tx id?
             let service_id = raw.service_id();
             let (tx_id, payload) = raw.service_transaction().into_raw_parts();
             let payload = JObject::from(env.byte_array_from_slice(&payload)?);
