@@ -52,6 +52,10 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * instead of:
  *
  * <pre><code>
+ * static {
+ *   LibraryLoader.load();
+ * }
+ *
  * MemoryDb db;
  *
  * @BeforeEach
