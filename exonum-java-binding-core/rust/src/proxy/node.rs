@@ -22,9 +22,6 @@ use utils::{
 use JniResult;
 
 const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/service/InternalServerError";
-const INVALID_TRANSACTION_EXCEPTION: &str =
-    "com/exonum/binding/service/InvalidTransactionException";
-const VERIFY_ERROR_MESSAGE: &str = "Unable to verify transaction";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
@@ -88,8 +85,7 @@ impl NodeContext {
 /// - `node_handle` - a native handle to the native node object
 /// - `transaction` - a transaction to submit
 /// - `payload` - an array containing the transaction payload
-/// - `offset` - an offset from which the payload starts
-/// - `size` - a size of the payload in bytes
+/// - `service_id` - an identifier of the service
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
@@ -106,19 +102,10 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
                 let payload = env.convert_byte_array(payload)?;
                 let service_transaction = ServiceTransaction::from_raw_unchecked(0, payload);
                 let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
-                let exec = node.executor().clone();
                 if let Err(err) = node.submit(raw_transaction) {
-                    let class;
-                    // FIXME: error handling
-                    /*if err.kind() == io::ErrorKind::Other
-                        && err.description() == VERIFY_ERROR_MESSAGE
-                    {
-                        class = INVALID_TRANSACTION_EXCEPTION;
-                    } else {
-                        class = INTERNAL_SERVER_ERROR;
-                    };*/
-                    class = INTERNAL_SERVER_ERROR;
-                    env.throw_new(class, "Some desciption")?;
+                    let error_class = INTERNAL_SERVER_ERROR;
+                    let error_description = err.to_string();
+                    env.throw_new(error_class, error_description)?;
                 }
                 Ok(())
             }(),
