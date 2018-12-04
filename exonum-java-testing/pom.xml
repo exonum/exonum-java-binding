@@ -20,21 +20,10 @@
       <artifactId>guava</artifactId>
     </dependency>
 
-    <!-- TODO: Move junit-x to <dependency> section in the parent project: ECR-2023 -->
+    <!-- The Jupiter API is a _runtime_ dependency. -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
