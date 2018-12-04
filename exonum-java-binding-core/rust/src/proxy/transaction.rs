@@ -82,7 +82,7 @@ impl Transaction for TransactionProxy {
                 .call_method(
                     self.transaction.as_obj(),
                     "execute",
-                    "(J)V",
+                    "(J[B[B)V",
                     &[
                         JValue::from(view_handle),
                         JValue::from(tx_hash),
