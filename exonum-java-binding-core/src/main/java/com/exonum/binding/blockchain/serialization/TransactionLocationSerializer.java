@@ -27,8 +27,8 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
   public byte[] toBytes(TransactionLocation value) {
     CoreProtos.TxLocation txLocation =
         CoreProtos.TxLocation.newBuilder()
-            .setHeight(value.getHeight())
-            .setIndexInBlock(value.getIndexInBlock())
+            .setBlockHeight(value.getHeight())
+            .setPositionInBlock(value.getIndexInBlock())
             .build();
     return txLocation.toByteArray();
   }
@@ -38,8 +38,8 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
     try {
       CoreProtos.TxLocation copiedtxLocationProtos =
           CoreProtos.TxLocation.parseFrom(binaryTransactionLocation);
-      return TransactionLocation.valueOf(copiedtxLocationProtos.getHeight(),
-          copiedtxLocationProtos.getIndexInBlock());
+      return TransactionLocation.valueOf(copiedtxLocationProtos.getBlockHeight(),
+          copiedtxLocationProtos.getPositionInBlock());
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException("Unable to instantiate "
           + "CoreProtos.TxLocation instance from provided binary data", e);
