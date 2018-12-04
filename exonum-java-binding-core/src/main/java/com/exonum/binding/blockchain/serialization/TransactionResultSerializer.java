@@ -40,8 +40,8 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
       default:
         throw new AssertionError("Unreachable");
     }
-    TransactionResultProto txLocation =
-        TransactionResultProto.newBuilder()
+    CoreProtos.TransactionResult txLocation =
+        CoreProtos.TransactionResult.newBuilder()
             .setStatus(status)
             .setDescription(value.getErrorDescription().orElse(""))
             .build();
@@ -51,8 +51,8 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
   @Override
   public TransactionResult fromBytes(byte[] binaryTransactionResult) {
     try {
-      TransactionResultProto copiedtxLocationProtos =
-          TransactionResultProto.parseFrom(binaryTransactionResult);
+      CoreProtos.TransactionResult copiedtxLocationProtos =
+          CoreProtos.TransactionResult.parseFrom(binaryTransactionResult);
       int status = copiedtxLocationProtos.getStatus();
       String description = copiedtxLocationProtos.getDescription();
       if (status <= 255) {
@@ -66,7 +66,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
       }
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException("Unable to instantiate "
-          + "TransactionResultProtos.TransactionResult instance from provided binary data", e);
+          + "CoreProtos.TransactionResult instance from provided binary data", e);
     }
   }
 

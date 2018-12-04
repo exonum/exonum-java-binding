@@ -28,7 +28,7 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @Override
   public byte[] toBytes(Block value) {
-    BlockProtos.Block block = BlockProtos.Block.newBuilder()
+    CoreProtos.Block block = CoreProtos.Block.newBuilder()
         .setProposerId(value.getProposerId())
         .setHeight(value.getHeight())
         .setTxCount(value.getNumTransactions())
@@ -42,7 +42,7 @@ public enum BlockSerializer implements Serializer<Block> {
   @Override
   public Block fromBytes(byte[] binaryBlock) {
     try {
-      BlockProtos.Block copiedBlocks = BlockProtos.Block.parseFrom(binaryBlock);
+      CoreProtos.Block copiedBlocks = CoreProtos.Block.parseFrom(binaryBlock);
       return Block.valueOf(copiedBlocks.getProposerId(),
           copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
           fromHashProto(copiedBlocks.getPrevHash()),
@@ -54,13 +54,13 @@ public enum BlockSerializer implements Serializer<Block> {
     }
   }
 
-  private static BlockProtos.Hash toHashProto(HashCode hash) {
-    return BlockProtos.Hash.newBuilder()
+  private static CoreProtos.Hash toHashProto(HashCode hash) {
+    return CoreProtos.Hash.newBuilder()
         .setData(toByteString(hash))
         .build();
   }
 
-  private static HashCode fromHashProto(BlockProtos.Hash hash) {
+  private static HashCode fromHashProto(CoreProtos.Hash hash) {
     return toHashCode(hash.getData());
   }
 
