@@ -63,8 +63,12 @@ impl serde::Serialize for TransactionProxy {
     where
         S: serde::Serializer,
     {
-        // FIXME: smth with error handling
-        serializer.serialize_bytes(&self.raw.encode().unwrap())
+        serializer.serialize_bytes(
+            &self
+                .raw
+                .encode()
+                .expect("Could not serialize TransactionProxy"),
+        )
     }
 }
 
