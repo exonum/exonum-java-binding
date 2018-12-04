@@ -34,4 +34,55 @@ public class RawTransaction {
     HashFunction hashFunction = Hashing.defaultHashFunction();
     return hashFunction.hashBytes(getPayload());
   }
+
+  public static final class Builder {
+    private Short serviceId;
+    private Short transactionId;
+    private byte[] payload;
+
+    /**
+     * Sets service identifier to the transaction message.
+     */
+    public RawTransaction.Builder serviceId(short serviceId) {
+      this.serviceId = serviceId;
+      return this;
+    }
+
+    /**
+     * Sets transaction identifier to the transaction message.
+     */
+    public RawTransaction.Builder transactionId(short transactionId) {
+      this.transactionId = transactionId;
+      return this;
+    }
+
+    /**
+     * Sets payload to the transaction message.
+     */
+    public RawTransaction.Builder payload(byte[] payload) {
+      this.payload = payload.clone();
+      return this;
+    }
+
+    public RawTransaction build() {
+      checkRequiredFieldsSet();
+
+      return new RawTransaction(this.serviceId, this.transactionId, this.payload);
+    }
+
+    private void checkRequiredFieldsSet() {
+      String undefinedFields = "";
+      undefinedFields = this.serviceId == null ? undefinedFields + " serviceId" : undefinedFields;
+      undefinedFields =
+          this.transactionId == null ? undefinedFields + " transactionId" : undefinedFields;
+      undefinedFields = this.payload == null ? undefinedFields + " payload" : undefinedFields;
+      if (!undefinedFields.isEmpty()) {
+        throw new IllegalStateException(
+            "Following field(s) are required but weren't set: " + undefinedFields);
+      }
+    }
+
+    public Builder() {
+    }
+  }
 }
