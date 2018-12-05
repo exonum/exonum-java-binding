@@ -7,13 +7,12 @@ use exonum::node::ApiSender;
 use exonum::storage::Snapshot;
 use failure;
 use jni::objects::JClass;
-use jni::sys::{jbyteArray, jint, jobject};
+use jni::sys::{jbyteArray, jint};
 use jni::JNIEnv;
 
-use std::error::Error;
-use std::{io, panic, ptr};
+use std::{panic, ptr};
 
-use proxy::{MainExecutor, TransactionProxy};
+use proxy::MainExecutor;
 use storage::View;
 use utils::{
     cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose,

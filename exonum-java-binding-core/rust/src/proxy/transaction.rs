@@ -1,22 +1,16 @@
 use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
-use exonum::encoding::serialize::json::ExonumJson;
-use exonum::encoding::serialize::WriteBufferWrapper;
-use exonum::encoding::Offset;
 use exonum::messages::BinaryForm;
 use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::JNIEnv;
 use serde;
-use serde_json;
-use serde_json::value::Value;
 
-use std::error::Error;
 use std::fmt;
 
 use storage::View;
 use utils::{
-    check_error_on_exception, convert_to_string, describe_java_exception,
-    get_and_clear_java_exception, get_exception_message, panic_on_exception, to_handle, unwrap_jni,
+    describe_java_exception, get_and_clear_java_exception, get_exception_message, to_handle,
+    unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
