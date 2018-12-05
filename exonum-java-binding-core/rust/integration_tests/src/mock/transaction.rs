@@ -8,7 +8,9 @@ use super::NATIVE_FACADE_CLASS;
 pub const TRANSACTION_ADAPTER_CLASS: &str =
     "com/exonum/binding/service/adapters/UserTransactionAdapter";
 
-pub const ENTRY_NAME: &str = "test_entry";
+pub const TEST_ENTRY_NAME: &str = "test_entry";
+pub const TX_HASH_ENTRY_NAME: &str = "tx_hash";
+pub const AUTHOR_PK_ENTRY_NAME: &str = "author_pk";
 pub const ENTRY_VALUE: &str = "test_value";
 pub const INFO_JSON: &str = r#""test_info""#;
 
@@ -20,7 +22,7 @@ lazy_static! {
 pub fn create_throwing_mock_transaction_proxy(
     executor: MainExecutor,
     exception_class: &str,
-) -> TransactionProxy {
+) -> (TransactionProxy, RawTransaction) {
     let (java_tx_mock, raw) = executor
         .with_attached(|env| {
             let exception = env.find_class(exception_class)?;
@@ -32,11 +34,12 @@ pub fn create_throwing_mock_transaction_proxy(
                     &[JValue::from(JObject::from(exception.into_inner()))],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
-            let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
+            let raw = create_empty_raw_transaction();
             Ok((java_tx_mock, raw))
         }).unwrap();
 
-    TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
+    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
+    (tx_proxy, raw)
 }
 
 /// Creates `TransactionProxy` which throws TransactionExecutionException on the `execute` call.
@@ -45,7 +48,7 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
     is_subclass: bool,
     error_code: i8,
     error_message: Option<&str>,
-) -> TransactionProxy {
+) -> (TransactionProxy, RawTransaction) {
     let (java_tx_mock, raw) = executor
         .with_attached(|env| {
             let msg = match error_message {
@@ -67,17 +70,22 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
                     ],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
-            let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
+            let raw = create_empty_raw_transaction();
             Ok((java_tx_mock, raw))
         }).unwrap();
 
-    TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
+    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
+    (tx_proxy, raw)
 }
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction_proxy(executor: MainExecutor, valid: bool) -> TransactionProxy {
+pub fn create_mock_transaction_proxy(
+    executor: MainExecutor,
+    valid: bool,
+) -> (TransactionProxy, RawTransaction) {
     let (java_tx_mock, raw) = create_mock_transaction(&executor, valid);
-    TransactionProxy::from_global_ref(executor, java_tx_mock, raw)
+    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
+    (tx_proxy, raw)
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
@@ -104,7 +112,12 @@ pub fn create_mock_transaction(
                     ],
                 )?.l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;
-            let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
+            let raw = create_empty_raw_transaction();
             Ok((java_tx_mock, raw))
         }).unwrap()
+}
+
+pub fn create_empty_raw_transaction() -> RawTransaction {
+    let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![]);
+    RawTransaction::new(0, service_transaction)
 }

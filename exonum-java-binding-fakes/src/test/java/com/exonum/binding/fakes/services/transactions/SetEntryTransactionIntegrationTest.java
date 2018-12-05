@@ -16,7 +16,7 @@
 //
 //package com.exonum.binding.fakes.services.transactions;
 //
-//import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.ENTRY_NAME;
+//import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.TEST_ENTRY_NAME;
 //import static org.hamcrest.MatcherAssert.assertThat;
 //import static org.hamcrest.Matchers.equalTo;
 //import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,7 +54,7 @@
 //      database.merge(fork);
 //
 //      Snapshot snapshot = database.createSnapshot(cleaner);
-//      EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
+//      EntryIndexProxy entry = EntryIndexProxy.newInstance(TEST_ENTRY_NAME, snapshot,
 //          StandardSerializers.string());
 //      assertTrue(entry.isPresent());
 //      assertThat(entry.get(), equalTo(value));
