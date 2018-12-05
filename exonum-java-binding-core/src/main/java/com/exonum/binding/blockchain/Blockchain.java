@@ -26,7 +26,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.Nullable;
 
 /**
  * Provides read-only access to the subset of
@@ -86,12 +85,11 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block with given id or null if
-   * the block with given id doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block with given id or an empty
+   * list if the block with given id doesn't exist.
    *
    * @param blockId id of the block
    */
-  @Nullable
   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
     MapIndex<HashCode, Block> blocks = schema.getBlocks();
     Block block = blocks.get(blockId);

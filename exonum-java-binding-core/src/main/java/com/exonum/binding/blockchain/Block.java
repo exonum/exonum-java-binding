@@ -18,6 +18,7 @@ package com.exonum.binding.blockchain;
 
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 
@@ -54,7 +55,7 @@ public abstract class Block {
 
   /**
    * Height of the block, which also identifies the number of this particular block in the
-   * blockchain.
+   * blockchain starting from 0 ("genesis" block).
    */
   public abstract long getHeight();
 
@@ -79,10 +80,11 @@ public abstract class Block {
   public abstract HashCode getStateHash();
 
   /**
-   * Calculates a hash of this instance.
+   * Returns the SHA-256 hash of this block.
    */
   public HashCode getBlockHash() {
-    return HashCode.fromBytes(blockSerializer.toBytes(this));
+    return Hashing.defaultHashFunction()
+        .hashBytes(blockSerializer.toBytes(this));
   }
 
 }
