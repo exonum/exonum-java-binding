@@ -82,6 +82,37 @@ class BinaryTransactionMessageTest {
   }
 
   @Test
+  void internalBufferPositionImmutabilityTest() {
+    TransactionMessage message1 = TransactionMessage.builder()
+        .serviceId((short) 100)
+        .transactionId((short) 200)
+        .payload(Bytes.bytes(0x00, 0x01, 0x02))
+        .sign(KEYS, CRYPTO);
+    TransactionMessage message2 = TransactionMessage.builder()
+        .serviceId((short) 100)
+        .transactionId((short) 200)
+        .payload(Bytes.bytes(0x00, 0x01, 0x02))
+        .sign(KEYS, CRYPTO);
+
+    assertThat(message1, equalTo(message2));
+
+    message1.getAuthor();
+    assertThat(message1, equalTo(message2));
+    message1.getPayload();
+    assertThat(message1, equalTo(message2));
+    message1.getServiceId();
+    assertThat(message1, equalTo(message2));
+    message1.getSignature();
+    assertThat(message1, equalTo(message2));
+    message1.getTransactionId();
+    assertThat(message1, equalTo(message2));
+    message1.hash();
+    assertThat(message1, equalTo(message2));
+    message1.toBytes();
+    assertThat(message1, equalTo(message2));
+  }
+
+  @Test
   void invalidBytesArrayTest() {
     byte[] messageBytes = Bytes.randomBytes(MIN_MESSAGE_SIZE - 1);
 
