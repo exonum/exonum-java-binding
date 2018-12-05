@@ -6,8 +6,9 @@
     <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
   </Match>
 
-  <!-- Exclude the auto-generated Message_Builder2.java -->
+  <!-- Exclude the auto-generated files -->
   <Match>
     <Source name="~.*Message_Builder2\.java"/>
+    <Source name="~.*CoreProtos\.java"/>
   </Match>
 </FindBugsFilter>
