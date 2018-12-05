@@ -21,6 +21,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -50,7 +52,8 @@ class SetEntryTransactionIntegrationTest {
 
       Fork fork = database.createFork(cleaner);
       SetEntryTransaction tx = new SetEntryTransaction(value);
-      tx.execute(new InternalTransactionContext(fork, null, null));
+      tx.execute(new InternalTransactionContext(fork, HashCode.fromInt(123),
+          PublicKey.fromHexString("1234")));
 
       database.merge(fork);
 

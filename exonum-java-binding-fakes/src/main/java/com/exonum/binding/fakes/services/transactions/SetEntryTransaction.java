@@ -40,16 +40,12 @@ public final class SetEntryTransaction implements Transaction {
   static final String TX_HASH_NAME = "tx_hash";
   static final String AUTHOR_PK_NAME = "author_pk";
 
-  private final boolean valid;
   private final String value;
 
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
-   * @param value a value to put into an entry {@link #ENTRY_NAME}
-   * @param valid whether a transaction has to be valid
    * @param value a value to put into an entry {@link #TEST_ENTRY_NAME}
-   * @param info a value to be returned as this transaction text representation
    */
   public SetEntryTransaction(String value) {
     this.value = checkNotNull(value);
@@ -57,11 +53,8 @@ public final class SetEntryTransaction implements Transaction {
 
   @Override
   public void execute(TransactionContext context) {
-    checkState(valid, "Cannot execute an invalid transaction");
-
     Fork fork = context.getFork();
-    EntryIndexProxy<String> entry = createTestEntry(fork);
-    EntryIndexProxy<String> entry = createEntry(context.getFork());
+    EntryIndexProxy<String> entry = createTestEntry(context.getFork());
     entry.set(value);
     EntryIndexProxy<HashCode> txHash = createTxHashEntry(fork);
     txHash.set(context.getTransactionMessageHash());
