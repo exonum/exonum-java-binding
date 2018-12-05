@@ -17,6 +17,8 @@
 
 package com.exonum.binding.blockchain;
 
+import static autovalue.shaded.com.google$.common.base.$Preconditions.checkNotNull;
+
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -26,6 +28,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Optional;
 
 /**
  * Provides read-only access to the subset of
@@ -74,35 +77,41 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block at the given height or
-   * an empty list if the block at the given height doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block at the given height.
    *
    * @param height block height starting from 0
    * @throws IllegalArgumentException if the height is negative
+   * @return a proof list index containing block hashes for the given height,
+   *         or {@code Optional.empty()} if the block at given height doesn't exist
    */
-  public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
+  public Optional<ProofListIndexProxy<HashCode>> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block with given id or an empty
-   * list if the block with given id doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block with given id.
    *
-   * @param blockId id of the block
+   * @return proof list of transaction hashes committed in the block with given id,
+   *         or {@code Optional.empty()} if the block with given id doesn't exist
    */
-  public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
+  public Optional<ProofListIndexProxy<HashCode>> getBlockTransactions(HashCode blockId) {
     MapIndex<HashCode, Block> blocks = schema.getBlocks();
     Block block = blocks.get(blockId);
-    return getBlockTransactions(block.getHeight());
+    return block == null ? Optional.empty() : getBlockTransactions(block.getHeight());
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the given block or an empty list if
-   * the block with given id doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block, corresponding to the given
+   * block height.
    *
    * @param block block of which list of transaction hashes should be returned
+   *
+   * @throws NullPointerException if the block is null
+   * @return a proof list index containing block hashes for the given height,
+   *         or {@code Optional.empty()} if the block at given height doesn't exist
    */
-  public ProofListIndexProxy<HashCode> getBlockTransactions(Block block) {
+  public Optional<ProofListIndexProxy<HashCode>> getBlockTransactions(Block block) {
+    checkNotNull(block);
     return getBlockTransactions(block.getHeight());
   }
 
@@ -123,11 +132,15 @@ public final class Blockchain {
 
   /**
    * Returns a transaction execution result for given message hash.
-   * @param messageHash a message hash
+   *
+   * @return a transaction execution result, or {@code Optional.empty()} if this transaction
+   *         was not yet executed
    */
-  public TransactionResult getTxResult(HashCode messageHash) {
+  public Optional<TransactionResult> getTxResult(HashCode messageHash) {
     ProofMapIndexProxy<HashCode, TransactionResult> txResults = getTxResults();
-    return txResults.get(messageHash);
+    TransactionResult transactionResult = txResults.get(messageHash);
+    // TODO: add a test for Nullable
+    return Optional.ofNullable(transactionResult);
   }
 
   /**
@@ -140,11 +153,14 @@ public final class Blockchain {
 
   /**
    * Returns transaction position inside the blockchain for given message hash.
-   * @param messageHash message hash
+   *
+   * @return a transaction location, or {@code Optional.empty()} if this transaction
+   *         was not yet executed
    */
-  public TransactionLocation getTxLocation(HashCode messageHash) {
+  public Optional<TransactionLocation> getTxLocation(HashCode messageHash) {
     MapIndex<HashCode, TransactionLocation> txLocations = getTxLocations();
-    return txLocations.get(messageHash);
+    TransactionLocation transactionLocation = txLocations.get(messageHash);
+    return Optional.ofNullable(transactionLocation);
   }
 
   /**
@@ -156,14 +172,20 @@ public final class Blockchain {
 
   /**
    * Returns a block object for given block hash.
+   *
+   * @return a corresponding block, or {@code Optional.empty()} if there is no block with given
+   *         block hash
    */
-  public Block getBlock(HashCode blockHash) {
+  public Optional<Block> getBlock(HashCode blockHash) {
     MapIndex<HashCode, Block> blocks = getBlocks();
-    return blocks.get(blockHash);
+    Block block = blocks.get(blockHash);
+    return Optional.ofNullable(block);
   }
 
   /**
    * Returns the latest committed block.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
    */
   public Block getLastBlock() {
     return schema.getLastBlock();

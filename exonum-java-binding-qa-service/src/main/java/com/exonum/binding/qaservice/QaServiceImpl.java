@@ -48,6 +48,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -218,9 +219,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
   public List<HashCode> getBlockTransactions(long height) {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
-      ProofListIndexProxy<HashCode> hashes = blockchain.getBlockTransactions(height);
-
-      return Lists.newArrayList(hashes);
+      Optional<ProofListIndexProxy<HashCode>> hashes = blockchain.getBlockTransactions(height);
+      return hashes.isPresent() ? Lists.newArrayList(hashes.get()) : Collections.emptyList();
     });
   }
 

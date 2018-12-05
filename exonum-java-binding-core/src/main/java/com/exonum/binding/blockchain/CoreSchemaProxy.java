@@ -39,6 +39,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import java.util.Optional;
 
 /**
  * A proxy class for the blockchain::Schema struct maintained by Exonum core.
@@ -95,13 +96,19 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns an proof list index containing block hashes for the given height.
+   * Returns a proof list index containing block hashes for the given height.
+   *
+   * @return a proof list index containing block hashes for the given height,
+   *         or {@code Optional.empty()} if the block at given height doesn't exist
    */
-  ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
+  Optional<ProofListIndexProxy<HashCode>> getBlockTransactions(long height) {
     checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
+    if (height > getHeight()) {
+      return Optional.empty();
+    }
     byte[] id = fixed64().toBytes(height);
-    return ProofListIndexProxy.newInGroupUnsafe(
-        CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
+    return Optional.of(ProofListIndexProxy.newInGroupUnsafe(
+        CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash()));
   }
 
   /**

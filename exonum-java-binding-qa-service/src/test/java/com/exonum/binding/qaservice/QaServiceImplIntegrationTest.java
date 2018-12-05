@@ -310,8 +310,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      List<HashCode> hashes = service.getBlockTransactions(0L);
-      assertThat(hashes).isEmpty();
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlockTransactions(0L));
+      assertThat(t.getMessage()).contains("An attempt to get the actual `height` during creating"
+          + " the genesis block.");
     }
   }
 
