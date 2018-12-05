@@ -139,7 +139,6 @@ public final class Blockchain {
   public Optional<TransactionResult> getTxResult(HashCode messageHash) {
     ProofMapIndexProxy<HashCode, TransactionResult> txResults = getTxResults();
     TransactionResult transactionResult = txResults.get(messageHash);
-    // TODO: add a test for Nullable
     return Optional.ofNullable(transactionResult);
   }
 
