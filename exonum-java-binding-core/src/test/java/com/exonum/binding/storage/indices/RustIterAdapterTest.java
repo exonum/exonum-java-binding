@@ -16,12 +16,20 @@
 
 package com.exonum.binding.storage.indices;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class RustIterAdapterTest {
 
@@ -43,5 +51,33 @@ class RustIterAdapterTest {
     adapter.next();
 
     assertThrows(NoSuchElementException.class, () -> adapter.next());
+  }
+
+  @ParameterizedTest
+  @MethodSource("testData")
+  void iteratorMustIncludeAllTheItemsFromTheList(List<Integer> underlyingList) {
+    // Create an adapter under test, converting a list to rustIter.
+    RustIterAdapter<Integer> iterAdapter = new RustIterAdapter<>(
+        rustIterMockFromIterable(underlyingList));
+
+    // Use an adapter as Iterator to collect all items in a list
+    List<Integer> itemsFromIterAdapter = ImmutableList.copyOf(iterAdapter);
+
+    // check that the lists are the same.
+    assertThat(itemsFromIterAdapter, equalTo(underlyingList));
+  }
+
+  private static RustIter<Integer> rustIterMockFromIterable(Iterable<Integer> iterable) {
+    return new RustIterTestFake(iterable);
+  }
+
+  private static List<List<Integer>> testData() {
+    return Arrays.asList(
+        emptyList(),
+        singletonList(1),
+        asList(1, 2),
+        asList(1, 2, 3),
+        asList(1, 2, 3, 4, 5)
+    );
   }
 }

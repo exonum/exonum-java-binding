@@ -23,45 +23,53 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-
 class NativeHandleTest {
 
   private NativeHandle nativeHandle;
 
+  private static long HANDLE = 0x11L;
+
+  private static final String HANDLE_STRING_REPRESENTATION =
+      Long.toHexString(HANDLE).toUpperCase();
+
   @Test
   void getIfValid() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
     assertTrue(nativeHandle.isValid());
-    assertThat(nativeHandle.get()).isEqualTo(handle);
+    assertThat(nativeHandle.get()).isEqualTo(HANDLE);
   }
 
   @Test
   void getInvalid() {
     long handle = NativeHandle.INVALID_NATIVE_HANDLE;
-    nativeHandle = new NativeHandle(handle);
 
-    assertFalse(nativeHandle.isValid());
-    assertThrows(IllegalStateException.class, () -> nativeHandle.get());
+    assertThrows(IllegalStateException.class, () -> nativeHandle = new NativeHandle(handle));
   }
 
   @Test
   void close() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 
   @Test
   void closeMultipleTimes() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+    nativeHandle = new NativeHandle(HANDLE);
 
     nativeHandle.close();
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
+  }
+
+  @Test
+  void toStringHexRepresentation() {
+    nativeHandle = new NativeHandle(HANDLE);
+
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 }
