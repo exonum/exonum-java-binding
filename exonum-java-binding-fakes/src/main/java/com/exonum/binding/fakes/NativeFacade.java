@@ -30,7 +30,6 @@ import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.exonum.binding.util.LibraryLoader;
-
 import javax.annotation.Nullable;
 
 /**
@@ -50,15 +49,10 @@ public final class NativeFacade {
   /**
    * Creates a UserTransactionAdapter of a transaction that puts a given value into the storage.
    *
-   * @param valid whether a transaction has to be valid (i.e., return true
-   *              in its {@link Transaction#isValid()} method)
    * @param value a value to put into an entry
-   * @param info a value to be returned by {@link UserTransactionAdapter#info()}
    */
-  public static UserTransactionAdapter createTransaction(boolean valid,
-                                                         String value,
-                                                         String info) {
-    SetEntryTransaction userTransaction = new SetEntryTransaction(valid, value, info);
+  public static UserTransactionAdapter createTransaction(String value) {
+    SetEntryTransaction userTransaction = new SetEntryTransaction(value);
     return new UserTransactionAdapter(userTransaction, VIEW_FACTORY);
   }
 
@@ -77,7 +71,7 @@ public final class NativeFacade {
 
   /**
    * Creates a UserTransactionAdapter that contains a transaction that throws
-   * {@link TransactionExecutionException} in its execute method.
+   * {@link com.exonum.binding.transaction.TransactionExecutionException} in its execute method.
    *
    * @param isSubclass whether method should produce a subclass of TransactionExecutionException
    * @param errorCode an error code that will be included in the exception
@@ -112,7 +106,7 @@ public final class NativeFacade {
    * <ul>
    *   <li>{@link UserServiceAdapter#initialize(long)}</li>
    *   <li>{@link UserServiceAdapter#getStateHashes(long)}</li>
-   *   <li>{@link UserServiceAdapter#convertTransaction(byte[])}</li>
+   *   <li>{@link UserServiceAdapter#convertTransaction(int, int, byte[])}</li>
    * </ul>
    *
    * @see #createServiceFakeBuilder()

@@ -17,7 +17,6 @@
 package com.exonum.binding.fakes.services.transactions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -36,6 +35,7 @@ import com.exonum.binding.transaction.TransactionContext;
  */
 public final class SetEntryTransaction implements Transaction {
 
+  static final String ENTRY_NAME = "test_entry";
   static final String TEST_ENTRY_NAME = "test_entry";
   static final String TX_HASH_NAME = "tx_hash";
   static final String AUTHOR_PK_NAME = "author_pk";
@@ -46,12 +46,12 @@ public final class SetEntryTransaction implements Transaction {
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
+   * @param value a value to put into an entry {@link #ENTRY_NAME}
    * @param valid whether a transaction has to be valid
    * @param value a value to put into an entry {@link #TEST_ENTRY_NAME}
    * @param info a value to be returned as this transaction text representation
    */
-  public SetEntryTransaction(boolean valid, String value, String info) {
-    this.valid = valid;
+  public SetEntryTransaction(String value) {
     this.value = checkNotNull(value);
   }
 
@@ -61,6 +61,7 @@ public final class SetEntryTransaction implements Transaction {
 
     Fork fork = context.getFork();
     EntryIndexProxy<String> entry = createTestEntry(fork);
+    EntryIndexProxy<String> entry = createEntry(context.getFork());
     entry.set(value);
     EntryIndexProxy<HashCode> txHash = createTxHashEntry(fork);
     txHash.set(context.getTransactionMessageHash());
