@@ -148,7 +148,8 @@
 //      MapIndex<HashCode, String> counterNames = schema.counterNames();
 //
 //      HashCode defaultCounterId = Hashing.sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
-//      HashCode afterCommitCounterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+//      HashCode afterCommitCounterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME,
+//      UTF_8);
 //
 //      assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
 //      assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
