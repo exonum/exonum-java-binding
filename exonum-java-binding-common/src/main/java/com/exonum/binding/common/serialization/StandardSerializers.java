@@ -19,6 +19,7 @@ package com.exonum.binding.common.serialization;
 import com.exonum.binding.common.crypto.PrivateKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.MessageLite;
 
@@ -137,6 +138,13 @@ public final class StandardSerializers {
    */
   public static Serializer<PrivateKey> privateKey() {
     return PrivateKeySerializer.INSTANCE;
+  }
+
+  /**
+   * Returns a serializer of transaction messages.
+   */
+  public static Serializer<TransactionMessage> transactionMessage() {
+    return TransactionMessageSerializer.INSTANCE;
   }
 
   /**

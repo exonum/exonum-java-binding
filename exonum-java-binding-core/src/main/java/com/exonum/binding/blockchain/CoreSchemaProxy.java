@@ -54,6 +54,8 @@ final class CoreSchemaProxy {
       TransactionLocationSerializer.INSTANCE;
   private final Serializer<TransactionResult> transactionResultSerializer =
       TransactionResultSerializer.INSTANCE;
+  private final Serializer<TransactionMessage> transactionMessageSerializer =
+      StandardSerializers.transactionMessage();
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
     this.nativeHandle = nativeHandle;
@@ -122,9 +124,8 @@ final class CoreSchemaProxy {
    * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
-    // TODO: serializer
     return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbView, StandardSerializers.hash(),
-        null);
+        transactionMessageSerializer);
   }
 
   /**
