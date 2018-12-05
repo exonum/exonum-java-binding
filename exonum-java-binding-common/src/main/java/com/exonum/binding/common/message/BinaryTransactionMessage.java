@@ -49,13 +49,12 @@ final class BinaryTransactionMessage implements TransactionMessage {
 
     this.rawTransaction = ByteBuffer.allocate(messageSize).order(LITTLE_ENDIAN);
     this.rawTransaction.put(slice);
+    this.rawTransaction.flip();
   }
 
   @Override
   public PublicKey getAuthor() {
-    byte[] key = new byte[AUTHOR_PUBLIC_KEY_SIZE];
-    rawTransaction.position(AUTHOR_PUBLIC_KEY_OFFSET);
-    rawTransaction.get(key);
+    byte[] key = getBytes(AUTHOR_PUBLIC_KEY_OFFSET, AUTHOR_PUBLIC_KEY_SIZE);
     return PublicKey.fromBytes(key);
   }
 
@@ -72,26 +71,18 @@ final class BinaryTransactionMessage implements TransactionMessage {
   @Override
   public byte[] getPayload() {
     int payloadSize = messageSize - MIN_MESSAGE_SIZE;
-    byte[] payload = new byte[payloadSize];
-    rawTransaction.position(PAYLOAD_OFFSET);
-    rawTransaction.get(payload);
-    return payload;
+    return getBytes(PAYLOAD_OFFSET, payloadSize);
   }
 
   @Override
   public HashCode hash() {
-    // We can't use BB directly for hashing because rawTransaction#position might be changed
-    // and it causes having different hashes for the same message.
     return sha256().hashBytes(rawTransaction.array());
   }
 
   @Override
   public byte[] getSignature() {
     int payloadSize = messageSize - MIN_MESSAGE_SIZE;
-    rawTransaction.position(PAYLOAD_OFFSET + payloadSize);
-    byte[] signature = new byte[SIGNATURE_SIZE];
-    rawTransaction.get(signature);
-    return signature;
+    return getBytes(PAYLOAD_OFFSET + payloadSize, SIGNATURE_SIZE);
   }
 
   @Override
@@ -125,6 +116,18 @@ final class BinaryTransactionMessage implements TransactionMessage {
   @Override
   public String toString() {
     return Arrays.toString(rawTransaction.array());
+  }
+
+  /**
+   * Returns bytes by slicing raw transaction to avoid changing it's position.
+   */
+  private byte[] getBytes(int startOffset, int size) {
+    byte[] slice = new byte[size];
+    ByteBuffer buffer = rawTransaction.duplicate();
+    buffer.position(startOffset);
+    buffer.get(slice);
+
+    return slice;
   }
 
 }

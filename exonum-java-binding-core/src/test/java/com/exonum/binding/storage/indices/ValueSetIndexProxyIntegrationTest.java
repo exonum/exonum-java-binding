@@ -199,9 +199,7 @@ class ValueSetIndexProxyIntegrationTest
   @Test
   void removeFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
-
       assertThrows(UnsupportedOperationException.class, () -> set.remove(V1));
-
     });
   }
 
@@ -236,9 +234,7 @@ class ValueSetIndexProxyIntegrationTest
   @Test
   void removeByHashFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
-
       assertThrows(UnsupportedOperationException.class, () -> set.removeByHash(getHashOf(V1)));
-
     });
   }
 

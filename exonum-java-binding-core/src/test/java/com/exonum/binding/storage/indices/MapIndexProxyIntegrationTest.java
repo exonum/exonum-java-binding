@@ -225,8 +225,10 @@ class MapIndexProxyIntegrationTest
 
   @Test
   void putShouldFailWithSnapshot() {
-    assertThrows(UnsupportedOperationException.class,
-        () -> runTestWithView(database::createSnapshot, (map) -> map.put(K1, V1)));
+    runTestWithView(database::createSnapshot, (map) -> {
+      assertThrows(UnsupportedOperationException.class,
+          () -> map.put(K1, V1));
+    });
   }
 
   @Test
@@ -402,8 +404,10 @@ class MapIndexProxyIntegrationTest
 
   @Test
   void clearSnapshotMustFail() {
-    assertThrows(UnsupportedOperationException.class,
-        () -> runTestWithView(database::createSnapshot, MapIndexProxy::clear));  // boom
+    runTestWithView(database::createSnapshot, (m) -> {
+      assertThrows(UnsupportedOperationException.class,
+          m::clear);
+    });
   }
 
   @Test

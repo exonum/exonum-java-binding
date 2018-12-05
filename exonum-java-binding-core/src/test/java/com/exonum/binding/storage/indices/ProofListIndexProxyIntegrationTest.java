@@ -27,24 +27,20 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
-class ProofListIndexProxyIntegrationTest {
+class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   /**
    * An empty list root hash: an all-zero hash code.
@@ -52,22 +48,16 @@ class ProofListIndexProxyIntegrationTest {
   private static final HashCode EMPTY_LIST_ROOT_HASH =
       HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
 
-  static {
-    LibraryLoader.load();
-  }
-
-  private Database database;
-
   private static final String LIST_NAME = "test_proof_list";
 
-  @BeforeEach
-  void setUp() {
-    database = MemoryDb.newInstance();
+  @Override
+  ProofListIndexProxy<String> create(String name, View view) {
+    return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
-  @AfterEach
-  void tearDown() {
-    database.close();
+  @Override
+  Object getAnyElement(AbstractListIndexProxy<String> index) {
+    return index.get(0L);
   }
 
   @Test

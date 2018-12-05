@@ -68,7 +68,6 @@ class BlockchainTest {
   @Test
   void getAllBlockHashes() {
     ListIndexProxy mockListIndex = mock(ListIndexProxy.class);
-
     when(mockSchema.getAllBlockHashes()).thenReturn(mockListIndex);
 
     assertThat(blockchain.getAllBlockHashes()).isEqualTo(mockListIndex);
@@ -77,7 +76,6 @@ class BlockchainTest {
   @Test
   void getBlockTransactionsByHeight() {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-
     when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
 
     assertThat(blockchain.getBlockTransactions(HEIGHT)).isEqualTo(mockListIndex);
@@ -99,7 +97,6 @@ class BlockchainTest {
   @Test
   void getBlockTransactionsByBlock() {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-
     when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
 
     assertThat(blockchain.getBlockTransactions(block)).isEqualTo(mockListIndex);
