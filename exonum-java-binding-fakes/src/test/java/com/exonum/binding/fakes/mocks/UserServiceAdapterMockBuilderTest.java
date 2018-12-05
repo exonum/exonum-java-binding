@@ -23,8 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.message.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
+import com.exonum.binding.test.Slow;
 import org.junit.jupiter.api.Test;
 
+@Slow
 class UserServiceAdapterMockBuilderTest {
 
   private static final int MIN_MESSAGE_SIZE = Message.messageSize(0);

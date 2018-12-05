@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.test.Slow;
 import org.junit.jupiter.api.Test;
 
 class UnknownTxTest {
@@ -32,6 +33,7 @@ class UnknownTxTest {
     assertTrue(tx.isValid());
   }
 
+  @Slow
   @Test
   void execute() {
     UnknownTx tx = new UnknownTx();

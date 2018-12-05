@@ -37,6 +37,7 @@ import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
 import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.test.Slow;
 import com.exonum.binding.transaction.Transaction;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.Vertx;
@@ -61,6 +62,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+@Slow
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
