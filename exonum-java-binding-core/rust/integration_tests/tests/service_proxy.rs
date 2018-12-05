@@ -4,7 +4,6 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::mock::service::ServiceMockBuilder;
-use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
 use integration_tests::test_service::{
     create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
 };

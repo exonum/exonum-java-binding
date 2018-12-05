@@ -8,7 +8,6 @@ use std::sync::Arc;
 
 use futures::sync::mpsc::{self, Receiver};
 use futures::Stream;
-use integration_tests::mock::transaction::create_mock_transaction;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::exonum::blockchain::Blockchain;
 use java_bindings::exonum::crypto::gen_keypair;
