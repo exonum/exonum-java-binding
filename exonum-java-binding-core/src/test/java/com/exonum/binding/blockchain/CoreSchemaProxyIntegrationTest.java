@@ -73,7 +73,7 @@ class CoreSchemaProxyIntegrationTest {
 
   @Test
   void getTxMessagesTest() {
-     assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
+    assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
   }
 
   @Test
