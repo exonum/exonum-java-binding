@@ -98,7 +98,7 @@ public class UserServiceAdapter {
     } catch (NullPointerException | IllegalArgumentException e) {
       logger.warn("Failed to convert transaction {}", Arrays.toString(transactionMessage), e);
       throw e;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       logger.error("Unexpected exception occurs at convert transaction {}",
           Arrays.toString(transactionMessage), e);
       throw e;
@@ -115,20 +115,18 @@ public class UserServiceAdapter {
    * @see Service#getStateHashes(Snapshot)
    */
   public byte[][] getStateHashes(long snapshotHandle) {
-    try {
-      assert snapshotHandle != 0;
+    assert snapshotHandle != 0;
 
-      try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
-        Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
-        List<HashCode> stateHashes = service.getStateHashes(snapshot);
-        return stateHashes.stream()
-            .map(HashCode::asBytes)
-            .toArray(byte[][]::new);
-      } catch (CloseFailuresException e) {
-        logger.warn("Failed to close some resources at getStateHashes", e);
-        throw new RuntimeException(e);
-      }
-    } catch (Throwable e) {
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#getStateHashes")) {
+      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
+      List<HashCode> stateHashes = service.getStateHashes(snapshot);
+      return stateHashes.stream()
+          .map(HashCode::asBytes)
+          .toArray(byte[][]::new);
+    } catch (CloseFailuresException e) {
+      logger.error("Failed to close some resources at getStateHashes", e);
+      throw new RuntimeException(e);
+    } catch (Exception e) {
       logger.error("Unexpected exception occurs at getStateHashes", e);
       throw e;
     }
@@ -144,16 +142,15 @@ public class UserServiceAdapter {
    * @see Service#initialize(Fork)
    */
   public @Nullable String initialize(long forkHandle) {
-    try {
-      assert forkHandle != 0;
-      try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
-        Fork fork = viewFactory.createFork(forkHandle, cleaner);
-        return service.initialize(fork)
-            .orElse(null);
-      } catch (CloseFailuresException e) {
-        logger.warn("Failed to close some resources at initialize", e);
-        throw new RuntimeException(e);
-      }
+    assert forkHandle != 0;
+
+    try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
+      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      return service.initialize(fork)
+          .orElse(null);
+    } catch (CloseFailuresException e) {
+      logger.error("Failed to close some resources at initialize", e);
+      throw new RuntimeException(e);
     } catch (Exception e) {
       logger.error("Unexpected exception occurs at initialize", e);
       throw e;
@@ -194,7 +191,7 @@ public class UserServiceAdapter {
           BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
       doAfterCommit(event);
     } catch (CloseFailuresException e) {
-      logger.warn("Failed to close some resources at afterCommit", e);
+      logger.error("Failed to close some resources at afterCommit", e);
       throw new RuntimeException(e);
     }
   }
