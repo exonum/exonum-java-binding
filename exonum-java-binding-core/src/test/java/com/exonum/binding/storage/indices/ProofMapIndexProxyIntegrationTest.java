@@ -55,7 +55,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.test.Bytes;
-import com.exonum.binding.test.Slow;
+import com.exonum.binding.test.CiOnly;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
@@ -374,7 +374,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Slow
+  @CiOnly
   @Test
   /*
     Takes quite a lot of time (validating 257 proofs), but it's an integration test, isn't it? :-)

@@ -32,5 +32,5 @@ import org.junit.jupiter.api.Tag;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Tag("slow-test")
-public @interface Slow {
+public @interface CiOnly {
 }
