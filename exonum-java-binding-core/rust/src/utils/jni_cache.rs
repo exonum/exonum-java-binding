@@ -3,7 +3,12 @@ use jni::{
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
-use std::os::raw::c_void;
+use std::{
+    os::raw::c_void,
+    sync::{Once, ONCE_INIT},
+};
+
+static CACHE_INIT: Once = ONCE_INIT;
 
 static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
@@ -23,7 +28,7 @@ static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {
     let env = vm.get_env().expect("Cannot get reference to the JNIEnv");
-    cache_methods(&env);
+    CACHE_INIT.call_once(|| cache_methods(&env));
 
     JNI_VERSION_1_8
 }
