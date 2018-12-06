@@ -33,12 +33,15 @@ import org.junit.jupiter.api.Test;
 class StoredConfigurationGsonSerializerTest {
 
   private static final String CONFIG_EXAMPLE = "{\n"
-      + "\"previous_cfg_hash\": \"0000000000000000000000000000000000000000000000000000000000000000\",\n"
+      + "\"previous_cfg_hash\": \"000000000000000000000000000000000000000000000000000000000000000"
+      + "0\",\n"
       + "\"actual_from\": 0,\n"
       + "\"validator_keys\": [\n"
       + "    {\n"
-      + "        \"consensus_key\": \"43eb3be553c55b02b65e08c18bb060404b27e362ccf108cbad94ea097decbc0a\",\n"
-      + "        \"service_key\": \"79c1fcefcbfaeae43575ab0ef793c24aae7b39186244e6552c18b8f7d0b0de12\"\n"
+      + "        \"consensus_key\": \"43eb3be553c55b02b65e08c18bb060404b27e362ccf108cbad94ea097de"
+      + "cbc0a\",\n"
+      + "        \"service_key\": \"79c1fcefcbfaeae43575ab0ef793c24aae7b39186244e6552c18b8f7d0b0d"
+      + "e12\"\n"
       + "    }\n"
       + "],\n"
       + "\"consensus\": {\n"
