@@ -94,15 +94,16 @@ class StoredConfigurationGsonSerializerTest {
     );
     assertThat(configuration.actualFrom(), is(0L));
 
-    assertThat(configuration.consensusConfiguration(), notNullValue());
-    assertThat(configuration.consensusConfiguration().maxMessageLen(), is(1048576));
-    assertThat(configuration.consensusConfiguration().maxProposeTimeout(), is(200L));
-    assertThat(configuration.consensusConfiguration().minProposeTimeout(), is(10L));
-    assertThat(configuration.consensusConfiguration().peersTimeout(), is(10000L));
-    assertThat(configuration.consensusConfiguration().proposeTimeoutThreshold(), is(500));
-    assertThat(configuration.consensusConfiguration().roundTimeout(), is(3000L));
-    assertThat(configuration.consensusConfiguration().statusTimeout(), is(5000L));
-    assertThat(configuration.consensusConfiguration().txsBlockLimit(), is(1000));
+    ConsensusConfiguration consensusConfiguration = configuration.consensusConfiguration();
+    assertThat(consensusConfiguration, notNullValue());
+    assertThat(consensusConfiguration.maxMessageLen(), is(1048576));
+    assertThat(consensusConfiguration.maxProposeTimeout(), is(200L));
+    assertThat(consensusConfiguration.minProposeTimeout(), is(10L));
+    assertThat(consensusConfiguration.peersTimeout(), is(10000L));
+    assertThat(consensusConfiguration.proposeTimeoutThreshold(), is(500));
+    assertThat(consensusConfiguration.roundTimeout(), is(3000L));
+    assertThat(consensusConfiguration.statusTimeout(), is(5000L));
+    assertThat(consensusConfiguration.txsBlockLimit(), is(1000));
 
     assertThat(configuration.validatorKeys(), notNullValue());
     assertThat(configuration.validatorKeys().get(0).consensusKey(), is(PublicKey.fromHexString(
