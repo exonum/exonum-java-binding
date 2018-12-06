@@ -16,8 +16,11 @@
 
 package com.exonum.binding.blockchain.serialization;
 
+import static com.exonum.binding.blockchain.TransactionResult.Type.ERROR;
+import static com.exonum.binding.blockchain.TransactionResult.Type.SUCCESS;
+import static com.exonum.binding.blockchain.TransactionResult.Type.UNEXPECTED_ERROR;
+
 import com.exonum.binding.blockchain.TransactionResult;
-import com.exonum.binding.blockchain.TransactionResult.Type;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -26,20 +29,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
 
   @Override
   public byte[] toBytes(TransactionResult value) {
-    int status;
-    switch (value.getType()) {
-      case ERROR:
-        status = value.getErrorCode().get();
-        break;
-      case SUCCESS:
-        status = 256;
-        break;
-      case UNEXPECTED_ERROR:
-        status = 257;
-        break;
-      default:
-        throw new AssertionError("Unreachable");
-    }
+    int status = convertToCoreStatusCode(value);
     CoreProtos.TransactionResult txLocation =
         CoreProtos.TransactionResult.newBuilder()
             .setStatus(status)
@@ -56,11 +46,11 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
       int status = copiedtxLocationProtos.getStatus();
       String description = copiedtxLocationProtos.getDescription();
       if (status <= 255) {
-        return TransactionResult.valueOf(Type.ERROR, status, description);
+        return TransactionResult.valueOf(ERROR, status, description);
       } else if (status == 256) {
-        return TransactionResult.valueOf(Type.SUCCESS, null, null);
+        return TransactionResult.valueOf(SUCCESS, null, null);
       } else if (status == 257) {
-        return TransactionResult.valueOf(Type.UNEXPECTED_ERROR, null, description);
+        return TransactionResult.valueOf(UNEXPECTED_ERROR, null, description);
       } else {
         throw new InvalidProtocolBufferException("Invalid status code");
       }
@@ -68,6 +58,24 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
       throw new IllegalArgumentException("Unable to instantiate "
           + "CoreProtos.TransactionResult instance from provided binary data", e);
     }
+  }
+
+  private int convertToCoreStatusCode(TransactionResult transactionResult) {
+    int status;
+    switch (transactionResult.getType()) {
+      case ERROR:
+        status = transactionResult.getErrorCode().get();
+        break;
+      case SUCCESS:
+        status = 256;
+        break;
+      case UNEXPECTED_ERROR:
+        status = 257;
+        break;
+      default:
+        throw new AssertionError("Unreachable");
+    }
+    return status;
   }
 
 }

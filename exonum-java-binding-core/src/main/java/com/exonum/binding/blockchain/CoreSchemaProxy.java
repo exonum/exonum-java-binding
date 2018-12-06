@@ -49,12 +49,12 @@ final class CoreSchemaProxy {
 
   private final NativeHandle nativeHandle;
   private final View dbView;
-  private final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
-  private final Serializer<TransactionLocation> transactionLocationSerializer =
+  private static final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
+  private static final Serializer<TransactionLocation> transactionLocationSerializer =
       TransactionLocationSerializer.INSTANCE;
-  private final Serializer<TransactionResult> transactionResultSerializer =
+  private static final Serializer<TransactionResult> transactionResultSerializer =
       TransactionResultSerializer.INSTANCE;
-  private final Serializer<TransactionMessage> transactionMessageSerializer =
+  private static final Serializer<TransactionMessage> transactionMessageSerializer =
       StandardSerializers.transactionMessage();
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
@@ -114,6 +114,7 @@ final class CoreSchemaProxy {
 
   /**
    * Returns the latest committed block.
+   *
    * @throws RuntimeException if the "genesis block" was not created
    */
   Block getLastBlock() {

@@ -16,10 +16,7 @@
 
 package com.exonum.binding.blockchain;
 
-import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.serialization.Serializer;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -35,17 +32,16 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Block {
 
-  private final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
-
   public static Block valueOf(
       int proposerId,
       long height,
       int numTransactions,
       HashCode previousBlockHash,
       HashCode txRootHash,
-      HashCode stateHash) {
+      HashCode stateHash,
+      HashCode blockHash) {
     return new AutoValue_Block(
-        proposerId, height, numTransactions, previousBlockHash, txRootHash, stateHash);
+        proposerId, height, numTransactions, previousBlockHash, txRootHash, stateHash, blockHash);
   }
 
   /**
@@ -71,6 +67,7 @@ public abstract class Block {
 
   /**
    * Root hash of the Merkle tree of transactions in this block.
+   * These transactions can be accesed with {@link Blockchain#getBlockTransactions(Block)}.
    */
   public abstract HashCode getTxRootHash();
 
@@ -82,9 +79,6 @@ public abstract class Block {
   /**
    * Returns the SHA-256 hash of this block.
    */
-  public HashCode getBlockHash() {
-    return Hashing.defaultHashFunction()
-        .hashBytes(blockSerializer.toBytes(this));
-  }
+  public abstract HashCode getBlockHash();
 
 }

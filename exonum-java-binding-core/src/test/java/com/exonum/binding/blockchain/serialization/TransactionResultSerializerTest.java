@@ -28,7 +28,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionResultSerializerTest {
 
-  private Serializer<TransactionResult> serializer = TransactionResultSerializer.INSTANCE;
+  private static final Serializer<TransactionResult> serializer =
+      TransactionResultSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")

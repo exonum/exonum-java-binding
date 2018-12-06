@@ -48,7 +48,8 @@ class BlockchainTest {
           1,
           HashCode.fromString("ab"),
           HashCode.fromString("bc"),
-          HashCode.fromString("cd"));
+          HashCode.fromString("cd"),
+          HashCode.fromString("ab"));
 
   @Mock
   private CoreSchemaProxy mockSchema;

@@ -91,14 +91,13 @@ public final class Blockchain {
    * @param blockId id of the block
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
-    MapIndex<HashCode, Block> blocks = schema.getBlocks();
-    Block block = blocks.get(blockId);
+    Block block = getBlock(blockId);
     return getBlockTransactions(block.getHeight());
   }
 
   /**
    * Returns a proof list of transaction hashes committed in the given block or an empty list if
-   * the block with given id doesn't exist.
+   * the block doesn't exist.
    *
    * @param block block of which list of transaction hashes should be returned
    */
@@ -108,7 +107,7 @@ public final class Blockchain {
 
   /**
    * Returns a map of transaction messages identified by their SHA-256 hashes. Both committed and
-   * in-pool transactions are returned.
+   * in-pool (not yet processed) transactions are returned.
    */
   public MapIndex<HashCode, TransactionMessage> getTxMessages() {
     return schema.getTxMessages();
@@ -164,6 +163,8 @@ public final class Blockchain {
 
   /**
    * Returns the latest committed block.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
    */
   public Block getLastBlock() {
     return schema.getLastBlock();

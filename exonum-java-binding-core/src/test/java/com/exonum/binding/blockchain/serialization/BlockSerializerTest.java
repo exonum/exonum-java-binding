@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class BlockSerializerTest {
 
-  private Serializer<Block> serializer = BlockSerializer.INSTANCE;
+  private static final Serializer<Block> serializer = BlockSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
@@ -40,21 +41,39 @@ class BlockSerializerTest {
   }
 
   private static Stream<Block> testSource() {
+    Block block1 = Block.valueOf(
+        1,
+        1,
+        1,
+        HashCode.fromString("ab"),
+        HashCode.fromString("bc"),
+        HashCode.fromString("cd"),
+        HashCode.fromString("ab"));
+    Block block2 = Block.valueOf(
+        Integer.MAX_VALUE,
+        Long.MAX_VALUE,
+        Integer.MAX_VALUE,
+        HashCode.fromString("a0a0a0a0a0"),
+        HashCode.fromString("a0a0a0a0a0"),
+        HashCode.fromString("a0a0a0a0a0"),
+        HashCode.fromString("a0a0a0a0a0"));
     return Stream.of(
         Block.valueOf(
-            1,
-            1,
-            1,
-            HashCode.fromString("ab"),
-            HashCode.fromString("bc"),
-            HashCode.fromString("cd")),
+            block1.getProposerId(),
+            block1.getHeight(),
+            block1.getNumTransactions(),
+            block1.getPreviousBlockHash(),
+            block1.getTxRootHash(),
+            block1.getStateHash(),
+            Hashing.sha256().hashBytes(serializer.toBytes(block1))),
         Block.valueOf(
-            Integer.MAX_VALUE,
-            Long.MAX_VALUE,
-            Integer.MAX_VALUE,
-            HashCode.fromString("a0a0a0a0a0"),
-            HashCode.fromString("a0a0a0a0a0"),
-            HashCode.fromString("a0a0a0a0a0")));
+            block2.getProposerId(),
+            block2.getHeight(),
+            block2.getNumTransactions(),
+            block2.getPreviousBlockHash(),
+            block2.getTxRootHash(),
+            block2.getStateHash(),
+            Hashing.sha256().hashBytes(serializer.toBytes(block2))));
   }
 
 }

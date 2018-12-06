@@ -27,7 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionLocationSerializerTest {
 
-  private Serializer<TransactionLocation> serializer = TransactionLocationSerializer.INSTANCE;
+  private static final Serializer<TransactionLocation> serializer =
+      TransactionLocationSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")

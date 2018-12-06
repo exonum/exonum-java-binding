@@ -22,10 +22,10 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
- * Returns a result of transaction execution. This result may be either a success, or an error,
+ * Returns a result of the transaction execution. This result may be either a success, or an error,
  * if execution has failed.
  * Errors might be either service-defined or unexpected. Service-defined errors consist of an error
- * code and an optional description. Unexpected errors consist of an optional description.
+ * code and an optional description. Unexpected errors consist of an optional description only.
  *
  * @see TransactionExecutionException
  */

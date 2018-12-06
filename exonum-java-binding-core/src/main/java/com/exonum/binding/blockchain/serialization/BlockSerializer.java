@@ -18,8 +18,8 @@ package com.exonum.binding.blockchain.serialization;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -47,7 +47,8 @@ public enum BlockSerializer implements Serializer<Block> {
           copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
           fromHashProto(copiedBlocks.getPrevHash()),
           fromHashProto(copiedBlocks.getTxHash()),
-          fromHashProto(copiedBlocks.getStateHash()));
+          fromHashProto(copiedBlocks.getStateHash()),
+          Hashing.sha256().hashBytes(binaryBlock));
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
           "Unable to instantiate Blocks.Block instance from provided binary data", e);
@@ -65,13 +66,13 @@ public enum BlockSerializer implements Serializer<Block> {
   }
 
   private static ByteString toByteString(HashCode hash) {
-    byte[] bytes = StandardSerializers.hash().toBytes(hash);
+    byte[] bytes = hash.asBytes();
     return ByteString.copyFrom(bytes);
   }
 
   private static HashCode toHashCode(ByteString byteString) {
     byte[] bytes = byteString.toByteArray();
-    return StandardSerializers.hash().fromBytes(bytes);
+    return HashCode.fromBytes(bytes);
   }
 
 }
