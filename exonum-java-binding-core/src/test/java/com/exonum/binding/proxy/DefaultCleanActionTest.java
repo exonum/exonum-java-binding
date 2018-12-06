@@ -33,7 +33,6 @@ class DefaultCleanActionTest {
     assertThat(a.resourceType()).isEmpty();
   }
 
-
   @Test
   void from() {
     Runnable r = mock(Runnable.class);
