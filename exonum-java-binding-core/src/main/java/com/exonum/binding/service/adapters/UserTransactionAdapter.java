@@ -86,6 +86,6 @@ public final class UserTransactionAdapter {
   }
 
   private void logUnexpectedException(Throwable e) {
-    logger.error("Unexpected exception at transaction {}:", transaction, e);
+    logger.error("Unexpected exception in transaction {}:", transaction, e);
   }
 }

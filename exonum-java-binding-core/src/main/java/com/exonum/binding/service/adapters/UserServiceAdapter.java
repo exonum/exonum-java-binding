@@ -164,9 +164,6 @@ public class UserServiceAdapter {
       Router router = server.createRouter();
       service.createPublicApiHandlers(node, router);
       server.mountSubRouter(serviceApiPath(), router);
-    } catch (IllegalStateException e) {
-      logger.warn(e);
-      throw e;
     } catch (Exception e) {
       logger.error("Unexpected exception occurs at mountPublicApiHandler", e);
       throw e;
