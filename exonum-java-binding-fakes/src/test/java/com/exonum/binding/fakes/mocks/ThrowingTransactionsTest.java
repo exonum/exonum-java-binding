@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.test.Slow;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import java.io.IOException;
@@ -69,7 +68,6 @@ class ThrowingTransactionsTest {
         () -> ThrowingTransactions.createThrowing(IOException.class));
   }
 
-  @Slow
   @Test
   void createThrowingExecutionException() {
     byte errorCode = 1;

@@ -49,7 +49,6 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.test.Slow;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
@@ -68,7 +67,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@Slow
 @ExtendWith(VertxExtension.class)
 class QaServiceImplIntegrationTest {
 

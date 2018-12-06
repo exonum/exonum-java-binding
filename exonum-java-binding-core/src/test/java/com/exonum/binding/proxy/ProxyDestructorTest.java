@@ -23,11 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import com.exonum.binding.test.Slow;
 import java.util.function.LongConsumer;
 import org.junit.jupiter.api.Test;
 
-@Slow
 class ProxyDestructorTest {
 
   @Test

@@ -46,7 +46,6 @@ import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSeria
 import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
-import com.exonum.binding.test.Slow;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -75,7 +74,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 
-@Slow
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)

@@ -25,10 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
-import com.exonum.binding.test.Slow;
 import org.junit.jupiter.api.Test;
 
-@Slow
 class NativeFacadeTest {
 
   private static final String TX_VALUE = "value";

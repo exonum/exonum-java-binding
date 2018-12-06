@@ -40,11 +40,9 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.test.Slow;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
-@Slow
 @RequiresNativeLibrary
 class TransferTxHistoryTest {
 
