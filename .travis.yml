@@ -31,20 +31,20 @@ env:
 
 matrix:
   include:
+    - name: "Linux JDK 8 CHECK_RUST=true"
+      os: linux
+      jdk: openjdk8
+      env: CHECK_RUST=true
+    - name: "Linux JDK 8 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk8
+      env: CHECK_RUST=false
     - name: "OSX JDK 11 CHECK_RUST=false"
       os: osx
       # Specify the image containing JDK 11
       # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
       osx_image: xcode10.1
       env: CHECK_RUST=false
-    - name: "Linux JDK 8 CHECK_RUST=false"
-      os: linux
-      jdk: openjdk8
-      env: CHECK_RUST=false
-    - name: "Linux JDK 8 CHECK_RUST=true"
-      os: linux
-      jdk: openjdk8
-      env: CHECK_RUST=true
     - name: "Linux JDK 11 CHECK_RUST=false"
       os: linux
       jdk: openjdk11
