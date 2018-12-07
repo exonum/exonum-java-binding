@@ -5,7 +5,7 @@
 # inferred from the java executable available on the path.
 
 # Fail immediately in case of errors and/or unset variables
-set -eu -o pipefail
+#set -eu -o pipefail
 
 # Echo commands so that the progress can be seen in CI server logs.
 set -x

@@ -5,7 +5,7 @@
 # inferred from the java executable available on the path.
 
 # Fail immediately in case of errors and/or unset variables
-set -eu -o pipefail
+#set -eu -o pipefail
 
 # Run all java tests and native unit tests.
 ./run_maven_tests.sh

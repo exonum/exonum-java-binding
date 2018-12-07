@@ -4,7 +4,7 @@
 # ¡Keep it MacOS/Ubuntu compatible!
 
 # Fail immediately in case of errors and/or unset variables
-set -eu -o pipefail
+#set -eu -o pipefail
 
 # Import necessary environment variables (see the tests_profile header comment for details).
 source tests_profile
