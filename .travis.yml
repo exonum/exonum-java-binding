@@ -39,12 +39,12 @@ env:
 
 matrix:
   include:
-#    - name: "OSX JDK 8 CHECK_RUST=false"
-#      os: osx
-      # Specify the image containing JDK 8, use `xcode9.4`
-      # in case JDK 10 is needed.
-#      osx_image: xcode9.3
-#      env: CHECK_RUST=false
+    - name: "OSX JDK 8 CHECK_RUST=false"
+      os: osx
+      # Specify the image containing JDK 11
+      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
+      osx_image: xcode10.1
+      env: CHECK_RUST=false
   # Exclude Rust code checks with JDK 10
   exclude:
     - jdk: openjdk11
