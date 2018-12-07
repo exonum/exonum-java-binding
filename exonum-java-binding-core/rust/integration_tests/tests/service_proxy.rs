@@ -1,3 +1,4 @@
+/*
 extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
@@ -294,3 +295,4 @@ struct AfterCommitArgs {
     validator: i32,
     height: i64,
 }
+*/
