@@ -304,7 +304,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[hash.into(), value.into()],
-                    )?.into_inner())
+                    )?
+                    .into_inner())
             }
             None => Ok(ptr::null_mut()),
         }
