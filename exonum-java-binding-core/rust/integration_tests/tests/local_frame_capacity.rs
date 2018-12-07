@@ -48,7 +48,8 @@ fn local_frame_allows_overflow() {
                 assert_eq!(java_string, expected_string_at(i));
             }
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 fn expected_string_at(index: usize) -> String {
