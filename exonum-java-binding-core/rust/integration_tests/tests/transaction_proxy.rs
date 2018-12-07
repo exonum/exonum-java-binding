@@ -198,10 +198,9 @@ fn json_serialize_should_return_err_if_java_exception_occurred() {
     let err = invalid_tx
         .serialize_field()
         .expect_err("This transaction should be serialized with an error!");
-    assert!(
-        err.description()
-            .starts_with("Java exception: java.lang.ArithmeticException",)
-    );
+    assert!(err
+        .description()
+        .starts_with("Java exception: java.lang.ArithmeticException",));
 }
 
 fn create_entry<V>(view: V) -> Entry<V, String>
