@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 
@@ -112,7 +113,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   @Override
   public String info() {
-    return CryptocurrencyTransactionGson.instance().toJson(this);
+    return json().toJson(this);
   }
 
   @Override
