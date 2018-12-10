@@ -73,7 +73,7 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
       return new CreateWalletTx(message, ownerPublicKey, initialBalance);
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
-          "Unable to instantiate TxMessageProtos.CreateWalletTx json from provided"
+          "Unable to instantiate TxMessageProtos.CreateWalletTx instance from provided"
               + " binary data", e);
     }
   }
