@@ -281,7 +281,8 @@ fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniRe
         "valueOf",
         format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
         &[key.into(), value.into()],
-    )?.l()
+    )?
+    .l()
 }
 
 fn create_java_missing_keys<'a>(
@@ -509,7 +510,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[key.into(), value.into()],
-                    )?.into_inner())
+                    )?
+                    .into_inner())
             }
             None => Ok(ptr::null_mut()),
         }
@@ -600,6 +602,7 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
             let mut key = Key::default();
             key.copy_from_slice(bytes);
             key
-        }).collect();
+        })
+        .collect();
     Ok(keys)
 }

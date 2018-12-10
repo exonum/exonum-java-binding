@@ -16,7 +16,6 @@
 
 package com.exonum.binding.proxy;
 
-import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test;
 
 class AbstractCloseableNativeProxyTest {
 
-  NativeProxyFake proxy;
+  private NativeProxyFake proxy;
 
   @Test
   void closeShallCallDispose() {
@@ -54,13 +53,6 @@ class AbstractCloseableNativeProxyTest {
     proxy.close();
     proxy.close();
     assertThat(proxy.timesDisposed, equalTo(1));
-  }
-
-  @Test
-  void closeShallNotDisposeInvalidHandle() {
-    proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
-    proxy.close();
-    assertThat(proxy.timesDisposed, equalTo(0));
   }
 
   @Test
@@ -101,12 +93,6 @@ class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  void shallNotBeValidIfInvalidHandle() {
-    proxy = new NativeProxyFake(INVALID_NATIVE_HANDLE, true);
-    assertFalse(proxy.isValidHandle());
-  }
-
-  @Test
   void getNativeHandle() {
     long expectedNativeHandle = 0x1FL;
     proxy = new NativeProxyFake(expectedNativeHandle, true);
@@ -124,11 +110,10 @@ class AbstractCloseableNativeProxyTest {
   }
 
   @Test
-  void getNativeHandle_ShallFailIfInvalid() {
+  void createProxy_ShallFailIfInvalidHandleProvided() {
     long invalidHandle = 0x0L;
-    proxy = new NativeProxyFake(invalidHandle, true);
 
-    assertThrows(IllegalStateException.class, () -> proxy.getNativeHandle());
+    assertThrows(IllegalStateException.class, () -> new NativeProxyFake(invalidHandle, true));
   }
 
   @Test

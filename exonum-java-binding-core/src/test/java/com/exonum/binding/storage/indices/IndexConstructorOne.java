@@ -16,22 +16,10 @@
 
 package com.exonum.binding.storage.indices;
 
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.storage.database.View;
 
-/**
- * A test of common ProofListIndex methods.
- */
-class ProofListIndexIntegrationTest
-    extends BaseListIndexIntegrationTest {
-
-  @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
-    return IndexConstructors.fromOneArg(ProofListIndexProxy::newInstance).create(name, view);
-  }
-
-  @Override
-  Object getAnyElement(AbstractListIndexProxy<String> index) {
-    return index.get(0L);
-  }
-
+@FunctionalInterface
+interface IndexConstructorOne<IndexT, ElementT> {
+  IndexT create(String name, View view, Serializer<ElementT> serializer);
 }

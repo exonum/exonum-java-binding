@@ -59,7 +59,8 @@ fn executor_must_not_leak_local_references() {
                         .expect("Can't create new local object.");
                 }
                 Ok(())
-            }).unwrap();
+            })
+            .unwrap();
         println!(
             "Iteration {} complete. Total size of Java-allocated arrays: {} kiB",
             i + 1,

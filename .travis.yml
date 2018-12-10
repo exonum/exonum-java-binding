@@ -1,10 +1,5 @@
 language: java
-os:
-  - linux
 dist: trusty
-jdk:
-  - openjdk8
-  - openjdk11
 sudo: false
 
 # Build only the following branches/tags pushed to the repository:
@@ -33,26 +28,31 @@ env:
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     # REPO_TOKEN used for integration with coveralls is encoded here
     - secure: Fp22iaJpttsIArAyWmdCGNtljIALTYRVKO7O+H2hgBkwHHqrU7+15sbaq3xzhz4YNWNfuFMIkFUBgd/KYHgAuNDDrtm2agib13C0lQT1NFQO9ccmNCJNsXQrYrXGwpnNqPKp0YmfBfgNwzEpBerlbtvzV/T/RZukT/403XxwxU9y5tHfQokwVLibqP2jJsxdihTfCKIOs+o6hBfArmsn+e+panEv17ZrCjOmBIM/W70Rf2rEM26wFnYsfnAUTCkpl4Ong0SYNpZZxNMtw61W8ApDY8bpz7cKUxCv7SmD3kO7Y+TTHWfWYx6FNXtUpE1vCi6I7fZAY16rViTWOX55NCeFQz56XER7ArJQZtC/nC1lZ9tGKtcofu2Rq7WUoRuTwvLTaf6VzAP/CUj0DUxkV+8WUggl3s/Im7Y9rn8Aqvh8LReZmqzTY+dJ0hFG4DLoLtl71eTEnNoumi5UleBhJPaei3wPNPHg1WlOmhFyhRCsbIIGiyFtSj/faLmdc7tN/sBFANb0g4Exl0mRNvB0IfS1gM6XouEGUTlVree68p11PnsGJGs/QaUB9F9AAGVKTZ2kz7sqkCDdGmLxzbdidYDHZtYWfOIYSJCQsA09n2Txi0fwNByKfl/spdyMmtI1uGeT803rhN9vu0NGrQFG3mU7mqO33fUDEStIQ6/xn0A=
-  matrix:
-    - CHECK_RUST=true
-    - CHECK_RUST=false
 
 matrix:
   include:
+    - name: "Linux JDK 8 CHECK_RUST=true"
+      os: linux
+      jdk: openjdk8
+      env: CHECK_RUST=true
+    - name: "Linux JDK 8 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk8
+      env: CHECK_RUST=false
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
-      # Specify the image containing JDK 8, use `xcode9.4`
-      # in case JDK 10 is needed.
+      # Specify the image containing JDK 8
+      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
       osx_image: xcode9.3
       env: CHECK_RUST=false
-  # Exclude Rust code checks with JDK 10
-  exclude:
-    - jdk: openjdk11
-      env: CHECK_RUST=true
-  # See ECR-1734
+    - name: "Linux JDK 11 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk11
+      env: CHECK_RUST=false
   allow_failures:
-    - jdk: openjdk11
-  # Report the result of JDK 8 build as it is ready.
+    - os: linux
+      jdk: openjdk11
+  # Report the result of the build as it is ready.
   fast_finish: true
 
 cache:
@@ -84,7 +84,3 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
-
-notifications:
-  slack:
-    secure: m9GypuiO7oTg5/PoPfYvJRsx2x44q+TwBzLaDQegJZOhP6vNUrLHV06wCMund2SqVG3EwQkaVP4L0DmDLPFd/i+SXRPK0BUC+1G4HTp/VllmtkrebePqtlaXTrkJDHpxKLafaOOZd948LqsGs+PKehbKU5FJGeUcNgtsqkE/LZ4F9GgrWgQzh5qNrPK/dCS+svwiNSICJOtMp5rG84LAbCLHLMS9lII1Mo/ELsIsZ1OreHZjfcweQ/Br5vIqlH14s98y4CaZhvHy3F1KsP00HCltA4sQSokiMLh2wWlxtjY5bCP6tAUY3CP6sYDHE4WoRc2zu2RCo+D7J0N2i8y/KbuduCqXVnFv9vIc311DrkfazFV1WvJkND9h8RyNA73ZdhTCRAXGECTgxqr1HYPzk0Ox9D0jcPW/6uJOdYGfG+UwYTqbHL9bEsc6RW5hw+siyA5bcgZ+Ah8njzrc6Z+09CQnNqqfF6KbQoqUl9VipYWSomBMVA6SCaWVFXN7b/OnEkNWPj+GlPDkSEqH8cFHVJYD0AZ0V9TdwXNheyIc7Aq7E9eiR7g+OOnKPBC2sJaa04Ae+Q5nWPk3/UtZplg3lJTIqe3NgkNI5bIo0XzKA+xFpNIWbJnWko4oFwjFdfmgTuyyI76sVQNwxwfaUQfr6BtUyELrtwt4eM17BmB9Crk=

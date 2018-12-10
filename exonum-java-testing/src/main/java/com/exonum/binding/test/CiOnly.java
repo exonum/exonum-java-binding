@@ -12,26 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.storage.indices;
+package com.exonum.binding.test;
 
-import com.exonum.binding.storage.database.View;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.Tag;
 
 /**
- * A test of common ListIndex methods.
+ * Annotation for long running tests for excluding them from the build flow for default profile.
+ * Tests with this annotation executes as usual at CI ("ci-build" maven profile).
  */
-class ListIndexIntegrationTest
-    extends BaseListIndexIntegrationTest {
-
-  @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
-    return IndexConstructors.fromOneArg(ListIndexProxy::newInstance).create(name, view);
-  }
-
-  @Override
-  Object getAnyElement(AbstractListIndexProxy<String> index) {
-    return index.get(0L);
-  }
-
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Tag("slow-test")
+public @interface CiOnly {
 }

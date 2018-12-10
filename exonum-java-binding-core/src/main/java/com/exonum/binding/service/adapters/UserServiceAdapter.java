@@ -36,12 +36,16 @@ import io.vertx.ext.web.Router;
 import java.util.List;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An adapter of a user-facing interface {@link Service} to an interface with a native code.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})  // Methods are called from the native proxy
 public class UserServiceAdapter {
+
+  private static final Logger logger = LogManager.getLogger(UserServiceAdapter.class);
 
   private static final String API_ROOT_PATH = "/api";
 
@@ -82,15 +86,24 @@ public class UserServiceAdapter {
    */
   public UserTransactionAdapter convertTransaction(int serviceId, int transactionId,
       byte[] payload) {
-    RawTransaction rawTransaction = new RawTransaction((short)serviceId, (short) transactionId,
-        payload);
-    Transaction transaction = service.convertToTransaction(rawTransaction);
-    checkNotNull(transaction, "Invalid service implementation: "
-            + "Service#convertToTransaction must never return null.\n"
-            + "Throw an exception if your service does not recognize this message id (%s)",
-        transactionId);
+    try {
+      RawTransaction rawTransaction = new RawTransaction((short) serviceId, (short) transactionId,
+          payload);
+      Transaction transaction = service.convertToTransaction(rawTransaction);
+      checkNotNull(transaction, "Invalid service implementation: "
+              + "Service#convertToTransaction must never return null.\n"
+              + "Throw an exception if your service does not recognize this message id (%s)",
+          transactionId);
 
-    return new UserTransactionAdapter(transaction, viewFactory);
+      return new UserTransactionAdapter(transaction, viewFactory);
+    } catch (NullPointerException | IllegalArgumentException e) {
+      logger.warn("Failed to convert transaction {} for service {}", transactionId, serviceId, e);
+      throw e;
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at convert transaction {} for service {}",
+          transactionId, serviceId, e);
+      throw e;
+    }
   }
 
   /**
@@ -112,7 +125,11 @@ public class UserServiceAdapter {
           .map(HashCode::asBytes)
           .toArray(byte[][]::new);
     } catch (CloseFailuresException e) {
+      logger.error("Failed to close some resources at getStateHashes", e);
       throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at getStateHashes", e);
+      throw e;
     }
   }
 
@@ -125,23 +142,34 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public @Nullable String initialize(long forkHandle) {
+  public @Nullable
+  String initialize(long forkHandle) {
     assert forkHandle != 0;
+
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
       return service.initialize(fork)
           .orElse(null);
     } catch (CloseFailuresException e) {
+      logger.error("Failed to close some resources at initialize", e);
       throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at initialize", e);
+      throw e;
     }
   }
 
   public void mountPublicApiHandler(long nodeNativeHandle) {
-    checkState(node == null, "There is a node already: are you calling this method twice?");
-    node = new NodeProxy(nodeNativeHandle, viewFactory);
-    Router router = server.createRouter();
-    service.createPublicApiHandlers(node, router);
-    server.mountSubRouter(serviceApiPath(), router);
+    try {
+      checkState(node == null, "There is a node already: are you calling this method twice?");
+      node = new NodeProxy(nodeNativeHandle, viewFactory);
+      Router router = server.createRouter();
+      service.createPublicApiHandlers(node, router);
+      server.mountSubRouter(serviceApiPath(), router);
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at mountPublicApiHandler", e);
+      throw e;
+    }
   }
 
   /**
@@ -160,9 +188,19 @@ public class UserServiceAdapter {
           : OptionalInt.empty();
       BlockCommittedEvent event =
           BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
-      service.afterCommit(event);
+      doAfterCommit(event);
     } catch (CloseFailuresException e) {
+      logger.error("Failed to close some resources at afterCommit", e);
       throw new RuntimeException(e);
+    }
+  }
+
+  private void doAfterCommit(BlockCommittedEvent event) {
+    try {
+      service.afterCommit(event);
+    } catch (Exception e) {
+      // swallow the exception because it occurs in a user code and it should not be propagated
+      logger.warn("An exception in after commit handler of event {}", event, e);
     }
   }
 
@@ -177,8 +215,13 @@ public class UserServiceAdapter {
    * <p>Releases any resources.
    */
   public void close() {
-    if (node != null) {
-      node.close();
+    try {
+      if (node != null) {
+        node.close();
+      }
+    } catch (Exception e) {
+      logger.error("Unexpected exception occurs at close", e);
+      throw e;
     }
   }
 }
