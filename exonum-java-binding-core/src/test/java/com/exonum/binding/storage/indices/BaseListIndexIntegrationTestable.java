@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Base class for common ListIndex tests.
  */
-abstract class BaseListIndexIntegrationTest
+abstract class BaseListIndexIntegrationTestable
     extends BaseIndexProxyTestable<AbstractListIndexProxy<String>> {
 
   private static final String LIST_NAME = "test_list";
@@ -125,8 +125,7 @@ abstract class BaseListIndexIntegrationTest
   void addAllCollectionWithFirstNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(null, V2);
-      NullPointerException e = assertThrows(NullPointerException.class,
-          () -> l.addAll(addedElements));
+      assertThrows(NullPointerException.class, () -> l.addAll(addedElements));
       assertTrue(l.isEmpty());
     });
   }
@@ -135,8 +134,7 @@ abstract class BaseListIndexIntegrationTest
   void addAllCollectionWithSecondNull() {
     runTestWithView(database::createFork, (l) -> {
       List<String> addedElements = asList(V1, null);
-      NullPointerException e = assertThrows(NullPointerException.class,
-          () -> l.addAll(addedElements));
+      assertThrows(NullPointerException.class, () -> l.addAll(addedElements));
       assertTrue(l.isEmpty());
     });
   }
@@ -144,9 +142,7 @@ abstract class BaseListIndexIntegrationTest
   @Test
   void addAllNullCollection() {
     runTestWithView(database::createFork, (l) -> {
-
       assertThrows(NullPointerException.class, () -> l.addAll(null));
-
     });
   }
 
@@ -182,9 +178,7 @@ abstract class BaseListIndexIntegrationTest
       long invalidIndex = 0;
       String replacingElement = "r2";
 
-
       assertThrows(IndexOutOfBoundsException.class, () -> l.set(invalidIndex, replacingElement));
-
     });
   }
 
@@ -207,9 +201,9 @@ abstract class BaseListIndexIntegrationTest
 
   @Test
   void getLastEmptyList() {
-    assertThrows(NoSuchElementException.class, () -> runTestWithView(database::createFork, (l) -> {
-      String ignored = l.getLast();
-    }));
+    runTestWithView(database::createFork, (l) -> {
+      assertThrows(NoSuchElementException.class, l::getLast);
+    });
   }
 
   @Test
@@ -258,8 +252,9 @@ abstract class BaseListIndexIntegrationTest
 
   @Test
   void clearWithSnapshot() {
-    assertThrows(UnsupportedOperationException.class,
-        () -> runTestWithView(database::createSnapshot, ListIndex::clear));
+    runTestWithView(database::createSnapshot, (list) -> {
+      assertThrows(UnsupportedOperationException.class, list::clear);
+    });
   }
 
   @Test
