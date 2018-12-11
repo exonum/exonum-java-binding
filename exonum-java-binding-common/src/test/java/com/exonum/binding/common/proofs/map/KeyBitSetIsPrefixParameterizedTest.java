@@ -70,6 +70,9 @@ class KeyBitSetIsPrefixParameterizedTest {
     return Arrays.asList(
         // "A <- B" reads "A is a prefix of B"
         // "!P" reads "not P"
+        // TODO: Consider using bitstrings (e.g, DbKeyTestUtils#keyFromString) to simplify
+        //    these parameters: (1) get rid of explicit length; (2) use sane order.
+        //    With that these parameters could be specified as a @CsvSource: ECR-2744
         Arguments.of(bytes(), 0, bytes(), 0, true, "[] <- []"),
         Arguments.of(bytes(), 0, bytes(), 2, true, "[] <- [00]"),
         Arguments.of(bytes(), 0, bytes(0xE), 4, true, "[] <- [1110]"),
