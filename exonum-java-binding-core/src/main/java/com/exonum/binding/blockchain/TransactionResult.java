@@ -19,6 +19,7 @@ package com.exonum.binding.blockchain;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
 /**
@@ -35,7 +36,9 @@ public abstract class TransactionResult {
   public static TransactionResult valueOf(
       Type type, @Nullable Integer errorCode, @Nullable String errorDescription) {
     return new AutoValue_TransactionResult(
-        type, Optional.ofNullable(errorCode), Optional.ofNullable(errorDescription));
+        type,
+        errorCode == null ? OptionalInt.empty() : OptionalInt.of(errorCode),
+        Optional.ofNullable(errorDescription));
   }
 
   /**
@@ -50,13 +53,13 @@ public abstract class TransactionResult {
   /**
    * Returns an error code of a transaction if its execution resulted in a service-defined error.
    * @return a transaction error code in case of a service-defined error, or
-   * {@code Optional.empty()} otherwise
+   *         {@code OptionalInt.empty()} otherwise
    */
-  public abstract Optional<Integer> getErrorCode();
+  public abstract OptionalInt getErrorCode();
 
   /**
    * Returns an optional description of a transaction if its execution resulted in an error.
-   * @return a description of an error, or {@code Optional.empty()} if transaction was successful
+   * @return a description of an error, or {@code Optional.empty()} if there is no description
    */
   public abstract Optional<String> getErrorDescription();
 

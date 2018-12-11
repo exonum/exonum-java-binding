@@ -64,7 +64,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
     int status;
     switch (transactionResult.getType()) {
       case ERROR:
-        status = transactionResult.getErrorCode().get();
+        status = transactionResult.getErrorCode().getAsInt();
         break;
       case SUCCESS:
         status = 256;

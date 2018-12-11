@@ -32,6 +32,7 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Block {
 
+  // TODO: implement a builder for this class - ECR-2734
   public static Block valueOf(
       int proposerId,
       long height,
