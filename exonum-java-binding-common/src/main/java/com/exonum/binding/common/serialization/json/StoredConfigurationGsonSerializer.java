@@ -19,6 +19,7 @@ package com.exonum.binding.common.serialization.json;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,6 +35,7 @@ public final class StoredConfigurationGsonSerializer {
 
   private static final Gson GSON = new GsonBuilder()
       .registerTypeAdapter(HashCode.class, new HashCodeJsonSerializer())
+      .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
       .registerTypeAdapterFactory(StoredConfigurationAdapterFactory.create())
       .setLongSerializationPolicy(LongSerializationPolicy.STRING)
       .create();
