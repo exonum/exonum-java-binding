@@ -189,7 +189,7 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      // Create the receiver wallet with the given initial balance
+      // Create a receiver’s wallet with the given initial balance
       long initialBalance = 50L;
       createWallet(view, toKey, initialBalance);
 
@@ -215,11 +215,14 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      // Create and execute the transaction that attempts to transfer to unknown wallet
+      // Create a sender’s wallet
       long initialBalance = 100L;
       createWallet(view, fromKey, initialBalance);
+
+      // Create and execute the transaction that attempts to transfer to unknown wallet
       long transferValue = 50L;
       long seed = 1L;
+
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
@@ -238,12 +241,13 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-
-      // Create and execute the transaction that attempts to transfer from unknown wallet
+      // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
       createWallet(view, fromKey, initialBalance);
       createWallet(view, toKey, initialBalance);
 
+      // Create and execute the transaction that attempts to transfer an amount
+      // exceeding the balance
       long seed = 1L;
       long transferValue = initialBalance + 50L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
