@@ -185,7 +185,7 @@ class TransferTxTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeNoSuchFromWallet() throws CloseFailuresException {
+  void executeTransfer_NoSuchFromWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -211,7 +211,7 @@ class TransferTxTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeNoSuchToWallet() throws CloseFailuresException {
+  void executeTransfer_NoSuchToWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
@@ -234,7 +234,7 @@ class TransferTxTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeInsufficientFunds() throws CloseFailuresException {
+  void executeTransfer_InsufficientFunds() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
