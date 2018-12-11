@@ -28,6 +28,7 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class StoredConfigurationGsonSerializerTest {
@@ -105,11 +106,13 @@ class StoredConfigurationGsonSerializerTest {
     assertThat(consensusConfiguration.statusTimeout(), is(5000L));
     assertThat(consensusConfiguration.txsBlockLimit(), is(1000));
 
-    assertThat(configuration.validatorKeys(), notNullValue());
-    assertThat(configuration.validatorKeys().get(0).consensusKey(), is(PublicKey.fromHexString(
-        "43eb3be553c55b02b65e08c18bb060404b27e362ccf108cbad94ea097decbc0a")));
-    assertThat(configuration.validatorKeys().get(0).serviceKey(), is(PublicKey.fromHexString(
-        "79c1fcefcbfaeae43575ab0ef793c24aae7b39186244e6552c18b8f7d0b0de12")));
+    List<ValidatorKey> expectedValidatorKeys = singletonList(ValidatorKey.builder()
+        .consensusKey(PublicKey.fromHexString(
+            "43eb3be553c55b02b65e08c18bb060404b27e362ccf108cbad94ea097decbc0a"))
+        .serviceKey(PublicKey.fromHexString(
+            "79c1fcefcbfaeae43575ab0ef793c24aae7b39186244e6552c18b8f7d0b0de12"))
+        .build());
+    assertThat(configuration.validatorKeys(), is(expectedValidatorKeys));
   }
 
   private StoredConfiguration createConfiguration() {
