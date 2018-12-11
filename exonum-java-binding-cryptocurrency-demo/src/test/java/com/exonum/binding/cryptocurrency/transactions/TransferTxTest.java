@@ -56,7 +56,6 @@ import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -140,10 +139,6 @@ class TransferTxTest {
     TransferTx tx = TransferTx.fromMessage(m);
 
     assertFalse(tx.isValid());
-  }
-
-  private static ByteString fromPublicKey(PublicKey k) {
-    return ByteString.copyFrom(k.toBytes());
   }
 
   @Test
