@@ -24,9 +24,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
 
 /**
- * Provides {@link Gson} serializer for converting java objects to Json and vice versa.
+ * Provides {@link Gson} serializer for converting Java objects to Json and vice versa.
+ * It is configured to serialize Exonum objects in a format, compatible with the core framework
+ * and light clients (e.g., {@link HashCode} as a hex string).
  */
 public final class JsonSerializer {
+
+  private static final Gson INSTANCE = builder().create();
 
   /**
    * Returns preconfigured {@link Gson} builder instance. Can be useful in cases when
@@ -45,7 +49,7 @@ public final class JsonSerializer {
    * of the Json serializer is required.
    */
   public static Gson json() {
-    return builder().create();
+    return INSTANCE;
   }
 
   private JsonSerializer() {

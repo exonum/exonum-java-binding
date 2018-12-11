@@ -12,7 +12,6 @@ The following third party software components are governed under Apache 2.0 lice
   - Vert.x Web, (c) 2018 https://vertx.io/
   - Apache Log4j, (c) 1999-2018 The Apache Software Foundation https://logging.apache.org/log4j/2.x/
   - Lazysodium, (c) 2018 Terl https://github.com/terl/lazysodium-java
-  - JsonPathAssert, (c) 2018 json-path https://github.com/json-path/JsonPath/tree/master/json-path-assert
 
 The following third party software components are governed under both Apache 2.0 and MIT licenses:
   - jni, (c) 2018 Josh Chase https://github.com/prevoty/jni-rs

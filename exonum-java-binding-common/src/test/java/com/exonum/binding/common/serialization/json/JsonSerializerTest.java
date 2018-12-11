@@ -36,16 +36,16 @@ class JsonSerializerTest {
 
     String json = json().toJson(new Wrapper<>(value));
 
-    assertJson(json, String.valueOf(value));
+    assertJsonValue(json, "10");
   }
 
   @Test
-  void publicKeySerializesAsValue() {
+  void publicKeySerializesAsHexValue() {
     PublicKey value = PublicKey.fromBytes(bytes(0x00, 0x01, 0x02));
 
     String json = json().toJson(new Wrapper<>(value));
 
-    assertJson(json, value.toString());
+    assertJsonValue(json, "000102");
   }
 
   @Test
@@ -54,10 +54,10 @@ class JsonSerializerTest {
 
     String json = json().toJson(new Wrapper<>(value));
 
-    assertJson(json, value.toString());
+    assertJsonValue(json, "000102");
   }
 
-  private static void assertJson(String json, Object expectedValue) {
+  private static void assertJsonValue(String json, Object expectedValue) {
     assertThat(json, isJson(withJsonPath("$.value", equalTo(expectedValue))));
   }
 
