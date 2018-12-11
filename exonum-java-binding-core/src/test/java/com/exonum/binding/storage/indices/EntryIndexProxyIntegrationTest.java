@@ -62,9 +62,7 @@ class EntryIndexProxyIntegrationTest
   @Test
   void setFailsWithSnapshot() {
     runTestWithView(database::createSnapshot, (e) -> {
-
       assertThrows(UnsupportedOperationException.class, () -> e.set(V1));
-
     });
   }
 

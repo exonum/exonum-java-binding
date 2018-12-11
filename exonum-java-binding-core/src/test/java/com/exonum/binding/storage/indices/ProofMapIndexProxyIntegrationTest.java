@@ -652,9 +652,7 @@ class ProofMapIndexProxyIntegrationTest
   @Test
   void clearFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
-
       assertThrows(UnsupportedOperationException.class, () -> map.clear());
-
     });
   }
 
@@ -667,7 +665,6 @@ class ProofMapIndexProxyIntegrationTest
   void constructorShallPreserveTypeInformation() {
     runTestWithView(database::createFork, (view, map) -> {
       map.put(PK1, V1);
-
 
       // Create a regular map with the same name as the proof map above.
       RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
