@@ -25,6 +25,7 @@
     <lazysodium-java.version>3.5.1</lazysodium-java.version>
     <auto-value.version>1.6.2</auto-value.version>
     <auto-value-gson.version>0.8.0</auto-value-gson.version>
+    <jsonpath.version>2.2.0</jsonpath.version>
   </properties>
 
   <dependencies>
@@ -109,6 +110,14 @@
       <artifactId>equalsverifier</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path-assert</artifactId>
+      <version>${jsonpath.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <repositories>
