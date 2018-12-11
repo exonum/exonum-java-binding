@@ -24,7 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
 
 /**
- * Provides configured {@link Gson} serializer for converting java objects to Json and vice versa.
+ * Provides {@link Gson} serializer for converting java objects to Json and vice versa.
  */
 public final class JsonSerializer {
 
@@ -41,7 +41,8 @@ public final class JsonSerializer {
   }
 
   /**
-   * Returns preconfigured {@link Gson} instance.
+   * Returns preconfigured {@link Gson} instance. Helpful in cases when no additional configuration
+   * of the Json serializer is required.
    */
   public static Gson json() {
     return builder().create();
