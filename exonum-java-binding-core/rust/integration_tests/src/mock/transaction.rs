@@ -92,9 +92,7 @@ pub fn create_mock_transaction_proxy(
 }
 
 /// Creates a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction(
-    executor: &MainExecutor,
-) -> (GlobalRef, RawTransaction) {
+pub fn create_mock_transaction(executor: &MainExecutor) -> (GlobalRef, RawTransaction) {
     executor
         .with_attached(|env| {
             let value = env.new_string(ENTRY_VALUE)?;
@@ -102,13 +100,8 @@ pub fn create_mock_transaction(
                 .call_static_method(
                     NATIVE_FACADE_CLASS,
                     "createTransaction",
-                    format!(
-                        "(Ljava/lang/String;)L{};",
-                        TRANSACTION_ADAPTER_CLASS
-                    ),
-                    &[
-                        JValue::from(JObject::from(value)),
-                    ],
+                    format!("(Ljava/lang/String;)L{};", TRANSACTION_ADAPTER_CLASS),
+                    &[JValue::from(JObject::from(value))],
                 )?
                 .l()?;
             let java_tx_mock = env.new_global_ref(java_tx_mock)?;

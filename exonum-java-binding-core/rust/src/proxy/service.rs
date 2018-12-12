@@ -1,9 +1,9 @@
 use exonum::api::ServiceApiBuilder;
 use exonum::blockchain::{Service, ServiceContext, Transaction};
 use exonum::crypto::Hash;
-use exonum::encoding::Error as MessageError;
 use exonum::messages::RawTransaction;
 use exonum::storage::{Fork, Snapshot};
+use failure;
 use jni::objects::{GlobalRef, JObject, JValue};
 use serde_json;
 use serde_json::value::Value;
@@ -95,7 +95,7 @@ impl Service for ServiceProxy {
         }))
     }
 
-    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, MessageError> {
+    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
         unwrap_jni(self.exec.with_attached(|env| {
             let raw_clone = raw.clone();
             let service_id = raw.service_id();
@@ -123,7 +123,7 @@ impl Service for ServiceProxy {
                     );
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
-                Err(error_message) => Err(MessageError::Basic(error_message.into())),
+                Err(error_message) => Err(format_err!("{}", error_message)),
             })
         }))
     }

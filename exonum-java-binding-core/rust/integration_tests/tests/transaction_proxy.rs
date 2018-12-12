@@ -17,7 +17,6 @@ use java_bindings::{
     exonum::{
         blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
         crypto::{Hash, PublicKey},
-        encoding::serialize::json::ExonumJson,
         messages::{Message, RawTransaction, ServiceTransaction},
         storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
