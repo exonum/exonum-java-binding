@@ -18,7 +18,11 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
@@ -30,6 +34,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -50,6 +55,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   @VisibleForTesting
   TransferTx(BinaryMessage message, long seed, PublicKey fromWallet, PublicKey toWallet, long sum) {
     super(message);
+    checkArgument(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
+    checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
     this.seed = seed;
     this.fromWallet = fromWallet;
     this.toWallet = toWallet;
@@ -87,27 +94,37 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   }
 
   @Override
-  public void execute(Fork view) {
+  public void execute(Fork view) throws TransactionExecutionException {
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-    if (wallets.containsKey(fromWallet) && wallets.containsKey(toWallet)) {
-      Wallet from = wallets.get(fromWallet);
-      Wallet to = wallets.get(toWallet);
-      if (from.getBalance() < sum || fromWallet.equals(toWallet)) {
-        return;
-      }
-      wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
-      wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+    checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
+    checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
 
-      HistoryEntity historyEntity = Builder.newBuilder()
-          .setSeed(seed)
-          .setWalletFrom(fromWallet)
-          .setWalletTo(toWallet)
-          .setAmount(sum)
-          .setTransactionHash(hash())
-          .build();
-      schema.walletHistory(fromWallet).add(historyEntity);
-      schema.walletHistory(toWallet).add(historyEntity);
+    Wallet from = wallets.get(fromWallet);
+    Wallet to = wallets.get(toWallet);
+    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
+
+    wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
+    wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+
+    HistoryEntity historyEntity = Builder.newBuilder()
+        .setSeed(seed)
+        .setWalletFrom(fromWallet)
+        .setWalletTo(toWallet)
+        .setAmount(sum)
+        .setTransactionHash(hash())
+        .build();
+    schema.walletHistory(fromWallet).add(historyEntity);
+    schema.walletHistory(toWallet).add(historyEntity);
+  }
+
+  // todo: consider extracting in a TransactionPreconditions or
+  //   TransactionExecutionException: ECR-2746.
+  /** Checks a transaction execution precondition, throwing if it is false. */
+  private static void checkExecution(boolean precondition, byte errorCode)
+      throws TransactionExecutionException {
+    if (!precondition) {
+      throw new TransactionExecutionException(errorCode);
     }
   }
 
