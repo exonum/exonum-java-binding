@@ -48,7 +48,6 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.Transaction;
@@ -196,11 +195,6 @@ class TransferTxTest {
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
       assertThat(e.getErrorCode(), equalTo(UNKNOWN_SENDER.errorCode));
-
-      // Check that balance of fromKey is unchanged
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(toKey).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -222,11 +216,6 @@ class TransferTxTest {
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
       assertThat(e.getErrorCode(), equalTo(UNKNOWN_RECEIVER.errorCode));
-
-      // Check that balance of toKey is unchanged
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
     }
   }
 
@@ -250,13 +239,6 @@ class TransferTxTest {
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
       assertThat(e.getErrorCode(), equalTo(INSUFFICIENT_FUNDS.errorCode));
-
-      // Fixme: Isn't that irrelevant with exceptions?
-      // Check that balance of toKey is unchanged
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-      assertThat(wallets.get(fromKey).getBalance(), equalTo(initialBalance));
-      assertThat(wallets.get(toKey).getBalance(), equalTo(initialBalance));
     }
   }
 
