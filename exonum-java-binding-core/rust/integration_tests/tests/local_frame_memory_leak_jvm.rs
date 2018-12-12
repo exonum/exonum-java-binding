@@ -57,7 +57,8 @@ fn jvm_must_not_leak_local_references_exceeding_frame_capacity() {
                     .expect("Can't create new local object.");
             }
             Ok(JObject::null())
-        }).unwrap();
+        })
+        .unwrap();
         println!(
             "Iteration {} complete. Total size of (potentially) leaked Java-allocated arrays: {} kiB",
             i + 1,

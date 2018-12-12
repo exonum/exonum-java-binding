@@ -119,6 +119,7 @@
          Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
+    <excludeTags>slow-test</excludeTags>
   </properties>
 
   <dependencyManagement>
@@ -321,6 +322,11 @@
          <plugin>
            <artifactId>maven-surefire-plugin</artifactId>
            <version>2.22.1</version>
+           <configuration>
+             <excludedGroups>
+               ${excludeTags}
+             </excludedGroups>
+           </configuration>
          </plugin>
 
          <plugin>
@@ -360,7 +366,7 @@
          <plugin>
            <groupId>com.github.spotbugs</groupId>
            <artifactId>spotbugs-maven-plugin</artifactId>
-           <version>3.1.8</version>
+           <version>3.1.9</version>
          </plugin>
 
          <plugin>
@@ -485,6 +491,7 @@
         <checkstyle.severity>error</checkstyle.severity>
         <jacoco.args>${argLine}</jacoco.args>
         <jacoco.it.args>${itCoverageAgent}</jacoco.it.args>
+        <excludeTags>none</excludeTags>
       </properties>
 
       <build>

@@ -17,7 +17,6 @@
 
 package com.exonum.binding.blockchain;
 
-import static com.exonum.binding.common.serialization.StandardSerializers.fixed64;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
@@ -39,6 +38,8 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * A proxy class for the blockchain::Schema struct maintained by Exonum core.
@@ -107,7 +108,7 @@ final class CoreSchemaProxy {
         "Height should be less or equal compared to blockchain height %s, but was %s",
         actualHeight,
         height);
-    byte[] id = fixed64().toBytes(height);
+    byte[] id = toCoreStorageKey(height);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
   }
@@ -179,6 +180,13 @@ final class CoreSchemaProxy {
    * @throws RuntimeException if the "genesis block" was not created
    */
   private static native byte[] nativeGetLastBlock(long nativeHandle);
+
+  private byte[] toCoreStorageKey(long value) {
+    return ByteBuffer.allocate(Long.BYTES)
+        .order(ByteOrder.BIG_ENDIAN)
+        .putLong(value)
+        .array();
+  }
 
   /**
    * Mapping for Exonum core indexes by name.
