@@ -5,10 +5,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 
 public class InternalTransactionContext implements TransactionContext {
-  private Fork fork;
-  private HashCode hash;
-  private PublicKey authorPk;
-
+  private final Fork fork;
+  private final HashCode hash;
+  private final PublicKey authorPk;
 
   /**
    * Creates Internal Transaction Context.

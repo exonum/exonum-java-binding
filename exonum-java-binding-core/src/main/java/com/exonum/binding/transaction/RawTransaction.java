@@ -3,13 +3,14 @@ package com.exonum.binding.transaction;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.google.common.base.Objects;
 
 public class RawTransaction {
   private final short serviceId;
   private final short transactionId;
   private final byte[] payload;
 
-  public RawTransaction(short serviceId, short transactionId, final byte[] payload) {
+  private RawTransaction(short serviceId, short transactionId, final byte[] payload) {
     this.serviceId = serviceId;
     this.transactionId = transactionId;
     this.payload = payload.clone();
@@ -33,6 +34,29 @@ public class RawTransaction {
   public HashCode hash() {
     HashFunction hashFunction = Hashing.defaultHashFunction();
     return hashFunction.hashBytes(getPayload());
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    RawTransaction that = (RawTransaction) o;
+    return serviceId == that.serviceId &&
+        transactionId == that.transactionId &&
+        Objects.equal(payload, that.payload);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(serviceId, transactionId, payload);
   }
 
   public static final class Builder {
@@ -82,7 +106,7 @@ public class RawTransaction {
       }
     }
 
-    public Builder() {
+    private Builder() {
     }
   }
 }

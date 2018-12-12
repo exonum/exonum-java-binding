@@ -69,8 +69,10 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransfer() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+
       // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
       createWallet(view, fromKey, initialBalance);
@@ -80,8 +82,6 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 40L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferSum);
-      InternalTransactionContext context = new InternalTransactionContext(view,null, null);
-
       tx.execute(context);
 
       // Check that wallets have correct balances
@@ -91,6 +91,7 @@ class TransferTxTest {
       assertThat(wallets.get(fromKey).getBalance(), equalTo(expectedFromValue));
       long expectedToValue = initialBalance + transferSum;
       assertThat(wallets.get(toKey).getBalance(), equalTo(expectedToValue));
+
       // Check history
       HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
           .setSeed(seed)
@@ -108,8 +109,9 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransferToTheSameWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
 
       long initialBalance = 100L;
       createWallet(view, fromKey, initialBalance);
@@ -118,8 +120,6 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 40L;
       TransferTx tx = withMockMessage(seed, fromKey, fromKey, transferSum);
-      InternalTransactionContext context = new InternalTransactionContext(view,null, null);
-
       tx.execute(context);
 
       // Check that the balance of the wallet remains the same
@@ -133,8 +133,10 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeNoSuchFromWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+
       // Create source wallet with the given initial balance
       long initialBalance = 50L;
       createWallet(view, fromKey, initialBalance);
@@ -143,8 +145,6 @@ class TransferTxTest {
 
       long transferValue = 50L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
-      InternalTransactionContext context = new InternalTransactionContext(view,null, null);
-
       // Execute the transaction that attempts to transfer to an unknown wallet
       tx.execute(context);
 
@@ -159,16 +159,16 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeNoSuchToWallet() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+
       // Create and execute the transaction that attempts to transfer from unknown wallet
       long initialBalance = 100L;
       createWallet(view, toKey, initialBalance);
       long transferValue = 50L;
       long seed = 1L;
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
-      InternalTransactionContext context = new InternalTransactionContext(view,null, null);
-
       tx.execute(context);
 
       // Check that balance of toKey is unchanged

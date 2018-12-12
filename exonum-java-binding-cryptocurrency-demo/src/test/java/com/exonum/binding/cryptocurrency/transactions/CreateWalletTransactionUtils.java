@@ -16,9 +16,8 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
-
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.protobuf.ByteString;
 
@@ -37,7 +36,9 @@ class CreateWalletTransactionUtils {
    * Creates new raw create wallet transaction using provided owner key and provided balance.
    */
   static RawTransaction createRawTransaction(PublicKey ownerKey, long initialBalance) {
-    return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
+    return RawTransaction.newBuilder()
+        .serviceId(CryptocurrencyService.ID)
+        .transactionId(CreateWalletTx.ID)
         .payload(TxMessageProtos.CreateWalletTx.newBuilder()
             .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
             .setInitialBalance(initialBalance)

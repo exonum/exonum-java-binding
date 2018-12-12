@@ -36,7 +36,7 @@ class PutValueTransactionTest {
 
   @Test
   void from_WrongMessageType() {
-    RawTransaction transaction = new RawTransaction.Builder()
+    RawTransaction transaction = RawTransaction.newBuilder()
         .serviceId(TestService.ID)
         .transactionId((short) (PutValueTransaction.ID - 1))
         .payload(encode("any value"))
@@ -48,7 +48,7 @@ class PutValueTransactionTest {
 
   @Test
   void from_WrongService() {
-    RawTransaction transaction = new RawTransaction.Builder()
+    RawTransaction transaction = RawTransaction.newBuilder()
         .serviceId(TestService.ID)
         .transactionId((short) (TestService.ID + 1))
         .payload(encode("any value"))
@@ -66,7 +66,7 @@ class PutValueTransactionTest {
     HashCode hash = Hashing.defaultHashFunction()
         .hashString(value, BODY_CHARSET);
 
-    RawTransaction transaction = new RawTransaction.Builder()
+    RawTransaction transaction = RawTransaction.newBuilder()
         .serviceId(TestService.ID)
         .transactionId(PutValueTransaction.ID)
         .payload(encode(value))

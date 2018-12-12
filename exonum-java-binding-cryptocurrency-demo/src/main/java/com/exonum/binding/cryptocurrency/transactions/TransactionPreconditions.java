@@ -31,31 +31,31 @@ final class TransactionPreconditions {
   }
 
   @CanIgnoreReturnValue
-  static <TransactionT extends RawTransaction> TransactionT checkTransaction(
-      TransactionT transaction, short expectedTxId) {
+  static <T extends RawTransaction> T checkTransaction(T transaction, short expectedTxId) {
     checkServiceId(transaction);
     checkTransactionId(transaction, expectedTxId);
     return transaction;
   }
 
-  static <TransactionT extends RawTransaction> void checkServiceId(TransactionT transaction) {
+  private static <T extends RawTransaction> void checkServiceId(T transaction) {
     short serviceId = transaction.getServiceId();
     checkArgument(
         serviceId == SERVICE_ID,
-        "This message (%s) does not belong to this service: wrong service ID (%s), must be %s",
+        "Transaction (%s) does not belong to this service: wrong service ID (%s), must be %s",
         transaction,
         serviceId,
         SERVICE_ID);
   }
 
-  static <TransactionT extends RawTransaction> void checkTransactionId(TransactionT transaction,
-                                                            short expectedTxId) {
+  private static <T extends RawTransaction> void checkTransactionId(
+      T transaction, short expectedTxId) {
     short txId = transaction.getTransactionId();
     checkArgument(
         txId == expectedTxId,
-        "This message (%s) has wrong transaction ID (%s), must be %s",
+        "Transaction (%s) has wrong transaction ID (%s), must be %s",
         transaction,
         txId,
         expectedTxId);
   }
+  
 }

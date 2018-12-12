@@ -59,6 +59,7 @@ class TransferTxHistoryTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
 
       // Create wallets with the given initial balances
       long initialBalance = 100L;
@@ -69,9 +70,8 @@ class TransferTxHistoryTest {
       long seed1 = 1L;
       long transferSum1 = 40L;
       TransferTx tx1 = withMockMessage(seed1, ACCOUNT_1, ACCOUNT_2, transferSum1);
-      InternalTransactionContext context = new InternalTransactionContext(view,null, null);
-
       tx1.execute(context);
+
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;

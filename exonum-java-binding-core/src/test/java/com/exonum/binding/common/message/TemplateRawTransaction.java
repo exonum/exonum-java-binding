@@ -26,7 +26,7 @@ public class TemplateRawTransaction {
    * Creates default raw transaction.
    */
   public static RawTransaction createRawTransaction(short transactionId) {
-    return new RawTransaction.Builder()
+    return RawTransaction.newBuilder()
         .serviceId((short) 0)
         .transactionId(transactionId)
         .payload(
