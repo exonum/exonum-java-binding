@@ -117,7 +117,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
     schema.walletHistory(toWallet).add(historyEntity);
   }
 
-  // todo: consider extracting in a TransactionPreconditions or TransactionExecutionException?
+  // todo: consider extracting in a TransactionPreconditions or
+  //   TransactionExecutionException: ECR-2746.
   /** Checks a transaction execution precondition, throwing if it is false. */
   private static void checkExecution(boolean precondition, byte errorCode)
       throws TransactionExecutionException {
