@@ -140,7 +140,7 @@ class BlockchainTest {
     when(mockMapIndex.get(messageHash)).thenReturn(null);
     when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
 
-    assertThat(blockchain.getTxResult(messageHash)).isEqualTo(Optional.empty());
+    assertThat(blockchain.getTxResult(messageHash)).isEmpty();
   }
 
   @Test
@@ -171,7 +171,7 @@ class BlockchainTest {
     when(mockMapIndex.get(messageHash)).thenReturn(null);
     when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
 
-    assertThat(blockchain.getTxLocation(messageHash)).isEqualTo(Optional.empty());
+    assertThat(blockchain.getTxLocation(messageHash)).isEmpty();
   }
 
   @Test
@@ -201,7 +201,7 @@ class BlockchainTest {
     when(mockMapIndex.get(blockHash)).thenReturn(null);
     when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
 
-    assertThat(blockchain.getBlock(blockHash)).isEqualTo(Optional.empty());
+    assertThat(blockchain.getBlock(blockHash)).isEmpty();
   }
 
   @Test

@@ -134,7 +134,7 @@ public final class Blockchain {
    * Returns a transaction execution result for given message hash.
    *
    * @return a transaction execution result, or {@code Optional.empty()} if this transaction
-   *         was not yet executed
+   *         is unknown or was not yet executed
    */
   public Optional<TransactionResult> getTxResult(HashCode messageHash) {
     ProofMapIndexProxy<HashCode, TransactionResult> txResults = getTxResults();
@@ -154,7 +154,7 @@ public final class Blockchain {
    * Returns transaction position inside the blockchain for given message hash.
    *
    * @return a transaction execution result, or {@code Optional.empty()} if this transaction
-   *         was not yet executed
+   *         is unknown or was not yet executed
    */
   public Optional<TransactionLocation> getTxLocation(HashCode messageHash) {
     MapIndex<HashCode, TransactionLocation> txLocations = getTxLocations();
