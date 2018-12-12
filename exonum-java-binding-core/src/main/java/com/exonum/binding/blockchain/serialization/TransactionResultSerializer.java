@@ -16,10 +16,6 @@
 
 package com.exonum.binding.blockchain.serialization;
 
-import static com.exonum.binding.blockchain.TransactionResult.Type.ERROR;
-import static com.exonum.binding.blockchain.TransactionResult.Type.SUCCESS;
-import static com.exonum.binding.blockchain.TransactionResult.Type.UNEXPECTED_ERROR;
-
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -46,11 +42,11 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
       int status = copiedtxLocationProtos.getStatus();
       String description = copiedtxLocationProtos.getDescription();
       if (status <= 255) {
-        return TransactionResult.valueOf(ERROR, status, description);
+        return TransactionResult.error(status, description);
       } else if (status == 256) {
-        return TransactionResult.valueOf(SUCCESS, null, null);
+        return TransactionResult.successful();
       } else if (status == 257) {
-        return TransactionResult.valueOf(UNEXPECTED_ERROR, null, description);
+        return TransactionResult.unexpectedError(description);
       } else {
         throw new InvalidProtocolBufferException("Invalid status code");
       }
