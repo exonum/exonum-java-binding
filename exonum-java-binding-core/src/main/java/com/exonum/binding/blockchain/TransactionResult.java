@@ -69,7 +69,7 @@ public abstract class TransactionResult {
    * @param errorDescription an optional error description; may be null
    */
   public static TransactionResult unexpectedError(@Nullable String errorDescription) {
-    return valueOf(Type.ERROR, null, errorDescription);
+    return valueOf(Type.UNEXPECTED_ERROR, null, errorDescription);
   }
 
   private static TransactionResult valueOf(
