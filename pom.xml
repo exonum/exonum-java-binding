@@ -119,6 +119,7 @@
          Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
+    <excludeTags>slow-test</excludeTags>
   </properties>
 
   <dependencyManagement>
@@ -224,6 +225,25 @@
       <scope>test</scope>
     </dependency>
 
+    <!--JUnit5-->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Needed to fix @Generated annotation java 8 - 11 issue, Javadoc generation with JDK 9 -->
     <dependency>
       <groupId>javax.annotation</groupId>
@@ -302,6 +322,11 @@
          <plugin>
            <artifactId>maven-surefire-plugin</artifactId>
            <version>2.22.1</version>
+           <configuration>
+             <excludedGroups>
+               ${excludeTags}
+             </excludedGroups>
+           </configuration>
          </plugin>
 
          <plugin>
@@ -341,7 +366,7 @@
          <plugin>
            <groupId>com.github.spotbugs</groupId>
            <artifactId>spotbugs-maven-plugin</artifactId>
-           <version>3.1.8</version>
+           <version>3.1.9</version>
          </plugin>
 
          <plugin>
@@ -466,6 +491,7 @@
         <checkstyle.severity>error</checkstyle.severity>
         <jacoco.args>${argLine}</jacoco.args>
         <jacoco.it.args>${itCoverageAgent}</jacoco.it.args>
+        <excludeTags>none</excludeTags>
       </properties>
 
       <build>
