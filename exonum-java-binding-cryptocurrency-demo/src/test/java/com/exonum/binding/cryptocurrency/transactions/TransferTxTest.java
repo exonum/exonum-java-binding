@@ -56,6 +56,8 @@ import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -194,7 +196,7 @@ class TransferTxTest {
       // Execute the transaction that attempts to transfer from an unknown wallet
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
-      assertThat(e.getErrorCode(), equalTo(UNKNOWN_SENDER.errorCode));
+      assertThat(e, hasErrorCode(UNKNOWN_SENDER));
     }
   }
 
@@ -215,7 +217,7 @@ class TransferTxTest {
       TransferTx tx = withMockMessage(seed, fromKey, toKey, transferValue);
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
-      assertThat(e.getErrorCode(), equalTo(UNKNOWN_RECEIVER.errorCode));
+      assertThat(e, hasErrorCode(UNKNOWN_RECEIVER));
     }
   }
 
@@ -238,7 +240,7 @@ class TransferTxTest {
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(view));
-      assertThat(e.getErrorCode(), equalTo(INSUFFICIENT_FUNDS.errorCode));
+      assertThat(e, hasErrorCode(INSUFFICIENT_FUNDS));
     }
   }
 
@@ -273,5 +275,16 @@ class TransferTxTest {
     BinaryMessage message = mock(BinaryMessage.class);
     lenient().when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
     return new TransferTx(message, seed, senderId, recipientId, amount);
+  }
+
+  private static Matcher<TransactionExecutionException> hasErrorCode(TransactionError expected) {
+    return new FeatureMatcher<TransactionExecutionException, Byte>(equalTo(expected.errorCode),
+        "ExecutionException#errorCode", "errorCode") {
+
+      @Override
+      protected Byte featureValueOf(TransactionExecutionException actual) {
+        return actual.getErrorCode();
+      }
+    };
   }
 }
