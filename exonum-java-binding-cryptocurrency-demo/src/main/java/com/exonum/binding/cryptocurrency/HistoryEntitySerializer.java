@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.google.protobuf.ByteString.copyFrom;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -23,10 +24,12 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
   INSTANCE;
+
+  private static final Serializer<TxMessageProtos.HistoryEntity> historyEntityProtobufSerializer =
+      protobuf(TxMessageProtos.HistoryEntity.class);
 
   @Override
   public byte[] toBytes(HistoryEntity value) {
@@ -43,22 +46,16 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
 
   @Override
   public HistoryEntity fromBytes(byte[] serializedValue) {
-    try {
-      TxMessageProtos.HistoryEntity entity = TxMessageProtos.HistoryEntity
-          .parseFrom(serializedValue);
+    TxMessageProtos.HistoryEntity entity =
+        historyEntityProtobufSerializer.fromBytes(serializedValue);
 
-      return HistoryEntity.Builder.newBuilder()
-          .setSeed(entity.getSeed())
-          .setWalletFrom(bytesToKey(entity.getWalletFrom()))
-          .setWalletTo(bytesToKey(entity.getWalletTo()))
-          .setAmount(entity.getSum())
-          .setTransactionHash(HashCode.fromBytes(entity.getHash().toByteArray()))
-          .build();
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException(
-          "Unable to instantiate TxMessageProtos.TransferTx instance from provided binary data",
-          e);
-    }
+    return HistoryEntity.Builder.newBuilder()
+        .setSeed(entity.getSeed())
+        .setWalletFrom(bytesToKey(entity.getWalletFrom()))
+        .setWalletTo(bytesToKey(entity.getWalletTo()))
+        .setAmount(entity.getSum())
+        .setTransactionHash(HashCode.fromBytes(entity.getHash().toByteArray()))
+        .build();
   }
 
   private static ByteString keyToByte(PublicKey key) {
