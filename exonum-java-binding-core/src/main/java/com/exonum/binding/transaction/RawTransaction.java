@@ -48,9 +48,9 @@ public class RawTransaction {
       return false;
     }
     RawTransaction that = (RawTransaction) o;
-    return serviceId == that.serviceId &&
-        transactionId == that.transactionId &&
-        Objects.equal(payload, that.payload);
+    return serviceId == that.serviceId
+            && transactionId == that.transactionId
+            && Objects.equal(payload, that.payload);
   }
 
   @Override
