@@ -14,6 +14,6 @@ crate-type = ["dylib"]
 futures = "0.1"
 failure = "0.1"
 java_bindings = { path = "..", features = ["invocation"] }
-exonum-testkit = { git = "https://github.com/exonum/exonum" }
-lazy_static = "1.1.0"
-rand = "0.5"
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "c4bcef725" }
+lazy_static = "1.2"
+rand = "0.6"
