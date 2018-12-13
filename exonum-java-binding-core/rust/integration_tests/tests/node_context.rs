@@ -33,8 +33,9 @@ lazy_static! {
 #[test]
 fn submit_transaction() {
     let (mut node, app_rx) = create_node();
-    let raw_transaction =
-        RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![1, 2, 3]));
+    let service_id = 0;
+    let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![1, 2, 3]);
+    let raw_transaction = RawTransaction::new(service_id, service_transaction);
     node.submit(raw_transaction.clone()).unwrap();
     let sent_message = app_rx.wait().next().unwrap().unwrap();
     match sent_message {

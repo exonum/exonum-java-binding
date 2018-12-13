@@ -5,8 +5,7 @@ extern crate lazy_static;
 
 use integration_tests::{
     mock::transaction::{
-        create_empty_raw_transaction, create_mock_transaction_proxy,
-        create_throwing_exec_exception_mock_transaction_proxy,
+        create_mock_transaction_proxy, create_throwing_exec_exception_mock_transaction_proxy,
         create_throwing_mock_transaction_proxy, AUTHOR_PK_ENTRY_NAME, ENTRY_VALUE, INFO_VALUE,
         TEST_ENTRY_NAME, TX_HASH_ENTRY_NAME,
     },

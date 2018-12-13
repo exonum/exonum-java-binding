@@ -4,6 +4,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::mock::service::ServiceMockBuilder;
+use integration_tests::mock::transaction::create_empty_raw_transaction;
 use integration_tests::test_service::{
     create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
 };
@@ -94,7 +95,7 @@ fn tx_from_raw() {
 #[test]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn tx_from_raw_should_panic_if_java_error_occurred() {
-    let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
+    let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(OOM_ERROR_CLASS)
         .build();
@@ -103,14 +104,16 @@ fn tx_from_raw_should_panic_if_java_error_occurred() {
 
 #[test]
 fn tx_from_raw_should_return_err_if_java_exception_occurred() {
-    let raw = RawTransaction::new(0, ServiceTransaction::from_raw_unchecked(0, vec![]));
+    let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
         .build();
     let err = service
         .tx_from_raw(raw)
         .expect_err("This transaction should be de-serialized with an error!");
-    assert!(err.to_string().starts_with("Java exception: java.lang.RuntimeException"));
+    assert!(err
+        .to_string()
+        .starts_with("Java exception: java.lang.RuntimeException"));
 }
 
 #[test]
