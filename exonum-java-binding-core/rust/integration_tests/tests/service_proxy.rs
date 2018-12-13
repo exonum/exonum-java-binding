@@ -110,12 +110,7 @@ fn tx_from_raw_should_return_err_if_java_exception_occurred() {
     let err = service
         .tx_from_raw(raw)
         .expect_err("This transaction should be de-serialized with an error!");
-    //TODO
-    /*if let MessageError::Basic(ref s) = err {
-        assert!(s.starts_with("Java exception: java.lang.RuntimeException"));
-    } else {
-        panic!("Unexpected error message {:#?}", err);
-    }*/
+    assert!(err.to_string().starts_with("Java exception: java.lang.RuntimeException"));
 }
 
 #[test]
