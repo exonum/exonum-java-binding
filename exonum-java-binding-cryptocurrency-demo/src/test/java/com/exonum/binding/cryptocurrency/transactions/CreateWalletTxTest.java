@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createSignedMessage;
@@ -154,7 +155,7 @@ class CreateWalletTxTest {
 
     String info = tx.info();
 
-    CreateWalletTx txParams = CryptocurrencyTransactionGson.instance()
+    CreateWalletTx txParams = json()
         .fromJson(info, CreateWalletTx.class);
 
     assertThat(txParams, equalTo(tx));
