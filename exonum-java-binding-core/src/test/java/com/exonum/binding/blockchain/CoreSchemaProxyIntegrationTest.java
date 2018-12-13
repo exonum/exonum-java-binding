@@ -52,7 +52,10 @@ class CoreSchemaProxyIntegrationTest {
   void getBlockTransactionsTest() {
     assertSchema((schema) -> {
       long height = 0L;
-      assertThat(schema.getBlockTransactions(height)).isEmpty();
+      Exception e = assertThrows(RuntimeException.class,
+          () -> schema.getBlockTransactions(height));
+      assertThat(e).hasMessageContaining("An attempt to get the actual `height` "
+          + "during creating the genesis block");
     });
   }
 
