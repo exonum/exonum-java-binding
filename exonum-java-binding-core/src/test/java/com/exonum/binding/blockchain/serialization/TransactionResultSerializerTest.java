@@ -42,9 +42,9 @@ class TransactionResultSerializerTest {
   private static Stream<TransactionResult> testSource() {
     return Stream.of(
         TransactionResult.successful(),
-        TransactionResult.error(1, "Error description"),
-        TransactionResult.error(255, /* No description: */ null),
+        TransactionResult.error(0, "Error description"),
+        TransactionResult.error(1, /* Empty as no description: */ ""),
+        TransactionResult.error(255, /* Null as no description: */ null),
         TransactionResult.unexpectedError(""));
   }
-
 }

@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.util.Optional;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
@@ -77,7 +78,15 @@ public abstract class TransactionResult {
     return new AutoValue_TransactionResult(
         type,
         errorCode == null ? OptionalInt.empty() : OptionalInt.of(errorCode),
-        Optional.ofNullable(errorDescription));
+        nullOrEmptyToNone(errorDescription));
+  }
+
+  private static Optional<String> nullOrEmptyToNone(String s) {
+    if (Strings.isNullOrEmpty(s)) {
+      return Optional.empty();
+    } else {
+      return Optional.of(s);
+    }
   }
 
   /**

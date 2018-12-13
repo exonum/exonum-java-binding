@@ -54,6 +54,22 @@ class TransactionResultTest {
     assertFalse(result.isSuccessful());
   }
 
+  @Test
+  void errorNullDescription() {
+    int errorCode = 1;
+    TransactionResult result = TransactionResult.error(errorCode, null);
+
+    assertThat(result.getErrorDescription()).isEmpty();
+  }
+
+  @Test
+  void errorEmptyDescription() {
+    int errorCode = 1;
+    TransactionResult result = TransactionResult.error(errorCode, "");
+
+    assertThat(result.getErrorDescription()).isEmpty();
+  }
+
   @ParameterizedTest
   @ValueSource(ints = {
       Integer.MIN_VALUE,
