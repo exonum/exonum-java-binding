@@ -19,6 +19,7 @@ package com.exonum.binding.blockchain.serialization;
 import static com.exonum.binding.blockchain.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
 import static com.exonum.binding.blockchain.TransactionResult.SUCCESSFUL_RESULT_STATUS_CODE;
 import static com.exonum.binding.blockchain.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
@@ -26,6 +27,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;
+
+  private static final Serializer<CoreProtos.TransactionResult> PROTO_SERIALIZER =
+      protobuf(CoreProtos.TransactionResult.class);
 
   @Override
   public byte[] toBytes(TransactionResult value) {
@@ -40,23 +44,18 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
 
   @Override
   public TransactionResult fromBytes(byte[] binaryTransactionResult) {
-    try {
-      CoreProtos.TransactionResult copiedtxLocationProtos =
-          CoreProtos.TransactionResult.parseFrom(binaryTransactionResult);
-      int status = copiedtxLocationProtos.getStatus();
-      String description = copiedtxLocationProtos.getDescription();
-      if (status <= MAX_USER_DEFINED_ERROR_CODE) {
-        return TransactionResult.error(status, description);
-      } else if (status == SUCCESSFUL_RESULT_STATUS_CODE) {
-        return TransactionResult.successful();
-      } else if (status == UNEXPECTED_ERROR_STATUS_CODE) {
-        return TransactionResult.unexpectedError(description);
-      } else {
-        throw new InvalidProtocolBufferException("Invalid status code");
-      }
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Unable to instantiate "
-          + "CoreProtos.TransactionResult instance from provided binary data", e);
+    CoreProtos.TransactionResult copiedtxLocationProtos =
+        PROTO_SERIALIZER.fromBytes(binaryTransactionResult);
+    int status = copiedtxLocationProtos.getStatus();
+    String description = copiedtxLocationProtos.getDescription();
+    if (status <= MAX_USER_DEFINED_ERROR_CODE) {
+      return TransactionResult.error(status, description);
+    } else if (status == SUCCESSFUL_RESULT_STATUS_CODE) {
+      return TransactionResult.successful();
+    } else if (status == UNEXPECTED_ERROR_STATUS_CODE) {
+      return TransactionResult.unexpectedError(description);
+    } else {
+      throw new IllegalArgumentException("Invalid status code");
     }
   }
 
