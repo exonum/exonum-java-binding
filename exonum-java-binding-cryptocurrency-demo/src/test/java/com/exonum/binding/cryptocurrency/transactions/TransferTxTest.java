@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createSignedMessage;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createUnsignedMessage;
@@ -54,7 +55,6 @@ import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
@@ -252,9 +252,7 @@ class TransferTxTest {
     String info = tx.info();
 
     // Check the transaction parameters in JSON
-    Gson gson = CryptocurrencyTransactionGson.instance();
-
-    Transaction txParameters = gson.fromJson(info, new TypeToken<TransferTx>() {
+    Transaction txParameters = json().fromJson(info, new TypeToken<TransferTx>() {
     }.getType());
 
     assertThat(txParameters, equalTo(tx));
