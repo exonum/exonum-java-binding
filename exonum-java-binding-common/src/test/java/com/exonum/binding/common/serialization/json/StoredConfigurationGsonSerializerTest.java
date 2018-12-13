@@ -16,12 +16,12 @@
 
 package com.exonum.binding.common.serialization.json;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
@@ -65,28 +65,16 @@ class StoredConfigurationGsonSerializerTest {
   @Test
   void roundTripTest() {
     StoredConfiguration configuration = createConfiguration();
-    StoredConfiguration restoredConfiguration = StoredConfigurationGsonSerializer
-        .fromJson(StoredConfigurationGsonSerializer.toJson(configuration));
+    StoredConfiguration restoredConfiguration = json().fromJson(
+        json().toJson(configuration), StoredConfiguration.class);
 
     assertThat(restoredConfiguration, equalTo(configuration));
   }
 
   @Test
-  void nullPointerException() {
-    StoredConfiguration configuration = null;
-    String jsonConfiguration = null;
-
-    assertThrows(NullPointerException.class,
-        () -> StoredConfigurationGsonSerializer.toJson(configuration));
-
-    assertThrows(NullPointerException.class,
-        () -> StoredConfigurationGsonSerializer.fromJson(jsonConfiguration));
-  }
-
-  @Test
   void readConfiguration() {
-    StoredConfiguration configuration = StoredConfigurationGsonSerializer
-        .fromJson(CONFIG_EXAMPLE);
+    StoredConfiguration configuration = json()
+        .fromJson(CONFIG_EXAMPLE, StoredConfiguration.class);
 
     assertThat(configuration, notNullValue());
     assertThat(configuration.previousCfgHash(),

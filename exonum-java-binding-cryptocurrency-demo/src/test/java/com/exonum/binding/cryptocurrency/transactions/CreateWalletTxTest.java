@@ -18,6 +18,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,6 +39,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -83,7 +85,7 @@ class CreateWalletTxTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeCreateWalletTx() throws CloseFailuresException {
+  void executeCreateWalletTx() throws Exception {
     CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
@@ -107,6 +109,7 @@ class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, OWNER_KEY);
       Long initialBalance = DEFAULT_BALANCE;
 
       // Create a wallet manually.
@@ -120,16 +123,12 @@ class CreateWalletTxTest {
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
       CreateWalletTx tx = withMockMessage(OWNER_KEY, newBalance);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, OWNER_KEY);
 
-      tx.execute(context);
 
-      // Check it has not changed the entries in the maps.
-      {
-        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        assertTrue(wallets.containsKey(OWNER_KEY));
-        assertThat(wallets.get(OWNER_KEY).getBalance(), equalTo(initialBalance));
-      }
+      TransactionExecutionException e = assertThrows(
+          TransactionExecutionException.class, () -> tx.execute(context));
+
+      assertThat(e.getErrorCode(), equalTo(WALLET_ALREADY_EXISTS.errorCode));
     }
   }
 

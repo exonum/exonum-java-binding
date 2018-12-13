@@ -16,17 +16,16 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -81,10 +80,9 @@ final class ApiController {
     Optional<Wallet> wallet = service.getWallet(walletId);
 
     if (wallet.isPresent()) {
-      Gson gson = CryptocurrencyTransactionGson.instance();
       rc.response()
           .putHeader("Content-Type", "application/json")
-          .end(gson.toJson(wallet.get()));
+          .end(json().toJson(wallet.get()));
     } else {
       rc.response()
           .setStatusCode(HTTP_NOT_FOUND)
@@ -99,7 +97,7 @@ final class ApiController {
 
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(CryptocurrencyTransactionGson.instance().toJson(walletHistory));
+        .end(json().toJson(walletHistory));
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,

@@ -21,8 +21,6 @@ import static com.exonum.binding.qaservice.transactions.TransactionPreconditions
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * An invalid transaction always throwing IllegalStateException.
@@ -30,8 +28,6 @@ import java.util.Map;
 public final class InvalidThrowingTx implements Transaction {
 
   private static final short ID = QaTransaction.INVALID_THROWING.id();
-  private static final String INVALID_TX_JSON = QaTransactionGson.instance()
-      .toJson(new AnyTransaction<Map>(ID, Collections.emptyMap()));
 
   @Override
   public void execute(TransactionContext context) {
