@@ -16,12 +16,9 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.json.HashCodeJsonSerializer;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+
 import com.exonum.binding.qaservice.PromoteToCore;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.LongSerializationPolicy;
 
 /**
  * A converter of transaction parameters of QA service to JSON.
@@ -29,18 +26,6 @@ import com.google.gson.LongSerializationPolicy;
 @PromoteToCore("… in some form or another. You may add a constructor that accepts extra "
     + "type hierarchy adapters to create a proper GSON.")
 public final class QaTransactionGson {
-
-  private static final Gson GSON = new GsonBuilder()
-      .registerTypeHierarchyAdapter(HashCode.class, new HashCodeJsonSerializer())
-      .setLongSerializationPolicy(LongSerializationPolicy.STRING)
-      .create();
-
-  /**
-   * Returns a configured instance of Gson.
-   */
-  public static Gson instance() {
-    return GSON;
-  }
 
   /**
    * Converts a transaction of QA service with the given body into its JSON representation.
@@ -52,6 +37,6 @@ public final class QaTransactionGson {
    */
   public String toJson(short txId, Object txBody) {
     AnyTransaction txParams = new AnyTransaction<>(txId, txBody);
-    return GSON.toJson(txParams);
+    return json().toJson(txParams);
   }
 }
