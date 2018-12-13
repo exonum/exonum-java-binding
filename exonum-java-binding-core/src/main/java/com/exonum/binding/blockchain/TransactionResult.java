@@ -39,6 +39,15 @@ public abstract class TransactionResult {
   /** The maximum allowed user-defined transaction error code. */
   public static final int MAX_USER_DEFINED_ERROR_CODE = 0xFF;
 
+  /** The status code of a successfully executed transaction. */
+  public static final int SUCCESSFUL_RESULT_STATUS_CODE = 256;
+
+  /**
+   * The status code of transaction execution corresponding to an <em>unexpected</em> error
+   * during transaction execution (some unexpected runtime exception in Java, panic in Rust).
+   */
+  public static final int UNEXPECTED_ERROR_STATUS_CODE = 257;
+
   private static final TransactionResult SUCCESSFUL_RESULT = valueOf(Type.SUCCESS, null, null);
 
   /**

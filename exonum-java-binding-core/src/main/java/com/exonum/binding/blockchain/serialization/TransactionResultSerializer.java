@@ -17,6 +17,8 @@
 package com.exonum.binding.blockchain.serialization;
 
 import static com.exonum.binding.blockchain.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
+import static com.exonum.binding.blockchain.TransactionResult.SUCCESSFUL_RESULT_STATUS_CODE;
+import static com.exonum.binding.blockchain.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
 
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
@@ -24,9 +26,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;
-
-  private static final int SUCCESSFUL_RESULT_STATUS_CODE = 256;
-  private static final int UNEXPECTED_ERROR_CODE = 257;
 
   @Override
   public byte[] toBytes(TransactionResult value) {
@@ -50,7 +49,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
         return TransactionResult.error(status, description);
       } else if (status == SUCCESSFUL_RESULT_STATUS_CODE) {
         return TransactionResult.successful();
-      } else if (status == UNEXPECTED_ERROR_CODE) {
+      } else if (status == UNEXPECTED_ERROR_STATUS_CODE) {
         return TransactionResult.unexpectedError(description);
       } else {
         throw new InvalidProtocolBufferException("Invalid status code");
@@ -68,7 +67,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
       case SUCCESS:
         return SUCCESSFUL_RESULT_STATUS_CODE;
       case UNEXPECTED_ERROR:
-        return UNEXPECTED_ERROR_CODE;
+        return UNEXPECTED_ERROR_STATUS_CODE;
       default:
         throw new AssertionError("Unreachable: " + transactionResult);
     }
