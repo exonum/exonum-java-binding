@@ -19,7 +19,7 @@ use jni::{
 };
 use std::{
     os::raw::c_void,
-    sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering},
+    sync::atomic::{AtomicBool, Ordering, ATOMIC_BOOL_INIT},
 };
 
 static CACHE_IS_LOCKED: AtomicBool = ATOMIC_BOOL_INIT;
@@ -50,7 +50,7 @@ pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {
 
 /// Initializes JNI cache implementing optimal synchronization
 pub fn init_cache(env: &JNIEnv) {
-    while CACHE_IS_LOCKED.compare_and_swap(false, true, Ordering::Acquire){}
+    while CACHE_IS_LOCKED.compare_and_swap(false, true, Ordering::Acquire) {}
 
     unsafe {
         if !CACHE_INITIALIZED {
@@ -64,8 +64,7 @@ pub fn init_cache(env: &JNIEnv) {
 
 /// Caches all required classes and methods ids.
 unsafe fn cache_methods(env: &JNIEnv) {
-    OBJECT_GET_CLASS =
-        get_method_id(&env, "java/lang/Object", "getClass", "()Ljava/lang/Class;");
+    OBJECT_GET_CLASS = get_method_id(&env, "java/lang/Object", "getClass", "()Ljava/lang/Class;");
     CLASS_GET_NAME = get_method_id(&env, "java/lang/Class", "getName", "()Ljava/lang/String;");
     THROWABLE_GET_MESSAGE = get_method_id(
         &env,
@@ -111,7 +110,8 @@ unsafe fn cache_methods(env: &JNIEnv) {
             env.find_class("com/exonum/binding/transaction/TransactionExecutionException")
                 .unwrap()
                 .into(),
-        ).ok();
+        )
+        .ok();
 
     assert!(
         OBJECT_GET_CLASS.is_some()
@@ -140,7 +140,7 @@ fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMe
 
 fn check_cache_initalized() {
     while CACHE_IS_LOCKED.compare_and_swap(false, true, Ordering::Acquire) {}
-    let is_init = unsafe {CACHE_INITIALIZED};
+    let is_init = unsafe { CACHE_INITIALIZED };
     CACHE_IS_LOCKED.store(false, Ordering::Release);
 
     if !is_init {
