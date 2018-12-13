@@ -81,14 +81,18 @@ public class UserServiceAdapter {
    * @param payload a transaction payload
    * @return an executable transaction of this service
    * @throws NullPointerException if payload is null, or a user service returns
-   *     a null transaction
+   *     a nullable transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
   public UserTransactionAdapter convertTransaction(int serviceId, int transactionId,
       byte[] payload) {
     try {
-      RawTransaction rawTransaction = new RawTransaction((short) serviceId, (short) transactionId,
-          payload);
+      checkNotNull(payload);
+      RawTransaction rawTransaction = RawTransaction.newBuilder()
+          .serviceId((short) serviceId)
+          .transactionId((short) transactionId)
+          .payload(payload)
+          .build();
       Transaction transaction = service.convertToTransaction(rawTransaction);
       checkNotNull(transaction, "Invalid service implementation: "
               + "Service#convertToTransaction must never return null.\n"
@@ -142,8 +146,8 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public @Nullable
-  String initialize(long forkHandle) {
+  @Nullable
+  public String initialize(long forkHandle) {
     assert forkHandle != 0;
 
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
@@ -162,7 +166,7 @@ public class UserServiceAdapter {
   public void mountPublicApiHandler(long nodeNativeHandle) {
     try {
       checkState(node == null, "There is a node already: are you calling this method twice?");
-      node = new NodeProxy(nodeNativeHandle, viewFactory);
+      node = new NodeProxy(nodeNativeHandle);
       Router router = server.createRouter();
       service.createPublicApiHandlers(node, router);
       server.mountSubRouter(serviceApiPath(), router);

@@ -20,7 +20,6 @@ import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
-import java.nio.ByteBuffer;
 
 /**
  * A transaction that has QA service identifier, but an unknown transaction id.
@@ -47,6 +46,10 @@ public final class UnknownTx extends AbstractTransaction {
   }
 
   private static RawTransaction createRawTransaction() {
-    return new RawTransaction(QaService.ID, ID, ByteBuffer.allocate(0).array());
+    return RawTransaction.newBuilder()
+        .serviceId(QaService.ID)
+        .transactionId(ID)
+        .payload(new byte[]{})
+        .build();
   }
 }

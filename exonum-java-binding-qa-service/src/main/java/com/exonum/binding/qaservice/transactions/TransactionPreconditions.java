@@ -27,8 +27,7 @@ final class TransactionPreconditions {
 
   private static final short SERVICE_ID = QaService.ID;
 
-  static <TransactionT extends RawTransaction> TransactionT checkTransaction(
-      TransactionT transaction, short expectedTxId) {
+  static <T extends RawTransaction> T checkTransaction(T transaction, short expectedTxId) {
     short serviceId = transaction.getServiceId();
     checkArgument(serviceId == SERVICE_ID,
         "This message (%s) does not belong to this service: wrong service id (%s), must be %s",
@@ -41,19 +40,6 @@ final class TransactionPreconditions {
 
     return transaction;
   }
-
-  //static <TransactionT extends RawTransaction> TransactionT checkMessageSize(
-  //    TransactionT transaction, int expectedBodySize) {
-  //  checkArgument(0 <= expectedBodySize, "You cannot expect negative size, can you?");
-  //
-  //  int expectedSize = Message.messageSize(expectedBodySize);
-  //  checkArgument(transaction.size() == expectedSize,
-  //      "This message (%s) has wrong size (%s), expected %s bytes", transaction,
-  //      transaction.size(),
-  //      expectedSize);
-  //
-  //  return transaction;
-  //}
 
   private TransactionPreconditions() {
     throw new AssertionError("Non-instantiable");

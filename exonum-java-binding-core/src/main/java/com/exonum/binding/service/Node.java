@@ -29,18 +29,17 @@ public interface Node {
 
   /**
    * Submits a transaction into Exonum network. This node does <em>not</em> execute
-   * the transaction immediately, but verifies it and, if it is valid,
-   * broadcasts it to all the nodes in the network. Then each node adds the transaction to a
+   * the transaction immediately, broadcasts it to all the nodes in the network.
+   * Then each node adds the transaction to a
    * <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
    *
    * @param rawTransaction a transaction to send
-   * @throws InvalidTransactionException if the transaction is not valid
    * @throws InternalServerError if this node failed to process the transaction
    * @throws NullPointerException if the transaction is null
    */
   void submitTransaction(RawTransaction rawTransaction)
-      throws InvalidTransactionException, InternalServerError;
+      throws InternalServerError;
 
   /**
    * Performs a given function with a snapshot of the current database state.

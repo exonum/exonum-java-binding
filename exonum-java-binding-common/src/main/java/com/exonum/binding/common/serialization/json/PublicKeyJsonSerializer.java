@@ -34,7 +34,7 @@ import java.lang.reflect.Type;
  *
  * <p>All method arguments are non-null by default.
  */
-public final class PublicKeyJsonSerializer
+final class PublicKeyJsonSerializer
     implements JsonSerializer<PublicKey>, JsonDeserializer<PublicKey> {
 
   /**

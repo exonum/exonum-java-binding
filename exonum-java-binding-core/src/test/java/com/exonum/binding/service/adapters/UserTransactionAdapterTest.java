@@ -16,7 +16,8 @@
 
 package com.exonum.binding.service.adapters;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static com.exonum.binding.test.Bytes.randomBytes;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,16 +26,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
-import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,6 +40,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class UserTransactionAdapterTest {
+  private static final long FORK_HANDLE = 0x0B;
+  private static final byte[] TX_HASH = randomBytes(10);
+  private static final byte[] AUTHOR_PK = randomBytes(10);
 
   @Mock
   private Transaction transaction;
@@ -56,13 +55,10 @@ class UserTransactionAdapterTest {
 
   @Test
   void execute_closesCleanerAfterExecution() throws TransactionExecutionException {
-    long forkHandle = 0x0B;
-    byte[] txHashBytes = ByteBuffer.allocate(1).array();
-    byte[] authorPkbytes = ByteBuffer.allocate(1).array();
-    transactionAdapter.execute(forkHandle, txHashBytes, authorPkbytes);
+    transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
-    verify(viewFactory).createFork(eq(forkHandle), ac.capture());
+    verify(viewFactory).createFork(eq(FORK_HANDLE), ac.capture());
 
     Cleaner cleaner = ac.getValue();
     assertTrue(cleaner.isClosed());
@@ -70,37 +66,24 @@ class UserTransactionAdapterTest {
 
   @Test
   void execute_rethrowsExecutionException() throws TransactionExecutionException {
-    long forkHandle = 0x0A;
-    HashCode txHash = HashCode.fromInt(1);
-    PublicKey authorPk = PublicKey.fromHexString("123abc");
-    byte errorCode = 1;
-    TransactionExecutionException txError = new TransactionExecutionException(errorCode);
+    TransactionExecutionException txError = mock(TransactionExecutionException.class);
 
     doThrow(txError).when(transaction).execute(any(TransactionContext.class));
 
     TransactionExecutionException thrown = assertThrows(TransactionExecutionException.class,
-        () -> transactionAdapter.execute(forkHandle, txHash.asBytes(), authorPk.toBytes()));
-    assertThat(thrown, equalTo(txError));
+        () -> transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK));
+    assertThat(thrown, is(txError));
   }
 
   @Test
   void execute_rethrowsRuntimeExceptions() throws TransactionExecutionException {
-    long forkHandle = 0x0A;
-    HashCode txHash = HashCode.fromInt(1);
-    PublicKey authorPk = PublicKey.fromHexString("123abc");
-    RuntimeException unexpectedTxError = new NullPointerException("foo");
+    RuntimeException unexpectedTxError = mock(RuntimeException.class);
 
     doThrow(unexpectedTxError).when(transaction).execute(any(TransactionContext.class));
 
     RuntimeException thrown = assertThrows(RuntimeException.class,
-        () -> transactionAdapter.execute(forkHandle, txHash.asBytes(), authorPk.toBytes()));
-    assertThat(thrown, equalTo(unexpectedTxError));
+        () -> transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK));
+    assertThat(thrown, is(unexpectedTxError));
   }
 
-  private Fork setupViewFactory(long forkHandle) {
-    Fork fork = mock(Fork.class);
-    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
-    return fork;
-  }
 }

@@ -16,10 +16,9 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
@@ -33,7 +32,9 @@ class CreateTransferTransactionUtils {
    */
   static RawTransaction createRawTransaction(long seed, PublicKey senderId,
       PublicKey recipientId, long amount) {
-    return newCryptocurrencyTransactionBuilder(TransferTx.ID)
+    return RawTransaction.newBuilder()
+        .serviceId(CryptocurrencyService.ID)
+        .transactionId(TransferTx.ID)
         .payload(TxMessageProtos.TransferTx.newBuilder()
             .setSeed(seed)
             .setFromWallet(fromPublicKey(senderId))

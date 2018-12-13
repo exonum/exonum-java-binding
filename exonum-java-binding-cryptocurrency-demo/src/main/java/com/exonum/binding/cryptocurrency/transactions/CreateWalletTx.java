@@ -17,6 +17,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -28,6 +31,7 @@ import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;
@@ -77,12 +81,12 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
   }
 
   @Override
-  public void execute(TransactionContext context) {
+  public void execute(TransactionContext context) throws TransactionExecutionException {
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
     if (wallets.containsKey(ownerPublicKey)) {
-      return;
+      throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
     }
 
     Wallet wallet = new Wallet(initialBalance);
@@ -108,3 +112,4 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
     return Objects.hash(ownerPublicKey, initialBalance);
   }
 }
+

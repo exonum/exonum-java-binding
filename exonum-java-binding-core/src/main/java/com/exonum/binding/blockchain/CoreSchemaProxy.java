@@ -17,12 +17,12 @@
 
 package com.exonum.binding.blockchain;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -98,7 +98,7 @@ final class CoreSchemaProxy {
   StoredConfiguration getActualConfiguration() {
     String rawConfiguration = nativeGetActualConfiguration(nativeHandle.get());
 
-    return StoredConfigurationGsonSerializer.fromJson(rawConfiguration);
+    return json().fromJson(rawConfiguration, StoredConfiguration.class);
   }
 
   private static native long nativeCreate(long viewNativeHandle);

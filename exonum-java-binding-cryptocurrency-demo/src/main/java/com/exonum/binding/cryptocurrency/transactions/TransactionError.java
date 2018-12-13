@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.transaction.Transaction;
+enum TransactionError {
+  WALLET_ALREADY_EXISTS(0),
+  UNKNOWN_RECEIVER(1),
+  UNKNOWN_SENDER(2),
+  INSUFFICIENT_FUNDS(3);
 
-/**
- * Indicates that a transaction is not valid
- * (e.g., its {@link Transaction#isValid()} returns false).
- */
-public final class InvalidTransactionException extends Exception {
-  InvalidTransactionException(String message) {
-    super(message);
+  final byte errorCode;
+
+  TransactionError(int errorCode) {
+    this.errorCode = (byte) errorCode;
   }
 }
