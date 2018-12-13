@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -39,7 +40,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -166,8 +166,7 @@ class CreateCounterTxIntegrationTest {
 
     String info = tx.info();
 
-    Gson gson = QaTransactionGson.instance();
-    AnyTransaction<CreateCounterTx> txParams = gson.fromJson(info,
+    AnyTransaction<CreateCounterTx> txParams = json().fromJson(info,
         new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
     );
     assertThat(txParams.service_id, equalTo(QaService.ID));

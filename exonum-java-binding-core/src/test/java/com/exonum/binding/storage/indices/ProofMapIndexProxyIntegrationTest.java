@@ -55,6 +55,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.test.Bytes;
+import com.exonum.binding.test.CiOnly;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
@@ -373,6 +374,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @CiOnly
   @Test
   /*
     Takes quite a lot of time (validating 257 proofs), but it's an integration test, isn't it? :-)
@@ -652,9 +654,7 @@ class ProofMapIndexProxyIntegrationTest
   @Test
   void clearFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
-
       assertThrows(UnsupportedOperationException.class, () -> map.clear());
-
     });
   }
 
@@ -667,7 +667,6 @@ class ProofMapIndexProxyIntegrationTest
   void constructorShallPreserveTypeInformation() {
     runTestWithView(database::createFork, (view, map) -> {
       map.put(PK1, V1);
-
 
       // Create a regular map with the same name as the proof map above.
       RuntimeException thrown = assertThrows(RuntimeException.class, () -> {

@@ -19,6 +19,7 @@ package com.exonum.binding.qaservice;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
@@ -225,6 +226,17 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   private void createCounter(String name, Fork fork) {
     new CreateCounterTx(name).execute(fork);
+  }
+
+  @Override
+  public StoredConfiguration getActualConfiguration() {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+
+      return blockchain.getActualConfiguration();
+    });
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.
