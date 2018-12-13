@@ -111,7 +111,8 @@ impl Transaction for TransactionProxy {
                     transaction_adapter::execute_id(),
                     JavaType::Primitive(Primitive::Void),
                     &[JValue::from(view_handle)],
-                ).and_then(JValue::v)
+                )
+                .and_then(JValue::v)
             };
             Ok(check_transaction_execution_result(env, res))
         });

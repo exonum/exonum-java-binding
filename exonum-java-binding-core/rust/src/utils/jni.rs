@@ -20,7 +20,8 @@ pub fn get_class_name(env: &JNIEnv, obj: JObject) -> JniResult<String> {
             JavaType::Object(RETVAL_TYPE_CLASS.into()),
             &[],
         )
-    }?.l()?;
+    }?
+    .l()?;
 
     let class_name = unsafe {
         env.call_method_unsafe(
@@ -29,7 +30,8 @@ pub fn get_class_name(env: &JNIEnv, obj: JObject) -> JniResult<String> {
             JavaType::Object(RETVAL_TYPE_STRING.into()),
             &[],
         )
-    }?.l()?;
+    }?
+    .l()?;
     convert_to_string(env, class_name)
 }
 

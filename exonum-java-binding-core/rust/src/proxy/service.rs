@@ -134,7 +134,8 @@ impl Service for ServiceProxy {
                     "(J)Ljava/lang/String;",
                     &[JValue::from(view_handle)],
                 ),
-            ).l()?;
+            )
+            .l()?;
             if json_config.is_null() {
                 Ok(None)
             } else {
@@ -149,7 +150,8 @@ impl Service for ServiceProxy {
                         "JSON deserialization error: {:?}; json string: {:?}",
                         e, json_config
                     )
-                }).unwrap(),
+                })
+                .unwrap(),
         }
     }
 

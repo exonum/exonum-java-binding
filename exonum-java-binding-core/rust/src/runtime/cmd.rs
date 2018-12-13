@@ -77,7 +77,8 @@ impl CommandExtension for GenerateNodeConfig {
             vec![(
                 EJB_JVM_CONFIG_NAME.to_owned(),
                 Value::try_from(jvm_config).unwrap(),
-            )].into_iter(),
+            )]
+            .into_iter(),
         );
 
         context.set(keys::SERVICES_SECRET_CONFIGS, services_secret_configs);
