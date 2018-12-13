@@ -3,17 +3,18 @@ extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
+extern crate failure;
 
 use std::sync::Arc;
 
 use futures::sync::mpsc::{self, Receiver};
 use futures::Stream;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::exonum::blockchain::Blockchain;
-use java_bindings::exonum::crypto::gen_keypair;
+use java_bindings::exonum::blockchain::{Blockchain, Service, Transaction};
+use java_bindings::exonum::crypto::{gen_keypair, Hash};
 use java_bindings::exonum::messages::{BinaryForm, RawTransaction, ServiceTransaction};
 use java_bindings::exonum::node::{ApiSender, ExternalMessage};
-use java_bindings::exonum::storage::MemoryDB;
+use java_bindings::exonum::storage::{MemoryDB, Snapshot};
 use java_bindings::jni::objects::JObject;
 use java_bindings::jni::{JNIEnv, JavaVM};
 use java_bindings::utils::{
@@ -30,8 +31,6 @@ lazy_static! {
 }
 
 #[test]
-//TODO
-#[ignore]
 fn submit_transaction() {
     let (mut node, app_rx) = create_node();
     let raw_transaction =
@@ -49,10 +48,30 @@ fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
     let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
+    struct EmptyService;
+
+    impl Service for EmptyService {
+        fn service_id(&self) -> u16 {
+            0
+        }
+
+        fn service_name(&self) -> &str {
+            "empty_service"
+        }
+
+        fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
+            vec![]
+        }
+
+        fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
+            unimplemented!()
+        }
+    }
+
     let storage = MemoryDB::new();
     let blockchain = Blockchain::new(
         storage,
-        vec![],
+        vec![Box::new(EmptyService)],
         service_keypair.0,
         service_keypair.1,
         app_tx.clone(),
