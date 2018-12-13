@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.ValidErrorTx.serializeBody;
@@ -37,7 +38,6 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeAll;
@@ -183,9 +183,7 @@ class ValidErrorTxIntegrationTest {
 
     String txInJson = tx.info();
 
-    Gson gson = QaTransactionGson.instance();
-
-    AnyTransaction<ValidErrorTx> txFromJson = gson.fromJson(txInJson,
+    AnyTransaction<ValidErrorTx> txFromJson = json().fromJson(txInJson,
         new TypeToken<AnyTransaction<ValidErrorTx>>() {}.getType());
 
     assertThat(txFromJson.message_id, equalTo(QaTransaction.VALID_ERROR.id()));

@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -34,7 +35,6 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.transaction.Transaction;
@@ -201,7 +201,7 @@ class ApiControllerTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Wallet actualWallet = CryptocurrencyTransactionGson.instance()
+          Wallet actualWallet = json()
               .fromJson(body, Wallet.class);
           assertThat(actualWallet.getBalance()).isEqualTo(wallet.getBalance());
 
@@ -287,7 +287,7 @@ class ApiControllerTest {
   private List<HistoryEntity> parseWalletHistory(HttpResponse<Buffer> response) {
     Type listType = new TypeToken<List<HistoryEntity>>() {
     }.getType();
-    return CryptocurrencyTransactionGson.instance()
+    return json()
         .fromJson(response.bodyAsString(), listType);
   }
 

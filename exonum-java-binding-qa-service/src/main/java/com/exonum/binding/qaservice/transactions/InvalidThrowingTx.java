@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkMessageSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
@@ -33,7 +34,7 @@ import java.util.Map;
 public final class InvalidThrowingTx implements Transaction {
 
   private static final short ID = QaTransaction.INVALID_THROWING.id();
-  private static final String INVALID_TX_JSON = QaTransactionGson.instance()
+  private static final String INVALID_TX_JSON = json()
       .toJson(new AnyTransaction<Map>(ID, Collections.emptyMap()));
 
   @Override

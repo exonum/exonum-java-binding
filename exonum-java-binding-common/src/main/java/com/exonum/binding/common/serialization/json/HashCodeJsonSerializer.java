@@ -34,8 +34,7 @@ import java.lang.reflect.Type;
  *
  * <p>All method arguments are non-null by default.
  */
-public final class HashCodeJsonSerializer
-    implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
+final class HashCodeJsonSerializer implements JsonSerializer<HashCode>, JsonDeserializer<HashCode> {
 
   /**
    * Serialize HashCode to JsonElement.
