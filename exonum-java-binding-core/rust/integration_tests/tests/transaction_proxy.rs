@@ -6,8 +6,8 @@ extern crate lazy_static;
 use integration_tests::{
     mock::transaction::{
         create_mock_transaction_proxy, create_throwing_exec_exception_mock_transaction_proxy,
-        create_throwing_mock_transaction_proxy, AUTHOR_PK_ENTRY_NAME, ENTRY_VALUE, INFO_VALUE,
-        TEST_ENTRY_NAME, TX_HASH_ENTRY_NAME,
+        create_throwing_mock_transaction_proxy, AUTHOR_PK_ENTRY_NAME, ENTRY_VALUE, TEST_ENTRY_NAME,
+        TX_HASH_ENTRY_NAME,
     },
     vm::create_vm_for_tests_with_fake_classes,
 };
@@ -16,7 +16,7 @@ use java_bindings::{
     exonum::{
         blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
         crypto::{Hash, PublicKey},
-        messages::{Message, RawTransaction, ServiceTransaction},
+        messages::RawTransaction,
         storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
     jni::JavaVM,
@@ -43,7 +43,7 @@ fn execute_valid_transaction() {
     }
     {
         let mut fork = db.fork();
-        let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone(), true);
+        let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
         {
             let tx_context = create_transaction_context(&mut fork, raw);
             valid_tx
@@ -174,7 +174,7 @@ fn passing_transaction_context() {
     let db = MemoryDB::new();
     let (tx_hash, author_pk) = {
         let mut fork = db.fork();
-        let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone(), true);
+        let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
         let (tx_hash, author_pk) = {
             let context = create_transaction_context(&mut fork, raw);
             let (tx_hash, author_pk) = (context.tx_hash(), context.author());

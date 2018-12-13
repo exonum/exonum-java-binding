@@ -11,7 +11,6 @@ use integration_tests::test_service::{
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::exonum::blockchain::Service;
 use java_bindings::exonum::crypto::hash;
-use java_bindings::exonum::messages::{RawTransaction, ServiceTransaction};
 use java_bindings::exonum::storage::{Database, MemoryDB};
 use java_bindings::jni::JavaVM;
 use java_bindings::serde_json::Value;

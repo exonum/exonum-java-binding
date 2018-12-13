@@ -12,18 +12,11 @@ use futures::Stream;
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::exonum::blockchain::{Blockchain, Service, Transaction};
 use java_bindings::exonum::crypto::{gen_keypair, Hash};
-use java_bindings::exonum::messages::{BinaryForm, RawTransaction, ServiceTransaction};
+use java_bindings::exonum::messages::{RawTransaction, ServiceTransaction};
 use java_bindings::exonum::node::{ApiSender, ExternalMessage};
 use java_bindings::exonum::storage::{MemoryDB, Snapshot};
-use java_bindings::jni::objects::JObject;
-use java_bindings::jni::{JNIEnv, JavaVM};
-use java_bindings::utils::{
-    as_handle, get_and_clear_java_exception, get_class_name, unwrap_jni, unwrap_jni_verbose,
-};
-use java_bindings::{
-    Java_com_exonum_binding_service_NodeProxy_nativeSubmit, JniExecutor, JniResult, MainExecutor,
-    NodeContext,
-};
+use java_bindings::jni::JavaVM;
+use java_bindings::{MainExecutor, NodeContext};
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
@@ -32,7 +25,7 @@ lazy_static! {
 
 #[test]
 fn submit_transaction() {
-    let (mut node, app_rx) = create_node();
+    let (node, app_rx) = create_node();
     let service_id = 0;
     let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![1, 2, 3]);
     let raw_transaction = RawTransaction::new(service_id, service_transaction);
@@ -60,11 +53,11 @@ fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
             "empty_service"
         }
 
-        fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
+        fn state_hash(&self, _: &Snapshot) -> Vec<Hash> {
             vec![]
         }
 
-        fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
+        fn tx_from_raw(&self, _: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
             unimplemented!()
         }
     }
@@ -79,8 +72,4 @@ fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
     );
     let node = NodeContext::new(EXECUTOR.clone(), blockchain, service_keypair.0, app_tx);
     (node, app_rx)
-}
-
-fn message_from_raw<'e>(env: &'e JNIEnv<'e>, buffer: &[u8]) -> JniResult<JObject<'e>> {
-    env.byte_array_from_slice(buffer).map(JObject::from)
 }

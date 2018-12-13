@@ -82,10 +82,7 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
 }
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction_proxy(
-    executor: MainExecutor,
-    valid: bool,
-) -> (TransactionProxy, RawTransaction) {
+pub fn create_mock_transaction_proxy(executor: MainExecutor) -> (TransactionProxy, RawTransaction) {
     let (java_tx_mock, raw) = create_mock_transaction(&executor);
     let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
     (tx_proxy, raw)
