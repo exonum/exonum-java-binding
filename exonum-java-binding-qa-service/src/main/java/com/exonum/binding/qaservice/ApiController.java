@@ -25,7 +25,6 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -285,13 +284,6 @@ final class ApiController {
       return Optional.of(message);
     }
 
-    // Check for checked InvalidTransactionExceptions — they are wrapped in RuntimeExceptions.
-    Throwable cause = requestFailure.getCause();
-    if (cause instanceof InvalidTransactionException) {
-      String description = Strings.nullToEmpty(cause.getLocalizedMessage());
-      String message = String.format("Transaction is not valid: %s", description);
-      return Optional.of(message);
-    }
     // This throwable must correspond to an internal server error.
     return Optional.empty();
   }

@@ -1,8 +1,8 @@
 package com.exonum.binding.transaction;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
+
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.HashFunction;
-import com.exonum.binding.common.hash.Hashing;
 import com.google.common.base.Objects;
 
 public class RawTransaction {
@@ -32,8 +32,7 @@ public class RawTransaction {
    * Returns the SHA-256 hash raw transaction payload.
    */
   public HashCode hash() {
-    HashFunction hashFunction = Hashing.defaultHashFunction();
-    return hashFunction.hashBytes(getPayload());
+    return sha256().hashBytes(getPayload());
   }
 
   public static Builder newBuilder() {

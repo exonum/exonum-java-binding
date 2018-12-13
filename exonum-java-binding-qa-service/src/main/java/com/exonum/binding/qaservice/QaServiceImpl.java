@@ -32,7 +32,6 @@ import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.InternalServerError;
-import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
@@ -255,7 +254,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
     try {
       node.submitTransaction(rawTransaction);
       return rawTransaction.hash();
-    } catch (InvalidTransactionException | InternalServerError e) {
+    } catch (InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }
   }

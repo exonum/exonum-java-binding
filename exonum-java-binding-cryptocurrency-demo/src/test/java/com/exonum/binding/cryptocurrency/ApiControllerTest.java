@@ -24,7 +24,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -48,6 +47,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -59,13 +59,10 @@ class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
-  private static final short CREATE_WALLET_TX_ID = 1;
+  private static final PublicKey FROM_KEY = PredefinedOwnerKeys.firstOwnerKey;
 
-  private static final PublicKey fromKey = PredefinedOwnerKeys.firstOwnerKey;
-
+  @Mock
   private CryptocurrencyService service;
-
-  private ApiController controller;
 
   private HttpServer httpServer;
 
@@ -75,14 +72,11 @@ class ApiControllerTest {
 
   @BeforeEach
   void setup(Vertx vertx, VertxTestContext context) {
-    service = mock(CryptocurrencyService.class);
-    controller = new ApiController(service);
-
     httpServer = vertx.createHttpServer();
     webClient = WebClient.create(vertx);
 
     Router router = Router.router(vertx);
-    controller.mountApi(router);
+    new ApiController(service).mountApi(router);
 
     httpServer.requestHandler(router::accept)
         .listen(0, context.succeeding(result -> {
@@ -103,10 +97,10 @@ class ApiControllerTest {
   void getWallet(VertxTestContext context) {
     long balance = 200L;
     Wallet wallet = new Wallet(balance);
-    when(service.getWallet(eq(fromKey)))
+    when(service.getWallet(eq(FROM_KEY)))
         .thenReturn(Optional.of(wallet));
 
-    String getWalletUri = getWalletUri(fromKey);
+    String getWalletUri = getWalletUri(FROM_KEY);
     get(getWalletUri)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
@@ -123,10 +117,10 @@ class ApiControllerTest {
 
   @Test
   void getNonexistentWallet(VertxTestContext context) {
-    when(service.getWallet(fromKey))
+    when(service.getWallet(FROM_KEY))
         .thenReturn(Optional.empty());
 
-    String getWalletUri = getWalletUri(fromKey);
+    String getWalletUri = getWalletUri(FROM_KEY);
     get(getWalletUri)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
@@ -155,15 +149,15 @@ class ApiControllerTest {
     List<HistoryEntity> history = singletonList(
         HistoryEntity.Builder.newBuilder()
             .setSeed(1L)
-            .setWalletFrom(fromKey)
-            .setWalletTo(fromKey)
+            .setWalletFrom(FROM_KEY)
+            .setWalletTo(FROM_KEY)
             .setAmount(10L)
             .setTransactionHash(HashCode.fromString("a0a0a0"))
             .build()
     );
-    when(service.getWalletHistory(fromKey)).thenReturn(history);
+    when(service.getWalletHistory(FROM_KEY)).thenReturn(history);
 
-    String uri = getWalletUri(fromKey) + "/history";
+    String uri = getWalletUri(FROM_KEY) + "/history";
 
     get(uri)
         .send(context.succeeding(response -> context.verify(() -> {
@@ -179,9 +173,9 @@ class ApiControllerTest {
 
   @Test
   void getWalletHistoryNonexistentWallet(VertxTestContext context) {
-    when(service.getWalletHistory(fromKey)).thenReturn(emptyList());
+    when(service.getWalletHistory(FROM_KEY)).thenReturn(emptyList());
 
-    String uri = getWalletUri(fromKey) + "/history";
+    String uri = getWalletUri(FROM_KEY) + "/history";
 
     get(uri)
         .send(context.succeeding(response -> context.verify(() -> {
@@ -196,18 +190,6 @@ class ApiControllerTest {
     }.getType();
     return json()
         .fromJson(response.bodyAsString(), listType);
-  }
-
-  private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
-    Throwable wrappingException = logSafeExceptionMock(RuntimeException.class);
-    Throwable cause = logSafeExceptionMock(checkedException);
-    when(wrappingException.getCause()).thenReturn(cause);
-    return wrappingException;
-  }
-
-  private Throwable logSafeExceptionMock(Class<? extends Throwable> exceptionType) {
-    Throwable t = mock(exceptionType);
-    return t;
   }
 
   private String getWalletUri(PublicKey publicKey) {
@@ -226,7 +208,4 @@ class ApiControllerTest {
     return webClient.get(port, HOST, requestPath);
   }
 
-  private HttpRequest<Buffer> post(String requestPath) {
-    return webClient.post(port, HOST, requestPath);
-  }
 }

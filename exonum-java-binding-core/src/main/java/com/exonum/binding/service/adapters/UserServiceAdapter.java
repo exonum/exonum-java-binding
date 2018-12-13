@@ -146,8 +146,8 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public @Nullable
-  String initialize(long forkHandle) {
+  @Nullable
+  public String initialize(long forkHandle) {
     assert forkHandle != 0;
 
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
@@ -166,7 +166,7 @@ public class UserServiceAdapter {
   public void mountPublicApiHandler(long nodeNativeHandle) {
     try {
       checkState(node == null, "There is a node already: are you calling this method twice?");
-      node = new NodeProxy(nodeNativeHandle, viewFactory);
+      node = new NodeProxy(nodeNativeHandle);
       Router router = server.createRouter();
       service.createPublicApiHandlers(node, router);
       server.mountSubRouter(serviceApiPath(), router);

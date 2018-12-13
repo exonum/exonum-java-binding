@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
@@ -42,9 +43,7 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.InternalServerError;
-import com.exonum.binding.service.InvalidTransactionException;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -68,6 +67,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -81,12 +81,10 @@ class ApiControllerIntegrationTest {
 
   private static final String HOST = "0.0.0.0";
 
-  private static final HashCode EXPECTED_TX_HASH = Hashing.sha256()
-      .hashInt(1);
+  private static final HashCode EXPECTED_TX_HASH = sha256().hashInt(1);
 
+  @Mock
   QaService qaService;
-
-  ApiController controller;
 
   HttpServer httpServer;
 
@@ -96,14 +94,11 @@ class ApiControllerIntegrationTest {
 
   @BeforeEach
   void setup(Vertx vertx, VertxTestContext context) {
-    qaService = mock(QaService.class);
-    controller = new ApiController(qaService);
-
     httpServer = vertx.createHttpServer();
     webClient = WebClient.create(vertx);
 
     Router router = Router.router(vertx);
-    controller.mountApi(router);
+    new ApiController(qaService).mountApi(router);
 
     httpServer.requestHandler(router::accept)
         .listen(0, context.succeeding(result -> {
@@ -142,28 +137,6 @@ class ApiControllerIntegrationTest {
 
             assertThat(response.bodyAsString())
                 .contains("No required key (name) in request parameters:");
-
-            context.completeNow();
-          });
-        }));
-  }
-
-  @Test
-  void submitCreateCounter_InvalidTransaction(VertxTestContext context) {
-    String counterName = "counter 1";
-    MultiMap params = multiMap("name", counterName);
-
-    Throwable error = wrappingChecked(InvalidTransactionException.class);
-    when(qaService.submitCreateCounter(counterName))
-        .thenThrow(error);
-
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(response -> {
-          context.verify(() -> {
-            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-
-            assertThat(response.bodyAsString())
-                .startsWith("Transaction is not valid:");
 
             context.completeNow();
           });
@@ -220,7 +193,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void submitInvalidTx(VertxTestContext context) {
-    Throwable error = wrappingChecked(InvalidTransactionException.class);
+    Throwable error = wrappingChecked(Exception.class);
     when(qaService.submitInvalidTx()).thenThrow(error);
 
     post(ApiController.SUBMIT_INVALID_TX_PATH)
@@ -229,7 +202,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void submitInvalidThrowingTx(VertxTestContext context) {
-    Throwable error = wrappingChecked(InvalidTransactionException.class);
+    Throwable error = wrappingChecked(Exception.class);
     when(qaService.submitInvalidThrowingTx()).thenThrow(error);
 
     post(ApiController.SUBMIT_INVALID_THROWING_TX_PATH)
@@ -290,7 +263,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getCounter(VertxTestContext context) {
-    HashCode id = Hashing.sha256().hashInt(2);
+    HashCode id = sha256().hashInt(2);
     String name = "counter";
     long value = 10L;
     Counter counter = new Counter(name, value);
@@ -313,7 +286,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getCounter_NoCounter(VertxTestContext context) {
-    HashCode id = Hashing.sha256().hashInt(2);
+    HashCode id = sha256().hashInt(2);
     when(qaService.getValue(id))
         .thenReturn(Optional.empty());
 
@@ -537,10 +510,7 @@ class ApiControllerIntegrationTest {
       VertxTestContext context) {
     return context.succeeding(
         response -> context.verify(() -> {
-          assertAll(
-              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
-              () -> assertThat(response.bodyAsString()).startsWith("Transaction is not valid")
-          );
+          assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
           context.completeNow();
         })
     );

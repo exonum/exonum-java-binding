@@ -19,7 +19,6 @@ package com.exonum.binding.service;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.RawTransaction;
 import java.util.function.Function;
@@ -33,18 +32,15 @@ import org.apache.logging.log4j.Logger;
 public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
 
   private static final Logger logger = LogManager.getLogger(NodeProxy.class);
-  private final ViewFactory viewFactory;
 
   /**
    * Creates a proxy of a node. Native code owns the node,
    * and, therefore, shall destroy the object.
    *
    * @param nativeHandle an implementation-specific reference to a native node
-   * @param viewFactory a factory to instantiate native database views
    */
-  public NodeProxy(long nativeHandle, ViewFactory viewFactory) {
+  public NodeProxy(long nativeHandle) {
     super(nativeHandle, false);
-    this.viewFactory = viewFactory;
   }
 
   /**
@@ -54,11 +50,12 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    */
   @Override
   public void submitTransaction(RawTransaction rawTransaction)
-      throws InvalidTransactionException, InternalServerError {
+      throws InternalServerError {
     byte[] payload = rawTransaction.getPayload();
-    int serviceId = (int)rawTransaction.getServiceId();
+    short serviceId = rawTransaction.getServiceId();
+    short transactionId = rawTransaction.getTransactionId();
 
-    nativeSubmit(getNativeHandle(), payload, serviceId);
+    nativeSubmit(getNativeHandle(), payload, serviceId, transactionId);
   }
 
   /**
@@ -67,9 +64,10 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param nodeHandle a native handle to the native node object
    * @param payload an array containing the transaction payload
    * @param serviceId an identifier of the service
+   * @param transactionId an identifier of the transaction
    */
-  private static native void nativeSubmit(long nodeHandle, byte[] payload, int serviceId)
-      throws InvalidTransactionException, InternalServerError;
+  private static native void nativeSubmit(long nodeHandle, byte[] payload, short serviceId,
+      short transactionId) throws InternalServerError;
 
   /**
    * {@inheritDoc}
