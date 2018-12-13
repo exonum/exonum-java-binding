@@ -89,6 +89,10 @@ public class HistoryEntity {
         .toString();
   }
 
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
   public static final class Builder {
     private long seed;
     private PublicKey walletFrom;
@@ -97,10 +101,6 @@ public class HistoryEntity {
     private HashCode txMessageHash;
 
     private Builder() {
-    }
-
-    public static Builder newBuilder() {
-      return new Builder();
     }
 
     public Builder setSeed(long seed) {

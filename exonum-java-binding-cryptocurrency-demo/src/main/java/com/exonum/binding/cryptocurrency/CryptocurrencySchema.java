@@ -59,17 +59,17 @@ public final class CryptocurrencySchema implements Schema {
   }
 
   /**
-   * Returns transactions history of the wallet.
+   * Returns transactions history of the wallet. It contains hashes of
+   * {@link com.exonum.binding.cryptocurrency.transactions.TransferTx} transaction messages,
+   * that changed the balance of the given wallet.
    *
-   * @param key wallet address
-   * @return transactions history
+   * @param walletId wallet address
    */
-  //TODO: replace by HashCode instead of HistoryEntity when blockchain::Schema will be supported
-  public ListIndexProxy<HistoryEntity> walletHistory(PublicKey key) {
-    String name = fullIndexName("wallet_history");
+  public ListIndexProxy<HashCode> transactionsHistory(PublicKey walletId) {
+    String name = fullIndexName("transactions_history");
 
-    return ListIndexProxy.newInGroupUnsafe(name, key.toBytes(), view,
-        HistoryEntitySerializer.INSTANCE);
+    return ListIndexProxy.newInGroupUnsafe(name, walletId.toBytes(), view,
+        StandardSerializers.hash());
   }
 
   private static String fullIndexName(String name) {

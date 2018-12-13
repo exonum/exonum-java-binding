@@ -12,11 +12,3 @@ message TransferTx {
 message CreateWalletTx {
   int64 initialBalance = 1;
 }
-
-message HistoryEntity {
-  int64 seed = 1;
-  bytes walletFrom = 2;
-  bytes walletTo = 3;
-  int64 sum = 4;
-  bytes hash = 5;
-}

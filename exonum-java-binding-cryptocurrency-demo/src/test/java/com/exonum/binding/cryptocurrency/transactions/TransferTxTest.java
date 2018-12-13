@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.proxy.Cleaner;
@@ -128,15 +127,8 @@ class TransferTxTest {
       assertThat(wallets.get(TO_KEY).getBalance(), equalTo(expectedToValue));
 
       // Check history
-      HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
-          .setSeed(seed)
-          .setWalletFrom(FROM_KEY)
-          .setWalletTo(TO_KEY)
-          .setAmount(transferSum)
-          .setTxMessageHash(context.getTransactionMessageHash())
-          .build();
-      assertThat(schema.walletHistory(FROM_KEY), hasItem(expectedEntity));
-      assertThat(schema.walletHistory(TO_KEY), hasItem(expectedEntity));
+      assertThat(schema.transactionsHistory(FROM_KEY), hasItem(hash));
+      assertThat(schema.transactionsHistory(TO_KEY), hasItem(hash));
     }
   }
 

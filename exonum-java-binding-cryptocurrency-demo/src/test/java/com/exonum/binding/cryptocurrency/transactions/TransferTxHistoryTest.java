@@ -19,16 +19,14 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
-import static org.hamcrest.CoreMatchers.allOf;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.contains;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.proxy.Cleaner;
@@ -39,6 +37,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -94,26 +93,9 @@ class TransferTxHistoryTest {
       assertThat(wallets.get(ACCOUNT_2).getBalance(), equalTo(expectedBalance2));
 
       // Check history
-      HistoryEntity expectedEntity = HistoryEntity.Builder.newBuilder()
-          .setSeed(seed1)
-          .setWalletFrom(ACCOUNT_1)
-          .setWalletTo(ACCOUNT_2)
-          .setAmount(transferSum1)
-          .setTxMessageHash(context1.getTransactionMessageHash())
-          .build();
-      HistoryEntity expectedEntity2 = HistoryEntity.Builder.newBuilder()
-          .setSeed(seed2)
-          .setWalletFrom(ACCOUNT_2)
-          .setWalletTo(ACCOUNT_1)
-          .setAmount(transferSum2)
-          .setTxMessageHash(context2.getTransactionMessageHash())
-          .build();
-      assertThat(schema.walletHistory(ACCOUNT_1),
-          allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));
-      assertThat(schema.walletHistory(ACCOUNT_2),
-          allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));
+      List<HashCode> expectedEntries = asList(txMessageHash1, txMessageHash2);
+      assertThat(schema.transactionsHistory(ACCOUNT_1), contains(expectedEntries));
+      assertThat(schema.transactionsHistory(ACCOUNT_2), contains(expectedEntries));
     }
-
   }
-
 }
