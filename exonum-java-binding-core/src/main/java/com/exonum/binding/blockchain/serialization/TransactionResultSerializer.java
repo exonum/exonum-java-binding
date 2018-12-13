@@ -16,12 +16,17 @@
 
 package com.exonum.binding.blockchain.serialization;
 
+import static com.exonum.binding.blockchain.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
+
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;
+
+  private static final int SUCCESSFUL_RESULT_STATUS_CODE = 256;
+  private static final int UNEXPECTED_ERROR_CODE = 257;
 
   @Override
   public byte[] toBytes(TransactionResult value) {
@@ -41,11 +46,11 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
           CoreProtos.TransactionResult.parseFrom(binaryTransactionResult);
       int status = copiedtxLocationProtos.getStatus();
       String description = copiedtxLocationProtos.getDescription();
-      if (status <= 255) {
+      if (status <= MAX_USER_DEFINED_ERROR_CODE) {
         return TransactionResult.error(status, description);
-      } else if (status == 256) {
+      } else if (status == SUCCESSFUL_RESULT_STATUS_CODE) {
         return TransactionResult.successful();
-      } else if (status == 257) {
+      } else if (status == UNEXPECTED_ERROR_CODE) {
         return TransactionResult.unexpectedError(description);
       } else {
         throw new InvalidProtocolBufferException("Invalid status code");
@@ -57,21 +62,16 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
   }
 
   private int convertToCoreStatusCode(TransactionResult transactionResult) {
-    int status;
     switch (transactionResult.getType()) {
       case ERROR:
-        status = transactionResult.getErrorCode().getAsInt();
-        break;
+        return transactionResult.getErrorCode().getAsInt();
       case SUCCESS:
-        status = 256;
-        break;
+        return SUCCESSFUL_RESULT_STATUS_CODE;
       case UNEXPECTED_ERROR:
-        status = 257;
-        break;
+        return UNEXPECTED_ERROR_CODE;
       default:
-        throw new AssertionError("Unreachable");
+        throw new AssertionError("Unreachable: " + transactionResult);
     }
-    return status;
   }
 
 }

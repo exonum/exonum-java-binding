@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -37,8 +36,8 @@ import javax.annotation.Nullable;
 @AutoValue
 public abstract class TransactionResult {
 
-  @VisibleForTesting
-  static final int MAX_USER_DEFINED_ERROR_CODE = 0xFF;
+  /** The maximum allowed user-defined transaction error code. */
+  public static final int MAX_USER_DEFINED_ERROR_CODE = 0xFF;
 
   private static final TransactionResult SUCCESSFUL_RESULT = valueOf(Type.SUCCESS, null, null);
 
