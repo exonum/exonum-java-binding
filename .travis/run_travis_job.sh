@@ -13,8 +13,10 @@ set -x
 # Run rust code checks if CHECK_RUST is true, or java tests if it's not
 if [ "$CHECK_RUST" = true ] 
 then
+    # Todo: install when it compiles ecr-2750
     # Install cargo-audit if it's not already.
-    cargo audit --version || cargo install cargo-audit --force
+    #cargo audit --version || cargo install cargo-audit --force
+
     # Install nightly rust version and clippy.
     rustup toolchain install $RUST_NIGHTLY_VERSION
     cargo +$RUST_NIGHTLY_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_NIGHTLY_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
@@ -38,7 +40,7 @@ then
 
     # Run audit of vulnerable dependencies.
     # TODO: enable when vulnerabilities will be fixed
-    cargo audit || true
+    # cargo audit || true
 
     # Check silently for updates of Maven dependencies.
     # TODO Disabled until ECR-2252 is fixed.
