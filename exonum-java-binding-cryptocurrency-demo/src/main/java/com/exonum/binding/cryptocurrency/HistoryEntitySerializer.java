@@ -28,7 +28,7 @@ import com.google.protobuf.ByteString;
 public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
   INSTANCE;
 
-  private static final Serializer<TxMessageProtos.HistoryEntity> historyEntityProtobufSerializer =
+  private static final Serializer<TxMessageProtos.HistoryEntity> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.HistoryEntity.class);
 
   @Override
@@ -46,8 +46,7 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
 
   @Override
   public HistoryEntity fromBytes(byte[] serializedValue) {
-    TxMessageProtos.HistoryEntity entity =
-        historyEntityProtobufSerializer.fromBytes(serializedValue);
+    TxMessageProtos.HistoryEntity entity = PROTO_SERIALIZER.fromBytes(serializedValue);
 
     return HistoryEntity.Builder.newBuilder()
         .setSeed(entity.getSeed())

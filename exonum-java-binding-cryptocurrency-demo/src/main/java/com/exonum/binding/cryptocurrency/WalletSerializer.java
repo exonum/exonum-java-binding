@@ -23,7 +23,7 @@ import com.exonum.binding.common.serialization.Serializer;
 public enum WalletSerializer implements Serializer<Wallet> {
   INSTANCE;
 
-  private static final Serializer<WalletProtos.Wallet> walletProtobufSerializer =
+  private static final Serializer<WalletProtos.Wallet> PROTO_SERIALIZER =
       protobuf(WalletProtos.Wallet.class);
 
   @Override
@@ -36,7 +36,7 @@ public enum WalletSerializer implements Serializer<Wallet> {
 
   @Override
   public Wallet fromBytes(byte[] binaryWallet) {
-    WalletProtos.Wallet copiedWalletProtos = walletProtobufSerializer.fromBytes(binaryWallet);
+    WalletProtos.Wallet copiedWalletProtos = PROTO_SERIALIZER.fromBytes(binaryWallet);
     return new Wallet(copiedWalletProtos.getBalance());
   }
 }
