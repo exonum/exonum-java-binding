@@ -112,6 +112,9 @@ pub fn create_mock_transaction(executor: &MainExecutor) -> (GlobalRef, RawTransa
 }
 
 pub fn create_empty_raw_transaction() -> RawTransaction {
-    let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![]);
-    RawTransaction::new(0, service_transaction)
+    let transaction_id = 0;
+    let service_id = 0;
+    let payload = Vec::new();
+    let service_transaction = ServiceTransaction::from_raw_unchecked(transaction_id, payload);
+    RawTransaction::new(service_id, service_transaction)
 }
