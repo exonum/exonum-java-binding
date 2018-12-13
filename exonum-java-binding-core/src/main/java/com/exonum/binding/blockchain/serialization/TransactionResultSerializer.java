@@ -23,7 +23,6 @@ import static com.exonum.binding.common.serialization.StandardSerializers.protob
 
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;
