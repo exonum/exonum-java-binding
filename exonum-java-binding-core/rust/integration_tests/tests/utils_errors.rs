@@ -27,7 +27,7 @@ lazy_static! {
         let ex = MainExecutor::new(VM.clone());
         // JNI_OnLoad() is not called for these tests
         ex.with_attached(|env|{
-            jni_cache::cache_methods(env);
+            jni_cache::init_cache(env);
             Ok(())
         }).unwrap();
         ex
