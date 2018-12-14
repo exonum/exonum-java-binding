@@ -128,7 +128,11 @@ module.exports = {
         }
         const body = CreateTransactionProtobuf.encode(data).finish()
 
-        return axios.post(TX_URL, buildMessage(header, body, keyPair))
+        return axios.post(TX_URL, buildMessage(header, body, keyPair), {
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          }
+        })
       },
 
       transfer (keyPair, receiver, amountToTransfer, seed) {
@@ -144,7 +148,11 @@ module.exports = {
         }
         const body = TransferTransactionProtobuf.encode(data).finish()
 
-        return axios.post(TX_URL, buildMessage(header, body, keyPair))
+        return axios.post(TX_URL, buildMessage(header, body, keyPair), {
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          }
+        })
           .then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
