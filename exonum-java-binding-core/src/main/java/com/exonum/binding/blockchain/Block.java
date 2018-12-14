@@ -82,4 +82,11 @@ public abstract class Block {
    */
   public abstract HashCode getBlockHash();
 
+  @Override
+  public int hashCode() {
+    // Use just the first 4 bytes of the SHA-256 hash of the binary object representation,
+    // as they will have close to uniform distribution.
+    // AutoValue will still use all fields in #equals.
+    return getBlockHash().hashCode();
+  }
 }
