@@ -105,7 +105,7 @@ impl Service for ServiceProxy {
             let res = env.call_method(
                 self.service.as_obj(),
                 "convertTransaction",
-                "(II[B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
+                "(SS[B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
                 &[
                     JValue::from(service_id),
                     JValue::from(tx_id),

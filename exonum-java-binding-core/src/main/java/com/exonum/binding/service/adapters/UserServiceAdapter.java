@@ -84,13 +84,13 @@ public class UserServiceAdapter {
    *     a nullable transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  public UserTransactionAdapter convertTransaction(int serviceId, int transactionId,
+  public UserTransactionAdapter convertTransaction(short serviceId, short transactionId,
       byte[] payload) {
     try {
       checkNotNull(payload);
       RawTransaction rawTransaction = RawTransaction.newBuilder()
-          .serviceId((short) serviceId)
-          .transactionId((short) transactionId)
+          .serviceId(serviceId)
+          .transactionId(transactionId)
           .payload(payload)
           .build();
       Transaction transaction = service.convertToTransaction(rawTransaction);

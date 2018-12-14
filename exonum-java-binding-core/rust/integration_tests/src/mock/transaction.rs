@@ -82,10 +82,7 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
 }
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
-pub fn create_mock_transaction_proxy(
-    executor: MainExecutor,
-    valid: bool,
-) -> (TransactionProxy, RawTransaction) {
+pub fn create_mock_transaction_proxy(executor: MainExecutor) -> (TransactionProxy, RawTransaction) {
     let (java_tx_mock, raw) = create_mock_transaction(&executor);
     let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
     (tx_proxy, raw)
@@ -112,6 +109,9 @@ pub fn create_mock_transaction(executor: &MainExecutor) -> (GlobalRef, RawTransa
 }
 
 pub fn create_empty_raw_transaction() -> RawTransaction {
-    let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![]);
-    RawTransaction::new(0, service_transaction)
+    let transaction_id = 0;
+    let service_id = 0;
+    let payload = Vec::new();
+    let service_transaction = ServiceTransaction::from_raw_unchecked(transaction_id, payload);
+    RawTransaction::new(service_id, service_transaction)
 }
