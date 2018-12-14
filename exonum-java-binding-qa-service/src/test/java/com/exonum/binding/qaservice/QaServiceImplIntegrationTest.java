@@ -70,6 +70,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 class QaServiceImplIntegrationTest {
 
+  private static final String NO_GENESIS_BLOCK_ERROR_MESSAGE =
+      "An attempt to get the actual `height` during creating the genesis block";
+
   static {
     LibraryLoader.load();
   }
@@ -285,9 +288,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      Throwable t = assertThrows(RuntimeException.class, () -> service.getHeight());
-      assertThat(t.getMessage()).contains("An attempt to get the actual `height` during creating"
-          + " the genesis block.");
+      Exception e = assertThrows(RuntimeException.class, () -> service.getHeight());
+
+      assertThat(e).hasMessageContaining(NO_GENESIS_BLOCK_ERROR_MESSAGE);
     }
   }
 
@@ -310,8 +313,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      List<HashCode> hashes = service.getBlockTransactions(0L);
-      assertThat(hashes).isEmpty();
+      Exception e = assertThrows(RuntimeException.class, () -> service.getBlockTransactions(0L));
+
+      assertThat(e).hasMessageContaining(NO_GENESIS_BLOCK_ERROR_MESSAGE);
     }
   }
 
