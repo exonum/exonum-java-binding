@@ -20,8 +20,13 @@ package com.exonum.binding.blockchain;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.blockchain.serialization.BlockSerializer;
+import com.exonum.binding.blockchain.serialization.TransactionLocationSerializer;
+import com.exonum.binding.blockchain.serialization.TransactionResultSerializer;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
@@ -29,7 +34,10 @@ import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.ListIndexProxy;
+import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -42,6 +50,13 @@ final class CoreSchemaProxy {
 
   private final NativeHandle nativeHandle;
   private final View dbView;
+  private static final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
+  private static final Serializer<TransactionLocation> transactionLocationSerializer =
+      TransactionLocationSerializer.INSTANCE;
+  private static final Serializer<TransactionResult> transactionResultSerializer =
+      TransactionResultSerializer.INSTANCE;
+  private static final Serializer<TransactionMessage> transactionMessageSerializer =
+      StandardSerializers.transactionMessage();
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
     this.nativeHandle = nativeHandle;
@@ -82,12 +97,62 @@ final class CoreSchemaProxy {
 
   /**
    * Returns an proof list index containing block hashes for the given height.
+   *
+   * @throws IllegalArgumentException if the height is negative or there is no block at given height
    */
   ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
+    long actualHeight = getHeight();
+    checkArgument(
+        height > actualHeight,
+        "Height should be less or equal compared to blockchain height %s, but was %s",
+        actualHeight,
+        height);
     byte[] id = toCoreStorageKey(height);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
+  }
+
+  /**
+   * Returns a map that stores a block object for every block hash.
+   */
+  MapIndex<HashCode, Block> getBlocks() {
+    return MapIndexProxy.newInstance(
+        CoreIndex.BLOCKS, dbView, StandardSerializers.hash(), blockSerializer);
+  }
+
+  /**
+   * Returns the latest committed block.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
+   */
+  Block getLastBlock() {
+    return blockSerializer.fromBytes(nativeGetLastBlock(nativeHandle.get()));
+  }
+
+  /**
+   * Returns a map of transaction messages identified by their SHA-256 hashes.
+   */
+  MapIndex<HashCode, TransactionMessage> getTxMessages() {
+    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbView, StandardSerializers.hash(),
+        transactionMessageSerializer);
+  }
+
+  /**
+   * Returns a map with a key-value pair of a transaction hash and execution result.
+   */
+  ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
+    return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
+        StandardSerializers.hash(), transactionResultSerializer);
+  }
+
+  /**
+   * Returns a map that keeps the block height and transaction position inside the block for every
+   * transaction hash.
+   */
+  MapIndex<HashCode, TransactionLocation> getTxLocations() {
+    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_LOCATIONS, dbView,
+        StandardSerializers.hash(), transactionLocationSerializer);
   }
 
   /**
@@ -114,7 +179,6 @@ final class CoreSchemaProxy {
    *
    * @throws RuntimeException if the "genesis block" was not created
    */
-  @SuppressWarnings("unused") //TODO: Will be done in the next task
   private static native byte[] nativeGetLastBlock(long nativeHandle);
 
   private byte[] toCoreStorageKey(long value) {
@@ -131,6 +195,10 @@ final class CoreSchemaProxy {
     private static final String PREFIX = "core.";
     private static final String BLOCK_TRANSACTIONS = PREFIX + "block_transactions";
     private static final String ALL_BLOCK_HASHES = PREFIX + "block_hashes_by_height";
+    private static final String TRANSACTIONS = PREFIX + "transactions";
+    private static final String BLOCKS = PREFIX + "blocks";
+    private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
+    private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
   }
 
 }

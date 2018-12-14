@@ -506,6 +506,7 @@
                 <exclude>**/*AutoValue*</exclude>
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
+                <exclude>**/CoreProtos*</exclude>
               </excludes>
             </configuration>
             <executions>

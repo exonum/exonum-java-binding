@@ -6,8 +6,14 @@
     <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
   </Match>
 
-  <!-- Exclude the auto-generated Message_Builder2.java -->
+  <!-- Seems to be a false-positive, nullable is perfectly valid there. -->
   <Match>
-    <Source name="~.*Message_Builder2\.java"/>
+    <Class name="~.*TransactionResult"/>
+    <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+  </Match>
+
+  <!-- Exclude the auto-generated files -->
+  <Match>
+    <Source name="~.*CoreProtos\.java"/>
   </Match>
 </FindBugsFilter>
