@@ -16,12 +16,14 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
@@ -68,8 +70,11 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @Override
-  public RawTransaction getRawTransaction() {
-    return converter().toRawTransaction(this);
+  public HashCode hash() {
+    return sha256().newHasher()
+        .putLong(seed)
+        .putBytes(counterId.asBytes())
+        .hash();
   }
 
   @Override
@@ -90,7 +95,7 @@ public final class IncrementCounterTx implements Transaction {
     return Objects.hash(seed, counterId);
   }
 
-  static TransactionMessageConverter<IncrementCounterTx> converter() {
+  public static TransactionMessageConverter<IncrementCounterTx> converter() {
     return MessageConverter.INSTANCE;
   }
 
@@ -117,7 +122,16 @@ public final class IncrementCounterTx implements Transaction {
 
     @Override
     public RawTransaction toRawTransaction(IncrementCounterTx transaction) {
-      return transaction.getRawTransaction();
+      byte[] payload = ByteBuffer.allocate(Long.BYTES + transaction.counterId.bits())
+          .putLong(transaction.seed)
+          .put(transaction.counterId.asBytes())
+          .array();
+
+      return RawTransaction.newBuilder()
+          .serviceId(QaService.ID)
+          .transactionId(ID)
+          .payload(payload)
+          .build();
     }
 
     private void checkMessage(RawTransaction rawTransaction) {

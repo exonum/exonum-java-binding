@@ -143,44 +143,48 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public HashCode submitCreateCounter(String counterName) {
     CreateCounterTx tx = new CreateCounterTx(counterName);
-    return submitTransaction(tx.getRawTransaction());
+    return submitTransaction(CreateCounterTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
-    Transaction tx = new IncrementCounterTx(requestSeed, counterId);
-    return submitTransaction(tx.getRawTransaction());
+    IncrementCounterTx tx = new IncrementCounterTx(requestSeed, counterId);
+
+    return submitTransaction(IncrementCounterTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitInvalidTx() {
-    Transaction tx = new InvalidTx();
-    return submitTransaction(tx.getRawTransaction());
+    InvalidTx tx = new InvalidTx();
+
+    return submitTransaction(InvalidTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitInvalidThrowingTx() {
-    Transaction tx = new InvalidThrowingTx();
-    return submitTransaction(tx.getRawTransaction());
+    InvalidThrowingTx tx = new InvalidThrowingTx();
+
+    return submitTransaction(InvalidThrowingTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
-    Transaction tx = new ValidThrowingTx(requestSeed);
-    return submitTransaction(tx.getRawTransaction());
+    ValidThrowingTx tx = new ValidThrowingTx(requestSeed);
+
+    return submitTransaction(ValidThrowingTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
       @Nullable String description) {
-    Transaction tx = new ValidErrorTx(requestSeed, errorCode, description);
-    return submitTransaction(tx.getRawTransaction());
+    ValidErrorTx tx = new ValidErrorTx(requestSeed, errorCode, description);
+
+    return submitTransaction(ValidErrorTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitUnknownTx() {
-    Transaction tx = new UnknownTx();
-    return submitTransaction(tx.getRawTransaction());
+    return submitTransaction(UnknownTx.createRawTransaction());
   }
 
   @Override

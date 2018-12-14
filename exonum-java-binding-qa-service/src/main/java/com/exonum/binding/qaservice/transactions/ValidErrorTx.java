@@ -16,10 +16,14 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidErrorTxBody;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
@@ -27,8 +31,10 @@ import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -82,8 +88,8 @@ public final class ValidErrorTx implements Transaction {
   }
 
   @Override
-  public RawTransaction getRawTransaction() {
-    return converter().toRawTransaction(this);
+  public HashCode hash() {
+    return null;
   }
 
   @Override
@@ -105,7 +111,7 @@ public final class ValidErrorTx implements Transaction {
     return Objects.hash(seed, errorCode, errorDescription);
   }
 
-  static TransactionMessageConverter<ValidErrorTx> converter() {
+  public static TransactionMessageConverter<ValidErrorTx> converter() {
     return ValidErrorTx.MessageConverter.INSTANCE;
   }
 
@@ -133,7 +139,19 @@ public final class ValidErrorTx implements Transaction {
 
     @Override
     public RawTransaction toRawTransaction(ValidErrorTx transaction) {
-      return transaction.getRawTransaction();
+      byte[] descr = string().toBytes(transaction.errorDescription);
+      byte[] payload = ByteBuffer.allocate(1 + Long.BYTES + descr.length)
+          .put(transaction.errorCode)
+          .putLong(transaction.seed)
+          .put(descr)
+          .array();
+
+      return RawTransaction.newBuilder()
+          .serviceId(QaService.ID)
+          .transactionId(ID)
+          .payload(payload)
+          .build();
+
     }
 
     private void checkRawTransaction(RawTransaction rawTransaction) {
@@ -141,13 +159,4 @@ public final class ValidErrorTx implements Transaction {
     }
   }
 
-  @VisibleForTesting
-  static byte[] serializeBody(ValidErrorTx transaction) {
-    return ValidErrorTxBody.newBuilder()
-        .setSeed(transaction.seed)
-        .setErrorCode(transaction.errorCode)
-        .setErrorDescription(Strings.nullToEmpty(transaction.errorDescription))
-        .build()
-        .toByteArray();
-  }
 }

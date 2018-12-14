@@ -23,7 +23,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 
@@ -63,9 +62,8 @@ public final class SetEntryTransaction implements Transaction {
   }
 
   @Override
-  public RawTransaction getRawTransaction() {
-    // Not needed for transaction ITs.
-    throw new UnsupportedOperationException("Transaction#getRawTransaction is not implemented");
+  public HashCode hash() {
+    return HashCode.fromString(value);
   }
 
   private EntryIndexProxy<String> createTestEntry(Fork view) {

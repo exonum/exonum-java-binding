@@ -41,6 +41,15 @@ final class TransactionPreconditions {
     return transaction;
   }
 
+  static <T extends RawTransaction> T checkPayloadSize(T transaction, int expectedSize) {
+    checkArgument(transaction.getPayload().length == expectedSize,
+        "This transaction (%s) has wrong size (%s), expected %s bytes",
+        transaction, transaction.getPayload().length, expectedSize);
+
+    return transaction;
+  }
+
+
   private TransactionPreconditions() {
     throw new AssertionError("Non-instantiable");
   }
