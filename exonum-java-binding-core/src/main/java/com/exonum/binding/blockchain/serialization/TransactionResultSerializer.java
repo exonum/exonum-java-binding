@@ -54,7 +54,8 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
     } else if (status == UNEXPECTED_ERROR_STATUS_CODE) {
       return TransactionResult.unexpectedError(description);
     } else {
-      throw new IllegalArgumentException("Invalid status code");
+      String message = String.format("Invalid status code: %s, must be in the range [0, 257]", status);
+      throw new IllegalArgumentException(message);
     }
   }
 
