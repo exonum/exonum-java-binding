@@ -38,17 +38,18 @@ class BlockchainTest {
 
   private static final long HEIGHT = 10L;
 
+  private static final Block BLOCK = Block.builder()
+      .proposerId(1)
+      .height(HEIGHT)
+      .numTransactions(1)
+      .blockHash(HashCode.fromString("ab"))
+      .previousBlockHash(HashCode.fromString("bc"))
+      .txRootHash(HashCode.fromString("cd"))
+      .stateHash(HashCode.fromString("ab"))
+      .build();
+
   private Blockchain blockchain;
 
-  private Block block =
-      Block.valueOf(
-          1,
-          HEIGHT,
-          1,
-          HashCode.fromString("ab"),
-          HashCode.fromString("bc"),
-          HashCode.fromString("cd"),
-          HashCode.fromString("ab"));
 
   @Mock
   private CoreSchemaProxy mockSchema;
@@ -88,7 +89,7 @@ class BlockchainTest {
     HashCode blockId = HashCode.fromString("ab");
 
     when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
-    when(mockMapIndex.get(blockId)).thenReturn(block);
+    when(mockMapIndex.get(blockId)).thenReturn(BLOCK);
     when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
 
     assertThat(blockchain.getBlockTransactions(blockId)).isEqualTo(mockListIndex);
@@ -99,7 +100,7 @@ class BlockchainTest {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
     when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
 
-    assertThat(blockchain.getBlockTransactions(block)).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockTransactions(BLOCK)).isEqualTo(mockListIndex);
   }
 
   @Test
@@ -185,10 +186,10 @@ class BlockchainTest {
     MapIndex mockMapIndex = mock(MapIndex.class);
     HashCode blockHash = HashCode.fromString("ab");
 
-    when(mockMapIndex.get(blockHash)).thenReturn(block);
+    when(mockMapIndex.get(blockHash)).thenReturn(BLOCK);
     when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
 
-    assertThat(blockchain.getBlock(blockHash).get()).isEqualTo(block);
+    assertThat(blockchain.getBlock(blockHash).get()).isEqualTo(BLOCK);
   }
 
   @Test
@@ -204,9 +205,9 @@ class BlockchainTest {
 
   @Test
   void getLastBlock() {
-    when(mockSchema.getLastBlock()).thenReturn(block);
+    when(mockSchema.getLastBlock()).thenReturn(BLOCK);
 
-    assertThat(blockchain.getLastBlock()).isEqualTo(block);
+    assertThat(blockchain.getLastBlock()).isEqualTo(BLOCK);
   }
 
   @Test

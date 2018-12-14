@@ -42,13 +42,17 @@ public enum BlockSerializer implements Serializer<Block> {
   @Override
   public Block fromBytes(byte[] binaryBlock) {
     try {
+      HashCode blockHash = Hashing.sha256().hashBytes(binaryBlock);
       CoreProtos.Block copiedBlocks = CoreProtos.Block.parseFrom(binaryBlock);
-      return Block.valueOf(copiedBlocks.getProposerId(),
-          copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
-          fromHashProto(copiedBlocks.getPrevHash()),
-          fromHashProto(copiedBlocks.getTxHash()),
-          fromHashProto(copiedBlocks.getStateHash()),
-          Hashing.sha256().hashBytes(binaryBlock));
+      return Block.builder()
+          .proposerId(copiedBlocks.getProposerId())
+          .height(copiedBlocks.getHeight())
+          .numTransactions(copiedBlocks.getTxCount())
+          .blockHash(blockHash)
+          .previousBlockHash(fromHashProto(copiedBlocks.getPrevHash()))
+          .txRootHash(fromHashProto(copiedBlocks.getTxHash()))
+          .stateHash(fromHashProto(copiedBlocks.getStateHash()))
+          .build();
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(
           "Unable to instantiate Blocks.Block instance from provided binary data", e);

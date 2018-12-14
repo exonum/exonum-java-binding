@@ -16,7 +16,10 @@
 
 package com.exonum.binding.blockchain;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.service.Schema;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -32,18 +35,10 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Block {
 
-  // TODO: implement a builder for this class - ECR-2734
-  public static Block valueOf(
-      int proposerId,
-      long height,
-      int numTransactions,
-      HashCode previousBlockHash,
-      HashCode txRootHash,
-      HashCode stateHash,
-      HashCode blockHash) {
-    return new AutoValue_Block(
-        proposerId, height, numTransactions, previousBlockHash, txRootHash, stateHash, blockHash);
-  }
+  /**
+   * Returns the SHA-256 hash of this block.
+   */
+  public abstract HashCode getBlockHash();
 
   /**
    * Identifier of the leader node which has proposed the block.
@@ -68,19 +63,16 @@ public abstract class Block {
 
   /**
    * Root hash of the Merkle tree of transactions in this block.
-   * These transactions can be accesed with {@link Blockchain#getBlockTransactions(Block)}.
+   * These transactions can be accessed with {@link Blockchain#getBlockTransactions(Block)}.
    */
   public abstract HashCode getTxRootHash();
 
   /**
    * Hash of the blockchain state after applying transactions in the block.
+   *
+   * @see Schema#getStateHashes()
    */
   public abstract HashCode getStateHash();
-
-  /**
-   * Returns the SHA-256 hash of this block.
-   */
-  public abstract HashCode getBlockHash();
 
   @Override
   public int hashCode() {
@@ -88,5 +80,76 @@ public abstract class Block {
     // as they will have close to uniform distribution.
     // AutoValue will still use all fields in #equals.
     return getBlockHash().hashCode();
+  }
+
+  /**
+   * Creates a new block builder.
+   */
+  public static Builder builder() {
+    return new AutoValue_Block.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+
+    /**
+     * Sets the hash of the block binary representation.
+     */
+    public abstract Builder blockHash(HashCode hash);
+
+    /**
+     * Sets the identifier of the leader node which has proposed the block.
+     */
+    public abstract Builder proposerId(int proposerId);
+
+    /**
+     * Sets the block height, which is the distance between the block and the genesis block,
+     * which has zero height. Must be non-negative.
+     */
+    public abstract Builder height(long height);
+
+    /**
+     * Sets the number of transactions in this block. Must be non-negative.
+     */
+    public abstract Builder numTransactions(int numTransactions);
+
+    /**
+     * Sets the hash of the previous block in the hash chain. The previous block is the block
+     * with the height, that is equal to this minus one. Genesis block has a previous hash
+     * of zeroes.
+     */
+    public abstract Builder previousBlockHash(HashCode previousBlockHash);
+
+    /**
+     * Sets the Merkle root hash of the collection holding all transactions in this block.
+     * This collection and transactions can be accessed with
+     * {@link Blockchain#getBlockTransactions(Block)}.
+     */
+    public abstract Builder txRootHash(HashCode txRootHash);
+
+    // TODO: Expand on that when it has meaningful applications
+    /**
+     * Sets the blockchain state hash at the moment this block was committed. The blockchain
+     * state hash reflects the state of each service in the database.
+     *
+     * @see Schema#getStateHashes()
+     */
+    public abstract Builder stateHash(HashCode blockchainStateHash);
+
+    abstract Block autoBuild();
+
+    /**
+     * Creates a new block with the set arguments.
+     *
+     * @throws IllegalStateException if some of the arguments were not set or aren't valid
+     */
+    public Block build() {
+      Block block = autoBuild();
+      checkState(block.getHeight() >= 0, "Height is negative: %s", block.getHeight());
+      checkState(block.getNumTransactions() >= 0,
+          "numTransaction was negative: %s", block.getNumTransactions());
+
+      return block;
+    }
   }
 }
