@@ -106,6 +106,14 @@ const buildMessage = (header, body, keyPair) => {
   return appendBuffer(unsignedMessage, Exonum.hexadecimalToUint8Array(signature))
 }
 
+const sendTransaction = (header, body, keyPair) => {
+  return axios.post(TX_URL, buildMessage(header, body, keyPair), {
+    headers: {
+      'Content-Type': 'application/octet-stream',
+    }
+  })
+}
+
 module.exports = {
   install (Vue) {
     Vue.prototype.$blockchain = {
@@ -128,11 +136,7 @@ module.exports = {
         }
         const body = CreateTransactionProtobuf.encode(data).finish()
 
-        return axios.post(TX_URL, buildMessage(header, body, keyPair), {
-          headers: {
-            'Content-Type': 'application/octet-stream',
-          }
-        })
+        return sendTransaction(header, body, keyPair)
       },
 
       transfer (keyPair, receiver, amountToTransfer, seed) {
@@ -148,11 +152,7 @@ module.exports = {
         }
         const body = TransferTransactionProtobuf.encode(data).finish()
 
-        return axios.post(TX_URL, buildMessage(header, body, keyPair), {
-          headers: {
-            'Content-Type': 'application/octet-stream',
-          }
-        })
+        return sendTransaction(header, body, keyPair)
           .then(response => waitForAcceptance(keyPair.publicKey, response.data))
       },
 
