@@ -69,9 +69,13 @@ pub fn is_instance_of_cached(b: &mut Bencher) {
     EXECUTOR
         .with_attached(|env| {
             let exception = create_exception(env);
-            let tx_exec_exception_ref = jni_cache::classes_refs::transaction_execution_exception();
 
-            b.iter(|| black_box(env.is_instance_of(exception, &tx_exec_exception_ref)));
+            b.iter(|| {
+                black_box(env.is_instance_of(
+                    exception,
+                    &jni_cache::classes_refs::transaction_execution_exception(),
+                ))
+            });
             Ok(())
         })
         .unwrap();
