@@ -16,15 +16,19 @@
 
 package com.exonum.binding.blockchain.serialization;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
+
+  private static final Serializer<CoreProtos.Block> PROTO_SERIALIZER =
+      protobuf(CoreProtos.Block.class);
 
   @Override
   public byte[] toBytes(Block value) {
@@ -41,18 +45,13 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @Override
   public Block fromBytes(byte[] binaryBlock) {
-    try {
-      CoreProtos.Block copiedBlocks = CoreProtos.Block.parseFrom(binaryBlock);
-      return Block.valueOf(copiedBlocks.getProposerId(),
-          copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
-          fromHashProto(copiedBlocks.getPrevHash()),
-          fromHashProto(copiedBlocks.getTxHash()),
-          fromHashProto(copiedBlocks.getStateHash()),
-          Hashing.sha256().hashBytes(binaryBlock));
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException(
-          "Unable to instantiate Blocks.Block instance from provided binary data", e);
-    }
+    CoreProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
+    return Block.valueOf(copiedBlocks.getProposerId(),
+        copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
+        fromHashProto(copiedBlocks.getPrevHash()),
+        fromHashProto(copiedBlocks.getTxHash()),
+        fromHashProto(copiedBlocks.getStateHash()),
+        Hashing.sha256().hashBytes(binaryBlock));
   }
 
   private static CoreProtos.Hash toHashProto(HashCode hash) {
