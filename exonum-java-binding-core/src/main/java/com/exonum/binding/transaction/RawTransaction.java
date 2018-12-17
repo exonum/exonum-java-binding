@@ -10,7 +10,7 @@ import java.util.Arrays;
  * Raw transaction class that contains the service and transaction identifiers and a transaction
  * data serialized in payload.
  */
-public class RawTransaction {
+public final class RawTransaction {
   private final short serviceId;
   private final short transactionId;
   private final byte[] payload;
@@ -72,7 +72,7 @@ public class RawTransaction {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(serviceId, transactionId, payload);
+    return Objects.hashCode(serviceId, transactionId) + Arrays.hashCode(payload);
   }
 
   public static final class Builder {
