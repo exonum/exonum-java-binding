@@ -26,6 +26,7 @@ import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
+import com.exonum.binding.qaservice.transactions.QaContext;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidErrorTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
@@ -43,7 +44,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -111,8 +111,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
     String defaultCounterName = "default";
 
-    //TODO initialize HashCode and PublicKey ?
-    TransactionContext context = new InternalTransactionContext(fork, null, null);
+    TransactionContext context = new QaContext(fork);
 
     new CreateCounterTx(defaultCounterName)
         .execute(context);
@@ -143,44 +142,48 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public HashCode submitCreateCounter(String counterName) {
     CreateCounterTx tx = new CreateCounterTx(counterName);
-    return submitTransaction(tx.getRawTransaction());
+    return submitTransaction(CreateCounterTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
-    Transaction tx = new IncrementCounterTx(requestSeed, counterId);
-    return submitTransaction(tx.getRawTransaction());
+    IncrementCounterTx tx = new IncrementCounterTx(requestSeed, counterId);
+
+    return submitTransaction(IncrementCounterTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitInvalidTx() {
-    Transaction tx = new InvalidTx();
-    return submitTransaction(tx.getRawTransaction());
+    InvalidTx tx = new InvalidTx();
+
+    return submitTransaction(InvalidTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitInvalidThrowingTx() {
-    Transaction tx = new InvalidThrowingTx();
-    return submitTransaction(tx.getRawTransaction());
+    InvalidThrowingTx tx = new InvalidThrowingTx();
+
+    return submitTransaction(InvalidThrowingTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
-    Transaction tx = new ValidThrowingTx(requestSeed);
-    return submitTransaction(tx.getRawTransaction());
+    ValidThrowingTx tx = new ValidThrowingTx(requestSeed);
+
+    return submitTransaction(ValidThrowingTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
       @Nullable String description) {
-    Transaction tx = new ValidErrorTx(requestSeed, errorCode, description);
-    return submitTransaction(tx.getRawTransaction());
+    ValidErrorTx tx = new ValidErrorTx(requestSeed, errorCode, description);
+
+    return submitTransaction(ValidErrorTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitUnknownTx() {
-    Transaction tx = new UnknownTx();
-    return submitTransaction(tx.getRawTransaction());
+    return submitTransaction(UnknownTx.createRawTransaction());
   }
 
   @Override

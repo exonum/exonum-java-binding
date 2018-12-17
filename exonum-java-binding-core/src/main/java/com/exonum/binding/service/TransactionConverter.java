@@ -27,7 +27,7 @@ import com.exonum.binding.transaction.Transaction;
 @FunctionalInterface
 @AutoGenerationCandidate(reason = "Perfectly viable given a service id "
     + "and description of all transactions (ids & implementing classes")
-public interface TransactionConverter {
+public interface TransactionConverter<T extends Transaction> {
 
   /**
    * Converts an Exonum transaction message to an executable transaction of some service.
@@ -38,5 +38,5 @@ public interface TransactionConverter {
    *         or a transaction of an unknown service
    * @throws NullPointerException if message is null
    */
-  Transaction toTransaction(RawTransaction rawTransaction);
+  T toTransaction(RawTransaction rawTransaction);
 }

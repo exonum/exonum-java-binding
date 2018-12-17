@@ -16,8 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
@@ -25,6 +24,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.HistoryEntity.Builder;
@@ -37,7 +37,6 @@ import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;
 
 /**
@@ -46,6 +45,8 @@ import java.util.Objects;
 public final class TransferTx extends AbstractTransaction implements Transaction {
 
   static final short ID = 2;
+  private static final Serializer<TxMessageProtos.TransferTx> PROTO_SERIALIZER =
+      protobuf(TxMessageProtos.TransferTx.class);
 
   private final long seed;
   private final PublicKey fromWallet;
@@ -70,19 +71,15 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   public static TransferTx fromMessage(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
-    try {
-      TxMessageProtos.TransferTx messageBody =
-          TxMessageProtos.TransferTx.parseFrom(rawTransaction.getPayload());
+    TxMessageProtos.TransferTx messageBody =
+        PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
-      long seed = messageBody.getSeed();
-      PublicKey fromWallet = toPublicKey(messageBody.getFromWallet());
-      PublicKey toWallet = toPublicKey(messageBody.getToWallet());
-      long sum = messageBody.getSum();
+    long seed = messageBody.getSeed();
+    PublicKey fromWallet = toPublicKey(messageBody.getFromWallet());
+    PublicKey toWallet = toPublicKey(messageBody.getToWallet());
+    long sum = messageBody.getSum();
 
-      return new TransferTx(rawTransaction, seed, fromWallet, toWallet, sum);
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Invalid TxMessageProtos.TransferTx buffer", e);
-    }
+    return new TransferTx(rawTransaction, seed, fromWallet, toWallet, sum);
   }
 
   private static PublicKey toPublicKey(ByteString s) {
@@ -116,6 +113,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
 
   // todo: consider extracting in a TransactionPreconditions or
   //   TransactionExecutionException: ECR-2746.
+
   /** Checks a transaction execution precondition, throwing if it is false. */
   private static void checkExecution(boolean precondition, byte errorCode)
       throws TransactionExecutionException {

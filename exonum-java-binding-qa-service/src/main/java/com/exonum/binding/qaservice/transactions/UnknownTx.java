@@ -45,7 +45,7 @@ public final class UnknownTx extends AbstractTransaction {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 
-  private static RawTransaction createRawTransaction() {
+  public static RawTransaction createRawTransaction() {
     return RawTransaction.newBuilder()
         .serviceId(QaService.ID)
         .transactionId(ID)

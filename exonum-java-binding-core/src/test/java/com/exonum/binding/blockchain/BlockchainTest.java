@@ -22,8 +22,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.indices.ListIndexProxy;
+import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +36,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BlockchainTest {
 
+  private static final long HEIGHT = 10L;
+
   private Blockchain blockchain;
+
+  private Block block =
+      Block.valueOf(
+          1,
+          HEIGHT,
+          1,
+          HashCode.fromString("ab"),
+          HashCode.fromString("bc"),
+          HashCode.fromString("cd"),
+          HashCode.fromString("ab"));
+
   @Mock
   private CoreSchemaProxy mockSchema;
 
@@ -44,10 +60,9 @@ class BlockchainTest {
 
   @Test
   void getHeight() {
-    long height = 30L;
-    when(mockSchema.getHeight()).thenReturn(height);
+    when(mockSchema.getHeight()).thenReturn(HEIGHT);
 
-    assertThat(blockchain.getHeight()).isEqualTo(height);
+    assertThat(blockchain.getHeight()).isEqualTo(HEIGHT);
   }
 
   @Test
@@ -59,12 +74,139 @@ class BlockchainTest {
   }
 
   @Test
-  void getBlockTransactions() {
-    long height = 1L;
+  void getBlockTransactionsByHeight() {
     ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-    when(mockSchema.getBlockTransactions(height)).thenReturn(mockListIndex);
+    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
 
-    assertThat(blockchain.getBlockTransactions(height)).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockTransactions(HEIGHT)).isEqualTo(mockListIndex);
+  }
+
+  @Test
+  void getBlockTransactionsByBlockId() {
+    ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    HashCode blockId = HashCode.fromString("ab");
+
+    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+    when(mockMapIndex.get(blockId)).thenReturn(block);
+    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
+
+    assertThat(blockchain.getBlockTransactions(blockId)).isEqualTo(mockListIndex);
+  }
+
+  @Test
+  void getBlockTransactionsByBlock() {
+    ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
+    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
+
+    assertThat(blockchain.getBlockTransactions(block)).isEqualTo(mockListIndex);
+  }
+
+  @Test
+  void getTxMessages() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    when(mockSchema.getTxMessages()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxMessages()).isEqualTo(mockMapIndex);
+  }
+
+  @Test
+  void getTxResults() {
+    ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
+    when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxResults()).isEqualTo(mockMapIndex);
+  }
+
+  @Test
+  void getTxResult() {
+    ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
+    HashCode messageHash = HashCode.fromString("ab");
+    TransactionResult txResult = TransactionResult.successful();
+
+    when(mockMapIndex.get(messageHash)).thenReturn(txResult);
+    when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxResult(messageHash).get()).isEqualTo(txResult);
+  }
+
+  @Test
+  void getNonexistentTxResult() {
+    ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
+    HashCode messageHash = HashCode.fromString("ab");
+
+    when(mockMapIndex.get(messageHash)).thenReturn(null);
+    when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxResult(messageHash)).isEmpty();
+  }
+
+  @Test
+  void getTxLocations() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxLocations()).isEqualTo(mockMapIndex);
+  }
+
+  @Test
+  void getTxLocation() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    HashCode messageHash = HashCode.fromString("ab");
+    TransactionLocation txLocation = TransactionLocation.valueOf(1L, 1L);
+
+    when(mockMapIndex.get(messageHash)).thenReturn(txLocation);
+    when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxLocation(messageHash).get()).isEqualTo(txLocation);
+  }
+
+  @Test
+  void getNonexistentTxLocation() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    HashCode messageHash = HashCode.fromString("ab");
+
+    when(mockMapIndex.get(messageHash)).thenReturn(null);
+    when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getTxLocation(messageHash)).isEmpty();
+  }
+
+  @Test
+  void getBlocks() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getBlocks()).isEqualTo(mockMapIndex);
+  }
+
+  @Test
+  void getBlock() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    HashCode blockHash = HashCode.fromString("ab");
+
+    when(mockMapIndex.get(blockHash)).thenReturn(block);
+    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getBlock(blockHash).get()).isEqualTo(block);
+  }
+
+  @Test
+  void getNonexistentBlock() {
+    MapIndex mockMapIndex = mock(MapIndex.class);
+    HashCode blockHash = HashCode.fromString("ab");
+
+    when(mockMapIndex.get(blockHash)).thenReturn(null);
+    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+
+    assertThat(blockchain.getBlock(blockHash)).isEmpty();
+  }
+
+  @Test
+  void getLastBlock() {
+    when(mockSchema.getLastBlock()).thenReturn(block);
+
+    assertThat(blockchain.getLastBlock()).isEqualTo(block);
   }
 
   @Test

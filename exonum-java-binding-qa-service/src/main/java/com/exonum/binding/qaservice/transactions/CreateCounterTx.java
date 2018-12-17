@@ -16,21 +16,21 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -39,7 +39,8 @@ import java.util.Objects;
 public final class CreateCounterTx implements Transaction {
 
   private static final short ID = QaTransaction.CREATE_COUNTER.id();
-
+  private static final Serializer<CreateCounterTxBody> PROTO_SERIALIZER =
+      protobuf(CreateCounterTxBody.class);
   private final String name;
 
   public CreateCounterTx(String name) {
@@ -65,8 +66,8 @@ public final class CreateCounterTx implements Transaction {
   }
 
   @Override
-  public RawTransaction getRawTransaction() {
-    return converter().toRawTransaction(this);
+  public HashCode hash() {
+    return converter().toRawTransaction(this).hash();
   }
 
   @Override
@@ -86,39 +87,34 @@ public final class CreateCounterTx implements Transaction {
     return Objects.hashCode(name);
   }
 
-  static TransactionMessageConverter<CreateCounterTx> converter() {
-    return TransactionConverter.INSTANCE;
+  public static TransactionMessageConverter<CreateCounterTx> converter() {
+    return Converter.INSTANCE;
   }
 
-  private enum TransactionConverter implements TransactionMessageConverter<CreateCounterTx> {
+  private enum Converter implements TransactionMessageConverter<CreateCounterTx> {
     INSTANCE;
 
     @Override
     public CreateCounterTx fromRawTransaction(RawTransaction rawTransaction) {
       checkTransaction(rawTransaction, ID);
-      ByteBuffer rawBody = ByteBuffer.wrap(rawTransaction.getPayload());
-      try {
-        CreateCounterTxBody body = CreateCounterTxBody
-            .parseFrom(rawBody);
-        String name = body.getName();
+      CreateCounterTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
-        return new CreateCounterTx(name);
-      } catch (InvalidProtocolBufferException e) {
-        throw new IllegalArgumentException(e);
-      }
+      return new CreateCounterTx(body.getName());
     }
 
     @Override
     public RawTransaction toRawTransaction(CreateCounterTx transaction) {
-      return transaction.getRawTransaction();
+      byte[] payload = PROTO_SERIALIZER.toBytes(
+          CreateCounterTxBody.newBuilder()
+              .setName(transaction.name)
+              .build());
+
+      return RawTransaction.newBuilder()
+          .serviceId(QaService.ID)
+          .transactionId(CreateCounterTx.ID)
+          .payload(payload)
+          .build();
     }
   }
 
-  @VisibleForTesting
-  static byte[] serializeBody(CreateCounterTx tx) {
-    return CreateCounterTxBody.newBuilder()
-        .setName(tx.name)
-        .build()
-        .toByteArray();
-  }
 }

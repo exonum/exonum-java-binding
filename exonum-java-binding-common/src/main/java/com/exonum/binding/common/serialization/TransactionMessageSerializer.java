@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.common.serialization;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
+import com.exonum.binding.common.message.TransactionMessage;
 
-import com.exonum.binding.transaction.TransactionContext;
-import org.junit.jupiter.api.Test;
+enum TransactionMessageSerializer implements Serializer<TransactionMessage> {
+  INSTANCE;
 
-class UnknownTxTest {
+  @Override
+  public byte[] toBytes(TransactionMessage value) {
+    return value.toBytes();
+  }
 
-  @Test
-  void execute() {
-    UnknownTx tx = new UnknownTx();
-
-    assertThrows(AssertionError.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+  @Override
+  public TransactionMessage fromBytes(byte[] serializedValue) {
+    return TransactionMessage.fromBytes(serializedValue);
   }
 
 }

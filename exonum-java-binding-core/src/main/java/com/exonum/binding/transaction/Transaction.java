@@ -46,15 +46,7 @@ public interface Transaction {
 
   /**
    * Returns a hash of this transaction — a SHA-256 hash of the transaction message.
-   *
-   * @implSpec Default implementation returns {@code getRawTransaction().hash()}.
    */
-  default HashCode hash() {
-    return getRawTransaction().hash();
-  }
+  HashCode hash();
 
-  /**
-   * Returns this transaction as a binary Exonum message.
-   */
-  RawTransaction getRawTransaction();
 }

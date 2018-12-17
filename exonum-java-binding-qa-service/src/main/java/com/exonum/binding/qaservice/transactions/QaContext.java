@@ -12,32 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.transaction;
+package com.exonum.binding.qaservice.transactions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.TransactionContext;
 
-/**
- * An abstract Exonum transaction. It includes a reference to a raw Exonum transaction
- * ({@link AbstractTransaction#rawTransaction}, representing this transaction.
- */
-public abstract class AbstractTransaction implements Transaction {
+public final class QaContext implements TransactionContext {
 
-  /**
-   * A binary Exonum message, representing this transaction.
-   */
-  protected final transient RawTransaction rawTransaction;
+  private final Fork view;
 
-  protected AbstractTransaction(RawTransaction rawTransaction) {
-    this.rawTransaction = checkNotNull(rawTransaction);
+  public QaContext(Fork view) {
+    this.view = view;
   }
 
   @Override
-  public HashCode hash() {
-    return rawTransaction.hash();
+  public Fork getFork() {
+    return view;
   }
 
+  @Override
+  public HashCode getTransactionMessageHash() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public PublicKey getAuthorPk() {
+    throw new UnsupportedOperationException();
+  }
 }

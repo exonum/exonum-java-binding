@@ -34,7 +34,7 @@ import com.exonum.binding.transaction.Transaction;
     + "is known (and must be known by transaction): a network id, a protocol version, "
     + "the signature. These things do not comprise the transaction parameters."
 )
-interface TransactionMessageConverter<TransactionT extends Transaction> {
+public interface TransactionMessageConverter<TransactionT extends Transaction> {
 
   /**
    * Converts a raw transaction into an executable transaction.

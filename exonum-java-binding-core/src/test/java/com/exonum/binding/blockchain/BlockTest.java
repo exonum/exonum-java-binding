@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.blockchain;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-
-import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.common.hash.HashCode;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
-class UnknownTxTest {
+class BlockTest {
 
   @Test
-  void execute() {
-    UnknownTx tx = new UnknownTx();
-
-    assertThrows(AssertionError.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+  void verifyEquals() {
+    EqualsVerifier.forClass(AutoValue_Block.class)
+        // Constructor ensures that we have no nulls
+        .suppress(Warning.NULL_FIELDS)
+        // We use 4 bytes from proper SHA-256 with good distribution
+        .suppress(Warning.STRICT_HASHCODE)
+        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
+        .verify();
   }
-
 }

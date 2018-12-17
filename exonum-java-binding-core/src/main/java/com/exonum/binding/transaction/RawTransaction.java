@@ -4,7 +4,12 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.common.base.Objects;
+import java.util.Arrays;
 
+/**
+ * Raw transaction class that contains the service and transaction identifiers and a transaction
+ * data serialized in payload.
+ */
 public class RawTransaction {
   private final short serviceId;
   private final short transactionId;
@@ -16,14 +21,23 @@ public class RawTransaction {
     this.payload = payload.clone();
   }
 
+  /**
+   * Returns the service identifier.
+   */
   public short getServiceId() {
     return serviceId;
   }
 
+  /**
+   * Returns the transaction identifier.
+   */
   public short getTransactionId() {
     return transactionId;
   }
 
+  /**
+   * Returns the transaction payload.
+   */
   public byte[] getPayload() {
     return payload.clone();
   }
@@ -35,6 +49,9 @@ public class RawTransaction {
     return sha256().hashBytes(getPayload());
   }
 
+  /**
+   * Returns the new builder for the transaction.
+   */
   public static Builder newBuilder() {
     return new Builder();
   }
@@ -49,8 +66,8 @@ public class RawTransaction {
     }
     RawTransaction that = (RawTransaction) o;
     return serviceId == that.serviceId
-            && transactionId == that.transactionId
-            && Objects.equal(payload, that.payload);
+        && transactionId == that.transactionId
+        && Arrays.equals(payload, that.payload);
   }
 
   @Override
