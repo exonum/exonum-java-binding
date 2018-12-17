@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -32,7 +31,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
-import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
@@ -69,7 +67,7 @@ public final class CreateCounterTx implements Transaction {
 
   @Override
   public HashCode hash() {
-    return sha256().hashString(name, Charset.forName("UTF-8"));
+    return converter().toRawTransaction(this).hash();
   }
 
   @Override
@@ -100,9 +98,8 @@ public final class CreateCounterTx implements Transaction {
     public CreateCounterTx fromRawTransaction(RawTransaction rawTransaction) {
       checkTransaction(rawTransaction, ID);
       CreateCounterTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
-      String name = body.getName();
 
-      return new CreateCounterTx(name);
+      return new CreateCounterTx(body.getName());
     }
 
     @Override

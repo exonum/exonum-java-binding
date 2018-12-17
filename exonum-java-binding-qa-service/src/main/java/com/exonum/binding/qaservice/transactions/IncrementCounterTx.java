@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -72,10 +71,7 @@ public final class IncrementCounterTx implements Transaction {
 
   @Override
   public HashCode hash() {
-    return sha256().newHasher()
-        .putLong(seed)
-        .putBytes(counterId.asBytes())
-        .hash();
+    return converter().toRawTransaction(this).hash();
   }
 
   @Override

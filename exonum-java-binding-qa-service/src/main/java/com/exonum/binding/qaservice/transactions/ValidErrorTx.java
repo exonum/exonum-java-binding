@@ -89,7 +89,7 @@ public final class ValidErrorTx implements Transaction {
 
   @Override
   public HashCode hash() {
-    return null;
+    return converter().toRawTransaction(this).hash();
   }
 
   @Override

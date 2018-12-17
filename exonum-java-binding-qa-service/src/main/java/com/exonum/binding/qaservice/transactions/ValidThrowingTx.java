@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
@@ -63,9 +62,7 @@ public final class ValidThrowingTx implements Transaction {
 
   @Override
   public HashCode hash() {
-    return sha256().newHasher()
-        .putLong(seed)
-        .hash();
+    return converter().toRawTransaction(this).hash();
   }
 
   @Override
