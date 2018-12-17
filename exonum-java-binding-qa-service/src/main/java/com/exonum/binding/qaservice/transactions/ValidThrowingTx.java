@@ -21,9 +21,7 @@ import static com.exonum.binding.common.serialization.StandardSerializers.protob
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTxBody;
@@ -31,13 +29,12 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public final class ValidThrowingTx implements Transaction {
 
-  private static final short ID = QaTransaction.VALID_THROWING.id();
+  @VisibleForTesting
+  static final short ID = QaTransaction.VALID_THROWING.id();
   private static final Serializer<ValidThrowingTxBody> PROTO_SERIALIZER =
       protobuf(ValidThrowingTxBody.class);
 
@@ -106,9 +103,9 @@ public final class ValidThrowingTx implements Transaction {
 
     @Override
     public RawTransaction toRawTransaction(ValidThrowingTx transaction) {
-      byte[] payload = ByteBuffer.allocate(Long.BYTES)
-          .putLong(transaction.seed)
-          .array();
+      byte[] payload = PROTO_SERIALIZER.toBytes(ValidThrowingTxBody.newBuilder()
+          .setSeed(transaction.seed)
+          .build());
 
       return RawTransaction.newBuilder()
           .serviceId(QaService.ID)

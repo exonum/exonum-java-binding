@@ -4,6 +4,7 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.common.base.Objects;
+import java.util.Arrays;
 
 public class RawTransaction {
   private final short serviceId;
@@ -50,7 +51,7 @@ public class RawTransaction {
     RawTransaction that = (RawTransaction) o;
     return serviceId == that.serviceId
         && transactionId == that.transactionId
-        && Objects.equal(payload, that.payload);
+        && Arrays.equals(payload, that.payload);
   }
 
   @Override

@@ -22,6 +22,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
@@ -29,10 +31,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -42,6 +41,8 @@ import java.util.Objects;
 public final class IncrementCounterTx implements Transaction {
 
   private static final short ID = QaTransaction.INCREMENT_COUNTER.id();
+  private static final Serializer<IncrementCounterTxBody> PROTO_SERIALIZER =
+      StandardSerializers.protobuf(IncrementCounterTxBody.class);
 
   private final long seed;
   private final HashCode counterId;
@@ -106,26 +107,21 @@ public final class IncrementCounterTx implements Transaction {
     public IncrementCounterTx fromRawTransaction(RawTransaction rawTransaction) {
       checkMessage(rawTransaction);
 
-      // Unpack the message.
-      ByteBuffer rawBody = ByteBuffer.wrap(rawTransaction.getPayload());
-      try {
-        IncrementCounterTxBody body = IncrementCounterTxBody.parseFrom(rawBody);
-        long seed = body.getSeed();
-        byte[] rawCounterId = body.getCounterId().toByteArray();
-        HashCode counterId = HashCode.fromBytes(rawCounterId);
+      IncrementCounterTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+      long seed = body.getSeed();
+      byte[] rawCounterId = body.getCounterId().toByteArray();
+      HashCode counterId = HashCode.fromBytes(rawCounterId);
 
-        return new IncrementCounterTx(seed, counterId);
-      } catch (InvalidProtocolBufferException e) {
-        throw new IllegalArgumentException(e);
-      }
+      return new IncrementCounterTx(seed, counterId);
     }
 
     @Override
     public RawTransaction toRawTransaction(IncrementCounterTx transaction) {
-      byte[] payload = ByteBuffer.allocate(Long.BYTES + transaction.counterId.bits())
-          .putLong(transaction.seed)
-          .put(transaction.counterId.asBytes())
-          .array();
+
+      byte[] payload = PROTO_SERIALIZER.toBytes(IncrementCounterTxBody.newBuilder()
+          .setSeed(transaction.seed)
+          .setCounterId(ByteString.copyFrom(transaction.counterId.asBytes()))
+          .build());
 
       return RawTransaction.newBuilder()
           .serviceId(QaService.ID)
@@ -139,16 +135,4 @@ public final class IncrementCounterTx implements Transaction {
     }
   }
 
-  @VisibleForTesting
-  static byte[] serializeBody(IncrementCounterTx transaction) {
-    return IncrementCounterTxBody.newBuilder()
-        .setSeed(transaction.seed)
-        .setCounterId(toByteString(transaction.counterId))
-        .build()
-        .toByteArray();
-  }
-
-  private static ByteString toByteString(HashCode hash) {
-    return ByteString.copyFrom(hash.asBytes());
-  }
 }

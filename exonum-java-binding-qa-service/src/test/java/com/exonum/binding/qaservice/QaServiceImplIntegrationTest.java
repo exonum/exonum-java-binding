@@ -33,8 +33,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
-import com.exonum.binding.qaservice.transactions.InvalidTx;
+import com.exonum.binding.qaservice.transactions.QaContext;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.BlockCommittedEvent;
@@ -49,7 +48,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -117,7 +116,7 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void getStateHashesLogsThem() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
 
       List<HashCode> stateHashes = service.getStateHashes(view);
@@ -138,7 +137,7 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       Optional<String> initialConfiguration = service.initialize(view);
 
@@ -167,10 +166,10 @@ class QaServiceImplIntegrationTest {
     String counterName = "bids";
     HashCode txHash = service.submitCreateCounter(counterName);
 
-    Transaction expectedTx = new CreateCounterTx(counterName);
+    CreateCounterTx expectedTx = new CreateCounterTx(counterName);
 
     assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(expectedTx));
+    verify(node).submitTransaction(eq(CreateCounterTx.converter().toRawTransaction(expectedTx)));
   }
 
   @Test
@@ -182,10 +181,10 @@ class QaServiceImplIntegrationTest {
         .hashString("Cats counter", StandardCharsets.UTF_8);
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
-    Transaction expectedTx = new IncrementCounterTx(seed, counterId);
+    IncrementCounterTx expectedTx = new IncrementCounterTx(seed, counterId);
 
     assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(expectedTx));
+    verify(node).submitTransaction(eq(IncrementCounterTx.converter().toRawTransaction(expectedTx)));
   }
 
   @Test
@@ -193,7 +192,7 @@ class QaServiceImplIntegrationTest {
     setServiceNode(node);
 
     service.submitInvalidTx();
-    verify(node).submitTransaction(any(InvalidTx.class));
+    verify(node).submitTransaction(any(RawTransaction.class));
   }
 
   @Test
@@ -201,7 +200,7 @@ class QaServiceImplIntegrationTest {
     setServiceNode(node);
 
     service.submitInvalidThrowingTx();
-    verify(node).submitTransaction(any(InvalidThrowingTx.class));
+    verify(node).submitTransaction(any(RawTransaction.class));
   }
 
   @Test
@@ -211,10 +210,10 @@ class QaServiceImplIntegrationTest {
     long seed = 1L;
     HashCode txHash = service.submitValidThrowingTx(seed);
 
-    Transaction expectedTx = new ValidThrowingTx(seed);
+    ValidThrowingTx expectedTx = new ValidThrowingTx(seed);
 
     assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(expectedTx));
+    verify(node).submitTransaction(eq(ValidThrowingTx.converter().toRawTransaction(expectedTx)));
   }
 
   @Test
@@ -223,10 +222,10 @@ class QaServiceImplIntegrationTest {
 
     HashCode txHash = service.submitUnknownTx();
 
-    Transaction expectedTx = new UnknownTx();
+    UnknownTx expectedTx = new UnknownTx();
 
     assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(any(UnknownTx.class));
+    verify(node).submitTransaction(any(RawTransaction.class));
   }
 
   @Test
@@ -247,8 +246,10 @@ class QaServiceImplIntegrationTest {
       String counterName = "bids";
       try (Cleaner cleaner = new Cleaner()) {
         Fork view = db.createFork(cleaner);
+        QaContext context = new QaContext(view);
+
         new CreateCounterTx(counterName)
-            .execute(view);
+            .execute(context);
 
         db.merge(view);
       }
@@ -323,7 +324,7 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void afterCommit() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       setServiceNode(node);
       service.initialize(fork);
@@ -336,9 +337,10 @@ class QaServiceImplIntegrationTest {
 
       HashCode counterId = Hashing.sha256()
           .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
-      Transaction expectedTx = new IncrementCounterTx(height, counterId);
+      IncrementCounterTx expectedTx = new IncrementCounterTx(height, counterId);
 
-      verify(node).submitTransaction(eq(expectedTx));
+      verify(node)
+          .submitTransaction(eq(IncrementCounterTx.converter().toRawTransaction(expectedTx)));
     }
   }
 

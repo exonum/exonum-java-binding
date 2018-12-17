@@ -43,7 +43,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;

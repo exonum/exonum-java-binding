@@ -26,7 +26,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
@@ -37,7 +36,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
