@@ -34,7 +34,9 @@ fn submit_transaction() {
     let keypair = gen_keypair();
     let (node, app_rx) = create_node_with_keypair(keypair.0, keypair.1);
     let service_id = 0;
-    let service_transaction = ServiceTransaction::from_raw_unchecked(0, vec![1, 2, 3]);
+    let transaction_id = 0;
+    let tx_payload = vec![1, 2, 3];
+    let service_transaction = ServiceTransaction::from_raw_unchecked(transaction_id, tx_payload);
     let raw_transaction = RawTransaction::new(service_id, service_transaction);
     node.submit(raw_transaction.clone()).unwrap();
     let sent_message = app_rx.wait().next().unwrap().unwrap();
@@ -47,6 +49,20 @@ fn submit_transaction() {
         }
         _ => panic!("Message is not Transaction"),
     }
+}
+
+#[test]
+fn submit_transaction_to_missing_service() {
+    let keypair = gen_keypair();
+    let (node, app_rx) = create_node_with_keypair(keypair.0, keypair.1);
+    // invalid service_id
+    let service_id = 1;
+    let transaction_id = 0;
+    let tx_payload = vec![1, 2, 3];
+    let service_transaction = ServiceTransaction::from_raw_unchecked(transaction_id, tx_payload);
+    let raw_transaction = RawTransaction::new(service_id, service_transaction);
+    let res = node.submit(raw_transaction.clone());
+    assert!(res.is_err());
 }
 
 fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
