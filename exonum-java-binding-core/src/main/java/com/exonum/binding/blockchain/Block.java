@@ -147,7 +147,7 @@ public abstract class Block {
       Block block = autoBuild();
       checkState(block.getHeight() >= 0, "Height is negative: %s", block.getHeight());
       checkState(block.getNumTransactions() >= 0,
-          "numTransaction was negative: %s", block.getNumTransactions());
+          "numTransaction is negative: %s", block.getNumTransactions());
 
       return block;
     }
