@@ -175,10 +175,14 @@ fn passing_transaction_context() {
     let (tx_hash, author_pk) = {
         let mut fork = db.fork();
         let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
+        // get transaction hash and author public key from mock transaction
         let (tx_hash, author_pk) = {
             let context = create_transaction_context(&mut fork, raw);
             let (tx_hash, author_pk) = (context.tx_hash(), context.author());
+
+            // execute transaction
             valid_tx.execute(context).unwrap();
+
             (tx_hash, author_pk)
         };
         db.merge(fork.into_patch()).unwrap();
