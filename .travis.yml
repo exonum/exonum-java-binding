@@ -14,11 +14,13 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:chris-lea/libsodium'
+      - sourceline: 'ppa:maarten-fonville/protobuf'
     packages:
       - build-essential
       - libsodium-dev
       - libssl-dev
       - pkg-config
+      - protobuf-compiler
 
 env:
   global:
