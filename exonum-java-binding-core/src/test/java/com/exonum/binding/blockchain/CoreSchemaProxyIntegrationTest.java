@@ -19,6 +19,7 @@ package com.exonum.binding.blockchain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.proxy.Cleaner;
@@ -51,14 +52,41 @@ class CoreSchemaProxyIntegrationTest {
   void getBlockTransactionsTest() {
     assertSchema((schema) -> {
       long height = 0L;
-      assertThat(schema.getBlockTransactions(height)).isEmpty();
+      Exception e = assertThrows(RuntimeException.class,
+          () -> schema.getBlockTransactions(height));
+      assertThat(e).hasMessageContaining("An attempt to get the actual `height` "
+          + "during creating the genesis block");
     });
   }
 
   @Test
   void getActiveConfigurationBeforeGenesisBlock() {
-    assertSchema((schema) ->
-        assertThrows(RuntimeException.class, schema::getActualConfiguration));
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getActualConfiguration));
+  }
+
+  @Test
+  void getBlocksTest() {
+    assertSchema((schema) -> assertTrue(schema.getBlocks().isEmpty()));
+  }
+
+  @Test
+  void getLastBlockBeforeGenesisBlockTest() {
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getLastBlock));
+  }
+
+  @Test
+  void getTxMessagesTest() {
+    assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
+  }
+
+  @Test
+  void getTxResultsTest() {
+    assertSchema((schema) -> assertTrue(schema.getTxResults().isEmpty()));
+  }
+
+  @Test
+  void getTxLocationsTest() {
+    assertSchema((schema) -> assertTrue(schema.getTxLocations().isEmpty()));
   }
 
   private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
