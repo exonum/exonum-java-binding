@@ -43,9 +43,13 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -59,83 +63,136 @@ class BlockchainIntegrationTest {
   @Mock
   CoreSchemaProxy coreSchema;
 
-  Blockchain blockchain;
+  private Blockchain blockchain;
+
+  private MemoryDb database;
 
   @BeforeEach
   void setUp() {
     blockchain = new Blockchain(coreSchema);
+    database = MemoryDb.newInstance();
   }
 
-  @Test
-  void containsBlock() throws Exception {
-    try (MemoryDb database = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
+  @AfterEach
+  void tearDown() {
+    database.close();
+  }
+
+  @Nested
+  class Contains {
+    Cleaner cleaner;
+    Block block;
+
+    @BeforeEach
+    void setUp() {
+      cleaner = new Cleaner();
       Fork fork = database.createFork(cleaner);
+
       MapIndex<HashCode, Block> blocks = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
           StandardSerializers.hash(), BlockSerializer.INSTANCE);
+      block = withProperHash(aBlock(1).build());
+      blocks.put(block.getBlockHash(), block);
+
       when(coreSchema.getBlocks()).thenReturn(blocks);
-
-      Block b = withProperHash(aBlock(1).build());
-
-      blocks.put(b.getBlockHash(), b);
-
-      assertTrue(blockchain.containsBlock(b));
     }
-  }
 
-  @Test
-  void containsBlockNoSuchBlock() throws Exception {
-    try (MemoryDb database = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork fork = database.createFork(cleaner);
-      MapIndex<HashCode, Block> blocks = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
-          StandardSerializers.hash(), BlockSerializer.INSTANCE);
-      when(coreSchema.getBlocks()).thenReturn(blocks);
+    @AfterEach
+    void tearDown() throws CloseFailuresException {
+      cleaner.close();
+    }
 
-      Block b = withProperHash(aBlock(1).build());
-      blocks.put(b.getBlockHash(), b);
+    @Test
+    void containsBlock() {
+      assertTrue(blockchain.containsBlock(block));
+    }
 
+    @Test
+    void containsBlockNoSuchBlock() {
       Block unknownBlock = withProperHash(aBlock(Long.MAX_VALUE).build());
       assertFalse(blockchain.containsBlock(unknownBlock));
     }
-  }
 
-  @Test
-  void containsBlockSameHashDistinctFields() throws Exception {
-    try (MemoryDb database = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork fork = database.createFork(cleaner);
-      MapIndex<HashCode, Block> blocks = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
-          StandardSerializers.hash(), BlockSerializer.INSTANCE);
-      when(coreSchema.getBlocks()).thenReturn(blocks);
-
-      Block b = withProperHash(aBlock(1).build());
-      blocks.put(b.getBlockHash(), b);
-
+    @Test
+    void containsBlockSameHashDistinctFields() {
       // Check against a block that has the same hash, but different fields.
       Block unknownBlock = aBlock(10L)
-          .blockHash(b.getBlockHash())
+          .blockHash(block.getBlockHash())
           .build();
       assertFalse(blockchain.containsBlock(unknownBlock));
     }
   }
 
-  @Test
-  void getBlockAtHeight() throws Exception {
-    try (MemoryDb database = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      long blockchainHeight = 2;
-      List<Block> blocks = createTestBlockchain(database, blockchainHeight);
+  @Nested
+  class GetBlocks {
+
+    private static final long HEIGHT = 2;
+
+    Cleaner cleaner;
+    List<Block> blocks;
+
+    @BeforeEach
+    void setUp() throws CloseFailuresException {
+      // Fill database with test data
+      blocks = createTestBlockchain(HEIGHT);
+
+      // Create a cleaner for Snapshot
+      cleaner = new Cleaner();
+      Snapshot snapshot = database.createSnapshot(cleaner);
 
       // Setup mocks
-      when(coreSchema.getHeight()).thenReturn(blockchainHeight);
-      Snapshot snapshot = database.createSnapshot(cleaner);
+      setupMocks(snapshot);
+    }
+
+    @AfterEach
+    void tearDown() throws CloseFailuresException {
+      cleaner.close();
+    }
+
+    private List<Block> createTestBlockchain(long blockchainHeight)
+        throws CloseFailuresException {
+      try (Cleaner cleaner = new Cleaner()) {
+        List<Block> blocks = LongStream.rangeClosed(0, blockchainHeight)
+            .mapToObj(h -> aBlock(h).build())
+            .map(Blocks::withProperHash)
+            .collect(Collectors.toList());
+
+        // Add the blocks
+        // … to the map of blocks
+        Fork fork = database.createFork(cleaner);
+        MapIndex<HashCode, Block> blocksByHash = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
+            StandardSerializers.hash(), BlockSerializer.INSTANCE);
+
+        for (Block b : blocks) {
+          blocksByHash.put(b.getBlockHash(), b);
+        }
+
+        // … to the list of block hashes
+        ListIndex<HashCode> blockHashes = ListIndexProxy.newInstance(TEST_BLOCK_HASHES, fork,
+            StandardSerializers.hash());
+        for (Block b : blocks) {
+          blockHashes.add(b.getBlockHash());
+        }
+
+        // Merge the changes
+        database.merge(fork);
+
+        return blocks;
+      }
+    }
+
+    private void setupMocks(Snapshot snapshot) {
+      when(coreSchema.getHeight()).thenReturn(HEIGHT);
       MapIndex<HashCode, Block> blocksByHash = MapIndexProxy.newInstance(TEST_BLOCKS, snapshot,
           StandardSerializers.hash(), BlockSerializer.INSTANCE);
       when(coreSchema.getBlocks()).thenReturn(blocksByHash);
       ListIndex<HashCode> blockHashes = ListIndexProxy.newInstance(TEST_BLOCK_HASHES, snapshot,
           StandardSerializers.hash());
       when(coreSchema.getBlockHashes()).thenReturn(blockHashes);
+    }
+
+    @Test
+    void getBlockAtHeight() {
+      long blockchainHeight = HEIGHT;
 
       // Test that correct blocks are returned
       for (int height = 0; height <= blockchainHeight; height++) {
@@ -146,41 +203,18 @@ class BlockchainIntegrationTest {
       }
       // Test no blocks beyond the height
       assertThrows(IndexOutOfBoundsException.class,
-          () -> blockchain.getBlock(blockchainHeight + 1));
-      assertThrows(IndexOutOfBoundsException.class,
           () -> blockchain.getBlock(blockchainHeight + 2));
     }
-  }
 
-  private List<Block> createTestBlockchain(MemoryDb database, long blockchainHeight)
-      throws CloseFailuresException {
-    try (Cleaner cleaner = new Cleaner()) {
-      List<Block> blocks = LongStream.rangeClosed(0, blockchainHeight)
-          .mapToObj(h -> aBlock(h).build())
-          .map(Blocks::withProperHash)
-          .collect(Collectors.toList());
+    @ParameterizedTest
+    @ValueSource(longs = {
+        Long.MIN_VALUE, -1, HEIGHT + 1, HEIGHT + 2, Long.MAX_VALUE
+    })
+    void getBlockAtInvalidHeight(long blockchainHeight) {
+      Exception e = assertThrows(IndexOutOfBoundsException.class,
+          () -> blockchain.getBlock(blockchainHeight + 1));
 
-      // Add the blocks
-      // … to the map of blocks
-      Fork fork = database.createFork(cleaner);
-      MapIndex<HashCode, Block> blocksByHash = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
-          StandardSerializers.hash(), BlockSerializer.INSTANCE);
-
-      for (Block b : blocks) {
-        blocksByHash.put(b.getBlockHash(), b);
-      }
-
-      // … to the list of block hashes
-      ListIndex<HashCode> blockHashes = ListIndexProxy.newInstance(TEST_BLOCK_HASHES, fork,
-          StandardSerializers.hash());
-      for (Block b : blocks) {
-        blockHashes.add(b.getBlockHash());
-      }
-
-      // Merge the changes
-      database.merge(fork);
-
-      return blocks;
+      assertThat(e).hasMessageContaining(Long.toString(blockchainHeight));
     }
   }
 
