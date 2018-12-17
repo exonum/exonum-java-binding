@@ -12,23 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.exonum.binding.test;
 
-public final class TestParameters {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.Tag;
 
-  /**
-   * A syntactic sugar to fluently convert a list of Objects to an array.
-   *
-   * <p>Instead of: <code>new Object[]{o1, o2, o3}</code>,
-   * you get: <code>parameters(o1, o2, o3)</code>.
-   *
-   * <p>Use in {@link org.junit.runners.Parameterized} tests.
-   */
-  public static Object[] parameters(Object... testParameters) {
-    return testParameters;
-  }
-
-  private TestParameters() {}
+/**
+ * Annotation for long running tests for excluding them from the build flow for default profile.
+ * Tests with this annotation executes as usual at CI ("ci-build" maven profile).
+ */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Tag("slow-test")
+public @interface CiOnly {
 }

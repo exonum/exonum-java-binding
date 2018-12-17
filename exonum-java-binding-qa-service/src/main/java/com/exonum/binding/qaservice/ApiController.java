@@ -16,19 +16,19 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -58,6 +58,8 @@ final class ApiController {
   static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
   @VisibleForTesting
   static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
+  @VisibleForTesting
+  static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
   private static final String COUNTER_ID_PARAM = "counterId";
   private static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
 
@@ -100,6 +102,7 @@ final class ApiController {
             .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
             .put(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH, this::getAllBlockHashes)
             .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH, this::getBlockTransactions)
+            .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -163,10 +166,9 @@ final class ApiController {
     Optional<Counter> counter = service.getValue(counterId);
 
     if (counter.isPresent()) {
-      Gson gson = QaTransactionGson.instance();
       rc.response()
           .putHeader("Content-Type", "application/json")
-          .end(gson.toJson(counter.get()));
+          .end(json().toJson(counter.get()));
     } else {
       rc.response()
           .setStatusCode(HTTP_NOT_FOUND)
@@ -177,10 +179,9 @@ final class ApiController {
   private void getHeight(RoutingContext rc) {
     try {
       Height height = service.getHeight();
-      Gson gson = QaTransactionGson.instance();
       rc.response()
           .putHeader("Content-Type", "application/json")
-          .end(gson.toJson(height));
+          .end(json().toJson(height));
     } catch (RuntimeException ex) {
       rc.response()
           .setStatusCode(HTTP_BAD_REQUEST)
@@ -190,10 +191,9 @@ final class ApiController {
 
   private void getAllBlockHashes(RoutingContext rc) {
     List<HashCode> hashes = service.getAllBlockHashes();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(hashes));
+        .end(json().toJson(hashes));
   }
 
   private void getBlockTransactions(RoutingContext rc) {
@@ -201,10 +201,18 @@ final class ApiController {
         Long::parseLong);
 
     List<HashCode> hashes = service.getBlockTransactions(height);
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(hashes));
+        .end(json().toJson(hashes));
+  }
+
+  private void getActualConfiguration(RoutingContext rc) {
+    StoredConfiguration configuration = service.getActualConfiguration();
+    String json = json().toJson(configuration);
+
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(json);
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {
