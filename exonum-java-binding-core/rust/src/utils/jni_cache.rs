@@ -17,13 +17,10 @@ use jni::{
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
-use std::{
-    os::raw::c_void,
-    sync::atomic::{AtomicBool, Ordering, ATOMIC_BOOL_INIT},
-};
+use parking_lot::{Once, ONCE_INIT};
+use std::os::raw::c_void;
 
-static CACHE_IS_LOCKED: AtomicBool = ATOMIC_BOOL_INIT;
-static mut CACHE_INITIALIZED: bool = false;
+static INIT: Once = ONCE_INIT;
 
 static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
@@ -48,18 +45,9 @@ pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {
     JNI_VERSION_1_8
 }
 
-/// Initializes JNI cache implementing optimal synchronization
+/// Initializes JNI cache considering synchronization
 pub fn init_cache(env: &JNIEnv) {
-    while CACHE_IS_LOCKED.compare_and_swap(false, true, Ordering::Acquire) {}
-
-    unsafe {
-        if !CACHE_INITIALIZED {
-            cache_methods(env);
-            CACHE_INITIALIZED = true;
-        }
-    }
-
-    CACHE_IS_LOCKED.store(false, Ordering::Release);
+    INIT.call_once(|| unsafe { cache_methods(env) });
 }
 
 /// Caches all required classes and methods ids.
@@ -139,11 +127,7 @@ fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMe
 }
 
 fn check_cache_initalized() {
-    while CACHE_IS_LOCKED.compare_and_swap(false, true, Ordering::Acquire) {}
-    let is_init = unsafe { CACHE_INITIALIZED };
-    CACHE_IS_LOCKED.store(false, Ordering::Release);
-
-    if !is_init {
+    if !INIT.state().done() {
         panic!("Cache is not initialized")
     }
 }

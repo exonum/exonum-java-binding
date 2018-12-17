@@ -31,6 +31,7 @@ lazy_static! {
 }
 
 #[test]
+// NOTE: This test is not supposed to reliably catch synchronization errors.
 fn concurrent_cache_read() {
     const THREAD_NUM: usize = 8;
     let mut threads = Vec::new();
