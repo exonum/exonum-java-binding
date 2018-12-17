@@ -127,7 +127,7 @@ public abstract class Block {
      */
     public abstract Builder txRootHash(HashCode txRootHash);
 
-    // TODO: Expand on that when it has meaningful applications
+    // TODO: Expand on that when it has meaningful applications: ECR-2756
     /**
      * Sets the blockchain state hash at the moment this block was committed. The blockchain
      * state hash reflects the state of each service in the database.
