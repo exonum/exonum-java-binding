@@ -88,10 +88,10 @@ public final class CreateCounterTx implements Transaction {
   }
 
   public static TransactionMessageConverter<CreateCounterTx> converter() {
-    return TransactionConverter.INSTANCE;
+    return Converter.INSTANCE;
   }
 
-  private enum TransactionConverter implements TransactionMessageConverter<CreateCounterTx> {
+  private enum Converter implements TransactionMessageConverter<CreateCounterTx> {
     INSTANCE;
 
     @Override
@@ -115,8 +115,6 @@ public final class CreateCounterTx implements Transaction {
           .payload(payload)
           .build();
     }
-
-
   }
 
 }

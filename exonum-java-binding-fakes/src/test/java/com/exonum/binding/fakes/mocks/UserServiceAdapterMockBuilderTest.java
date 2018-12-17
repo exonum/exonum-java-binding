@@ -34,7 +34,6 @@ class UserServiceAdapterMockBuilderTest {
     builder.id(id);
     UserServiceAdapter service = builder.build();
 
-
     assertThat(service.getId(), equalTo(id));
   }
 

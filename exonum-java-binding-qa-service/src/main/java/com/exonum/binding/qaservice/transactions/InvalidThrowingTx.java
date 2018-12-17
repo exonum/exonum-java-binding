@@ -43,10 +43,10 @@ public final class InvalidThrowingTx implements Transaction {
   }
 
   public static TransactionMessageConverter<InvalidThrowingTx> converter() {
-    return TransactionConverter.INSTANCE;
+    return Converter.INSTANCE;
   }
 
-  private enum TransactionConverter implements TransactionMessageConverter<InvalidThrowingTx> {
+  private enum Converter implements TransactionMessageConverter<InvalidThrowingTx> {
     INSTANCE;
 
     static final int BODY_SIZE = 0;

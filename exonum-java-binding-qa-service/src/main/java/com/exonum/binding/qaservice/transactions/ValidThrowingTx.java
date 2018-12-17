@@ -83,10 +83,10 @@ public final class ValidThrowingTx implements Transaction {
   }
 
   public static TransactionMessageConverter<ValidThrowingTx> converter() {
-    return TransactionConverter.INSTANCE;
+    return Converter.INSTANCE;
   }
 
-  private enum TransactionConverter implements TransactionMessageConverter<ValidThrowingTx> {
+  private enum Converter implements TransactionMessageConverter<ValidThrowingTx> {
     INSTANCE;
 
     @Override

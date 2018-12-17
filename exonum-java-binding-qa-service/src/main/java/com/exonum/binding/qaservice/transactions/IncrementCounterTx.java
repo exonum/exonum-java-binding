@@ -93,10 +93,10 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   public static TransactionMessageConverter<IncrementCounterTx> converter() {
-    return MessageConverter.INSTANCE;
+    return Converter.INSTANCE;
   }
 
-  private enum MessageConverter implements TransactionMessageConverter<IncrementCounterTx> {
+  private enum Converter implements TransactionMessageConverter<IncrementCounterTx> {
     INSTANCE;
 
     @Override

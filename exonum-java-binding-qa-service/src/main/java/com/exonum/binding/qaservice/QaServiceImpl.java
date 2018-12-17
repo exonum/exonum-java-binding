@@ -26,6 +26,7 @@ import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
+import com.exonum.binding.qaservice.transactions.QaContext;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidErrorTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
@@ -110,8 +111,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
     String defaultCounterName = "default";
 
-    //TODO initialize HashCode and PublicKey ?
-    TransactionContext context = new InternalTransactionContext(fork, null, null);
+    TransactionContext context = new QaContext(fork);
 
     new CreateCounterTx(defaultCounterName)
         .execute(context);

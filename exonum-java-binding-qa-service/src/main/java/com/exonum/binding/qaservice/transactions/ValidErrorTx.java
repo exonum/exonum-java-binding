@@ -112,10 +112,10 @@ public final class ValidErrorTx implements Transaction {
   }
 
   public static TransactionMessageConverter<ValidErrorTx> converter() {
-    return ValidErrorTx.MessageConverter.INSTANCE;
+    return Converter.INSTANCE;
   }
 
-  private enum MessageConverter implements TransactionMessageConverter<ValidErrorTx> {
+  private enum Converter implements TransactionMessageConverter<ValidErrorTx> {
     INSTANCE;
 
     @Override
