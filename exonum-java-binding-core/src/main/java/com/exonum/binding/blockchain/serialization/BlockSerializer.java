@@ -52,30 +52,21 @@ public enum BlockSerializer implements Serializer<Block> {
         .height(copiedBlocks.getHeight())
         .numTransactions(copiedBlocks.getTxCount())
         .blockHash(blockHash)
-        .previousBlockHash(fromHashProto(copiedBlocks.getPrevHash()))
-        .txRootHash(fromHashProto(copiedBlocks.getTxHash()))
-        .stateHash(fromHashProto(copiedBlocks.getStateHash()))
+        .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
+        .txRootHash(toHashCode(copiedBlocks.getTxHash()))
+        .stateHash(toHashCode(copiedBlocks.getStateHash()))
         .build();
   }
 
   private static CoreProtos.Hash toHashProto(HashCode hash) {
+    ByteString bytes = ByteString.copyFrom(hash.asBytes());
     return CoreProtos.Hash.newBuilder()
-        .setData(toByteString(hash))
+        .setData(bytes)
         .build();
   }
 
-  private static HashCode fromHashProto(CoreProtos.Hash hash) {
-    return toHashCode(hash.getData());
+  private static HashCode toHashCode(CoreProtos.Hash hash) {
+    ByteString bytes = hash.getData();
+    return HashCode.fromBytes(bytes.toByteArray());
   }
-
-  private static ByteString toByteString(HashCode hash) {
-    byte[] bytes = hash.asBytes();
-    return ByteString.copyFrom(bytes);
-  }
-
-  private static HashCode toHashCode(ByteString byteString) {
-    byte[] bytes = byteString.toByteArray();
-    return HashCode.fromBytes(bytes);
-  }
-
 }
