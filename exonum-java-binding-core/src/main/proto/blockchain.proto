@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.test;
+syntax = "proto3";
 
-public final class TestParameters {
+option java_package = "com.exonum.binding.blockchain.serialization";
+option java_outer_classname = "CoreProtos";
 
-  /**
-   * A syntactic sugar to fluently convert a list of Objects to an array.
-   *
-   * <p>Instead of: <code>new Object[]{o1, o2, o3}</code>,
-   * you get: <code>parameters(o1, o2, o3)</code>.
-   *
-   * <p>Use in {@link org.junit.runners.Parameterized} tests.
-   */
-  public static Object[] parameters(Object... testParameters) {
-    return testParameters;
-  }
-
-  private TestParameters() {}
+message Block {
+  uint32 proposer_id = 1;
+  uint64 height = 2;
+  uint32 tx_count = 3;
+  Hash prev_hash = 4;
+  Hash tx_hash = 5;
+  Hash state_hash = 6;
 }
+
+message TxLocation {
+  uint64 block_height = 1;
+  uint64 position_in_block = 2;
+}
+
+message TransactionResult {
+  uint32 status = 1;
+  string description = 2;
+}
+
+message Hash { bytes data = 1; }

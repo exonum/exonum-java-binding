@@ -16,7 +16,11 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import static com.exonum.binding.common.proofs.map.DbKeyComparisonParameterizedTest.ComparisonResult.EQUAL;
+import static com.exonum.binding.common.proofs.map.DbKeyComparisonParameterizedTest.ComparisonResult.GREATER;
+import static com.exonum.binding.common.proofs.map.DbKeyComparisonParameterizedTest.ComparisonResult.LESS;
 import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.branchKeyFromPrefix;
+import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.leafKeyFromPrefix;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -28,13 +32,23 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class DbKeyComparisonParameterizedTest {
 
-  @ParameterizedTest(name = "{index} => description={3}")
+  @ParameterizedTest(name = "[{index}] => {3}")
   @MethodSource("testData")
-  void dbKeyCompareTest(DbKey firstKey, DbKey secondKey, boolean expectedResult,
+  void dbKeyCompareTest(DbKey firstKey, DbKey secondKey, ComparisonResult expectedResult,
       String description) {
     int comparisonResult = firstKey.compareTo(secondKey);
 
-    assertThat(comparisonResult > 0, equalTo(expectedResult));
+    assertThat(ComparisonResult.fromInt(comparisonResult), equalTo(expectedResult));
+  }
+
+  @ParameterizedTest
+  @MethodSource("testData")
+  void dbKeyComparatorSymmetric(DbKey firstKey, DbKey secondKey, ComparisonResult firstToSecond,
+      String description) {
+    int comparisonResult = secondKey.compareTo(firstKey);
+
+    ComparisonResult expectedResult = firstToSecond.opposite();
+    assertThat(ComparisonResult.fromInt(comparisonResult), equalTo(expectedResult));
   }
 
   private static List<Arguments> testData() {
@@ -43,23 +57,62 @@ class DbKeyComparisonParameterizedTest {
         Arguments.of(
             branchKeyFromPrefix("1100"),
             branchKeyFromPrefix("0"),
-            true,
+            GREATER,
             "[1100] > [0]"),
         Arguments.of(
             branchKeyFromPrefix("1100"),
             branchKeyFromPrefix("001101"),
-            true,
+            GREATER,
             "[1100] > [001101]"),
         Arguments.of(
             branchKeyFromPrefix("001101"),
             branchKeyFromPrefix("00110101"),
-            false,
+            LESS,
             "[001101] < [00110101]"),
         Arguments.of(
             branchKeyFromPrefix("101"),
             branchKeyFromPrefix("110"),
-            false,
-            "[101] < [110]")
+            LESS,
+            "[101] < [110]"),
+        Arguments.of(
+            branchKeyFromPrefix("1"),
+            branchKeyFromPrefix("1"),
+            EQUAL,
+            "[1] = [1] (branches)"),
+        Arguments.of(
+            leafKeyFromPrefix("0"),
+            leafKeyFromPrefix("0"),
+            EQUAL,
+            "[0] = [0] (leaves)")
     );
+  }
+
+  enum ComparisonResult {
+    GREATER,
+    LESS,
+    EQUAL;
+
+    static ComparisonResult fromInt(int compareCode) {
+      if (compareCode < 0) {
+        return LESS;
+      } else if (0 < compareCode) {
+        return GREATER;
+      } else {
+        return EQUAL;
+      }
+    }
+
+    /**
+     * Returns the opposite comparison result — the one you would obtain if you swap
+     * the arguments positions.
+     */
+    ComparisonResult opposite() {
+      switch (this) {
+        case GREATER: return LESS;
+        case LESS: return GREATER;
+        case EQUAL: return EQUAL;
+        default: throw new AssertionError("unreachable");
+      }
+    }
   }
 }

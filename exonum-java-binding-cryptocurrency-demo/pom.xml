@@ -54,6 +54,7 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
+      <classifier>no_aop</classifier>
       <scope>provided</scope>
     </dependency>
 
@@ -66,19 +67,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-    </dependency>
-
-    <!-- TODO: Move junit-x to <dependency> section in the parent project: ECR-2023 -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.serializeBody;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
@@ -41,7 +42,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -159,9 +159,7 @@ class IncrementCounterTxIntegrationTest {
     String info = tx.info();
 
     // Check the transaction parameters in JSON
-    Gson gson = QaTransactionGson.instance();
-
-    AnyTransaction<IncrementCounterTx> txParameters = gson.fromJson(info,
+    AnyTransaction<IncrementCounterTx> txParameters = json().fromJson(info,
         new TypeToken<AnyTransaction<IncrementCounterTx>>(){}.getType());
 
     assertThat(txParameters.body, equalTo(tx));

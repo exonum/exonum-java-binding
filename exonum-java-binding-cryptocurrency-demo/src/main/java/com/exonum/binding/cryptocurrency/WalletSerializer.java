@@ -16,11 +16,15 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+
 import com.exonum.binding.common.serialization.Serializer;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum WalletSerializer implements Serializer<Wallet> {
   INSTANCE;
+
+  private static final Serializer<WalletProtos.Wallet> PROTO_SERIALIZER =
+      protobuf(WalletProtos.Wallet.class);
 
   @Override
   public byte[] toBytes(Wallet value) {
@@ -32,14 +36,7 @@ public enum WalletSerializer implements Serializer<Wallet> {
 
   @Override
   public Wallet fromBytes(byte[] binaryWallet) {
-    Wallet wallet;
-    try {
-      WalletProtos.Wallet copiedWalletProtos = WalletProtos.Wallet.parseFrom(binaryWallet);
-      wallet = new Wallet(copiedWalletProtos.getBalance());
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException(
-          "Unable to instantiate WalletProtos.Wallet instance from provided binary data", e);
-    }
-    return wallet;
+    WalletProtos.Wallet copiedWalletProtos = PROTO_SERIALIZER.fromBytes(binaryWallet);
+    return new Wallet(copiedWalletProtos.getBalance());
   }
 }

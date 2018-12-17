@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.indices;
+package com.exonum.binding.common.serialization;
 
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.common.message.TransactionMessage;
 
-/**
- * A test of common ProofListIndex methods.
- */
-class ProofListIndexIntegrationTest
-    extends BaseListIndexIntegrationTest {
+enum TransactionMessageSerializer implements Serializer<TransactionMessage> {
+  INSTANCE;
 
   @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
-    return IndexConstructors.fromOneArg(ProofListIndexProxy::newInstance).create(name, view);
+  public byte[] toBytes(TransactionMessage value) {
+    return value.toBytes();
   }
 
   @Override
-  Object getAnyElement(AbstractListIndexProxy<String> index) {
-    return index.get(0L);
+  public TransactionMessage fromBytes(byte[] serializedValue) {
+    return TransactionMessage.fromBytes(serializedValue);
   }
 
 }
