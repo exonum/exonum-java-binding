@@ -29,51 +29,53 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class BlockSerializerTest {
 
-  private static final Serializer<Block> serializer = BlockSerializer.INSTANCE;
+  private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(Block expected) {
-    byte[] bytes = serializer.toBytes(expected);
-    Block actual = serializer.fromBytes(bytes);
+    byte[] bytes = BLOCK_SERIALIZER.toBytes(expected);
+    Block actual = BLOCK_SERIALIZER.fromBytes(bytes);
 
     assertThat(actual, equalTo(expected));
   }
 
   private static Stream<Block> testSource() {
-    Block block1 = Block.valueOf(
-        1,
-        1,
-        1,
-        HashCode.fromString("ab"),
-        HashCode.fromString("bc"),
-        HashCode.fromString("cd"),
-        HashCode.fromString("ab"));
-    Block block2 = Block.valueOf(
-        Integer.MAX_VALUE,
-        Long.MAX_VALUE,
-        Integer.MAX_VALUE,
-        HashCode.fromString("a0a0a0a0a0"),
-        HashCode.fromString("a0a0a0a0a0"),
-        HashCode.fromString("a0a0a0a0a0"),
-        HashCode.fromString("a0a0a0a0a0"));
-    return Stream.of(
-        Block.valueOf(
-            block1.getProposerId(),
-            block1.getHeight(),
-            block1.getNumTransactions(),
-            block1.getPreviousBlockHash(),
-            block1.getTxRootHash(),
-            block1.getStateHash(),
-            Hashing.sha256().hashBytes(serializer.toBytes(block1))),
-        Block.valueOf(
-            block2.getProposerId(),
-            block2.getHeight(),
-            block2.getNumTransactions(),
-            block2.getPreviousBlockHash(),
-            block2.getTxRootHash(),
-            block2.getStateHash(),
-            Hashing.sha256().hashBytes(serializer.toBytes(block2))));
+    Block block1 = Block.builder()
+        .proposerId(0)
+        .height(1)
+        .numTransactions(2)
+        .blockHash(HashCode.fromString("ab"))
+        .previousBlockHash(HashCode.fromString("bc"))
+        .txRootHash(HashCode.fromString("cd"))
+        .stateHash(HashCode.fromString("ab"))
+        .build();
+    Block block2 = Block.builder()
+        .proposerId(Integer.MAX_VALUE)
+        .height(Long.MAX_VALUE)
+        .numTransactions(Integer.MAX_VALUE)
+        .blockHash(HashCode.fromString("ab"))
+        .previousBlockHash(HashCode.fromString("bc"))
+        .txRootHash(HashCode.fromString("cd"))
+        .stateHash(HashCode.fromString("ab"))
+        .build();
+
+    return Stream.of(block1, block2)
+        .map(BlockSerializerTest::withProperHash);
   }
 
+  private static Block withProperHash(Block block) {
+    byte[] blockBytes = BLOCK_SERIALIZER.toBytes(block);
+    HashCode actualBlockHash = Hashing.sha256()
+        .hashBytes(blockBytes);
+    return Block.builder()
+        .proposerId(block.getProposerId())
+        .height(block.getHeight())
+        .numTransactions(block.getNumTransactions())
+        .blockHash(actualBlockHash)
+        .previousBlockHash(block.getPreviousBlockHash())
+        .txRootHash(block.getTxRootHash())
+        .stateHash(block.getStateHash())
+        .build();
+  }
 }
