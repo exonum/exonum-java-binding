@@ -29,7 +29,6 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -41,9 +40,7 @@ import javax.annotation.Nullable;
  */
 public final class ValidErrorTx implements Transaction {
 
-  @VisibleForTesting
-  static final short ID = QaTransaction.VALID_ERROR.id();
-
+  private static final short ID = QaTransaction.VALID_ERROR.id();
   private static final Serializer<ValidErrorTxBody> PROTO_SERIALIZER =
       StandardSerializers.protobuf(ValidErrorTxBody.class);
 

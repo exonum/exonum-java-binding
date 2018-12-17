@@ -27,13 +27,11 @@ import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTx
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Objects;
 
 public final class ValidThrowingTx implements Transaction {
 
-  @VisibleForTesting
-  static final short ID = QaTransaction.VALID_THROWING.id();
+  private static final short ID = QaTransaction.VALID_THROWING.id();
   private static final Serializer<ValidThrowingTxBody> PROTO_SERIALIZER =
       protobuf(ValidThrowingTxBody.class);
 
@@ -93,9 +91,9 @@ public final class ValidThrowingTx implements Transaction {
     public ValidThrowingTx fromRawTransaction(RawTransaction rawTransaction) {
       checkRawTransaction(rawTransaction);
 
-        long seed = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload())
-            .getSeed();
-        return new ValidThrowingTx(seed);
+      long seed = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload())
+          .getSeed();
+      return new ValidThrowingTx(seed);
     }
 
     @Override
