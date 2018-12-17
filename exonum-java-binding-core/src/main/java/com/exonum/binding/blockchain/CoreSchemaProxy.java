@@ -90,7 +90,7 @@ final class CoreSchemaProxy {
    * Returns an list index containing a block hash for every block height
    * (represented by list index id).
    */
-  ListIndex<HashCode> getAllBlockHashes() {
+  ListIndex<HashCode> getBlockHashes() {
     return ListIndexProxy.newInstance(
         CoreIndex.ALL_BLOCK_HASHES, dbView, StandardSerializers.hash());
   }

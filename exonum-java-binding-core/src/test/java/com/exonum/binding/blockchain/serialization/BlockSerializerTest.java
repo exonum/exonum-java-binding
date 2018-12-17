@@ -20,8 +20,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.blockchain.Block;
+import com.exonum.binding.blockchain.Blocks;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,21 +61,6 @@ class BlockSerializerTest {
         .build();
 
     return Stream.of(block1, block2)
-        .map(BlockSerializerTest::withProperHash);
-  }
-
-  private static Block withProperHash(Block block) {
-    byte[] blockBytes = BLOCK_SERIALIZER.toBytes(block);
-    HashCode actualBlockHash = Hashing.sha256()
-        .hashBytes(blockBytes);
-    return Block.builder()
-        .proposerId(block.getProposerId())
-        .height(block.getHeight())
-        .numTransactions(block.getNumTransactions())
-        .blockHash(actualBlockHash)
-        .previousBlockHash(block.getPreviousBlockHash())
-        .txRootHash(block.getTxRootHash())
-        .stateHash(block.getStateHash())
-        .build();
+        .map(Blocks::withProperHash);
   }
 }

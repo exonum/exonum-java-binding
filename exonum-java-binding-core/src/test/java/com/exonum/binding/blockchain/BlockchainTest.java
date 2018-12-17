@@ -50,7 +50,6 @@ class BlockchainTest {
 
   private Blockchain blockchain;
 
-
   @Mock
   private CoreSchemaProxy mockSchema;
 
@@ -68,107 +67,107 @@ class BlockchainTest {
 
   @Test
   void getAllBlockHashes() {
-    ListIndexProxy mockListIndex = mock(ListIndexProxy.class);
-    when(mockSchema.getAllBlockHashes()).thenReturn(mockListIndex);
+    ListIndexProxy blockHashes = mock(ListIndexProxy.class);
+    when(mockSchema.getBlockHashes()).thenReturn(blockHashes);
 
-    assertThat(blockchain.getAllBlockHashes()).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockHashes()).isEqualTo(blockHashes);
   }
 
   @Test
   void getBlockTransactionsByHeight() {
-    ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
+    ProofListIndexProxy transactions = mock(ProofListIndexProxy.class);
+    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(transactions);
 
-    assertThat(blockchain.getBlockTransactions(HEIGHT)).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockTransactions(HEIGHT)).isEqualTo(transactions);
   }
 
   @Test
   void getBlockTransactionsByBlockId() {
-    ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-    MapIndex mockMapIndex = mock(MapIndex.class);
+    ProofListIndexProxy transactions = mock(ProofListIndexProxy.class);
+    MapIndex blocks = mock(MapIndex.class);
     HashCode blockId = HashCode.fromString("ab");
 
-    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
-    when(mockMapIndex.get(blockId)).thenReturn(BLOCK);
-    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
+    when(mockSchema.getBlocks()).thenReturn(blocks);
+    when(blocks.get(blockId)).thenReturn(BLOCK);
+    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(transactions);
 
-    assertThat(blockchain.getBlockTransactions(blockId)).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockTransactions(blockId)).isEqualTo(transactions);
   }
 
   @Test
   void getBlockTransactionsByBlock() {
-    ProofListIndexProxy mockListIndex = mock(ProofListIndexProxy.class);
-    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(mockListIndex);
+    ProofListIndexProxy transactions = mock(ProofListIndexProxy.class);
+    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(transactions);
 
-    assertThat(blockchain.getBlockTransactions(BLOCK)).isEqualTo(mockListIndex);
+    assertThat(blockchain.getBlockTransactions(BLOCK)).isEqualTo(transactions);
   }
 
   @Test
   void getTxMessages() {
-    MapIndex mockMapIndex = mock(MapIndex.class);
-    when(mockSchema.getTxMessages()).thenReturn(mockMapIndex);
+    MapIndex txMessages = mock(MapIndex.class);
+    when(mockSchema.getTxMessages()).thenReturn(txMessages);
 
-    assertThat(blockchain.getTxMessages()).isEqualTo(mockMapIndex);
+    assertThat(blockchain.getTxMessages()).isEqualTo(txMessages);
   }
 
   @Test
   void getTxResults() {
-    ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
-    when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
+    ProofMapIndexProxy txResults = mock(ProofMapIndexProxy.class);
+    when(mockSchema.getTxResults()).thenReturn(txResults);
 
-    assertThat(blockchain.getTxResults()).isEqualTo(mockMapIndex);
+    assertThat(blockchain.getTxResults()).isEqualTo(txResults);
   }
 
   @Test
   void getTxResult() {
-    ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
+    ProofMapIndexProxy txResults = mock(ProofMapIndexProxy.class);
     HashCode messageHash = HashCode.fromString("ab");
     TransactionResult txResult = TransactionResult.successful();
 
-    when(mockMapIndex.get(messageHash)).thenReturn(txResult);
-    when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
+    when(txResults.get(messageHash)).thenReturn(txResult);
+    when(mockSchema.getTxResults()).thenReturn(txResults);
 
     assertThat(blockchain.getTxResult(messageHash).get()).isEqualTo(txResult);
   }
 
   @Test
   void getNonexistentTxResult() {
-    ProofMapIndexProxy mockMapIndex = mock(ProofMapIndexProxy.class);
+    ProofMapIndexProxy txResults = mock(ProofMapIndexProxy.class);
     HashCode messageHash = HashCode.fromString("ab");
 
-    when(mockMapIndex.get(messageHash)).thenReturn(null);
-    when(mockSchema.getTxResults()).thenReturn(mockMapIndex);
+    when(txResults.get(messageHash)).thenReturn(null);
+    when(mockSchema.getTxResults()).thenReturn(txResults);
 
     assertThat(blockchain.getTxResult(messageHash)).isEmpty();
   }
 
   @Test
   void getTxLocations() {
-    MapIndex mockMapIndex = mock(MapIndex.class);
-    when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
+    MapIndex txLocations = mock(MapIndex.class);
+    when(mockSchema.getTxLocations()).thenReturn(txLocations);
 
-    assertThat(blockchain.getTxLocations()).isEqualTo(mockMapIndex);
+    assertThat(blockchain.getTxLocations()).isEqualTo(txLocations);
   }
 
   @Test
   void getTxLocation() {
-    MapIndex mockMapIndex = mock(MapIndex.class);
+    MapIndex txLocations = mock(MapIndex.class);
     HashCode messageHash = HashCode.fromString("ab");
     TransactionLocation txLocation = TransactionLocation.valueOf(1L, 1L);
 
-    when(mockMapIndex.get(messageHash)).thenReturn(txLocation);
-    when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
+    when(txLocations.get(messageHash)).thenReturn(txLocation);
+    when(mockSchema.getTxLocations()).thenReturn(txLocations);
 
     assertThat(blockchain.getTxLocation(messageHash).get()).isEqualTo(txLocation);
   }
 
   @Test
   void getNonexistentTxLocation() {
-    MapIndex mockMapIndex = mock(MapIndex.class);
+    MapIndex blocks = mock(MapIndex.class);
     HashCode messageHash = HashCode.fromString("ab");
 
-    when(mockMapIndex.get(messageHash)).thenReturn(null);
-    when(mockSchema.getTxLocations()).thenReturn(mockMapIndex);
+    when(blocks.get(messageHash)).thenReturn(null);
+    when(mockSchema.getTxLocations()).thenReturn(blocks);
 
     assertThat(blockchain.getTxLocation(messageHash)).isEmpty();
   }
@@ -182,25 +181,25 @@ class BlockchainTest {
   }
 
   @Test
-  void getBlock() {
-    MapIndex mockMapIndex = mock(MapIndex.class);
+  void findBlock() {
+    MapIndex blocks = mock(MapIndex.class);
     HashCode blockHash = HashCode.fromString("ab");
 
-    when(mockMapIndex.get(blockHash)).thenReturn(BLOCK);
-    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+    when(blocks.get(blockHash)).thenReturn(BLOCK);
+    when(mockSchema.getBlocks()).thenReturn(blocks);
 
-    assertThat(blockchain.getBlock(blockHash).get()).isEqualTo(BLOCK);
+    assertThat(blockchain.findBlock(blockHash).get()).isEqualTo(BLOCK);
   }
 
   @Test
-  void getNonexistentBlock() {
-    MapIndex mockMapIndex = mock(MapIndex.class);
+  void findNonexistentBlock() {
+    MapIndex blocks = mock(MapIndex.class);
     HashCode blockHash = HashCode.fromString("ab");
 
-    when(mockMapIndex.get(blockHash)).thenReturn(null);
-    when(mockSchema.getBlocks()).thenReturn(mockMapIndex);
+    when(blocks.get(blockHash)).thenReturn(null);
+    when(mockSchema.getBlocks()).thenReturn(blocks);
 
-    assertThat(blockchain.getBlock(blockHash)).isEmpty();
+    assertThat(blockchain.findBlock(blockHash)).isEmpty();
   }
 
   @Test
