@@ -81,7 +81,7 @@ public class UserServiceAdapter {
    * @param payload a transaction payload
    * @return an executable transaction of this service
    * @throws NullPointerException if payload is null, or a user service returns
-   *     a nullable transaction
+   *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
   public UserTransactionAdapter convertTransaction(short serviceId, short transactionId,

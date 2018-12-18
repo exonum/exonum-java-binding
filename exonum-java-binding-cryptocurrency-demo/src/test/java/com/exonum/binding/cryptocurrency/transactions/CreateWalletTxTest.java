@@ -50,16 +50,16 @@ class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.firstOwnerKey;
+  private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
 
   @Test
-  void fromMessage() {
+  void fromRawTransaction() {
     long initialBalance = 100L;
     RawTransaction m = createRawTransaction(OWNER_KEY, initialBalance);
 
-    CreateWalletTx tx = CreateWalletTx.fromMessage(m);
+    CreateWalletTx tx = CreateWalletTx.fromRawTransaction(m);
 
-    assertThat(tx, equalTo(withMockMessage(OWNER_KEY, initialBalance)));
+    assertThat(tx, equalTo(withMockRawTransaction(OWNER_KEY, initialBalance)));
   }
 
   @Test
@@ -67,7 +67,7 @@ class CreateWalletTxTest {
     PublicKey publicKey = PublicKey.fromBytes(bytes(0x01));
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> withMockMessage(publicKey, DEFAULT_BALANCE)
+        () -> withMockRawTransaction(publicKey, DEFAULT_BALANCE)
     );
     assertThat(t.getMessage(), equalTo("Public key has invalid size (1), must be 32 bytes long."));
   }
@@ -77,7 +77,7 @@ class CreateWalletTxTest {
     long initialBalance = -1L;
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> withMockMessage(OWNER_KEY, initialBalance)
+        () -> withMockRawTransaction(OWNER_KEY, initialBalance)
     );
     assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
 
@@ -86,7 +86,7 @@ class CreateWalletTxTest {
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx() throws Exception {
-    CreateWalletTx tx = withMockMessage(OWNER_KEY, DEFAULT_BALANCE);
+    CreateWalletTx tx = withMockRawTransaction(OWNER_KEY, DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -122,8 +122,7 @@ class CreateWalletTxTest {
       // Execute the transaction, that has the same owner key.
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
-      CreateWalletTx tx = withMockMessage(OWNER_KEY, newBalance);
-
+      CreateWalletTx tx = withMockRawTransaction(OWNER_KEY, newBalance);
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
@@ -139,9 +138,7 @@ class CreateWalletTxTest {
         .verify();
   }
 
-  private static CreateWalletTx withMockMessage(PublicKey ownerKey, long initialBalance) {
-    // If a normal raw transaction object is ever needed, take the code from the 'fromMessage' test
-    // and put it here, replacing `mock(RawTransaction.class)`.
+  private static CreateWalletTx withMockRawTransaction(PublicKey ownerKey, long initialBalance) {
     return new CreateWalletTx(mock(RawTransaction.class), ownerKey, initialBalance);
   }
 }

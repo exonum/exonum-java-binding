@@ -45,8 +45,8 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
   private final long initialBalance;
 
   @VisibleForTesting
-  CreateWalletTx(RawTransaction message, PublicKey ownerPublicKey, long initialBalance) {
-    super(message);
+  CreateWalletTx(RawTransaction rawTransaction, PublicKey ownerPublicKey, long initialBalance) {
+    super(rawTransaction);
 
     checkArgument(ownerPublicKey.size() == PUBLIC_KEY_BYTES,
         "Public key has invalid size (%s), must be %s bytes long.", ownerPublicKey.size(),
@@ -62,15 +62,15 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
    * Creates a create wallet transaction from its message.
    * @param rawTransaction a raw transaction
    */
-  public static CreateWalletTx fromMessage(RawTransaction rawTransaction) {
+  public static CreateWalletTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
-    TxMessageProtos.CreateWalletTx messageBody =
+    TxMessageProtos.CreateWalletTx body =
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
     PublicKey ownerPublicKey = PublicKey.fromBytes(
-        (messageBody.getOwnerPublicKey().toByteArray()));
-    long initialBalance = messageBody.getInitialBalance();
+        (body.getOwnerPublicKey().toByteArray()));
+    long initialBalance = body.getInitialBalance();
     return new CreateWalletTx(rawTransaction, ownerPublicKey, initialBalance);
   }
 

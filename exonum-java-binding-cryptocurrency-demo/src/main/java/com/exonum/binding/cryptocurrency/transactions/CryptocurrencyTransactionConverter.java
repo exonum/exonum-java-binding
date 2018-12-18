@@ -31,8 +31,8 @@ public final class CryptocurrencyTransactionConverter implements TransactionConv
   private static final ImmutableMap<Short, Function<RawTransaction, Transaction>>
       TRANSACTION_FACTORIES =
           ImmutableMap.of(
-              CreateWalletTx.ID, CreateWalletTx::fromMessage,
-              TransferTx.ID, TransferTx::fromMessage);
+              CreateWalletTx.ID, CreateWalletTx::fromRawTransaction,
+              TransferTx.ID, TransferTx::fromRawTransaction);
 
   @Override
   public Transaction toTransaction(RawTransaction rawTransaction) {

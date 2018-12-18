@@ -26,7 +26,6 @@ import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
 import com.exonum.binding.qaservice.transactions.InvalidTx;
-import com.exonum.binding.qaservice.transactions.QaContext;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidErrorTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
@@ -44,7 +43,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -109,12 +107,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
     // Add an afterCommit counter that will be incremented after each block commited event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
-    String defaultCounterName = "default";
-
-    TransactionContext context = new QaContext(fork);
-
-    new CreateCounterTx(defaultCounterName)
-        .execute(context);
 
     return Optional.of(INITIAL_SERVICE_CONFIGURATION);
   }

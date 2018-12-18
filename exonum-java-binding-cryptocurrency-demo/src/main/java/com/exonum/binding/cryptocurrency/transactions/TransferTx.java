@@ -54,9 +54,9 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   private final long sum;
 
   @VisibleForTesting
-  TransferTx(RawTransaction message, long seed, PublicKey fromWallet, PublicKey toWallet,
+  TransferTx(RawTransaction rawTransaction, long seed, PublicKey fromWallet, PublicKey toWallet,
       long sum) {
-    super(message);
+    super(rawTransaction);
     checkArgument(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
     checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
     this.seed = seed;
@@ -68,16 +68,16 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   /**
    * Creates a new transfer transaction from the binary message.
    */
-  public static TransferTx fromMessage(RawTransaction rawTransaction) {
+  public static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
-    TxMessageProtos.TransferTx messageBody =
+    TxMessageProtos.TransferTx body =
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
-    long seed = messageBody.getSeed();
-    PublicKey fromWallet = toPublicKey(messageBody.getFromWallet());
-    PublicKey toWallet = toPublicKey(messageBody.getToWallet());
-    long sum = messageBody.getSum();
+    long seed = body.getSeed();
+    PublicKey fromWallet = toPublicKey(body.getFromWallet());
+    PublicKey toWallet = toPublicKey(body.getToWallet());
+    long sum = body.getSum();
 
     return new TransferTx(rawTransaction, seed, fromWallet, toWallet, sum);
   }

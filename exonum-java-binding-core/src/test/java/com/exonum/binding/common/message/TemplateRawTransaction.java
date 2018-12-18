@@ -37,5 +37,6 @@ public class TemplateRawTransaction {
   }
 
   private TemplateRawTransaction() {
+    throw new AssertionError("Non-instantiable");
   }
 }

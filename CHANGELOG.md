@@ -27,10 +27,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
   `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
   to use this implementation of `MapEntry`.
+- `com.exonum.binding.transaction.Transaction#execute` now accepts 
+  `com.exonum.binding.transaction.TransactionContext`
+  instead of `com.exonum.binding.storage.database.View`  
 
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
+- `com.exonum.binding.common.message.Message`
 - `com.exonum.binding.common.message.BinaryMessage`
 
 ## [0.3] - 2018-10-30

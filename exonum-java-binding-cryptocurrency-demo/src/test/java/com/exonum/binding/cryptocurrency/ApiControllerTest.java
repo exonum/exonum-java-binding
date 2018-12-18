@@ -59,7 +59,7 @@ class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
-  private static final PublicKey FROM_KEY = PredefinedOwnerKeys.firstOwnerKey;
+  private static final PublicKey FROM_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
 
   @Mock
   private CryptocurrencyService service;

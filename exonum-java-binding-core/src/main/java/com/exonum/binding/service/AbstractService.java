@@ -61,8 +61,8 @@ public abstract class AbstractService implements Service {
   }
 
   @Override
-  public Transaction convertToTransaction(RawTransaction message) {
-    return transactionConverter.toTransaction(message);
+  public Transaction convertToTransaction(RawTransaction rawTransaction) {
+    return transactionConverter.toTransaction(rawTransaction);
   }
 
   @Override

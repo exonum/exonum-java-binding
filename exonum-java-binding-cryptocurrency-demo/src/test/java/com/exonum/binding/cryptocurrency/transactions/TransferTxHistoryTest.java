@@ -50,8 +50,8 @@ class TransferTxHistoryTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.firstOwnerKey;
-  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.secondOwnerKey;
+  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
 
   @Test
   void transfersHistoryBetweenTwoAccountsTest() throws Exception {
@@ -110,7 +110,7 @@ class TransferTxHistoryTest {
 
   private TransferTx withMockMessage(long seed, PublicKey senderId, PublicKey recipientId,
       long amount) {
-    // If a normal raw transaction object is ever needed, take the code from the 'fromMessage' test
+    // If a normal raw transaction object is ever needed, take the code from the 'fromRawTransaction' test
     // and put it here, replacing `mock(RawTransaction.class)`.
     RawTransaction rawTransaction = mock(RawTransaction.class);
     lenient().when(rawTransaction.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));

@@ -23,10 +23,10 @@ import com.exonum.binding.test.Bytes;
 
 public class PredefinedOwnerKeys {
 
-  public static final PublicKey firstOwnerKey =
+  public static final PublicKey FIRST_OWNER_KEY =
       PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(0), PUBLIC_KEY_BYTES));
 
-  public static final PublicKey secondOwnerKey =
+  public static final PublicKey SECOND_OWNER_KEY =
       PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(1), PUBLIC_KEY_BYTES));
 
   private PredefinedOwnerKeys() {}

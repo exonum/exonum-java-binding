@@ -35,10 +35,10 @@ import org.junit.jupiter.api.Test;
 class PutValueTransactionTest {
 
   @Test
-  void from_WrongMessageType() {
+  void from_WrongTransactionId() {
     RawTransaction transaction = RawTransaction.newBuilder()
         .serviceId(TestService.ID)
-        .transactionId((short) (PutValueTransaction.ID - 1))
+        .transactionId((short) -1)
         .payload(encode("any value"))
         .build();
 
@@ -49,8 +49,8 @@ class PutValueTransactionTest {
   @Test
   void from_WrongService() {
     RawTransaction transaction = RawTransaction.newBuilder()
-        .serviceId(TestService.ID)
-        .transactionId((short) (TestService.ID + 1))
+        .serviceId((short) -1)
+        .transactionId(PutValueTransaction.ID)
         .payload(encode("any value"))
         .build();
 
@@ -80,7 +80,9 @@ class PutValueTransactionTest {
     PutValueTransaction tx = PutValueTransaction.from(transaction,
         createTestSchemaFactory(fork, schema));
 
-    tx.execute(new InternalTransactionContext(fork, tx.hash(), null));
+    InternalTransactionContext context = new InternalTransactionContext(fork,
+        tx.hash(), null);
+    tx.execute(context);
 
     verify(testMap).put(eq(hash), eq(value));
   }

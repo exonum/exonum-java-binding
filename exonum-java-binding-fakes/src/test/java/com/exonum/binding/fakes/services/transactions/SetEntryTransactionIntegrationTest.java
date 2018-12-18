@@ -49,11 +49,13 @@ class SetEntryTransactionIntegrationTest {
     try (MemoryDb database = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String value = "A value to set into entry";
-
       Fork fork = database.createFork(cleaner);
+
       SetEntryTransaction tx = new SetEntryTransaction(value);
-      tx.execute(new InternalTransactionContext(fork, HashCode.fromInt(123),
-          PublicKey.fromHexString("1234")));
+      InternalTransactionContext context = new InternalTransactionContext(fork,
+          HashCode.fromInt(123),
+          PublicKey.fromHexString("1234"));
+      tx.execute(context);
 
       database.merge(fork);
 

@@ -94,6 +94,5 @@ class ThrowingTransactionsTest {
     assertThat(actual.getMessage(), equalTo(description));
   }
 
-  private abstract static class UninstantiableException extends Exception {
-  }
+  private abstract static class UninstantiableException extends Exception {}
 }

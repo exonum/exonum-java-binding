@@ -18,8 +18,6 @@ package com.exonum.binding.cryptocurrency;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.common.crypto.CryptoFunction;
-import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.Node;
@@ -39,9 +37,6 @@ import javax.annotation.Nullable;
 /** A cryptocurrency demo service. */
 public final class CryptocurrencyServiceImpl extends AbstractService
     implements CryptocurrencyService {
-
-  /** A cryptographic function for signing transaction messages of this service. */
-  public static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   @Nullable private Node node;
 

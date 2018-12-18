@@ -61,28 +61,28 @@ class TransferTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey FROM_KEY = PredefinedOwnerKeys.firstOwnerKey;
-  private static final PublicKey TO_KEY = PredefinedOwnerKeys.secondOwnerKey;
+  private static final PublicKey FROM_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+  private static final PublicKey TO_KEY = PredefinedOwnerKeys.SECOND_OWNER_KEY;
 
   @Test
-  void fromMessage() {
+  void fromRawTransaction() {
     long seed = 1;
     long amount = 50L;
     RawTransaction m = createRawTransaction(seed, FROM_KEY, TO_KEY, amount);
 
-    TransferTx tx = TransferTx.fromMessage(m);
+    TransferTx tx = TransferTx.fromRawTransaction(m);
 
-    assertThat(tx, equalTo(withMockMessage(seed, FROM_KEY, TO_KEY, amount)));
+    assertThat(tx, equalTo(withMockRawTransaction(seed, FROM_KEY, TO_KEY, amount)));
   }
 
   @Test
-  void fromMessageRejectsSameSenderAndReceiver() {
+  void fromRawTransactionRejectsSameSenderAndReceiver() {
     long seed = 1;
     long amount = 50L;
-    RawTransaction m = createRawTransaction(seed, FROM_KEY, FROM_KEY, amount);
+    RawTransaction tx = createRawTransaction(seed, FROM_KEY, FROM_KEY, amount);
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.fromMessage(m));
+        () -> TransferTx.fromRawTransaction(tx));
 
     assertThat(e.getMessage(), allOf(
         containsStringIgnoringCase("same sender and receiver"),
@@ -96,12 +96,12 @@ class TransferTxTest {
       -1,
       0
   })
-  void fromMessageRejectsNonPositiveBalance(long transferAmount) {
+  void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
     long seed = 1;
-    RawTransaction m = createRawTransaction(seed, FROM_KEY, TO_KEY, transferAmount);
+    RawTransaction tx = createRawTransaction(seed, FROM_KEY, TO_KEY, transferAmount);
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.fromMessage(m));
+        () -> TransferTx.fromRawTransaction(tx));
 
     assertThat(e.getMessage(), allOf(
         containsStringIgnoringCase("transfer amount"),
@@ -114,7 +114,6 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
 
       // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
@@ -124,7 +123,8 @@ class TransferTxTest {
       // Create and execute the transaction
       long seed = 1L;
       long transferSum = 40L;
-      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferSum);
+      TransferTx tx = withMockRawTransaction(seed, FROM_KEY, TO_KEY, transferSum);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
       tx.execute(context);
 
       // Check that wallets have correct balances
@@ -154,7 +154,6 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
 
       // Create a receiver’s wallet with the given initial balance
       long initialBalance = 50L;
@@ -162,7 +161,8 @@ class TransferTxTest {
 
       long seed = 1L;
       long transferValue = 50L;
-      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferValue);
+      TransferTx tx = withMockRawTransaction(seed, FROM_KEY, TO_KEY, transferValue);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
       // Execute the transaction that attempts to transfer from an unknown wallet
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
@@ -176,7 +176,6 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
 
       // Create a sender’s wallet
       long initialBalance = 100L;
@@ -186,7 +185,8 @@ class TransferTxTest {
       long transferValue = 50L;
       long seed = 1L;
 
-      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferValue);
+      TransferTx tx = withMockRawTransaction(seed, FROM_KEY, TO_KEY, transferValue);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
       assertThat(e, hasErrorCode(UNKNOWN_RECEIVER));
@@ -199,7 +199,6 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
 
       // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
@@ -210,8 +209,8 @@ class TransferTxTest {
       // exceeding the balance
       long seed = 1L;
       long transferValue = initialBalance + 50L;
-      TransferTx tx = withMockMessage(seed, FROM_KEY, TO_KEY, transferValue);
-
+      TransferTx tx = withMockRawTransaction(seed, FROM_KEY, TO_KEY, transferValue);
+      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
       assertThat(e, hasErrorCode(INSUFFICIENT_FUNDS));
@@ -226,10 +225,8 @@ class TransferTxTest {
         .verify();
   }
 
-  private TransferTx withMockMessage(long seed, PublicKey senderId, PublicKey recipientId,
+  private TransferTx withMockRawTransaction(long seed, PublicKey senderId, PublicKey recipientId,
       long amount) {
-    // If a normal raw transaction object is ever needed, take the code from the 'fromMessage' test
-    // and put it here, replacing `mock(RawTransaction.class)`.
     RawTransaction rawTransaction = mock(RawTransaction.class);
     lenient().when(rawTransaction.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
     return new TransferTx(rawTransaction, seed, senderId, recipientId, amount);
