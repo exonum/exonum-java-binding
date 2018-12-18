@@ -17,7 +17,7 @@
 
 package com.exonum.binding.blockchain;
 
-import static com.exonum.binding.common.serialization.StandardSerializers.fixed64;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
@@ -28,7 +28,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -39,6 +38,8 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * A proxy class for the blockchain::Schema struct maintained by Exonum core.
@@ -49,11 +50,13 @@ final class CoreSchemaProxy {
 
   private final NativeHandle nativeHandle;
   private final View dbView;
-  private final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
-  private final Serializer<TransactionLocation> transactionLocationSerializer =
+  private static final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
+  private static final Serializer<TransactionLocation> transactionLocationSerializer =
       TransactionLocationSerializer.INSTANCE;
-  private final Serializer<TransactionResult> transactionResultSerializer =
+  private static final Serializer<TransactionResult> transactionResultSerializer =
       TransactionResultSerializer.INSTANCE;
+  private static final Serializer<TransactionMessage> transactionMessageSerializer =
+      StandardSerializers.transactionMessage();
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
     this.nativeHandle = nativeHandle;
@@ -94,10 +97,18 @@ final class CoreSchemaProxy {
 
   /**
    * Returns an proof list index containing block hashes for the given height.
+   *
+   * @throws IllegalArgumentException if the height is negative or there is no block at given height
    */
   ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
-    byte[] id = fixed64().toBytes(height);
+    long actualHeight = getHeight();
+    checkArgument(
+        height > actualHeight,
+        "Height should be less or equal compared to blockchain height %s, but was %s",
+        actualHeight,
+        height);
+    byte[] id = toCoreStorageKey(height);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
   }
@@ -112,6 +123,7 @@ final class CoreSchemaProxy {
 
   /**
    * Returns the latest committed block.
+   *
    * @throws RuntimeException if the "genesis block" was not created
    */
   Block getLastBlock() {
@@ -122,9 +134,8 @@ final class CoreSchemaProxy {
    * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
-    // TODO: serializer
     return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbView, StandardSerializers.hash(),
-        null);
+        transactionMessageSerializer);
   }
 
   /**
@@ -152,7 +163,7 @@ final class CoreSchemaProxy {
   StoredConfiguration getActualConfiguration() {
     String rawConfiguration = nativeGetActualConfiguration(nativeHandle.get());
 
-    return StoredConfigurationGsonSerializer.fromJson(rawConfiguration);
+    return json().fromJson(rawConfiguration, StoredConfiguration.class);
   }
 
   private static native long nativeCreate(long viewNativeHandle);
@@ -169,6 +180,13 @@ final class CoreSchemaProxy {
    * @throws RuntimeException if the "genesis block" was not created
    */
   private static native byte[] nativeGetLastBlock(long nativeHandle);
+
+  private byte[] toCoreStorageKey(long value) {
+    return ByteBuffer.allocate(Long.BYTES)
+        .order(ByteOrder.BIG_ENDIAN)
+        .putLong(value)
+        .array();
+  }
 
   /**
    * Mapping for Exonum core indexes by name.

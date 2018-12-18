@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.blockchain;
 
 import com.exonum.binding.common.hash.HashCode;
-import java.util.List;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.jupiter.api.Test;
 
-/**
- * A schema of the collections (a.k.a. indices) of a service.
- */
-public interface Schema {
+class BlockTest {
 
-  /**
-   * Returns the root hashes of Merklized tables in this database schema, as of the current
-   * state of the database. If there are no Merklized tables, returns an empty list.
-   *
-   * <p>This list of root hashes represents the current service state. Lists of these hashes
-   * from each service are aggregated in a single <em>blockchain state hash</em> that reflects
-   * the state of all services in the blockchain.
-   */
-  List<HashCode> getStateHashes();
+  @Test
+  void verifyEquals() {
+    EqualsVerifier.forClass(AutoValue_Block.class)
+        // Constructor ensures that we have no nulls
+        .suppress(Warning.NULL_FIELDS)
+        // We use 4 bytes from proper SHA-256 with good distribution
+        .suppress(Warning.STRICT_HASHCODE)
+        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
+        .verify();
+  }
 }

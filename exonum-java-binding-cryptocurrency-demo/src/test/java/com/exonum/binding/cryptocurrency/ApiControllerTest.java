@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -34,7 +35,6 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.transaction.Transaction;
@@ -122,7 +122,7 @@ class ApiControllerTest {
 
     String expectedResponse = messageHash;
     // Send a request to submitTransaction
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
+    postTransaction()
         .sendBuffer(
             Buffer.buffer(message.getSignedMessage().array()),
             context.succeeding(
@@ -147,11 +147,30 @@ class ApiControllerTest {
   }
 
   @Test
+  void submitValidTransactionWrongContentType(VertxTestContext context) {
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
+
+    // Send a request to submitTransaction
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .putHeader("Content-Type", "application/x-www-form-urlencoded")
+        .sendBuffer(
+            Buffer.buffer(message.getSignedMessage().array()),
+            context.succeeding(
+                response -> context.verify(() -> {
+                  // Check the response status
+                  int statusCode = response.statusCode();
+                  assertEquals(HTTP_BAD_REQUEST, statusCode);
+
+                  context.completeNow();
+                })));
+  }
+
+  @Test
   void submitTransactionOfIncorrectMessageSize(VertxTestContext context) {
     BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
     byte errorByte = 1;
 
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
+    postTransaction()
         .sendBuffer(
             Buffer.buffer(message.getSignedMessage().array()).appendByte(errorByte),
             context.succeeding(response -> context.verify(() -> {
@@ -176,7 +195,7 @@ class ApiControllerTest {
     when(service.submitTransaction(transaction))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
+    postTransaction()
         .sendBuffer(
             Buffer.buffer(message.getSignedMessage().array()),
             context.succeeding(response -> context.verify(() -> {
@@ -201,7 +220,7 @@ class ApiControllerTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Wallet actualWallet = CryptocurrencyTransactionGson.instance()
+          Wallet actualWallet = json()
               .fromJson(body, Wallet.class);
           assertThat(actualWallet.getBalance()).isEqualTo(wallet.getBalance());
 
@@ -287,7 +306,7 @@ class ApiControllerTest {
   private List<HistoryEntity> parseWalletHistory(HttpResponse<Buffer> response) {
     Type listType = new TypeToken<List<HistoryEntity>>() {
     }.getType();
-    return CryptocurrencyTransactionGson.instance()
+    return json()
         .fromJson(response.bodyAsString(), listType);
   }
 
@@ -317,6 +336,11 @@ class ApiControllerTest {
 
   private HttpRequest<Buffer> get(String requestPath) {
     return webClient.get(port, HOST, requestPath);
+  }
+
+  private HttpRequest<Buffer> postTransaction() {
+    return post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .putHeader("Content-Type", "application/octet-stream");
   }
 
   private HttpRequest<Buffer> post(String requestPath) {

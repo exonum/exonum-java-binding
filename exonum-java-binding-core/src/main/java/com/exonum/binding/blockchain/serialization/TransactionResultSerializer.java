@@ -16,32 +16,25 @@
 
 package com.exonum.binding.blockchain.serialization;
 
+import static com.exonum.binding.blockchain.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
+import static com.exonum.binding.blockchain.TransactionResult.SUCCESSFUL_RESULT_STATUS_CODE;
+import static com.exonum.binding.blockchain.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+
 import com.exonum.binding.blockchain.TransactionResult;
-import com.exonum.binding.blockchain.TransactionResult.Type;
 import com.exonum.binding.common.serialization.Serializer;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;
 
+  private static final Serializer<CoreProtos.TransactionResult> PROTO_SERIALIZER =
+      protobuf(CoreProtos.TransactionResult.class);
+
   @Override
   public byte[] toBytes(TransactionResult value) {
-    int status;
-    switch (value.getType()) {
-      case ERROR:
-        status = value.getErrorCode().get();
-        break;
-      case SUCCESS:
-        status = 256;
-        break;
-      case UNEXPECTED_ERROR:
-        status = 257;
-        break;
-      default:
-        throw new AssertionError("Unreachable");
-    }
-    TransactionResultProto txLocation =
-        TransactionResultProto.newBuilder()
+    int status = convertToCoreStatusCode(value);
+    CoreProtos.TransactionResult txLocation =
+        CoreProtos.TransactionResult.newBuilder()
             .setStatus(status)
             .setDescription(value.getErrorDescription().orElse(""))
             .build();
@@ -50,23 +43,33 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
 
   @Override
   public TransactionResult fromBytes(byte[] binaryTransactionResult) {
-    try {
-      TransactionResultProto copiedtxLocationProtos =
-          TransactionResultProto.parseFrom(binaryTransactionResult);
-      int status = copiedtxLocationProtos.getStatus();
-      String description = copiedtxLocationProtos.getDescription();
-      if (status <= 255) {
-        return TransactionResult.valueOf(Type.ERROR, status, description);
-      } else if (status == 256) {
-        return TransactionResult.valueOf(Type.SUCCESS, null, null);
-      } else if (status == 257) {
-        return TransactionResult.valueOf(Type.UNEXPECTED_ERROR, null, description);
-      } else {
-        throw new InvalidProtocolBufferException("Invalid status code");
-      }
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Unable to instantiate "
-          + "TransactionResultProtos.TransactionResult instance from provided binary data", e);
+    CoreProtos.TransactionResult copiedtxLocationProtos =
+        PROTO_SERIALIZER.fromBytes(binaryTransactionResult);
+    int status = copiedtxLocationProtos.getStatus();
+    String description = copiedtxLocationProtos.getDescription();
+    if (status <= MAX_USER_DEFINED_ERROR_CODE) {
+      return TransactionResult.error(status, description);
+    } else if (status == SUCCESSFUL_RESULT_STATUS_CODE) {
+      return TransactionResult.successful();
+    } else if (status == UNEXPECTED_ERROR_STATUS_CODE) {
+      return TransactionResult.unexpectedError(description);
+    } else {
+      String message =
+          String.format("Invalid status code: %s, must be in the range [0, 257]", status);
+      throw new IllegalArgumentException(message);
+    }
+  }
+
+  private int convertToCoreStatusCode(TransactionResult transactionResult) {
+    switch (transactionResult.getType()) {
+      case ERROR:
+        return transactionResult.getErrorCode().getAsInt();
+      case SUCCESS:
+        return SUCCESSFUL_RESULT_STATUS_CODE;
+      case UNEXPECTED_ERROR:
+        return UNEXPECTED_ERROR_STATUS_CODE;
+      default:
+        throw new AssertionError("Unreachable: " + transactionResult);
     }
   }
 

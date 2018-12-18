@@ -63,6 +63,7 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>${guice.version}</version>
+      <classifier>no_aop</classifier>
     </dependency>
 
     <dependency>
@@ -86,6 +87,12 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -133,31 +140,6 @@
     <dependency>
       <groupId>nl.jqno.equalsverifier</groupId>
       <artifactId>equalsverifier</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!--JUnit5-->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -270,6 +252,7 @@
         <executions>
           <execution>
             <goals>
+              <goal>compile</goal>
               <goal>test-compile</goal>
             </goals>
             <configuration>
@@ -351,7 +334,7 @@
         <configuration>
           <effort>max</effort>
           <threshold>medium</threshold>
-          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+          <excludeFilterFile>${project.basedir}/findbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
 

@@ -171,7 +171,8 @@ impl ServiceMockBuilder {
                     "getMockInteractionAfterCommit",
                     "()Lcom/exonum/binding/fakes/mocks/MockInteraction;",
                     &[],
-                )?.l()?;
+                )?
+                .l()?;
             Ok(env.new_global_ref(mock_interaction)?)
         }));
         (self, obj)

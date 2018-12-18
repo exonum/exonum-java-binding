@@ -16,19 +16,23 @@
 
 package com.exonum.binding.blockchain.serialization;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
 
+  private static final Serializer<CoreProtos.Block> PROTO_SERIALIZER =
+      protobuf(CoreProtos.Block.class);
+
   @Override
   public byte[] toBytes(Block value) {
-    BlockProtos.Block block = BlockProtos.Block.newBuilder()
+    CoreProtos.Block block = CoreProtos.Block.newBuilder()
         .setProposerId(value.getProposerId())
         .setHeight(value.getHeight())
         .setTxCount(value.getNumTransactions())
@@ -41,37 +45,28 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @Override
   public Block fromBytes(byte[] binaryBlock) {
-    try {
-      BlockProtos.Block copiedBlocks = BlockProtos.Block.parseFrom(binaryBlock);
-      return Block.valueOf(copiedBlocks.getProposerId(),
-          copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
-          fromHashProto(copiedBlocks.getPrevHash()),
-          fromHashProto(copiedBlocks.getTxHash()),
-          fromHashProto(copiedBlocks.getStateHash()));
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException(
-          "Unable to instantiate Blocks.Block instance from provided binary data", e);
-    }
-  }
-
-  private static BlockProtos.Hash toHashProto(HashCode hash) {
-    return BlockProtos.Hash.newBuilder()
-        .setData(toByteString(hash))
+    HashCode blockHash = Hashing.sha256().hashBytes(binaryBlock);
+    CoreProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
+    return Block.builder()
+        .proposerId(copiedBlocks.getProposerId())
+        .height(copiedBlocks.getHeight())
+        .numTransactions(copiedBlocks.getTxCount())
+        .blockHash(blockHash)
+        .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
+        .txRootHash(toHashCode(copiedBlocks.getTxHash()))
+        .stateHash(toHashCode(copiedBlocks.getStateHash()))
         .build();
   }
 
-  private static HashCode fromHashProto(BlockProtos.Hash hash) {
-    return toHashCode(hash.getData());
+  private static CoreProtos.Hash toHashProto(HashCode hash) {
+    ByteString bytes = ByteString.copyFrom(hash.asBytes());
+    return CoreProtos.Hash.newBuilder()
+        .setData(bytes)
+        .build();
   }
 
-  private static ByteString toByteString(HashCode hash) {
-    byte[] bytes = StandardSerializers.hash().toBytes(hash);
-    return ByteString.copyFrom(bytes);
+  private static HashCode toHashCode(CoreProtos.Hash hash) {
+    ByteString bytes = hash.getData();
+    return HashCode.fromBytes(bytes.toByteArray());
   }
-
-  private static HashCode toHashCode(ByteString byteString) {
-    byte[] bytes = byteString.toByteArray();
-    return StandardSerializers.hash().fromBytes(bytes);
-  }
-
 }

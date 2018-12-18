@@ -17,6 +17,9 @@
 
 package com.exonum.binding.blockchain;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -26,7 +29,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * Provides read-only access to the subset of
@@ -79,42 +82,46 @@ public final class Blockchain {
    * an empty list if the block at the given height doesn't exist.
    *
    * @param height block height starting from 0
-   * @throws IllegalArgumentException if the height is negative
+   * @throws IllegalArgumentException if the height is negative or there is no block at given height
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block with given id or null if
-   * the block with given id doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block with given id or an empty
+   * list if the block with given id doesn't exist.
    *
    * @param blockId id of the block
+   * @throws IllegalArgumentException if there is no block with given id
    */
-  @Nullable
   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
-    MapIndex<HashCode, Block> blocks = schema.getBlocks();
-    Block block = blocks.get(blockId);
-    return getBlockTransactions(block.getHeight());
+    Optional<Block> block = getBlock(blockId);
+    checkArgument(block.isPresent(), "No block found for given id %s", blockId);
+    return getBlockTransactions(block.get().getHeight());
   }
 
   /**
    * Returns a proof list of transaction hashes committed in the given block or an empty list if
-   * the block with given id doesn't exist.
+   * the block doesn't exist.
    *
    * @param block block of which list of transaction hashes should be returned
+   * @throws NullPointerException if the block is null
+   * @throws IllegalArgumentException if the height of given block is negative or there is no block
+   *                                  at given height
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(Block block) {
+    checkNotNull(block);
     return getBlockTransactions(block.getHeight());
   }
 
   /**
    * Returns a map of transaction messages identified by their SHA-256 hashes. Both committed and
-   * in-pool transactions are returned.
+   * in-pool (not yet processed) transactions are returned.
    */
-   public MapIndex<HashCode, TransactionMessage> getTxMessages() {
-     return schema.getTxMessages();
-   }
+  public MapIndex<HashCode, TransactionMessage> getTxMessages() {
+    return schema.getTxMessages();
+  }
 
   /**
    * Returns a map with a key-value pair of a transaction hash and execution result.
@@ -125,11 +132,14 @@ public final class Blockchain {
 
   /**
    * Returns a transaction execution result for given message hash.
-   * @param messageHash a message hash
+   *
+   * @return a transaction execution result, or {@code Optional.empty()} if this transaction
+   *         is unknown or was not yet executed
    */
-  public TransactionResult getTxResult(HashCode messageHash) {
+  public Optional<TransactionResult> getTxResult(HashCode messageHash) {
     ProofMapIndexProxy<HashCode, TransactionResult> txResults = getTxResults();
-    return txResults.get(messageHash);
+    TransactionResult transactionResult = txResults.get(messageHash);
+    return Optional.ofNullable(transactionResult);
   }
 
   /**
@@ -142,11 +152,14 @@ public final class Blockchain {
 
   /**
    * Returns transaction position inside the blockchain for given message hash.
-   * @param messageHash message hash
+   *
+   * @return a transaction execution result, or {@code Optional.empty()} if this transaction
+   *         is unknown or was not yet executed
    */
-  public TransactionLocation getTxLocation(HashCode messageHash) {
+  public Optional<TransactionLocation> getTxLocation(HashCode messageHash) {
     MapIndex<HashCode, TransactionLocation> txLocations = getTxLocations();
-    return txLocations.get(messageHash);
+    TransactionLocation transactionLocation = txLocations.get(messageHash);
+    return Optional.ofNullable(transactionLocation);
   }
 
   /**
@@ -158,14 +171,20 @@ public final class Blockchain {
 
   /**
    * Returns a block object for given block hash.
+   *
+   * @return a corresponding block, or {@code Optional.empty()} if there is no block with given
+   *         block hash
    */
-  public Block getBlock(HashCode blockHash) {
+  public Optional<Block> getBlock(HashCode blockHash) {
     MapIndex<HashCode, Block> blocks = getBlocks();
-    return blocks.get(blockHash);
+    Block block = blocks.get(blockHash);
+    return Optional.ofNullable(block);
   }
 
   /**
    * Returns the latest committed block.
+   *
+   * @throws RuntimeException if the "genesis block" was not created
    */
   public Block getLastBlock() {
     return schema.getLastBlock();

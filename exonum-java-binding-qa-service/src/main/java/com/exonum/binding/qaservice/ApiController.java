@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -28,13 +29,10 @@ import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
-import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -209,10 +207,9 @@ final class ApiController {
     Optional<Counter> counter = service.getValue(counterId);
 
     if (counter.isPresent()) {
-      Gson gson = QaTransactionGson.instance();
       rc.response()
           .putHeader("Content-Type", "application/json")
-          .end(gson.toJson(counter.get()));
+          .end(json().toJson(counter.get()));
     } else {
       rc.response()
           .setStatusCode(HTTP_NOT_FOUND)
@@ -223,10 +220,9 @@ final class ApiController {
   private void getHeight(RoutingContext rc) {
     try {
       Height height = service.getHeight();
-      Gson gson = QaTransactionGson.instance();
       rc.response()
           .putHeader("Content-Type", "application/json")
-          .end(gson.toJson(height));
+          .end(json().toJson(height));
     } catch (RuntimeException ex) {
       rc.response()
           .setStatusCode(HTTP_BAD_REQUEST)
@@ -236,18 +232,16 @@ final class ApiController {
 
   private void getAllBlockHashes(RoutingContext rc) {
     List<HashCode> hashes = service.getAllBlockHashes();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(hashes));
+        .end(json().toJson(hashes));
   }
 
   private void getBlocks(RoutingContext rc) {
     Map<HashCode, Block> blocks = service.getBlocks();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(blocks));
+        .end(json().toJson(blocks));
   }
 
   private void getBlock(RoutingContext rc) {
@@ -255,18 +249,16 @@ final class ApiController {
         HashCode::fromString);
 
     Block block = service.getBlock(blockId);
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(block));
+        .end(json().toJson(block));
   }
 
   private void getLastBlock(RoutingContext rc) {
     Block block = service.getLastBlock();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(block));
+        .end(json().toJson(block));
   }
 
   private void getBlockTransactionsByHeight(RoutingContext rc) {
@@ -274,10 +266,9 @@ final class ApiController {
         Long::parseLong);
 
     List<HashCode> hashes = service.getBlockTransactions(height);
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(hashes));
+        .end(json().toJson(hashes));
   }
 
   private void getBlockTransactionsByBlockId(RoutingContext rc) {
@@ -285,27 +276,24 @@ final class ApiController {
         HashCode::fromString);
 
     List<HashCode> hashes = service.getBlockTransactions(blockId);
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(hashes));
+        .end(json().toJson(hashes));
   }
 
   private void getTransactionMessages(RoutingContext rc) {
     // TODO: TransactionMessage
     Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(txMessages));
+        .end(json().toJson(txMessages));
   }
 
   private void getTransactionResults(RoutingContext rc) {
     Map<HashCode, TransactionResult> txResults = service.getTxResults();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(txResults));
+        .end(json().toJson(txResults));
   }
 
   private void getTransactionResult(RoutingContext rc) {
@@ -313,18 +301,16 @@ final class ApiController {
         HashCode::fromString);
 
     TransactionResult txResult = service.getTxResult(messageHash);
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(txResult));
+        .end(json().toJson(txResult));
   }
 
   private void getTransactionLocations(RoutingContext rc) {
     Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(txLocations));
+        .end(json().toJson(txLocations));
   }
 
   private void getTransactionLocation(RoutingContext rc) {
@@ -332,15 +318,14 @@ final class ApiController {
         HashCode::fromString);
 
     TransactionLocation txLocation = service.getTxLocation(messageHash);
-    Gson gson = QaTransactionGson.instance();
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(gson.toJson(txLocation));
+        .end(json().toJson(txLocation));
   }
 
   private void getActualConfiguration(RoutingContext rc) {
     StoredConfiguration configuration = service.getActualConfiguration();
-    String json = StoredConfigurationGsonSerializer.toJson(configuration);
+    String json = json().toJson(configuration);
 
     rc.response()
         .putHeader("Content-Type", "application/json")

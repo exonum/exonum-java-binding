@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.storage.indices;
+package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.storage.database.View;
+enum TransactionError {
+  WALLET_ALREADY_EXISTS(0),
+  UNKNOWN_RECEIVER(1),
+  UNKNOWN_SENDER(2),
+  INSUFFICIENT_FUNDS(3);
 
-/**
- * A test of common ListIndex methods.
- */
-class ListIndexIntegrationTest
-    extends BaseListIndexIntegrationTest {
+  final byte errorCode;
 
-  @Override
-  AbstractListIndexProxy<String> create(String name, View view) {
-    return IndexConstructors.fromOneArg(ListIndexProxy::newInstance).create(name, view);
+  TransactionError(int errorCode) {
+    this.errorCode = (byte) errorCode;
   }
-
-  @Override
-  Object getAnyElement(AbstractListIndexProxy<String> index) {
-    return index.get(0L);
-  }
-
 }

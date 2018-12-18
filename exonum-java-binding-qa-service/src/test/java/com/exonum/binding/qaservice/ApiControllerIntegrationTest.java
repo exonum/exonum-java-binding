@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_PATH;
@@ -57,8 +58,6 @@ import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.serialization.json.StoredConfigurationGsonSerializer;
-import com.exonum.binding.qaservice.transactions.QaTransactionGson;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.collect.Lists;
@@ -325,8 +324,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Counter actualCounter = QaTransactionGson.instance()
-              .fromJson(body, Counter.class);
+          Counter actualCounter = json().fromJson(body, Counter.class);
           assertThat(actualCounter).isEqualTo(counter);
 
           context.completeNow();
@@ -386,8 +384,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Height actualHeight = QaTransactionGson.instance()
-              .fromJson(body, Height.class);
+          Height actualHeight = json().fromJson(body, Height.class);
           assertThat(actualHeight).isEqualTo(height);
 
           context.completeNow();
@@ -419,7 +416,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = QaTransactionGson.instance()
+          Object actualHashes = json()
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(blockHashes);
@@ -464,7 +461,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = QaTransactionGson.instance()
+          Object actualHashes = json()
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(transactionHashes);
@@ -676,8 +673,8 @@ class ApiControllerIntegrationTest {
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
               () -> {
                 String body = response.bodyAsString();
-                StoredConfiguration storedConfiguration = StoredConfigurationGsonSerializer
-                    .fromJson(body);
+                StoredConfiguration storedConfiguration = json()
+                    .fromJson(body, StoredConfiguration.class);
 
                 assertThat(storedConfiguration).isEqualTo(configuration);
               });

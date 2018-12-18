@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.blockchain.TransactionResult;
-import com.exonum.binding.blockchain.TransactionResult.Type;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionResultSerializerTest {
 
-  private Serializer<TransactionResult> serializer = TransactionResultSerializer.INSTANCE;
+  private static final Serializer<TransactionResult> serializer =
+      TransactionResultSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
@@ -41,9 +41,10 @@ class TransactionResultSerializerTest {
 
   private static Stream<TransactionResult> testSource() {
     return Stream.of(
-        TransactionResult.valueOf(Type.SUCCESS, null, null),
-        TransactionResult.valueOf(Type.ERROR, 1, "Error description"),
-        TransactionResult.valueOf(Type.UNEXPECTED_ERROR, null, ""));
+        TransactionResult.successful(),
+        TransactionResult.error(0, "Error description"),
+        TransactionResult.error(1, /* Empty as no description: */ ""),
+        TransactionResult.error(255, /* Null as no description: */ null),
+        TransactionResult.unexpectedError(""));
   }
-
 }
