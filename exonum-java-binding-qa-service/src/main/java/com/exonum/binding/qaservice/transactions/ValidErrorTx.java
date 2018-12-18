@@ -19,7 +19,6 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
@@ -82,11 +81,6 @@ public final class ValidErrorTx implements Transaction {
 
     // Throw an exception. Framework must revert the changes made above.
     throw new TransactionExecutionException(errorCode, errorDescription);
-  }
-
-  @Override
-  public HashCode hash() {
-    return converter().toRawTransaction(this).hash();
   }
 
   @Override

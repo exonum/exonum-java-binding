@@ -22,20 +22,16 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TemplateRawTransaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ServiceBootstrapIntegrationTest {
@@ -80,13 +76,7 @@ class UserModule extends AbstractModule {
         .to(UserService.class);
 
     bind(TransactionConverter.class)
-        .toInstance((m) -> new AbstractTransaction(m) {
-
-          @Override
-          public void execute(TransactionContext context) {
-            System.out.println("Transaction#execute");
-          }
-        });
+        .toInstance((m) -> (context) -> System.out.println("Transaction#execute"));
   }
 }
 
@@ -102,13 +92,7 @@ class UserService extends AbstractService {
 
   @Override
   protected Schema createDataSchema(View view) {
-    return new Schema() {
-
-      @Override
-      public List<HashCode> getStateHashes() {
-        return Collections.emptyList();
-      }
-    };
+    return Collections::emptyList;
   }
 
   @Override

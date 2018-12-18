@@ -16,17 +16,13 @@
 
 package com.exonum.binding.transaction;
 
-import com.exonum.binding.common.hash.HashCode;
-
 /**
  * An Exonum transaction.
- *
- * <p>You shall usually extend {@link AbstractTransaction} rather than implementing
- * this interface.
  *
  * @see <a href="https://exonum.com/doc/architecture/transactions">Exonum Transactions</a>
  * @see <a href="https://exonum.com/doc/architecture/services">Exonum Services</a>
  */
+@FunctionalInterface
 public interface Transaction {
 
   /**
@@ -43,10 +39,5 @@ public interface Transaction {
    *     (status "panic").
    */
   void execute(TransactionContext context) throws TransactionExecutionException;
-
-  /**
-   * Returns a hash of this transaction — a SHA-256 hash of the transaction message.
-   */
-  HashCode hash();
 
 }

@@ -61,11 +61,6 @@ public final class SetEntryTransaction implements Transaction {
     authorPk.set(context.getAuthorPk());
   }
 
-  @Override
-  public HashCode hash() {
-    return HashCode.fromString(value);
-  }
-
   private EntryIndexProxy<String> createTestEntry(Fork view) {
     return EntryIndexProxy.newInstance(TEST_ENTRY_NAME, view, StandardSerializers.string());
   }

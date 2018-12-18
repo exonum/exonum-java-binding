@@ -19,7 +19,6 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
@@ -55,12 +54,6 @@ public final class ValidThrowingTx implements Transaction {
 
     // Throw an exception. Framework must revert the changes made above.
     throw new IllegalStateException("#execute of this transaction always throws: " + this);
-  }
-
-
-  @Override
-  public HashCode hash() {
-    return converter().toRawTransaction(this).hash();
   }
 
   @Override

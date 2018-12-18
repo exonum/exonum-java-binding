@@ -17,8 +17,8 @@
 package com.exonum.binding.qaservice.transactions;
 
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 
 /**
@@ -32,13 +32,9 @@ import com.exonum.binding.transaction.TransactionContext;
  * once they receive it as a message from this node. If multiple unknown transaction messages
  * need to be submitted, a seed might be added.
  */
-public final class UnknownTx extends AbstractTransaction {
+public final class UnknownTx implements Transaction {
 
   private static final short ID = 9999;
-
-  public UnknownTx() {
-    super(createRawTransaction());
-  }
 
   @Override
   public void execute(TransactionContext context) {

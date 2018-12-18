@@ -19,7 +19,6 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkPayloadSize;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
@@ -35,11 +34,6 @@ public final class InvalidThrowingTx implements Transaction {
   @Override
   public void execute(TransactionContext context) {
     throw new AssertionError("Must never be executed by the framework: " + this);
-  }
-
-  @Override
-  public HashCode hash() {
-    return null;
   }
 
   public static TransactionMessageConverter<InvalidThrowingTx> converter() {

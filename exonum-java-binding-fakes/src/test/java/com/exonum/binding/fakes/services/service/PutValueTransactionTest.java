@@ -81,7 +81,7 @@ class PutValueTransactionTest {
         createTestSchemaFactory(fork, schema));
 
     InternalTransactionContext context = new InternalTransactionContext(fork,
-        tx.hash(), null);
+        null, null);
     tx.execute(context);
 
     verify(testMap).put(eq(hash), eq(value));

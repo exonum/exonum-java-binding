@@ -70,11 +70,6 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @Override
-  public HashCode hash() {
-    return converter().toRawTransaction(this).hash();
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

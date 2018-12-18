@@ -30,7 +30,6 @@ import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.HistoryEntity.Builder;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -42,7 +41,7 @@ import java.util.Objects;
 /**
  * A transaction that transfers cryptocurrency between two wallets.
  */
-public final class TransferTx extends AbstractTransaction implements Transaction {
+public final class TransferTx implements Transaction {
 
   static final short ID = 2;
   private static final Serializer<TxMessageProtos.TransferTx> PROTO_SERIALIZER =
@@ -54,9 +53,8 @@ public final class TransferTx extends AbstractTransaction implements Transaction
   private final long sum;
 
   @VisibleForTesting
-  TransferTx(RawTransaction rawTransaction, long seed, PublicKey fromWallet, PublicKey toWallet,
+  TransferTx(long seed, PublicKey fromWallet, PublicKey toWallet,
       long sum) {
-    super(rawTransaction);
     checkArgument(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
     checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
     this.seed = seed;
@@ -79,7 +77,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
     PublicKey toWallet = toPublicKey(body.getToWallet());
     long sum = body.getSum();
 
-    return new TransferTx(rawTransaction, seed, fromWallet, toWallet, sum);
+    return new TransferTx(seed, fromWallet, toWallet, sum);
   }
 
   private static PublicKey toPublicKey(ByteString s) {
@@ -105,7 +103,7 @@ public final class TransferTx extends AbstractTransaction implements Transaction
         .setWalletFrom(fromWallet)
         .setWalletTo(toWallet)
         .setAmount(sum)
-        .setTransactionHash(hash())
+        .setTransactionHash(context.getTransactionMessageHash())
         .build();
     schema.walletHistory(fromWallet).add(historyEntity);
     schema.walletHistory(toWallet).add(historyEntity);

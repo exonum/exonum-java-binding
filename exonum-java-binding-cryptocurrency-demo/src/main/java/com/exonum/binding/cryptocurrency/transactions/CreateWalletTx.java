@@ -27,7 +27,6 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.transaction.AbstractTransaction;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -36,7 +35,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Objects;
 
 /** A transaction that creates a new named wallet with default balance. */
-public final class CreateWalletTx extends AbstractTransaction implements Transaction {
+public final class CreateWalletTx implements Transaction {
 
   static final short ID = 1;
   private static final Serializer<TxMessageProtos.CreateWalletTx> PROTO_SERIALIZER =
@@ -45,9 +44,7 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
   private final long initialBalance;
 
   @VisibleForTesting
-  CreateWalletTx(RawTransaction rawTransaction, PublicKey ownerPublicKey, long initialBalance) {
-    super(rawTransaction);
-
+  CreateWalletTx(PublicKey ownerPublicKey, long initialBalance) {
     checkArgument(ownerPublicKey.size() == PUBLIC_KEY_BYTES,
         "Public key has invalid size (%s), must be %s bytes long.", ownerPublicKey.size(),
         PUBLIC_KEY_BYTES);
@@ -71,7 +68,7 @@ public final class CreateWalletTx extends AbstractTransaction implements Transac
     PublicKey ownerPublicKey = PublicKey.fromBytes(
         (body.getOwnerPublicKey().toByteArray()));
     long initialBalance = body.getInitialBalance();
-    return new CreateWalletTx(rawTransaction, ownerPublicKey, initialBalance);
+    return new CreateWalletTx(ownerPublicKey, initialBalance);
   }
 
   @Override

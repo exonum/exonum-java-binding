@@ -24,7 +24,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
@@ -55,11 +54,11 @@ class CreateWalletTxTest {
   @Test
   void fromRawTransaction() {
     long initialBalance = 100L;
-    RawTransaction m = createRawTransaction(OWNER_KEY, initialBalance);
+    RawTransaction raw = createRawTransaction(OWNER_KEY, initialBalance);
 
-    CreateWalletTx tx = CreateWalletTx.fromRawTransaction(m);
+    CreateWalletTx tx = CreateWalletTx.fromRawTransaction(raw);
 
-    assertThat(tx, equalTo(withMockRawTransaction(OWNER_KEY, initialBalance)));
+    assertThat(tx, equalTo(new CreateWalletTx(OWNER_KEY, initialBalance)));
   }
 
   @Test
@@ -67,7 +66,7 @@ class CreateWalletTxTest {
     PublicKey publicKey = PublicKey.fromBytes(bytes(0x01));
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> withMockRawTransaction(publicKey, DEFAULT_BALANCE)
+        () -> new CreateWalletTx(publicKey, DEFAULT_BALANCE)
     );
     assertThat(t.getMessage(), equalTo("Public key has invalid size (1), must be 32 bytes long."));
   }
@@ -77,7 +76,7 @@ class CreateWalletTxTest {
     long initialBalance = -1L;
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> withMockRawTransaction(OWNER_KEY, initialBalance)
+        () -> new CreateWalletTx(OWNER_KEY, initialBalance)
     );
     assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
 
@@ -86,7 +85,7 @@ class CreateWalletTxTest {
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx() throws Exception {
-    CreateWalletTx tx = withMockRawTransaction(OWNER_KEY, DEFAULT_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(OWNER_KEY, DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -122,7 +121,7 @@ class CreateWalletTxTest {
       // Execute the transaction, that has the same owner key.
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
-      CreateWalletTx tx = withMockRawTransaction(OWNER_KEY, newBalance);
+      CreateWalletTx tx = new CreateWalletTx(OWNER_KEY, newBalance);
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
@@ -138,7 +137,4 @@ class CreateWalletTxTest {
         .verify();
   }
 
-  private static CreateWalletTx withMockRawTransaction(PublicKey ownerKey, long initialBalance) {
-    return new CreateWalletTx(mock(RawTransaction.class), ownerKey, initialBalance);
-  }
 }

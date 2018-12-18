@@ -23,8 +23,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.iterableWithSize;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -39,7 +37,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.InternalTransactionContext;
-import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +55,8 @@ class TransferTxHistoryTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+      HashCode hash = HashCode.fromString("a0a0a0a0");
+      InternalTransactionContext context = new InternalTransactionContext(view, hash, null);
 
       // Create wallets with the given initial balances
       long initialBalance = 100L;
@@ -68,13 +66,13 @@ class TransferTxHistoryTest {
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
-      TransferTx tx1 = withMockMessage(seed1, ACCOUNT_1, ACCOUNT_2, transferSum1);
+      TransferTx tx1 = new TransferTx(seed1, ACCOUNT_1, ACCOUNT_2, transferSum1);
       tx1.execute(context);
 
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
-      TransferTx tx2 = withMockMessage(seed2, ACCOUNT_2, ACCOUNT_1, transferSum2);
+      TransferTx tx2 = new TransferTx(seed2, ACCOUNT_2, ACCOUNT_1, transferSum2);
       tx2.execute(context);
 
       // Check that wallets have correct balances
@@ -91,14 +89,14 @@ class TransferTxHistoryTest {
           .setWalletFrom(ACCOUNT_1)
           .setWalletTo(ACCOUNT_2)
           .setAmount(transferSum1)
-          .setTransactionHash(tx1.hash())
+          .setTransactionHash(context.getTransactionMessageHash())
           .build();
       HistoryEntity expectedEntity2 = HistoryEntity.Builder.newBuilder()
           .setSeed(seed2)
           .setWalletFrom(ACCOUNT_2)
           .setWalletTo(ACCOUNT_1)
           .setAmount(transferSum2)
-          .setTransactionHash(tx2.hash())
+          .setTransactionHash(context.getTransactionMessageHash())
           .build();
       assertThat(schema.walletHistory(ACCOUNT_1),
           allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));
@@ -106,15 +104,6 @@ class TransferTxHistoryTest {
           allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));
     }
 
-  }
-
-  private TransferTx withMockMessage(long seed, PublicKey senderId, PublicKey recipientId,
-      long amount) {
-    // If a normal raw transaction object is ever needed, take the code from the 'fromRawTransaction' test
-    // and put it here, replacing `mock(RawTransaction.class)`.
-    RawTransaction rawTransaction = mock(RawTransaction.class);
-    lenient().when(rawTransaction.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
-    return new TransferTx(rawTransaction, seed, senderId, recipientId, amount);
   }
 
 }

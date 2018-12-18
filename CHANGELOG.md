@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `com.exonum.binding.common.collect`.
 - `com.exonum.binding.common.message.Message`
 - `com.exonum.binding.common.message.BinaryMessage`
+- `com.exonum.binding.transaction.Transaction#hash`
 
 ## [0.3] - 2018-10-30
 

@@ -34,7 +34,6 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.QaContext;
-import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.BlockCommittedEventImpl;
@@ -167,9 +166,10 @@ class QaServiceImplIntegrationTest {
     HashCode txHash = service.submitCreateCounter(counterName);
 
     CreateCounterTx expectedTx = new CreateCounterTx(counterName);
+    RawTransaction expectedRawTx = CreateCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(CreateCounterTx.converter().toRawTransaction(expectedTx)));
+    assertThat(txHash).isEqualTo(expectedRawTx.hash());
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
@@ -182,9 +182,10 @@ class QaServiceImplIntegrationTest {
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
     IncrementCounterTx expectedTx = new IncrementCounterTx(seed, counterId);
+    RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(IncrementCounterTx.converter().toRawTransaction(expectedTx)));
+    assertThat(txHash).isEqualTo(expectedRawTx.hash());
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
@@ -211,9 +212,10 @@ class QaServiceImplIntegrationTest {
     HashCode txHash = service.submitValidThrowingTx(seed);
 
     ValidThrowingTx expectedTx = new ValidThrowingTx(seed);
+    RawTransaction expectedRawTx = ValidThrowingTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(ValidThrowingTx.converter().toRawTransaction(expectedTx)));
+    assertThat(txHash).isEqualTo(expectedRawTx.hash());
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
@@ -222,9 +224,7 @@ class QaServiceImplIntegrationTest {
 
     HashCode txHash = service.submitUnknownTx();
 
-    UnknownTx expectedTx = new UnknownTx();
-
-    assertThat(txHash).isEqualTo(expectedTx.hash());
+    assertThat(txHash).isNotNull();
     verify(node).submitTransaction(any(RawTransaction.class));
   }
 
