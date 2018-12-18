@@ -16,12 +16,16 @@
 
 package com.exonum.binding.blockchain.serialization;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.common.serialization.Serializer;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;
+
+  private static final Serializer<CoreProtos.TxLocation> PROTO_SERIALIZER =
+      protobuf(CoreProtos.TxLocation.class);
 
   @Override
   public byte[] toBytes(TransactionLocation value) {
@@ -35,15 +39,10 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
 
   @Override
   public TransactionLocation fromBytes(byte[] binaryTransactionLocation) {
-    try {
-      CoreProtos.TxLocation copiedtxLocationProtos =
-          CoreProtos.TxLocation.parseFrom(binaryTransactionLocation);
-      return TransactionLocation.valueOf(copiedtxLocationProtos.getBlockHeight(),
-          copiedtxLocationProtos.getPositionInBlock());
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Unable to instantiate "
-          + "CoreProtos.TxLocation instance from provided binary data", e);
-    }
+    CoreProtos.TxLocation copiedtxLocationProtos =
+        PROTO_SERIALIZER.fromBytes(binaryTransactionLocation);
+    return TransactionLocation.valueOf(copiedtxLocationProtos.getBlockHeight(),
+        copiedtxLocationProtos.getPositionInBlock());
   }
 
 }
