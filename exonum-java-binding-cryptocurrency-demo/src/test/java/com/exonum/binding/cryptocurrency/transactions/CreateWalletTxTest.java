@@ -36,8 +36,8 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -90,7 +90,11 @@ class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, OWNER_KEY);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .authorPk(OWNER_KEY)
+          .build();
+
       tx.execute(context);
 
       // Check that entries have been added.
@@ -108,7 +112,7 @@ class CreateWalletTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, OWNER_KEY);
+
       Long initialBalance = DEFAULT_BALANCE;
 
       // Create a wallet manually.
@@ -122,6 +126,11 @@ class CreateWalletTxTest {
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
       CreateWalletTx tx = new CreateWalletTx(OWNER_KEY, newBalance);
+
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .authorPk(OWNER_KEY)
+          .build();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));

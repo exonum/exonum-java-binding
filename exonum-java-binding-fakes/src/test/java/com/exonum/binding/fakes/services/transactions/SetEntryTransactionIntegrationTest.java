@@ -31,7 +31,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.InternalTransactionContext;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,14 +47,17 @@ class SetEntryTransactionIntegrationTest {
   @Test
   void executePutsTheValueIntoEntry() throws CloseFailuresException {
     try (MemoryDb database = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       String value = "A value to set into entry";
       Fork fork = database.createFork(cleaner);
 
       SetEntryTransaction tx = new SetEntryTransaction(value);
-      InternalTransactionContext context = new InternalTransactionContext(fork,
-          HashCode.fromInt(123),
-          PublicKey.fromHexString("1234"));
+      TransactionContext context = TransactionContext.builder()
+          .fork(fork)
+          .hash(HashCode.fromInt(123))
+          .authorPk(PublicKey.fromHexString("1234"))
+          .build();
+
       tx.execute(context);
 
       database.merge(fork);

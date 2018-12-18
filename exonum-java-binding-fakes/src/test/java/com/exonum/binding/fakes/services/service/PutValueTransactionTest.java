@@ -28,8 +28,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import org.junit.jupiter.api.Test;
 
 class PutValueTransactionTest {
@@ -60,7 +60,7 @@ class PutValueTransactionTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  // No type parameters for clarity
+    // No type parameters for clarity
   void execute() {
     String value = "A value to put";
     HashCode hash = Hashing.defaultHashFunction()
@@ -80,8 +80,9 @@ class PutValueTransactionTest {
     PutValueTransaction tx = PutValueTransaction.from(transaction,
         createTestSchemaFactory(fork, schema));
 
-    InternalTransactionContext context = new InternalTransactionContext(fork,
-        null, null);
+    TransactionContext context = TransactionContext.builder()
+        .fork(fork)
+        .build();
     tx.execute(context);
 
     verify(testMap).put(eq(hash), eq(value));

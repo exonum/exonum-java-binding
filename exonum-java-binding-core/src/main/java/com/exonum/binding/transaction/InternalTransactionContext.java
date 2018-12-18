@@ -4,18 +4,12 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 
-public class InternalTransactionContext implements TransactionContext {
+final class InternalTransactionContext implements TransactionContext {
   private final Fork fork;
   private final HashCode hash;
   private final PublicKey authorPk;
 
-  /**
-   * Creates Internal Transaction Context.
-   * @param fork fork
-   * @param hash hash
-   * @param authorPk author private key
-   */
-  public InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk) {
+  InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk) {
     this.fork = fork;
     this.hash = hash;
     this.authorPk = authorPk;
@@ -35,4 +29,5 @@ public class InternalTransactionContext implements TransactionContext {
   public PublicKey getAuthorPk() {
     return authorPk;
   }
+
 }
