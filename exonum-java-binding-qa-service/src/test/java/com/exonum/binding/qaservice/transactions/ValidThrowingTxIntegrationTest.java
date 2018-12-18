@@ -62,7 +62,7 @@ class ValidThrowingTxIntegrationTest {
   void info() {
     long seed = 10L;
     ValidThrowingTx tx = new ValidThrowingTx(seed);
-    String txJson = QaTransactionJson.toJson(ValidThrowingTx.ID, tx);
+    String txJson = QaTransactionJson.toJson(QaTransaction.VALID_THROWING.id(), tx);
 
     AnyTransaction<ValidThrowingTx> txParams = json().fromJson(txJson,
         new TypeToken<AnyTransaction<ValidThrowingTx>>() {

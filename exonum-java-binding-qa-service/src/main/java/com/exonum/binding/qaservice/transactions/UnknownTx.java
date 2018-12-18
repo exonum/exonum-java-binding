@@ -34,7 +34,7 @@ import com.exonum.binding.transaction.TransactionContext;
  */
 public final class UnknownTx extends AbstractTransaction {
 
-  static final short ID = 9999;
+  private static final short ID = 9999;
 
   public UnknownTx() {
     super(createRawTransaction());
@@ -45,6 +45,9 @@ public final class UnknownTx extends AbstractTransaction {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 
+  /**
+   * Returns raw transaction.
+   */
   public static RawTransaction createRawTransaction() {
     return RawTransaction.newBuilder()
         .serviceId(QaService.ID)
@@ -52,4 +55,5 @@ public final class UnknownTx extends AbstractTransaction {
         .payload(new byte[]{})
         .build();
   }
+
 }

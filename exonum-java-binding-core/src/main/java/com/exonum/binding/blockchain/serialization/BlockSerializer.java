@@ -45,33 +45,28 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @Override
   public Block fromBytes(byte[] binaryBlock) {
+    HashCode blockHash = Hashing.sha256().hashBytes(binaryBlock);
     CoreProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
-    return Block.valueOf(copiedBlocks.getProposerId(),
-        copiedBlocks.getHeight(), copiedBlocks.getTxCount(),
-        fromHashProto(copiedBlocks.getPrevHash()),
-        fromHashProto(copiedBlocks.getTxHash()),
-        fromHashProto(copiedBlocks.getStateHash()),
-        Hashing.sha256().hashBytes(binaryBlock));
-  }
-
-  private static CoreProtos.Hash toHashProto(HashCode hash) {
-    return CoreProtos.Hash.newBuilder()
-        .setData(toByteString(hash))
+    return Block.builder()
+        .proposerId(copiedBlocks.getProposerId())
+        .height(copiedBlocks.getHeight())
+        .numTransactions(copiedBlocks.getTxCount())
+        .blockHash(blockHash)
+        .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
+        .txRootHash(toHashCode(copiedBlocks.getTxHash()))
+        .stateHash(toHashCode(copiedBlocks.getStateHash()))
         .build();
   }
 
-  private static HashCode fromHashProto(CoreProtos.Hash hash) {
-    return toHashCode(hash.getData());
+  private static CoreProtos.Hash toHashProto(HashCode hash) {
+    ByteString bytes = ByteString.copyFrom(hash.asBytes());
+    return CoreProtos.Hash.newBuilder()
+        .setData(bytes)
+        .build();
   }
 
-  private static ByteString toByteString(HashCode hash) {
-    byte[] bytes = hash.asBytes();
-    return ByteString.copyFrom(bytes);
+  private static HashCode toHashCode(CoreProtos.Hash hash) {
+    ByteString bytes = hash.getData();
+    return HashCode.fromBytes(bytes.toByteArray());
   }
-
-  private static HashCode toHashCode(ByteString byteString) {
-    byte[] bytes = byteString.toByteArray();
-    return HashCode.fromBytes(bytes);
-  }
-
 }

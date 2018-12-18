@@ -169,7 +169,7 @@ class ValidErrorTxIntegrationTest {
   void info(long seed, byte errorCode, String errorMessage) {
     Transaction tx = new ValidErrorTx(seed, errorCode, errorMessage);
 
-    String txInJson = QaTransactionJson.toJson(ValidErrorTx.ID, tx);
+    String txInJson = QaTransactionJson.toJson(QaTransaction.VALID_ERROR.id(), tx);
 
     AnyTransaction<ValidErrorTx> txFromJson = json().fromJson(txInJson,
         new TypeToken<AnyTransaction<ValidErrorTx>>() {
@@ -187,7 +187,7 @@ class ValidErrorTxIntegrationTest {
 
   private static RawTransaction.Builder txTemplate() {
     return RawTransaction.newBuilder()
-        .transactionId(ValidErrorTx.ID)
+        .transactionId(QaTransaction.VALID_ERROR.id())
         .serviceId(QaService.ID)
         .payload(Bytes.bytes());
   }
