@@ -21,6 +21,7 @@ addons:
       - libssl-dev
       - pkg-config
       - protobuf-compiler
+      - libprotobuf-dev
 
 env:
   global:
