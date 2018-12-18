@@ -103,6 +103,7 @@ final class CoreSchemaProxy {
   ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
     long actualHeight = getHeight();
+    // fixme: wrong condition
     checkArgument(
         height > actualHeight,
         "Height should be less or equal compared to blockchain height %s, but was %s",
