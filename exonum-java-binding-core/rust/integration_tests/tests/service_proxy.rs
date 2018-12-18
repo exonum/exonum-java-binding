@@ -84,24 +84,6 @@ fn state_hash() {
     assert_eq!(&hashes, service.state_hash(&*snapshot).as_slice());
 }
 
-// FIXME: deserialize to protobuf and compare with protobuf buffer
-/*
-#[test]
-fn tx_from_raw() {
-    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, true);
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .convert_transaction(java_transaction)
-        .build();
-    let executable_transaction = service
-        .tx_from_raw(raw_message)
-        .expect("Failed to convert transaction");
-    assert_eq!(
-        executable_transaction.serialize_field().unwrap(),
-        *INFO_VALUE
-    );
-}
-*/
-
 #[test]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn tx_from_raw_should_panic_if_java_error_occurred() {
