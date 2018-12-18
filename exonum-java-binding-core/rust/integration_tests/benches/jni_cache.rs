@@ -25,7 +25,10 @@ use integration_tests::{
 };
 use java_bindings::{
     exonum::blockchain::Transaction,
-    jni::{objects::JObject, JNIEnv, JavaVM},
+    jni::{
+        objects::{JObject, JValue},
+        JNIEnv, JavaVM,
+    },
     utils::{convert_to_string, get_class_name, jni_cache},
     JniExecutor, JniResult, MainExecutor,
 };
@@ -33,7 +36,8 @@ use java_bindings::{
 use std::sync::Arc;
 use test::{black_box, Bencher};
 
-const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
+const TX_EXEC_EXCEPTION_CLASS: &str =
+    "com/exonum/binding/transaction/TransactionExecutionException";
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();
@@ -60,7 +64,7 @@ fn get_class_name_not_cached_impl(env: &JNIEnv, obj: JObject) -> JniResult<Strin
 }
 
 fn create_exception<'a>(env: &'a JNIEnv) -> JObject<'a> {
-    env.new_object(ARITHMETIC_EXCEPTION_CLASS, "()V", &[])
+    env.new_object(TX_EXEC_EXCEPTION_CLASS, "(B)V", &[JValue::from(0 as i8)])
         .unwrap()
 }
 
@@ -71,10 +75,12 @@ pub fn is_instance_of_cached(b: &mut Bencher) {
             let exception = create_exception(env);
 
             b.iter(|| {
-                black_box(env.is_instance_of(
-                    exception,
-                    &jni_cache::classes_refs::transaction_execution_exception(),
-                ))
+                black_box(assert!(env
+                    .is_instance_of(
+                        exception,
+                        &jni_cache::classes_refs::transaction_execution_exception(),
+                    )
+                    .unwrap()))
             });
             Ok(())
         })
@@ -86,7 +92,11 @@ pub fn is_instance_of_not_cached(b: &mut Bencher) {
     EXECUTOR
         .with_attached(|env| {
             let exception = create_exception(env);
-            b.iter(|| black_box(env.is_instance_of(exception, ARITHMETIC_EXCEPTION_CLASS)));
+            b.iter(|| {
+                black_box(assert!(env
+                    .is_instance_of(exception, TX_EXEC_EXCEPTION_CLASS)
+                    .unwrap()))
+            });
             Ok(())
         })
         .unwrap();
@@ -97,7 +107,7 @@ pub fn get_class_name_cached(b: &mut Bencher) {
     EXECUTOR
         .with_attached(|env| {
             let obj = create_exception(env);
-            b.iter(|| black_box(get_class_name(env, obj)));
+            b.iter(|| black_box(get_class_name(env, obj).unwrap()));
             Ok(())
         })
         .unwrap();
@@ -108,7 +118,7 @@ pub fn get_class_name_not_cached(b: &mut Bencher) {
     EXECUTOR
         .with_attached(|env| {
             let obj = create_exception(env);
-            b.iter(|| black_box(get_class_name_not_cached_impl(env, obj)));
+            b.iter(|| black_box(get_class_name_not_cached_impl(env, obj).unwrap()));
             Ok(())
         })
         .unwrap();
@@ -117,5 +127,5 @@ pub fn get_class_name_not_cached(b: &mut Bencher) {
 #[bench]
 pub fn transaction_verify_cached(b: &mut Bencher) {
     let tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-    b.iter(move || black_box(tx.verify()));
+    b.iter(move || black_box(assert!(tx.verify())));
 }
