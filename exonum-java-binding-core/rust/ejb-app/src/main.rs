@@ -1,4 +1,4 @@
-//extern crate exonum_btc_anchoring;
+extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
 extern crate java_bindings;
 extern crate serde;
