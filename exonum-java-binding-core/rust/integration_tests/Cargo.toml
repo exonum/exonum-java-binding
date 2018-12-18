@@ -14,7 +14,7 @@ crate-type = ["dylib"]
 futures = "0.1"
 failure = "0.1"
 java_bindings = { path = "..", features = ["invocation"] }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "c4bcef725" }
+exonum-testkit = "0.10"
 lazy_static = "1.2"
 serde = "1.0"
 serde_derive = "1.0"
