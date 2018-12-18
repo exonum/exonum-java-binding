@@ -60,7 +60,7 @@ class PutValueTransactionTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  // No type parameters for clarity
+    // No type parameters for clarity
   void execute() {
     String value = "A value to put";
     HashCode hash = Hashing.defaultHashFunction()
