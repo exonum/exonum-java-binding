@@ -33,7 +33,6 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.QaContext;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.BlockCommittedEventImpl;
@@ -48,6 +47,7 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -246,7 +246,9 @@ class QaServiceImplIntegrationTest {
       String counterName = "bids";
       try (Cleaner cleaner = new Cleaner()) {
         Fork view = db.createFork(cleaner);
-        QaContext context = new QaContext(view);
+        TransactionContext context = TransactionContext.builder()
+            .fork(view)
+            .build();
 
         new CreateCounterTx(counterName)
             .execute(context);

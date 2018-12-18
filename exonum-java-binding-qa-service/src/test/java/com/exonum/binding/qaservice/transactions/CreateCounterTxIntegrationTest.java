@@ -49,7 +49,7 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  void converterFromMessageRejectsWrongServiceId() {
+  void converterRejectsWrongServiceId() {
     RawTransaction tx = txTemplate()
         .serviceId((short) (QaService.ID + 1))
         .build();
@@ -58,7 +58,7 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  void converterFromMessageRejectsWrongTxId() {
+  void converterRejectsWrongTxId() {
     RawTransaction tx = txTemplate()
         .transactionId((short) (CREATE_COUNTER.id() + 1))
         .build();
@@ -96,7 +96,10 @@ class CreateCounterTxIntegrationTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = new QaContext(view);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
+
       // Execute the transaction
       tx.execute(context);
 
@@ -119,7 +122,7 @@ class CreateCounterTxIntegrationTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = new QaContext(view);
+
       String name = "counter";
       Long value = 100500L;
       HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
@@ -129,6 +132,9 @@ class CreateCounterTxIntegrationTest {
 
       // Execute the transaction, that has the same name.
       CreateCounterTx tx = new CreateCounterTx(name);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
       tx.execute(context);
 
       // Check it has not changed the entries in the maps.

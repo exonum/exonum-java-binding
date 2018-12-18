@@ -23,7 +23,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
@@ -58,7 +57,12 @@ public final class UserTransactionAdapter {
         Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
         HashCode hash = HashCode.fromBytes(txHashBytes);
         PublicKey authorPk = PublicKey.fromBytes(authorPkBytes);
-        TransactionContext context = new InternalTransactionContext(fork, hash, authorPk);
+        TransactionContext context = TransactionContext.builder()
+            .fork(fork)
+            .hash(hash)
+            .authorPk(authorPk)
+            .build();
+
         transaction.execute(context);
       }
 

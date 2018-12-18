@@ -41,8 +41,8 @@ import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
-import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -229,7 +229,11 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   private void createCounter(String name, Fork fork) {
-    new CreateCounterTx(name).execute(new InternalTransactionContext(fork, null, null));
+    TransactionContext context = TransactionContext.builder()
+        .fork(fork)
+        .build();
+
+    new CreateCounterTx(name).execute(context);
   }
 
   @Override

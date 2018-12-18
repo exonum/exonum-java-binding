@@ -42,8 +42,8 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.InternalTransactionContext;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -123,7 +123,11 @@ class TransferTxTest {
       long transferSum = 40L;
       HashCode hash = HashCode.fromString("a0a0a0a0");
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferSum);
-      InternalTransactionContext context = new InternalTransactionContext(view, hash, null);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .hash(hash)
+          .build();
+
       tx.execute(context);
 
       // Check that wallets have correct balances
@@ -162,7 +166,10 @@ class TransferTxTest {
       long transferValue = 50L;
 
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
+
       // Execute the transaction that attempts to transfer from an unknown wallet
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
@@ -186,7 +193,10 @@ class TransferTxTest {
       long seed = 1L;
 
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
+
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
       assertThat(e, hasErrorCode(UNKNOWN_RECEIVER));
@@ -211,7 +221,10 @@ class TransferTxTest {
       long transferValue = initialBalance + 50L;
 
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      InternalTransactionContext context = new InternalTransactionContext(view, null, null);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
+
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
       assertThat(e, hasErrorCode(INSUFFICIENT_FUNDS));

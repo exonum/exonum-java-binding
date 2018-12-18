@@ -36,7 +36,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.InternalTransactionContext;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +56,11 @@ class TransferTxHistoryTest {
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       HashCode hash = HashCode.fromString("a0a0a0a0");
-      InternalTransactionContext context = new InternalTransactionContext(view, hash, null);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .hash(hash)
+          .build();
+
 
       // Create wallets with the given initial balances
       long initialBalance = 100L;

@@ -59,7 +59,7 @@ class ValidThrowingTxIntegrationTest {
   }
 
   @Test
-  void info() {
+  void jsonRepresentation() {
     long seed = 10L;
     ValidThrowingTx tx = new ValidThrowingTx(seed);
     String txJson = QaTransactionJson.toJson(QaTransaction.VALID_THROWING.id(), tx);
@@ -79,7 +79,10 @@ class ValidThrowingTxIntegrationTest {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = new QaContext(view);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
+
 
       // Initialize storage with a counter equal to 10
       String name = "counter";

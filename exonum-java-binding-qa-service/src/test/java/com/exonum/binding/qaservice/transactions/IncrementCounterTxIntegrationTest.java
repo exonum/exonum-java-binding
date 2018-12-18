@@ -52,7 +52,7 @@ class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  void converterFromMessageRejectsWrongServiceId() {
+  void converterRejectsWrongServiceId() {
     RawTransaction tx = txTemplate()
         .serviceId((short) (QaService.ID + 1))
         .build();
@@ -62,7 +62,7 @@ class IncrementCounterTxIntegrationTest {
   }
 
   @Test
-  void converterFromMessageRejectsWrongTxId() {
+  void converterRejectsWrongTxId() {
     RawTransaction tx = txTemplate()
         .transactionId((short) (INCREMENT_COUNTER.id() + 1))
         .build();
@@ -87,9 +87,9 @@ class IncrementCounterTxIntegrationTest {
   @RequiresNativeLibrary
   void executeIncrementsCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = new QaContext(view);
+
       // Add a new counter with the given name and initial value
       String name = "counter";
       long initialValue = 0;
@@ -99,6 +99,9 @@ class IncrementCounterTxIntegrationTest {
       long seed = 0L;
       HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
       IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
       tx.execute(context);
 
       // Check the counter has an incremented value
@@ -113,14 +116,17 @@ class IncrementCounterTxIntegrationTest {
   @RequiresNativeLibrary
   void executeNoSuchCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = new QaContext(view);
+
       // Create and execute the transaction that attempts to update an unknown counter
       long seed = 0L;
       String name = "unknown-counter";
       HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
       IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
       tx.execute(context);
 
       // Check there isn’t such a counter after tx execution

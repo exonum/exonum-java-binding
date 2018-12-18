@@ -53,7 +53,7 @@ class ValidErrorTxIntegrationTest {
   }
 
   @Test
-  void converterFromMessageRejectsWrongServiceId() {
+  void converterRejectsWrongServiceId() {
     RawTransaction tx = txTemplate()
         .serviceId((short) (QaService.ID + 1))
         .build();
@@ -63,7 +63,7 @@ class ValidErrorTxIntegrationTest {
   }
 
   @Test
-  void converterFromMessageRejectsWrongTxId() {
+  void converterRejectsWrongTxId() {
     RawTransaction tx = txTemplate()
         .transactionId((short) (INCREMENT_COUNTER.id() + 1))
         .build();
@@ -101,11 +101,14 @@ class ValidErrorTxIntegrationTest {
   void executeNoDescription() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
-      TransactionContext context = new QaContext(db.createFork(cleaner));
+      Fork view = db.createFork(cleaner);
 
       byte errorCode = 2;
       Transaction tx = new ValidErrorTx(1L, errorCode, null);
 
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
       TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
           () -> tx.execute(context));
 
@@ -119,12 +122,15 @@ class ValidErrorTxIntegrationTest {
   void executeWithDescription() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
-      TransactionContext context = new QaContext(db.createFork(cleaner));
+      Fork view = db.createFork(cleaner);
 
       byte errorCode = 2;
       String description = "Boom";
       Transaction tx = new ValidErrorTx(1L, errorCode, description);
 
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
       TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
           () -> tx.execute(context));
 
@@ -139,7 +145,7 @@ class ValidErrorTxIntegrationTest {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = new QaContext(view);
+
       // Initialize storage with a counter equal to 10
       String name = "counter";
       long value = 10L;
@@ -150,6 +156,9 @@ class ValidErrorTxIntegrationTest {
       ValidErrorTx tx = new ValidErrorTx(0L, errorCode, "Boom");
 
       // Execute the transaction
+      TransactionContext context = TransactionContext.builder()
+          .fork(view)
+          .build();
       assertThrows(TransactionExecutionException.class, () -> tx.execute(context));
 
       // Check that execute cleared the maps
@@ -166,7 +175,7 @@ class ValidErrorTxIntegrationTest {
       "9223372036854775807, 127,", // Max seed value, max error code value, null message
   })
   @ParameterizedTest
-  void info(long seed, byte errorCode, String errorMessage) {
+  void jsonRepresentation(long seed, byte errorCode, String errorMessage) {
     Transaction tx = new ValidErrorTx(seed, errorCode, errorMessage);
 
     String txInJson = QaTransactionJson.toJson(QaTransaction.VALID_ERROR.id(), tx);
