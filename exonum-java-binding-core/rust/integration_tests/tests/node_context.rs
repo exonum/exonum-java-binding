@@ -32,7 +32,7 @@ lazy_static! {
 #[test]
 fn submit_transaction() {
     let keypair = gen_keypair();
-    let (node, app_rx) = create_node_with_keypair(keypair.0, keypair.1);
+    let (node, app_rx) = create_node(keypair.0, keypair.1);
     let service_id = 0;
     let transaction_id = 0;
     let tx_payload = vec![1, 2, 3];
@@ -54,7 +54,7 @@ fn submit_transaction() {
 #[test]
 fn submit_transaction_to_missing_service() {
     let keypair = gen_keypair();
-    let (node, app_rx) = create_node_with_keypair(keypair.0, keypair.1);
+    let (node, _) = create_node(keypair.0, keypair.1);
     // invalid service_id
     let service_id = 1;
     let transaction_id = 0;
@@ -65,12 +65,7 @@ fn submit_transaction_to_missing_service() {
     assert!(res.is_err());
 }
 
-fn create_node() -> (NodeContext, Receiver<ExternalMessage>) {
-    let service_keypair = gen_keypair();
-    create_node_with_keypair(service_keypair.0, service_keypair.1)
-}
-
-fn create_node_with_keypair(
+fn create_node(
     public_key: PublicKey,
     secret_key: SecretKey,
 ) -> (NodeContext, Receiver<ExternalMessage>) {
