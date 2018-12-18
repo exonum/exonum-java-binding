@@ -69,7 +69,7 @@ public interface Service {
   }
 
   /**
-   * Converts an Exonum transaction message to an executable transaction of <em>this</em> service.
+   * Converts an Exonum raw transaction to an executable transaction of <em>this</em> service.
    *
    * @param rawTransaction a raw transaction
    * @return an executable transaction

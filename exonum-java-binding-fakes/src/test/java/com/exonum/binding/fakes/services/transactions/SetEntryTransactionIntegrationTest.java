@@ -20,6 +20,8 @@ import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -52,11 +54,11 @@ class SetEntryTransactionIntegrationTest {
       Fork fork = database.createFork(cleaner);
 
       SetEntryTransaction tx = new SetEntryTransaction(value);
-      TransactionContext context = TransactionContext.builder()
+      TransactionContext context = spy(TransactionContext.builder()
           .fork(fork)
           .hash(HashCode.fromInt(123))
           .authorPk(PublicKey.fromHexString("1234"))
-          .build();
+          .build());
 
       tx.execute(context);
 
@@ -67,6 +69,11 @@ class SetEntryTransactionIntegrationTest {
           StandardSerializers.string());
       assertTrue(entry.isPresent());
       assertThat(entry.get(), equalTo(value));
+
+      //verify context
+      verify(context).getFork();
+      verify(context).getTransactionMessageHash();
+      verify(context).getAuthorPk();
     }
   }
 }

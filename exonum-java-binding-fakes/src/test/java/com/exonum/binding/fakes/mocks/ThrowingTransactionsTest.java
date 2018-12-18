@@ -19,7 +19,6 @@ package com.exonum.binding.fakes.mocks;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -27,24 +26,22 @@ import com.exonum.binding.transaction.TransactionExecutionException;
 import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class ThrowingTransactionsTest {
+
+  @Mock
+  private TransactionContext context;
 
   @Test
   void createThrowingIllegalArgument() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    assertThrows(exceptionType, () -> transaction.execute(null));
-  }
-
-  @Test
-  void createThrowingIllegalArgumentInInfo() {
-    // Transaction#info is a default method, check it separately
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
-
-    assertThrows(exceptionType, () -> transaction.execute(null));
+    assertThrows(exceptionType, () -> transaction.execute(context));
   }
 
   @Test
@@ -52,7 +49,7 @@ class ThrowingTransactionsTest {
     Class<OutOfMemoryError> exceptionType = OutOfMemoryError.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    assertThrows(exceptionType, () -> transaction.execute(null));
+    assertThrows(exceptionType, () -> transaction.execute(context));
   }
 
   @Test
@@ -76,7 +73,7 @@ class ThrowingTransactionsTest {
         errorCode, description);
 
     TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+        () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
   }
@@ -89,7 +86,7 @@ class ThrowingTransactionsTest {
         errorCode, description);
 
     TransactionExecutionException actual = assertThrows(TestTxExecException.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+        () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
   }

@@ -81,7 +81,7 @@ public interface TransactionContext {
     /**
      * Creates the transaction context instance.
      */
-    public InternalTransactionContext build() {
+    public TransactionContext build() {
       return new InternalTransactionContext(fork, hash, authorPk);
     }
 

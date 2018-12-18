@@ -49,7 +49,7 @@ public final class UserServiceAdapterMockBuilder {
   }
 
   public void convertTransaction(UserTransactionAdapter transaction) {
-    when(service.convertTransaction(anyShort(), anyShort(), any(byte[].class)))
+    when(service.convertTransaction(anyShort(), any(byte[].class)))
         .thenReturn(checkNotNull(transaction));
   }
 
@@ -58,7 +58,7 @@ public final class UserServiceAdapterMockBuilder {
    * as if it is does not belong to this service.
    */
   public void convertTransactionThrowing(Class<? extends Throwable> exceptionType) {
-    when(service.convertTransaction(anyShort(), anyShort(), any(byte[].class)))
+    when(service.convertTransaction(anyShort(), any(byte[].class)))
         .thenThrow(exceptionType);
   }
 

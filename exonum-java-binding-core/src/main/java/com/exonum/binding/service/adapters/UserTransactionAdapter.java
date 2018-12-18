@@ -48,15 +48,15 @@ public final class UserTransactionAdapter {
     this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
-  public void execute(long forkNativeHandle, byte[] txHashBytes, byte[] authorPkBytes)
+  public void execute(long forkNativeHandle, byte[] txMessageHash, byte[] authorPublicKey)
       throws TransactionExecutionException {
     try {
       assert forkNativeHandle != 0L : "Fork handle must not be 0";
 
       try (Cleaner cleaner = new Cleaner("Transaction#execute")) {
         Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
-        HashCode hash = HashCode.fromBytes(txHashBytes);
-        PublicKey authorPk = PublicKey.fromBytes(authorPkBytes);
+        HashCode hash = HashCode.fromBytes(txMessageHash);
+        PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
         TransactionContext context = TransactionContext.builder()
             .fork(fork)
             .hash(hash)

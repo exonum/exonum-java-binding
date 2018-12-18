@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
+import static org.hamcrest.collection.IsArrayWithSize.emptyArray;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,11 +34,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.TemplateRawTransaction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.test.Bytes;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
@@ -81,7 +82,7 @@ class UserServiceAdapterTest {
   @Test
   void convertTransaction_ThrowsIfNull() {
     assertThrows(NullPointerException.class, () ->
-        serviceAdapter.convertTransaction(SERVICE_ID, TRANSACTION_ID, null));
+        serviceAdapter.convertTransaction(TRANSACTION_ID, null));
   }
 
   @Test
@@ -89,13 +90,21 @@ class UserServiceAdapterTest {
     Transaction expectedTransaction = mock(Transaction.class);
     when(service.convertToTransaction(any(RawTransaction.class)))
         .thenReturn(expectedTransaction);
+    when(service.getId()).thenReturn(SERVICE_ID);
 
-    byte[] message = TemplateRawTransaction.createRawTransaction(SERVICE_ID).getPayload();
+    byte[] payload = Bytes.bytes(0x00, 0x01);
 
     UserTransactionAdapter transactionAdapter =
-        serviceAdapter.convertTransaction(SERVICE_ID, TRANSACTION_ID, message);
+        serviceAdapter.convertTransaction(TRANSACTION_ID, payload);
+
+    RawTransaction expectedRawTransaction = RawTransaction.newBuilder()
+        .serviceId(SERVICE_ID)
+        .transactionId(TRANSACTION_ID)
+        .payload(payload)
+        .build();
 
     assertThat(transactionAdapter.transaction, equalTo(expectedTransaction));
+    verify(service).convertToTransaction(expectedRawTransaction);
   }
 
   @Test
@@ -104,10 +113,10 @@ class UserServiceAdapterTest {
         // Such service impl. is not valid
         .thenReturn(null);
 
-    byte[] message = TemplateRawTransaction.createRawTransaction(SERVICE_ID).getPayload();
+    byte[] payload = Bytes.bytes(0x00, 0x01);
 
     NullPointerException thrown = assertThrows(NullPointerException.class,
-        () -> serviceAdapter.convertTransaction(SERVICE_ID, TRANSACTION_ID, message));
+        () -> serviceAdapter.convertTransaction(TRANSACTION_ID, payload));
     assertThat(thrown.getLocalizedMessage(), containsString("Invalid service implementation: "
         + "Service#convertToTransaction must never return null."));
   }
@@ -122,7 +131,7 @@ class UserServiceAdapterTest {
 
     byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
-    assertThat(hashes, arrayWithSize(0));
+    assertThat(hashes, emptyArray());
   }
 
   @Test

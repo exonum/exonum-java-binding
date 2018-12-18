@@ -22,12 +22,11 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.message.TemplateRawTransaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.test.Bytes;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -44,11 +43,13 @@ class ServiceBootstrapIntegrationTest {
     // Check the service and its dependencies work as expected.
     assertThat(service.getId(), equalTo(UserService.ID));
     assertThat(service.getName(), equalTo(UserService.NAME));
-    RawTransaction transaction = TemplateRawTransaction.createRawTransaction((short) 1);
+    short transactionId = 1;
+    byte[] payload = Bytes.bytes(0x00, 0x01);
 
     UserTransactionAdapter transactionAdapter = service.convertTransaction(
-        transaction.getServiceId(), transaction.getTransactionId(), transaction.getPayload());
+        transactionId, payload);
 
+    assertNotNull(transactionAdapter);
     // Check that once startService returns, the native library is loaded. If it’s not,
     // we’ll get an UnsatisfiedLinkError.
     try (MemoryDb database = MemoryDb.newInstance()) {

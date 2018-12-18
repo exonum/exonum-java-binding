@@ -35,7 +35,6 @@ import com.exonum.binding.transaction.TransactionContext;
 public final class SetEntryTransaction implements Transaction {
 
   static final String ENTRY_NAME = "test_entry";
-  static final String TEST_ENTRY_NAME = "test_entry";
   static final String TX_HASH_NAME = "tx_hash";
   static final String AUTHOR_PK_NAME = "author_pk";
 
@@ -44,7 +43,7 @@ public final class SetEntryTransaction implements Transaction {
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
-   * @param value a value to put into an entry {@link #TEST_ENTRY_NAME}
+   * @param value a value to put into an entry {@link #ENTRY_NAME}
    */
   public SetEntryTransaction(String value) {
     this.value = checkNotNull(value);
@@ -53,7 +52,7 @@ public final class SetEntryTransaction implements Transaction {
   @Override
   public void execute(TransactionContext context) {
     Fork fork = context.getFork();
-    EntryIndexProxy<String> entry = createTestEntry(context.getFork());
+    EntryIndexProxy<String> entry = createTestEntry(fork);
     entry.set(value);
     EntryIndexProxy<HashCode> txHash = createTxHashEntry(fork);
     txHash.set(context.getTransactionMessageHash());
@@ -62,7 +61,7 @@ public final class SetEntryTransaction implements Transaction {
   }
 
   private EntryIndexProxy<String> createTestEntry(Fork view) {
-    return EntryIndexProxy.newInstance(TEST_ENTRY_NAME, view, StandardSerializers.string());
+    return EntryIndexProxy.newInstance(ENTRY_NAME, view, StandardSerializers.string());
   }
 
   private EntryIndexProxy<HashCode> createTxHashEntry(Fork view) {
