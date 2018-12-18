@@ -30,7 +30,7 @@ public interface TransactionContext {
   Fork getFork();
 
   /**
-   * Returns SHA-256 hash of the transaction.
+   * Returns SHA-256 hash of the transaction message.
    */
   HashCode getTransactionMessageHash();
 
@@ -39,35 +39,53 @@ public interface TransactionContext {
    */
   PublicKey getAuthorPk();
 
+  /**
+   * Returns the builder of the transaction context.
+   */
   static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * Transaction context builder.
+   */
   final class Builder {
     private Fork fork;
     private HashCode hash;
     private PublicKey authorPk;
 
-    private Builder() {
-    }
-
+    /**
+     * Sets database fork for the context.
+     */
     public Builder fork(Fork fork) {
       this.fork = fork;
       return this;
     }
 
+    /**
+     * Sets message hash for the context.
+     */
     public Builder hash(HashCode hash) {
       this.hash = hash;
       return this;
     }
 
+    /**
+     * Sets transaction author public key for the context.
+     */
     public Builder authorPk(PublicKey authorPk) {
       this.authorPk = authorPk;
       return this;
     }
 
+    /**
+     * Creates the transaction context instance.
+     */
     public InternalTransactionContext build() {
       return new InternalTransactionContext(fork, hash, authorPk);
+    }
+
+    private Builder() {
     }
   }
 

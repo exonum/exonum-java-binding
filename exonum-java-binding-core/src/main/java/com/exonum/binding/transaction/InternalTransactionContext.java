@@ -4,6 +4,9 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 
+/**
+ * Default implementation of the transaction context.
+ */
 final class InternalTransactionContext implements TransactionContext {
   private final Fork fork;
   private final HashCode hash;

@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
 - Support of Json serialization in a common way. (#611)  
-- Support of separated messages. (#574)
+- Support of separated messages format Exonum v0.10. (#574)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
@@ -34,9 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
-- `com.exonum.binding.common.message.Message`
-- `com.exonum.binding.common.message.BinaryMessage`
-- `com.exonum.binding.transaction.Transaction#hash`
+- Exonum v0.9 message format related classes.
 
 ## [0.3] - 2018-10-30
 

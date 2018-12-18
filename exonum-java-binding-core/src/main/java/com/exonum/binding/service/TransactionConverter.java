@@ -32,7 +32,7 @@ public interface TransactionConverter<T extends Transaction> {
   /**
    * Converts an Exonum transaction message to an executable transaction of some service.
    *
-   * @param rawTransaction a raw transaction (i.e., whose message type is a transaction)
+   * @param rawTransaction a raw transaction
    * @return an executable transaction of some service
    * @throws IllegalArgumentException if the message is not a transaction,
    *         or a transaction of an unknown service

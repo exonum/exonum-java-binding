@@ -7,8 +7,8 @@ import com.google.common.base.Objects;
 import java.util.Arrays;
 
 /**
- * Raw transaction class that contains the service and transaction identifiers and a transaction
- * data serialized in payload.
+ * An Exonum raw transaction. It is mainly used for interaction with the Exonum core
+ * as well as for transferring transactions between nodes within the network.
  */
 public final class RawTransaction {
   private final short serviceId;
@@ -22,7 +22,7 @@ public final class RawTransaction {
   }
 
   /**
-   * Returns the service identifier.
+   * Returns a service identifier which the transaction belongs to.
    */
   public short getServiceId() {
     return serviceId;
@@ -36,14 +36,14 @@ public final class RawTransaction {
   }
 
   /**
-   * Returns the transaction payload.
+   * Returns the transaction payload which contains actual transaction data.
    */
   public byte[] getPayload() {
     return payload.clone();
   }
 
   /**
-   * Returns the SHA-256 hash raw transaction payload.
+   * Returns the SHA-256 hash of the transaction data.
    */
   public HashCode hash() {
     return sha256().hashBytes(getPayload());
@@ -81,7 +81,7 @@ public final class RawTransaction {
     private byte[] payload;
 
     /**
-     * Sets service identifier to the transaction message.
+     * Sets service identifier to the transaction.
      */
     public RawTransaction.Builder serviceId(short serviceId) {
       this.serviceId = serviceId;
@@ -89,7 +89,7 @@ public final class RawTransaction {
     }
 
     /**
-     * Sets transaction identifier to the transaction message.
+     * Sets transaction identifier to the transaction.
      */
     public RawTransaction.Builder transactionId(short transactionId) {
       this.transactionId = transactionId;
@@ -97,13 +97,16 @@ public final class RawTransaction {
     }
 
     /**
-     * Sets payload to the transaction message.
+     * Sets payload to the transaction.
      */
     public RawTransaction.Builder payload(byte[] payload) {
       this.payload = payload.clone();
       return this;
     }
 
+    /**
+     * Creates the raw transaction instance.
+     */
     public RawTransaction build() {
       checkRequiredFieldsSet();
 
