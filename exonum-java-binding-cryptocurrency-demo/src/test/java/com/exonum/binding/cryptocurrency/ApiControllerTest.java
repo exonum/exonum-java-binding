@@ -122,7 +122,7 @@ class ApiControllerTest {
 
     String expectedResponse = messageHash;
     // Send a request to submitTransaction
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
+    postTransaction()
         .sendBuffer(
             Buffer.buffer(message.getSignedMessage().array()),
             context.succeeding(
@@ -147,11 +147,30 @@ class ApiControllerTest {
   }
 
   @Test
+  void submitValidTransactionWrongContentType(VertxTestContext context) {
+    BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
+
+    // Send a request to submitTransaction
+    post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .putHeader("Content-Type", "application/x-www-form-urlencoded")
+        .sendBuffer(
+            Buffer.buffer(message.getSignedMessage().array()),
+            context.succeeding(
+                response -> context.verify(() -> {
+                  // Check the response status
+                  int statusCode = response.statusCode();
+                  assertEquals(HTTP_BAD_REQUEST, statusCode);
+
+                  context.completeNow();
+                })));
+  }
+
+  @Test
   void submitTransactionOfIncorrectMessageSize(VertxTestContext context) {
     BinaryMessage message = createTestBinaryMessage(CREATE_WALLET_TX_ID);
     byte errorByte = 1;
 
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
+    postTransaction()
         .sendBuffer(
             Buffer.buffer(message.getSignedMessage().array()).appendByte(errorByte),
             context.succeeding(response -> context.verify(() -> {
@@ -176,7 +195,7 @@ class ApiControllerTest {
     when(service.submitTransaction(transaction))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_TRANSACTION_PATH)
+    postTransaction()
         .sendBuffer(
             Buffer.buffer(message.getSignedMessage().array()),
             context.succeeding(response -> context.verify(() -> {
@@ -317,6 +336,11 @@ class ApiControllerTest {
 
   private HttpRequest<Buffer> get(String requestPath) {
     return webClient.get(port, HOST, requestPath);
+  }
+
+  private HttpRequest<Buffer> postTransaction() {
+    return post(ApiController.SUBMIT_TRANSACTION_PATH)
+        .putHeader("Content-Type", "application/octet-stream");
   }
 
   private HttpRequest<Buffer> post(String requestPath) {
