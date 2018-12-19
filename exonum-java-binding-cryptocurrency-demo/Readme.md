@@ -34,7 +34,7 @@ Be sure you installed necessary packages:
 Build the project:
 
 ```sh
-$ source test_profile
+$ source tests_profile
 
 $ mvn install
 
@@ -77,6 +77,6 @@ Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
 - [Reference Documentation](https://exonum.com/doc/get-started/java-binding).
-- [Instructions][app-tutorial] explaining how to configure and run any Java service.  
+- [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding-core/rust/ejb-app/TUTORIAL.md
