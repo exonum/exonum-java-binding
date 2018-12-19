@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
 - Exonum v0.9 message format related classes.
+  
+### Fixed
+- A bug in the cryptocurrency demo frontend that sometimes resulted in rejected transactions and/or
+wrong response code (#621).
 
 ## [0.3] - 2018-10-30
 

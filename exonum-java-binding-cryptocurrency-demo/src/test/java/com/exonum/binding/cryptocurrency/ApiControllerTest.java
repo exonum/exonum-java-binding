@@ -76,7 +76,8 @@ class ApiControllerTest {
     webClient = WebClient.create(vertx);
 
     Router router = Router.router(vertx);
-    new ApiController(service).mountApi(router);
+    ApiController controller = new ApiController(service);
+    controller.mountApi(router);
 
     httpServer.requestHandler(router::accept)
         .listen(0, context.succeeding(result -> {
