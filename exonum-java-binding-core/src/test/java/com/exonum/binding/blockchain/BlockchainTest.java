@@ -95,14 +95,6 @@ class BlockchainTest {
   }
 
   @Test
-  void getBlockTransactionsByBlock() {
-    ProofListIndexProxy transactions = mock(ProofListIndexProxy.class);
-    when(mockSchema.getBlockTransactions(HEIGHT)).thenReturn(transactions);
-
-    assertThat(blockchain.getBlockTransactions(BLOCK)).isEqualTo(transactions);
-  }
-
-  @Test
   void getTxMessages() {
     MapIndex txMessages = mock(MapIndex.class);
     when(mockSchema.getTxMessages()).thenReturn(txMessages);

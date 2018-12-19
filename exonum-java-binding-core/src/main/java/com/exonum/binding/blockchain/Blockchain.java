@@ -18,7 +18,6 @@
 package com.exonum.binding.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
@@ -36,6 +35,8 @@ import java.util.Optional;
  * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
  * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
  * results.
+ *
+ * <p>All method arguments are non-null by default.
  */
 public final class Blockchain {
 
@@ -93,19 +94,18 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block at the given height or
-   * an empty list if the block at the given height doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block at the given height.
    *
    * @param height block height starting from 0
-   * @throws IllegalArgumentException if the height is negative or there is no block at given height
+   * @throws IllegalArgumentException if the height is invalid: negative or exceeding
+   *     {@linkplain #getHeight() the blockchain height}.
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block with given id or an empty
-   * list if the block with given id doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block with the given id.
    *
    * @param blockId id of the block
    * @throws IllegalArgumentException if there is no block with given id
@@ -117,16 +117,14 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the given block or an empty list if
-   * the block doesn't exist.
+   * Returns a proof list of transaction hashes committed in the given block.
+   * The given block must match exactly the block that is stored in the database.
    *
    * @param block block of which list of transaction hashes should be returned
-   * @throws NullPointerException if the block is null
-   * @throws IllegalArgumentException if the height of given block is negative or there is no block
-   *                                  at given height
+   * @throws IllegalArgumentException if there is no such block in the blockchain
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(Block block) {
-    checkNotNull(block);
+    checkArgument(containsBlock(block), "No such block (%s) in the database", block);
     return getBlockTransactions(block.getHeight());
   }
 

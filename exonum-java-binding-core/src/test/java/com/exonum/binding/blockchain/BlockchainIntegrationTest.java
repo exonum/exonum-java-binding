@@ -39,7 +39,9 @@ import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -59,6 +61,7 @@ class BlockchainIntegrationTest {
 
   private static final String TEST_BLOCKS = "test_blocks";
   private static final String TEST_BLOCK_HASHES = "test_block_hashes";
+  private static final String TEST_BLOCK_TRANSACTIONS = "test_block_transactions";
 
   @Mock
   CoreSchemaProxy coreSchema;
@@ -79,7 +82,9 @@ class BlockchainIntegrationTest {
   }
 
   @Nested
-  class Contains {
+  class WithSingleBlock {
+    final List<HashCode> expectedBlockTransactions = ImmutableList.of(HashCode.fromInt(1));
+
     Cleaner cleaner;
     Block block;
 
@@ -88,12 +93,21 @@ class BlockchainIntegrationTest {
       cleaner = new Cleaner();
       Fork fork = database.createFork(cleaner);
 
+      // Setup blocks
       MapIndex<HashCode, Block> blocks = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
           StandardSerializers.hash(), BlockSerializer.INSTANCE);
-      block = withProperHash(aBlock(1).build());
+      int blockHeight = 1;
+      block = withProperHash(aBlock(blockHeight)
+          .numTransactions(expectedBlockTransactions.size())
+          .build());
       blocks.put(block.getBlockHash(), block);
-
       when(coreSchema.getBlocks()).thenReturn(blocks);
+
+      // Setup tx hashes
+      ProofListIndexProxy<HashCode> transactionHashes = ProofListIndexProxy.newInstance(
+          TEST_BLOCK_TRANSACTIONS, fork, StandardSerializers.hash());
+      transactionHashes.addAll(expectedBlockTransactions);
+      when(coreSchema.getBlockTransactions(blockHeight)).thenReturn(transactionHashes);
     }
 
     @AfterEach
@@ -108,7 +122,7 @@ class BlockchainIntegrationTest {
 
     @Test
     void containsBlockNoSuchBlock() {
-      Block unknownBlock = withProperHash(aBlock(Long.MAX_VALUE).build());
+      Block unknownBlock = aBlock(Long.MAX_VALUE).build();
       assertFalse(blockchain.containsBlock(unknownBlock));
     }
 
@@ -120,10 +134,41 @@ class BlockchainIntegrationTest {
           .build();
       assertFalse(blockchain.containsBlock(unknownBlock));
     }
+
+    @Test
+    void getBlockTransactionsByBlock() {
+      assertThat(blockchain.getBlockTransactions(block))
+          .hasSameElementsAs(expectedBlockTransactions);
+    }
+
+    @Test
+    void getBlockTransactionsByBlockNoSuchBlock() {
+      Block unknownBlock = aBlock(Long.MAX_VALUE).build();
+
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> blockchain.getBlockTransactions(unknownBlock));
+
+      String hashAsString = unknownBlock.getBlockHash().toString();
+      assertThat(e).hasMessageContaining(hashAsString);
+    }
+
+    @Test
+    void getBlockTransactionsByBlockSameHashDistinctFields() {
+      // Check against a block that has the same hash, but different fields.
+      Block unknownBlock = aBlock(10L)
+          .blockHash(block.getBlockHash())
+          .build();
+
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> blockchain.getBlockTransactions(unknownBlock));
+
+      String hashAsString = unknownBlock.getBlockHash().toString();
+      assertThat(e).hasMessageContaining(hashAsString);
+    }
   }
 
   @Nested
-  class GetBlocks {
+  class WithSeveralBlocks {
 
     private static final long HEIGHT = 2;
 
