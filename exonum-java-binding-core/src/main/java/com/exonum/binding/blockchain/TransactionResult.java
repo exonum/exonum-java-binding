@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
-import java.util.Optional;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
@@ -29,7 +28,7 @@ import javax.annotation.Nullable;
  * Returns a result of the transaction execution. This result may be either a success, or an error,
  * if execution has failed.
  * Errors might be either service-defined or unexpected. Service-defined errors consist of an error
- * code and an optional description. Unexpected errors consist of an optional description only.
+ * code and an optional description. Unexpected errors include only a description.
  *
  * @see TransactionExecutionException
  */
@@ -63,7 +62,8 @@ public abstract class TransactionResult {
    * (or the corresponding Error in Rust services).
    *
    * @param errorCode a user-defined error code; must be in range [0; 255]
-   * @param errorDescription an optional error description; may be null
+   * @param errorDescription an optional error description; may be null, which is considered
+   *     as no description
    */
   public static TransactionResult error(int errorCode, @Nullable String errorDescription) {
     checkArgument(0 <= errorCode && errorCode <= MAX_USER_DEFINED_ERROR_CODE,
@@ -86,15 +86,7 @@ public abstract class TransactionResult {
     return new AutoValue_TransactionResult(
         type,
         errorCode == null ? OptionalInt.empty() : OptionalInt.of(errorCode),
-        nullOrEmptyToNone(errorDescription));
-  }
-
-  private static Optional<String> nullOrEmptyToNone(String s) {
-    if (Strings.isNullOrEmpty(s)) {
-      return Optional.empty();
-    } else {
-      return Optional.of(s);
-    }
+        Strings.nullToEmpty(errorDescription));
   }
 
   /**
@@ -114,10 +106,10 @@ public abstract class TransactionResult {
   public abstract OptionalInt getErrorCode();
 
   /**
-   * Returns an optional description of a transaction if its execution resulted in an error.
-   * @return a description of an error, or {@code Optional.empty()} if there is no description
+   * Returns the description of a transaction if its execution resulted in an error;
+   * or an empty string if there is no description. Never {@code null}.
    */
-  public abstract Optional<String> getErrorDescription();
+  public abstract String getErrorDescription();
 
   /**
    * Return whether transaction was successful or not.
