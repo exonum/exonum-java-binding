@@ -19,12 +19,14 @@ package com.exonum.binding.qaservice;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
+import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -246,12 +248,12 @@ class QaServiceImplIntegrationTest {
       String counterName = "bids";
       try (Cleaner cleaner = new Cleaner()) {
         Fork view = db.createFork(cleaner);
-        TransactionContext context = TransactionContext.builder()
-            .fork(view)
-            .build();
 
+        // Execute the transaction
+        TransactionContext context = spy(newContext(view).create());
         new CreateCounterTx(counterName)
             .execute(context);
+        verify(context).getFork();
 
         db.merge(view);
       }

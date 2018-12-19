@@ -18,6 +18,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
+import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
@@ -123,10 +124,9 @@ class TransferTxTest {
       long transferSum = 40L;
       HashCode hash = HashCode.fromString("a0a0a0a0");
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferSum);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .hash(hash)
-          .build();
+      TransactionContext context = newContext(view)
+          .withHash(hash)
+          .create();
 
       tx.execute(context);
 
@@ -166,9 +166,7 @@ class TransferTxTest {
       long transferValue = 50L;
 
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = newContext(view).create();
 
       // Execute the transaction that attempts to transfer from an unknown wallet
       TransactionExecutionException e = assertThrows(
@@ -193,9 +191,7 @@ class TransferTxTest {
       long seed = 1L;
 
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = newContext(view).create();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
@@ -221,9 +217,7 @@ class TransferTxTest {
       long transferValue = initialBalance + 50L;
 
       TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = newContext(view).create();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));

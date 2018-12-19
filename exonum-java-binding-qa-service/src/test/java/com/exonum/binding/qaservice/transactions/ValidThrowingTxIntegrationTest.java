@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
+import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -79,10 +80,6 @@ class ValidThrowingTxIntegrationTest {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
-
 
       // Initialize storage with a counter equal to 10
       String name = "counter";
@@ -93,6 +90,7 @@ class ValidThrowingTxIntegrationTest {
       ValidThrowingTx tx = new ValidThrowingTx(0L);
 
       // Execute the transaction
+      TransactionContext context = newContext(view).create();
       IllegalStateException expected = assertThrows(IllegalStateException.class,
           () -> tx.execute(context));
 

@@ -18,12 +18,17 @@ package com.exonum.binding.fakes.services.service;
 
 import static com.exonum.binding.fakes.services.service.PutValueTransaction.BODY_CHARSET;
 import static com.exonum.binding.fakes.services.service.TestSchemaFactories.createTestSchemaFactory;
+import static com.exonum.binding.fakes.services.transactions.TestContextBuilder.newContext;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.storage.database.Fork;
@@ -80,10 +85,10 @@ class PutValueTransactionTest {
     PutValueTransaction tx = PutValueTransaction.from(transaction,
         createTestSchemaFactory(fork, schema));
 
-    TransactionContext context = TransactionContext.builder()
-        .fork(fork)
-        .build();
+    // Execute the transaction
+    TransactionContext context = spy(newContext(fork).create());
     tx.execute(context);
+    verify(context).getFork();
 
     verify(testMap).put(eq(hash), eq(value));
   }

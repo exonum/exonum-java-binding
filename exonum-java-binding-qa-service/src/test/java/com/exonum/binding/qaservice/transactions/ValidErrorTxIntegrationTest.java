@@ -19,6 +19,7 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
+import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -106,9 +107,7 @@ class ValidErrorTxIntegrationTest {
       byte errorCode = 2;
       Transaction tx = new ValidErrorTx(1L, errorCode, null);
 
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = newContext(view).create();
       TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
           () -> tx.execute(context));
 
@@ -128,9 +127,7 @@ class ValidErrorTxIntegrationTest {
       String description = "Boom";
       Transaction tx = new ValidErrorTx(1L, errorCode, description);
 
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = newContext(view).create();
       TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
           () -> tx.execute(context));
 
@@ -156,9 +153,7 @@ class ValidErrorTxIntegrationTest {
       ValidErrorTx tx = new ValidErrorTx(0L, errorCode, "Boom");
 
       // Execute the transaction
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = newContext(view).create();
       assertThrows(TransactionExecutionException.class, () -> tx.execute(context));
 
       // Check that execute cleared the maps

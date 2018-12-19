@@ -17,6 +17,7 @@
 package com.exonum.binding.fakes.services.transactions;
 
 import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.ENTRY_NAME;
+import static com.exonum.binding.fakes.services.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,13 +55,13 @@ class SetEntryTransactionIntegrationTest {
       Fork fork = database.createFork(cleaner);
 
       SetEntryTransaction tx = new SetEntryTransaction(value);
-      TransactionContext context = spy(TransactionContext.builder()
-          .fork(fork)
-          .hash(HashCode.fromInt(123))
-          .authorPk(PublicKey.fromHexString("1234"))
-          .build());
 
+      // Execute the transaction
+      TransactionContext context = spy(newContext(fork).create());
       tx.execute(context);
+      verify(context).getFork();
+      verify(context).getTransactionMessageHash();
+      verify(context).getAuthorPk();
 
       database.merge(fork);
 
@@ -69,11 +70,6 @@ class SetEntryTransactionIntegrationTest {
           StandardSerializers.string());
       assertTrue(entry.isPresent());
       assertThat(entry.get(), equalTo(value));
-
-      //verify context
-      verify(context).getFork();
-      verify(context).getTransactionMessageHash();
-      verify(context).getAuthorPk();
     }
   }
 }

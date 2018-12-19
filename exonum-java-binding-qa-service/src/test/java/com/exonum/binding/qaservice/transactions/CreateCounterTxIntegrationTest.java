@@ -19,11 +19,14 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
+import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
@@ -96,12 +99,11 @@ class CreateCounterTxIntegrationTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
 
       // Execute the transaction
+      TransactionContext context = spy(newContext(view).create());
       tx.execute(context);
+      verify(context).getFork();
 
       // Check it has added entries in both maps.
       QaSchema schema = new QaSchema(view);
@@ -132,10 +134,9 @@ class CreateCounterTxIntegrationTest {
 
       // Execute the transaction, that has the same name.
       CreateCounterTx tx = new CreateCounterTx(name);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+      TransactionContext context = spy(newContext(view).create());
       tx.execute(context);
+      verify(context).getFork();
 
       // Check it has not changed the entries in the maps.
       QaSchema schema = new QaSchema(view);

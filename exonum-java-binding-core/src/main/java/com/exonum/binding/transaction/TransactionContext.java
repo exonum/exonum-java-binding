@@ -22,6 +22,8 @@ import com.exonum.binding.storage.database.Fork;
 
 /**
  * Transaction context class. Contains required information for the transaction execution.
+ * The context is provided by the framework and users shouldn't create context instances manually
+ * except tests.
  */
 public interface TransactionContext {
   /**

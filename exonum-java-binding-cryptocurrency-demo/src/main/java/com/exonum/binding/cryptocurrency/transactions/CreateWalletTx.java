@@ -73,6 +73,8 @@ public final class CreateWalletTx implements Transaction {
 
   @Override
   public void execute(TransactionContext context) throws TransactionExecutionException {
+    checkArgument(ownerPublicKey.equals(context.getAuthorPk()));
+
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 

@@ -1,5 +1,7 @@
 package com.exonum.binding.transaction;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
@@ -13,9 +15,9 @@ final class InternalTransactionContext implements TransactionContext {
   private final PublicKey authorPk;
 
   InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk) {
-    this.fork = fork;
-    this.hash = hash;
-    this.authorPk = authorPk;
+    this.fork = checkNotNull(fork);
+    this.hash = checkNotNull(hash);
+    this.authorPk = checkNotNull(authorPk);
   }
 
   @Override

@@ -21,11 +21,14 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
+import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
@@ -99,10 +102,11 @@ class IncrementCounterTxIntegrationTest {
       long seed = 0L;
       HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
       IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+
+      // Execute the transaction
+      TransactionContext context = spy(newContext(view).create());
       tx.execute(context);
+      verify(context).getFork();
 
       // Check the counter has an incremented value
       QaSchema schema = new QaSchema(view);
@@ -124,10 +128,11 @@ class IncrementCounterTxIntegrationTest {
       String name = "unknown-counter";
       HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
       IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .build();
+
+      // Execute the transaction
+      TransactionContext context = spy(newContext(view).create());
       tx.execute(context);
+      verify(context).getFork();
 
       // Check there isn’t such a counter after tx execution
       QaSchema schema = new QaSchema(view);

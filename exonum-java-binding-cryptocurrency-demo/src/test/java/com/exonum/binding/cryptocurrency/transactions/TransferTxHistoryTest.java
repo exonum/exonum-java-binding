@@ -18,6 +18,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
+import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -56,11 +57,9 @@ class TransferTxHistoryTest {
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       HashCode hash = HashCode.fromString("a0a0a0a0");
-      TransactionContext context = TransactionContext.builder()
-          .fork(view)
-          .hash(hash)
-          .build();
-
+      TransactionContext context = newContext(view)
+          .withHash(hash)
+          .create();
 
       // Create wallets with the given initial balances
       long initialBalance = 100L;

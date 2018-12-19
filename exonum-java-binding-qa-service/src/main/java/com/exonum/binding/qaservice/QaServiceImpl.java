@@ -16,7 +16,9 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.google.common.base.Preconditions.checkState;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.configuration.StoredConfiguration;
@@ -229,11 +231,16 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   private void createCounter(String name, Fork fork) {
-    TransactionContext context = TransactionContext.builder()
-        .fork(fork)
-        .build();
+    QaSchema schema = new QaSchema(fork);
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> names = schema.counterNames();
 
-    new CreateCounterTx(name).execute(context);
+    HashCode counterId = defaultHashFunction().hashString(name, UTF_8);
+    if (counters.containsKey(counterId)) {
+      return;
+    }
+    counters.put(counterId, 0L);
+    names.put(counterId, name);
   }
 
   @Override
