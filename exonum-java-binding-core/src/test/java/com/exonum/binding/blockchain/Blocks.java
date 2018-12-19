@@ -20,7 +20,7 @@ import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 
-public class Blocks {
+public final class Blocks {
 
   /**
    * Returns a new block that has its hash set up to the proper value — SHA-256 hash
