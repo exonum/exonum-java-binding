@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.blockchain.Block.Builder;
@@ -41,6 +42,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +60,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RequiresNativeLibrary
 @ExtendWith(MockitoExtension.class)
 class BlockchainIntegrationTest {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private static final String TEST_BLOCKS = "test_blocks";
   private static final String TEST_BLOCK_HASHES = "test_block_hashes";
@@ -107,7 +113,8 @@ class BlockchainIntegrationTest {
       ProofListIndexProxy<HashCode> transactionHashes = ProofListIndexProxy.newInstance(
           TEST_BLOCK_TRANSACTIONS, fork, StandardSerializers.hash());
       transactionHashes.addAll(expectedBlockTransactions);
-      when(coreSchema.getBlockTransactions(blockHeight)).thenReturn(transactionHashes);
+      lenient().when(coreSchema.getBlockTransactions(blockHeight))
+              .thenReturn(transactionHashes);
     }
 
     @AfterEach
@@ -229,10 +236,10 @@ class BlockchainIntegrationTest {
       when(coreSchema.getHeight()).thenReturn(HEIGHT);
       MapIndex<HashCode, Block> blocksByHash = MapIndexProxy.newInstance(TEST_BLOCKS, snapshot,
           StandardSerializers.hash(), BlockSerializer.INSTANCE);
-      when(coreSchema.getBlocks()).thenReturn(blocksByHash);
+      lenient().when(coreSchema.getBlocks()).thenReturn(blocksByHash);
       ListIndex<HashCode> blockHashes = ListIndexProxy.newInstance(TEST_BLOCK_HASHES, snapshot,
           StandardSerializers.hash());
-      when(coreSchema.getBlockHashes()).thenReturn(blockHashes);
+      lenient().when(coreSchema.getBlockHashes()).thenReturn(blockHashes);
     }
 
     @Test
@@ -255,11 +262,11 @@ class BlockchainIntegrationTest {
     @ValueSource(longs = {
         Long.MIN_VALUE, -1, HEIGHT + 1, HEIGHT + 2, Long.MAX_VALUE
     })
-    void getBlockAtInvalidHeight(long blockchainHeight) {
+    void getBlockAtInvalidHeight(long invalidBlockchainHeight) {
       Exception e = assertThrows(IndexOutOfBoundsException.class,
-          () -> blockchain.getBlock(blockchainHeight + 1));
+          () -> blockchain.getBlock(invalidBlockchainHeight));
 
-      assertThat(e).hasMessageContaining(Long.toString(blockchainHeight));
+      assertThat(e).hasMessageContaining(Long.toString(invalidBlockchainHeight));
     }
   }
 
