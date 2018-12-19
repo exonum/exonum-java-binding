@@ -98,7 +98,7 @@ public final class Blockchain {
    *
    * @param height block height starting from 0
    * @throws IllegalArgumentException if the height is invalid: negative or exceeding
-   *     {@linkplain #getHeight() the blockchain height}.
+   *     the {@linkplain #getHeight() blockchain height}
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
@@ -186,9 +186,9 @@ public final class Blockchain {
    * Returns the block at the given height.
    *
    * @param height the height of the block; must be non-negative and less than or equal to
-   *     the current blockchain height
+   *     the current {@linkplain #getHeight() blockchain height}
    * @return a block at the height
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the height is not valid
    */
   public Block getBlock(long height) {
     checkHeight(height);
