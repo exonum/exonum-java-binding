@@ -33,8 +33,8 @@ from the passed context: `TransactionContext#getFooKey`.
 ### Update `Transaction`s
 The following methods are **removed** from `Transaction` interface:
   - `isValid`. In v0.4 the framework verifies the cryptographic signature itself, using the
-  public key from the message. If your service performs any additional checks, 
-  move them to the constructor of your transaction or to `TransactionConverter`, whichever 
+  public key from the message. If your service performs any additional checks in `isValid`, 
+  move them to the constructor of your transaction or to `TransactionConverter`, whichever
   works best.
   - `getMessage`. Transactions are no longer required to store the corresponding 
   `TransactionMessage`, which makes it easier to instantiate them in unit or integration tests.
@@ -73,7 +73,7 @@ has occurred. <!-- TODO: Link the docs -->
 The framework now provides a method to create a transaction message and sign it with the
 _service key_. This allows service implementations to create new transactions and securely sign
 them, e.g., in their event handlers. But use with care — each node has its own service keypair.
-<!-- TODO: Some links would be welcome --> 
+<!-- TODO: Some links would be welcome -->
 
 ## Use example
 See how the cryptocurrency service has changed since the last release to understand what
