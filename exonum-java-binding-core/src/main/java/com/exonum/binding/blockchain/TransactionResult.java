@@ -107,13 +107,12 @@ public abstract class TransactionResult {
 
   /**
    * Returns the description of a transaction if its execution resulted in an error;
-   * or an empty string if there is no description. Never {@code null}.
+   * or an empty string if there is no description.
    */
   public abstract String getErrorDescription();
 
   /**
-   * Return whether transaction was successful or not.
-   * @return true if transaction was successful, false otherwise
+   * Returns true if transaction was {@linkplain Type#SUCCESS successful}, false otherwise
    */
   public boolean isSuccessful() {
     return getType() == Type.SUCCESS;
