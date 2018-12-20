@@ -59,7 +59,7 @@ public final class UserTransactionAdapter {
         PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
         TransactionContext context = TransactionContext.builder()
             .fork(fork)
-            .hash(hash)
+            .txMessageHash(hash)
             .authorPk(authorPk)
             .build();
 

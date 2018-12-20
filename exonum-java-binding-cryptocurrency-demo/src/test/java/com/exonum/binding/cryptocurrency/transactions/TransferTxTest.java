@@ -67,25 +67,11 @@ class TransferTxTest {
   void fromRawTransaction() {
     long seed = 1;
     long amount = 50L;
-    RawTransaction raw = createRawTransaction(seed, FROM_KEY, TO_KEY, amount);
+    RawTransaction raw = createRawTransaction(seed, TO_KEY, amount);
 
     TransferTx tx = TransferTx.fromRawTransaction(raw);
 
-    assertThat(tx, equalTo(new TransferTx(seed, FROM_KEY, TO_KEY, amount)));
-  }
-
-  @Test
-  void fromRawTransactionRejectsSameSenderAndReceiver() {
-    long seed = 1;
-    long amount = 50L;
-    RawTransaction tx = createRawTransaction(seed, FROM_KEY, FROM_KEY, amount);
-
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.fromRawTransaction(tx));
-
-    assertThat(e.getMessage(), allOf(
-        containsStringIgnoringCase("same sender and receiver"),
-        containsStringIgnoringCase(FROM_KEY.toString())));
+    assertThat(tx, equalTo(new TransferTx(seed, TO_KEY, amount)));
   }
 
   @ParameterizedTest
@@ -97,7 +83,7 @@ class TransferTxTest {
   })
   void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
     long seed = 1;
-    RawTransaction tx = createRawTransaction(seed, FROM_KEY, TO_KEY, transferAmount);
+    RawTransaction tx = createRawTransaction(seed, TO_KEY, transferAmount);
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransferTx.fromRawTransaction(tx));
@@ -123,9 +109,10 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 40L;
       HashCode hash = HashCode.fromString("a0a0a0a0");
-      TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferSum);
+      TransferTx tx = new TransferTx(seed, TO_KEY, transferSum);
       TransactionContext context = newContext(view)
-          .withHash(hash)
+          .withTxMessageHash(hash)
+          .withAuthorKey(FROM_KEY)
           .create();
 
       tx.execute(context);
@@ -165,8 +152,10 @@ class TransferTxTest {
       long seed = 1L;
       long transferValue = 50L;
 
-      TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      TransactionContext context = newContext(view).create();
+      TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
+      TransactionContext context = newContext(view)
+          .withAuthorKey(FROM_KEY)
+          .create();
 
       // Execute the transaction that attempts to transfer from an unknown wallet
       TransactionExecutionException e = assertThrows(
@@ -190,12 +179,37 @@ class TransferTxTest {
       long transferValue = 50L;
       long seed = 1L;
 
-      TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      TransactionContext context = newContext(view).create();
+      TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
+      TransactionContext context = newContext(view)
+          .withAuthorKey(FROM_KEY)
+          .create();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
       assertThat(e, hasErrorCode(UNKNOWN_RECEIVER));
+    }
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void executeTransfer_RejectsSameSenderAndReceiver() throws CloseFailuresException {
+    try (Database db = MemoryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
+      long seed = 1;
+      long amount = 50L;
+      TransferTx tx = new TransferTx(seed, FROM_KEY, amount);
+
+      TransactionContext context = newContext(view)
+          .withAuthorKey(FROM_KEY)
+          .create();
+
+      Exception e = assertThrows(IllegalStateException.class,
+          () -> tx.execute(context));
+
+      assertThat(e.getMessage(), allOf(
+          containsStringIgnoringCase("same sender and receiver"),
+          containsStringIgnoringCase(FROM_KEY.toString())));
     }
   }
 
@@ -216,8 +230,10 @@ class TransferTxTest {
       long seed = 1L;
       long transferValue = initialBalance + 50L;
 
-      TransferTx tx = new TransferTx(seed, FROM_KEY, TO_KEY, transferValue);
-      TransactionContext context = newContext(view).create();
+      TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
+      TransactionContext context = newContext(view)
+          .withAuthorKey(FROM_KEY)
+          .create();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));

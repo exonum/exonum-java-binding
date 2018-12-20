@@ -16,6 +16,7 @@
 
 package com.exonum.binding.transaction;
 
+import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
@@ -65,15 +66,17 @@ public interface TransactionContext {
     }
 
     /**
-     * Sets message hash for the context.
+     * Sets transaction message hash for the context.
      */
-    public Builder hash(HashCode hash) {
+    public Builder txMessageHash(HashCode hash) {
       this.hash = hash;
       return this;
     }
 
     /**
-     * Sets transaction author public key for the context.
+     * Sets transaction author public key for the context. The corresponding transaction message
+     * is guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature
+     * with this public key.
      */
     public Builder authorPk(PublicKey authorPk) {
       this.authorPk = authorPk;

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
@@ -40,23 +39,18 @@ public final class CreateWalletTx implements Transaction {
   static final short ID = 1;
   private static final Serializer<TxMessageProtos.CreateWalletTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.CreateWalletTx.class);
-  private final PublicKey ownerPublicKey;
   private final long initialBalance;
 
   @VisibleForTesting
-  CreateWalletTx(PublicKey ownerPublicKey, long initialBalance) {
-    checkArgument(ownerPublicKey.size() == PUBLIC_KEY_BYTES,
-        "Public key has invalid size (%s), must be %s bytes long.", ownerPublicKey.size(),
-        PUBLIC_KEY_BYTES);
+  CreateWalletTx(long initialBalance) {
     checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
         initialBalance);
 
-    this.ownerPublicKey = ownerPublicKey;
     this.initialBalance = initialBalance;
   }
 
   /**
-   * Creates a create wallet transaction from its message.
+   * Creates a create wallet transaction from the serialized transaction data.
    * @param rawTransaction a raw transaction
    */
   public static CreateWalletTx fromRawTransaction(RawTransaction rawTransaction) {
@@ -65,15 +59,13 @@ public final class CreateWalletTx implements Transaction {
     TxMessageProtos.CreateWalletTx body =
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
-    PublicKey ownerPublicKey = PublicKey.fromBytes(
-        (body.getOwnerPublicKey().toByteArray()));
     long initialBalance = body.getInitialBalance();
-    return new CreateWalletTx(ownerPublicKey, initialBalance);
+    return new CreateWalletTx( initialBalance);
   }
 
   @Override
   public void execute(TransactionContext context) throws TransactionExecutionException {
-    checkArgument(ownerPublicKey.equals(context.getAuthorPk()));
+    PublicKey ownerPublicKey = context.getAuthorPk();
 
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
@@ -96,13 +88,12 @@ public final class CreateWalletTx implements Transaction {
       return false;
     }
     CreateWalletTx that = (CreateWalletTx) o;
-    return Objects.equals(ownerPublicKey, that.ownerPublicKey)
-        && initialBalance == that.initialBalance;
+    return initialBalance == that.initialBalance;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ownerPublicKey, initialBalance);
+    return Objects.hash(initialBalance);
   }
 }
 

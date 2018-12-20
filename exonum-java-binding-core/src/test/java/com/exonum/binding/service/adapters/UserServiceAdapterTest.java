@@ -74,7 +74,7 @@ class UserServiceAdapterTest {
   private UserServiceAdapter serviceAdapter;
 
   private static final short SERVICE_ID = (short) 0xA103;
-  private static final short TRANSACTION_ID = 1;
+  private static final short TRANSACTION_ID = 0x05;
   private static final long SNAPSHOT_HANDLE = 0x0A;
   private static final long HEIGHT = 1;
   private static final int VALIDATOR_ID = 1;
@@ -91,19 +91,17 @@ class UserServiceAdapterTest {
     when(service.convertToTransaction(any(RawTransaction.class)))
         .thenReturn(expectedTransaction);
     when(service.getId()).thenReturn(SERVICE_ID);
-
     byte[] payload = Bytes.bytes(0x00, 0x01);
 
     UserTransactionAdapter transactionAdapter =
         serviceAdapter.convertTransaction(TRANSACTION_ID, payload);
+    assertThat(transactionAdapter.transaction, equalTo(expectedTransaction));
 
     RawTransaction expectedRawTransaction = RawTransaction.newBuilder()
         .serviceId(SERVICE_ID)
         .transactionId(TRANSACTION_ID)
         .payload(payload)
         .build();
-
-    assertThat(transactionAdapter.transaction, equalTo(expectedTransaction));
     verify(service).convertToTransaction(expectedRawTransaction);
   }
 

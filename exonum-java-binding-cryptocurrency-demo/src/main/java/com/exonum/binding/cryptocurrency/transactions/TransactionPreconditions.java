@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.transaction.RawTransaction;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 final class TransactionPreconditions {
 
@@ -30,14 +29,12 @@ final class TransactionPreconditions {
     throw new AssertionError("Non-instantiable");
   }
 
-  @CanIgnoreReturnValue
-  static <T extends RawTransaction> T checkTransaction(T transaction, short expectedTxId) {
+  static void checkTransaction(RawTransaction transaction, short expectedTxId) {
     checkServiceId(transaction);
     checkTransactionId(transaction, expectedTxId);
-    return transaction;
   }
 
-  private static <T extends RawTransaction> void checkServiceId(T transaction) {
+  private static void checkServiceId(RawTransaction transaction) {
     short serviceId = transaction.getServiceId();
     checkArgument(
         serviceId == SERVICE_ID,
@@ -47,8 +44,8 @@ final class TransactionPreconditions {
         SERVICE_ID);
   }
 
-  private static <T extends RawTransaction> void checkTransactionId(
-      T transaction, short expectedTxId) {
+  private static void checkTransactionId(
+      RawTransaction transaction, short expectedTxId) {
     short txId = transaction.getTransactionId();
     checkArgument(
         txId == expectedTxId,
@@ -57,5 +54,4 @@ final class TransactionPreconditions {
         txId,
         expectedTxId);
   }
-  
 }

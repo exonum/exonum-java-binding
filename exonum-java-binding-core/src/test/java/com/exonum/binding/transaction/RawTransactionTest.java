@@ -26,15 +26,9 @@ import org.junit.jupiter.api.Test;
 class RawTransactionTest {
 
   @Test
-  void equalsTest() {
-    EqualsVerifier.forClass(RawTransaction.class)
-        .verify();
-  }
-
-  @Test
   void builderTest() {
-    short serviceId = 10;
-    short transactionId = 20;
+    short serviceId = 0x0A;
+    short transactionId = 0x0B;
     byte[] payload = Bytes.bytes(0x00, 0x01, 0x02);
 
     RawTransaction transaction = RawTransaction.newBuilder()

@@ -192,24 +192,6 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void submitInvalidTx(VertxTestContext context) {
-    Throwable error = wrappingChecked(Exception.class);
-    when(qaService.submitInvalidTx()).thenThrow(error);
-
-    post(ApiController.SUBMIT_INVALID_TX_PATH)
-        .send(checkInvalidTransaction(context));
-  }
-
-  @Test
-  void submitInvalidThrowingTx(VertxTestContext context) {
-    Throwable error = wrappingChecked(Exception.class);
-    when(qaService.submitInvalidThrowingTx()).thenThrow(error);
-
-    post(ApiController.SUBMIT_INVALID_THROWING_TX_PATH)
-        .send(checkInvalidTransaction(context));
-  }
-
-  @Test
   void submitValidThrowing(VertxTestContext context) {
     long seed = 10L;
 

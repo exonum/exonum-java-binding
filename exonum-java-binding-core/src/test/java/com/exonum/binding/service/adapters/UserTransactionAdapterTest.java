@@ -26,8 +26,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
@@ -46,15 +48,18 @@ class UserTransactionAdapterTest {
 
   @Mock
   private Transaction transaction;
-
   @Mock
   private ViewFactory viewFactory;
+  @Mock
+  private Fork fork;
 
   @InjectMocks
   private UserTransactionAdapter transactionAdapter;
 
   @Test
   void execute_closesCleanerAfterExecution() throws TransactionExecutionException {
+    when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
+
     transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
@@ -66,6 +71,8 @@ class UserTransactionAdapterTest {
 
   @Test
   void execute_rethrowsExecutionException() throws TransactionExecutionException {
+    when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
+
     TransactionExecutionException txError = mock(TransactionExecutionException.class);
 
     doThrow(txError).when(transaction).execute(any(TransactionContext.class));
@@ -77,6 +84,8 @@ class UserTransactionAdapterTest {
 
   @Test
   void execute_rethrowsRuntimeExceptions() throws TransactionExecutionException {
+    when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
+
     RuntimeException unexpectedTxError = mock(RuntimeException.class);
 
     doThrow(unexpectedTxError).when(transaction).execute(any(TransactionContext.class));

@@ -22,6 +22,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
@@ -48,23 +49,20 @@ public final class TransferTx implements Transaction {
       protobuf(TxMessageProtos.TransferTx.class);
 
   private final long seed;
-  private final PublicKey fromWallet;
   private final PublicKey toWallet;
   private final long sum;
 
   @VisibleForTesting
-  TransferTx(long seed, PublicKey fromWallet, PublicKey toWallet,
+  TransferTx(long seed, PublicKey toWallet,
       long sum) {
-    checkArgument(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
     checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
     this.seed = seed;
-    this.fromWallet = fromWallet;
     this.toWallet = toWallet;
     this.sum = sum;
   }
 
   /**
-   * Creates a new transfer transaction from the binary message.
+   * Creates a new transfer transaction from the serialized transaction data.
    */
   public static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
@@ -73,11 +71,10 @@ public final class TransferTx implements Transaction {
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
     long seed = body.getSeed();
-    PublicKey fromWallet = toPublicKey(body.getFromWallet());
     PublicKey toWallet = toPublicKey(body.getToWallet());
     long sum = body.getSum();
 
-    return new TransferTx(seed, fromWallet, toWallet, sum);
+    return new TransferTx(seed, toWallet, sum);
   }
 
   private static PublicKey toPublicKey(ByteString s) {
@@ -86,6 +83,8 @@ public final class TransferTx implements Transaction {
 
   @Override
   public void execute(TransactionContext context) throws TransactionExecutionException {
+    PublicKey fromWallet = context.getAuthorPk();
+    checkState(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
@@ -131,12 +130,11 @@ public final class TransferTx implements Transaction {
     TransferTx that = (TransferTx) o;
     return seed == that.seed
         && sum == that.sum
-        && Objects.equals(fromWallet, that.fromWallet)
         && Objects.equals(toWallet, that.toWallet);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(seed, fromWallet, toWallet, sum);
+    return Objects.hash(seed, toWallet, sum);
   }
 }

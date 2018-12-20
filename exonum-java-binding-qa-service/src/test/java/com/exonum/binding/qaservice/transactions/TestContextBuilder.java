@@ -31,7 +31,7 @@ public final class TestContextBuilder {
   private TestContextBuilder(Fork view) {
     this.builder = TransactionContext.builder()
         .fork(view)
-        .hash(DEFAULT_HASH)
+        .txMessageHash(DEFAULT_HASH)
         .authorPk(DEFAULT_AUTHOR_KEY);
   }
 
@@ -43,8 +43,8 @@ public final class TestContextBuilder {
     return builder.build();
   }
 
-  public TestContextBuilder withHash(HashCode hash) {
-    builder.hash(hash);
+  public TestContextBuilder withTxMessageHash(HashCode hash) {
+    builder.txMessageHash(hash);
     return this;
   }
 

@@ -28,15 +28,15 @@ public interface Transaction {
   /**
    * Execute the transaction, possibly modifying the blockchain state.
    *
-   * @param context a transaction execution context, which allows to access transaction-related
-   *     data.
+   * @param context a transaction execution context, which allows to access the information about
+   *        this transaction and modify the blockchain state through the included database fork
    * @throws TransactionExecutionException if the transaction cannot be executed normally
    *     and has to be rolled back. The transaction will be committed as failed (status "error"),
    *     the error code with the optional description will be saved into the storage. The client
-   *     can request the error code to know the reason of the failure.
+   *     can request the error code to know the reason of the failure
    * @throws RuntimeException if an unexpected error occurs. A correct transaction implementation
    *     must not throw such exceptions. The transaction will be committed as failed
-   *     (status "panic").
+   *     (status "panic")
    */
   void execute(TransactionContext context) throws TransactionExecutionException;
 

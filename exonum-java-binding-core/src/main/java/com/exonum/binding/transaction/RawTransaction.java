@@ -1,131 +1,55 @@
 package com.exonum.binding.transaction;
 
-import static com.exonum.binding.common.hash.Hashing.sha256;
-
-import com.exonum.binding.common.hash.HashCode;
-import com.google.common.base.Objects;
-import java.util.Arrays;
+import com.google.auto.value.AutoValue;
 
 /**
  * An Exonum raw transaction. It is mainly used for interaction with the Exonum core
  * as well as for transferring transactions between nodes within the network.
  */
-public final class RawTransaction {
-  private final short serviceId;
-  private final short transactionId;
-  private final byte[] payload;
-
-  private RawTransaction(short serviceId, short transactionId, final byte[] payload) {
-    this.serviceId = serviceId;
-    this.transactionId = transactionId;
-    this.payload = payload.clone();
-  }
+@AutoValue
+public abstract class RawTransaction {
 
   /**
    * Returns a service identifier which the transaction belongs to.
    */
-  public short getServiceId() {
-    return serviceId;
-  }
+  public abstract short getServiceId();
 
   /**
-   * Returns the transaction identifier.
+   * Returns the type of this transaction within a service.
    */
-  public short getTransactionId() {
-    return transactionId;
-  }
+  public abstract short getTransactionId();
 
   /**
    * Returns the transaction payload which contains actual transaction data.
    */
-  public byte[] getPayload() {
-    return payload.clone();
-  }
-
-  /**
-   * Returns the SHA-256 hash of the transaction data.
-   */
-  public HashCode hash() {
-    return sha256().hashBytes(getPayload());
-  }
+  public abstract byte[] getPayload();
 
   /**
    * Returns the new builder for the transaction.
    */
-  public static Builder newBuilder() {
-    return new Builder();
+  public static RawTransaction.Builder newBuilder() {
+    return new AutoValue_RawTransaction.Builder();
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    RawTransaction that = (RawTransaction) o;
-    return serviceId == that.serviceId
-        && transactionId == that.transactionId
-        && Arrays.equals(payload, that.payload);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(serviceId, transactionId) + Arrays.hashCode(payload);
-  }
-
-  public static final class Builder {
-    private Short serviceId;
-    private Short transactionId;
-    private byte[] payload;
+  @AutoValue.Builder
+  public static abstract class Builder {
 
     /**
      * Sets service identifier to the transaction.
      */
-    public RawTransaction.Builder serviceId(short serviceId) {
-      this.serviceId = serviceId;
-      return this;
-    }
+    public abstract Builder serviceId(short serviceId);
 
     /**
      * Sets transaction identifier to the transaction.
      */
-    public RawTransaction.Builder transactionId(short transactionId) {
-      this.transactionId = transactionId;
-      return this;
-    }
+    public abstract Builder transactionId(short transactionId);
 
     /**
      * Sets payload to the transaction.
      */
-    public RawTransaction.Builder payload(byte[] payload) {
-      this.payload = payload.clone();
-      return this;
-    }
+    public abstract Builder payload(byte[] payload);
 
-    /**
-     * Creates the raw transaction instance.
-     */
-    public RawTransaction build() {
-      checkRequiredFieldsSet();
-
-      return new RawTransaction(this.serviceId, this.transactionId, this.payload);
-    }
-
-    private void checkRequiredFieldsSet() {
-      String undefinedFields = "";
-      undefinedFields = this.serviceId == null ? undefinedFields + " serviceId" : undefinedFields;
-      undefinedFields =
-          this.transactionId == null ? undefinedFields + " transactionId" : undefinedFields;
-      undefinedFields = this.payload == null ? undefinedFields + " payload" : undefinedFields;
-      if (!undefinedFields.isEmpty()) {
-        throw new IllegalStateException(
-            "Following field(s) are required but weren't set: " + undefinedFields);
-      }
-    }
-
-    private Builder() {
-    }
+    public abstract RawTransaction build();
   }
+
 }

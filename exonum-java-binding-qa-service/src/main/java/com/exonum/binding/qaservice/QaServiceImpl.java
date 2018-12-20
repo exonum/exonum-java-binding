@@ -26,8 +26,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
-import com.exonum.binding.qaservice.transactions.InvalidTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ValidErrorTx;
 import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
@@ -44,7 +42,6 @@ import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -146,19 +143,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
     return submitTransaction(IncrementCounterTx.converter().toRawTransaction(tx));
   }
 
-  @Override
-  public HashCode submitInvalidTx() {
-    InvalidTx tx = new InvalidTx();
-
-    return submitTransaction(InvalidTx.converter().toRawTransaction(tx));
-  }
-
-  @Override
-  public HashCode submitInvalidThrowingTx() {
-    InvalidThrowingTx tx = new InvalidThrowingTx();
-
-    return submitTransaction(InvalidThrowingTx.converter().toRawTransaction(tx));
-  }
 
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
@@ -259,7 +243,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
     checkBlockchainInitialized();
     try {
       node.submitTransaction(rawTransaction);
-      return rawTransaction.hash();
+      // TODO: return message hash from the core
+      return null;
     } catch (InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }

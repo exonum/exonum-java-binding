@@ -77,11 +77,12 @@ class TransactionPreconditionsTest {
   }
 
   @Test
-  void checkMessageCorrectSize() {
+  void checkTransactionCorrectSize() {
+    short txId = 0x01;
     int body = 10;
     RawTransaction tx = RawTransaction.newBuilder()
         .serviceId(QaService.ID)
-        .transactionId(QaTransaction.INVALID.id())
+        .transactionId(txId)
         .payload(ByteBuffer.allocate(body).array())
         .build();
 
@@ -91,12 +92,13 @@ class TransactionPreconditionsTest {
   }
 
   @Test
-  void checkMessageWrongSize() {
+  void checkTransactionWrongSize() {
+    short txId = 0x01;
     int expectedBody = 11;
     int body = 10;
     RawTransaction tx = RawTransaction.newBuilder()
         .serviceId(QaService.ID)
-        .transactionId(QaTransaction.INVALID.id())
+        .transactionId(txId)
         .payload(ByteBuffer.allocate(body).array())
         .build();
 

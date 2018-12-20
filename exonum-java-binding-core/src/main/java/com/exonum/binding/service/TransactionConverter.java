@@ -21,22 +21,22 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 
 /**
- * A converter of a binary Exonum message, which contains transaction data,
+ * A converter of a raw Exonum transaction, which contains transaction data,
  * into an executable transaction.
  */
 @FunctionalInterface
 @AutoGenerationCandidate(reason = "Perfectly viable given a service id "
     + "and description of all transactions (ids & implementing classes")
-public interface TransactionConverter<T extends Transaction> {
+public interface TransactionConverter {
 
   /**
-   * Converts an Exonum transaction message to an executable transaction of some service.
+   * Converts an Exonum raw transaction to an executable transaction of some service.
    *
-   * @param rawTransaction a raw transaction
+   * @param rawTransaction a raw transaction to be converted
    * @return an executable transaction of some service
-   * @throws IllegalArgumentException if the message is not a transaction,
+   * @throws IllegalArgumentException if the raw transaction is malformed,
    *         or a transaction of an unknown service
-   * @throws NullPointerException if message is null
+   * @throws NullPointerException if the raw transaction is null
    */
-  T toTransaction(RawTransaction rawTransaction);
+  Transaction toTransaction(RawTransaction rawTransaction);
 }

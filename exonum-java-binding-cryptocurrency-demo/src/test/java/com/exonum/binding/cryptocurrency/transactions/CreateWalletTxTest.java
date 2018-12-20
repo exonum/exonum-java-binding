@@ -61,17 +61,7 @@ class CreateWalletTxTest {
 
     CreateWalletTx tx = CreateWalletTx.fromRawTransaction(raw);
 
-    assertThat(tx, equalTo(new CreateWalletTx(OWNER_KEY, initialBalance)));
-  }
-
-  @Test
-  void constructorRejectsInvalidSizedKey() {
-    PublicKey publicKey = PublicKey.fromBytes(bytes(0x01));
-
-    Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> new CreateWalletTx(publicKey, DEFAULT_BALANCE)
-    );
-    assertThat(t.getMessage(), equalTo("Public key has invalid size (1), must be 32 bytes long."));
+    assertThat(tx, equalTo(new CreateWalletTx(initialBalance)));
   }
 
   @Test
@@ -79,7 +69,7 @@ class CreateWalletTxTest {
     long initialBalance = -1L;
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> new CreateWalletTx(OWNER_KEY, initialBalance)
+        () -> new CreateWalletTx(initialBalance)
     );
     assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
 
@@ -88,7 +78,7 @@ class CreateWalletTxTest {
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx() throws Exception {
-    CreateWalletTx tx = new CreateWalletTx(OWNER_KEY, DEFAULT_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -130,7 +120,7 @@ class CreateWalletTxTest {
       // Execute the transaction, that has the same owner key.
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
-      CreateWalletTx tx = new CreateWalletTx(OWNER_KEY, newBalance);
+      CreateWalletTx tx = new CreateWalletTx(newBalance);
 
       TransactionContext context = newContext(view)
           .withAuthorKey(OWNER_KEY)

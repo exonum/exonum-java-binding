@@ -71,10 +71,11 @@ public interface Service {
   /**
    * Converts an Exonum raw transaction to an executable transaction of <em>this</em> service.
    *
-   * @param rawTransaction a raw transaction
+   * @param rawTransaction a raw transaction to be converted
    * @return an executable transaction
-   * @throws IllegalArgumentException if the message is not a transaction of this service
-   * @throws NullPointerException if message is null
+   * @throws IllegalArgumentException if the raw transaction is malformed
+   *         or it doesn't belong to this service
+   * @throws NullPointerException if raw transaction is null
    */
   Transaction convertToTransaction(RawTransaction rawTransaction);
 
@@ -131,5 +132,6 @@ public interface Service {
    * @param event the read-only context allowing to access the blockchain state as of that committed
    *     block
    */
-  default void afterCommit(BlockCommittedEvent event) {}
+  default void afterCommit(BlockCommittedEvent event) {
+  }
 }

@@ -50,16 +50,14 @@ class TransferTxHistoryTest {
 
   private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
   private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
+  private static final HashCode MESSAGE_HASH = HashCode.fromString("a0a0a0a0");
 
   @Test
+  @RequiresNativeLibrary
   void transfersHistoryBetweenTwoAccountsTest() throws Exception {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
-      HashCode hash = HashCode.fromString("a0a0a0a0");
-      TransactionContext context = newContext(view)
-          .withHash(hash)
-          .create();
 
       // Create wallets with the given initial balances
       long initialBalance = 100L;
@@ -69,14 +67,22 @@ class TransferTxHistoryTest {
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
-      TransferTx tx1 = new TransferTx(seed1, ACCOUNT_1, ACCOUNT_2, transferSum1);
-      tx1.execute(context);
+      TransferTx tx1 = new TransferTx(seed1, ACCOUNT_2, transferSum1);
+      TransactionContext context1 = newContext(view)
+          .withTxMessageHash(MESSAGE_HASH)
+          .withAuthorKey(ACCOUNT_1)
+          .create();
+      tx1.execute(context1);
 
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
-      TransferTx tx2 = new TransferTx(seed2, ACCOUNT_2, ACCOUNT_1, transferSum2);
-      tx2.execute(context);
+      TransferTx tx2 = new TransferTx(seed2, ACCOUNT_1, transferSum2);
+      TransactionContext context2 = newContext(view)
+          .withTxMessageHash(MESSAGE_HASH)
+          .withAuthorKey(ACCOUNT_2)
+          .create();
+      tx2.execute(context2);
 
       // Check that wallets have correct balances
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -92,14 +98,14 @@ class TransferTxHistoryTest {
           .setWalletFrom(ACCOUNT_1)
           .setWalletTo(ACCOUNT_2)
           .setAmount(transferSum1)
-          .setTransactionHash(context.getTransactionMessageHash())
+          .setTransactionHash(context1.getTransactionMessageHash())
           .build();
       HistoryEntity expectedEntity2 = HistoryEntity.Builder.newBuilder()
           .setSeed(seed2)
           .setWalletFrom(ACCOUNT_2)
           .setWalletTo(ACCOUNT_1)
           .setAmount(transferSum2)
-          .setTransactionHash(context.getTransactionMessageHash())
+          .setTransactionHash(context2.getTransactionMessageHash())
           .build();
       assertThat(schema.walletHistory(ACCOUNT_1),
           allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));

@@ -18,8 +18,6 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.INVALID;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.INVALID_THROWING;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -40,8 +38,6 @@ public final class QaTransactionConverter implements TransactionConverter {
       ImmutableMap.<Short, Function<RawTransaction, Transaction>>builder()
           .put(INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromRawTransaction)
           .put(CREATE_COUNTER.id(), CreateCounterTx.converter()::fromRawTransaction)
-          .put(INVALID.id(), InvalidTx.converter()::fromRawTransaction)
-          .put(INVALID_THROWING.id(), InvalidThrowingTx.converter()::fromRawTransaction)
           .put(VALID_THROWING.id(), ValidThrowingTx.converter()::fromRawTransaction)
           .put(VALID_ERROR.id(), ValidErrorTx.converter()::fromRawTransaction)
           .build();
