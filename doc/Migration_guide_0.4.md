@@ -30,8 +30,6 @@ The following methods are **removed** from `Transaction` interface:
   public key from the message. If your service performs any additional checks, 
   move them to the constructor of your transaction or to `TransactionConverter`, whichever 
   works best.
-  - `info`. It is no longer possible to serialize the transaction in JSON in core endpoints.
-  <!-- ^ Or shall we keep it? -->
   - `getMessage`. Transactions are no longer required to store the corresponding 
   `TransactionMessage`, which makes it easier to instantiate them in unit or integration tests.
   If your transaction code needs a whole message of this or _any_ other transaction,
@@ -40,9 +38,9 @@ The following methods are **removed** from `Transaction` interface:
   from the passed context: `TransactionContext#getFooHash`. As a reminder, it uniquely identifies
   the message in the system.
   
-That leaves `Transaction` interface with a single `execute` method — less things to implement.
-Its signature changed too — it now accepts a `TransactionContext` that allows to access a `Fork`
-to modify the database state, which was available previously; and some information about 
+That leaves `Transaction` interface with two methods: `execute` and `info`.
+The argument of `execute` changed too — it now accepts a `TransactionContext` that allows
+to access a `Fork` to modify the database state, as previously; and some information about 
 the corresponding transaction message: its hash and the public key of the author.
 
 ### Update your controller
