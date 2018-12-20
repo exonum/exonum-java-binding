@@ -75,8 +75,10 @@ changes might be needed in your service: <!-- TODO: diff link -->
 
 ## Questions?
 
-In case of any questions, feel free to ask a question in Gitter or open an issue on Github.    
+In case of any questions, feel free to [ask][gitter] a question in Gitter or [open][new-issue] an issue
+on Github.    
 
-
+[gitter]: https://gitter.im/exonum/exonum-java-binding
+[new-issue]: https://github.com/exonum/exonum-java-binding/issues/new
 
   
