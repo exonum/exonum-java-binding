@@ -3,14 +3,20 @@
 ## Update the client apps
 Update the clients to submit transactions in the new format, introduced in Exonum 0.10.
 The most notable change in the format is that the public key of the transaction author 
-must always be included in the transaction message. This allows the framework to verify 
+is always included in the transaction message. This allows the framework to verify 
 the message signature with no conversion to an executable transaction.
 
-If the client application is in Java, use `com.exonum.binding.common.message.TransactionMessage`;
-if it is in Java Script, use the latest version of the JS light client.
+If the client application is in Java, use `com.exonum.binding.common.message.TransactionMessage`
+from "[com.exonum.binding:exonum-java-binding-common:0.4][common-0.4]";
+if it is in Java Script, use the latest version of the JS 
+[light client](https://github.com/exonum/exonum-client).
 
-The light client shall submit transactions directly to the core instead of a custom endpoint
-in the service controller. <!-- TODO: which core endpoint? -->
+The light client shall submit transactions directly to the core endpoint instead of a custom one
+in the service controller:
+`<public api IP address and port>/api/explorer/v1/transactions`
+ <!-- TODO: Link the docs when/if they are available -->
+
+[common-0.4]: https://search.maven.org/artifact/com.exonum.binding/exonum-java-binding-common/0.4/jar
 
 ## Update the service
 ### Use the new message format
