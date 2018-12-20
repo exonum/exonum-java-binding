@@ -100,15 +100,15 @@ final class CoreSchemaProxy {
    *
    * @throws IllegalArgumentException if the height is negative or there is no block at given height
    */
-  ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
-    checkArgument(height >= 0, "Height shouldn't be negative, but was %s", height);
-    long actualHeight = getHeight();
+  ProofListIndexProxy<HashCode> getBlockTransactions(long blockHeight) {
+    checkArgument(blockHeight >= 0, "Height shouldn't be negative, but was %s", blockHeight);
+    long blockchainHeight = getHeight();
     checkArgument(
-        height > actualHeight,
+        blockchainHeight >= blockHeight,
         "Height should be less or equal compared to blockchain height %s, but was %s",
-        actualHeight,
-        height);
-    byte[] id = toCoreStorageKey(height);
+        blockchainHeight,
+        blockHeight);
+    byte[] id = toCoreStorageKey(blockHeight);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
   }
