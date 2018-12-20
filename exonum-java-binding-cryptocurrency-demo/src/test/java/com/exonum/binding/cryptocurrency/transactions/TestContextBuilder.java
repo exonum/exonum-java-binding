@@ -17,7 +17,6 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;

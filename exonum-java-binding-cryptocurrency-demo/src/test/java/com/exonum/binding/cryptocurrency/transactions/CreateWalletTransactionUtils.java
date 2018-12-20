@@ -16,10 +16,8 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.transaction.RawTransaction;
-import com.google.protobuf.ByteString;
 
 class CreateWalletTransactionUtils {
 
@@ -28,19 +26,18 @@ class CreateWalletTransactionUtils {
   /**
    * Creates new raw create wallet transaction using provided owner key and default balance.
    */
-  static RawTransaction createRawTransaction(PublicKey ownerKey) {
-    return createRawTransaction(ownerKey, DEFAULT_BALANCE);
+  static RawTransaction createRawTransaction() {
+    return createRawTransaction(DEFAULT_BALANCE);
   }
 
   /**
    * Creates new raw create wallet transaction using provided owner key and provided balance.
    */
-  static RawTransaction createRawTransaction(PublicKey ownerKey, long initialBalance) {
+  static RawTransaction createRawTransaction(long initialBalance) {
     return RawTransaction.newBuilder()
         .serviceId(CryptocurrencyService.ID)
         .transactionId(CreateWalletTx.ID)
         .payload(TxMessageProtos.CreateWalletTx.newBuilder()
-            .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
             .setInitialBalance(initialBalance)
             .build()
             .toByteArray())

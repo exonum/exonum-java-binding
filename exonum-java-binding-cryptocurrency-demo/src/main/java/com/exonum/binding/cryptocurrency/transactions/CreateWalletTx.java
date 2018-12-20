@@ -61,7 +61,7 @@ public final class CreateWalletTx implements Transaction {
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
     long initialBalance = body.getInitialBalance();
-    return new CreateWalletTx( initialBalance);
+    return new CreateWalletTx(initialBalance);
   }
 
   @Override

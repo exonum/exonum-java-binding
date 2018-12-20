@@ -20,7 +20,6 @@ package com.exonum.binding.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.test.Bytes;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 class RawTransactionTest {

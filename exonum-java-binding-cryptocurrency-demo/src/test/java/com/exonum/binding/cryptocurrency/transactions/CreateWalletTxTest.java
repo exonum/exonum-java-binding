@@ -21,7 +21,6 @@ import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransac
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -58,7 +57,7 @@ class CreateWalletTxTest {
   @Test
   void fromRawTransaction() {
     long initialBalance = 100L;
-    RawTransaction raw = createRawTransaction(OWNER_KEY, initialBalance);
+    RawTransaction raw = createRawTransaction(initialBalance);
 
     CreateWalletTx tx = CreateWalletTx.fromRawTransaction(raw);
 

@@ -32,7 +32,7 @@ public abstract class RawTransaction {
   }
 
   @AutoValue.Builder
-  public static abstract class Builder {
+  public abstract static class Builder {
 
     /**
      * Sets service identifier to the transaction.
