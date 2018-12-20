@@ -6,7 +6,7 @@ use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, GenerateNodeConfig};
+use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
 use runtime::config::{self, Config, JvmConfig, ServiceConfig};
 use utils::unwrap_jni;
 use MainExecutor;
@@ -74,6 +74,12 @@ impl JavaServiceRuntime {
             "-Dlog4j.configurationFile={}",
             config.log_config_path
         ));
+        if let Some(socket) = config.jvm_debug_socket {
+            args_builder = args_builder.option(&format!(
+                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
+                socket
+            ));
+        }
 
         let args = args_builder.build().unwrap();
         jni::JavaVM::new(args).unwrap()
@@ -127,6 +133,7 @@ impl ServiceFactory for JavaServiceFactory {
         match command {
             v if v == fabric::GenerateNodeConfig.name() => Some(Box::new(GenerateNodeConfig)),
             v if v == fabric::Finalize.name() => Some(Box::new(Finalize)),
+            v if v == fabric::Run.name() => Some(Box::new(Run)),
             _ => None,
         }
     }

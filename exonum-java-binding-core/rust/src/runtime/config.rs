@@ -28,6 +28,8 @@ pub struct JvmConfig {
     pub lib_path: String,
     /// Path to `log4j` configuration file.
     pub log_config_path: String,
+    /// Socket address for JVM debugging
+    pub jvm_debug_socket: Option<String>,
 }
 
 /// Java service configuration.
@@ -73,6 +75,7 @@ fn check_not_forbidden(user_parameter: &str) -> Result<(), ForbiddenParameterErr
     if user_parameter.starts_with("Djava.class.path")
         || user_parameter.starts_with("Djava.library.path")
         || user_parameter.starts_with("Dlog4j.configurationFile")
+        || user_parameter.starts_with("agentlib:jdwp")
     {
         Err(ForbiddenParameterError(user_parameter.to_string()))
     } else {

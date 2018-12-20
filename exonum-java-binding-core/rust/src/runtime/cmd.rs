@@ -8,6 +8,7 @@ use failure;
 use toml::Value;
 
 const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
+const EJB_JVM_DEBUG_SOCKET: &str = "EJB_JVM_DEBUG_SOCKET";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_CLASSPATH: &str = "EJB_CLASSPATH";
 const EJB_LIBPATH: &str = "EJB_LIBPATH";
@@ -21,15 +22,6 @@ pub struct GenerateNodeConfig;
 impl CommandExtension for GenerateNodeConfig {
     fn args(&self) -> Vec<Argument> {
         vec![
-            Argument::new_named(
-                EJB_JVM_ARGUMENTS,
-                false,
-                "Additional parameters for JVM. Must not have a leading dash. \
-                 For example, `Xmx2G` or `Xdebug`",
-                None,
-                "ejb-jvm-args",
-                true,
-            ),
             Argument::new_named(
                 EJB_LOG_CONFIG_PATH,
                 false,
@@ -58,16 +50,18 @@ impl CommandExtension for GenerateNodeConfig {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
+        let user_parameters = Vec::new();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;
         let lib_path = context.arg(EJB_LIBPATH)?;
+        let jvm_debug_socket = None;
 
         let jvm_config = JvmConfig {
             user_parameters,
             class_path,
             lib_path,
             log_config_path,
+            jvm_debug_socket,
         };
 
         let mut services_secret_configs = context
@@ -135,6 +129,70 @@ impl CommandExtension for Finalize {
             .services_configs
             .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(config)?);
         context.set(keys::NODE_CONFIG, node_config);
+        Ok(context)
+    }
+}
+
+pub struct Run;
+
+impl CommandExtension for Run {
+    fn args(&self) -> Vec<Argument> {
+        vec![
+            Argument::new_named(
+                EJB_JVM_ARGUMENTS,
+                false,
+                "Additional parameters for JVM. Must not have a leading dash. \
+                 For example, `Xmx2G` or `Xdebug`",
+                None,
+                "ejb-jvm-args",
+                true,
+            ),
+            Argument::new_named(
+                EJB_JVM_DEBUG_SOCKET,
+                false,
+                "Allows JVM being remotely debugged. Takes a socket address as a parameter in form \
+                of `HOSTNAME:PORT`. Must not have a leading dash. For example, `localhost:8000`",
+                None,
+                "jvm-debug",
+                false,
+            ),
+        ]
+    }
+
+    fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
+        let user_parameters: Vec<String> =
+            context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
+        let jvm_debug_socket = context.arg(EJB_JVM_DEBUG_SOCKET).ok();
+
+        let curr_config: Config = context
+            .get(keys::NODE_CONFIG)
+            .expect("Unable to read node configuration.")
+            .services_configs
+            .get(EJB_CONFIG_NAME)
+            .expect("Unable to read EJB configuration.")
+            .clone()
+            .try_into()
+            .expect("Invalid EJB configuration format.");
+
+        let new_jvm_config = JvmConfig {
+            user_parameters,
+            class_path: curr_config.jvm_config.class_path,
+            lib_path: curr_config.jvm_config.lib_path,
+            log_config_path: curr_config.jvm_config.log_config_path,
+            jvm_debug_socket,
+        };
+
+        let config = Config {
+            jvm_config: new_jvm_config,
+            service_config: curr_config.service_config,
+        };
+
+        let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
+        node_config
+            .services_configs
+            .insert(EJB_CONFIG_NAME.to_owned(), Value::try_from(config)?);
+        context.set(keys::NODE_CONFIG, node_config);
+
         Ok(context)
     }
 }
