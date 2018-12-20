@@ -2,6 +2,7 @@ use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, Transacti
 use exonum::messages::BinaryForm;
 use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
+use jni::signature::{JavaType, Primitive};
 use jni::JNIEnv;
 use serde;
 
@@ -9,13 +10,11 @@ use std::fmt;
 
 use storage::View;
 use utils::{
+    jni_cache::{transaction_adapter::execute_id, classes_refs::transaction_execution_exception},
     describe_java_exception, get_and_clear_java_exception, get_exception_message, to_handle,
     unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
-
-const CLASS_TRANSACTION_EXCEPTION: &str =
-    "com/exonum/binding/transaction/TransactionExecutionException";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -76,18 +75,19 @@ impl Transaction for TransactionProxy {
             let tx_hash = JObject::from(env.byte_array_from_slice(tx_hash.as_ref())?);
             let author_pk = JObject::from(env.byte_array_from_slice(author_pk.as_ref())?);
 
-            let res = env
-                .call_method(
+            let res = unsafe {
+                env.call_method_unsafe(
                     self.transaction.as_obj(),
-                    "execute",
-                    "(J[B[B)V",
+                    execute_id(),
+                    JavaType::Primitive(Primitive::Void),
                     &[
                         JValue::from(view_handle),
                         JValue::from(tx_hash),
                         JValue::from(author_pk),
-                    ],
-                )
-                .and_then(JValue::v);
+                    ]
+                ).and_then(JValue::v)
+            };
+
             Ok(check_transaction_execution_result(env, res))
         });
         unwrap_jni(res)
@@ -111,7 +111,7 @@ fn check_transaction_execution_result<T>(
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = unwrap_jni(get_exception_message(env, exception));
-            if !unwrap_jni(env.is_instance_of(exception, CLASS_TRANSACTION_EXCEPTION)) {
+            if !unwrap_jni(env.is_instance_of(exception, &transaction_execution_exception())) {
                 let panic_msg = describe_java_exception(env, exception);
                 panic!(panic_msg);
             }
