@@ -105,12 +105,9 @@ impl Service for ServiceProxy {
                     self.service.as_obj(),
                     service_adapter::convert_transaction_id(),
                     JavaType::Object(
-                        "com/exonum/binding/service/adapters/UserTransactionAdapter".into()
+                        "com/exonum/binding/service/adapters/UserTransactionAdapter".into(),
                     ),
-                    &[
-                        JValue::from(tx_id),
-                        JValue::from(payload),
-                    ],
+                    &[JValue::from(tx_id), JValue::from(payload)],
                 )
             };
             // TODO consider whether `NullPointerException` should raise a panic:

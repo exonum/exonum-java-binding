@@ -28,7 +28,6 @@ static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
 
 static mut TRANSACTION_ADAPTER_EXECUTE: Option<JMethodID> = None;
 static mut TRANSACTION_ADAPTER_INFO: Option<JMethodID> = None;
-static mut TRANSACTION_ADAPTER_VERIFY: Option<JMethodID> = None;
 
 static mut SERVICE_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
 static mut SERVICE_ADAPTER_CONVERT_TRANSACTION: Option<JMethodID> = None;

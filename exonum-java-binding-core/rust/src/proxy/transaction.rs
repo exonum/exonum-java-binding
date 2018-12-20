@@ -10,9 +10,9 @@ use std::fmt;
 
 use storage::View;
 use utils::{
-    jni_cache::{transaction_adapter::execute_id, classes_refs::transaction_execution_exception},
-    describe_java_exception, get_and_clear_java_exception, get_exception_message, to_handle,
-    unwrap_jni,
+    describe_java_exception, get_and_clear_java_exception, get_exception_message,
+    jni_cache::{classes_refs::transaction_execution_exception, transaction_adapter::execute_id},
+    to_handle, unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
@@ -84,8 +84,9 @@ impl Transaction for TransactionProxy {
                         JValue::from(view_handle),
                         JValue::from(tx_hash),
                         JValue::from(author_pk),
-                    ]
-                ).and_then(JValue::v)
+                    ],
+                )
+                .and_then(JValue::v)
             };
 
             Ok(check_transaction_execution_result(env, res))
