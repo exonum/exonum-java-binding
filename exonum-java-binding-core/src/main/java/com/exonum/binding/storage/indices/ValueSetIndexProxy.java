@@ -270,6 +270,9 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     // Do not include (potentially) large value in the hash code: we already have a SHA-256 hash.
     @Override
     public final int hashCode() {
+      // Use just the first 4 bytes of the SHA-256 hash of the binary value,
+      // as they will have close to uniform distribution.
+      // AutoValue will still use all fields in #equals.
       return getHash().hashCode();
     }
 

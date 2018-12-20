@@ -6,8 +6,21 @@
     <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
   </Match>
 
-  <!-- Exclude the auto-generated Message_Builder2.java -->
+  <!-- Seems to be a false-positive, nullable is perfectly valid there. -->
   <Match>
-    <Source name="~.*Message_Builder2\.java"/>
+    <Class name="~.*TransactionResult"/>
+    <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+  </Match>
+
+  <!-- It is good, hashCode is specified in the parent, which is *the* way
+       to configure it in AutoValue -->
+  <Match>
+    <Class name="~.*AutoValue_Block"/>
+    <Bug pattern="HE_EQUALS_NO_HASHCODE"/>
+  </Match>
+
+  <!-- Exclude the auto-generated files -->
+  <Match>
+    <Source name="~.*CoreProtos\.java"/>
   </Match>
 </FindBugsFilter>

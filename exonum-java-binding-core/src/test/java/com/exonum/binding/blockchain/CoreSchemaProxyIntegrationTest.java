@@ -18,6 +18,9 @@
 package com.exonum.binding.blockchain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -25,47 +28,73 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.Test;
+import java.util.function.Consumer;
+import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
-public class CoreSchemaProxyIntegrationTest {
+class CoreSchemaProxyIntegrationTest {
 
   static {
     LibraryLoader.load();
   }
 
-  @Test(expected = RuntimeException.class)
-  public void getHeightBeforeGenesisBlockTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      schema.getHeight();
-    }
+  @Test
+  void getHeightBeforeGenesisBlockTest() {
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getHeight));
   }
 
   @Test
-  public void getAllBlockHashesTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
-      assertThat(schema.getAllBlockHashes()).isEmpty();
-    }
+  void getAllBlockHashesTest() {
+    assertSchema((schema) -> assertThat(schema.getAllBlockHashes()).isEmpty());
   }
 
   @Test
-  public void getBlockTransactionsTest() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-
-      CoreSchemaProxy schema = CoreSchemaProxy.newInstance(view);
+  void getBlockTransactionsTest() {
+    assertSchema((schema) -> {
       long height = 0L;
-      assertThat(schema.getBlockTransactions(height)).isEmpty();
-    }
+      Exception e = assertThrows(RuntimeException.class,
+          () -> schema.getBlockTransactions(height));
+      assertThat(e).hasMessageContaining("An attempt to get the actual `height` "
+          + "during creating the genesis block");
+    });
   }
 
+  @Test
+  void getActiveConfigurationBeforeGenesisBlock() {
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getActualConfiguration));
+  }
+
+  @Test
+  void getBlocksTest() {
+    assertSchema((schema) -> assertTrue(schema.getBlocks().isEmpty()));
+  }
+
+  @Test
+  void getLastBlockBeforeGenesisBlockTest() {
+    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getLastBlock));
+  }
+
+  @Test
+  void getTxMessagesTest() {
+    assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
+  }
+
+  @Test
+  void getTxResultsTest() {
+    assertSchema((schema) -> assertTrue(schema.getTxResults().isEmpty()));
+  }
+
+  @Test
+  void getTxLocationsTest() {
+    assertSchema((schema) -> assertTrue(schema.getTxLocations().isEmpty()));
+  }
+
+  private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
+    try (MemoryDb db = MemoryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+      assertion.accept(CoreSchemaProxy.newInstance(view));
+    } catch (CloseFailuresException e) {
+      fail(e.getLocalizedMessage());
+    }
+  }
 }

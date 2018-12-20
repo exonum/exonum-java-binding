@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
@@ -24,13 +25,11 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionGson;
 import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -83,6 +82,9 @@ final class ApiController {
   }
 
   private void submitTransaction(RoutingContext rc) {
+    checkRequestContentType(rc, "application/octet-stream");
+
+    // Read the transaction message
     Buffer buffer = rc.getBody();
     BinaryMessage message = BinaryMessage.fromBytes(buffer.getBytes());
 
@@ -97,6 +99,14 @@ final class ApiController {
         .end(String.valueOf(txHash));
   }
 
+  private void checkRequestContentType(RoutingContext rc,
+      String expectedContentType) {
+    String contentType = rc.request().getHeader("Content-Type");
+
+    checkArgument(expectedContentType.equals(contentType), "Content-Type must be %s, but was %s",
+        expectedContentType, contentType);
+  }
+
   private void getWallet(RoutingContext rc) {
     PublicKey walletId =
         getRequiredParameter(rc.request(), WALLET_ID_PARAM, PublicKey::fromHexString);
@@ -104,10 +114,9 @@ final class ApiController {
     Optional<Wallet> wallet = service.getWallet(walletId);
 
     if (wallet.isPresent()) {
-      Gson gson = CryptocurrencyTransactionGson.instance();
       rc.response()
           .putHeader("Content-Type", "application/json")
-          .end(gson.toJson(wallet.get()));
+          .end(json().toJson(wallet.get()));
     } else {
       rc.response()
           .setStatusCode(HTTP_NOT_FOUND)
@@ -122,7 +131,7 @@ final class ApiController {
 
     rc.response()
         .putHeader("Content-Type", "application/json")
-        .end(CryptocurrencyTransactionGson.instance().toJson(walletHistory));
+        .end(json().toJson(walletHistory));
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,

@@ -24,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,21 +46,19 @@ class DbKeyCommonPrefixParameterizedTest {
     assertThat(actualCommonPrefixKey, equalTo(expectedResultKey));
   }
 
-  @ParameterizedTest(name = "{index} => description={3}")
-  @MethodSource("testData")
-  void commonPrefixOfSelf(DbKey firstKey, DbKey secondKey, DbKey expectedResultKey,
-      String description) {
-    DbKey commonPrefix = firstKey.commonPrefix(firstKey);
-    assertThat(commonPrefix, sameInstance(firstKey));
+  @ParameterizedTest
+  @MethodSource("uniqueTestKeys")
+  void commonPrefixOfSelf(DbKey key) {
+    DbKey commonPrefix = key.commonPrefix(key);
+    assertThat(commonPrefix, sameInstance(key));
   }
 
-  @ParameterizedTest(name = "{index} => description={3}")
-  @MethodSource("testData")
-  void commonPrefixOfEqualKey(DbKey firstKey, DbKey secondKey, DbKey expectedResultKey,
-      String description) {
-    DbKey firstKeyClone = DbKey.fromBytes(firstKey.getRawDbKey());
-    DbKey commonPrefix = firstKey.commonPrefix(firstKeyClone);
-    assertThat(commonPrefix, equalTo(firstKey));
+  @ParameterizedTest
+  @MethodSource("uniqueTestKeys")
+  void commonPrefixOfEqualKey(DbKey key) {
+    DbKey keyClone = DbKey.fromBytes(key.getRawDbKey());
+    DbKey commonPrefix = key.commonPrefix(keyClone);
+    assertThat(commonPrefix, equalTo(key));
   }
 
   private static List<Arguments> testData() {
@@ -147,5 +146,13 @@ class DbKeyCommonPrefixParameterizedTest {
             branchKeyFromPrefix("1111 1111 | 10"),
             "[1111 1111 | 10_11] | [1111 1111 | 10] -> [1111 1111 | 10]")
     );
+  }
+
+  private static Stream<DbKey> uniqueTestKeys() {
+    return testData().stream()
+        .flatMap(args ->
+            Stream.of(args.get()[0], args.get()[1]))
+        .map(o -> (DbKey) o)
+        .distinct();
   }
 }

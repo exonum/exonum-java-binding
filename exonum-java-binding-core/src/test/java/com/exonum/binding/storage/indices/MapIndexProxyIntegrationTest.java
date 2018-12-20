@@ -26,9 +26,10 @@ import static com.exonum.binding.storage.indices.TestStorageItems.V4;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -53,20 +54,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class MapIndexProxyIntegrationTest
+class MapIndexProxyIntegrationTest
     extends BaseIndexProxyTestable<MapIndexProxy<String, String>> {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private static final String MAP_NAME = "test_map";
 
   @Test
-  public void newInstanceStoringProtobufMessages() throws CloseFailuresException {
+  void newInstanceStoringProtobufMessages() throws CloseFailuresException {
     try (Cleaner c = new Cleaner()) {
       Fork view = database.createFork(c);
       MapIndex<Id, Point> map = MapIndexProxy.newInstance(MAP_NAME, view, Id.class, Point.class);
@@ -89,21 +85,21 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void containsKeyShouldReturnFalseIfNoSuchKey() {
+  void containsKeyShouldReturnFalseIfNoSuchKey() {
     runTestWithView(database::createSnapshot,
         (map) -> assertFalse(map.containsKey(K1))
     );
   }
 
-  @Test(expected = NullPointerException.class)
-  public void containsKeyShouldThrowIfNullKey() {
-    runTestWithView(database::createSnapshot,
+  @Test
+  void containsKeyShouldThrowIfNullKey() {
+    assertThrows(NullPointerException.class, () -> runTestWithView(database::createSnapshot,
         (map) -> map.containsKey(null)
-    );
+    ));
   }
 
   @Test
-  public void containsKeyShouldReturnTrueIfHasMappingForKey() {
+  void containsKeyShouldReturnTrueIfHasMappingForKey() {
     runTestWithView(database::createFork, (map) -> {
       map.put(K1, V1);
       assertTrue(map.containsKey(K1));
@@ -112,7 +108,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getShouldReturnSuccessfullyPutValueSingleByteKey() {
+  void getShouldReturnSuccessfullyPutValueSingleByteKey() {
     runTestWithView(database::createFork, (map) -> {
       String key = "k";
       String value = V1;
@@ -126,7 +122,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getShouldReturnSuccessfullyPutValueThreeByteKey() {
+  void getShouldReturnSuccessfullyPutValueThreeByteKey() {
     runTestWithView(database::createFork, (map) -> {
       String key = "key";
       String value = V1;
@@ -140,7 +136,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void putShouldOverwritePreviousValue() {
+  void putShouldOverwritePreviousValue() {
     runTestWithView(database::createFork, (map) -> {
       String key = "key";
 
@@ -154,7 +150,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void putAllInEmptyMap() {
+  void putAllInEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
       ImmutableMap<String, String> source = ImmutableMap.of(
           "k1", V1,
@@ -174,7 +170,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void putAllOverwritesExistingMappings() {
+  void putAllOverwritesExistingMappings() {
     runTestWithView(database::createFork, (map) -> {
       // Initialize the map with some entries.
       map.putAll(ImmutableMap.of(
@@ -200,7 +196,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getShouldReturnSuccessfullyPutEmptyValue() {
+  void getShouldReturnSuccessfullyPutEmptyValue() {
     runTestWithView(database::createFork, (map) -> {
       String key = K1;
       String value = "";
@@ -214,7 +210,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getShouldReturnSuccessfullyPutValueByEmptyKey() {
+  void getShouldReturnSuccessfullyPutValueByEmptyKey() {
     runTestWithView(database::createFork, (map) -> {
       String key = "";
       String value = V1;
@@ -227,15 +223,16 @@ public class MapIndexProxyIntegrationTest
     });
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void putShouldFailWithSnapshot() {
+  @Test
+  void putShouldFailWithSnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
-      map.put(K1, V1);
+      assertThrows(UnsupportedOperationException.class,
+          () -> map.put(K1, V1));
     });
   }
 
   @Test
-  public void getShouldReturnNullIfNoSuchValueInFork() {
+  void getShouldReturnNullIfNoSuchValueInFork() {
     runTestWithView(database::createFork, (map) -> {
       String value = map.get(K1);
 
@@ -244,7 +241,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void getShouldReturnNullIfNoSuchValueInEmptySnapshot() {
+  void getShouldReturnNullIfNoSuchValueInEmptySnapshot() {
     runTestWithView(database::createSnapshot, (map) -> {
       String value = map.get(K1);
 
@@ -253,7 +250,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void putPrefixKeys() {
+  void putPrefixKeys() {
     runTestWithView(database::createFork, (map) -> {
       String fullKey = "A long key to take prefixes of";
 
@@ -288,7 +285,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void removeSuccessfullyPutValue() {
+  void removeSuccessfullyPutValue() {
     runTestWithView(database::createFork, (map) -> {
       String key = K1;
 
@@ -301,7 +298,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void keysShouldReturnEmptyIterIfNoEntries() {
+  void keysShouldReturnEmptyIterIfNoEntries() {
     runTestWithView(database::createSnapshot, (map) -> {
       Iterator<String> iterator = map.keys();
 
@@ -310,7 +307,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void keysShouldReturnIterWithAllKeys() {
+  void keysShouldReturnIterWithAllKeys() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<String, String>> entries = createSortedMapEntries(3);
       putAll(map, entries);
@@ -324,7 +321,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void keysIterNextShouldFailIfThisMapModifiedAfterNext() {
+  void keysIterNextShouldFailIfThisMapModifiedAfterNext() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<String, String>> entries = createMapEntries(3);
       putAll(map, entries);
@@ -333,27 +330,24 @@ public class MapIndexProxyIntegrationTest
       iterator.next();
       map.put("new key", "new value");
 
-      expectedException.expect(ConcurrentModificationException.class);
-      iterator.next();
+      assertThrows(ConcurrentModificationException.class, iterator::next);
     });
   }
 
   @Test
-  public void keysIterNextShouldFailIfThisMapModifiedBeforeNext() {
+  void keysIterNextShouldFailIfThisMapModifiedBeforeNext() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<String, String>> entries = createMapEntries(3);
       putAll(map, entries);
 
       Iterator<String> iterator = map.keys();
       map.put("new key", "new value");
-
-      expectedException.expect(ConcurrentModificationException.class);
-      iterator.next();
+      assertThrows(ConcurrentModificationException.class, iterator::next);
     });
   }
 
   @Test
-  public void keysIterNextShouldFailIfOtherIndexModified() {
+  void keysIterNextShouldFailIfOtherIndexModified() {
     runTestWithView(database::createFork, (view, map) -> {
       List<MapEntry<String, String>> entries = createMapEntries(3);
       putAll(map, entries);
@@ -364,13 +358,12 @@ public class MapIndexProxyIntegrationTest
       MapIndexProxy<String, String> otherMap = createMap("other_map", view);
       otherMap.put("new key", "new value");
 
-      expectedException.expect(ConcurrentModificationException.class);
-      iterator.next();
+      assertThrows(ConcurrentModificationException.class, iterator::next);
     });
   }
 
   @Test
-  public void valuesShouldReturnEmptyIterIfNoEntries() {
+  void valuesShouldReturnEmptyIterIfNoEntries() {
     runTestWithView(database::createSnapshot, (map) -> {
       Iterator<String> iterator = map.values();
       assertFalse(iterator.hasNext());
@@ -378,7 +371,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void valuesShouldReturnIterWithAllValues() {
+  void valuesShouldReturnIterWithAllValues() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<String, String>> entries = createSortedMapEntries(3);
       putAll(map, entries);
@@ -392,7 +385,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void entriesShouldReturnIterWithAllValues() {
+  void entriesShouldReturnIterWithAllValues() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<String, String>> entries = createSortedMapEntries(3);
       putAll(map, entries);
@@ -405,17 +398,20 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearEmptyFork() {
+  void clearEmptyFork() {
     runTestWithView(database::createFork, MapIndexProxy::clear);  // no-op
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void clearSnapshotMustFail() {
-    runTestWithView(database::createSnapshot, MapIndexProxy::clear);  // boom
+  @Test
+  void clearSnapshotMustFail() {
+    runTestWithView(database::createSnapshot, (m) -> {
+      assertThrows(UnsupportedOperationException.class,
+          m::clear);
+    });
   }
 
   @Test
-  public void clearSingleItemFork() {
+  void clearSingleItemFork() {
     runTestWithView(database::createFork, (map) -> {
       String key = K1;
       map.put(key, V1);
@@ -428,7 +424,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearSingleItemByEmptyKey() {
+  void clearSingleItemByEmptyKey() {
     runTestWithView(database::createFork, (map) -> {
       String key = "";
       map.put(key, V1);
@@ -441,7 +437,7 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void clearMultipleItemFork() {
+  void clearMultipleItemFork() {
     runTestWithView(database::createFork, (map) -> {
       byte numOfEntries = 5;
       List<MapEntry<String, String>> entries = createMapEntries(numOfEntries);
@@ -459,12 +455,12 @@ public class MapIndexProxyIntegrationTest
   }
 
   @Test
-  public void isEmptyShouldReturnTrueForEmptyMap() {
+  void isEmptyShouldReturnTrueForEmptyMap() {
     runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
   }
 
   @Test
-  public void isEmptyShouldReturnFalseForNonEmptyMap() {
+  void isEmptyShouldReturnFalseForNonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
       map.put(K1, V1);
 
@@ -473,12 +469,12 @@ public class MapIndexProxyIntegrationTest
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      Consumer<MapIndexProxy<String, String>> mapTest) {
+      Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
+      BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
       View view = viewFactory.apply(cleaner);
       MapIndexProxy<String, String> map = createMap(MAP_NAME, view);

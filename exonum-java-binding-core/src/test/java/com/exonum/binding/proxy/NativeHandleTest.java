@@ -17,56 +17,59 @@
 package com.exonum.binding.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class NativeHandleTest {
+class NativeHandleTest {
 
   private NativeHandle nativeHandle;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  private static long HANDLE = 0x11L;
+
+  private static final String HANDLE_STRING_REPRESENTATION =
+      Long.toHexString(HANDLE).toUpperCase();
 
   @Test
-  public void getIfValid() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+  void getIfValid() {
+    nativeHandle = new NativeHandle(HANDLE);
 
     assertTrue(nativeHandle.isValid());
-    assertThat(nativeHandle.get()).isEqualTo(handle);
+    assertThat(nativeHandle.get()).isEqualTo(HANDLE);
   }
 
   @Test
-  public void getInvalid() {
+  void getInvalid() {
     long handle = NativeHandle.INVALID_NATIVE_HANDLE;
-    nativeHandle = new NativeHandle(handle);
 
-    assertFalse(nativeHandle.isValid());
-
-    expectedException.expect(IllegalStateException.class);
-    nativeHandle.get();
+    assertThrows(IllegalStateException.class, () -> nativeHandle = new NativeHandle(handle));
   }
 
   @Test
-  public void close() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+  void close() {
+    nativeHandle = new NativeHandle(HANDLE);
 
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 
   @Test
-  public void closeMultipleTimes() {
-    long handle = 0x11L;
-    nativeHandle = new NativeHandle(handle);
+  void closeMultipleTimes() {
+    nativeHandle = new NativeHandle(HANDLE);
 
     nativeHandle.close();
     nativeHandle.close();
     assertFalse(nativeHandle.isValid());
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
+  }
+
+  @Test
+  void toStringHexRepresentation() {
+    nativeHandle = new NativeHandle(HANDLE);
+
+    assertThat(nativeHandle.toString()).contains(HANDLE_STRING_REPRESENTATION);
   }
 }

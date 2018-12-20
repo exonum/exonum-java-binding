@@ -18,9 +18,9 @@ package com.exonum.binding.storage.indices;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,15 +35,10 @@ import com.google.common.collect.ImmutableList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ConfigurableRustIterTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class ConfigurableRustIterTest {
 
   private static final int INITIAL_MOD_COUNT = 11;
 
@@ -53,15 +48,15 @@ public class ConfigurableRustIterTest {
 
   private ConfigurableRustIter<Integer> iter;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     modCounter = mock(ViewModificationCounter.class);
     when(modCounter.getModificationCount(any(View.class)))
         .thenReturn(INITIAL_MOD_COUNT);
   }
 
   @Test
-  public void nextGoesThroughAllElements() {
+  void nextGoesThroughAllElements() {
     Fork fork = createFork();
     List<Integer> underlyingList = asList(1, 2, 3);
     createFromIterable(underlyingList, fork);
@@ -72,7 +67,7 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextIsNotAffectedByUnrelatedModifications() {
+  void nextIsNotAffectedByUnrelatedModifications() {
     Snapshot view = createSnapshot();
     List<Integer> underlyingList = asList(1, 2);
     createFromIterable(underlyingList, view);
@@ -86,18 +81,17 @@ public class ConfigurableRustIterTest {
   }
 
   @Test
-  public void nextFailsIfModifiedBeforeFirstNext() {
+  void nextFailsIfModifiedBeforeFirstNext() {
     Fork fork = createFork();
     createFromIterable(emptyList(), fork);
 
     notifyModified(fork);
 
-    expectedException.expect(ConcurrentModificationException.class);
-    iter.next();
+    assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
   @Test
-  public void nextFailsIfModifiedAfterFirstNext() {
+  void nextFailsIfModifiedAfterFirstNext() {
     Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
 
@@ -105,12 +99,11 @@ public class ConfigurableRustIterTest {
 
     notifyModified(fork);
 
-    expectedException.expect(ConcurrentModificationException.class);
-    iter.next();
+    assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
   @Test
-  public void nextFailsIfHandleClosed() {
+  void nextFailsIfHandleClosed() {
     Fork fork = createFork();
     NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
     createFromIterable(nh, asList(1, 2), fork);
@@ -118,32 +111,31 @@ public class ConfigurableRustIterTest {
     // Close the native handle.
     nh.close();
 
-    expectedException.expect(IllegalStateException.class);
-    iter.next();
+    assertThrows(IllegalStateException.class, () -> iter.next());
   }
 
   @Test
-  public void viewModificationResultsInTerminalState() {
+  void viewModificationResultsInTerminalState() {
     Fork fork = createFork();
     createFromIterable(asList(1, 2), fork);
-    try {
+    ConcurrentModificationException e = assertThrows(ConcurrentModificationException.class, () -> {
       notifyModified(fork);
-      iter.next();  // Must throw.
-      fail("Fork is modified, but view is still valid");
-    } catch (ConcurrentModificationException e) {
-      // Exception above is well expected.
-      // Subsequent attempt to get the next item must result in the same exception:
-      expectedException.expect(ConcurrentModificationException.class);
       iter.next();
-    }
+    });
+
+    assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
-  /** Creates a mock of a fork. */
+  /**
+   * Creates a mock of a fork.
+   */
   private Fork createFork() {
     return mock(Fork.class);
   }
 
-  /** Creates a mock of a snapshot. */
+  /**
+   * Creates a mock of a snapshot.
+   */
   private Snapshot createSnapshot() {
     return mock(Snapshot.class);
   }

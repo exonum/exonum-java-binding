@@ -19,16 +19,20 @@ package com.exonum.binding.storage.indices;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.util.LibraryLoader;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 // TODO: Move all tests applicable to any index in here when ECR-642 (JUnit 5) is resolved.
 // Currently it's not possible due to JUnit 4 limitations (e.g., @Rules do not work).
@@ -40,13 +44,13 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
 
   MemoryDb database;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     database = MemoryDb.newInstance();
   }
 
-  @After
-  public void tearDown() {
+  @AfterEach
+  void tearDown() {
     if (database != null) {
       database.close();
     }
@@ -65,7 +69,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
    * and then that the index becomes inaccessible after the cleaner is closed.
    */
   @Test
-  public void indexConstructorRegistersItsDestructor() throws CloseFailuresException {
+  void indexConstructorRegistersItsDestructor() throws CloseFailuresException {
     String name = "test_index";
 
     try (Cleaner cleaner = new Cleaner()) {
@@ -83,17 +87,34 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       cleaner.close();
 
       // Try to access the index
-      try {
-        getAnyElement(index);
-        fail("index must be inaccessible");
-      } catch (IllegalStateException e) {
-        // expected
-      }
+      assertThrows(IllegalStateException.class, () -> getAnyElement(index));
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "",
+      " name",
+      "name ",
+      "name 1",
+      " name ",
+      "?name",
+      "name?",
+      "na?me",
+      "name#1",
+      "name-1",
+  })
+  void indexConstructorThrowsIfInvalidName(String name) throws Exception {
+    try (Cleaner cleaner = new Cleaner();
+        Database database = MemoryDb.newInstance()) {
+      Snapshot view = database.createSnapshot(cleaner);
+
+      assertThrows(Exception.class, () -> create(name, view));
     }
   }
 
   @Test
-  public void getName() throws CloseFailuresException {
+  void getName() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
       View view = database.createSnapshot(cleaner);
@@ -104,7 +125,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
-  public void toStringIncludesNameAndType() throws CloseFailuresException {
+  void toStringIncludesNameAndType() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
       View view = database.createSnapshot(cleaner);

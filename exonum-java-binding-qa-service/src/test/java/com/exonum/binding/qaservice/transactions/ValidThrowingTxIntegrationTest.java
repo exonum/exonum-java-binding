@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static com.exonum.binding.qaservice.transactions.ValidThrowingTx.serializeBody;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -34,7 +35,6 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeAll;
@@ -79,8 +79,7 @@ class ValidThrowingTxIntegrationTest {
     ValidThrowingTx tx = new ValidThrowingTx(seed);
     String info = tx.info();
 
-    Gson gson = QaTransactionGson.instance();
-    AnyTransaction<ValidThrowingTx> txParams = gson.fromJson(info,
+    AnyTransaction<ValidThrowingTx> txParams = json().fromJson(info,
         new TypeToken<AnyTransaction<ValidThrowingTx>>(){}.getType());
 
     assertThat(txParams.service_id, equalTo(QaService.ID));
