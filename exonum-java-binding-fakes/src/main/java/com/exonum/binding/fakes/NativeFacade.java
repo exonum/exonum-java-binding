@@ -50,9 +50,10 @@ public final class NativeFacade {
    * Creates a UserTransactionAdapter of a transaction that puts a given value into the storage.
    *
    * @param value a value to put into an entry
+   * @param info a value to be returned by {@link UserTransactionAdapter#info()}
    */
-  public static UserTransactionAdapter createTransaction(String value) {
-    SetEntryTransaction userTransaction = new SetEntryTransaction(value);
+  public static UserTransactionAdapter createTransaction(String value, String info) {
+    SetEntryTransaction userTransaction = new SetEntryTransaction(value, info);
     return new UserTransactionAdapter(userTransaction, VIEW_FACTORY);
   }
 

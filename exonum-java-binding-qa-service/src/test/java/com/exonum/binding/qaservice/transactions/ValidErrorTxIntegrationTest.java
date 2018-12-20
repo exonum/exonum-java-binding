@@ -170,14 +170,13 @@ class ValidErrorTxIntegrationTest {
       "9223372036854775807, 127,", // Max seed value, max error code value, null message
   })
   @ParameterizedTest
-  void jsonRepresentation(long seed, byte errorCode, String errorMessage) {
+  void info(long seed, byte errorCode, String errorMessage) {
     Transaction tx = new ValidErrorTx(seed, errorCode, errorMessage);
 
-    String txInJson = QaTransactionJson.toJson(QaTransaction.VALID_ERROR.id(), tx);
+    String txInJson = tx.info();
 
     AnyTransaction<ValidErrorTx> txFromJson = json().fromJson(txInJson,
-        new TypeToken<AnyTransaction<ValidErrorTx>>() {
-        }.getType());
+        new TypeToken<AnyTransaction<ValidErrorTx>>() {}.getType());
 
     assertThat(txFromJson.message_id, equalTo(QaTransaction.VALID_ERROR.id()));
     assertThat(txFromJson.body, equalTo(tx));

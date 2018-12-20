@@ -84,6 +84,12 @@ public final class ValidErrorTx implements Transaction {
   }
 
   @Override
+  public String info() {
+    return QaTransactionJson.toJson(ID, this);
+  }
+
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

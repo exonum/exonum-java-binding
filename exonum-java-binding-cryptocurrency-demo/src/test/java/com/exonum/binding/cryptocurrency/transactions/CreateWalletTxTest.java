@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
@@ -69,10 +70,9 @@ class CreateWalletTxTest {
     long initialBalance = -1L;
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> new CreateWalletTx(initialBalance)
-    );
-    assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
+        () -> new CreateWalletTx(initialBalance));
 
+    assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
   }
 
   @Test
@@ -125,12 +125,23 @@ class CreateWalletTxTest {
       TransactionContext context = newContext(view)
           .withAuthorKey(OWNER_KEY)
           .create();
-
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
 
       assertThat(e.getErrorCode(), equalTo(WALLET_ALREADY_EXISTS.errorCode));
     }
+  }
+
+  @Test
+  void info() {
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_BALANCE);
+
+    String info = tx.info();
+
+    CreateWalletTx txParams = json()
+        .fromJson(info, CreateWalletTx.class);
+
+    assertThat(txParams, equalTo(tx));
   }
 
   @Test

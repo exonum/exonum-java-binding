@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.common.hash.Hashing.sha256;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
 import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
@@ -45,6 +46,7 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -142,6 +144,25 @@ class IncrementCounterTxIntegrationTest {
       assertFalse(counterNames.containsKey(nameHash));
     }
   }
+
+  @Test
+  void info() {
+    // Create a transaction with the given parameters.
+    long seed = Long.MAX_VALUE - 1;
+    String name = "new_counter";
+    HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
+    IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
+
+    String info = tx.info();
+
+    // Check the transaction parameters in JSON
+    AnyTransaction<IncrementCounterTx> txParameters = json().fromJson(info,
+        new TypeToken<AnyTransaction<IncrementCounterTx>>() {
+        }.getType());
+
+    assertThat(txParameters.body, equalTo(tx));
+  }
+
 
   @Test
   void equals() {

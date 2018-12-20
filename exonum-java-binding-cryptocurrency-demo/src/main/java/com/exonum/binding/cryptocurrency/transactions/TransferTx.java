@@ -17,6 +17,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
@@ -117,6 +118,11 @@ public final class TransferTx implements Transaction {
     if (!precondition) {
       throw new TransactionExecutionException(errorCode);
     }
+  }
+
+  @Override
+  public String info() {
+    return json().toJson(this);
   }
 
   @Override

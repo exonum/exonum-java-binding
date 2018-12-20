@@ -17,6 +17,7 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
@@ -42,6 +43,7 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -147,6 +149,22 @@ class CreateCounterTxIntegrationTest {
       assertThat(counters.get(nameHash), equalTo(value));
     }
   }
+
+  @Test
+  void info() {
+    String name = "counter";
+    CreateCounterTx tx = new CreateCounterTx(name);
+
+    String info = tx.info();
+
+    AnyTransaction<CreateCounterTx> txParams = json().fromJson(info,
+        new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
+    );
+    assertThat(txParams.service_id, equalTo(QaService.ID));
+    assertThat(txParams.message_id, equalTo(CREATE_COUNTER.id()));
+    assertThat(txParams.body, equalTo(tx));
+  }
+
 
   @Test
   void equals() {

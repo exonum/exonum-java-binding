@@ -39,14 +39,18 @@ public final class SetEntryTransaction implements Transaction {
   static final String AUTHOR_PK_NAME = "author_pk";
 
   private final String value;
+  private final String info;
 
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
    * @param value a value to put into an entry {@link #ENTRY_NAME}
+   * @param info a value to be returned as this transaction text representation
+   *     {@link Transaction#info()}
    */
-  public SetEntryTransaction(String value) {
+  public SetEntryTransaction(String value, String info) {
     this.value = checkNotNull(value);
+    this.info = checkNotNull(info);
   }
 
   @Override
@@ -58,6 +62,11 @@ public final class SetEntryTransaction implements Transaction {
     txHash.set(context.getTransactionMessageHash());
     EntryIndexProxy<PublicKey> authorPk = createAuthorPkEntry(fork);
     authorPk.set(context.getAuthorPk());
+  }
+
+  @Override
+  public String info() {
+    return info;
   }
 
   private EntryIndexProxy<String> createTestEntry(Fork view) {

@@ -52,7 +52,7 @@ class SetEntryTransactionIntegrationTest {
       String value = "A value to set into entry";
       Fork fork = database.createFork(cleaner);
 
-      SetEntryTransaction tx = new SetEntryTransaction(value);
+      SetEntryTransaction tx = new SetEntryTransaction(value, "");
 
       // Execute the transaction
       TransactionContext context = spy(newContext(fork).create());

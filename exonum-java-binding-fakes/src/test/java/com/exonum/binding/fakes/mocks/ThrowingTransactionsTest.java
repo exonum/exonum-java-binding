@@ -37,12 +37,14 @@ class ThrowingTransactionsTest {
   private TransactionContext context;
 
   @Test
-  void createThrowingIllegalArgument() {
+  void createThrowingIllegalArgumentInInfo() {
+    // Transaction#info is a default method, check it separately
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    assertThrows(exceptionType, () -> transaction.execute(context));
+    assertThrows(exceptionType, transaction::info);
   }
+
 
   @Test
   void createThrowingOutOfMemoryError() {
@@ -91,5 +93,6 @@ class ThrowingTransactionsTest {
     assertThat(actual.getMessage(), equalTo(description));
   }
 
-  private abstract static class UninstantiableException extends Exception {}
+  private abstract static class UninstantiableException extends Exception {
+  }
 }

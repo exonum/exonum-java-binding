@@ -17,6 +17,7 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -78,6 +79,12 @@ public final class CreateWalletTx implements Transaction {
 
     wallets.put(ownerPublicKey, wallet);
   }
+
+  @Override
+  public String info() {
+    return json().toJson(this);
+  }
+
 
   @Override
   public boolean equals(Object o) {

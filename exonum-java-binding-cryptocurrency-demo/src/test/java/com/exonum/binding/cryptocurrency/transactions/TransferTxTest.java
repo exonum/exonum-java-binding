@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
 import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
@@ -44,9 +45,11 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
+import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
@@ -239,6 +242,20 @@ class TransferTxTest {
           TransactionExecutionException.class, () -> tx.execute(context));
       assertThat(e, hasErrorCode(INSUFFICIENT_FUNDS));
     }
+  }
+
+  @Test
+  void info() {
+    long seed = Long.MAX_VALUE - 1L;
+    TransferTx tx =  new TransferTx(seed, TO_KEY, 50L);
+
+    String info = tx.info();
+
+    // Check the transaction parameters in JSON
+    Transaction txParameters = json().fromJson(info, new TypeToken<TransferTx>() {
+    }.getType());
+
+    assertThat(txParameters, equalTo(tx));
   }
 
   @Test
