@@ -24,7 +24,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <lazysodium-java.version>3.5.1</lazysodium-java.version>
     <auto-value.version>1.6.2</auto-value.version>
-    <auto-value-gson.version>0.8.0</auto-value-gson.version>
     <jsonpath.version>2.2.0</jsonpath.version>
   </properties>
 
@@ -64,14 +63,11 @@
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
       <artifactId>auto-value-gson-annotations</artifactId>
-      <version>${auto-value-gson.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
       <artifactId>auto-value-gson</artifactId>
-      <version>${auto-value-gson.version}</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>

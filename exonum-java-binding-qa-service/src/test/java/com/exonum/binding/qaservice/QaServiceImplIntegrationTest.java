@@ -19,6 +19,8 @@ package com.exonum.binding.qaservice;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
+import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.createPrefixed;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -373,8 +375,8 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      List<HashCode> hashes = service.getBlockTransactions(0L);
-      assertThat(hashes).isEmpty();
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlockTransactions(0L));
+      assertThat(t.getMessage()).contains(NO_GENESIS_BLOCK_ERROR_MESSAGE);
     }
   }
 
@@ -409,10 +411,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      // TODO
-      HashCode messageHash = HashCode.fromString("ab");
-      TransactionResult txResult = service.getTxResult(messageHash);
-//      assertThat(txResult).isEmpty();
+      HashCode messageHash = HashCode.fromBytes(createPrefixed(bytes(0x00), 32));
+      Optional<TransactionResult> txResult = service.getTxResult(messageHash);
+      assertThat(txResult).isEmpty();
     }
   }
 
@@ -435,10 +436,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      // TODO
       HashCode messageHash = HashCode.fromString("ab");
-      TransactionLocation txLocation = service.getTxLocation(messageHash);
-//      assertThat(txResult).isEmpty();
+      Optional<TransactionLocation> txLocation = service.getTxLocation(messageHash);
+      assertThat(txLocation).isEmpty();
     }
   }
 
@@ -461,10 +461,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      // TODO
       HashCode blockId = HashCode.fromString("ab");
-      Block block = service.getBlock(blockId);
-//      assertThat(txResult).isEmpty();
+      Optional<Block> block = service.getBlock(blockId);
+      assertThat(block).isEmpty();
     }
   }
 
@@ -475,9 +474,9 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      // TODO
-      Block block = service.getLastBlock();
-//      assertThat(txResult).isEmpty();
+      Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
+
+      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the genesis block.");
     }
   }
 

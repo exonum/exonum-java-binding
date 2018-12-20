@@ -262,7 +262,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public TransactionResult getTxResult(HashCode messageHash) {
+  public Optional<TransactionResult> getTxResult(HashCode messageHash) {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       return blockchain.getTxResult(messageHash);
@@ -280,7 +280,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public TransactionLocation getTxLocation(HashCode messageHash) {
+  public Optional<TransactionLocation> getTxLocation(HashCode messageHash) {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       return blockchain.getTxLocation(messageHash);
@@ -298,7 +298,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public Block getBlock(HashCode blockHash) {
+  public Optional<Block> getBlock(HashCode blockHash) {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       return blockchain.getBlock(blockHash);

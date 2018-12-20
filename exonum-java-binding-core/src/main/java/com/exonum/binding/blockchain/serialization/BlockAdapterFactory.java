@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
+package com.exonum.binding.blockchain.serialization;
 
-option java_package = "com.exonum.binding.blockchain.serialization";
-option java_outer_classname = "TransactionResultProtos";
+import com.google.gson.TypeAdapterFactory;
+import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
 
-message TransactionResult {
-  uint32 status = 1;
-  string description = 2;
+@GsonTypeAdapterFactory
+public abstract class BlockAdapterFactory implements TypeAdapterFactory {
+
+  public static TypeAdapterFactory create() {
+    return new AutoValueGson_BlockAdapterFactory();
+  }
 }

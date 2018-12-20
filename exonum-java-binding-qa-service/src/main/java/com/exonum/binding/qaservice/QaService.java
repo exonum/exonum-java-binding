@@ -64,15 +64,15 @@ public interface QaService extends Service {
 
   Map<HashCode, TransactionResult> getTxResults();
 
-  TransactionResult getTxResult(HashCode messageHash);
+  Optional<TransactionResult> getTxResult(HashCode messageHash);
 
   Map<HashCode, TransactionLocation> getTxLocations();
 
-  TransactionLocation getTxLocation(HashCode messageHash);
+  Optional<TransactionLocation> getTxLocation(HashCode messageHash);
 
   Map<HashCode, Block> getBlocks();
 
-  Block getBlock(HashCode blockHash);
+  Optional<Block> getBlock(HashCode blockHash);
 
   Block getLastBlock();
 

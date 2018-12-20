@@ -89,36 +89,6 @@ class CoreSchemaProxyIntegrationTest {
     assertSchema((schema) -> assertTrue(schema.getTxLocations().isEmpty()));
   }
 
-  @Test
-  void getBlocksTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getBlocks().isEmpty()));
-  }
-
-  @Test
-  void getLastBlockBeforeGenesisBlockTest() {
-    assertSchema((schema) ->
-      assertThrows(RuntimeException.class, schema::getLastBlock));
-  }
-
-  @Test
-  void getTxMessagesTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getTxMessages().isEmpty()));
-  }
-
-  @Test
-  void getTxResultsTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getTxResults().isEmpty()));
-  }
-
-  @Test
-  void getTxLocationsTest() {
-    assertSchema((schema) ->
-      assertTrue(schema.getTxLocations().isEmpty()));
-  }
-
   private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
     try (MemoryDb db = MemoryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);

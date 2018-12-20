@@ -16,22 +16,9 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_LAST_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCK_HEIGHT_PARAM;
-import static com.exonum.binding.qaservice.ApiController.BLOCK_ID_PARAM;
-import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.*;
+import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.createPrefixed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -51,17 +38,21 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.blockchain.TransactionResult;
-import com.exonum.binding.blockchain.TransactionResult.Type;
+import com.exonum.binding.blockchain.serialization.BlockAdapterFactory;
+import com.exonum.binding.blockchain.serialization.TransactionLocationAdapterFactory;
+import com.exonum.binding.blockchain.serialization.TransactionResultAdapterFactory;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.InvalidTransactionException;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -90,7 +81,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
@@ -102,7 +92,13 @@ class ApiControllerIntegrationTest {
   private static final HashCode EXPECTED_TX_HASH = Hashing.sha256()
       .hashInt(1);
 
-  private static final String hashString = "ab";
+  private static final String HASH_STRING = "ab";
+
+  private static final Gson JSON_SERIALIZER = JsonSerializer.builder()
+      .registerTypeAdapterFactory(BlockAdapterFactory.create())
+      .registerTypeAdapterFactory(TransactionLocationAdapterFactory.create())
+      .registerTypeAdapterFactory(TransactionResultAdapterFactory.create())
+      .create();
 
   QaService qaService;
 
@@ -324,7 +320,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Counter actualCounter = json().fromJson(body, Counter.class);
+          Counter actualCounter = JSON_SERIALIZER.fromJson(body, Counter.class);
           assertThat(actualCounter).isEqualTo(counter);
 
           context.completeNow();
@@ -384,7 +380,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Height actualHeight = json().fromJson(body, Height.class);
+          Height actualHeight = JSON_SERIALIZER.fromJson(body, Height.class);
           assertThat(actualHeight).isEqualTo(height);
 
           context.completeNow();
@@ -416,7 +412,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = json()
+          Object actualHashes = JSON_SERIALIZER
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(blockHashes);
@@ -438,7 +434,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = QaTransactionGson.instance()
+          Object actualHashes = JSON_SERIALIZER
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(transactionHashes);
@@ -452,16 +448,16 @@ class ApiControllerIntegrationTest {
     List<HashCode> transactionHashes = Arrays
         .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
 
-    HashCode blockId = HashCode.fromString(hashString);
+    HashCode blockId = HashCode.fromString(HASH_STRING);
     when(qaService.getBlockTransactions(blockId)).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH.replace(":" + BLOCK_ID_PARAM, hashString))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH.replace(":" + BLOCK_ID_PARAM, HASH_STRING))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = json()
+          Object actualHashes = JSON_SERIALIZER
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(transactionHashes);
@@ -470,13 +466,15 @@ class ApiControllerIntegrationTest {
         })));
   }
 
-  @Test
-  void getTxMessages(VertxTestContext context) {
-    // TODO
-//    List<TransactionMessage> transactionMessages = Arrays
-//        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+  // TODO: how do we want to serialize transaction messages? should we return Map<HashCode, HashCode> with transaction
+  //  hashes for this test?
+//  @Test
+//  void getTxMessages(VertxTestContext context) {
+//    Map<HashCode, TransactionMessage> transactionMessages = ImmutableMap.of(
+//        HashCode.fromInt(0x00), TransactionMessage.fromBytes(createPrefixed(bytes(0x00), 102)),
+//        HashCode.fromInt(0x01), TransactionMessage.fromBytes(createPrefixed(bytes(0x01), 102)));
 //
-//    when(qaService.getTxMessages()).thenReturn();
+//    when(qaService.getTxMessages()).thenReturn(transactionMessages);
 //
 //    get(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH)
 //        .send(context.succeeding(response -> context.verify(() -> {
@@ -484,19 +482,20 @@ class ApiControllerIntegrationTest {
 //              .isEqualTo(HTTP_OK);
 //
 //          String body = response.bodyAsString();
-//          Object actualMessages = QaTransactionGson.instance()
-//              .fromJson(body, new TypeToken<List<TransactionMessage>>() {
+//          Object actualMessages = JSON_SERIALIZER
+//              .fromJson(body, new TypeToken<Map<HashCode, TransactionMessage>>() {
 //              }.getType());
 //          assertThat(actualMessages).isEqualTo(transactionMessages);
 //
 //          context.completeNow();
 //        })));
-  }
+//  }
 
   @Test
   void getTxResults(VertxTestContext context) {
-    Map<HashCode, TransactionResult> txResults = Arrays
-        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+    Map<HashCode, TransactionResult> txResults = ImmutableMap.of(
+        HashCode.fromInt(0x00), TransactionResult.successful(),
+        HashCode.fromInt(0x01), TransactionResult.error(1, "Error description"));
 
     when(qaService.getTxResults()).thenReturn(txResults);
 
@@ -506,7 +505,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualTxResults = QaTransactionGson.instance()
+          Object actualTxResults = JSON_SERIALIZER
               .fromJson(body, new TypeToken<Map<HashCode, TransactionResult>>() {
               }.getType());
           assertThat(actualTxResults).isEqualTo(txResults);
@@ -517,18 +516,18 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getTxResult(VertxTestContext context) {
-    TransactionResult transactionResult = TransactionResult.valueOf(Type.SUCCESS, null, null);
+    TransactionResult transactionResult = TransactionResult.successful();
 
-    HashCode messageHash = HashCode.fromString(hashString);
-    when(qaService.getTxResult(messageHash)).thenReturn(transactionResult);
+    HashCode messageHash = HashCode.fromString(HASH_STRING);
+    when(qaService.getTxResult(messageHash)).thenReturn(Optional.of(transactionResult));
 
-    get(BLOCKCHAIN_TRANSACTION_RESULT_PATH.replace(":" + MESSAGE_HASH_PARAM, hashString))
+    get(BLOCKCHAIN_TRANSACTION_RESULT_PATH.replace(":" + MESSAGE_HASH_PARAM, HASH_STRING))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualResult = QaTransactionGson.instance()
+          Object actualResult = JSON_SERIALIZER
               .fromJson(body, new TypeToken<TransactionResult>() {
               }.getType());
           assertThat(actualResult).isEqualTo(transactionResult);
@@ -539,8 +538,9 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getTxLocations(VertxTestContext context) {
-    Map<HashCode, TransactionLocation> txLocations = Arrays
-        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+    Map<HashCode, TransactionLocation> txLocations = ImmutableMap.of(
+        HashCode.fromInt(0x00), TransactionLocation.valueOf(1L, 1L),
+        HashCode.fromInt(0x01), TransactionLocation.valueOf(1L, 2L));
 
     when(qaService.getTxLocations()).thenReturn(txLocations);
 
@@ -550,8 +550,8 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualTxLocations = QaTransactionGson.instance()
-              .fromJson(body, new TypeToken<List<TransactionLocation>>() {
+          Object actualTxLocations = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<HashCode, TransactionLocation>>() {
               }.getType());
           assertThat(actualTxLocations).isEqualTo(txLocations);
 
@@ -563,16 +563,16 @@ class ApiControllerIntegrationTest {
   void getTxLocation(VertxTestContext context) {
     TransactionLocation transactionLocation = TransactionLocation.valueOf(1L, 1L);
 
-    HashCode messageHash = HashCode.fromString(hashString);
-    when(qaService.getTxLocation(messageHash)).thenReturn(transactionLocation);
+    HashCode messageHash = HashCode.fromString(HASH_STRING);
+    when(qaService.getTxLocation(messageHash)).thenReturn(Optional.of(transactionLocation));
 
-    get(BLOCKCHAIN_TRANSACTION_LOCATION_PATH.replace(":" + MESSAGE_HASH_PARAM, hashString))
+    get(BLOCKCHAIN_TRANSACTION_LOCATION_PATH.replace(":" + MESSAGE_HASH_PARAM, HASH_STRING))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualLocation = QaTransactionGson.instance()
+          Object actualLocation = JSON_SERIALIZER
               .fromJson(body, new TypeToken<TransactionLocation>() {
               }.getType());
           assertThat(actualLocation).isEqualTo(transactionLocation);
@@ -583,8 +583,11 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getBlocks(VertxTestContext context) {
-    Map<HashCode, Block> blocks = Arrays
-        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+    Block firstBlock = createBlock(1L);
+    Block secondBlock = createBlock(2L);
+    Map<HashCode, Block> blocks = ImmutableMap.of(
+        HashCode.fromInt(0x00), firstBlock,
+        HashCode.fromInt(0x01), secondBlock);
 
     when(qaService.getBlocks()).thenReturn(blocks);
 
@@ -594,7 +597,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualBlocks = QaTransactionGson.instance()
+          Object actualBlocks = JSON_SERIALIZER
               .fromJson(body, new TypeToken<Map<HashCode, Block>>() {
               }.getType());
           assertThat(actualBlocks).isEqualTo(blocks);
@@ -605,27 +608,18 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getBlock(VertxTestContext context) {
-    Block block =
-        Block.valueOf(
-            (short) 1,
-            1L,
-            1,
-            HashCode.fromString("ab"),
-            HashCode.fromString("ab"),
-            HashCode.fromString("ab"));
+    Block block = createBlock(1L);
 
-    // TODO: in all places with any(HashCode.class) replace it with actual instance of HashCode and
-    // TODO: use it in replace method
-    HashCode blockId = HashCode.fromString(hashString);
-    when(qaService.getBlock(blockId)).thenReturn(block);
+    HashCode blockId = HashCode.fromString(HASH_STRING);
+    when(qaService.getBlock(blockId)).thenReturn(Optional.of(block));
 
-    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_ID_PARAM, hashString))
+    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_ID_PARAM, HASH_STRING))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualBlock = QaTransactionGson.instance()
+          Object actualBlock = JSON_SERIALIZER
               .fromJson(body, new TypeToken<Block>() {
               }.getType());
           assertThat(actualBlock).isEqualTo(block);
@@ -636,14 +630,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getLastBlock(VertxTestContext context) {
-    Block block =
-        Block.valueOf(
-            (short) 1,
-            1L,
-            1,
-            HashCode.fromString("ab"),
-            HashCode.fromString("ab"),
-            HashCode.fromString("ab"));
+    Block block = createBlock(1L);
 
     when(qaService.getLastBlock()).thenReturn(block);
 
@@ -653,7 +640,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualBlock = QaTransactionGson.instance()
+          Object actualBlock = JSON_SERIALIZER
               .fromJson(body, new TypeToken<Block>() {
               }.getType());
           assertThat(actualBlock).isEqualTo(block);
@@ -673,13 +660,25 @@ class ApiControllerIntegrationTest {
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
               () -> {
                 String body = response.bodyAsString();
-                StoredConfiguration storedConfiguration = json()
+                StoredConfiguration storedConfiguration = JSON_SERIALIZER
                     .fromJson(body, StoredConfiguration.class);
 
                 assertThat(storedConfiguration).isEqualTo(configuration);
               });
           context.completeNow();
         })));
+  }
+
+  private Block createBlock(long height) {
+    return Block.builder()
+        .proposerId(1)
+        .height(height)
+        .numTransactions(1)
+        .previousBlockHash(HashCode.fromString(HASH_STRING))
+        .txRootHash(HashCode.fromString(HASH_STRING))
+        .stateHash(HashCode.fromString(HASH_STRING))
+        .blockHash(HashCode.fromString(HASH_STRING))
+        .build();
   }
 
   private StoredConfiguration createConfiguration() {

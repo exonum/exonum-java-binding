@@ -78,7 +78,7 @@ final class ApiController {
   @VisibleForTesting
   static final String BLOCK_ID_PARAM = "blockId";
   @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/" + BLOCK_ID_PARAM;
+  static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/:" + BLOCK_ID_PARAM;
   @VisibleForTesting
   static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
   @VisibleForTesting
@@ -248,10 +248,16 @@ final class ApiController {
     HashCode blockId = getRequiredParameter(rc.request().params(), BLOCK_ID_PARAM,
         HashCode::fromString);
 
-    Block block = service.getBlock(blockId);
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(block));
+    Optional<Block> block = service.getBlock(blockId);
+    if (block.isPresent()) {
+      rc.response()
+          .putHeader("Content-Type", "application/json")
+          .end(json().toJson(block.get()));
+    } else {
+      rc.response()
+          .setStatusCode(HTTP_BAD_REQUEST)
+          .end();
+    }
   }
 
   private void getLastBlock(RoutingContext rc) {
@@ -300,10 +306,16 @@ final class ApiController {
     HashCode messageHash = getRequiredParameter(rc.request().params(), MESSAGE_HASH_PARAM,
         HashCode::fromString);
 
-    TransactionResult txResult = service.getTxResult(messageHash);
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(txResult));
+    Optional<TransactionResult> txResult = service.getTxResult(messageHash);
+    if (txResult.isPresent()) {
+      rc.response()
+          .putHeader("Content-Type", "application/json")
+          .end(json().toJson(txResult.get()));
+    } else {
+      rc.response()
+          .setStatusCode(HTTP_BAD_REQUEST)
+          .end();
+    }
   }
 
   private void getTransactionLocations(RoutingContext rc) {
@@ -317,10 +329,16 @@ final class ApiController {
     HashCode messageHash = getRequiredParameter(rc.request().params(), MESSAGE_HASH_PARAM,
         HashCode::fromString);
 
-    TransactionLocation txLocation = service.getTxLocation(messageHash);
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(txLocation));
+    Optional<TransactionLocation> txLocation = service.getTxLocation(messageHash);
+    if (txLocation.isPresent()) {
+      rc.response()
+          .putHeader("Content-Type", "application/json")
+          .end(json().toJson(txLocation.get()));
+    } else {
+      rc.response()
+          .setStatusCode(HTTP_BAD_REQUEST)
+          .end();
+    }
   }
 
   private void getActualConfiguration(RoutingContext rc) {
