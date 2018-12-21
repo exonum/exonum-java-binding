@@ -29,5 +29,7 @@ public class PredefinedOwnerKeys {
   public static final PublicKey SECOND_OWNER_KEY =
       PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(1), PUBLIC_KEY_BYTES));
 
-  private PredefinedOwnerKeys() {}
+  private PredefinedOwnerKeys() {
+    throw new AssertionError("Non-instantiable");
+  }
 }

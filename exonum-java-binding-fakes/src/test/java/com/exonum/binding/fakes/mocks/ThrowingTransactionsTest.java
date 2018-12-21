@@ -45,7 +45,6 @@ class ThrowingTransactionsTest {
     assertThrows(exceptionType, transaction::info);
   }
 
-
   @Test
   void createThrowingOutOfMemoryError() {
     Class<OutOfMemoryError> exceptionType = OutOfMemoryError.class;
@@ -93,6 +92,5 @@ class ThrowingTransactionsTest {
     assertThat(actual.getMessage(), equalTo(description));
   }
 
-  private abstract static class UninstantiableException extends Exception {
-  }
+  private abstract static class UninstantiableException extends Exception {}
 }

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,9 +37,7 @@ class TransactionPreconditionsTest {
         .payload(Bytes.bytes())
         .build();
 
-    RawTransaction actual = TransactionPreconditions.checkTransaction(tx, txId);
-
-    assertThat(actual, sameInstance(tx));
+    TransactionPreconditions.checkTransaction(tx, txId);
   }
 
   @Test
@@ -55,7 +52,7 @@ class TransactionPreconditionsTest {
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransactionPreconditions.checkTransaction(tx, txId));
-    assertThat(e.getMessage(), matchesPattern("This message \\(.+\\) does not belong "
+    assertThat(e.getMessage(), matchesPattern("This transaction \\(.+\\) does not belong "
         + "to this service: wrong service id \\(10\\), must be " + QaService.ID));
   }
 
@@ -72,7 +69,7 @@ class TransactionPreconditionsTest {
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransactionPreconditions.checkTransaction(tx, expectedTxId));
-    assertThat(e.getMessage(), matchesPattern("This message \\(.+\\) "
+    assertThat(e.getMessage(), matchesPattern("This transaction \\(.+\\) "
         + "has wrong transaction id \\(1\\), must be " + expectedTxId));
   }
 
@@ -86,9 +83,7 @@ class TransactionPreconditionsTest {
         .payload(ByteBuffer.allocate(body).array())
         .build();
 
-    RawTransaction actual = TransactionPreconditions.checkPayloadSize(tx, body);
-
-    assertThat(actual, sameInstance(tx));
+    TransactionPreconditions.checkPayloadSize(tx, body);
   }
 
   @Test
@@ -104,7 +99,7 @@ class TransactionPreconditionsTest {
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransactionPreconditions.checkPayloadSize(tx, expectedBody));
-    assertThat(e.getMessage(), matchesPattern("This transaction \\(.+\\) "
+    assertThat(e.getMessage(), matchesPattern("The payload of this transaction \\(.+\\) "
         + "has wrong size \\(\\d+\\), expected \\d+ bytes"));
   }
 }

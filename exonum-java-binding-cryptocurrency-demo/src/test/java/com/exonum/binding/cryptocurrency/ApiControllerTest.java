@@ -60,6 +60,7 @@ class ApiControllerTest {
   private static final String HOST = "0.0.0.0";
 
   private static final PublicKey FROM_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+  private static final PublicKey TO_KEY = PredefinedOwnerKeys.SECOND_OWNER_KEY;
 
   @Mock
   private CryptocurrencyService service;
@@ -151,7 +152,7 @@ class ApiControllerTest {
         HistoryEntity.Builder.newBuilder()
             .setSeed(1L)
             .setWalletFrom(FROM_KEY)
-            .setWalletTo(FROM_KEY)
+            .setWalletTo(TO_KEY)
             .setAmount(10L)
             .setTransactionHash(HashCode.fromString("a0a0a0"))
             .build()

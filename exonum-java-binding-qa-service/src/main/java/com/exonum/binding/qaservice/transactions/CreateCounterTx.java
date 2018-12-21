@@ -87,11 +87,11 @@ public final class CreateCounterTx implements Transaction {
     return Objects.hashCode(name);
   }
 
-  public static TransactionMessageConverter<CreateCounterTx> converter() {
+  public static BiDirectionTransactionConverter<CreateCounterTx> converter() {
     return Converter.INSTANCE;
   }
 
-  private enum Converter implements TransactionMessageConverter<CreateCounterTx> {
+  private enum Converter implements BiDirectionTransactionConverter<CreateCounterTx> {
     INSTANCE;
 
     @Override

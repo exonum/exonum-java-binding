@@ -38,7 +38,9 @@ public interface TransactionContext {
   HashCode getTransactionMessageHash();
 
   /**
-   * Returns public key of the transaction author.
+   * Returns public key of the transaction author. The corresponding transaction message
+   * is guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature
+   * with this public key.
    */
   PublicKey getAuthorPk();
 
@@ -74,9 +76,7 @@ public interface TransactionContext {
     }
 
     /**
-     * Sets transaction author public key for the context. The corresponding transaction message
-     * is guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature
-     * with this public key.
+     * Sets transaction author public key for the context.
      */
     public Builder authorPk(PublicKey authorPk) {
       this.authorPk = authorPk;

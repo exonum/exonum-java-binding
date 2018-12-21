@@ -20,6 +20,7 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COU
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
+import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkServiceId;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.qaservice.QaService;
@@ -53,9 +54,4 @@ public final class QaTransactionConverter implements TransactionConverter {
         .apply(rawTransaction);
   }
 
-  private static void checkServiceId(RawTransaction rawTransaction) {
-    short serviceId = rawTransaction.getServiceId();
-    checkArgument(serviceId == QaService.ID,
-        "Wrong service id (%s), must be %s", serviceId, QaService.ID);
-  }
 }

@@ -78,11 +78,11 @@ public final class ValidThrowingTx implements Transaction {
     return Objects.hashCode(seed);
   }
 
-  public static TransactionMessageConverter<ValidThrowingTx> converter() {
+  public static BiDirectionTransactionConverter<ValidThrowingTx> converter() {
     return Converter.INSTANCE;
   }
 
-  private enum Converter implements TransactionMessageConverter<ValidThrowingTx> {
+  private enum Converter implements BiDirectionTransactionConverter<ValidThrowingTx> {
     INSTANCE;
 
     @Override

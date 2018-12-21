@@ -108,11 +108,11 @@ public final class ValidErrorTx implements Transaction {
     return Objects.hash(seed, errorCode, errorDescription);
   }
 
-  public static TransactionMessageConverter<ValidErrorTx> converter() {
+  public static BiDirectionTransactionConverter<ValidErrorTx> converter() {
     return Converter.INSTANCE;
   }
 
-  private enum Converter implements TransactionMessageConverter<ValidErrorTx> {
+  private enum Converter implements BiDirectionTransactionConverter<ValidErrorTx> {
     INSTANCE;
 
     @Override
@@ -133,7 +133,7 @@ public final class ValidErrorTx implements Transaction {
       byte[] payload = PROTO_SERIALIZER.toBytes(ValidErrorTxBody.newBuilder()
           .setSeed(transaction.seed)
           .setErrorCode(transaction.errorCode)
-          .setErrorDescription(transaction.errorDescription)
+          .setErrorDescription(Strings.nullToEmpty(transaction.errorDescription))
           .build());
 
       return RawTransaction.newBuilder()
@@ -141,7 +141,6 @@ public final class ValidErrorTx implements Transaction {
           .transactionId(ID)
           .payload(payload)
           .build();
-
     }
 
     private void checkRawTransaction(RawTransaction rawTransaction) {
