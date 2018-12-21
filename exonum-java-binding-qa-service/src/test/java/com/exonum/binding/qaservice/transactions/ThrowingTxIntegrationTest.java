@@ -40,7 +40,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class ValidThrowingTxIntegrationTest {
+class ThrowingTxIntegrationTest {
 
   @BeforeAll
   static void loadLibrary() {
@@ -50,23 +50,23 @@ class ValidThrowingTxIntegrationTest {
   @Test
   void converterRoundtrip() {
     long seed = 10L;
-    ValidThrowingTx tx = new ValidThrowingTx(seed);
+    ThrowingTx tx = new ThrowingTx(seed);
 
-    RawTransaction message = ValidThrowingTx.converter().toRawTransaction(tx);
+    RawTransaction message = ThrowingTx.converter().toRawTransaction(tx);
 
-    ValidThrowingTx txFromMessage = ValidThrowingTx.converter().fromRawTransaction(message);
+    ThrowingTx txFromRaw = ThrowingTx.converter().fromRawTransaction(message);
 
-    assertThat(txFromMessage, equalTo(tx));
+    assertThat(txFromRaw, equalTo(tx));
   }
 
   @Test
   void info() {
     long seed = 10L;
-    ValidThrowingTx tx = new ValidThrowingTx(seed);
-    String txJson = tx.info();
+    ThrowingTx tx = new ThrowingTx(seed);
+    String info = tx.info();
 
-    AnyTransaction<ValidThrowingTx> txParams = json().fromJson(txJson,
-        new TypeToken<AnyTransaction<ValidThrowingTx>>() {}.getType());
+    AnyTransaction<ThrowingTx> txParams = json().fromJson(info,
+        new TypeToken<AnyTransaction<ThrowingTx>>(){}.getType());
 
     assertThat(txParams.service_id, equalTo(QaService.ID));
     assertThat(txParams.message_id, equalTo(QaTransaction.VALID_THROWING.id()));
@@ -86,7 +86,7 @@ class ValidThrowingTxIntegrationTest {
       createCounter(view, name, value);
 
       // Create the transaction
-      ValidThrowingTx tx = new ValidThrowingTx(0L);
+      ThrowingTx tx = new ThrowingTx(0L);
 
       // Execute the transaction
       TransactionContext context = newContext(view).create();
@@ -106,7 +106,7 @@ class ValidThrowingTxIntegrationTest {
 
   @Test
   void equals() {
-    EqualsVerifier.forClass(ValidThrowingTx.class)
+    EqualsVerifier.forClass(ThrowingTx.class)
         .verify();
   }
 }

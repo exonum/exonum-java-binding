@@ -77,9 +77,9 @@ class CreateCounterTxIntegrationTest {
     CreateCounterTx tx = new CreateCounterTx(name);
 
     RawTransaction raw = converter().toRawTransaction(tx);
-    CreateCounterTx txFromMessage = converter().fromRawTransaction(raw);
+    CreateCounterTx txFromRaw = converter().fromRawTransaction(raw);
 
-    assertThat(txFromMessage, equalTo(tx));
+    assertThat(txFromRaw, equalTo(tx));
   }
 
   @Test

@@ -59,7 +59,7 @@ class IncrementCounterTxIntegrationTest {
   @Test
   void converterRejectsWrongServiceId() {
     RawTransaction tx = txTemplate()
-        .serviceId((short) (QaService.ID + 1))
+        .serviceId((short) -1)
         .build();
 
     assertThrows(IllegalArgumentException.class,
@@ -69,7 +69,7 @@ class IncrementCounterTxIntegrationTest {
   @Test
   void converterRejectsWrongTxId() {
     RawTransaction tx = txTemplate()
-        .transactionId((short) (INCREMENT_COUNTER.id() + 1))
+        .transactionId((short) -1)
         .build();
 
     assertThrows(IllegalArgumentException.class,
@@ -83,9 +83,9 @@ class IncrementCounterTxIntegrationTest {
 
     IncrementCounterTx tx = new IncrementCounterTx(seed, counterId);
     RawTransaction raw = converter().toRawTransaction(tx);
-    IncrementCounterTx txFromMessage = converter().fromRawTransaction(raw);
+    IncrementCounterTx txFromRaw = converter().fromRawTransaction(raw);
 
-    assertThat(txFromMessage, equalTo(tx));
+    assertThat(txFromRaw, equalTo(tx));
   }
 
   @Test
@@ -129,9 +129,9 @@ class IncrementCounterTxIntegrationTest {
       long seed = 0L;
       String name = "unknown-counter";
       HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
-      IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
 
       // Execute the transaction
+      IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
       TransactionContext context = spy(newContext(view).create());
       tx.execute(context);
       verify(context).getFork();
@@ -157,12 +157,10 @@ class IncrementCounterTxIntegrationTest {
 
     // Check the transaction parameters in JSON
     AnyTransaction<IncrementCounterTx> txParameters = json().fromJson(info,
-        new TypeToken<AnyTransaction<IncrementCounterTx>>() {
-        }.getType());
+        new TypeToken<AnyTransaction<IncrementCounterTx>>(){}.getType());
 
     assertThat(txParameters.body, equalTo(tx));
   }
-
 
   @Test
   void equals() {

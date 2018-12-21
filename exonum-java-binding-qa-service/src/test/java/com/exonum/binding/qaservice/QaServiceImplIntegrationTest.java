@@ -35,7 +35,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
+import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.BlockCommittedEventImpl;
 import com.exonum.binding.service.Node;
@@ -199,8 +199,8 @@ class QaServiceImplIntegrationTest {
     long seed = 1L;
     HashCode txHash = service.submitValidThrowingTx(seed);
 
-    ValidThrowingTx expectedTx = new ValidThrowingTx(seed);
-    RawTransaction expectedRawTx = ValidThrowingTx.converter().toRawTransaction(expectedTx);
+    ThrowingTx expectedTx = new ThrowingTx(seed);
+    RawTransaction expectedRawTx = ThrowingTx.converter().toRawTransaction(expectedTx);
 
     // TODO: return message hash from the core
     // assertThat(txHash).isEqualTo(expectedRawTx.hash());

@@ -18,7 +18,6 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -46,7 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class ValidErrorTxIntegrationTest {
+class ErrorTxIntegrationTest {
 
   @BeforeAll
   static void loadLibrary() {
@@ -56,7 +55,7 @@ class ValidErrorTxIntegrationTest {
   @Test
   void converterRejectsWrongServiceId() {
     RawTransaction tx = txTemplate()
-        .serviceId((short) (QaService.ID + 1))
+        .serviceId((short) -1)
         .build();
 
     assertThrows(IllegalArgumentException.class,
@@ -66,7 +65,7 @@ class ValidErrorTxIntegrationTest {
   @Test
   void converterRejectsWrongTxId() {
     RawTransaction tx = txTemplate()
-        .transactionId((short) (INCREMENT_COUNTER.id() + 1))
+        .transactionId((short) -1)
         .build();
 
     assertThrows(IllegalArgumentException.class,
@@ -75,26 +74,26 @@ class ValidErrorTxIntegrationTest {
 
   @Test
   void converterRoundtrip() {
-    ValidErrorTx tx = new ValidErrorTx(1L, (byte) 2, "Foo");
+    ErrorTx tx = new ErrorTx(1L, (byte) 2, "Foo");
 
-    RawTransaction raw = ValidErrorTx.converter().toRawTransaction(tx);
-    ValidErrorTx txFromMessage = ValidErrorTx.converter().fromRawTransaction(raw);
+    RawTransaction raw = ErrorTx.converter().toRawTransaction(tx);
+    ErrorTx txFromRaw = ErrorTx.converter().fromRawTransaction(raw);
 
-    assertThat(txFromMessage, equalTo(tx));
+    assertThat(txFromRaw, equalTo(tx));
   }
 
   @Test
   void constructorRejectsInvalidErrorCode() {
     byte invalidErrorCode = -1;
     assertThrows(IllegalArgumentException.class,
-        () -> new ValidErrorTx(1L, invalidErrorCode, "Boom"));
+        () -> new ErrorTx(1L, invalidErrorCode, "Boom"));
   }
 
   @Test
   void constructorRejectsInvalidDescription() {
     String invalidDescription = "";
     assertThrows(IllegalArgumentException.class,
-        () -> new ValidErrorTx(1L, (byte) 1, invalidDescription));
+        () -> new ErrorTx(1L, (byte) 1, invalidDescription));
   }
 
   @Test
@@ -105,7 +104,7 @@ class ValidErrorTxIntegrationTest {
       Fork view = db.createFork(cleaner);
 
       byte errorCode = 2;
-      Transaction tx = new ValidErrorTx(1L, errorCode, null);
+      Transaction tx = new ErrorTx(1L, errorCode, null);
 
       TransactionContext context = newContext(view).create();
       TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
@@ -125,7 +124,7 @@ class ValidErrorTxIntegrationTest {
 
       byte errorCode = 2;
       String description = "Boom";
-      Transaction tx = new ValidErrorTx(1L, errorCode, description);
+      Transaction tx = new ErrorTx(1L, errorCode, description);
 
       TransactionContext context = newContext(view).create();
       TransactionExecutionException expected = assertThrows(TransactionExecutionException.class,
@@ -150,7 +149,7 @@ class ValidErrorTxIntegrationTest {
 
       // Create the transaction
       byte errorCode = 1;
-      ValidErrorTx tx = new ValidErrorTx(0L, errorCode, "Boom");
+      ErrorTx tx = new ErrorTx(0L, errorCode, "Boom");
 
       // Execute the transaction
       TransactionContext context = newContext(view).create();
@@ -171,12 +170,12 @@ class ValidErrorTxIntegrationTest {
   })
   @ParameterizedTest
   void info(long seed, byte errorCode, String errorMessage) {
-    Transaction tx = new ValidErrorTx(seed, errorCode, errorMessage);
+    Transaction tx = new ErrorTx(seed, errorCode, errorMessage);
 
     String txInJson = tx.info();
 
-    AnyTransaction<ValidErrorTx> txFromJson = json().fromJson(txInJson,
-        new TypeToken<AnyTransaction<ValidErrorTx>>() {}.getType());
+    AnyTransaction<ErrorTx> txFromJson = json().fromJson(txInJson,
+        new TypeToken<AnyTransaction<ErrorTx>>(){}.getType());
 
     assertThat(txFromJson.message_id, equalTo(QaTransaction.VALID_ERROR.id()));
     assertThat(txFromJson.body, equalTo(tx));
@@ -184,7 +183,7 @@ class ValidErrorTxIntegrationTest {
 
   @Test
   void equals() {
-    EqualsVerifier.forClass(ValidErrorTx.class)
+    EqualsVerifier.forClass(ErrorTx.class)
         .verify();
   }
 

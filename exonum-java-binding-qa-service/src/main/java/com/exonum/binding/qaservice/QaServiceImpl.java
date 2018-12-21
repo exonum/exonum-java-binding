@@ -27,8 +27,8 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
-import com.exonum.binding.qaservice.transactions.ValidErrorTx;
-import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
+import com.exonum.binding.qaservice.transactions.ErrorTx;
+import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.InternalServerError;
@@ -146,17 +146,17 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   public HashCode submitValidThrowingTx(long requestSeed) {
-    ValidThrowingTx tx = new ValidThrowingTx(requestSeed);
+    ThrowingTx tx = new ThrowingTx(requestSeed);
 
-    return submitTransaction(ValidThrowingTx.converter().toRawTransaction(tx));
+    return submitTransaction(ThrowingTx.converter().toRawTransaction(tx));
   }
 
   @Override
   public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
       @Nullable String description) {
-    ValidErrorTx tx = new ValidErrorTx(requestSeed, errorCode, description);
+    ErrorTx tx = new ErrorTx(requestSeed, errorCode, description);
 
-    return submitTransaction(ValidErrorTx.converter().toRawTransaction(tx));
+    return submitTransaction(ErrorTx.converter().toRawTransaction(tx));
   }
 
   @Override

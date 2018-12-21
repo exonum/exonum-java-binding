@@ -76,29 +76,29 @@ class TransactionPreconditionsTest {
   @Test
   void checkTransactionCorrectSize() {
     short txId = 0x01;
-    int body = 10;
+    int payloadSize = 10;
     RawTransaction tx = RawTransaction.newBuilder()
         .serviceId(QaService.ID)
         .transactionId(txId)
-        .payload(ByteBuffer.allocate(body).array())
+        .payload(new byte[payloadSize])
         .build();
 
-    TransactionPreconditions.checkPayloadSize(tx, body);
+    TransactionPreconditions.checkPayloadSize(tx, payloadSize);
   }
 
   @Test
   void checkTransactionWrongSize() {
     short txId = 0x01;
-    int expectedBody = 11;
-    int body = 10;
+    int expectedPayloadSize = 11;
+    int payloadSize = 10;
     RawTransaction tx = RawTransaction.newBuilder()
         .serviceId(QaService.ID)
         .transactionId(txId)
-        .payload(ByteBuffer.allocate(body).array())
+        .payload(new byte[payloadSize])
         .build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransactionPreconditions.checkPayloadSize(tx, expectedBody));
+        () -> TransactionPreconditions.checkPayloadSize(tx, expectedPayloadSize));
     assertThat(e.getMessage(), matchesPattern("The payload of this transaction \\(.+\\) "
         + "has wrong size \\(\\d+\\), expected \\d+ bytes"));
   }

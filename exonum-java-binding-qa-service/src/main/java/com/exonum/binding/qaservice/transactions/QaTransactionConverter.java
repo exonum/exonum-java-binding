@@ -23,7 +23,6 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THRO
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkServiceId;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
@@ -39,8 +38,8 @@ public final class QaTransactionConverter implements TransactionConverter {
       ImmutableMap.<Short, Function<RawTransaction, Transaction>>builder()
           .put(INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromRawTransaction)
           .put(CREATE_COUNTER.id(), CreateCounterTx.converter()::fromRawTransaction)
-          .put(VALID_THROWING.id(), ValidThrowingTx.converter()::fromRawTransaction)
-          .put(VALID_ERROR.id(), ValidErrorTx.converter()::fromRawTransaction)
+          .put(VALID_THROWING.id(), ThrowingTx.converter()::fromRawTransaction)
+          .put(VALID_ERROR.id(), ErrorTx.converter()::fromRawTransaction)
           .build();
 
   @Override

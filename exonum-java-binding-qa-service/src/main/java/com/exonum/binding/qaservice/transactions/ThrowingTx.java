@@ -28,7 +28,7 @@ import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import java.util.Objects;
 
-public final class ValidThrowingTx implements Transaction {
+public final class ThrowingTx implements Transaction {
 
   private static final short ID = QaTransaction.VALID_THROWING.id();
   private static final Serializer<ValidThrowingTxBody> PROTO_SERIALIZER =
@@ -36,7 +36,7 @@ public final class ValidThrowingTx implements Transaction {
 
   private final long seed;
 
-  public ValidThrowingTx(long seed) {
+  public ThrowingTx(long seed) {
     this.seed = seed;
   }
 
@@ -69,7 +69,7 @@ public final class ValidThrowingTx implements Transaction {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ValidThrowingTx that = (ValidThrowingTx) o;
+    ThrowingTx that = (ThrowingTx) o;
     return seed == that.seed;
   }
 
@@ -78,24 +78,24 @@ public final class ValidThrowingTx implements Transaction {
     return Objects.hashCode(seed);
   }
 
-  public static BiDirectionTransactionConverter<ValidThrowingTx> converter() {
+  public static BiDirectionTransactionConverter<ThrowingTx> converter() {
     return Converter.INSTANCE;
   }
 
-  private enum Converter implements BiDirectionTransactionConverter<ValidThrowingTx> {
+  private enum Converter implements BiDirectionTransactionConverter<ThrowingTx> {
     INSTANCE;
 
     @Override
-    public ValidThrowingTx fromRawTransaction(RawTransaction rawTransaction) {
+    public ThrowingTx fromRawTransaction(RawTransaction rawTransaction) {
       checkRawTransaction(rawTransaction);
 
       long seed = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload())
           .getSeed();
-      return new ValidThrowingTx(seed);
+      return new ThrowingTx(seed);
     }
 
     @Override
-    public RawTransaction toRawTransaction(ValidThrowingTx transaction) {
+    public RawTransaction toRawTransaction(ThrowingTx transaction) {
       byte[] payload = PROTO_SERIALIZER.toBytes(ValidThrowingTxBody.newBuilder()
           .setSeed(transaction.seed)
           .build());

@@ -16,10 +16,12 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.qaservice.QaService;
+import com.exonum.binding.test.Bytes;
 import com.exonum.binding.transaction.RawTransaction;
 import java.nio.ByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +55,7 @@ class QaTransactionConverterTest {
     RawTransaction tx = RawTransaction.newBuilder()
         .serviceId((short) (QaService.ID + 1))
         .transactionId(QaTransaction.INCREMENT_COUNTER.id())
-        .payload(ByteBuffer.allocate(0).array())
+        .payload(bytes())
         .build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
@@ -64,10 +66,10 @@ class QaTransactionConverterTest {
 
   @Test
   void toTransactionUnknownTransaction() {
-    RawTransaction message = UnknownTx.createRawTransaction();
+    RawTransaction raw = UnknownTx.createRawTransaction();
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> converter.toTransaction(message));
+        () -> converter.toTransaction(raw));
     assertThat(e).hasMessageStartingWith("Unknown transaction");
   }
 
