@@ -1,9 +1,10 @@
-use exonum::blockchain::Blockchain;
-use exonum::crypto::PublicKey;
-use exonum::messages::RawTransaction;
-use exonum::messages::ServiceTransaction;
-use exonum::node::ApiSender;
-use exonum::storage::Snapshot;
+use exonum::{
+    blockchain::Blockchain,
+    crypto::{Hash, PublicKey},
+    messages::{Message, RawTransaction, ServiceTransaction},
+    node::ApiSender,
+    storage::Snapshot,
+};
 use failure;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
@@ -63,12 +64,22 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: RawTransaction) -> Result<(), failure::Error> {
-        self.blockchain.broadcast_raw_transaction(transaction)
+    pub fn submit(&self, transaction: RawTransaction) -> Result<Hash, failure::Error> {
+        let service_id = transaction.service_id();
+        let msg = Message::sign_transaction(
+            transaction.service_transaction(),
+            service_id,
+            self.blockchain.service_keypair.0,
+            &self.blockchain.service_keypair.1,
+        );
+        let tx_hash = msg.hash();
+
+        self.transaction_sender.broadcast_transaction(msg)?;
+        Ok(tx_hash)
     }
 }
 
-/// Submits a transaction into the network.
+/// Submits a transaction into the network. Returns transaction hash as byte array.
 ///
 /// Parameters:
 /// - `node_handle` - a native handle to the native node object
@@ -83,27 +94,35 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     payload: jbyteArray,
     service_id: jshort,
     transaction_id: jshort,
-) {
+) -> jbyteArray {
+    use std::ptr;
+    use utils::convert_hash;
     let res = panic::catch_unwind(|| {
         let node = cast_handle::<NodeContext>(node_handle);
-        unwrap_jni_verbose(
+        let hash = unwrap_jni_verbose(
             &env,
-            || -> JniResult<()> {
+            || -> JniResult<Option<Hash>> {
                 let payload = env.convert_byte_array(payload)?;
                 let service_transaction =
                     ServiceTransaction::from_raw_unchecked(transaction_id as u16, payload);
                 let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
-                if let Err(err) = node.submit(raw_transaction) {
-                    let error_class = INTERNAL_SERVER_ERROR;
-                    let error_description = err.to_string();
-                    env.throw_new(error_class, error_description)?;
+                match node.submit(raw_transaction) {
+                    Ok(tx_hash) => Ok(Some(tx_hash)),
+                    Err(err) => {
+                        let error_class = INTERNAL_SERVER_ERROR;
+                        let error_description = err.to_string();
+                        env.throw_new(error_class, error_description)?;
+                        Ok(None)
+                    }
                 }
-                Ok(())
             }(),
         );
-        Ok(())
+        match hash {
+            Some(hash) => Ok(convert_hash(&env, &hash)?),
+            None => Ok(ptr::null_mut()),
+        }
     });
-    unwrap_exc_or_default(&env, res);
+    unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Creates a new snapshot of the current database state.

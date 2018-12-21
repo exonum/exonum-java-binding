@@ -52,6 +52,7 @@ fn submit_transaction() {
 }
 
 #[test]
+#[ignore]
 fn submit_transaction_to_missing_service() {
     let keypair = gen_keypair();
     let (node, _) = create_node(keypair.0, keypair.1);
