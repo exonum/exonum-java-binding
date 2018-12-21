@@ -132,6 +132,5 @@ public interface Service {
    * @param event the read-only context allowing to access the blockchain state as of that committed
    *     block
    */
-  default void afterCommit(BlockCommittedEvent event) {
-  }
+  default void afterCommit(BlockCommittedEvent event) {}
 }

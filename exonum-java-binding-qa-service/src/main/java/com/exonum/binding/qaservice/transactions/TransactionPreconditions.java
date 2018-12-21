@@ -27,28 +27,27 @@ final class TransactionPreconditions {
 
   private static final short SERVICE_ID = QaService.ID;
 
-  static <T extends RawTransaction> T checkTransaction(T transaction, short expectedTxId) {
-    short serviceId = transaction.getServiceId();
-    checkArgument(serviceId == SERVICE_ID,
-        "This message (%s) does not belong to this service: wrong service id (%s), must be %s",
-        transaction, serviceId, SERVICE_ID);
+  static void checkTransaction(RawTransaction transaction, short expectedTxId) {
+    checkServiceId(transaction);
 
     short txId = transaction.getTransactionId();
     checkArgument(txId == expectedTxId,
-        "This message (%s) has wrong transaction id (%s), must be %s",
+        "This transaction (%s) has wrong transaction id (%s), must be %s",
         transaction, txId, expectedTxId);
-
-    return transaction;
   }
 
-  static <T extends RawTransaction> T checkPayloadSize(T transaction, int expectedSize) {
+  static void checkPayloadSize(RawTransaction transaction, int expectedSize) {
     checkArgument(transaction.getPayload().length == expectedSize,
-        "This transaction (%s) has wrong size (%s), expected %s bytes",
+        "The payload of this transaction (%s) has wrong size (%s), expected %s bytes",
         transaction, transaction.getPayload().length, expectedSize);
-
-    return transaction;
   }
 
+  static void checkServiceId(RawTransaction transaction) {
+    short serviceId = transaction.getServiceId();
+    checkArgument(serviceId == SERVICE_ID,
+        "This transaction (%s) does not belong to this service: wrong service id (%s), must be %s",
+        transaction, serviceId, SERVICE_ID);
+  }
 
   private TransactionPreconditions() {
     throw new AssertionError("Non-instantiable");

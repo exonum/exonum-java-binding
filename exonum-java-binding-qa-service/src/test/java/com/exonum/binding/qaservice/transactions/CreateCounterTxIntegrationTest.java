@@ -56,7 +56,7 @@ class CreateCounterTxIntegrationTest {
   @Test
   void converterRejectsWrongServiceId() {
     RawTransaction tx = txTemplate()
-        .serviceId((short) (QaService.ID + 1))
+        .serviceId((short) -1)
         .build();
 
     assertThrows(IllegalArgumentException.class, () -> converter().fromRawTransaction(tx));
@@ -65,7 +65,7 @@ class CreateCounterTxIntegrationTest {
   @Test
   void converterRejectsWrongTxId() {
     RawTransaction tx = txTemplate()
-        .transactionId((short) (CREATE_COUNTER.id() + 1))
+        .transactionId((short) -1)
         .build();
 
     assertThrows(IllegalArgumentException.class, () -> converter().fromRawTransaction(tx));
@@ -112,8 +112,7 @@ class CreateCounterTxIntegrationTest {
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode nameHash = defaultHashFunction()
-          .hashString(name, UTF_8);
+      HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
 
       assertThat(counters.get(nameHash), equalTo(0L));
       assertThat(counterNames.get(nameHash), equalTo(name));

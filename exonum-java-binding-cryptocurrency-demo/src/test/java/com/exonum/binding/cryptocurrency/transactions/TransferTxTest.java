@@ -49,7 +49,7 @@ import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.gson.reflect.TypeToken;
+import com.google.common.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
@@ -117,7 +117,6 @@ class TransferTxTest {
           .withTxMessageHash(hash)
           .withAuthorKey(FROM_KEY)
           .create();
-
       tx.execute(context);
 
       // Check that wallets have correct balances
@@ -154,7 +153,6 @@ class TransferTxTest {
 
       long seed = 1L;
       long transferValue = 50L;
-
       TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
       TransactionContext context = newContext(view)
           .withAuthorKey(FROM_KEY)
@@ -181,7 +179,6 @@ class TransferTxTest {
       // Create and execute the transaction that attempts to transfer to unknown wallet
       long transferValue = 50L;
       long seed = 1L;
-
       TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
       TransactionContext context = newContext(view)
           .withAuthorKey(FROM_KEY)
@@ -199,10 +196,10 @@ class TransferTxTest {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+
       long seed = 1;
       long amount = 50L;
       TransferTx tx = new TransferTx(seed, FROM_KEY, amount);
-
       TransactionContext context = newContext(view)
           .withAuthorKey(FROM_KEY)
           .create();
@@ -232,7 +229,6 @@ class TransferTxTest {
       // exceeding the balance
       long seed = 1L;
       long transferValue = initialBalance + 50L;
-
       TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
       TransactionContext context = newContext(view)
           .withAuthorKey(FROM_KEY)

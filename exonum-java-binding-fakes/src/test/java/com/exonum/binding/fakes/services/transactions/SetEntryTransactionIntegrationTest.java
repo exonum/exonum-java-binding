@@ -57,6 +57,7 @@ class SetEntryTransactionIntegrationTest {
       // Execute the transaction
       TransactionContext context = spy(newContext(fork).create());
       tx.execute(context);
+
       verify(context).getFork();
       verify(context).getTransactionMessageHash();
       verify(context).getAuthorPk();

@@ -85,7 +85,6 @@ public final class CreateWalletTx implements Transaction {
     return json().toJson(this);
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

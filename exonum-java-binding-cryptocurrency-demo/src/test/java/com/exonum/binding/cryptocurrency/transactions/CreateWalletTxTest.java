@@ -120,7 +120,6 @@ class CreateWalletTxTest {
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
       CreateWalletTx tx = new CreateWalletTx(newBalance);
-
       TransactionContext context = newContext(view)
           .withAuthorKey(OWNER_KEY)
           .create();
