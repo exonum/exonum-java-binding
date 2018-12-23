@@ -112,7 +112,7 @@ public abstract class TransactionResult {
   public abstract String getErrorDescription();
 
   /**
-   * Returns true if transaction was {@linkplain Type#SUCCESS successful}, false otherwise
+   * Returns true if transaction was {@linkplain Type#SUCCESS successful}, false otherwise.
    */
   public boolean isSuccessful() {
     return getType() == Type.SUCCESS;
