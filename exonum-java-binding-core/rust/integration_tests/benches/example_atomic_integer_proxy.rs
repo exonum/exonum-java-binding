@@ -29,8 +29,8 @@ use std::sync::Arc;
 use test::{black_box, Bencher};
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = Arc::new(create_vm_for_benchmarks());
-    pub static ref EXECUTOR: DumbExecutor = DumbExecutor { vm: VM.clone() };
+    pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks();
+    pub static ref EXECUTOR: DumbExecutor = DumbExecutor::new(VM.clone());
 }
 
 #[bench]
