@@ -45,6 +45,8 @@ class TransactionResultSerializerTest {
         TransactionResult.error(0, "Error description"),
         TransactionResult.error(1, /* Empty as no description: */ ""),
         TransactionResult.error(255, /* Null as no description: */ null),
-        TransactionResult.unexpectedError(""));
+        TransactionResult.unexpectedError("Boom"),
+        TransactionResult.unexpectedError(""),
+        TransactionResult.unexpectedError(null));
   }
 }
