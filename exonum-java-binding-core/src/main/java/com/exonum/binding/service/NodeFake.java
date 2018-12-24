@@ -86,8 +86,9 @@ public final class NodeFake implements Node {
    * @throws NullPointerException if the transaction is null
    */
   @Override
-  public void submitTransaction(RawTransaction transaction) {
+  public byte[] submitTransaction(RawTransaction transaction) {
     checkNotNull(transaction);
+    return new byte[0];
   }
 
   @Override

@@ -25,10 +25,10 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
-import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.qaservice.transactions.ErrorTx;
+import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.ThrowingTx;
+import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.InternalServerError;
@@ -242,9 +242,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
   private HashCode submitTransaction(RawTransaction rawTransaction) {
     checkBlockchainInitialized();
     try {
-      node.submitTransaction(rawTransaction);
-      // TODO: return message hash from the core
-      return null;
+      byte[] txMessageHash = node.submitTransaction(rawTransaction);
+      return HashCode.fromBytes(txMessageHash);
     } catch (InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }

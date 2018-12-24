@@ -38,10 +38,11 @@ public interface Node {
    * will produce different transactions.</em>
    *
    * @param rawTransaction transaction parameters to include in transaction message
+   * @return hash of the transaction message created by the framework
    * @throws InternalServerError if this node failed to process the transaction
    * @throws NullPointerException if the transaction is null
    */
-  void submitTransaction(RawTransaction rawTransaction)
+  byte[] submitTransaction(RawTransaction rawTransaction)
       throws InternalServerError;
 
   /**

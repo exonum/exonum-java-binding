@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.transaction.RawTransaction;
-import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;
 
 class TransactionPreconditionsTest {

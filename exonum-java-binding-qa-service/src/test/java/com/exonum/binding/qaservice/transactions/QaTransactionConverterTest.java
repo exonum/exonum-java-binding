@@ -21,9 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.test.Bytes;
 import com.exonum.binding.transaction.RawTransaction;
-import java.nio.ByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,8 +58,8 @@ class QaTransactionConverterTest {
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> converter.toTransaction(tx));
-    assertThat(e).hasMessageMatching("Wrong service id \\(\\d+\\), must be "
-        + QaService.ID);
+    assertThat(e).hasMessageMatching("This transaction \\(.+\\) does not belong "
+        + "to this service: wrong service id \\(\\d+\\), must be " + QaService.ID);
   }
 
   @Test

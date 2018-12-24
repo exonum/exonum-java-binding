@@ -23,7 +23,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidErrorTxBody;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -40,8 +40,8 @@ import javax.annotation.Nullable;
 public final class ErrorTx implements Transaction {
 
   private static final short ID = QaTransaction.VALID_ERROR.id();
-  private static final Serializer<ValidErrorTxBody> PROTO_SERIALIZER =
-      StandardSerializers.protobuf(ValidErrorTxBody.class);
+  private static final Serializer<ErrorTxBody> PROTO_SERIALIZER =
+      StandardSerializers.protobuf(ErrorTxBody.class);
 
   private final long seed;
   private final byte errorCode;
@@ -119,7 +119,7 @@ public final class ErrorTx implements Transaction {
     public ErrorTx fromRawTransaction(RawTransaction rawTransaction) {
       checkRawTransaction(rawTransaction);
 
-      ValidErrorTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+      ErrorTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
       long seed = body.getSeed();
       byte errorCode = (byte) body.getErrorCode();
       // Convert empty to null because unset error description will be deserialized
@@ -130,7 +130,7 @@ public final class ErrorTx implements Transaction {
 
     @Override
     public RawTransaction toRawTransaction(ErrorTx transaction) {
-      byte[] payload = PROTO_SERIALIZER.toBytes(ValidErrorTxBody.newBuilder()
+      byte[] payload = PROTO_SERIALIZER.toBytes(ErrorTxBody.newBuilder()
           .setSeed(transaction.seed)
           .setErrorCode(transaction.errorCode)
           .setErrorDescription(Strings.nullToEmpty(transaction.errorDescription))

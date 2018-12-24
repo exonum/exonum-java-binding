@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
@@ -28,9 +29,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
@@ -47,6 +48,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -54,7 +56,6 @@ import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.junit5.VertxExtension;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -150,8 +151,8 @@ class QaServiceImplIntegrationTest {
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode defaultCounterId = Hashing.sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
-      HashCode afterCommitCounterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+      HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
+      HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
       assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
       assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
@@ -163,6 +164,7 @@ class QaServiceImplIntegrationTest {
   @Test
   void submitCreateCounter() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(Bytes.bytes(0x00));
 
     String counterName = "bids";
     HashCode txHash = service.submitCreateCounter(counterName);
@@ -170,31 +172,31 @@ class QaServiceImplIntegrationTest {
     CreateCounterTx expectedTx = new CreateCounterTx(counterName);
     RawTransaction expectedRawTx = CreateCounterTx.converter().toRawTransaction(expectedTx);
 
-    // TODO: return message hash from the core
-    // assertThat(txHash).isEqualTo(expectedRawTx.hash());
+    assertThat(txHash).isNotNull();
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitIncrementCounter() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(Bytes.bytes(0x00));
 
     long seed = 1L;
-    HashCode counterId = Hashing.sha256()
-        .hashString("Cats counter", StandardCharsets.UTF_8);
+    HashCode counterId = sha256()
+        .hashString("Cats counter", UTF_8);
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
     IncrementCounterTx expectedTx = new IncrementCounterTx(seed, counterId);
     RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-    // TODO: return message hash from the core
-    // assertThat(txHash).isEqualTo(expectedRawTx.hash());
+    assertThat(txHash).isEqualTo(txHash);
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitValidThrowingTx() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(Bytes.bytes(0x00));
 
     long seed = 1L;
     HashCode txHash = service.submitValidThrowingTx(seed);
@@ -202,20 +204,17 @@ class QaServiceImplIntegrationTest {
     ThrowingTx expectedTx = new ThrowingTx(seed);
     RawTransaction expectedRawTx = ThrowingTx.converter().toRawTransaction(expectedTx);
 
-    // TODO: return message hash from the core
-    // assertThat(txHash).isEqualTo(expectedRawTx.hash());
-    verify(node).submitTransaction(eq(expectedRawTx));
+    assertThat(txHash).isNotNull();
   }
 
   @Test
   void submitUnknownTx() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(Bytes.bytes(0x00));
 
     HashCode txHash = service.submitUnknownTx();
 
-    // TODO: return message hash from the core
-    // assertThat(txHash).isNotNull();
-    verify(node).submitTransaction(any(RawTransaction.class));
+    assertThat(txHash).isNotNull();
   }
 
   @Test
@@ -247,7 +246,7 @@ class QaServiceImplIntegrationTest {
       }
 
       // Check that the service returns expected value
-      HashCode counterId = Hashing.sha256().hashString(counterName, UTF_8);
+      HashCode counterId = sha256().hashString(counterName, UTF_8);
       Optional<Counter> counterValueOpt = service.getValue(counterId);
       Counter expectedCounter = new Counter(counterName, 0L);
       assertThat(counterValueOpt).hasValue(expectedCounter);
@@ -261,7 +260,7 @@ class QaServiceImplIntegrationTest {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      HashCode counterId = Hashing.sha256().hashString("Unknown counter", UTF_8);
+      HashCode counterId = sha256().hashString("Unknown counter", UTF_8);
       // Check there is no such counter
       assertThat(service.getValue(counterId)).isEmpty();
     }
@@ -319,6 +318,7 @@ class QaServiceImplIntegrationTest {
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       setServiceNode(node);
+      when(node.submitTransaction(any(RawTransaction.class))).thenReturn(Bytes.bytes(0x00));
       service.initialize(fork);
 
       Snapshot snapshot = db.createSnapshot(cleaner);
@@ -327,12 +327,11 @@ class QaServiceImplIntegrationTest {
           BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), height);
       service.afterCommit(event);
 
-      HashCode counterId = Hashing.sha256()
-          .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
+      HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
       IncrementCounterTx expectedTx = new IncrementCounterTx(height, counterId);
+      RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-      verify(node)
-          .submitTransaction(eq(IncrementCounterTx.converter().toRawTransaction(expectedTx)));
+      verify(node).submitTransaction(eq(expectedRawTx));
     }
   }
 

@@ -21,7 +21,6 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkServiceId;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.transaction.RawTransaction;

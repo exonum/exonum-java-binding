@@ -22,7 +22,7 @@ import static com.exonum.binding.qaservice.transactions.TransactionPreconditions
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.qaservice.transactions.TxMessageProtos.ValidThrowingTxBody;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -31,8 +31,8 @@ import java.util.Objects;
 public final class ThrowingTx implements Transaction {
 
   private static final short ID = QaTransaction.VALID_THROWING.id();
-  private static final Serializer<ValidThrowingTxBody> PROTO_SERIALIZER =
-      protobuf(ValidThrowingTxBody.class);
+  private static final Serializer<ThrowingTxBody> PROTO_SERIALIZER =
+      protobuf(ThrowingTxBody.class);
 
   private final long seed;
 
@@ -96,7 +96,7 @@ public final class ThrowingTx implements Transaction {
 
     @Override
     public RawTransaction toRawTransaction(ThrowingTx transaction) {
-      byte[] payload = PROTO_SERIALIZER.toBytes(ValidThrowingTxBody.newBuilder()
+      byte[] payload = PROTO_SERIALIZER.toBytes(ThrowingTxBody.newBuilder()
           .setSeed(transaction.seed)
           .build());
 
