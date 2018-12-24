@@ -16,16 +16,24 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.test.Bytes.bytes;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.Transaction;
+import java.util.Collection;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class QaTransactionConverterTest {
 
@@ -69,6 +77,36 @@ class QaTransactionConverterTest {
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> converter.toTransaction(raw));
     assertThat(e).hasMessageStartingWith("Unknown transaction");
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactions")
+  void toTransaction(Class<? extends Transaction> expectedType, RawTransaction tx) {
+    Transaction transaction = converter.toTransaction(tx);
+
+    assertThat(transaction).isInstanceOf(expectedType);
+  }
+
+  private static Collection<Arguments> transactions() {
+    List<Arguments> transactionTemplates = asList(
+        Arguments.of(CreateCounterTx.class,
+            new CreateCounterTx("name").toRawTransaction()),
+
+        Arguments.of(IncrementCounterTx.class,
+            new IncrementCounterTx(10L, defaultHashFunction().hashString("name", UTF_8))
+                .toRawTransaction()),
+
+        Arguments.of(ThrowingTx.class,
+            new ThrowingTx(10L).toRawTransaction()),
+
+        Arguments.of(ErrorTx.class,
+            new ErrorTx(10L, (byte) 1, "some error").toRawTransaction())
+    );
+
+    // Check that the test data includes all known transactions.
+    assertThat(transactionTemplates).hasSameSizeAs(QaTransaction.values());
+
+    return transactionTemplates;
   }
 
 }

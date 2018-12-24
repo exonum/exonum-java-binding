@@ -133,14 +133,15 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public HashCode submitCreateCounter(String counterName) {
     CreateCounterTx tx = new CreateCounterTx(counterName);
-    return submitTransaction(CreateCounterTx.converter().toRawTransaction(tx));
+
+    return submitTransaction(tx.toRawTransaction());
   }
 
   @Override
   public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
     IncrementCounterTx tx = new IncrementCounterTx(requestSeed, counterId);
 
-    return submitTransaction(IncrementCounterTx.converter().toRawTransaction(tx));
+    return submitTransaction(tx.toRawTransaction());
   }
 
 
@@ -148,7 +149,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   public HashCode submitValidThrowingTx(long requestSeed) {
     ThrowingTx tx = new ThrowingTx(requestSeed);
 
-    return submitTransaction(ThrowingTx.converter().toRawTransaction(tx));
+    return submitTransaction(tx.toRawTransaction());
   }
 
   @Override
@@ -156,7 +157,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
       @Nullable String description) {
     ErrorTx tx = new ErrorTx(requestSeed, errorCode, description);
 
-    return submitTransaction(ErrorTx.converter().toRawTransaction(tx));
+    return submitTransaction(tx.toRawTransaction());
   }
 
   @Override

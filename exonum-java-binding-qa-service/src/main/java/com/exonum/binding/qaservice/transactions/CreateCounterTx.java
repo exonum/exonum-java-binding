@@ -70,6 +70,10 @@ public final class CreateCounterTx implements Transaction {
     return QaTransactionJson.toJson(ID, this);
   }
 
+  public RawTransaction toRawTransaction() {
+    return converter().toRawTransaction(this);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
