@@ -50,7 +50,7 @@ class TransactionResultTest {
 
     assertThat(result.getType()).isEqualTo(Type.ERROR);
     assertThat(result.getErrorCode()).hasValue(errorCode);
-    assertThat(result.getErrorDescription()).hasValue(description);
+    assertThat(result.getErrorDescription()).isEqualTo(description);
     assertFalse(result.isSuccessful());
   }
 
@@ -94,7 +94,7 @@ class TransactionResultTest {
 
     assertThat(result.getType()).isEqualTo(Type.UNEXPECTED_ERROR);
     assertThat(result.getErrorCode()).isEmpty();
-    assertThat(result.getErrorDescription()).hasValue(description);
+    assertThat(result.getErrorDescription()).isEqualTo(description);
     assertFalse(result.isSuccessful());
   }
 }
