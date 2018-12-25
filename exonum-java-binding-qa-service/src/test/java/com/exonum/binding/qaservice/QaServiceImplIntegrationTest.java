@@ -271,14 +271,11 @@ class QaServiceImplIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void getValueNoSuchCounter() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       HashCode counterId = Hashing.sha256().hashString("Unknown counter", UTF_8);
       // Check there is no such counter
       assertThat(service.getValue(counterId)).isEmpty();
-    }
+    });
   }
 
   @Test
@@ -291,39 +288,28 @@ class QaServiceImplIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void getHeight() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Exception e = assertThrows(RuntimeException.class, () -> service.getHeight());
-
       assertThat(e).hasMessageContaining(NO_GENESIS_BLOCK_ERROR_MESSAGE);
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getAllBlockHashes() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       List<HashCode> hashes = service.getAllBlockHashes();
       assertThat(hashes).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getBlockTransactionsByHeight() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Exception e = assertThrows(RuntimeException.class, () -> service.getBlockTransactions(0L));
-
       assertThat(e).hasMessageContaining(NO_GENESIS_BLOCK_ERROR_MESSAGE);
-    }
+    });
   }
 
   @Test
@@ -358,125 +344,104 @@ class QaServiceImplIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void getActualConfiguration() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Throwable t = assertThrows(RuntimeException.class, () -> service.getActualConfiguration());
       assertThat(t.getMessage()).contains("Couldn't not find any config for"
           + " height 0, that means that genesis block was created incorrectly.");
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getBlockTransactionsByBlockId() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Throwable t = assertThrows(RuntimeException.class, () -> service.getBlockTransactions(0L));
       assertThat(t.getMessage()).contains(NO_GENESIS_BLOCK_ERROR_MESSAGE);
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getTxMessages() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
       assertThat(txMessages).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getTxResults() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Map<HashCode, TransactionResult> txResults = service.getTxResults();
       assertThat(txResults).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getTxResult() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       HashCode messageHash = HashCode.fromBytes(createPrefixed(bytes(0x00), 32));
       Optional<TransactionResult> txResult = service.getTxResult(messageHash);
       assertThat(txResult).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getTxLocations() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
       assertThat(txLocations).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getTxLocation() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       HashCode messageHash = HashCode.fromString("ab");
       Optional<TransactionLocation> txLocation = service.getTxLocation(messageHash);
       assertThat(txLocation).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getBlocks() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       Map<HashCode, Block> blocks = service.getBlocks();
       assertThat(blocks).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getBlock() {
-    try (MemoryDb db = MemoryDb.newInstance()) {
-      node = new NodeFake(db);
-      setServiceNode(node);
-
+    withNodeFake(() -> {
       HashCode blockId = HashCode.fromString("ab");
       Optional<Block> block = service.getBlock(blockId);
       assertThat(block).isEmpty();
-    }
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getLastBlock() {
+    withNodeFake(() -> {
+      Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
+      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the genesis block.");
+    });
+  }
+
+  /** Runs a test with a service with a node fake set. */
+  private void withNodeFake(Runnable test) {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);
 
-      Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
-
-      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the genesis block.");
+      test.run();
     }
   }
 

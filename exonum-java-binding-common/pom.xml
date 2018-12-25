@@ -68,6 +68,7 @@
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
       <artifactId>auto-value-gson</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

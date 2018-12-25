@@ -33,6 +33,7 @@ import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.BaseEncoding;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -44,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -105,6 +108,8 @@ final class ApiController {
       + MESSAGE_HASH_PARAM;
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
+
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   private final QaService service;
 
@@ -206,23 +211,13 @@ final class ApiController {
 
     Optional<Counter> counter = service.getValue(counterId);
 
-    if (counter.isPresent()) {
-      rc.response()
-          .putHeader("Content-Type", "application/json")
-          .end(json().toJson(counter.get()));
-    } else {
-      rc.response()
-          .setStatusCode(HTTP_NOT_FOUND)
-          .end();
-    }
+    respondWithJson(rc, counter);
   }
 
   private void getHeight(RoutingContext rc) {
     try {
       Height height = service.getHeight();
-      rc.response()
-          .putHeader("Content-Type", "application/json")
-          .end(json().toJson(height));
+      respondWithJson(rc, height);
     } catch (RuntimeException ex) {
       rc.response()
           .setStatusCode(HTTP_BAD_REQUEST)
@@ -232,16 +227,12 @@ final class ApiController {
 
   private void getAllBlockHashes(RoutingContext rc) {
     List<HashCode> hashes = service.getAllBlockHashes();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(hashes));
+    respondWithJson(rc, hashes);
   }
 
   private void getBlocks(RoutingContext rc) {
     Map<HashCode, Block> blocks = service.getBlocks();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(blocks));
+    respondWithJson(rc, blocks);
   }
 
   private void getBlock(RoutingContext rc) {
@@ -249,22 +240,12 @@ final class ApiController {
         HashCode::fromString);
 
     Optional<Block> block = service.getBlock(blockId);
-    if (block.isPresent()) {
-      rc.response()
-          .putHeader("Content-Type", "application/json")
-          .end(json().toJson(block.get()));
-    } else {
-      rc.response()
-          .setStatusCode(HTTP_BAD_REQUEST)
-          .end();
-    }
+    respondWithJson(rc, block);
   }
 
   private void getLastBlock(RoutingContext rc) {
     Block block = service.getLastBlock();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(block));
+    respondWithJson(rc, block);
   }
 
   private void getBlockTransactionsByHeight(RoutingContext rc) {
@@ -272,9 +253,7 @@ final class ApiController {
         Long::parseLong);
 
     List<HashCode> hashes = service.getBlockTransactions(height);
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(hashes));
+    respondWithJson(rc, hashes);
   }
 
   private void getBlockTransactionsByBlockId(RoutingContext rc) {
@@ -282,24 +261,19 @@ final class ApiController {
         HashCode::fromString);
 
     List<HashCode> hashes = service.getBlockTransactions(blockId);
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(hashes));
+    respondWithJson(rc, hashes);
   }
 
   private void getTransactionMessages(RoutingContext rc) {
-    // TODO: TransactionMessage
-    Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(txMessages));
+    Map<HashCode, TransactionMessage> transactionMessages = service.getTxMessages();
+    Map<HashCode, String> transactionMessagesEncoded = hexEncodeTransactionMessages(transactionMessages);
+
+    respondWithJson(rc, transactionMessagesEncoded);
   }
 
   private void getTransactionResults(RoutingContext rc) {
     Map<HashCode, TransactionResult> txResults = service.getTxResults();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(txResults));
+    respondWithJson(rc, txResults);
   }
 
   private void getTransactionResult(RoutingContext rc) {
@@ -307,22 +281,12 @@ final class ApiController {
         HashCode::fromString);
 
     Optional<TransactionResult> txResult = service.getTxResult(messageHash);
-    if (txResult.isPresent()) {
-      rc.response()
-          .putHeader("Content-Type", "application/json")
-          .end(json().toJson(txResult.get()));
-    } else {
-      rc.response()
-          .setStatusCode(HTTP_BAD_REQUEST)
-          .end();
-    }
+    respondWithJson(rc, txResult);
   }
 
   private void getTransactionLocations(RoutingContext rc) {
     Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json().toJson(txLocations));
+    respondWithJson(rc, txLocations);
   }
 
   private void getTransactionLocation(RoutingContext rc) {
@@ -330,24 +294,12 @@ final class ApiController {
         HashCode::fromString);
 
     Optional<TransactionLocation> txLocation = service.getTxLocation(messageHash);
-    if (txLocation.isPresent()) {
-      rc.response()
-          .putHeader("Content-Type", "application/json")
-          .end(json().toJson(txLocation.get()));
-    } else {
-      rc.response()
-          .setStatusCode(HTTP_BAD_REQUEST)
-          .end();
-    }
+    respondWithJson(rc, txLocation);
   }
 
   private void getActualConfiguration(RoutingContext rc) {
     StoredConfiguration configuration = service.getActualConfiguration();
-    String json = json().toJson(configuration);
-
-    rc.response()
-        .putHeader("Content-Type", "application/json")
-        .end(json);
+    respondWithJson(rc, configuration);
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {
@@ -408,6 +360,26 @@ final class ApiController {
     }
   }
 
+  private <T> void respondWithJson(RoutingContext rc, Optional<T> responseBody) {
+    if (responseBody.isPresent()) {
+      respondWithJson(rc, responseBody.get());
+    } else {
+      respondNotFound(rc);
+    }
+  }
+
+  private void respondWithJson(RoutingContext rc, Object responseBody) {
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(json().toJson(responseBody));
+  }
+
+  private void respondNotFound(RoutingContext rc) {
+    rc.response()
+        .setStatusCode(HTTP_NOT_FOUND)
+        .end();
+  }
+
   /**
    * If the passed throwable corresponds to a bad request — returns an error message,
    * or {@code Optional.empty()} otherwise.
@@ -429,5 +401,18 @@ final class ApiController {
     }
     // This throwable must correspond to an internal server error.
     return Optional.empty();
+  }
+
+  @VisibleForTesting
+  static Map<HashCode, String> hexEncodeTransactionMessages(Map<HashCode, TransactionMessage> txMessages) {
+    return txMessages.entrySet()
+        .stream()
+        .collect(Collectors.toMap(Map.Entry::getKey,
+            tx -> hexEncodeTransactionMessage(tx.getValue())));
+  }
+
+  @VisibleForTesting
+  static String hexEncodeTransactionMessage(TransactionMessage transactionMessage) {
+    return HEX_ENCODING.encode(transactionMessage.toBytes());
   }
 }
