@@ -64,6 +64,7 @@ module.exports = {
       },
 
       transfer (keyPair, receiver, amountToTransfer, seed) {
+        // Describe transaction
         const transaction = new TransferTransaction(keyPair.publicKey)
 
         // Transaction data
