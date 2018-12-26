@@ -200,10 +200,10 @@ public final class Blockchain {
   }
 
   private void checkHeight(long height) {
-    long maxHeight = getHeight();
-    if (height < 0 || height > maxHeight) {
-      throw new IndexOutOfBoundsException("Blockchain height (" + height + ") is out of range [0, "
-          + maxHeight + "]");
+    long blockchainHeight = getHeight();
+    if (height < 0 || height > blockchainHeight) {
+      throw new IndexOutOfBoundsException("Block height (" + height + ") is out of range [0, "
+          + blockchainHeight + "]");
     }
   }
 
