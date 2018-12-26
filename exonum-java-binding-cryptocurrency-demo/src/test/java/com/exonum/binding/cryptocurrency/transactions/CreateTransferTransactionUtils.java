@@ -30,8 +30,7 @@ class CreateTransferTransactionUtils {
   /**
    * Creates new raw transfer transaction message using provided keys and provided amount.
    */
-  static RawTransaction createRawTransaction(long seed,
-      PublicKey recipientId, long amount) {
+  static RawTransaction createRawTransaction(long seed, PublicKey recipientId, long amount) {
     return RawTransaction.newBuilder()
         .serviceId(CryptocurrencyService.ID)
         .transactionId(TransferTx.ID)

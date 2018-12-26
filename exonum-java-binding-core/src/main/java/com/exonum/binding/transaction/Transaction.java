@@ -41,7 +41,7 @@ public interface Transaction {
   void execute(TransactionContext context) throws TransactionExecutionException;
 
   /**
-   * Returns some information about this transaction in JSON format.
+   * Returns some information about this transaction in a format specified by user mainly JSON.
    */
   default String info() {
     return "";

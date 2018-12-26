@@ -54,8 +54,7 @@ public final class TransferTx implements Transaction {
   private final long sum;
 
   @VisibleForTesting
-  TransferTx(long seed, PublicKey toWallet,
-      long sum) {
+  TransferTx(long seed, PublicKey toWallet, long sum) {
     checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
     this.seed = seed;
     this.toWallet = toWallet;
