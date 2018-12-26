@@ -69,9 +69,9 @@ public final class Blockchain {
   }
 
   /**
-   * Returns the height of the latest committed block in the blockchain,
-   * or <em>blockchain height</em>. The height is a distance between the last block
-   * and the "genesis", or initial, block. Therefore, the height is equal to the number
+   * Returns the <em>blockchain height</em> which is the height of the latest committed block
+   * in the blockchain. The block height is a distance between the last block
+   * and the "genesis", or initial, block. Therefore, the blockchain height is equal to the number
    * of blocks plus one.
    *
    * <p>For example, the "genesis" block has height {@code h = 0}. The latest committed block
