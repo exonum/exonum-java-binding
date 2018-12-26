@@ -9,10 +9,11 @@
     "url": "https://github.com/exonum/exonum-java-binding"
   },
   "scripts": {
+    "proto": "pbjs --keep-case -t static-module ./src/proto/helpers.proto ../src/main/proto/transactions.proto ../src/main/proto/wallet.proto -o ./src/proto/proto.js",
     "lint": "eslint --ext .js,.vue src test",
     "compile": "webpack",
     "test": "jest",
-    "build": "npm run lint && npm run test && npm run compile",
+    "build": "npm run proto && npm run lint && npm run test && npm run compile",
     "start": "node server.js"
   },
   "jest": {
@@ -25,7 +26,7 @@
     "axios": "^0.18.0",
     "big-integer": "^1.6.32",
     "bootstrap": "^4.1.3",
-    "exonum-client": "^0.15.0",
+    "exonum-client": "^0.16.4",
     "jquery": "^3.3.1",
     "noty": "^3.2.0-beta",
     "numeral": "^2.0.6",

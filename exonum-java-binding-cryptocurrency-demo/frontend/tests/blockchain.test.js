@@ -63,7 +63,7 @@ describe('Interaction with blockchain', () => {
 
     expect(seed).toBeLessThan(MAX_VALUE)
   })
-
+/*
   it('should create new wallet', async () => {
     const keyPair = {
       publicKey: '47ac527ee7b903b0da76d1e0e6b649e9b2e7456aa56343204de9c5cc5a8efb0c',
@@ -87,4 +87,5 @@ describe('Interaction with blockchain', () => {
       'type': 'committed'
     })
   })
+  */
 })
