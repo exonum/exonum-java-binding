@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -266,7 +265,8 @@ final class ApiController {
 
   private void getTransactionMessages(RoutingContext rc) {
     Map<HashCode, TransactionMessage> transactionMessages = service.getTxMessages();
-    Map<HashCode, String> transactionMessagesEncoded = hexEncodeTransactionMessages(transactionMessages);
+    Map<HashCode, String> transactionMessagesEncoded =
+        hexEncodeTransactionMessages(transactionMessages);
 
     respondWithJson(rc, transactionMessagesEncoded);
   }
@@ -404,15 +404,15 @@ final class ApiController {
   }
 
   @VisibleForTesting
-  static Map<HashCode, String> hexEncodeTransactionMessages(Map<HashCode, TransactionMessage> txMessages) {
+  static Map<HashCode, String> hexEncodeTransactionMessages(
+      Map<HashCode, TransactionMessage> txMessages) {
     return txMessages.entrySet()
         .stream()
         .collect(Collectors.toMap(Map.Entry::getKey,
             tx -> hexEncodeTransactionMessage(tx.getValue())));
   }
 
-  @VisibleForTesting
-  static String hexEncodeTransactionMessage(TransactionMessage transactionMessage) {
+  private static String hexEncodeTransactionMessage(TransactionMessage transactionMessage) {
     return HEX_ENCODING.encode(transactionMessage.toBytes());
   }
 }

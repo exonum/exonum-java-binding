@@ -16,7 +16,23 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.ApiController.*;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_LAST_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_MESSAGES_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
+import static com.exonum.binding.qaservice.ApiController.BLOCK_HEIGHT_PARAM;
+import static com.exonum.binding.qaservice.ApiController.BLOCK_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -483,7 +499,8 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getTxMessages()).thenReturn(transactionMessages);
 
-    Map<HashCode, String> transactionMessagesEncoded = hexEncodeTransactionMessages(transactionMessages);
+    Map<HashCode, String> transactionMessagesEncoded =
+        hexEncodeTransactionMessages(transactionMessages);
 
     get(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH)
         .send(context.succeeding(response -> context.verify(() -> {

@@ -18,14 +18,14 @@ package com.exonum.binding.qaservice;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.blockchain.Block;
+import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
@@ -52,7 +52,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
