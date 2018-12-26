@@ -28,7 +28,7 @@ and its payload — the serialized transaction parameters (equivalent to `Messag
 
 Also, consider removing the public key of the transaction author from its _payload_ because
 it is now included in a standard field of the message, and is accessible in `Transaction#execute`
-from the passed context: `TransactionContext#getFooKey`.
+from the passed context: `TransactionContext#getAuthorPk`.
 
 ### Update `Transaction`s
 The following methods are **removed** from `Transaction` interface:
