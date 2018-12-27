@@ -18,6 +18,8 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -86,9 +88,9 @@ public final class NodeFake implements Node {
    * @throws NullPointerException if the transaction is null
    */
   @Override
-  public byte[] submitTransaction(RawTransaction transaction) {
+  public HashCode submitTransaction(RawTransaction transaction) {
     checkNotNull(transaction);
-    return new byte[0];
+    return null;
   }
 
   @Override

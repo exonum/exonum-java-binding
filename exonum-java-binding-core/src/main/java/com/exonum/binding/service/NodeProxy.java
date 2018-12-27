@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -49,13 +50,14 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public byte[] submitTransaction(RawTransaction rawTransaction)
+  public HashCode submitTransaction(RawTransaction rawTransaction)
       throws InternalServerError {
     byte[] payload = rawTransaction.getPayload();
     short serviceId = rawTransaction.getServiceId();
     short transactionId = rawTransaction.getTransactionId();
+    byte[] txMessageHash = nativeSubmit(getNativeHandle(), payload, serviceId, transactionId);
 
-    return nativeSubmit(getNativeHandle(), payload, serviceId, transactionId);
+    return HashCode.fromBytes(txMessageHash);
   }
 
   /**

@@ -243,8 +243,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   private HashCode submitTransaction(RawTransaction rawTransaction) {
     checkBlockchainInitialized();
     try {
-      byte[] txMessageHash = node.submitTransaction(rawTransaction);
-      return HashCode.fromBytes(txMessageHash);
+      return node.submitTransaction(rawTransaction);
     } catch (InternalServerError e) {
       throw new RuntimeException("Propagated transaction submission exception", e);
     }

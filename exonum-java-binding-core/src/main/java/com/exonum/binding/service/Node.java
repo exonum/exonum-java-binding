@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.RawTransaction;
 import java.util.function.Function;
@@ -42,7 +43,7 @@ public interface Node {
    * @throws InternalServerError if this node failed to process the transaction
    * @throws NullPointerException if the transaction is null
    */
-  byte[] submitTransaction(RawTransaction rawTransaction)
+  HashCode submitTransaction(RawTransaction rawTransaction)
       throws InternalServerError;
 
   /**
