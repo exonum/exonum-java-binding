@@ -9,7 +9,7 @@
     "url": "https://github.com/exonum/exonum-java-binding"
   },
   "scripts": {
-    "proto": "pbjs --keep-case -t static-module ./src/proto/helpers.proto ../src/main/proto/transactions.proto ../src/main/proto/wallet.proto -o ./src/proto/proto.js",
+    "proto": "pbjs --keep-case -t static-module ../src/main/proto/transactions.proto ../src/main/proto/wallet.proto -o ./src/proto/proto.js",
     "lint": "eslint --ext .js,.vue src test",
     "compile": "webpack",
     "test": "jest",
