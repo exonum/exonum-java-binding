@@ -20,14 +20,13 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
-import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
+import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -163,8 +162,8 @@ class QaServiceImplIntegrationTest {
   @Test
   void submitCreateCounter() throws Exception {
     setServiceNode(node);
-    HashCode hash = mock(HashCode.class);
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(hash);
+    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
 
     String counterName = "bids";
     HashCode txHash = service.submitCreateCounter(counterName);
@@ -172,15 +171,15 @@ class QaServiceImplIntegrationTest {
     CreateCounterTx expectedTx = new CreateCounterTx(counterName);
     RawTransaction expectedRawTx = CreateCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isNotNull();
+    assertThat(txHash).isEqualTo(expectedTxMessageHash);
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitIncrementCounter() throws Exception {
     setServiceNode(node);
-    HashCode hash = mock(HashCode.class);
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(hash);
+    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
 
     long seed = 1L;
     HashCode counterId = sha256()
@@ -190,15 +189,15 @@ class QaServiceImplIntegrationTest {
     IncrementCounterTx expectedTx = new IncrementCounterTx(seed, counterId);
     RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(txHash);
+    assertThat(txHash).isEqualTo(expectedTxMessageHash);
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitValidThrowingTx() throws Exception {
     setServiceNode(node);
-    HashCode hash = mock(HashCode.class);
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(hash);
+    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
 
     long seed = 1L;
     HashCode txHash = service.submitValidThrowingTx(seed);
@@ -206,18 +205,19 @@ class QaServiceImplIntegrationTest {
     ThrowingTx expectedTx = new ThrowingTx(seed);
     RawTransaction expectedRawTx = ThrowingTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isNotNull();
+    assertThat(txHash).isEqualTo(expectedTxMessageHash);
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitUnknownTx() throws Exception {
     setServiceNode(node);
-    HashCode hash = mock(HashCode.class);
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(hash);
+    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
 
     HashCode txHash = service.submitUnknownTx();
 
-    assertThat(txHash).isNotNull();
+    assertThat(txHash).isEqualTo(expectedTxMessageHash);
   }
 
   @Test
@@ -240,10 +240,9 @@ class QaServiceImplIntegrationTest {
         Fork view = db.createFork(cleaner);
 
         // Execute the transaction
-        TransactionContext context = spy(newContext(view).create());
+        TransactionContext context = newContext(view);
         new CreateCounterTx(counterName)
             .execute(context);
-        verify(context).getFork();
 
         db.merge(view);
       }
@@ -321,8 +320,8 @@ class QaServiceImplIntegrationTest {
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       setServiceNode(node);
-      HashCode hash = mock(HashCode.class);
-      when(node.submitTransaction(any(RawTransaction.class))).thenReturn(hash);
+      HashCode txMessageHash = HashCode.fromString("a0a0a0a0");
+      when(node.submitTransaction(any(RawTransaction.class))).thenReturn(txMessageHash);
       service.initialize(fork);
 
       Snapshot snapshot = db.createSnapshot(cleaner);

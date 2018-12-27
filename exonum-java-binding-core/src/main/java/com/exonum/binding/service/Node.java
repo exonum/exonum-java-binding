@@ -29,14 +29,15 @@ import java.util.function.Function;
 public interface Node {
 
   /**
-   * Creates a transaction from the given parameters and sign it with its service key.
-   * And then submits it into Exonum network. This node does <em>not</em> execute
+   * Creates a transaction from the given parameters, sign it with the node service key,
+   * and then submits it into Exonum network. This node does <em>not</em> execute
    * the transaction immediately, broadcasts it to all the nodes in the network.
    * Then each node adds the transaction to a
    * <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
-   * <em>Be aware that invocations of this method on different nodes
-   * will produce different transactions.</em>
+   * <br/>
+   * <em>Be aware that that each node has its own service key pair, therefore
+   * invocations of this method on different nodes will produce different transactions.</em>
    *
    * @param rawTransaction transaction parameters to include in transaction message
    * @return hash of the transaction message created by the framework

@@ -17,8 +17,8 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
-import static com.exonum.binding.qaservice.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -89,7 +89,7 @@ class ThrowingTxIntegrationTest {
       ThrowingTx tx = new ThrowingTx(0L);
 
       // Execute the transaction
-      TransactionContext context = newContext(view).create();
+      TransactionContext context = newContext(view);
       IllegalStateException expected = assertThrows(IllegalStateException.class,
           () -> tx.execute(context));
 

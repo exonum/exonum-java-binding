@@ -15,42 +15,29 @@
  *
  */
 
-package com.exonum.binding.fakes.services.transactions;
+package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.transaction.TransactionContext.Builder;
 
-public final class TestContextBuilder {
+/**
+ * Helper class to provide preconfigured context with default values.
+ */
+final class ContextUtils {
   private static final HashCode DEFAULT_HASH = HashCode.fromString("a0b0c0d0");
   private static final PublicKey DEFAULT_AUTHOR_KEY = PublicKey.fromHexString("abcd");
 
-  private final TransactionContext.Builder builder;
-
-  private TestContextBuilder(Fork view) {
-    this.builder = TransactionContext.builder()
+  /**
+   * Returns new context builder with default values for a given view.
+   */
+  static Builder newContextBuilder(Fork view) {
+    return TransactionContext.builder()
         .fork(view)
         .txMessageHash(DEFAULT_HASH)
         .authorPk(DEFAULT_AUTHOR_KEY);
-  }
-
-  public static TestContextBuilder newContext(Fork view) {
-    return new TestContextBuilder(view);
-  }
-
-  public TransactionContext create() {
-    return builder.build();
-  }
-
-  public TestContextBuilder withTxMessageHash(HashCode hash) {
-    builder.txMessageHash(hash);
-    return this;
-  }
-
-  public TestContextBuilder withAuthorKey(PublicKey key) {
-    builder.authorPk(key);
-    return this;
   }
 
 }

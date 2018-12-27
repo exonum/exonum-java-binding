@@ -20,7 +20,6 @@ import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A transaction that has QA service identifier, but an unknown transaction id.
@@ -46,13 +45,10 @@ public final class UnknownTx implements Transaction {
    * Returns raw transaction.
    */
   public static RawTransaction createRawTransaction() {
-    byte[] seed = new byte[1];
-    ThreadLocalRandom.current().nextBytes(seed);
-
     return RawTransaction.newBuilder()
         .serviceId(QaService.ID)
         .transactionId(ID)
-        .payload(seed)
+        .payload(new byte[0])
         .build();
   }
 

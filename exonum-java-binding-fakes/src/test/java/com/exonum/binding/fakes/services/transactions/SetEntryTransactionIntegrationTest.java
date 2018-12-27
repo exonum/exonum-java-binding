@@ -16,13 +16,11 @@
 
 package com.exonum.binding.fakes.services.transactions;
 
+import static com.exonum.binding.fakes.services.transactions.ContextUtils.newContext;
 import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.ENTRY_NAME;
-import static com.exonum.binding.fakes.services.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
@@ -55,12 +53,8 @@ class SetEntryTransactionIntegrationTest {
       SetEntryTransaction tx = new SetEntryTransaction(value, "");
 
       // Execute the transaction
-      TransactionContext context = spy(newContext(fork).create());
+      TransactionContext context = newContext(fork);
       tx.execute(context);
-
-      verify(context).getFork();
-      verify(context).getTransactionMessageHash();
-      verify(context).getAuthorPk();
 
       database.merge(fork);
 

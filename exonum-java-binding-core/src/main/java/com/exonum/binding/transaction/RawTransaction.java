@@ -1,5 +1,6 @@
 package com.exonum.binding.transaction;
 
+import com.exonum.binding.service.Service;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -11,11 +12,13 @@ public abstract class RawTransaction {
 
   /**
    * Returns a service identifier which the transaction belongs to.
+   * @see Service#getId()
    */
   public abstract short getServiceId();
 
   /**
    * Returns the type of this transaction within a service.
+   * @see com.exonum.binding.common.message.TransactionMessage#getTransactionId
    */
   public abstract short getTransactionId();
 
@@ -35,20 +38,23 @@ public abstract class RawTransaction {
   public abstract static class Builder {
 
     /**
-     * Sets service identifier to the transaction.
+     * Sets identifier of the service this transaction belongs to.
      */
     public abstract Builder serviceId(short serviceId);
 
     /**
-     * Sets transaction identifier to the transaction.
+     * Sets the identifier of the transaction within a service.
      */
     public abstract Builder transactionId(short transactionId);
 
     /**
-     * Sets payload to the transaction.
+     * Sets the payload of the transaction.
      */
     public abstract Builder payload(byte[] payload);
 
+    /**
+     * Creates the RawTransaction instance with specified parameters.
+     */
     public abstract RawTransaction build();
   }
 

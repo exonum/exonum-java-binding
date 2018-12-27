@@ -488,13 +488,4 @@ class ApiControllerIntegrationTest {
         }));
   }
 
-  private Handler<AsyncResult<HttpResponse<Buffer>>> checkInvalidTransaction(
-      VertxTestContext context) {
-    return context.succeeding(
-        response -> context.verify(() -> {
-          assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
-          context.completeNow();
-        })
-    );
-  }
 }

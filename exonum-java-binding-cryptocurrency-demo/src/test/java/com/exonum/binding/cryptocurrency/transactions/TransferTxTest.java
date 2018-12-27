@@ -17,9 +17,9 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
-import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
@@ -113,10 +113,10 @@ class TransferTxTest {
       long transferSum = 40L;
       HashCode hash = HashCode.fromString("a0a0a0a0");
       TransferTx tx = new TransferTx(seed, TO_KEY, transferSum);
-      TransactionContext context = newContext(view)
-          .withTxMessageHash(hash)
-          .withAuthorKey(FROM_KEY)
-          .create();
+      TransactionContext context = newContextBuilder(view)
+          .txMessageHash(hash)
+          .authorPk(FROM_KEY)
+          .build();
       tx.execute(context);
 
       // Check that wallets have correct balances
@@ -154,9 +154,9 @@ class TransferTxTest {
       long seed = 1L;
       long transferValue = 50L;
       TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
-      TransactionContext context = newContext(view)
-          .withAuthorKey(FROM_KEY)
-          .create();
+      TransactionContext context = newContextBuilder(view)
+          .authorPk(FROM_KEY)
+          .build();
 
       // Execute the transaction that attempts to transfer from an unknown wallet
       TransactionExecutionException e = assertThrows(
@@ -180,9 +180,9 @@ class TransferTxTest {
       long transferValue = 50L;
       long seed = 1L;
       TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
-      TransactionContext context = newContext(view)
-          .withAuthorKey(FROM_KEY)
-          .create();
+      TransactionContext context = newContextBuilder(view)
+          .authorPk(FROM_KEY)
+          .build();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
@@ -200,9 +200,9 @@ class TransferTxTest {
       long seed = 1;
       long amount = 50L;
       TransferTx tx = new TransferTx(seed, FROM_KEY, amount);
-      TransactionContext context = newContext(view)
-          .withAuthorKey(FROM_KEY)
-          .create();
+      TransactionContext context = newContextBuilder(view)
+          .authorPk(FROM_KEY)
+          .build();
 
       Exception e = assertThrows(IllegalStateException.class,
           () -> tx.execute(context));
@@ -230,9 +230,9 @@ class TransferTxTest {
       long seed = 1L;
       long transferValue = initialBalance + 50L;
       TransferTx tx = new TransferTx(seed, TO_KEY, transferValue);
-      TransactionContext context = newContext(view)
-          .withAuthorKey(FROM_KEY)
-          .create();
+      TransactionContext context = newContextBuilder(view)
+          .authorPk(FROM_KEY)
+          .build();
 
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));

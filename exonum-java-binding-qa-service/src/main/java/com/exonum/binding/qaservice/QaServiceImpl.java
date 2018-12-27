@@ -221,9 +221,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
     MapIndex<HashCode, String> names = schema.counterNames();
 
     HashCode counterId = defaultHashFunction().hashString(name, UTF_8);
-    if (counters.containsKey(counterId)) {
-      return;
-    }
+    checkState(!counters.containsKey(counterId), "Counter %s already exists", name);
+
     counters.put(counterId, 0L);
     names.put(counterId, name);
   }

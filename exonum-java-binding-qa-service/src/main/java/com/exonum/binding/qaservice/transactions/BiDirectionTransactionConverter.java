@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.qaservice.PromoteToCore;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 
@@ -27,10 +26,6 @@ import com.exonum.binding.transaction.Transaction;
  *     {@link BiDirectionTransactionConverter} that works with any transactions of this service
  *     or a converter for each transaction type.
  */
-@PromoteToCore("… with first-class support of transactions that don’t need a message to operate."
-    + "Consider splitting into two functional interfaces, so that some APIs may use "
-    + "method references."
-)
 public interface BiDirectionTransactionConverter<TransactionT extends Transaction> {
 
   /**

@@ -17,8 +17,8 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
-import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -50,7 +50,6 @@ class TransferTxHistoryTest {
 
   private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
   private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
-  private static final HashCode MESSAGE_HASH = HashCode.fromString("a0a0a0a0");
 
   @Test
   @RequiresNativeLibrary
@@ -67,21 +66,23 @@ class TransferTxHistoryTest {
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
+      HashCode txMessageHash1 = HashCode.fromString("a0a0a0a0");
       TransferTx tx1 = new TransferTx(seed1, ACCOUNT_2, transferSum1);
-      TransactionContext context1 = newContext(view)
-          .withTxMessageHash(MESSAGE_HASH)
-          .withAuthorKey(ACCOUNT_1)
-          .create();
+      TransactionContext context1 = newContextBuilder(view)
+          .txMessageHash(txMessageHash1)
+          .authorPk(ACCOUNT_1)
+          .build();
       tx1.execute(context1);
 
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
+      HashCode txMessageHash2 = HashCode.fromString("b1b1b1b1");
       TransferTx tx2 = new TransferTx(seed2, ACCOUNT_1, transferSum2);
-      TransactionContext context2 = newContext(view)
-          .withTxMessageHash(MESSAGE_HASH)
-          .withAuthorKey(ACCOUNT_2)
-          .create();
+      TransactionContext context2 = newContextBuilder(view)
+          .txMessageHash(txMessageHash2)
+          .authorPk(ACCOUNT_2)
+          .build();
       tx2.execute(context2);
 
       // Check that wallets have correct balances

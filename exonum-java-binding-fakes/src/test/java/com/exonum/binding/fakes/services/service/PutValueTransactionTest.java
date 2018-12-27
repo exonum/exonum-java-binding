@@ -18,11 +18,10 @@ package com.exonum.binding.fakes.services.service;
 
 import static com.exonum.binding.fakes.services.service.PutValueTransaction.BODY_CHARSET;
 import static com.exonum.binding.fakes.services.service.TestSchemaFactories.createTestSchemaFactory;
-import static com.exonum.binding.fakes.services.transactions.TestContextBuilder.newContext;
+import static com.exonum.binding.fakes.services.transactions.ContextUtils.newContext;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,9 +82,8 @@ class PutValueTransactionTest {
         createTestSchemaFactory(fork, schema));
 
     // Execute the transaction
-    TransactionContext context = spy(newContext(fork).create());
+    TransactionContext context = newContext(fork);
     tx.execute(context);
-    verify(context).getFork();
 
     verify(testMap).put(eq(hash), eq(value));
   }

@@ -17,16 +17,14 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TestContextBuilder.newContext;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
@@ -84,12 +82,10 @@ class CreateWalletTxTest {
       Fork view = db.createFork(cleaner);
 
       // Execute the transaction
-      TransactionContext context = spy(newContext(view)
-          .withAuthorKey(OWNER_KEY)
-          .create());
+      TransactionContext context = newContextBuilder(view)
+          .authorPk(OWNER_KEY)
+          .build();
       tx.execute(context);
-      verify(context).getFork();
-      verify(context).getAuthorPk();
 
       // Check that entries have been added.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -120,9 +116,9 @@ class CreateWalletTxTest {
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
       CreateWalletTx tx = new CreateWalletTx(newBalance);
-      TransactionContext context = newContext(view)
-          .withAuthorKey(OWNER_KEY)
-          .create();
+      TransactionContext context = newContextBuilder(view)
+          .authorPk(OWNER_KEY)
+          .build();
       TransactionExecutionException e = assertThrows(
           TransactionExecutionException.class, () -> tx.execute(context));
 
