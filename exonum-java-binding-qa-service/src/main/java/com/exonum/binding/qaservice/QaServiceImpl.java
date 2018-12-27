@@ -199,7 +199,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   public List<HashCode> getAllBlockHashes() {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
-      ListIndex<HashCode> hashes = blockchain.getAllBlockHashes();
+      ListIndex<HashCode> hashes = blockchain.getBlockHashes();
 
       return Lists.newArrayList(hashes);
     });

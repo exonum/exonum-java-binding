@@ -31,6 +31,8 @@ import com.google.auto.value.AutoValue;
  *
  * <p>This structure only contains the amount of transactions and the transactions root hash as well
  * as other information, but not the transactions themselves.
+ *
+ * @see Blockchain
  */
 @AutoValue
 public abstract class Block {
@@ -46,8 +48,12 @@ public abstract class Block {
   public abstract int getProposerId();
 
   /**
-   * Height of the block, which also identifies the number of this particular block in the
-   * blockchain starting from 0 ("genesis" block).
+   * Returns the height of this block which is a distance between the last block and the "genesis"
+   * block. Genesis block has 0 height. Therefore, the blockchain height is equal to
+   * the number of blocks plus one.
+   *
+   * <p>The height also identifies each block in the blockchain.
+   *
    */
   public abstract long getHeight();
 
