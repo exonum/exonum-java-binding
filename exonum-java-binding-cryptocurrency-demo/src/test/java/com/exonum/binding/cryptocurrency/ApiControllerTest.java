@@ -154,7 +154,7 @@ class ApiControllerTest {
             .setWalletFrom(FROM_KEY)
             .setWalletTo(TO_KEY)
             .setAmount(10L)
-            .setTransactionHash(HashCode.fromString("a0a0a0"))
+            .setTxMessageHash(HashCode.fromString("a0a0a0"))
             .build()
     );
     when(service.getWalletHistory(FROM_KEY)).thenReturn(history);

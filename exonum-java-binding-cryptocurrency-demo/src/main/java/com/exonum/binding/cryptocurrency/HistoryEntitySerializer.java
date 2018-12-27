@@ -38,7 +38,7 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
         .setWalletFrom(keyToByte(value.getWalletFrom()))
         .setWalletTo(keyToByte(value.getWalletTo()))
         .setSum(value.getAmount())
-        .setHash(copyFrom(value.getTransactionHash().asBytes()))
+        .setHash(copyFrom(value.getTxMessageHash().asBytes()))
         .build();
 
     return entity.toByteArray();
@@ -53,7 +53,7 @@ public enum HistoryEntitySerializer implements Serializer<HistoryEntity> {
         .setWalletFrom(bytesToKey(entity.getWalletFrom()))
         .setWalletTo(bytesToKey(entity.getWalletTo()))
         .setAmount(entity.getSum())
-        .setTransactionHash(HashCode.fromBytes(entity.getHash().toByteArray()))
+        .setTxMessageHash(HashCode.fromBytes(entity.getHash().toByteArray()))
         .build();
   }
 

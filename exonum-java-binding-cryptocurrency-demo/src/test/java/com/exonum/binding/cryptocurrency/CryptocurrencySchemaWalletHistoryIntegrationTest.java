@@ -47,7 +47,7 @@ class CryptocurrencySchemaWalletHistoryIntegrationTest {
           .setWalletFrom(keyPair.getPublicKey())
           .setWalletTo(keyPair.getPublicKey())
           .setAmount(10L)
-          .setTransactionHash(HashCode.fromString("a0a0a0"))
+          .setTxMessageHash(HashCode.fromString("a0a0a0"))
           .build();
 
   @Test

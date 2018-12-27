@@ -24,8 +24,8 @@
                 {{ item.walletFrom === keyPair.publicKey ? '-' : '+' }}{{ item.amount }}$
               </td>
               <td>
-                <router-link :to="{ name: 'transaction', params: { hash: item.transactionHash } }">
-                  {{ item.transactionHash | slice }}
+                <router-link :to="{ name: 'transaction', params: { hash: item.txMessageHash } }">
+                  {{ item.txMessageHash | slice }}
                 </router-link>
               </td>
             </tr>

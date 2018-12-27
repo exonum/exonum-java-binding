@@ -133,7 +133,7 @@ class TransferTxTest {
           .setWalletFrom(FROM_KEY)
           .setWalletTo(TO_KEY)
           .setAmount(transferSum)
-          .setTransactionHash(context.getTransactionMessageHash())
+          .setTxMessageHash(context.getTransactionMessageHash())
           .build();
       assertThat(schema.walletHistory(FROM_KEY), hasItem(expectedEntity));
       assertThat(schema.walletHistory(TO_KEY), hasItem(expectedEntity));

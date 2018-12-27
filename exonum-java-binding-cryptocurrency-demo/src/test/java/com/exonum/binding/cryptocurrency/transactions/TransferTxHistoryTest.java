@@ -98,14 +98,14 @@ class TransferTxHistoryTest {
           .setWalletFrom(ACCOUNT_1)
           .setWalletTo(ACCOUNT_2)
           .setAmount(transferSum1)
-          .setTransactionHash(context1.getTransactionMessageHash())
+          .setTxMessageHash(context1.getTransactionMessageHash())
           .build();
       HistoryEntity expectedEntity2 = HistoryEntity.Builder.newBuilder()
           .setSeed(seed2)
           .setWalletFrom(ACCOUNT_2)
           .setWalletTo(ACCOUNT_1)
           .setAmount(transferSum2)
-          .setTransactionHash(context2.getTransactionMessageHash())
+          .setTxMessageHash(context2.getTransactionMessageHash())
           .build();
       assertThat(schema.walletHistory(ACCOUNT_1),
           allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));

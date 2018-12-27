@@ -102,7 +102,7 @@ public final class TransferTx implements Transaction {
         .setWalletFrom(fromWallet)
         .setWalletTo(toWallet)
         .setAmount(sum)
-        .setTransactionHash(context.getTransactionMessageHash())
+        .setTxMessageHash(context.getTransactionMessageHash())
         .build();
     schema.walletHistory(fromWallet).add(historyEntity);
     schema.walletHistory(toWallet).add(historyEntity);
