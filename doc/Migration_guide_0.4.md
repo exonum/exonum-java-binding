@@ -41,8 +41,8 @@ The following methods are **removed** from `Transaction` interface:
   If your transaction code needs a whole message of this or _any_ other transaction,
   use `com.exonum.binding.blockchain.Blockchain.getTxMessages`.
   - `hash`. You can access the SHA-256 hash of this transaction message in `Transaction#execute`
-  from the passed context: `TransactionContext#getFooHash`. As a reminder, it uniquely identifies
-  the message in the system.
+  from the passed context: `TransactionContext#getTransactionMessageHash`. As a reminder,
+  it uniquely identifies the message in the system.
   
 That leaves `Transaction` interface with two methods: `execute` and `info`.
 The argument of `execute` changed too — it now accepts a `TransactionContext` that allows
