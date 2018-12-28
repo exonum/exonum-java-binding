@@ -16,8 +16,8 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
@@ -669,10 +669,10 @@ class ApiControllerIntegrationTest {
   void getBlock(VertxTestContext context) {
     Block block = createBlock(1L);
 
-    HashCode blockId = block.getBlockHash();
-    when(qaService.getBlock(blockId)).thenReturn(Optional.of(block));
+    long blockHeight = block.getHeight();
+    when(qaService.getBlock(blockHeight)).thenReturn(block);
 
-    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_ID_PARAM, blockId.toString()))
+    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_ID_PARAM, Long.toString(blockHeight)))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -689,9 +689,9 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getNonexistentBlock(VertxTestContext context) {
-    HashCode blockId = HashCode.fromString(HASH_STRING);
+    long blockHeight = 1L;
 
-    when(qaService.getBlock(blockId)).thenReturn(Optional.empty());
+    when(qaService.getBlock(blockHeight)).thenThrow(new IllegalArgumentException());
 
     get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_ID_PARAM, HASH_STRING))
         .send(context.succeeding(response -> context.verify(() -> {

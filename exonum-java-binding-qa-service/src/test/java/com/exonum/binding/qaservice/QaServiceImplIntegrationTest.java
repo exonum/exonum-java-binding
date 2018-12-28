@@ -420,9 +420,9 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void getBlock() {
     withNodeFake(() -> {
-      HashCode blockId = HashCode.fromString("ab");
-      Optional<Block> block = service.getBlock(blockId);
-      assertThat(block).isEmpty();
+      long blockHeight = 0L;
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlock(blockHeight));
+      assertThat(t.getMessage()).contains(NO_GENESIS_BLOCK_ERROR_MESSAGE);
     });
   }
 

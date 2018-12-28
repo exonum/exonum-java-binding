@@ -17,8 +17,8 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
@@ -205,10 +205,10 @@ final class ApiController {
   }
 
   private void getBlock(RoutingContext rc) {
-    HashCode blockId = getRequiredParameter(rc.request().params(), BLOCK_ID_PARAM,
-        HashCode::fromString);
+    Long blockHeight = getRequiredParameter(rc.request().params(), BLOCK_HEIGHT_PARAM,
+        Long::parseLong);
 
-    Optional<Block> block = service.getBlock(blockId);
+    Block block = service.getBlock(blockHeight);
     respondWithJson(rc, block);
   }
 
@@ -422,8 +422,8 @@ final class ApiController {
     static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
         + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
     @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT + "/block/:"
-        + BLOCK_ID_PARAM + "/transactionsByBlockId";
+    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT +
+        "/block/:" + BLOCK_ID_PARAM + "/transactionsByBlockId";
     @VisibleForTesting
     static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
     @VisibleForTesting

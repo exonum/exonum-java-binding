@@ -297,10 +297,10 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public Optional<Block> getBlock(HashCode blockHash) {
+  public Block getBlock(long height) {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
-      return blockchain.getBlock(blockHash);
+      return blockchain.getBlock(height);
     });
   }
 
