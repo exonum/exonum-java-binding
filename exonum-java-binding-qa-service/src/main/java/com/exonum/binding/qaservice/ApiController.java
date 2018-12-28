@@ -355,9 +355,10 @@ final class ApiController {
    * or {@code Optional.empty()} otherwise.
    */
   private Optional<String> badRequestDescription(Throwable requestFailure) {
-    // All IllegalArgumentExceptions (including NumberFormatException) are considered
-    // to be caused by a bad request.
-    if (requestFailure instanceof IllegalArgumentException) {
+    // All IllegalArgumentExceptions (including NumberFormatException) and IndexOutOfBoundsException
+    // are considered to be caused by a bad request.
+    if (requestFailure instanceof IllegalArgumentException
+        || requestFailure instanceof IndexOutOfBoundsException) {
       String message = Strings.nullToEmpty(requestFailure.getLocalizedMessage());
       return Optional.of(message);
     }
@@ -411,16 +412,16 @@ final class ApiController {
     @VisibleForTesting
     static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
     @VisibleForTesting
-    static final String BLOCK_ID_PARAM = "blockId";
+    static final String BLOCK_HEIGHT_PARAM = "blockHeight";
     @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/:" + BLOCK_ID_PARAM;
+    static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/:" + BLOCK_HEIGHT_PARAM;
     @VisibleForTesting
     static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
     @VisibleForTesting
-    static final String BLOCK_HEIGHT_PARAM = "blockHeight";
-    @VisibleForTesting
     static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
         + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
+    @VisibleForTesting
+    static final String BLOCK_ID_PARAM = "blockId";
     @VisibleForTesting
     static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT
         + "/block/:" + BLOCK_ID_PARAM + "/transactionsByBlockId";
