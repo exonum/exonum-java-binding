@@ -19,6 +19,16 @@ package com.exonum.binding.blockchain.serialization;
 import com.google.gson.TypeAdapterFactory;
 import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
 
+/**
+ * Class used to automatically create Gson type adapters for AutoValue classes.
+ * Note that you need to provide static factory method in your AutoValue class.
+ *
+ * <pre><code>
+ *   public static TypeAdapter&lt;TransactionResult&gt; typeAdapter(Gson gson) {
+ *     return new AutoValue_TransactionResult.GsonTypeAdapter(gson);
+ *   }
+ * </code></pre>
+ */
 @GsonTypeAdapterFactory
 public abstract class TransactionResultAdapterFactory implements TypeAdapterFactory {
 

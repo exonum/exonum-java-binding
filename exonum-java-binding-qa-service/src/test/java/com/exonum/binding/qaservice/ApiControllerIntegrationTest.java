@@ -16,22 +16,29 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCKS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_LAST_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_MESSAGES_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCK_HEIGHT_PARAM;
-import static com.exonum.binding.qaservice.ApiController.BLOCK_ID_PARAM;
-import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_LAST_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_MESSAGES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_HEIGHT_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_THROWING_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -168,13 +175,13 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(eq(counterName)))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
   @Test
   void submitCreateCounter_NoParameter(VertxTestContext context) {
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(MultiMap.caseInsensitiveMultiMap(), context.succeeding(response -> {
           context.verify(() -> {
             assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
@@ -196,7 +203,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(counterName))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, context.succeeding(response -> {
           context.verify(() -> {
             assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
@@ -218,7 +225,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(counterName))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
           context.completeNow();
@@ -234,7 +241,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(counterName))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, context.succeeding(response -> {
           context.verify(() -> {
             assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
@@ -253,7 +260,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitIncrementCounter(eq(seed), eq(counterId)))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_INCREMENT_COUNTER_TX_PATH)
+    post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -262,7 +269,7 @@ class ApiControllerIntegrationTest {
     Throwable error = wrappingChecked(InvalidTransactionException.class);
     when(qaService.submitInvalidTx()).thenThrow(error);
 
-    post(ApiController.SUBMIT_INVALID_TX_PATH)
+    post(SUBMIT_INVALID_TX_PATH)
         .send(checkInvalidTransaction(context));
   }
 
@@ -271,7 +278,7 @@ class ApiControllerIntegrationTest {
     Throwable error = wrappingChecked(InvalidTransactionException.class);
     when(qaService.submitInvalidThrowingTx()).thenThrow(error);
 
-    post(ApiController.SUBMIT_INVALID_THROWING_TX_PATH)
+    post(SUBMIT_INVALID_THROWING_TX_PATH)
         .send(checkInvalidTransaction(context));
   }
 
@@ -284,7 +291,7 @@ class ApiControllerIntegrationTest {
 
     MultiMap form = multiMap("seed", Long.toString(seed));
 
-    post(ApiController.SUBMIT_VALID_THROWING_TX_PATH)
+    post(SUBMIT_VALID_THROWING_TX_PATH)
         .sendForm(form, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -300,7 +307,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), eq(description)))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+    post(SUBMIT_VALID_ERROR_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -314,7 +321,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), isNull()))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+    post(SUBMIT_VALID_ERROR_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -323,7 +330,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitUnknownTx())
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_UNKNOWN_TX_PATH)
+    post(SUBMIT_UNKNOWN_TX_PATH)
         .send(checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 

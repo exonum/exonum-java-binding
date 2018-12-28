@@ -17,11 +17,37 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_LAST_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_MESSAGES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_HEIGHT_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_THROWING_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
@@ -33,6 +59,7 @@ import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
@@ -43,68 +70,13 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 final class ApiController {
-
-  @VisibleForTesting
-  static final String SUBMIT_CREATE_COUNTER_TX_PATH = "/submit-create-counter";
-  @VisibleForTesting
-  static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
-  @VisibleForTesting
-  static final String SUBMIT_INVALID_TX_PATH = "/submit-invalid";
-  @VisibleForTesting
-  static final String SUBMIT_INVALID_THROWING_TX_PATH = "/submit-invalid-throwing";
-  @VisibleForTesting
-  static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
-  @VisibleForTesting
-  static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
-  @VisibleForTesting
-  static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
-  @VisibleForTesting
-  static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
-  private static final String COUNTER_ID_PARAM = "counterId";
-  private static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
-
-  private static final String BLOCKCHAIN_ROOT = "/blockchain";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_ALL_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
-  @VisibleForTesting
-  static final String BLOCK_ID_PARAM = "blockId";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/:" + BLOCK_ID_PARAM;
-  @VisibleForTesting
-  static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
-  @VisibleForTesting
-  static final String BLOCK_HEIGHT_PARAM = "blockHeight";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
-      + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT + "/block/:"
-      + BLOCK_ID_PARAM + "/transactionsByBlockId";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_TRANSACTION_RESULTS_PATH = BLOCKCHAIN_ROOT + "/txResults";
-  @VisibleForTesting
-  static final String MESSAGE_HASH_PARAM = "messageHash";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_TRANSACTION_RESULT_PATH = BLOCKCHAIN_ROOT + "/txResult/:"
-      + MESSAGE_HASH_PARAM;
-  @VisibleForTesting
-  static final String BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH = BLOCKCHAIN_ROOT + "/txLocations";
-  @VisibleForTesting
-  static final String BLOCKCHAIN_TRANSACTION_LOCATION_PATH = BLOCKCHAIN_ROOT + "/txLocation/:"
-      + MESSAGE_HASH_PARAM;
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
@@ -406,13 +378,68 @@ final class ApiController {
   @VisibleForTesting
   static Map<HashCode, String> hexEncodeTransactionMessages(
       Map<HashCode, TransactionMessage> txMessages) {
-    return txMessages.entrySet()
-        .stream()
-        .collect(Collectors.toMap(Map.Entry::getKey,
-            tx -> hexEncodeTransactionMessage(tx.getValue())));
+    return Maps.transformValues(txMessages, ApiController::hexEncodeTransactionMessage);
   }
 
   private static String hexEncodeTransactionMessage(TransactionMessage transactionMessage) {
     return HEX_ENCODING.encode(transactionMessage.toBytes());
   }
+
+  static class QaPaths {
+    @VisibleForTesting
+    static final String SUBMIT_CREATE_COUNTER_TX_PATH = "/submit-create-counter";
+    @VisibleForTesting
+    static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
+    @VisibleForTesting
+    static final String SUBMIT_INVALID_TX_PATH = "/submit-invalid";
+    @VisibleForTesting
+    static final String SUBMIT_INVALID_THROWING_TX_PATH = "/submit-invalid-throwing";
+    @VisibleForTesting
+    static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
+    @VisibleForTesting
+    static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
+    @VisibleForTesting
+    static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
+    @VisibleForTesting
+    static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
+    static final String COUNTER_ID_PARAM = "counterId";
+    static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
+
+    private static final String BLOCKCHAIN_ROOT = "/blockchain";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_ALL_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
+    @VisibleForTesting
+    static final String BLOCK_ID_PARAM = "blockId";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/:" + BLOCK_ID_PARAM;
+    @VisibleForTesting
+    static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
+    @VisibleForTesting
+    static final String BLOCK_HEIGHT_PARAM = "blockHeight";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
+        + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT + "/block/:"
+        + BLOCK_ID_PARAM + "/transactionsByBlockId";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_TRANSACTION_RESULTS_PATH = BLOCKCHAIN_ROOT + "/txResults";
+    @VisibleForTesting
+    static final String MESSAGE_HASH_PARAM = "messageHash";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_TRANSACTION_RESULT_PATH = BLOCKCHAIN_ROOT + "/txResult/:"
+        + MESSAGE_HASH_PARAM;
+    @VisibleForTesting
+    static final String BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH = BLOCKCHAIN_ROOT + "/txLocations";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_TRANSACTION_LOCATION_PATH = BLOCKCHAIN_ROOT + "/txLocation/:"
+        + MESSAGE_HASH_PARAM;
+  }
+
 }
