@@ -422,8 +422,8 @@ final class ApiController {
     static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
         + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
     @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT +
-        "/block/:" + BLOCK_ID_PARAM + "/transactionsByBlockId";
+    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT
+        + "/block/:" + BLOCK_ID_PARAM + "/transactionsByBlockId";
     @VisibleForTesting
     static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
     @VisibleForTesting
