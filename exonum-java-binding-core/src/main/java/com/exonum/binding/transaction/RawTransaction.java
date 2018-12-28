@@ -1,11 +1,20 @@
 package com.exonum.binding.transaction;
 
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
+import com.exonum.binding.service.TransactionConverter;
 import com.google.auto.value.AutoValue;
 
 /**
  * An Exonum raw transaction. It is mainly used for interaction with the Exonum core
  * as well as for transferring transactions between nodes within the network.
+ * The raw transaction is separated from the
+ * {@linkplain TransactionMessage} and consists only
+ * the data related to the transaction i.e.
+ * it <em>doesn't contain</em> neither signature and transaction creator public key.
+ * <br/>
+ * The raw transaction can be converted to executable {@linkplain Transaction} using
+ * an implementation of the {@linkplain TransactionConverter}.
  */
 @AutoValue
 public abstract class RawTransaction {
@@ -17,8 +26,8 @@ public abstract class RawTransaction {
   public abstract short getServiceId();
 
   /**
-   * Returns the type of this transaction within a service.
-   * @see com.exonum.binding.common.message.TransactionMessage#getTransactionId
+   * Returns the type of this transaction within a service. Unique within the service.
+   * @see TransactionMessage#getTransactionId
    */
   public abstract short getTransactionId();
 
