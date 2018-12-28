@@ -18,7 +18,6 @@
 package com.exonum.binding.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
@@ -36,6 +35,8 @@ import java.util.Optional;
  * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
  * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
  * results.
+ *
+ * <p>All method arguments are non-null by default.
  */
 public final class Blockchain {
 
@@ -55,11 +56,26 @@ public final class Blockchain {
   }
 
   /**
-   * Returns the height of the latest committed block in the blockchain.
-   * The height can be considered as a count of blocks in the blockchain,
-   * where the first block has height {@code h = 0}. For example,
-   * the "genesis block" (first, initial block in the blockchain) has height {@code h = 0}.
-   * The latest committed block has height {@code h = getAllBlockHashes().size() - 1}.
+   * Returns true if the blockchain contains <em>exactly</em> the same block as the passed
+   * value; false if it does not contain such block. Please note that all block fields
+   * are compared, not only its hash.
+   *
+   * @param block a value to check for presence in the blockchain
+   */
+  public boolean containsBlock(Block block) {
+    return findBlock(block.getBlockHash())
+        .map(block::equals)
+        .orElse(false);
+  }
+
+  /**
+   * Returns the <em>blockchain height</em> which is the height of the latest committed block
+   * in the blockchain. The block height is a distance between the last block
+   * and the "genesis", or initial, block. Therefore, the blockchain height is equal to the number
+   * of blocks plus one.
+   *
+   * <p>For example, the "genesis" block has height {@code h = 0}. The latest committed block
+   * has height {@code h = getBlockHashes().size() - 1}.
    *
    * @throws RuntimeException if the "genesis block" was not created
    */
@@ -71,47 +87,44 @@ public final class Blockchain {
    * Returns a list of all block hashes, indexed by the block height.
    * For example, the "genesis block" will be at index 0,
    * the block at height {@code h = 10} — at index 10.
-   * The last committed block will be at height {@code h = getAllBlockHashes().size() - 1}.
+   * The last committed block will be at height {@code h = getBlockHashes().size() - 1}.
    */
-  public ListIndex<HashCode> getAllBlockHashes() {
-    return schema.getAllBlockHashes();
+  public ListIndex<HashCode> getBlockHashes() {
+    return schema.getBlockHashes();
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block at the given height or
-   * an empty list if the block at the given height doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block at the given height.
    *
    * @param height block height starting from 0
-   * @throws IllegalArgumentException if the height is negative or there is no block at given height
+   * @throws IllegalArgumentException if the height is invalid: negative or exceeding
+   *     the {@linkplain #getHeight() blockchain height}
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the block with given id or an empty
-   * list if the block with given id doesn't exist.
+   * Returns a proof list of transaction hashes committed in the block with the given id.
    *
    * @param blockId id of the block
    * @throws IllegalArgumentException if there is no block with given id
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
-    Optional<Block> block = getBlock(blockId);
+    Optional<Block> block = findBlock(blockId);
     checkArgument(block.isPresent(), "No block found for given id %s", blockId);
     return getBlockTransactions(block.get().getHeight());
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the given block or an empty list if
-   * the block doesn't exist.
+   * Returns a proof list of transaction hashes committed in the given block.
+   * The given block must match exactly the block that is stored in the database.
    *
    * @param block block of which list of transaction hashes should be returned
-   * @throws NullPointerException if the block is null
-   * @throws IllegalArgumentException if the height of given block is negative or there is no block
-   *                                  at given height
+   * @throws IllegalArgumentException if there is no such block in the blockchain
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(Block block) {
-    checkNotNull(block);
+    checkArgument(containsBlock(block), "No such block (%s) in the database", block);
     return getBlockTransactions(block.getHeight());
   }
 
@@ -170,12 +183,37 @@ public final class Blockchain {
   }
 
   /**
+   * Returns the block at the given height.
+   *
+   * @param height the height of the block; must be non-negative and less than or equal to
+   *     the current {@linkplain #getHeight() blockchain height}
+   * @return a block at the height
+   * @throws IllegalArgumentException if the height is not valid
+   */
+  public Block getBlock(long height) {
+    checkHeight(height);
+
+    ListIndex<HashCode> blockHashes = getBlockHashes();
+    HashCode blockHash = blockHashes.get(height);
+    MapIndex<HashCode, Block> blocks = getBlocks();
+    return blocks.get(blockHash);
+  }
+
+  private void checkHeight(long height) {
+    long blockchainHeight = getHeight();
+    if (height < 0 || height > blockchainHeight) {
+      throw new IndexOutOfBoundsException("Block height (" + height + ") is out of range [0, "
+          + blockchainHeight + "]");
+    }
+  }
+
+  /**
    * Returns a block object for given block hash.
    *
    * @return a corresponding block, or {@code Optional.empty()} if there is no block with given
    *         block hash
    */
-  public Optional<Block> getBlock(HashCode blockHash) {
+  public Optional<Block> findBlock(HashCode blockHash) {
     MapIndex<HashCode, Block> blocks = getBlocks();
     Block block = blocks.get(blockHash);
     return Optional.ofNullable(block);
@@ -199,5 +237,4 @@ public final class Blockchain {
   public StoredConfiguration getActualConfiguration() {
     return schema.getActualConfiguration();
   }
-
 }
