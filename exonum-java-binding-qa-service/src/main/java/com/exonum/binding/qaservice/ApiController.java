@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
@@ -47,7 +47,6 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
@@ -70,7 +69,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -107,7 +105,7 @@ final class ApiController {
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
             .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
-            .put(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH, this::getAllBlockHashes)
+            .put(BLOCKCHAIN_BLOCK_HASHES_PATH, this::getBlockHashes)
             .put(BLOCKCHAIN_BLOCKS_PATH, this::getBlocks)
             .put(BLOCKCHAIN_BLOCK_PATH, this::getBlock)
             .put(BLOCKCHAIN_LAST_BLOCK_PATH, this::getLastBlock)
@@ -196,8 +194,8 @@ final class ApiController {
     }
   }
 
-  private void getAllBlockHashes(RoutingContext rc) {
-    List<HashCode> hashes = service.getAllBlockHashes();
+  private void getBlockHashes(RoutingContext rc) {
+    List<HashCode> hashes = service.getBlockHashes();
     respondWithJson(rc, hashes);
   }
 
@@ -409,7 +407,7 @@ final class ApiController {
     @VisibleForTesting
     static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
     @VisibleForTesting
-    static final String BLOCKCHAIN_ALL_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
+    static final String BLOCKCHAIN_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
     @VisibleForTesting
     static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
     @VisibleForTesting

@@ -296,9 +296,9 @@ class QaServiceImplIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void getAllBlockHashes() {
+  void getBlockHashes() {
     withNodeFake(() -> {
-      List<HashCode> hashes = service.getAllBlockHashes();
+      List<HashCode> hashes = service.getBlockHashes();
       assertThat(hashes).isEmpty();
     });
   }

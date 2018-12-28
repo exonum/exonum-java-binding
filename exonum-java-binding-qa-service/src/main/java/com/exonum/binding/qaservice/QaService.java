@@ -54,7 +54,7 @@ public interface QaService extends Service {
 
   Height getHeight();
 
-  List<HashCode> getAllBlockHashes();
+  List<HashCode> getBlockHashes();
 
   List<HashCode> getBlockTransactions(long height);
 

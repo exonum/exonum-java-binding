@@ -16,7 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
@@ -431,12 +431,12 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void getAllBlockHashes(VertxTestContext context) {
+  void getBlockHashes(VertxTestContext context) {
     List<HashCode> blockHashes = Arrays.asList(HASH_1, HASH_2);
 
-    when(qaService.getAllBlockHashes()).thenReturn(blockHashes);
+    when(qaService.getBlockHashes()).thenReturn(blockHashes);
 
-    get(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH)
+    get(BLOCKCHAIN_BLOCK_HASHES_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);

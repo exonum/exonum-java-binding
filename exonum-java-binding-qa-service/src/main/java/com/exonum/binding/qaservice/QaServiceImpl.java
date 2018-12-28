@@ -211,7 +211,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public List<HashCode> getAllBlockHashes() {
+  public List<HashCode> getBlockHashes() {
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       ListIndex<HashCode> hashes = blockchain.getBlockHashes();
