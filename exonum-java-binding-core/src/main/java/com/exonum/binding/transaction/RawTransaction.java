@@ -11,7 +11,7 @@ import com.google.auto.value.AutoValue;
  * The raw transaction is separated from the
  * {@linkplain TransactionMessage} and consists only
  * the data related to the transaction i.e.
- * it <em>doesn't contain</em> neither signature and transaction creator public key.
+ * it <em>doesn't contain</em> neither cryptographic signature and transaction creator public key.
  * <br/>
  * The raw transaction can be converted to executable {@linkplain Transaction} using
  * an implementation of the {@linkplain TransactionConverter}.
