@@ -19,11 +19,11 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
@@ -84,7 +84,8 @@ public final class TransferTx implements Transaction {
   @Override
   public void execute(TransactionContext context) throws TransactionExecutionException {
     PublicKey fromWallet = context.getAuthorPk();
-    checkState(!fromWallet.equals(toWallet), "Same sender and receiver: %s", fromWallet);
+    checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
+
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);

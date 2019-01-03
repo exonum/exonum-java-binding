@@ -204,12 +204,7 @@ class TransferTxTest {
           .authorPk(FROM_KEY)
           .build();
 
-      Exception e = assertThrows(IllegalStateException.class,
-          () -> tx.execute(context));
-
-      assertThat(e.getMessage(), allOf(
-          containsStringIgnoringCase("same sender and receiver"),
-          containsStringIgnoringCase(FROM_KEY.toString())));
+      assertThrows(TransactionExecutionException.class, () -> tx.execute(context));
     }
   }
 

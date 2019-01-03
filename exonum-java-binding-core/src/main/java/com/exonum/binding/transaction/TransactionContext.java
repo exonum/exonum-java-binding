@@ -20,6 +20,8 @@ import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 
 /**
@@ -34,13 +36,10 @@ public interface TransactionContext {
   Fork getFork();
 
   /**
-   * Returns SHA-256 hash of the transaction message
-   * {@linkplain com.exonum.binding.common.message.BinaryTransactionMessage}
-   * that carried the payload from which the transaction was created
-   * {@linkplain com.exonum.binding.service.TransactionConverter}.
-   * Each transaction message is uniquely identified by its hash.
-   * The messages are persisted in the blockchain {@link Blockchain#getTxMessages()}
-   * and can be fetched by this hash.
+   * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that
+   * carried the payload from which the transaction was {@linkplain TransactionConverter created}.
+   * Each transaction message is uniquely identified by its hash; the messages are persisted
+   * in the {@linkplain Blockchain#getTxMessages() blockchain} and can be fetched by this hash.
    */
   HashCode getTransactionMessageHash();
 

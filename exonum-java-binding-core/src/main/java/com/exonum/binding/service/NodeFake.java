@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -89,7 +90,7 @@ public final class NodeFake implements Node {
   @Override
   public HashCode submitTransaction(RawTransaction transaction) {
     checkNotNull(transaction);
-    return HashCode.fromString("00000000000000000000000000000000");
+    return HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
   }
 
   @Override

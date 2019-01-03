@@ -35,8 +35,7 @@ public interface Node {
    * Then each node adds the transaction to a
    * <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
-   * <br/>
-   * <em>Be aware that that each node has its own service key pair, therefore
+   * <p/><em>Be aware that that each node has its own service key pair, therefore
    * invocations of this method on different nodes will produce different transactions.</em>
    *
    * @param rawTransaction transaction parameters to include in transaction message
