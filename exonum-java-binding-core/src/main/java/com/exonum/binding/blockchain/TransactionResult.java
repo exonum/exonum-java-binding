@@ -21,6 +21,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
@@ -116,6 +119,15 @@ public abstract class TransactionResult {
    */
   public boolean isSuccessful() {
     return getType() == Type.SUCCESS;
+  }
+
+  /**
+   * Provides a Gson type adapter for this class.
+   *
+   * @see com.exonum.binding.blockchain.serialization.TransactionResultAdapterFactory
+   */
+  public static TypeAdapter<TransactionResult> typeAdapter(Gson gson) {
+    return new AutoValue_TransactionResult.GsonTypeAdapter(gson);
   }
 
   /** A type of transaction execution result. */

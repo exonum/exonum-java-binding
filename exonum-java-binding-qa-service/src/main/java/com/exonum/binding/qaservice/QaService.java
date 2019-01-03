@@ -16,10 +16,15 @@
 
 package com.exonum.binding.qaservice;
 
+import com.exonum.binding.blockchain.Block;
+import com.exonum.binding.blockchain.TransactionLocation;
+import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -49,9 +54,27 @@ public interface QaService extends Service {
 
   Height getHeight();
 
-  List<HashCode> getAllBlockHashes();
+  List<HashCode> getBlockHashes();
 
   List<HashCode> getBlockTransactions(long height);
+
+  List<HashCode> getBlockTransactions(HashCode blockId);
+
+  Map<HashCode, TransactionMessage> getTxMessages();
+
+  Map<HashCode, TransactionResult> getTxResults();
+
+  Optional<TransactionResult> getTxResult(HashCode messageHash);
+
+  Map<HashCode, TransactionLocation> getTxLocations();
+
+  Optional<TransactionLocation> getTxLocation(HashCode messageHash);
+
+  Map<HashCode, Block> getBlocks();
+
+  Block getBlock(long height);
+
+  Block getLastBlock();
 
   StoredConfiguration getActualConfiguration();
 }

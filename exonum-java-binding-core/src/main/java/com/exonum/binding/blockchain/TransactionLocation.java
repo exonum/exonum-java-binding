@@ -17,6 +17,8 @@
 package com.exonum.binding.blockchain;
 
 import com.google.auto.value.AutoValue;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 
 /**
  * Transaction position in the blockchain. Enumeration begins from 0.
@@ -38,5 +40,14 @@ public abstract class TransactionLocation {
    * order of these indices.
    */
   public abstract long getIndexInBlock();
+
+  /**
+   * Provides a Gson type adapter for this class.
+   *
+   * @see com.exonum.binding.blockchain.serialization.TransactionLocationAdapterFactory
+   */
+  public static TypeAdapter<TransactionLocation> typeAdapter(Gson gson) {
+    return new AutoValue_TransactionLocation.GsonTypeAdapter(gson);
+  }
 
 }
