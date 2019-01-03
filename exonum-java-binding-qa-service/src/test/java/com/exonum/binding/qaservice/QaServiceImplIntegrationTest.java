@@ -71,6 +71,7 @@ class QaServiceImplIntegrationTest {
 
   private static final String NO_GENESIS_BLOCK_ERROR_MESSAGE =
       "An attempt to get the actual `height` during creating the genesis block";
+  private static final HashCode DEFAULT_TX_MESSAGE_HASH = HashCode.fromString("a0a0a0a0");
 
   static {
     LibraryLoader.load();
@@ -162,8 +163,8 @@ class QaServiceImplIntegrationTest {
   @Test
   void submitCreateCounter() throws Exception {
     setServiceNode(node);
-    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
+
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     String counterName = "bids";
     HashCode txHash = service.submitCreateCounter(counterName);
@@ -171,15 +172,14 @@ class QaServiceImplIntegrationTest {
     CreateCounterTx expectedTx = new CreateCounterTx(counterName);
     RawTransaction expectedRawTx = CreateCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTxMessageHash);
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitIncrementCounter() throws Exception {
     setServiceNode(node);
-    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     long seed = 1L;
     HashCode counterId = sha256()
@@ -189,15 +189,14 @@ class QaServiceImplIntegrationTest {
     IncrementCounterTx expectedTx = new IncrementCounterTx(seed, counterId);
     RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTxMessageHash);
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitValidThrowingTx() throws Exception {
     setServiceNode(node);
-    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     long seed = 1L;
     HashCode txHash = service.submitValidThrowingTx(seed);
@@ -205,19 +204,18 @@ class QaServiceImplIntegrationTest {
     ThrowingTx expectedTx = new ThrowingTx(seed);
     RawTransaction expectedRawTx = ThrowingTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTxMessageHash);
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
     verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitUnknownTx() throws Exception {
     setServiceNode(node);
-    HashCode expectedTxMessageHash = HashCode.fromString("a0a0a0a0");
-    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(expectedTxMessageHash);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     HashCode txHash = service.submitUnknownTx();
 
-    assertThat(txHash).isEqualTo(expectedTxMessageHash);
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
   }
 
   @Test
@@ -320,8 +318,7 @@ class QaServiceImplIntegrationTest {
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       setServiceNode(node);
-      HashCode txMessageHash = HashCode.fromString("a0a0a0a0");
-      when(node.submitTransaction(any(RawTransaction.class))).thenReturn(txMessageHash);
+      when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
       service.initialize(fork);
 
       Snapshot snapshot = db.createSnapshot(cleaner);

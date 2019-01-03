@@ -130,6 +130,7 @@ class IncrementCounterTxIntegrationTest {
       // Execute the transaction
       IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
       TransactionContext context = newContext(view);
+      tx.execute(context);
 
       // Check there isn’t such a counter after tx execution
       QaSchema schema = new QaSchema(view);

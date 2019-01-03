@@ -16,15 +16,18 @@
 
 package com.exonum.binding.fakes.services.transactions;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.hash;
+import static com.exonum.binding.common.serialization.StandardSerializers.publicKey;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A transaction whose behaviour can be configured. It's not a mock: it writes a given value
@@ -34,8 +37,11 @@ import com.exonum.binding.transaction.TransactionContext;
  */
 public final class SetEntryTransaction implements Transaction {
 
+  @VisibleForTesting
   static final String ENTRY_NAME = "test_entry";
+  @VisibleForTesting
   static final String TX_HASH_NAME = "tx_hash";
+  @VisibleForTesting
   static final String AUTHOR_PK_NAME = "author_pk";
 
   private final String value;
@@ -70,14 +76,14 @@ public final class SetEntryTransaction implements Transaction {
   }
 
   private EntryIndexProxy<String> createTestEntry(Fork view) {
-    return EntryIndexProxy.newInstance(ENTRY_NAME, view, StandardSerializers.string());
+    return EntryIndexProxy.newInstance(ENTRY_NAME, view, string());
   }
 
   private EntryIndexProxy<HashCode> createTxHashEntry(Fork view) {
-    return EntryIndexProxy.newInstance(TX_HASH_NAME, view, StandardSerializers.hash());
+    return EntryIndexProxy.newInstance(TX_HASH_NAME, view, hash());
   }
 
   private EntryIndexProxy<PublicKey> createAuthorPkEntry(Fork view) {
-    return EntryIndexProxy.newInstance(AUTHOR_PK_NAME, view, StandardSerializers.publicKey());
+    return EntryIndexProxy.newInstance(AUTHOR_PK_NAME, view, publicKey());
   }
 }

@@ -21,7 +21,7 @@ enum TransactionError {
   UNKNOWN_RECEIVER(1),
   UNKNOWN_SENDER(2),
   INSUFFICIENT_FUNDS(3),
-  SAME_SENDER_AND_RECEIVER(5);
+  SAME_SENDER_AND_RECEIVER(4);
 
   final byte errorCode;
 

@@ -16,13 +16,19 @@
 
 package com.exonum.binding.fakes.services.transactions;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.hash;
+import static com.exonum.binding.common.serialization.StandardSerializers.publicKey;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.fakes.services.transactions.ContextUtils.newContext;
+import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.AUTHOR_PK_NAME;
 import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.ENTRY_NAME;
+import static com.exonum.binding.fakes.services.transactions.SetEntryTransaction.TX_HASH_NAME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Fork;
@@ -59,10 +65,24 @@ class SetEntryTransactionIntegrationTest {
       database.merge(fork);
 
       Snapshot snapshot = database.createSnapshot(cleaner);
-      EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot,
-          StandardSerializers.string());
+
+      //assert value
+      EntryIndexProxy entry = EntryIndexProxy.newInstance(ENTRY_NAME, snapshot, string());
       assertTrue(entry.isPresent());
       assertThat(entry.get(), equalTo(value));
+
+      //assert tx message hash
+      EntryIndexProxy<HashCode> hashEntry = EntryIndexProxy
+          .newInstance(TX_HASH_NAME, snapshot, hash());
+      assertTrue(hashEntry.isPresent());
+      assertThat(hashEntry.get(), equalTo(context.getTransactionMessageHash()));
+
+      //assert author's key
+      EntryIndexProxy<PublicKey> keyEntry =
+          EntryIndexProxy.newInstance(AUTHOR_PK_NAME, snapshot, publicKey());
+      assertTrue(keyEntry.isPresent());
+      assertThat(keyEntry.get(), equalTo(context.getAuthorPk()));
     }
   }
+
 }
