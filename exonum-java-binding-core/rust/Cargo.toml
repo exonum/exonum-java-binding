@@ -24,7 +24,7 @@ log = "0.4.1"
 parking_lot = "0.6"
 serde = "1.0"
 serde_derive = "1.0"
-serde_json = "1.0.32"
+serde_json = "1.0.34"
 
 [profile.dev]
 rpath = true
