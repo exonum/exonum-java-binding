@@ -461,7 +461,7 @@ class ApiControllerIntegrationTest {
         )
         .consensusConfiguration(
             ConsensusConfiguration.builder()
-                .roundTimeout(1)
+                .firstRoundTimeout(1)
                 .statusTimeout(2)
                 .peersTimeout(3)
                 .txsBlockLimit(4)

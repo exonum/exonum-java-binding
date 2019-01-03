@@ -30,15 +30,17 @@ import com.google.gson.annotations.SerializedName;
 @AutoValue
 public abstract class ConsensusConfiguration {
 
-  //TODO update to "first_round_timeout" after exonum 0.1.0 release
-  //https://github.com/exonum/exonum/commit/b7c4bc471ddce70ec0de085cc82901271ec1544e
   /**
-   * Interval between rounds. This interval defines the time that passes between the moment a new
-   * block is committed to the blockchain and the time when a new round starts, regardless of
-   * whether a new block has been committed during this period or not.
+   * Interval between first two rounds. This interval defines the time that passes
+   * between the moment a new block is committed to the blockchain and the
+   * time when second round starts, regardless of whether a new block has
+   * been committed during this period or not..
+   *
+   * <p>Note that rounds in Exonum do not have a defined end time. Nodes in a new round can
+   * continue to vote for proposals and process messages related to previous rounds.
    */
-  @SerializedName("round_timeout")
-  public abstract long roundTimeout();
+  @SerializedName("first_round_timeout")
+  public abstract long firstRoundTimeout();
 
   /**
    * This parameter defines the frequency with which a node broadcasts its status message to the
@@ -99,7 +101,7 @@ public abstract class ConsensusConfiguration {
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder roundTimeout(long roundTimeout);
+    public abstract Builder firstRoundTimeout(long firstRoundTimeout);
 
     public abstract Builder statusTimeout(long statusTimeout);
 
