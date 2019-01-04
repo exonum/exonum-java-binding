@@ -188,7 +188,7 @@ public final class Blockchain {
    * @param height the height of the block; must be non-negative and less than or equal to
    *     the current {@linkplain #getHeight() blockchain height}
    * @return a block at the height
-   * @throws IllegalArgumentException if the height is not valid
+   * @throws IndexOutOfBoundsException if the height is not valid
    */
   public Block getBlock(long height) {
     checkHeight(height);

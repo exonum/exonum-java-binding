@@ -17,17 +17,35 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_ALL_BLOCK_HASHES_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
-import static com.exonum.binding.qaservice.ApiController.BLOCKCHAIN_HEIGHT_PATH;
-import static com.exonum.binding.qaservice.ApiController.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_LAST_BLOCK_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_MESSAGES_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_HEIGHT_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.MESSAGE_HASH_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -38,12 +56,29 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.blockchain.Block;
+import com.exonum.binding.blockchain.TransactionLocation;
+import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.blockchain.serialization.BlockAdapterFactory;
+import com.exonum.binding.blockchain.serialization.TransactionLocationAdapterFactory;
+import com.exonum.binding.blockchain.serialization.TransactionResultAdapterFactory;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.test.Bytes;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -61,6 +96,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
@@ -72,7 +108,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
@@ -82,6 +117,16 @@ class ApiControllerIntegrationTest {
   private static final String HOST = "0.0.0.0";
 
   private static final HashCode EXPECTED_TX_HASH = sha256().hashInt(1);
+
+  private static final String HASH_STRING = "ab";
+  private static final HashCode HASH_1 = HashCode.fromInt(0x00);
+  private static final HashCode HASH_2 = HashCode.fromInt(0x01);
+
+  private static final Gson JSON_SERIALIZER = JsonSerializer.builder()
+      .registerTypeAdapterFactory(BlockAdapterFactory.create())
+      .registerTypeAdapterFactory(TransactionLocationAdapterFactory.create())
+      .registerTypeAdapterFactory(TransactionResultAdapterFactory.create())
+      .create();
 
   @Mock
   QaService qaService;
@@ -124,13 +169,13 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(eq(counterName)))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
   @Test
   void submitCreateCounter_NoParameter(VertxTestContext context) {
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(MultiMap.caseInsensitiveMultiMap(), context.succeeding(response -> {
           context.verify(() -> {
             assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
@@ -152,7 +197,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(counterName))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
           context.completeNow();
@@ -168,7 +213,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitCreateCounter(counterName))
         .thenThrow(error);
 
-    post(ApiController.SUBMIT_CREATE_COUNTER_TX_PATH)
+    post(SUBMIT_CREATE_COUNTER_TX_PATH)
         .sendForm(params, context.succeeding(response -> {
           context.verify(() -> {
             assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
@@ -180,14 +225,14 @@ class ApiControllerIntegrationTest {
   @Test
   void submitIncrementCounter(VertxTestContext context) {
     long seed = 1L;
-    HashCode counterId = HashCode.fromInt(1);
+    HashCode counterId = HASH_1;
     MultiMap params = multiMap("seed", Long.toString(seed),
         "counterId", String.valueOf(counterId));
 
     when(qaService.submitIncrementCounter(eq(seed), eq(counterId)))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_INCREMENT_COUNTER_TX_PATH)
+    post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -200,7 +245,7 @@ class ApiControllerIntegrationTest {
 
     MultiMap form = multiMap("seed", Long.toString(seed));
 
-    post(ApiController.SUBMIT_VALID_THROWING_TX_PATH)
+    post(SUBMIT_VALID_THROWING_TX_PATH)
         .sendForm(form, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -216,7 +261,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), eq(description)))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+    post(SUBMIT_VALID_ERROR_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -230,7 +275,7 @@ class ApiControllerIntegrationTest {
     when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), isNull()))
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_VALID_ERROR_TX_PATH)
+    post(SUBMIT_VALID_ERROR_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
@@ -239,13 +284,13 @@ class ApiControllerIntegrationTest {
     when(qaService.submitUnknownTx())
         .thenReturn(EXPECTED_TX_HASH);
 
-    post(ApiController.SUBMIT_UNKNOWN_TX_PATH)
+    post(SUBMIT_UNKNOWN_TX_PATH)
         .send(checkCreatedTransaction(context, EXPECTED_TX_HASH));
   }
 
   @Test
   void getCounter(VertxTestContext context) {
-    HashCode id = sha256().hashInt(2);
+    HashCode id = HASH_1;
     String name = "counter";
     long value = 10L;
     Counter counter = new Counter(name, value);
@@ -259,7 +304,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Counter actualCounter = json().fromJson(body, Counter.class);
+          Counter actualCounter = JSON_SERIALIZER.fromJson(body, Counter.class);
           assertThat(actualCounter).isEqualTo(counter);
 
           context.completeNow();
@@ -268,7 +313,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getCounter_NoCounter(VertxTestContext context) {
-    HashCode id = sha256().hashInt(2);
+    HashCode id = HASH_1;
     when(qaService.getValue(id))
         .thenReturn(Optional.empty());
 
@@ -319,7 +364,7 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Height actualHeight = json().fromJson(body, Height.class);
+          Height actualHeight = JSON_SERIALIZER.fromJson(body, Height.class);
           assertThat(actualHeight).isEqualTo(height);
 
           context.completeNow();
@@ -340,18 +385,18 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void getAllBlockHashes(VertxTestContext context) {
-    List<HashCode> blockHashes = Arrays.asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+  void getBlockHashes(VertxTestContext context) {
+    List<HashCode> blockHashes = Arrays.asList(HASH_1, HASH_2);
 
-    when(qaService.getAllBlockHashes()).thenReturn(blockHashes);
+    when(qaService.getBlockHashes()).thenReturn(blockHashes);
 
-    get(BLOCKCHAIN_ALL_BLOCK_HASHES_PATH)
+    get(BLOCKCHAIN_BLOCK_HASHES_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = json()
+          Object actualHashes = JSON_SERIALIZER
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(blockHashes);
@@ -363,20 +408,270 @@ class ApiControllerIntegrationTest {
   @Test
   void getBlockTransactions(VertxTestContext context) {
     List<HashCode> transactionHashes = Arrays
-        .asList(HashCode.fromInt(0x00), HashCode.fromInt(0x01));
+        .asList(HASH_1, HASH_2);
 
     when(qaService.getBlockTransactions(anyLong())).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH.replace(":blockHeight", "123"))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, "123"))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualHashes = json()
+          Object actualHashes = JSON_SERIALIZER
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(transactionHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlockTransactionsByBlockId(VertxTestContext context) {
+    List<HashCode> transactionHashes = Arrays
+        .asList(HASH_1, HASH_2);
+
+    HashCode blockId = HashCode.fromString(HASH_STRING);
+    when(qaService.getBlockTransactions(blockId)).thenReturn(transactionHashes);
+
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH.replace(":" + BLOCK_ID_PARAM, HASH_STRING))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualHashes = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<List<HashCode>>() {
+              }.getType());
+          assertThat(actualHashes).isEqualTo(transactionHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxMessages(VertxTestContext context) {
+    Map<HashCode, TransactionMessage> transactionMessages = Maps.uniqueIndex(
+        Arrays.asList(
+            transactionMessageSource("first transaction"),
+            transactionMessageSource("second transaction")),
+        TransactionMessage::hash);
+
+    when(qaService.getTxMessages()).thenReturn(transactionMessages);
+
+    Map<HashCode, String> transactionMessagesEncoded =
+        hexEncodeTransactionMessages(transactionMessages);
+
+    get(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualMessages = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<HashCode, String>>() {
+              }.getType());
+          assertThat(actualMessages).isEqualTo(transactionMessagesEncoded);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxResults(VertxTestContext context) {
+    Map<HashCode, TransactionResult> txResults = ImmutableMap.of(
+        HASH_1, TransactionResult.successful(),
+        HASH_2, TransactionResult.error(1, "Error description"));
+
+    when(qaService.getTxResults()).thenReturn(txResults);
+
+    get(BLOCKCHAIN_TRANSACTION_RESULTS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualTxResults = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<HashCode, TransactionResult>>() {
+              }.getType());
+          assertThat(actualTxResults).isEqualTo(txResults);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxResult(VertxTestContext context) {
+    TransactionResult transactionResult = TransactionResult.successful();
+
+    HashCode messageHash = HashCode.fromString(HASH_STRING);
+    when(qaService.getTxResult(messageHash)).thenReturn(Optional.of(transactionResult));
+
+    get(BLOCKCHAIN_TRANSACTION_RESULT_PATH.replace(":" + MESSAGE_HASH_PARAM, HASH_STRING))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualResult = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<TransactionResult>() {
+              }.getType());
+          assertThat(actualResult).isEqualTo(transactionResult);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getNonexistentTxResult(VertxTestContext context) {
+    HashCode messageHash = HashCode.fromString(HASH_STRING);
+    when(qaService.getTxResult(messageHash)).thenReturn(Optional.empty());
+
+    get(BLOCKCHAIN_TRANSACTION_RESULT_PATH.replace(":" + MESSAGE_HASH_PARAM, HASH_STRING))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_NOT_FOUND);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxLocations(VertxTestContext context) {
+    Map<HashCode, TransactionLocation> txLocations = ImmutableMap.of(
+        HASH_1, TransactionLocation.valueOf(1L, 1L),
+        HASH_2, TransactionLocation.valueOf(1L, 2L));
+
+    when(qaService.getTxLocations()).thenReturn(txLocations);
+
+    get(BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualTxLocations = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<HashCode, TransactionLocation>>() {
+              }.getType());
+          assertThat(actualTxLocations).isEqualTo(txLocations);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTxLocation(VertxTestContext context) {
+    TransactionLocation transactionLocation = TransactionLocation.valueOf(1L, 1L);
+
+    HashCode messageHash = HashCode.fromString(HASH_STRING);
+    when(qaService.getTxLocation(messageHash)).thenReturn(Optional.of(transactionLocation));
+
+    get(BLOCKCHAIN_TRANSACTION_LOCATION_PATH.replace(":" + MESSAGE_HASH_PARAM, HASH_STRING))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualLocation = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<TransactionLocation>() {
+              }.getType());
+          assertThat(actualLocation).isEqualTo(transactionLocation);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getNonexistentTxLocation(VertxTestContext context) {
+    HashCode messageHash = HashCode.fromString(HASH_STRING);
+    when(qaService.getTxLocation(messageHash)).thenReturn(Optional.empty());
+
+    get(BLOCKCHAIN_TRANSACTION_LOCATION_PATH.replace(":" + MESSAGE_HASH_PARAM, HASH_STRING))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_NOT_FOUND);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlocks(VertxTestContext context) {
+    Map<HashCode, Block> blocks = Maps.uniqueIndex(
+        Arrays.asList(createBlock(1L), createBlock(2L)),
+        Block::getBlockHash);
+
+    when(qaService.getBlocks()).thenReturn(blocks);
+
+    get(BLOCKCHAIN_BLOCKS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlocks = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<HashCode, Block>>() {
+              }.getType());
+          assertThat(actualBlocks).isEqualTo(blocks);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlock(VertxTestContext context) {
+    Block block = createBlock(1L);
+
+    long blockHeight = block.getHeight();
+    when(qaService.getBlock(blockHeight)).thenReturn(block);
+
+    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlock = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Block>() {
+              }.getType());
+          assertThat(actualBlock).isEqualTo(block);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getNonexistentBlock(VertxTestContext context) {
+    long blockHeight = 1L;
+
+    when(qaService.getBlock(blockHeight)).thenThrow(new IndexOutOfBoundsException());
+
+    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_BAD_REQUEST);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getLastBlock(VertxTestContext context) {
+    Block block = createBlock(1L);
+
+    when(qaService.getLastBlock()).thenReturn(block);
+
+    get(BLOCKCHAIN_LAST_BLOCK_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlock = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Block>() {
+              }.getType());
+          assertThat(actualBlock).isEqualTo(block);
 
           context.completeNow();
         })));
@@ -393,13 +688,34 @@ class ApiControllerIntegrationTest {
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
               () -> {
                 String body = response.bodyAsString();
-                StoredConfiguration storedConfiguration = json()
+                StoredConfiguration storedConfiguration = JSON_SERIALIZER
                     .fromJson(body, StoredConfiguration.class);
 
                 assertThat(storedConfiguration).isEqualTo(configuration);
               });
           context.completeNow();
         })));
+  }
+
+  /**
+   * Creates a builder of a block, fully initialized with defaults, inferred from the height.
+   * An invocation with the same height will produce exactly the same builder. The block hash
+   * is <strong>not</strong> equal to the hash of the block with such parameters.
+   *
+   * @param blockHeight a block height
+   * @return a new block builder
+   */
+  private static Block createBlock(long blockHeight) {
+    HashFunction hashFunction = Hashing.sha256();
+    return Block.builder()
+        .proposerId(0)
+        .height(blockHeight)
+        .numTransactions(0)
+        .blockHash(hashFunction.hashLong(blockHeight))
+        .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
+        .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
+        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
+        .build();
   }
 
   private StoredConfiguration createConfiguration() {
@@ -488,4 +804,13 @@ class ApiControllerIntegrationTest {
         }));
   }
 
+  private static TransactionMessage transactionMessageSource(String payloadString) {
+    CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
+    KeyPair keys = cryptoFunction.generateKeyPair();
+    return TransactionMessage.builder()
+        .serviceId((short) 0)
+        .transactionId((short) 1)
+        .payload(Bytes.bytes(payloadString))
+        .sign(keys, cryptoFunction);
+  }
 }
