@@ -34,7 +34,7 @@ public abstract class ConsensusConfiguration {
    * Interval between first two rounds. This interval defines the time that passes
    * between the moment a new block is committed to the blockchain and the
    * time when second round starts, regardless of whether a new block has
-   * been committed during this period or not..
+   * been committed during this period or not.
    *
    * <p>Note that rounds in Exonum do not have a defined end time. Nodes in a new round can
    * continue to vote for proposals and process messages related to previous rounds.
