@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.google.auto.value.AutoValue;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 
 /**
  * Exonum block header data structure.
@@ -86,6 +88,15 @@ public abstract class Block {
     // as they will have close to uniform distribution.
     // AutoValue will still use all fields in #equals.
     return getBlockHash().hashCode();
+  }
+
+  /**
+   * Provides a Gson type adapter for this class.
+   *
+   * @see com.exonum.binding.blockchain.serialization.BlockAdapterFactory
+   */
+  public static TypeAdapter<Block> typeAdapter(Gson gson) {
+    return new AutoValue_Block.GsonTypeAdapter(gson);
   }
 
   /**
