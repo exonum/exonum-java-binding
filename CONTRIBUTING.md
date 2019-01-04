@@ -7,7 +7,8 @@ or a pull request. This document describes how to work with this project:
   * how to [test](#tests) it
   * the [code style guidelines](#the-code-style)
   * how to [submit an issue](#submitting-issues)
-  * how to [submit a PR](#submitting-pull-requests).
+  * how to [submit a PR](#submitting-pull-requests)
+  * how to [work with error-prone](#working-with-error-prone).
 
 ## How to Build
 ### System Dependencies
@@ -131,5 +132,30 @@ Chances are — we are already working on something similar. If not — we can t
 help with the requirements, design, implementation or documentation.
 
 It’s fine to open a PR as soon as you need any feedback — ask any questions in the description.
+
+## Working with Error Prone
+We use [Error Prone](https://github.com/google/error-prone/) to catch common programming errors at compile time.
+
+### How to pass a flag to Error Prone
+Override `java.compiler.errorprone.flag` property:
+```$sh
+$ mvn -Djava.compiler.errorprone.flag=-XepAllDisabledChecksAsWarnings compile
+```
+Some useful flags:
+ * `-XepAllErrorsAsWarnings`
+ * `-XepAllDisabledChecksAsWarnings`
+ * `-XepDisableAllChecks`
+
+For a complete list of flags, go to http://errorprone.info/docs/flags 
+
+### How to enable a particular Error Prone check
+Use `java.compiler.errorprone.flag` property:
+```$sh
+$ mvn -Djava.compiler.errorprone.flag=-Xep:MissingOverride:ERROR compile
+```
+In this example, Error Prone will fail the build if any method 
+does not have `@Override` annotation.
+
+For a complete list of checks, go to http://errorprone.info/bugpatterns
 
 <!-- todo: Add licensing information/CLA -->
