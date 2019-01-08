@@ -61,7 +61,7 @@ our internal system tests run on 11. 8 is still fine too.
 
 ### Use the Core Schema
 v0.4 provides access to some data stored by the framework in the database: transaction messages,
-execution results; blocks; node configuration, etc — take a look at `Blockchain` to see if will
+execution results; blocks; node configuration, etc — take a look at `Blockchain` to see if it will
 simplify your service implementation. 
 
 ### Handle blockchain events
@@ -91,5 +91,3 @@ on Github.
 
 [gitter]: https://gitter.im/exonum/exonum-java-binding
 [new-issue]: https://github.com/exonum/exonum-java-binding/issues/new
-
-  
