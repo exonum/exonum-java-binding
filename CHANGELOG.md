@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
   `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
   to use this implementation of `MapEntry`.
+- `Node#getPublicKey` to return `PublicKey` instead of `byte[]`.
 
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package

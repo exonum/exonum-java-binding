@@ -25,7 +25,6 @@ import java.util.function.Function;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-// todo: a better name?
 public interface Node {
 
   /**
