@@ -1,21 +1,25 @@
-use super::{Config, JvmConfig, ServiceConfig};
+use super::{Config, JvmConfig, EjbConfig, ServiceConfig};
 use exonum::helpers::fabric::keys;
 use exonum::helpers::fabric::Argument;
 use exonum::helpers::fabric::CommandExtension;
 use exonum::helpers::fabric::Context;
 use exonum::node::NodeConfig;
 use failure;
+use std::collections::BTreeMap;
 use toml::Value;
 
-const EJB_JVM_ARGUMENTS: &str = "EJB_JVM_ARGUMENTS";
-const EJB_JVM_DEBUG_SOCKET: &str = "EJB_JVM_DEBUG_SOCKET";
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_CLASSPATH: &str = "EJB_CLASSPATH";
 const EJB_LIBPATH: &str = "EJB_LIBPATH";
 const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
 const EJB_PORT: &str = "EJB_PORT";
+const JVM_DEBUG_SOCKET: &str = "JVM_DEBUG_SOCKET";
+const JVM_ARGS_PREPEND: &str = "JVM_ARGS_PREPEND";
+const JVM_ARGS_APPEND: &str = "JVM_ARGS_APPEND";
 const EJB_JVM_CONFIG_NAME: &str = "ejb_jvm_config";
 pub const EJB_CONFIG_NAME: &str = "ejb";
+const EJB_CONFIG_KEY: &str = "ejb_config";
+const SERVICE_CONFIG_KEY: &str = "service_config";
 
 pub struct GenerateNodeConfig;
 
@@ -50,20 +54,18 @@ impl CommandExtension for GenerateNodeConfig {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters = Vec::new();
         let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
         let class_path = context.arg(EJB_CLASSPATH)?;
         let lib_path = context.arg(EJB_LIBPATH)?;
-        let jvm_debug_socket = None;
 
-        let jvm_config = JvmConfig {
-            user_parameters,
+        let jvm_config = EjbConfig {
             class_path,
             lib_path,
             log_config_path,
-            jvm_debug_socket,
         };
 
+        // Keep `EjbConfig` under the `keys::SERVICES_SECRET_CONFIGS` section. Will be retrieved
+        // later at the `Finalize` step for further processing.
         let mut services_secret_configs = context
             .get(keys::SERVICES_SECRET_CONFIGS)
             .unwrap_or_default();
@@ -111,7 +113,8 @@ impl CommandExtension for Finalize {
 
         let service_config = ServiceConfig { module_name, port };
 
-        let jvm_config: JvmConfig = context
+        // Retrieve `EjbConfig` saved at the `GenerateNodeConfig` step
+        let ejb_config: EjbConfig = context
             .get(keys::SERVICES_SECRET_CONFIGS)
             .expect("Can't get services secret configs")
             .get(EJB_JVM_CONFIG_NAME)
@@ -119,10 +122,11 @@ impl CommandExtension for Finalize {
             .clone()
             .try_into()?;
 
-        let config = Config {
-            jvm_config,
-            service_config,
-        };
+        // Keep `ServiceConfig` and `EjbConfig` as individual entities under the `keys::NODE_CONFIG`
+        // until processed at the `Run` step
+        let mut config: BTreeMap<String, Value> = BTreeMap::new();
+        config.insert(EJB_CONFIG_KEY.to_owned(), Value::try_from(ejb_config)?);
+        config.insert(SERVICE_CONFIG_KEY.to_owned(), Value::try_from(service_config)?);
 
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;
         node_config
@@ -139,52 +143,74 @@ impl CommandExtension for Run {
     fn args(&self) -> Vec<Argument> {
         vec![
             Argument::new_named(
-                EJB_JVM_ARGUMENTS,
-                false,
-                "Additional parameters for JVM. Must not have a leading dash. \
-                 For example, `Xmx2G` or `Xdebug`",
-                None,
-                "ejb-jvm-args",
-                true,
-            ),
-            Argument::new_named(
-                EJB_JVM_DEBUG_SOCKET,
+                JVM_DEBUG_SOCKET,
                 false,
                 "Allows JVM being remotely debugged. Takes a socket address as a parameter in form \
-                of `HOSTNAME:PORT`. Must not have a leading dash. For example, `localhost:8000`",
+                of `HOSTNAME:PORT`. For example, `localhost:8000`",
                 None,
                 "jvm-debug",
                 false,
+            ),
+            Argument::new_named(
+                JVM_ARGS_PREPEND,
+                false,
+                "Additional parameters for JVM that prepend the rest of arguments. Must not have a \
+                leading dash. For example, `Xmx2G` or `Xdebug`",
+                None,
+                "jvm-args-prepend",
+                true,
+            ),
+            Argument::new_named(
+                JVM_ARGS_APPEND,
+                false,
+                "Additional parameters for JVM that get appended to the rest of arguments. Must not\
+                 have a leading dash. For example, `Xmx2G` or `Xdebug`",
+                None,
+                "jvm-args-append",
+                true,
             ),
         ]
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let user_parameters: Vec<String> =
-            context.arg_multiple(EJB_JVM_ARGUMENTS).unwrap_or_default();
-        let jvm_debug_socket = context.arg(EJB_JVM_DEBUG_SOCKET).ok();
+        let args_prepend: Vec<String> =
+            context.arg_multiple(JVM_ARGS_PREPEND).unwrap_or_default();
+        let args_append: Vec<String> =
+            context.arg_multiple(JVM_ARGS_APPEND).unwrap_or_default();
+        let jvm_debug_socket = context.arg(JVM_DEBUG_SOCKET).ok();
 
-        let curr_config: Config = context
+        let jvm_config = JvmConfig {
+            args_prepend,
+            args_append,
+            jvm_debug_socket,
+        };
+
+        let svc_config: BTreeMap<String, Value> = context
             .get(keys::NODE_CONFIG)
             .expect("Unable to read node configuration.")
             .services_configs
             .get(EJB_CONFIG_NAME)
             .expect("Unable to read EJB configuration.")
             .clone()
-            .try_into()
-            .expect("Invalid EJB configuration format.");
+            .try_into()?;
 
-        let new_jvm_config = JvmConfig {
-            user_parameters,
-            class_path: curr_config.jvm_config.class_path,
-            lib_path: curr_config.jvm_config.lib_path,
-            log_config_path: curr_config.jvm_config.log_config_path,
-            jvm_debug_socket,
-        };
+        // Retrieve `EjbConfig` and `ServiceConfig` saved at the `Finalize` step
+        let ejb_config = svc_config
+            .get(EJB_CONFIG_KEY)
+            .expect("Unable to read EjbConfig from node configuration")
+            .clone()
+            .try_into()?;
+
+        let service_config = svc_config
+            .get(SERVICE_CONFIG_KEY)
+            .expect("Unable to read ServiceConfig from node configuration")
+            .clone()
+            .try_into()?;
 
         let config = Config {
-            jvm_config: new_jvm_config,
-            service_config: curr_config.service_config,
+            jvm_config,
+            ejb_config,
+            service_config,
         };
 
         let mut node_config: NodeConfig = context.get(keys::NODE_CONFIG)?;

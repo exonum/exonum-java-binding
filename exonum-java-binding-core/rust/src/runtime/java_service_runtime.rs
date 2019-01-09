@@ -7,7 +7,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
-use runtime::config::{self, Config, JvmConfig, ServiceConfig};
+use runtime::config::{self, Config, EjbConfig, JvmConfig, ServiceConfig};
 use utils::unwrap_jni;
 use MainExecutor;
 
@@ -34,7 +34,7 @@ impl JavaServiceRuntime {
         unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(config.jvm_config);
+                let java_vm = Self::create_java_vm(config.jvm_config, config.ejb_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
                 let service_proxy = Self::create_service(config.service_config, executor.clone());
                 let runtime = JavaServiceRuntime {
@@ -60,25 +60,30 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(config: JvmConfig) -> JavaVM {
+    fn create_java_vm(jvm_config: JvmConfig, ejb_config: EjbConfig) -> JavaVM {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
-        for param in &config.user_parameters {
+        for param in &jvm_config.args_prepend {
             let option = config::validate_and_convert(param).unwrap();
             args_builder = args_builder.option(&option);
         }
 
-        args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
-        args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
+        args_builder = args_builder.option(&format!("-Djava.class.path={}", ejb_config.class_path));
+        args_builder = args_builder.option(&format!("-Djava.library.path={}", ejb_config.lib_path));
         args_builder = args_builder.option(&format!(
             "-Dlog4j.configurationFile={}",
-            config.log_config_path
+            ejb_config.log_config_path
         ));
-        if let Some(socket) = config.jvm_debug_socket {
+        if let Some(socket) = jvm_config.jvm_debug_socket {
             args_builder = args_builder.option(&format!(
                 "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
                 socket
             ));
+        }
+
+        for param in &jvm_config.args_append {
+            let option = config::validate_and_convert(param).unwrap();
+            args_builder = args_builder.option(&option);
         }
 
         let args = args_builder.build().unwrap();
