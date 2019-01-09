@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.Transaction;
 import java.util.function.Function;
@@ -56,5 +57,5 @@ public interface Node {
    *
    * @throws IllegalStateException if the node proxy is closed
    */
-  byte[] getPublicKey();
+  PublicKey getPublicKey();
 }

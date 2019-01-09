@@ -18,6 +18,7 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
@@ -116,8 +117,9 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public byte[] getPublicKey() {
-    return nativeGetPublicKey(getNativeHandle());
+  public PublicKey getPublicKey() {
+    byte[] bytePk = nativeGetPublicKey(getNativeHandle());
+    return PublicKey.fromBytes(bytePk);
   }
 
   private native byte[] nativeGetPublicKey(long nativeHandle);

@@ -18,6 +18,7 @@ package com.exonum.binding.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -57,7 +58,7 @@ public final class NodeFake implements Node {
 
   private final MemoryDb database;
 
-  private final byte[] publicKey;
+  private final PublicKey publicKey;
 
   /**
    * Creates a new node fake with the given database and an empty public key.
@@ -65,7 +66,7 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    */
   public NodeFake(MemoryDb database) {
-    this(database, new byte[0]);
+    this(database, PublicKey.fromBytes(new byte[0]));
   }
 
   /**
@@ -74,9 +75,9 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    * @param publicKey a public key of the node
    */
-  public NodeFake(MemoryDb database, byte[] publicKey) {
+  public NodeFake(MemoryDb database, PublicKey publicKey) {
     this.database = checkNotNull(database);
-    this.publicKey = publicKey.clone();
+    this.publicKey = publicKey;
   }
 
   /**
@@ -102,8 +103,8 @@ public final class NodeFake implements Node {
   }
 
   @Override
-  public byte[] getPublicKey() {
-    return publicKey.clone();
+  public PublicKey getPublicKey() {
+    return publicKey;
   }
 
   /**
