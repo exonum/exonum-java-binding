@@ -28,8 +28,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
   to use this implementation of `MapEntry`.
 - The `--ejb-jvm-args` command line argument has been substituted with `--jvm-args-prepend` and
- `--jvm-args-append` arguments that are now executed at the `Run` stage instead of 
- `Generate-Config`. (#629) 
+`--jvm-args-append` arguments that can now be passed at the `Run` stage instead of `Generate-Config`
+. Also, the value of `--jvm-args-append` is not saved to any of the configuration files. (#629) 
 
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package

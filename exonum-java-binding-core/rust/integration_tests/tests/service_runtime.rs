@@ -4,7 +4,7 @@ extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
 use integration_tests::vm::{get_fakes_classpath, get_libpath};
-use java_bindings::{Config, JavaServiceRuntime, EjbConfig, JvmConfig, ServiceConfig};
+use java_bindings::{Config, EjbConfig, JavaServiceRuntime, JvmConfig, ServiceConfig};
 
 const TEST_SERVICE_MODULE_NAME: &str =
     "com.exonum.binding.fakes.services.service.TestServiceModule";
@@ -19,7 +19,7 @@ fn bootstrap() {
     let jvm_config = JvmConfig {
         args_prepend: Vec::new(),
         args_append: Vec::new(),
-        jvm_debug_socket: None
+        jvm_debug_socket: None,
     };
 
     let ejb_config = EjbConfig {

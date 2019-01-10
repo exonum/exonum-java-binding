@@ -34,7 +34,7 @@ pub struct JvmConfig {
     /// Passed directly to JVM while initializing EJB runtime.
     /// Parameters must not have dash at the beginning.
     /// Some parameters are forbidden for setting up by user.
-    /// Parameters that prepends the rest.
+    /// Parameters that are prepended to the rest.
     pub args_prepend: Vec<String>,
     /// Parameters that get appended to the rest.
     pub args_append: Vec<String>,

@@ -94,19 +94,19 @@ $ cargo run -- finalize testnet/sec.toml testnet/node.toml \
 ### Step 3. Run Configured Node
 
 ```$sh
-$ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 
+$ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
 ```
 
 There are few specific optional parameters here:
 - `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
- append the rest of arguments. Must not have a leading dash. For example, `Xmx2G` or `Xdebug`.
+ append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
 
 ```$sh
 $ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
-	 --jvm-args-prepend Xmx2G \
-	 --jvm-args-append Xdebug \
+	 --jvm-args-prepend Xms512M \
+	 --jvm-args-append Xmx2G \
 	 --jvm-debug localhost:8000
 ```
 
