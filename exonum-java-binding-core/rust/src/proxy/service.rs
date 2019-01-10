@@ -1,9 +1,9 @@
 use exonum::api::ServiceApiBuilder;
 use exonum::blockchain::{Service, ServiceContext, Transaction};
 use exonum::crypto::Hash;
-use exonum::encoding::Error as MessageError;
-use exonum::messages::RawMessage;
+use exonum::messages::RawTransaction;
 use exonum::storage::{Fork, Snapshot};
+use failure;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::JavaType;
 use serde_json;
@@ -94,9 +94,12 @@ impl Service for ServiceProxy {
         }))
     }
 
-    fn tx_from_raw(&self, raw: RawMessage) -> Result<Box<Transaction>, MessageError> {
+    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
         unwrap_jni(self.exec.with_attached(|env| {
-            let transaction_message = JObject::from(env.byte_array_from_slice(raw.as_ref())?);
+            let raw_clone = raw.clone();
+            let (tx_id, payload) = raw.service_transaction().into_raw_parts();
+            let payload = JObject::from(env.byte_array_from_slice(&payload)?);
+
             let res = unsafe {
                 env.call_method_unsafe(
                     self.service.as_obj(),
@@ -104,7 +107,7 @@ impl Service for ServiceProxy {
                     JavaType::Object(
                         "com/exonum/binding/service/adapters/UserTransactionAdapter".into(),
                     ),
-                    &[JValue::from(transaction_message)],
+                    &[JValue::from(tx_id), JValue::from(payload)],
                 )
             };
             // TODO consider whether `NullPointerException` should raise a panic:
@@ -114,11 +117,11 @@ impl Service for ServiceProxy {
                     let java_transaction_proxy = TransactionProxy::from_global_ref(
                         self.exec.clone(),
                         env.new_global_ref(java_transaction.l()?)?,
-                        raw,
+                        raw_clone,
                     );
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
-                Err(error_message) => Err(MessageError::Basic(error_message.into())),
+                Err(error_message) => Err(format_err!("{}", error_message)),
             })
         }))
     }

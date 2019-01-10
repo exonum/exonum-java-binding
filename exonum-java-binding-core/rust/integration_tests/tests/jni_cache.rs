@@ -51,7 +51,6 @@ fn concurrent_cache_read() {
             barrier.wait();
             jni_cache::transaction_adapter::execute_id();
             jni_cache::transaction_adapter::info_id();
-            jni_cache::transaction_adapter::verify_id();
             jni_cache::service_adapter::convert_transaction_id();
             jni_cache::service_adapter::state_hashes_id();
             jni_cache::class::get_name_id();

@@ -1,39 +1,33 @@
-extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
+extern crate exonum_testkit;
 #[macro_use]
 extern crate serde_derive;
 
-use std::{
-    panic::{catch_unwind, AssertUnwindSafe},
-    sync::Arc,
-};
-
-use exonum_testkit::TestKitBuilder;
-
 use integration_tests::{
-    mock::{
-        service::ServiceMockBuilder,
-        transaction::{create_mock_transaction, INFO_VALUE},
-    },
+    mock::{service::ServiceMockBuilder, transaction::create_empty_raw_transaction},
     test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE},
     vm::create_vm_for_tests_with_fake_classes,
 };
+
 use java_bindings::{
     exonum::{
         blockchain::Service,
         crypto::hash,
-        encoding::Error as MessageError,
-        messages::RawTransaction,
         storage::{Database, MemoryDB},
     },
     jni::{objects::JObject, JavaVM},
-    serde_json,
+    serde_json::{self, Value},
     utils::{any_to_string, convert_to_string, unwrap_jni},
     JniExecutor, MainExecutor,
 };
+
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::sync::Arc;
+
+use exonum_testkit::TestKitBuilder;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
@@ -48,8 +42,7 @@ const TEST_CONFIG_JSON: &str = r#""test config""#;
 const TEST_CONFIG_NOT_JSON: &str = r#"()"#;
 
 lazy_static! {
-    static ref TEST_CONFIG_VALUE: serde_json::Value =
-        serde_json::Value::String("test config".to_string());
+    static ref TEST_CONFIG_VALUE: Value = Value::String("test config".to_string());
 }
 
 #[test]
@@ -92,24 +85,9 @@ fn state_hash() {
 }
 
 #[test]
-fn tx_from_raw() {
-    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, true);
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .convert_transaction(java_transaction)
-        .build();
-    let executable_transaction = service
-        .tx_from_raw(raw_message)
-        .expect("Failed to convert transaction");
-    assert_eq!(
-        executable_transaction.serialize_field().unwrap(),
-        *INFO_VALUE
-    );
-}
-
-#[test]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn tx_from_raw_should_panic_if_java_error_occurred() {
-    let raw = RawTransaction::from_vec(vec![]);
+    let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(OOM_ERROR_CLASS)
         .build();
@@ -118,18 +96,16 @@ fn tx_from_raw_should_panic_if_java_error_occurred() {
 
 #[test]
 fn tx_from_raw_should_return_err_if_java_exception_occurred() {
-    let raw = RawTransaction::from_vec(vec![]);
+    let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
         .build();
     let err = service
         .tx_from_raw(raw)
         .expect_err("This transaction should be de-serialized with an error!");
-    if let MessageError::Basic(ref s) = err {
-        assert!(s.starts_with("Java exception: java.lang.RuntimeException"));
-    } else {
-        panic!("Unexpected error message {:#?}", err);
-    }
+    assert!(err
+        .to_string()
+        .starts_with("Java exception: java.lang.RuntimeException"));
 }
 
 #[test]
@@ -155,7 +131,7 @@ fn initialize_config_null() {
         .build();
 
     let config = service.initialize(&mut fork);
-    assert_eq!(config, serde_json::Value::Null);
+    assert_eq!(config, Value::Null);
 }
 
 #[test]

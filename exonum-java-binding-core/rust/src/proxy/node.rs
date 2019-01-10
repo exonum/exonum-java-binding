@@ -1,16 +1,18 @@
-use exonum::blockchain::{Blockchain, Transaction};
-use exonum::crypto::PublicKey;
-use exonum::messages::RawMessage;
-use exonum::node::{ApiSender, TransactionSend};
-use exonum::storage::Snapshot;
+use exonum::{
+    blockchain::Blockchain,
+    crypto::{Hash, PublicKey},
+    messages::{Message, RawTransaction, ServiceTransaction},
+    node::ApiSender,
+    storage::Snapshot,
+};
+use failure;
 use jni::objects::JClass;
-use jni::sys::{jbyteArray, jint, jobject};
+use jni::sys::{jbyteArray, jshort};
 use jni::JNIEnv;
 
-use std::error::Error;
-use std::{io, panic, ptr};
+use std::{panic, ptr};
 
-use proxy::{MainExecutor, TransactionProxy};
+use proxy::MainExecutor;
 use storage::View;
 use utils::{
     cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose,
@@ -19,9 +21,6 @@ use utils::{
 use JniResult;
 
 const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/service/InternalServerError";
-const INVALID_TRANSACTION_EXCEPTION: &str =
-    "com/exonum/binding/service/InvalidTransactionException";
-const VERIFY_ERROR_MESSAGE: &str = "Unable to verify transaction";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
@@ -30,7 +29,7 @@ pub struct NodeContext {
     executor: MainExecutor,
     blockchain: Blockchain,
     public_key: PublicKey,
-    channel: ApiSender,
+    transaction_sender: ApiSender,
 }
 
 impl NodeContext {
@@ -39,13 +38,13 @@ impl NodeContext {
         executor: MainExecutor,
         blockchain: Blockchain,
         public_key: PublicKey,
-        channel: ApiSender,
+        transaction_sender: ApiSender,
     ) -> Self {
         NodeContext {
             executor,
             blockchain,
             public_key,
-            channel,
+            transaction_sender,
         }
     }
 
@@ -65,60 +64,65 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: Box<Transaction>) -> io::Result<()> {
-        self.channel.send(transaction)
+    pub fn submit(&self, transaction: RawTransaction) -> Result<Hash, failure::Error> {
+        let service_id = transaction.service_id();
+        let msg = Message::sign_transaction(
+            transaction.service_transaction(),
+            service_id,
+            self.blockchain.service_keypair.0,
+            &self.blockchain.service_keypair.1,
+        );
+        let tx_hash = msg.hash();
+
+        self.transaction_sender.broadcast_transaction(msg)?;
+        Ok(tx_hash)
     }
 }
 
-/// Submits a transaction into the network.
+/// Submits a transaction into the network. Returns transaction hash as byte array.
 ///
 /// Parameters:
 /// - `node_handle` - a native handle to the native node object
 /// - `transaction` - a transaction to submit
-/// - `message` - an array containing the transaction message
-/// - `offset` - an offset from which the message starts
-/// - `size` - a size of the message in bytes
+/// - `payload` - an array containing the transaction payload
+/// - `service_id` - an identifier of the service
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
-    transaction: jobject,
-    message: jbyteArray,
-    offset: jint,
-    size: jint,
-) {
+    payload: jbyteArray,
+    service_id: jshort,
+    transaction_id: jshort,
+) -> jbyteArray {
+    use std::ptr;
+    use utils::convert_hash;
     let res = panic::catch_unwind(|| {
-        assert!(offset >= 0, "Offset can't be negative");
-        assert!(size >= 0, "Size can't be negative");
-        let (offset, size) = (offset as usize, size as usize);
         let node = cast_handle::<NodeContext>(node_handle);
-        unwrap_jni_verbose(
+        let hash = unwrap_jni_verbose(
             &env,
-            || -> JniResult<()> {
-                let message = env.convert_byte_array(message)?;
-                let message = message[offset..offset + size].to_vec();
-                let message = RawMessage::from_vec(message);
-                let transaction = env.new_global_ref(transaction.into())?;
-                let exec = node.executor().clone();
-                let transaction = TransactionProxy::from_global_ref(exec, transaction, message);
-                if let Err(err) = node.submit(Box::new(transaction)) {
-                    let class;
-                    if err.kind() == io::ErrorKind::Other
-                        && err.description() == VERIFY_ERROR_MESSAGE
-                    {
-                        class = INVALID_TRANSACTION_EXCEPTION;
-                    } else {
-                        class = INTERNAL_SERVER_ERROR;
-                    };
-                    env.throw_new(class, err.description())?;
+            || -> JniResult<Option<Hash>> {
+                let payload = env.convert_byte_array(payload)?;
+                let service_transaction =
+                    ServiceTransaction::from_raw_unchecked(transaction_id as u16, payload);
+                let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
+                match node.submit(raw_transaction) {
+                    Ok(tx_hash) => Ok(Some(tx_hash)),
+                    Err(err) => {
+                        let error_class = INTERNAL_SERVER_ERROR;
+                        let error_description = err.to_string();
+                        env.throw_new(error_class, error_description)?;
+                        Ok(None)
+                    }
                 }
-                Ok(())
             }(),
         );
-        Ok(())
+        match hash {
+            Some(hash) => Ok(convert_hash(&env, &hash)?),
+            None => Ok(ptr::null_mut()),
+        }
     });
-    unwrap_exc_or_default(&env, res);
+    unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Creates a new snapshot of the current database state.

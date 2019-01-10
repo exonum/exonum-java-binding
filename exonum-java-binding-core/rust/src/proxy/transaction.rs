@@ -1,35 +1,27 @@
-use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction};
-use exonum::encoding::serialize::json::ExonumJson;
-use exonum::encoding::serialize::WriteBufferWrapper;
-use exonum::encoding::Offset;
-use exonum::messages::{Message, RawMessage};
-use exonum::storage::Fork;
+use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
+use exonum::messages::BinaryForm;
+use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{JavaType, Primitive};
 use jni::JNIEnv;
-use serde_json;
-use serde_json::value::Value;
+use serde;
 
-use std::error::Error;
 use std::fmt;
 
 use storage::View;
 use utils::{
-    check_error_on_exception, convert_to_string, describe_java_exception,
-    get_and_clear_java_exception, get_exception_message,
-    jni_cache::{classes_refs, transaction_adapter},
-    panic_on_exception, to_handle, unwrap_jni,
+    describe_java_exception, get_and_clear_java_exception, get_exception_message,
+    jni_cache::{classes_refs::transaction_execution_exception, transaction_adapter::execute_id},
+    to_handle, unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
-
-const RETVAL_TYPE_STRING: &str = "java/lang/String";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
 pub struct TransactionProxy {
     exec: MainExecutor,
     transaction: GlobalRef,
-    raw: RawMessage,
+    raw: RawTransaction,
 }
 
 // `TransactionProxy` is immutable, so it can be safely used in different threads.
@@ -43,7 +35,11 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef, raw: RawMessage) -> Self {
+    pub fn from_global_ref(
+        exec: MainExecutor,
+        transaction: GlobalRef,
+        raw: RawTransaction,
+    ) -> Self {
         TransactionProxy {
             exec,
             transaction,
@@ -52,84 +48,50 @@ impl TransactionProxy {
     }
 }
 
-impl ExonumJson for TransactionProxy {
-    fn deserialize_field<B>(
-        _value: &Value,
-        _buffer: &mut B,
-        _from: Offset,
-        _to: Offset,
-    ) -> Result<(), Box<Error>>
+impl serde::Serialize for TransactionProxy {
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as serde::Serializer>::Ok, <S as serde::Serializer>::Error>
     where
-        Self: Sized,
-        B: WriteBufferWrapper,
+        S: serde::Serializer,
     {
-        unimplemented!("Is not used in Java bindings")
-    }
-
-    fn serialize_field(&self) -> Result<Value, Box<Error + Send + Sync>> {
-        let res: Result<String, String> = unwrap_jni(self.exec.with_attached(|env| {
-            let res = unsafe {
-                env.call_method_unsafe(
-                    self.transaction.as_obj(),
-                    transaction_adapter::info_id(),
-                    JavaType::Object(RETVAL_TYPE_STRING.into()),
-                    &[],
-                )
-            };
-
-            Ok(check_error_on_exception(env, res).map(|json_string| {
-                let obj = unwrap_jni(json_string.l());
-                unwrap_jni(convert_to_string(env, obj))
-            }))
-        }));
-        Ok(serde_json::from_str(&res?)?)
+        serializer.serialize_bytes(
+            &self
+                .raw
+                .encode()
+                .expect("Could not serialize TransactionProxy"),
+        )
     }
 }
 
 impl Transaction for TransactionProxy {
-    fn verify(&self) -> bool {
+    fn execute(&self, mut context: TransactionContext) -> ExecutionResult {
         let res = self.exec.with_attached(|env: &JNIEnv| {
-            let res = unsafe {
-                env.call_method_unsafe(
-                    self.transaction.as_obj(),
-                    transaction_adapter::verify_id(),
-                    JavaType::Primitive(Primitive::Boolean),
-                    &[],
-                )
-            };
-            panic_on_exception(env, res).z()
-        });
-        unwrap_jni(res)
-    }
+            let tx_hash = context.tx_hash();
+            let author_pk = context.author();
 
-    fn execute(&self, fork: &mut Fork) -> ExecutionResult {
-        let res = self.exec.with_attached(|env: &JNIEnv| {
-            let view_handle = to_handle(View::from_ref_fork(fork));
+            let view_handle = to_handle(View::from_ref_fork(context.fork()));
+            let tx_hash = JObject::from(env.byte_array_from_slice(tx_hash.as_ref())?);
+            let author_pk = JObject::from(env.byte_array_from_slice(author_pk.as_ref())?);
+
             let res = unsafe {
                 env.call_method_unsafe(
                     self.transaction.as_obj(),
-                    transaction_adapter::execute_id(),
+                    execute_id(),
                     JavaType::Primitive(Primitive::Void),
-                    &[JValue::from(view_handle)],
+                    &[
+                        JValue::from(view_handle),
+                        JValue::from(tx_hash),
+                        JValue::from(author_pk),
+                    ],
                 )
                 .and_then(JValue::v)
             };
+
             Ok(check_transaction_execution_result(env, res))
         });
         unwrap_jni(res)
-    }
-}
-
-impl Message for TransactionProxy {
-    fn from_raw(_raw: RawMessage) -> Result<Self, ::exonum::encoding::Error>
-    where
-        Self: Sized,
-    {
-        unimplemented!("Is not used in Java bindings")
-    }
-
-    fn raw(&self) -> &RawMessage {
-        &self.raw
     }
 }
 
@@ -150,9 +112,7 @@ fn check_transaction_execution_result<T>(
         JniErrorKind::JavaException => {
             let exception = get_and_clear_java_exception(env);
             let message = unwrap_jni(get_exception_message(env, exception));
-            if !unwrap_jni(
-                env.is_instance_of(exception, &classes_refs::transaction_execution_exception()),
-            ) {
+            if !unwrap_jni(env.is_instance_of(exception, &transaction_execution_exception())) {
                 let panic_msg = describe_java_exception(env, exception);
                 panic!(panic_msg);
             }
