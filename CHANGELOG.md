@@ -21,15 +21,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
 - Support of Json serialization in a common way. (#611)  
+- Support of separated messages format Exonum v0.10. (#574)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
   `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
   to use this implementation of `MapEntry`.
+- `com.exonum.binding.transaction.Transaction#execute` now accepts 
+  `com.exonum.binding.transaction.TransactionContext`
+  instead of `com.exonum.binding.storage.database.View`  
 
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
+- Exonum v0.9 message format related classes.
   
 ### Fixed
 - A bug in the cryptocurrency demo frontend that sometimes resulted in rejected transactions and/or

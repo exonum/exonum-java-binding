@@ -19,24 +19,22 @@ package com.exonum.binding.fakes.mocks;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class ThrowingTransactionsTest {
 
-  @Test
-  void createThrowingIllegalArgument() {
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
-
-    assertThrows(exceptionType, transaction::isValid);
-  }
+  @Mock
+  private TransactionContext context;
 
   @Test
   void createThrowingIllegalArgumentInInfo() {
@@ -52,7 +50,7 @@ class ThrowingTransactionsTest {
     Class<OutOfMemoryError> exceptionType = OutOfMemoryError.class;
     Transaction transaction = ThrowingTransactions.createThrowing(exceptionType);
 
-    assertThrows(exceptionType, transaction::isValid);
+    assertThrows(exceptionType, () -> transaction.execute(context));
   }
 
   @Test
@@ -73,10 +71,10 @@ class ThrowingTransactionsTest {
     byte errorCode = 1;
     String description = "Foo";
     Transaction tx = ThrowingTransactions.createThrowingExecutionException(false,
-            errorCode, description);
+        errorCode, description);
 
     TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
-        () -> tx.execute(mock(Fork.class)));
+        () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
   }
@@ -86,10 +84,10 @@ class ThrowingTransactionsTest {
     byte errorCode = 1;
     String description = "Foo";
     Transaction tx = ThrowingTransactions.createThrowingExecutionException(true,
-            errorCode, description);
+        errorCode, description);
 
     TransactionExecutionException actual = assertThrows(TestTxExecException.class,
-        () -> tx.execute(mock(Fork.class)));
+        () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
   }

@@ -23,17 +23,11 @@ import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.service.InvalidTransactionException;
-import com.exonum.binding.transaction.Transaction;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -51,8 +45,6 @@ final class ApiController {
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
 
-  @VisibleForTesting
-  static final String SUBMIT_TRANSACTION_PATH = "/submit-transaction";
   private static final String WALLET_ID_PARAM = "walletId";
   private static final String GET_WALLET_PATH = "/wallet/:" + WALLET_ID_PARAM;
   private static final String GET_WALLET_HISTORY_PATH = "/wallet/:" + WALLET_ID_PARAM + "/history";
@@ -71,7 +63,6 @@ final class ApiController {
 
     ImmutableMap<String, Handler<RoutingContext>> handlers =
         ImmutableMap.<String, Handler<RoutingContext>>builder()
-            .put(SUBMIT_TRANSACTION_PATH, this::submitTransaction)
             .put(GET_WALLET_PATH, this::getWallet)
             .put(GET_WALLET_HISTORY_PATH, this::getWalletHistory)
             .build();
@@ -79,32 +70,6 @@ final class ApiController {
     handlers.forEach((path, handler) ->
         router.route(path).handler(handler)
     );
-  }
-
-  private void submitTransaction(RoutingContext rc) {
-    checkRequestContentType(rc, "application/octet-stream");
-
-    // Read the transaction message
-    Buffer buffer = rc.getBody();
-    BinaryMessage message = BinaryMessage.fromBytes(buffer.getBytes());
-
-    // Create a transaction for the given binary message.
-    Transaction tx = service.convertToTransaction(message);
-
-    // Submit the transaction to the network.
-    HashCode txHash = service.submitTransaction(tx);
-
-    rc.response()
-        .putHeader("Content-Type", "text/plain")
-        .end(String.valueOf(txHash));
-  }
-
-  private void checkRequestContentType(RoutingContext rc,
-      String expectedContentType) {
-    String contentType = rc.request().getHeader("Content-Type");
-
-    checkArgument(expectedContentType.equals(contentType), "Content-Type must be %s, but was %s",
-        expectedContentType, contentType);
   }
 
   private void getWallet(RoutingContext rc) {
@@ -187,13 +152,6 @@ final class ApiController {
       return Optional.of(message);
     }
 
-    // Check for checked InvalidTransactionExceptions — they are wrapped in RuntimeExceptions.
-    Throwable cause = requestFailure.getCause();
-    if (cause instanceof InvalidTransactionException) {
-      String description = Strings.nullToEmpty(cause.getLocalizedMessage());
-      String message = String.format("Transaction is not valid: %s", description);
-      return Optional.of(message);
-    }
     // This throwable must correspond to an internal server error.
     return Optional.empty();
   }

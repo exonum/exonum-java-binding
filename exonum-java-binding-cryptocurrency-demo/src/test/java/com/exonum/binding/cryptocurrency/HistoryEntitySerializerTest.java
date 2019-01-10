@@ -43,7 +43,7 @@ class HistoryEntitySerializerTest {
         .setWalletFrom(CryptoFunctions.ed25519().generateKeyPair().getPublicKey())
         .setWalletTo(CryptoFunctions.ed25519().generateKeyPair().getPublicKey())
         .setAmount(10L)
-        .setTransactionHash(HashCode.fromString("a0a0a0a0a0"))
+        .setTxMessageHash(HashCode.fromString("a0a0a0a0a0"))
         .build();
   }
 

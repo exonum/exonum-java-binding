@@ -16,48 +16,32 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CRYPTO_FUNCTION;
-import static com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionTemplate.newCryptocurrencyTransactionBuilder;
-
-import com.exonum.binding.common.crypto.KeyPair;
-import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
-import com.google.protobuf.ByteString;
+import com.exonum.binding.cryptocurrency.CryptocurrencyService;
+import com.exonum.binding.transaction.RawTransaction;
 
 class CreateWalletTransactionUtils {
 
   static final long DEFAULT_BALANCE = 100L;
 
   /**
-   * Creates new signed binary create wallet message using provided owner key pair.
+   * Creates new raw create wallet transaction using provided owner key and default balance.
    */
-  static BinaryMessage createSignedMessage(KeyPair ownerKeyPair) {
-    BinaryMessage unsignedMessage = createUnsignedMessage(ownerKeyPair.getPublicKey(),
-        DEFAULT_BALANCE);
-    return unsignedMessage.sign(CRYPTO_FUNCTION, ownerKeyPair.getPrivateKey());
+  static RawTransaction createRawTransaction() {
+    return createRawTransaction(DEFAULT_BALANCE);
   }
 
   /**
-   * Creates new unsigned binary create wallet message using provided owner key and default balance.
+   * Creates new raw create wallet transaction using provided owner key and provided balance.
    */
-  static BinaryMessage createUnsignedMessage(PublicKey ownerKey) {
-    return createUnsignedMessage(ownerKey, DEFAULT_BALANCE);
-  }
-
-  /**
-   * Creates new unsigned binary create wallet message using provided owner key and provided
-   * balance.
-   */
-  static BinaryMessage createUnsignedMessage(PublicKey ownerKey, long initialBalance) {
-    return newCryptocurrencyTransactionBuilder(CreateWalletTx.ID)
-        .setBody(TxMessageProtos.CreateWalletTx.newBuilder()
-            .setOwnerPublicKey(ByteString.copyFrom(ownerKey.toBytes()))
+  static RawTransaction createRawTransaction(long initialBalance) {
+    return RawTransaction.newBuilder()
+        .serviceId(CryptocurrencyService.ID)
+        .transactionId(CreateWalletTx.ID)
+        .payload(TxMessageProtos.CreateWalletTx.newBuilder()
             .setInitialBalance(initialBalance)
             .build()
             .toByteArray())
-        .setSignature(new byte[Message.SIGNATURE_SIZE])
-        .buildRaw();
+        .build();
   }
 
   private CreateWalletTransactionUtils() {

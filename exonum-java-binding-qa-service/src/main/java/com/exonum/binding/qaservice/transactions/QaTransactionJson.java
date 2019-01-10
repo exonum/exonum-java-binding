@@ -25,7 +25,7 @@ import com.exonum.binding.qaservice.PromoteToCore;
  */
 @PromoteToCore("… in some form or another. You may add a constructor that accepts extra "
     + "type hierarchy adapters to create a proper GSON.")
-public final class QaTransactionGson {
+public final class QaTransactionJson {
 
   /**
    * Converts a transaction of QA service with the given body into its JSON representation.
@@ -35,7 +35,7 @@ public final class QaTransactionGson {
    * @return a transaction message serialized in JSON
    * @see AnyTransaction
    */
-  public String toJson(short txId, Object txBody) {
+  public static String toJson(short txId, Object txBody) {
     AnyTransaction txParams = new AnyTransaction<>(txId, txBody);
     return json().toJson(txParams);
   }

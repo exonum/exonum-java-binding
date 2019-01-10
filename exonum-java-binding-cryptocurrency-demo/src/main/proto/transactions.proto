@@ -5,14 +5,12 @@ option java_outer_classname = "TxMessageProtos";
 
 message TransferTx {
   int64 seed = 1;
-  bytes fromWallet = 2;
-  bytes toWallet = 3;
-  int64 sum = 4;
+  bytes toWallet = 2;
+  int64 sum = 3;
 }
 
 message CreateWalletTx {
-  bytes ownerPublicKey = 1;
-  int64 initialBalance = 2;
+  int64 initialBalance = 1;
 }
 
 message HistoryEntity {

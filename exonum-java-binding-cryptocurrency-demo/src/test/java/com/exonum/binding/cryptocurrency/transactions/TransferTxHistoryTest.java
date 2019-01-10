@@ -17,18 +17,16 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.iterableWithSize;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.HistoryEntity;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
@@ -39,6 +37,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
@@ -49,10 +48,11 @@ class TransferTxHistoryTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.firstOwnerKey;
-  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.secondOwnerKey;
+  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
 
   @Test
+  @RequiresNativeLibrary
   void transfersHistoryBetweenTwoAccountsTest() throws Exception {
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -66,13 +66,24 @@ class TransferTxHistoryTest {
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
-      TransferTx tx1 = withMockMessage(seed1, ACCOUNT_1, ACCOUNT_2, transferSum1);
-      tx1.execute(view);
+      HashCode txMessageHash1 = HashCode.fromString("a0a0a0a0");
+      TransferTx tx1 = new TransferTx(seed1, ACCOUNT_2, transferSum1);
+      TransactionContext context1 = newContextBuilder(view)
+          .txMessageHash(txMessageHash1)
+          .authorPk(ACCOUNT_1)
+          .build();
+      tx1.execute(context1);
+
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
-      TransferTx tx2 = withMockMessage(seed2, ACCOUNT_2, ACCOUNT_1, transferSum2);
-      tx2.execute(view);
+      HashCode txMessageHash2 = HashCode.fromString("b1b1b1b1");
+      TransferTx tx2 = new TransferTx(seed2, ACCOUNT_1, transferSum2);
+      TransactionContext context2 = newContextBuilder(view)
+          .txMessageHash(txMessageHash2)
+          .authorPk(ACCOUNT_2)
+          .build();
+      tx2.execute(context2);
 
       // Check that wallets have correct balances
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -88,14 +99,14 @@ class TransferTxHistoryTest {
           .setWalletFrom(ACCOUNT_1)
           .setWalletTo(ACCOUNT_2)
           .setAmount(transferSum1)
-          .setTransactionHash(tx1.hash())
+          .setTxMessageHash(context1.getTransactionMessageHash())
           .build();
       HistoryEntity expectedEntity2 = HistoryEntity.Builder.newBuilder()
           .setSeed(seed2)
           .setWalletFrom(ACCOUNT_2)
           .setWalletTo(ACCOUNT_1)
           .setAmount(transferSum2)
-          .setTransactionHash(tx2.hash())
+          .setTxMessageHash(context2.getTransactionMessageHash())
           .build();
       assertThat(schema.walletHistory(ACCOUNT_1),
           allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));
@@ -103,15 +114,6 @@ class TransferTxHistoryTest {
           allOf(iterableWithSize(2), hasItem(expectedEntity), hasItem(expectedEntity2)));
     }
 
-  }
-
-  private TransferTx withMockMessage(long seed, PublicKey senderId, PublicKey recipientId,
-      long amount) {
-    // If a normal binary message object is ever needed, take the code from the 'fromMessage' test
-    // and put it here, replacing `mock(BinaryMessage.class)`.
-    BinaryMessage message = mock(BinaryMessage.class);
-    lenient().when(message.hash()).thenReturn(HashCode.fromString("a0a0a0a0"));
-    return new TransferTx(message, seed, senderId, recipientId, amount);
   }
 
 }

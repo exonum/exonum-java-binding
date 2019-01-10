@@ -12,24 +12,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.exonum.binding.qaservice.transactions;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.TransactionContext;
-import org.junit.jupiter.api.Test;
 
-class UnknownTxTest {
+/**
+ * Helper class to provide preconfigured context with default values.
+ */
+public final class ContextUtils {
+  private static final HashCode DEFAULT_HASH = HashCode.fromString("a0b0c0d0");
+  private static final PublicKey DEFAULT_AUTHOR_KEY = PublicKey.fromHexString("abcd");
 
-  @Test
-  void execute() {
-    UnknownTx tx = new UnknownTx();
-
-    assertThrows(AssertionError.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+  /**
+   * Returns new context with default values for a given view.
+   */
+  public static TransactionContext newContext(Fork view) {
+    return TransactionContext.builder()
+        .fork(view)
+        .txMessageHash(DEFAULT_HASH)
+        .authorPk(DEFAULT_AUTHOR_KEY)
+        .build();
   }
 
 }

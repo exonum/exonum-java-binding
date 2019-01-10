@@ -18,15 +18,12 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.INVALID;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.INVALID_THROWING;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkServiceId;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.service.TransactionConverter;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -36,30 +33,23 @@ import java.util.function.Function;
 public final class QaTransactionConverter implements TransactionConverter {
 
   @VisibleForTesting
-  static final ImmutableMap<Short, Function<BinaryMessage, Transaction>> TRANSACTION_FACTORIES =
-      ImmutableMap.<Short, Function<BinaryMessage, Transaction>>builder()
-          .put(INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromMessage)
-          .put(CREATE_COUNTER.id(), CreateCounterTx.converter()::fromMessage)
-          .put(INVALID.id(), InvalidTx.converter()::fromMessage)
-          .put(INVALID_THROWING.id(), InvalidThrowingTx.converter()::fromMessage)
-          .put(VALID_THROWING.id(), ValidThrowingTx.converter()::fromMessage)
-          .put(VALID_ERROR.id(), ValidErrorTx.converter()::fromMessage)
+  static final ImmutableMap<Short, Function<RawTransaction, Transaction>> TRANSACTION_FACTORIES =
+      ImmutableMap.<Short, Function<RawTransaction, Transaction>>builder()
+          .put(INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromRawTransaction)
+          .put(CREATE_COUNTER.id(), CreateCounterTx.converter()::fromRawTransaction)
+          .put(VALID_THROWING.id(), ThrowingTx.converter()::fromRawTransaction)
+          .put(VALID_ERROR.id(), ErrorTx.converter()::fromRawTransaction)
           .build();
 
   @Override
-  public Transaction toTransaction(BinaryMessage message) {
-    checkServiceId(message);
+  public Transaction toTransaction(RawTransaction rawTransaction) {
+    checkServiceId(rawTransaction);
 
-    short txId = message.getMessageType();
+    short txId = rawTransaction.getTransactionId();
     return TRANSACTION_FACTORIES.getOrDefault(txId, (m) -> {
       throw new IllegalArgumentException("Unknown transaction id: " + txId);
     })
-        .apply(message);
+        .apply(rawTransaction);
   }
 
-  private static void checkServiceId(BinaryMessage message) {
-    short serviceId = message.getServiceId();
-    checkArgument(serviceId == QaService.ID,
-        "Wrong service id (%s), must be %s", serviceId, QaService.ID);
-  }
 }

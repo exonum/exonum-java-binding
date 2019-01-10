@@ -18,9 +18,7 @@ package com.exonum.binding.fakes;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
@@ -28,23 +26,6 @@ import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import org.junit.jupiter.api.Test;
 
 class NativeFacadeTest {
-
-  private static final String TX_VALUE = "value";
-  private static final String TX_INFO = "{}";
-
-  @Test
-  void createValidTransaction() {
-    UserTransactionAdapter tx = NativeFacade.createTransaction(true, TX_VALUE, TX_INFO);
-
-    assertTrue(tx.isValid());
-  }
-
-  @Test
-  void createInvalidTransaction() {
-    UserTransactionAdapter tx = NativeFacade.createTransaction(false, TX_VALUE, TX_INFO);
-
-    assertFalse(tx.isValid());
-  }
 
   @Test
   void createThrowingIllegalArgumentInInfo() {
@@ -56,8 +37,9 @@ class NativeFacadeTest {
 
   @Test
   void createTransactionWithInfo() {
+    String txValue = "value";
     String txInfo = "{ \"info\": \"A custom transaction information\" }";
-    UserTransactionAdapter tx = NativeFacade.createTransaction(true, TX_VALUE, txInfo);
+    UserTransactionAdapter tx = NativeFacade.createTransaction(txValue, txInfo);
 
     assertThat(tx.info(), equalTo(txInfo));
   }

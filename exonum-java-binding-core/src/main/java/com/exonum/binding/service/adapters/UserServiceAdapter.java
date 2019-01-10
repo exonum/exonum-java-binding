@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.service.BlockCommittedEvent;
@@ -29,11 +28,11 @@ import com.exonum.binding.service.NodeProxy;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
@@ -77,30 +76,35 @@ public class UserServiceAdapter {
    *
    * <p>The callee must handle the declared exceptions.
    *
-   * @param transactionMessage a transaction message to be converted
+   * @param transactionId an identifier of the transaction
+   * @param payload a transaction payload
    * @return an executable transaction of this service
-   * @throws NullPointerException if transactionMessage is null, or a user service returns
+   * @throws NullPointerException if payload is null, or a user service returns
    *     a null transaction
    * @throws IllegalArgumentException if message is not a valid transaction message of this service
    */
-  public UserTransactionAdapter convertTransaction(byte[] transactionMessage) {
+  public UserTransactionAdapter convertTransaction(short transactionId, byte[] payload) {
     try {
-      BinaryMessage message = BinaryMessage.fromBytes(transactionMessage);
-      assert message.getServiceId() == getId() :
-          "Message id is distinct from the service id";
-
-      Transaction transaction = service.convertToTransaction(message);
+      checkNotNull(payload);
+      RawTransaction rawTransaction = RawTransaction.newBuilder()
+          .serviceId(service.getId())
+          .transactionId(transactionId)
+          .payload(payload)
+          .build();
+      Transaction transaction = service.convertToTransaction(rawTransaction);
       checkNotNull(transaction, "Invalid service implementation: "
               + "Service#convertToTransaction must never return null.\n"
               + "Throw an exception if your service does not recognize this message id (%s)",
-          message.getMessageType());
+          transactionId);
+
       return new UserTransactionAdapter(transaction, viewFactory);
     } catch (NullPointerException | IllegalArgumentException e) {
-      logger.warn("Failed to convert transaction {}", Arrays.toString(transactionMessage), e);
+      logger.warn("Failed to convert transaction {} for service {}",
+          transactionId, service.getId(), e);
       throw e;
     } catch (Exception e) {
-      logger.error("Unexpected exception occurs at convert transaction {}",
-          Arrays.toString(transactionMessage), e);
+      logger.error("Unexpected exception occurs at convert transaction {} for service {}",
+          transactionId, service.getId(), e);
       throw e;
     }
   }
@@ -141,7 +145,8 @@ public class UserServiceAdapter {
    * @return the service global configuration as a JSON string or null if it does not have any
    * @see Service#initialize(Fork)
    */
-  public @Nullable String initialize(long forkHandle) {
+  @Nullable
+  public String initialize(long forkHandle) {
     assert forkHandle != 0;
 
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
@@ -160,7 +165,7 @@ public class UserServiceAdapter {
   public void mountPublicApiHandler(long nodeNativeHandle) {
     try {
       checkState(node == null, "There is a node already: are you calling this method twice?");
-      node = new NodeProxy(nodeNativeHandle, viewFactory);
+      node = new NodeProxy(nodeNativeHandle);
       Router router = server.createRouter();
       service.createPublicApiHandlers(node, router);
       server.mountSubRouter(serviceApiPath(), router);
