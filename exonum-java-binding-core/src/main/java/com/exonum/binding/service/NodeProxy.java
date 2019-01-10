@@ -118,8 +118,8 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    */
   @Override
   public PublicKey getPublicKey() {
-    byte[] bytePk = nativeGetPublicKey(getNativeHandle());
-    return PublicKey.fromBytes(bytePk);
+    byte[] publicKey = nativeGetPublicKey(getNativeHandle());
+    return PublicKey.fromBytes(publicKey);
   }
 
   private native byte[] nativeGetPublicKey(long nativeHandle);

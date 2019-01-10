@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -66,7 +67,7 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    */
   public NodeFake(MemoryDb database) {
-    this(database, PublicKey.fromBytes(new byte[0]));
+    this(database, PublicKey.fromBytes(new byte[PUBLIC_KEY_BYTES]));
   }
 
   /**
