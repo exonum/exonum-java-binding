@@ -1,52 +1,37 @@
 import Vue from 'vue/dist/vue'
 import axios from 'axios'
-import fs from 'fs'
-import path from 'path'
 import MockAdapter from 'axios-mock-adapter'
-import * as Exonum from 'exonum-client'
 import * as Blockchain from '../src/plugins/blockchain.js'
 
 const mock = new MockAdapter(axios)
 const MAX_VALUE = 2147483647
 const hexRegex = /[0-9A-Fa-f]+/i
+const TRANSACTION_URL = '/api/explorer/v1/transactions'
+const TRANSACTION_EXPLORER_URL = '/api/explorer/v1/transactions?hash='
+const keyPair = {
+  publicKey: '78cf8b5e5c020696319eb32a1408e6c65e7d97733d34528fbdce08438a0243e8',
+  secretKey: 'b5b3ccf6ca4475b7ff3d910d5ab31e4723098490a3e341dd9d2896b42ebc9f8978cf8b5e5c020696319eb32a1408e6c65e7d97733d34528fbdce08438a0243e8'
+}
 
 Vue.use(Blockchain)
 
-const bufferToHex = buffer => Exonum.uint8ArrayToHexadecimal(new Uint8Array(buffer))
+// Mock `createWallet` transaction
+const createWalletTxHash = '55209b3c6bd8593b9c90eacd3a57cfc448ebc0d47316235a4ca3a1751548a384'
+mock.onPost(TRANSACTION_URL, {
+  'tx_body': '78cf8b5e5c020696319eb32a1408e6c65e7d97733d34528fbdce08438a0243e80000800002000a084a6f686e20446f65a71558ef2f2d592acfffbac71ea13327a78be83d6977240d3ca8cf4a92ba3d87cd30b9df1ca9b83147be274a85369ce5a2ce3e3a490be6acbaca48c764b40907'
+}).replyOnce(200)
 
-const createWalletTX = bufferToHex(fs.readFileSync(path.resolve(__dirname, './mocks/createWallet.tx')))
-const transferFundsTX = bufferToHex(fs.readFileSync(path.resolve(__dirname, './mocks/transferFunds.tx')))
+mock.onGet(`${TRANSACTION_EXPLORER_URL}${createWalletTxHash}`).replyOnce(200, { 'type': 'in-pool' })
 
-mock.onPost('/api/cryptocurrency-demo-service/submit-transaction')
-  .replyOnce(config => {
-    const dataHex = bufferToHex(config.data)
-    if (dataHex === createWalletTX) return [200, 'ad248cd86e1fc27bde07f25a6d4632c3a8c596851a78cd0035f1ababcee2986d']
-  })
+mock.onGet(`${TRANSACTION_EXPLORER_URL}${createWalletTxHash}`).replyOnce(200, { 'type': 'committed' })
 
-mock.onGet('/api/explorer/v1/transactions/ad248cd86e1fc27bde07f25a6d4632c3a8c596851a78cd0035f1ababcee2986d').replyOnce(200, {
-  'type': 'in-pool'
-})
+// Mock `transfer` transaction
+const transferTxHash = '85e2c97aab7d2b6518850b3c9f647b1bb2fa7f8370f33c6f9b6c11cfa6371969'
+mock.onPost(TRANSACTION_URL, {
+  'tx_body': '78cf8b5e5c020696319eb32a1408e6c65e7d97733d34528fbdce08438a0243e80000800000000a220a20278663010ebe1136011618ad5be1b9d6f51edc5b6c6b51b5450ffc72f54a57df10191880a0db99c6b080bc6ba0bfeb12fc750df184136bd8d9a4f33676b8ee6e1e40754d7d19f0cb4f62db67e36e83253e737dce0ec3a6566857ef71de440d329fd470e77fed232d2411590c'
+}).replyOnce(200)
 
-mock.onGet('/api/explorer/v1/transactions/ad248cd86e1fc27bde07f25a6d4632c3a8c596851a78cd0035f1ababcee2986d').replyOnce(200, {
-  'type': 'committed'
-})
-
-mock.onPost('/api/cryptocurrency-demo-service/submit-transaction').replyOnce(config => {
-  const dataHex = bufferToHex(config.data)
-  if (dataHex === transferFundsTX) return [200, '1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127']
-})
-
-mock.onGet('/api/explorer/v1/transactions?hash=1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
-  'type': 'in-pool'
-})
-
-mock.onGet('/api/explorer/v1/transactions?hash=1ef4ad31435588a8290a460d1bd0f57edce7ec2e34258693b25216818ed2b127').replyOnce(200, {
-  'type': 'committed'
-})
-
-mock.onGet('/api/cryptocurrency-demo-service/wallet/9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13').replyOnce(200, {
-  'balance': '75'
-})
+mock.onGet(`${TRANSACTION_EXPLORER_URL}${transferTxHash}`).replyOnce(200, { 'type': 'committed' })
 
 describe('Interaction with blockchain', () => {
   it('should generate new signing key pair', () => {
@@ -65,26 +50,17 @@ describe('Interaction with blockchain', () => {
   })
 
   it('should create new wallet', async () => {
-    const keyPair = {
-      publicKey: '47ac527ee7b903b0da76d1e0e6b649e9b2e7456aa56343204de9c5cc5a8efb0c',
-      secretKey: '82f74d982b2a750466294b1d162fd8b12609414f8abf00561865700fe367c7f247ac527ee7b903b0da76d1e0e6b649e9b2e7456aa56343204de9c5cc5a8efb0c'
-    }
-    const data = await Vue.prototype.$blockchain.createWallet(keyPair, 432)
-    expect(data.data).toEqual('ad248cd86e1fc27bde07f25a6d4632c3a8c596851a78cd0035f1ababcee2986d')
+    const balance = 93
+
+    await expect(Vue.prototype.$blockchain.createWallet(keyPair, balance)).resolves
   })
 
   it('should transfer funds', async () => {
-    const keyPair = {
-      publicKey: '9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13',
-      secretKey: 'e6361a3221d68148bcb5875af57b2ef8f3cbf821dadaab8ad27bc50d29abf22a9f3ed8007937950d889981a1f0beff041f54d704840e01c207b07b0d5581db13'
-    }
-    const receiver = '7c3cd965f8084b5730f0f95da1f3b5baf7554c044078d986e249d78c4ee00a98'
+    const receiver = '278663010ebe1136011618ad5be1b9d6f51edc5b6c6b51b5450ffc72f54a57df'
     const amountToTransfer = '25'
-    const seed = '21093588264774074'
-    const data = await Vue.prototype.$blockchain.transfer(keyPair, receiver, amountToTransfer, seed)
+    const seed = '7743941227375415562'
 
-    expect(data).toEqual({
-      'type': 'committed'
-    })
+    await expect(Vue.prototype.$blockchain.transfer(keyPair, receiver, amountToTransfer, seed)).resolves
   })
+
 })
