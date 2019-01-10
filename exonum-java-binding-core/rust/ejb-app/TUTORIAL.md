@@ -103,15 +103,20 @@ There are few specific optional parameters here:
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
 
-```$sh
+#### Debugging the JVM
+
+To enable remote debugging of Java code on a running Exonum node, 
+pass `--jvm-debug` option with a socket address to connect to
+from a debugger:
+
+```sh
 $ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
-	 --jvm-args-prepend Xms512M \
-	 --jvm-args-append Xmx2G \
-	 --jvm-debug localhost:8000
+    --jvm-debug localhost:8000
 ```
 
-Now you can use your favorite JDWP client for debugging:
+Now you can debug the service using any JDWP client, such as command line
+JDB or a debugger built in your IDE:
 
-```$sh
+```sh
 jdb -attach localhost:8000 -sourcepath /path/to/source
-``` 
+```

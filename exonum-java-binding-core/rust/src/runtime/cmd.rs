@@ -209,7 +209,7 @@ impl CommandExtension for Run {
             .clone()
             .try_into()?;
 
-        // Now we're ready to construct the full configuration
+        // Construct the complete EJB configuration
         let config = Config {
             jvm_config,
             ejb_config,
