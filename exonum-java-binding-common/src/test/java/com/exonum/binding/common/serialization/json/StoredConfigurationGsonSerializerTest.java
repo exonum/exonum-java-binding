@@ -46,7 +46,7 @@ class StoredConfigurationGsonSerializerTest {
       + "    }\n"
       + "],\n"
       + "\"consensus\": {\n"
-      + "    \"round_timeout\": 3000,\n"
+      + "    \"first_round_timeout\": 3000,\n"
       + "    \"status_timeout\": 5000,\n"
       + "    \"peers_timeout\": 10000,\n"
       + "    \"txs_block_limit\": 1000,\n"
@@ -90,7 +90,7 @@ class StoredConfigurationGsonSerializerTest {
     assertThat(consensusConfiguration.minProposeTimeout(), is(10L));
     assertThat(consensusConfiguration.peersTimeout(), is(10000L));
     assertThat(consensusConfiguration.proposeTimeoutThreshold(), is(500));
-    assertThat(consensusConfiguration.roundTimeout(), is(3000L));
+    assertThat(consensusConfiguration.firstRoundTimeout(), is(3000L));
     assertThat(consensusConfiguration.statusTimeout(), is(5000L));
     assertThat(consensusConfiguration.txsBlockLimit(), is(1000));
 
@@ -117,7 +117,7 @@ class StoredConfigurationGsonSerializerTest {
         )
         .consensusConfiguration(
             ConsensusConfiguration.builder()
-                .roundTimeout(1)
+                .firstRoundTimeout(1)
                 .statusTimeout(2)
                 .peersTimeout(3)
                 .txsBlockLimit(4)
