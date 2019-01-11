@@ -118,5 +118,5 @@ Now you can debug the service using any JDWP client, such as command line
 JDB or a debugger built in your IDE:
 
 ```sh
-jdb -attach localhost:8000 -sourcepath /path/to/source
+$ jdb -attach localhost:8000 -sourcepath /path/to/source
 ```
