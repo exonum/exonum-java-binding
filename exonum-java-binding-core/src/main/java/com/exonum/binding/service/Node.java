@@ -52,7 +52,10 @@ public interface Node {
   <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction);
 
   /**
-   * Returns the service public key of this node.
+   * Returns the service public key of this node. The corresponding private key is used
+   * for signing transactions in {@link #submitTransaction(RawTransaction)}.
+   *
+   * <p>This key is stored under "service_public_key" key in the node configuration file.
    *
    * @throws IllegalStateException if the node proxy is closed
    */
