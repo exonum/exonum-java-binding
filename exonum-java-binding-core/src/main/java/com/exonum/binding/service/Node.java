@@ -52,7 +52,7 @@ public interface Node {
   <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction);
 
   /**
-   * Returns the public key of this node.
+   * Returns the service public key of this node.
    *
    * @throws IllegalStateException if the node proxy is closed
    */
