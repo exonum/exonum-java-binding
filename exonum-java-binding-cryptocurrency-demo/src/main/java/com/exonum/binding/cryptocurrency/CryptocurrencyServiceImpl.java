@@ -37,6 +37,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 
@@ -92,11 +93,16 @@ public final class CryptocurrencyServiceImpl extends AbstractService
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
 
-      return StreamSupport.stream(walletHistory.spliterator(), false)
+      return stream(walletHistory)
           .map(txMessages::get)
           .map(this::createTransferHistoryEntry)
           .collect(toList());
     });
+  }
+
+  private static Stream<HashCode> stream(ListIndex<HashCode> list) {
+    // TODO: Replace with a proper thing in ECR-597!
+    return StreamSupport.stream(list.spliterator(), false);
   }
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {
