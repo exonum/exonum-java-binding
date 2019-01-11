@@ -18,7 +18,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_BALANCE;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_INITIAL_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -75,7 +75,7 @@ class CreateWalletTxTest {
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx() throws Exception {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
 
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -92,7 +92,7 @@ class CreateWalletTxTest {
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       assertTrue(wallets.containsKey(OWNER_KEY));
-      assertThat(wallets.get(OWNER_KEY).getBalance(), equalTo(DEFAULT_BALANCE));
+      assertThat(wallets.get(OWNER_KEY).getBalance(), equalTo(DEFAULT_INITIAL_BALANCE));
     }
   }
 
@@ -103,7 +103,7 @@ class CreateWalletTxTest {
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
-      Long initialBalance = DEFAULT_BALANCE;
+      Long initialBalance = DEFAULT_INITIAL_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -128,7 +128,7 @@ class CreateWalletTxTest {
 
   @Test
   void info() {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
 
     String info = tx.info();
 

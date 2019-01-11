@@ -82,7 +82,7 @@ public final class NodeFake implements Node {
   }
 
   /**
-   * A no-op.
+   * Returns a zero hash always, ignoring the transaction.
    *
    * @param transaction a transaction to send
    * @throws NullPointerException if the transaction is null

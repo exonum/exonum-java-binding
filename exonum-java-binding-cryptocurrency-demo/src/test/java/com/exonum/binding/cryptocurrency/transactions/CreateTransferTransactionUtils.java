@@ -28,7 +28,7 @@ import com.google.protobuf.ByteString;
 class CreateTransferTransactionUtils {
 
   /**
-   * Creates new raw transfer transaction message using provided keys and provided amount.
+   * Creates a new raw transfer transaction message using the provided receiver key and amount.
    */
   static RawTransaction createRawTransaction(long seed, PublicKey recipientId, long amount) {
     return RawTransaction.newBuilder()
