@@ -21,7 +21,7 @@ import com.google.common.io.BaseEncoding;
 /**
  * Utils for crypto system.
  */
-class CryptoUtils {
+public class CryptoUtils {
 
   private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
@@ -30,7 +30,7 @@ class CryptoUtils {
    *
    * @throws NullPointerException if it is {@code null}
    */
-  static boolean hasLength(byte[] data, int size) {
+  public static boolean hasLength(byte[] data, int size) {
     return data.length == size;
   }
 
@@ -40,7 +40,7 @@ class CryptoUtils {
    * @param hex hexadecimal string
    * @return bytes array
    */
-  static byte[] hexToByteArray(String hex) {
+  public static byte[] hexToByteArray(String hex) {
     return HEX_ENCODING.decode(hex);
   }
 
@@ -50,7 +50,7 @@ class CryptoUtils {
    * @param bytes bytes array
    * @return hexadecimal string
    */
-  static String byteArrayToHex(byte[] bytes) {
+  public static String byteArrayToHex(byte[] bytes) {
     return HEX_ENCODING.encode(bytes);
   }
 
