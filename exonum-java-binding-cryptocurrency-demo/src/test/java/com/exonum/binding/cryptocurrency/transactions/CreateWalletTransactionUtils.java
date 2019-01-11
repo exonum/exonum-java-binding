@@ -21,17 +21,17 @@ import com.exonum.binding.transaction.RawTransaction;
 
 class CreateWalletTransactionUtils {
 
-  static final long DEFAULT_BALANCE = 100L;
+  static final long DEFAULT_INITIAL_BALANCE = 100L;
 
   /**
-   * Creates new raw create wallet transaction using provided owner key and default balance.
+   * Creates new raw create wallet transaction with a default initial balance.
    */
   static RawTransaction createRawTransaction() {
-    return createRawTransaction(DEFAULT_BALANCE);
+    return createRawTransaction(DEFAULT_INITIAL_BALANCE);
   }
 
   /**
-   * Creates new raw create wallet transaction using provided owner key and provided balance.
+   * Creates new raw create wallet transaction with a given initial balance.
    */
   static RawTransaction createRawTransaction(long initialBalance) {
     return RawTransaction.newBuilder()
