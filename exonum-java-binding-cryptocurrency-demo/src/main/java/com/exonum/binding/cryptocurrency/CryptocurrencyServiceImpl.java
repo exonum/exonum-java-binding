@@ -107,7 +107,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {
     checkState(txMessage.getServiceId() == getId(),
-        "service id mismatch: message contains %s, expected %s", txMessage.getServiceId(), getId());
+        "Service ID mismatch: message contains %s, expected %s", txMessage.getServiceId(), getId());
     try {
       TxMessageProtos.TransferTx txBody = TxMessageProtos.TransferTx
           .parseFrom(txMessage.getPayload());
