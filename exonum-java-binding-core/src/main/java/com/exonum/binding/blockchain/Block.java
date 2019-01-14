@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Schema;
 import com.google.auto.value.AutoValue;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 
 /**
  * Exonum block header data structure.
@@ -31,6 +33,8 @@ import com.google.auto.value.AutoValue;
  *
  * <p>This structure only contains the amount of transactions and the transactions root hash as well
  * as other information, but not the transactions themselves.
+ *
+ * @see Blockchain
  */
 @AutoValue
 public abstract class Block {
@@ -46,8 +50,12 @@ public abstract class Block {
   public abstract int getProposerId();
 
   /**
-   * Height of the block, which also identifies the number of this particular block in the
-   * blockchain starting from 0 ("genesis" block).
+   * Returns the height of this block which is a distance between the last block and the "genesis"
+   * block. Genesis block has 0 height. Therefore, the blockchain height is equal to
+   * the number of blocks plus one.
+   *
+   * <p>The height also identifies each block in the blockchain.
+   *
    */
   public abstract long getHeight();
 
@@ -80,6 +88,15 @@ public abstract class Block {
     // as they will have close to uniform distribution.
     // AutoValue will still use all fields in #equals.
     return getBlockHash().hashCode();
+  }
+
+  /**
+   * Provides a Gson type adapter for this class.
+   *
+   * @see com.exonum.binding.blockchain.serialization.BlockAdapterFactory
+   */
+  public static TypeAdapter<Block> typeAdapter(Gson gson) {
+    return new AutoValue_Block.GsonTypeAdapter(gson);
   }
 
   /**

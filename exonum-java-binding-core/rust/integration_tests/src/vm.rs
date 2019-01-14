@@ -17,6 +17,13 @@ pub fn create_vm_for_benchmarks() -> Arc<JavaVM> {
     Arc::new(create_vm(false, false))
 }
 
+/// Creates a configured `JavaVM` for benchmarks with fake classes.
+/// _`JavaVM` should be created only *once*._
+#[allow(dead_code)]
+pub fn create_vm_for_benchmarks_with_fakes() -> Arc<JavaVM> {
+    Arc::new(create_vm(false, true))
+}
+
 /// Creates a configured `JavaVM` for tests.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]

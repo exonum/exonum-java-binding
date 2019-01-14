@@ -45,7 +45,7 @@ class CoreSchemaProxyIntegrationTest {
 
   @Test
   void getAllBlockHashesTest() {
-    assertSchema((schema) -> assertThat(schema.getAllBlockHashes()).isEmpty());
+    assertSchema((schema) -> assertThat(schema.getBlockHashes()).isEmpty());
   }
 
   @Test

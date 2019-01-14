@@ -36,7 +36,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
     CoreProtos.TransactionResult txLocation =
         CoreProtos.TransactionResult.newBuilder()
             .setStatus(status)
-            .setDescription(value.getErrorDescription().orElse(""))
+            .setDescription(value.getErrorDescription())
             .build();
     return txLocation.toByteArray();
   }
