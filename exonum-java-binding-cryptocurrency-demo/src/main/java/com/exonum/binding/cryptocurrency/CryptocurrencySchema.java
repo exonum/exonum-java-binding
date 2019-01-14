@@ -60,7 +60,7 @@ public final class CryptocurrencySchema implements Schema {
 
   /**
    * Returns transactions history of the wallet. It contains hashes of
-   * {@link com.exonum.binding.cryptocurrency.transactions.TransferTx} transaction messages,
+   * {@link com.exonum.binding.cryptocurrency.transactions.TransferTx} transaction messages
    * that changed the balance of the given wallet.
    *
    * @param walletId wallet address
