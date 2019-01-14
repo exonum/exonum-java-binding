@@ -19,7 +19,6 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -37,7 +36,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
-import java.util.List;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -93,9 +92,9 @@ class TransferTxHistoryTest {
       assertThat(wallets.get(ACCOUNT_2).getBalance(), equalTo(expectedBalance2));
 
       // Check history
-      List<HashCode> expectedEntries = asList(txMessageHash1, txMessageHash2);
-      assertThat(schema.transactionsHistory(ACCOUNT_1), contains(expectedEntries));
-      assertThat(schema.transactionsHistory(ACCOUNT_2), contains(expectedEntries));
+      Matcher<Iterable<?>> containsExpectedEntries = contains(txMessageHash1, txMessageHash2);
+      assertThat(schema.transactionsHistory(ACCOUNT_1), containsExpectedEntries);
+      assertThat(schema.transactionsHistory(ACCOUNT_2), containsExpectedEntries);
     }
   }
 }
