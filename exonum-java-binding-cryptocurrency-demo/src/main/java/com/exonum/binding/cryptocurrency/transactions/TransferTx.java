@@ -26,10 +26,9 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.HistoryEntity;
-import com.exonum.binding.cryptocurrency.HistoryEntity.Builder;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
@@ -95,18 +94,14 @@ public final class TransferTx implements Transaction {
     Wallet to = wallets.get(toWallet);
     checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
 
+    // Update the balances
     wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
     wallets.put(toWallet, new Wallet(to.getBalance() + sum));
 
-    HistoryEntity historyEntity = Builder.newBuilder()
-        .setSeed(seed)
-        .setWalletFrom(fromWallet)
-        .setWalletTo(toWallet)
-        .setAmount(sum)
-        .setTxMessageHash(context.getTransactionMessageHash())
-        .build();
-    schema.walletHistory(fromWallet).add(historyEntity);
-    schema.walletHistory(toWallet).add(historyEntity);
+    // Update the transaction history of each wallet
+    HashCode messageHash = context.getTransactionMessageHash();
+    schema.transactionsHistory(fromWallet).add(messageHash);
+    schema.transactionsHistory(toWallet).add(messageHash);
   }
 
   // todo: consider extracting in a TransactionPreconditions or

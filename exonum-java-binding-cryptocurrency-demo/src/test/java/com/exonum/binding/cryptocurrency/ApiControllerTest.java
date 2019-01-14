@@ -149,7 +149,7 @@ class ApiControllerTest {
   @Test
   void getWalletHistory(VertxTestContext context) {
     List<HistoryEntity> history = singletonList(
-        HistoryEntity.Builder.newBuilder()
+        HistoryEntity.newBuilder()
             .setSeed(1L)
             .setWalletFrom(FROM_KEY)
             .setWalletTo(TO_KEY)

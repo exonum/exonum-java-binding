@@ -18,7 +18,9 @@ package com.exonum.binding.cryptocurrency;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyIterable;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
@@ -36,6 +38,8 @@ class CryptocurrencySchemaIntegrationTest {
     LibraryLoader.load();
   }
 
+  private static final PublicKey WALLET_OWNER_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+
   @Test
   void getStateHashes() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
@@ -47,6 +51,17 @@ class CryptocurrencySchemaIntegrationTest {
       ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
 
       assertThat(schema.getStateHashes(), equalTo(expectedHashes));
+    }
+  }
+
+  @Test
+  void walletHistoryNoRecords() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Snapshot view = db.createSnapshot(cleaner);
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+
+      assertThat(schema.transactionsHistory(WALLET_OWNER_KEY), emptyIterable());
     }
   }
 }
