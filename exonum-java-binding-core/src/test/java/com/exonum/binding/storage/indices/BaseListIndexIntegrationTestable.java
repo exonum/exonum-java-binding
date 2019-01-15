@@ -18,10 +18,12 @@ package com.exonum.binding.storage.indices;
 
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.storage.indices.TestStorageItems.V3;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,11 +35,14 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -298,6 +303,58 @@ abstract class BaseListIndexIntegrationTestable
       List<String> iterElements = ImmutableList.copyOf(iterator);
 
       assertThat(iterElements, equalTo(elements));
+    });
+  }
+
+  @Test
+  void testStream() {
+    runTestWithView(database::createFork, (l) -> {
+      List<String> elements = TestStorageItems.values;
+
+      l.addAll(elements);
+
+      List<String> streamElements = l.stream()
+          .collect(Collectors.toList());
+
+      assertThat(streamElements, equalTo(elements));
+    });
+  }
+
+  @Test
+  void streamIsLateBinding() {
+    runTestWithView(database::createFork, (l) -> {
+      // Add some elements
+      l.add(V1);
+      l.add(V2);
+
+      // Create a stream
+      Stream<String> stream = l.stream();
+
+      // Replace the first
+      l.set(0, V3);
+
+      // Check the updated values are available, with no exceptions
+      String[] streamElements = stream.toArray(String[]::new);
+      assertThat(streamElements, arrayContaining(V3, V2));
+    });
+  }
+
+  @Test
+  void streamDetectsStructuralModifications() {
+    runTestWithView(database::createFork, (l) -> {
+      // Add some elements
+      l.add(V1);
+      l.add(V2);
+
+      // Create a stream that modifies the collection while it is evaluated
+      long maxIterations = l.size();
+      assertThrows(ConcurrentModificationException.class, () -> l.stream()
+          // Perform a structurally-interfering operation on the source list
+          .peek(l::add)
+          // Limit, so that we don't get infinite number of iterations in case of a broken
+          // spliterator
+          .limit(maxIterations)
+          .count());
     });
   }
 

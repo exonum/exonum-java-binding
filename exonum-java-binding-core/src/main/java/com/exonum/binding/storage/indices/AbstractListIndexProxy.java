@@ -25,6 +25,7 @@ import com.exonum.binding.storage.database.View;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 /**
  * An abstract class for list indices implementing {@link ListIndex} interface.
@@ -114,6 +115,11 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
         dbView,
         modCounter,
         serializer::fromBytes);
+  }
+
+  @Override
+  public Stream<T> stream() {
+    return null;
   }
 
   abstract void nativeAdd(long nativeHandle, byte[] e);
