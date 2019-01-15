@@ -1,5 +1,5 @@
 language: java
-dist: trusty
+dist: xenial
 sudo: false
 
 # Build only the following branches/tags pushed to the repository:
@@ -7,6 +7,8 @@ branches:
   only:
     - master
     - ejb-app-configuration
+    # TODO: remove after merging this branch to the master
+    - new-message-format-1
     # Also build tagged revisions, e.g. v1.2.3-beta
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
@@ -25,9 +27,7 @@ addons:
 
 env:
   global:
-    - RUST_COMPILER_VERSION=nightly
-    - RUST_NIGHTLY_VERSION=nightly-2018-06-29
-    - RUST_CLIPPY_VERSION=0.0.211
+    - RUST_COMPILER_VERSION=stable
     - EJB_RUST_BUILD_DIR="$TRAVIS_BUILD_DIR/exonum-java-binding-core/rust/"
     # REPO_TOKEN used for integration with coveralls is encoded here
     - secure: Fp22iaJpttsIArAyWmdCGNtljIALTYRVKO7O+H2hgBkwHHqrU7+15sbaq3xzhz4YNWNfuFMIkFUBgd/KYHgAuNDDrtm2agib13C0lQT1NFQO9ccmNCJNsXQrYrXGwpnNqPKp0YmfBfgNwzEpBerlbtvzV/T/RZukT/403XxwxU9y5tHfQokwVLibqP2jJsxdihTfCKIOs+o6hBfArmsn+e+panEv17ZrCjOmBIM/W70Rf2rEM26wFnYsfnAUTCkpl4Ong0SYNpZZxNMtw61W8ApDY8bpz7cKUxCv7SmD3kO7Y+TTHWfWYx6FNXtUpE1vCi6I7fZAY16rViTWOX55NCeFQz56XER7ArJQZtC/nC1lZ9tGKtcofu2Rq7WUoRuTwvLTaf6VzAP/CUj0DUxkV+8WUggl3s/Im7Y9rn8Aqvh8LReZmqzTY+dJ0hFG4DLoLtl71eTEnNoumi5UleBhJPaei3wPNPHg1WlOmhFyhRCsbIIGiyFtSj/faLmdc7tN/sBFANb0g4Exl0mRNvB0IfS1gM6XouEGUTlVree68p11PnsGJGs/QaUB9F9AAGVKTZ2kz7sqkCDdGmLxzbdidYDHZtYWfOIYSJCQsA09n2Txi0fwNByKfl/spdyMmtI1uGeT803rhN9vu0NGrQFG3mU7mqO33fUDEStIQ6/xn0A=
@@ -82,12 +82,34 @@ before_install:
   - cargo install --list
   # Install OSX requirements
   # TODO: Temporary fix, the problem is described here: https://jira.bf.local/browse/ECR-2795
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsodium rocksdb pkg-config || brew install libsodium rocksdb pkg-config; fi
-  # force building instead of using from apt.
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsodium rocksdb pkg-config protobuf || brew install libsodium rocksdb pkg-config protobuf; fi
+#  # force building instead of using from apt.
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
-install: true  # Skip the installation step, as Maven requires
-               # several extra properties when run on a CI server (see below).
+#install: true  # Skip the installation step, as Maven requires
+#               # several extra properties when run on a CI server (see below).
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y gdb; fi # install gdb
+
+before_script:
+  - ulimit -c unlimited -S
+
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
+
+after_script:
+#  - find "$TRAVIS_BUILD_DIR" -name "service_proxy*"
+#  - find "$TRAVIS_BUILD_DIR" -name "service_runtime*"
+  - find "$EJB_RUST_BUILD_DIR/target/debug/deps" -name "transaction_proxy-*"
+
+after_failure:
+  - COREFILE=$(find "$TRAVIS_BUILD_DIR" -name core | head -n 1) # find core file
+  - ls -l "$COREFILE"
+#  - EXEFILE=$(find "$EJB_RUST_BUILD_DIR/target/debug/deps" -name "service_proxy-*" | head -n 1)
+#  - EXEFILE="/home/travis/build/exonum/exonum-java-binding/exonum-java-binding-core/rust/target/debug/deps/service_proxy-2044b6bf673e2c95"
+#  - EXEFILE="/home/travis/build/exonum/exonum-java-binding/exonum-java-binding-core/rust/target/debug/deps/service_runtime-e225faf0fc016b62"
+#  - EXEFILE=$(find "$EJB_RUST_BUILD_DIR/target/debug/deps" -name "transaction_proxy-*" | head -n 2 | tail -n 1)
+  - EXEFILE="/home/travis/build/exonum/exonum-java-binding/exonum-java-binding-core/rust//target/debug/deps/transaction_proxy-9580d82563f65eb5"
+  - ls -l "$EXEFILE"
+  - if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" "$EXEFILE" -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
