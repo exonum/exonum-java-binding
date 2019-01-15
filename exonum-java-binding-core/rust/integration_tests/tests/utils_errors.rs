@@ -19,12 +19,14 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::{
+    executor::create_executor_with_cache_initialized, vm::create_vm_for_tests_with_fake_classes,
+};
 use java_bindings::{
     jni::{objects::JThrowable, JNIEnv, JavaVM},
     utils::{
         check_error_on_exception, get_and_clear_java_exception, get_class_name,
-        get_exception_message, jni_cache, panic_on_exception,
+        get_exception_message, panic_on_exception,
     },
     JniErrorKind, JniExecutor, JniResult, MainExecutor,
 };
@@ -39,15 +41,7 @@ const CUSTOM_EXCEPTION_MESSAGE: &str = "Test exception message";
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = {
-        let ex = MainExecutor::new(VM.clone());
-        // JNI_OnLoad() is not called for these tests
-        ex.with_attached(|env|{
-            jni_cache::init_cache(env);
-            Ok(())
-        }).unwrap();
-        ex
-    };
+    pub static ref EXECUTOR: MainExecutor = create_executor_with_cache_initialized(VM.clone());
 }
 
 #[test]

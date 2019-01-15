@@ -36,6 +36,7 @@ fn concurrent_cache_read() {
     const THREAD_NUM: usize = 8;
     let mut threads = Vec::new();
 
+    // Initialize JNI cache
     EXECUTOR
         .with_attached(|env| {
             jni_cache::init_cache(env);

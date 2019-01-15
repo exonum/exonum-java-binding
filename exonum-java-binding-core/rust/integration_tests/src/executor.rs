@@ -15,12 +15,16 @@
  */
 
 use example_proxy::AtomicIntegerProxy;
-use java_bindings::jni::sys::jint;
-use java_bindings::jni::JavaVM;
-use java_bindings::{JniErrorKind, JniExecutor};
+use java_bindings::{
+    jni::{sys::jint, JavaVM},
+    utils::jni_cache,
+    JniErrorKind, JniExecutor, MainExecutor,
+};
 
-use std::sync::{Arc, Barrier};
-use std::thread::spawn;
+use std::{
+    sync::{Arc, Barrier},
+    thread::spawn,
+};
 
 /// Checks if detached native thread attaches and detaches as it should when calls to
 /// `with_attached` appears to be nested. After the nested function call ends, thread should stay
@@ -48,6 +52,18 @@ pub fn check_attached(vm: &JavaVM) {
 
 pub fn check_detached(vm: &JavaVM) {
     assert!(!is_attached(vm));
+}
+
+/// Creates MainExecutor and initializes JNI cache
+pub fn create_executor_with_cache_initialized(vm: Arc<JavaVM>) -> MainExecutor {
+    let executor = MainExecutor::new(vm);
+    executor
+        .with_attached(|env| {
+            jni_cache::init_cache(env);
+            Ok(())
+        })
+        .unwrap();
+    executor
 }
 
 pub fn is_attached(vm: &JavaVM) -> bool {
