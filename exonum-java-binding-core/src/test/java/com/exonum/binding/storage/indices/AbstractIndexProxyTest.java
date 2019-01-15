@@ -19,42 +19,25 @@ package com.exonum.binding.storage.indices;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ModificationCounter;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.database.ViewModificationCounter;
 import java.util.regex.Pattern;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PrepareForTest(ViewModificationCounter.class)
-//TODO disabled since jUnit5 doesn't support PowerMock yet.
-@Disabled
 class AbstractIndexProxyTest {
 
   private static final String INDEX_NAME = "index_name";
 
-  @Mock
-  private ViewModificationCounter modCounter;
 
   private AbstractIndexProxy proxy;
-
-  @BeforeEach
-  void setUp() {
-    mockStatic(ViewModificationCounter.class);
-    when(ViewModificationCounter.getInstance()).thenReturn(modCounter);
-  }
 
   @Test
   void testConstructor() {
@@ -74,23 +57,31 @@ class AbstractIndexProxyTest {
   @Test
   void notifyModifiedThrowsIfSnapshotPassed() {
     Snapshot dbView = createSnapshot();
-    proxy = new IndexProxyImpl(dbView);
+    ModificationCounter counter = dbView.getModificationCounter();
+    int initialValue = counter.getCurrentValue();
 
-    Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
-        + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
+    proxy = new IndexProxyImpl(dbView);
 
     UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
         () -> proxy.notifyModified());
+
+    Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
+        + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
     assertThat(thrown.getMessage(), matchesPattern(pattern));
+
+    assertFalse(counter.isModifiedSince(initialValue));
   }
 
   @Test
   void notifyModifiedAcceptsFork() {
     Fork dbView = createFork();
-    proxy = new IndexProxyImpl(dbView);
+    ModificationCounter counter = dbView.getModificationCounter();
+    int initialValue = counter.getCurrentValue();
 
+    proxy = new IndexProxyImpl(dbView);
     proxy.notifyModified();
-    verify(modCounter).notifyModified(eq(dbView));
+
+    assertTrue(counter.isModifiedSince(initialValue));
   }
 
   @Test
@@ -102,17 +93,17 @@ class AbstractIndexProxyTest {
   }
 
   /**
-   * Create a mock of a fork.
+   * Create a non-owning fork.
    */
   private Fork createFork() {
-    return mock(Fork.class);
+    return Fork.newInstance(0x01, false, new Cleaner());
   }
 
   /**
-   * Create a mock of a snapshot.
+   * Create a non-owning snapshot.
    */
   private Snapshot createSnapshot() {
-    return mock(Snapshot.class);
+    return Snapshot.newInstance(0x02, false, new Cleaner());
   }
 
   private static class IndexProxyImpl extends AbstractIndexProxy {

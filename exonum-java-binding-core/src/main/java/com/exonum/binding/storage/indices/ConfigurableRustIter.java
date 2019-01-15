@@ -18,8 +18,8 @@ package com.exonum.binding.storage.indices;
 
 import com.exonum.binding.proxy.AbstractNativeProxy;
 import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.storage.database.ModificationCounter;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.database.ViewModificationCounter;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
 import java.util.function.LongFunction;
@@ -32,8 +32,10 @@ import java.util.function.LongFunction;
 final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
   private final LongFunction<E> nextFunction;
+  // todo: This view is kept only for diagnostic purposes (to put in error message) —
+  //  shall we keep it?
   private final View collectionView;
-  private final ViewModificationCounter modificationCounter;
+  private final ModificationCounter modificationCounter;
   private final Integer initialModCount;
 
   /**
@@ -47,12 +49,12 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
   ConfigurableRustIter(NativeHandle nativeHandle,
                        LongFunction<E> nextFunction,
                        View collectionView,
-                       ViewModificationCounter modificationCounter) {
+                       ModificationCounter modificationCounter) {
     super(nativeHandle);
     this.nextFunction = nextFunction;
     this.collectionView = collectionView;
     this.modificationCounter = modificationCounter;
-    this.initialModCount = modificationCounter.getModificationCount(collectionView);
+    this.initialModCount = modificationCounter.getCurrentValue();
   }
 
   @Override
@@ -62,7 +64,7 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
   }
 
   private void checkNotModified() {
-    if (modificationCounter.isModifiedSince(collectionView, initialModCount)) {
+    if (modificationCounter.isModifiedSince(initialModCount)) {
       throw new ConcurrentModificationException("Fork was modified during iteration: "
           + collectionView);
     }
