@@ -588,6 +588,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "ejb-app"
 version = "0.4.0-rc-draft"
 dependencies = [
+ "env_logger 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-btc-anchoring 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-configuration 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.4.0-rc-draft",
