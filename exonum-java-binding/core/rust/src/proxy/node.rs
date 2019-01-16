@@ -117,26 +117,23 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
         let node = cast_handle::<NodeContext>(node_handle);
         let hash = unwrap_jni_verbose(
             &env,
-            || -> JniResult<Option<Hash>> {
+            || -> JniResult<jbyteArray> {
                 let payload = env.convert_byte_array(payload)?;
                 let service_transaction =
                     ServiceTransaction::from_raw_unchecked(transaction_id as u16, payload);
                 let raw_transaction = RawTransaction::new(service_id as u16, service_transaction);
                 match node.submit(raw_transaction) {
-                    Ok(tx_hash) => Ok(Some(tx_hash)),
+                    Ok(tx_hash) => convert_hash(&env, &tx_hash),
                     Err(err) => {
                         let error_class = INTERNAL_SERVER_ERROR;
                         let error_description = err.to_string();
                         env.throw_new(error_class, error_description)?;
-                        Ok(None)
+                        Ok(ptr::null_mut())
                     }
                 }
             }(),
         );
-        match hash {
-            Some(hash) => Ok(convert_hash(&env, &hash)?),
-            None => Ok(ptr::null_mut()),
-        }
+        Ok(hash)
     });
     unwrap_exc_or(&env, res, ptr::null_mut())
 }
