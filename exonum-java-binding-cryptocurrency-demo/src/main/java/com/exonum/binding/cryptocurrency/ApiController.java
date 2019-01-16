@@ -25,7 +25,6 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
@@ -51,7 +50,6 @@ final class ApiController {
 
   private final CryptocurrencyService service;
 
-  @Inject
   ApiController(CryptocurrencyService service) {
     this.service = service;
   }
