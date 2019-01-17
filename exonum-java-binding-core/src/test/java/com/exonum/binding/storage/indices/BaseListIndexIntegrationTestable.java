@@ -340,6 +340,24 @@ abstract class BaseListIndexIntegrationTestable
   }
 
   @Test
+  void streamIsLateBindingInCaseOfStructuralModifications() {
+    runTestWithView(database::createFork, (l) -> {
+      // Add an element
+      l.add(V1);
+
+      // Create a stream
+      Stream<String> stream = l.stream();
+
+      // Add a new one
+      l.add(V2);
+
+      // Check the updated values are available, with no exceptions
+      String[] streamElements = stream.toArray(String[]::new);
+      assertThat(streamElements, arrayContaining(V1, V2));
+    });
+  }
+
+  @Test
   void streamDetectsStructuralModifications() {
     runTestWithView(database::createFork, (l) -> {
       // Add some elements

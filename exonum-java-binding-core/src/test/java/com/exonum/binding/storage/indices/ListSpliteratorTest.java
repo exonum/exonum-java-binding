@@ -21,14 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.storage.database.IncrementalModificationCounter;
 import com.exonum.binding.storage.database.ModificationCounter;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -41,13 +40,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 @ExtendWith(MockitoExtension.class)
 class ListSpliteratorTest {
+
+  private static final Consumer<Integer> NULL_CONSUMER = e -> { };
 
   @Test
   void trySplit_Empty() {
@@ -93,7 +94,7 @@ class ListSpliteratorTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {3, 4, 5, 7, 8, 9, 16, 128, 1024, 2048})
+  @ValueSource(ints = {3, 4, 5, 7, 8, 9, 16, 128})
   @DisplayName("Multiple recursive trySplit split properly")
   void trySplit_splitsWhileSplittable(int size) {
     int[] array = IntStream.range(0, size).toArray();
@@ -141,12 +142,11 @@ class ListSpliteratorTest {
   @ParameterizedTest
   @MethodSource("bindingOperations")
   void spliteratorFailsFast(Consumer<Spliterator<Integer>> bindingOperation) {
-    View view = mock(Snapshot.class);
+    ListIndex<Integer> list = mock(ListIndex.class);
     ModificationCounter counter = mock(ModificationCounter.class);
 
     // Create a spliterator
-    int size = 10;
-    Spliterator<Integer> spliterator = new ListSpliterator<>(i -> (int) i, 0, size, view, counter);
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
     // Perform an operation that binds it to the source
     int counterAtBindTime = 1;
@@ -166,22 +166,21 @@ class ListSpliteratorTest {
    * the spliterator.
    */
   private static List<Consumer<Spliterator<Integer>>> bindingOperations() {
-    Consumer<Integer> nullConsumer = e -> { };
     return Arrays.asList(
-        s -> s.tryAdvance(nullConsumer),
+        s -> s.tryAdvance(NULL_CONSUMER),
         Spliterator::estimateSize,
         Spliterator::trySplit
     );
   }
 
   @Test
-  void spliteratorIsBoundToTheSourceAfterSplit() {
-    View view = mock(Snapshot.class);
+  void spliteratorRemainsBoundToTheSourceAfterSplit() {
+    ListIndex<Integer> list = mock(ListIndex.class);
+    when(list.size()).thenReturn(10L);
     ModificationCounter counter = new IncrementalModificationCounter();
 
     // Create a spliterator
-    int size = 10;
-    Spliterator<Integer> spliterator = new ListSpliterator<>(i -> (int) i, 0, size, view, counter);
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
     // Split the spliterator into two (binds the original spliterator to the source).
     Spliterator<Integer> other = spliterator.trySplit();
@@ -197,12 +196,13 @@ class ListSpliteratorTest {
 
   @Test
   void spliteratorIsLateBinding() {
-    View view = mock(Snapshot.class);
+    ListIndex<Integer> list = mock(ListIndex.class);
+    long size = 10;
+    when(list.size()).thenReturn(size);
     ModificationCounter counter = new IncrementalModificationCounter();
 
     // Create a spliterator
-    int size = 10;
-    Spliterator<Integer> spliterator = new ListSpliterator<>(i -> (int) i, 0, size, view, counter);
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
     // Notify of some modifications
     counter.notifyModified();
@@ -210,7 +210,7 @@ class ListSpliteratorTest {
     // Test that spliterator is usable despite modifications after initialization but before
     // binding
     assertThat(spliterator.estimateSize()).isEqualTo(size);
-    assertTrue(spliterator.tryAdvance(e -> { }));
+    assertTrue(spliterator.tryAdvance(NULL_CONSUMER));
 
     // Verify that subsequent modifications are detected
     counter.notifyModified();
@@ -218,63 +218,86 @@ class ListSpliteratorTest {
     assertHasDetectedModification(spliterator);
   }
 
+  @Test
+  @DisplayName("spliterator uses the list size at bind time, allowing for structural modifications")
+  void spliteratorIsLateBindingUsesProperSize() {
+    ListIndex<Integer> list = mock(ListIndex.class);
+    long size = 10;
+    long initialSize = size - 1;
+    when(list.size()).thenReturn(initialSize);
+    ModificationCounter counter = new IncrementalModificationCounter();
+
+    // Create a spliterator
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
+
+    // "Add" an element to the list
+    when(list.size()).thenReturn(size);
+    counter.notifyModified();
+
+    // Test that spliterator is usable despite modifications after initialization but before
+    // binding, reporting the correct size
+    assertThat(spliterator.estimateSize()).isEqualTo(size);
+  }
+
   private static void assertHasDetectedModification(Spliterator<Integer> spliterator) {
-    assertThrows(ConcurrentModificationException.class, () -> spliterator.tryAdvance(e -> { }));
     assertThrows(ConcurrentModificationException.class,
-        () -> spliterator.forEachRemaining(e -> { }));
+        () -> spliterator.tryAdvance(NULL_CONSUMER));
+    assertThrows(ConcurrentModificationException.class,
+        () -> spliterator.forEachRemaining(NULL_CONSUMER));
     assertThrows(ConcurrentModificationException.class, spliterator::trySplit);
   }
 
   @ParameterizedTest
-  @CsvSource({
-      "0, 0, 0",
-      "0, 1, 1",
-      "0, 2, 2",
-      "1, 1, 0",
-      "1, 2, 1"
-  })
-  void estimateSize(long origin, long size, long expectedSize) {
-    Spliterator<Integer> spliterator = createSpliterator(origin, size);
+  @ValueSource(longs = {0, 1, 2})
+  void estimateSizeAtBindTime(long listSize) {
+    ListIndex<Integer> list = mock(ListIndex.class);
+    when(list.size()).thenReturn(listSize);
+    ModificationCounter counter = mock(ModificationCounter.class);
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
-    assertThat(spliterator.estimateSize()).isEqualTo(expectedSize);
+    assertThat(spliterator.estimateSize()).isEqualTo(listSize);
   }
 
   @ParameterizedTest
-  @ValueSource(longs = {-1, 5, 6})
-  void constructorRejectsInvalidOrigin(long origin) {
-    int size = 4;
+  @ValueSource(longs = {1, 2, 3})
+  void estimateSizeAfterSingleSuccessfulAdvance(long listSize) {
+    ListIndex<Integer> list = mock(ListIndex.class);
+    when(list.size()).thenReturn(listSize);
+    ModificationCounter counter = mock(ModificationCounter.class);
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
-    assertThrows(IndexOutOfBoundsException.class,
-        () -> createSpliterator(origin, size));
+    // Advance the iterator
+    spliterator.tryAdvance(NULL_CONSUMER);
+
+    assertThat(spliterator.estimateSize()).isEqualTo(listSize - 1);
   }
 
-  @ParameterizedTest
-  @ValueSource(longs = {-2, -1})
-  void constructorRejectsInvalidSize(long size) {
-    long origin = 2;
+  @Test
+  void estimateSizeIsZeroAfterSpliteratorIsConsumed() {
+    ListIndex<Integer> list = mock(ListIndex.class);
+    long listSize = 5;
+    when(list.size()).thenReturn(listSize);
+    ModificationCounter counter = mock(ModificationCounter.class);
+    Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
-    assertThrows(IllegalArgumentException.class,
-        () -> createSpliterator(origin, size));
+    // Advance the iterator
+    spliterator.forEachRemaining(NULL_CONSUMER);
+
+    assertThat(spliterator.estimateSize()).isEqualTo(0);
   }
 
   private static Spliterator<Integer> createSpliteratorOf(int[] source) {
-    View view = mock(Snapshot.class);
+    ListIndex<Integer> list = mock(ListIndex.class);
+    lenient().when(list.get(anyLong())).thenAnswer((Answer<Integer>) invocation -> {
+      Long index = invocation.getArgument(0);
+      return source[Math.toIntExact(index)];
+    });
+    lenient().when(list.size()).thenReturn((long) source.length);
+
     ModificationCounter modCounter = mock(ModificationCounter.class);
     lenient().when(modCounter.isModifiedSince(anyInt()))
         .thenReturn(false);
 
-    return new ListSpliterator<>(i -> source[(int) i], 0, source.length, view, modCounter);
+    return new ListSpliterator<>(list, modCounter, true);
   }
-
-  private static Spliterator<Integer> createSpliterator(long origin, long size) {
-    // todo: Do we really need a View for diagnostic purposes? Shan't we override a
-    //   View#toString then?
-    View view = mock(Snapshot.class);
-    ModificationCounter modCounter = mock(ModificationCounter.class);
-    lenient().when(modCounter.isModifiedSince(anyInt()))
-        .thenReturn(false);
-
-    return new ListSpliterator<>(i -> (int) i, origin, size, view, modCounter);
-  }
-
 }
