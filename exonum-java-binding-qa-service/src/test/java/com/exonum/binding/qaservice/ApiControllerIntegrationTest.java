@@ -18,8 +18,8 @@ package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_BY_BLOCK_ID_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
@@ -673,7 +673,8 @@ class ApiControllerIntegrationTest {
     long blockHeight = block.getHeight();
     when(qaService.getBlockByHeight(blockHeight)).thenReturn(block);
 
-    get(BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+    get(BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM,
+        Long.toString(blockHeight)))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -694,7 +695,8 @@ class ApiControllerIntegrationTest {
 
     when(qaService.getBlockByHeight(blockHeight)).thenThrow(new IndexOutOfBoundsException());
 
-    get(BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+    get(BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM,
+        Long.toString(blockHeight)))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_BAD_REQUEST);

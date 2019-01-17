@@ -421,7 +421,8 @@ class QaServiceImplIntegrationTest {
   void getBlockByHeight() {
     withNodeFake(() -> {
       long blockHeight = 0L;
-      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlockByHeight(blockHeight));
+      Throwable t =
+          assertThrows(RuntimeException.class, () -> service.getBlockByHeight(blockHeight));
       assertThat(t.getMessage()).contains(NO_GENESIS_BLOCK_ERROR_MESSAGE);
     });
   }
@@ -441,7 +442,8 @@ class QaServiceImplIntegrationTest {
   void getLastBlock() {
     withNodeFake(() -> {
       Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
-      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the genesis block.");
+      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the"
+          + "genesis block.");
     });
   }
 
