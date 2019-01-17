@@ -18,22 +18,20 @@ package com.exonum.binding.storage.database;
 
 final class IncrementalModificationCounter implements ModificationCounter {
 
-  private static final int INITIAL_VALUE = 0;
-
-  private int value = INITIAL_VALUE;
+  private int counter = 0;
 
   @Override
   public boolean isModifiedSince(int lastValue) {
-    return value != lastValue;
+    return counter != lastValue;
   }
 
   @Override
   public int getCurrentValue() {
-    return value;
+    return counter;
   }
 
   @Override
   public void notifyModified() {
-    value++;
+    counter++;
   }
 }
