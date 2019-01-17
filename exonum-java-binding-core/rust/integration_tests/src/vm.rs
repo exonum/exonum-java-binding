@@ -49,7 +49,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         jvm_args_builder = jvm_args_builder.option(&get_fakes_classpath_option());
     }
     if debug {
-        jvm_args_builder = jvm_args_builder.option("-Xcheck:jni").option("-Xdebug");
+        jvm_args_builder = jvm_args_builder.option("-Xcheck:jni");
     }
 
     let jvm_args = jvm_args_builder
@@ -64,7 +64,6 @@ pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     let jvm_args = InitArgsBuilder::new()
         .version(JNIVersion::V8)
         .option(&get_libpath_option())
-        .option("-Xdebug")
         .option(&format!("-Xmx{}m", memory_limit_mib))
         .build()
         .unwrap_or_else(|e| panic!("{:#?}", e));
