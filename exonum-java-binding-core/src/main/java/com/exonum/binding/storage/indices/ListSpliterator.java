@@ -147,7 +147,8 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
     // todo: It also detects non-structural interference (e.g., replacing an element),
     //   isn't it a false-positive?
     if (counter.isModifiedSince(initialCounterValue)) {
-      throw new ConcurrentModificationException("The source has been modified since the bind-time");
+      throw new ConcurrentModificationException(
+          "The source (" + list + ") has been modified since the bind-time");
     }
   }
 }
