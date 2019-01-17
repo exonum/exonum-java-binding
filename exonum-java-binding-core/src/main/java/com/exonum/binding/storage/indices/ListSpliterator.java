@@ -90,7 +90,7 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
   //    can avoid performing repetitive operation per each get:
   //    - a check for modifications of the source list
   //    - getNativeHandle
-  //    - size checks (a native call to size)
+  //    - size checks (a native call to size): [ECR-2817]
 
   @Override
   public boolean tryAdvance(Consumer<? super ElementT> action) {
