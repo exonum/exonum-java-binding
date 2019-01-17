@@ -19,7 +19,6 @@ package com.exonum.binding.storage.indices;
 import com.exonum.binding.proxy.AbstractNativeProxy;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.ModificationCounter;
-import com.exonum.binding.storage.database.View;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
 import java.util.function.LongFunction;
@@ -32,9 +31,6 @@ import java.util.function.LongFunction;
 final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustIter<E> {
 
   private final LongFunction<E> nextFunction;
-  // todo: This view is kept only for diagnostic purposes (to put in error message) —
-  //  shall we keep it?
-  private final View collectionView;
   private final ModificationCounter modificationCounter;
   private final Integer initialModCount;
 
@@ -43,16 +39,13 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
    *
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
-   * @param collectionView a database view of the collection over which to iterate
    * @param modificationCounter a view modification counter
    */
   ConfigurableRustIter(NativeHandle nativeHandle,
                        LongFunction<E> nextFunction,
-                       View collectionView,
                        ModificationCounter modificationCounter) {
     super(nativeHandle);
     this.nextFunction = nextFunction;
-    this.collectionView = collectionView;
     this.modificationCounter = modificationCounter;
     this.initialModCount = modificationCounter.getCurrentValue();
   }
@@ -65,8 +58,8 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
 
   private void checkNotModified() {
     if (modificationCounter.isModifiedSince(initialModCount)) {
-      throw new ConcurrentModificationException("Fork was modified during iteration: "
-          + collectionView);
+      throw new ConcurrentModificationException("Collection or the corresponding Fork "
+          + "were modified during iteration");
     }
   }
 }

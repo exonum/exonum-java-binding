@@ -60,7 +60,6 @@ final class StorageIterators {
         new ConfigurableRustIter<>(
             handle,
             nextFunction,
-            collectionView,
             modificationCounter
         )
     );

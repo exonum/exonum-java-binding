@@ -26,9 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.proxy.NativeHandle;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.ModificationCounter;
-import com.exonum.binding.storage.database.View;
 import com.google.common.collect.ImmutableList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -55,9 +53,8 @@ class ConfigurableRustIterTest {
 
   @Test
   void nextGoesThroughAllElements() {
-    Fork fork = createFork();
     List<Integer> underlyingList = asList(1, 2, 3);
-    createFromIterable(underlyingList, fork);
+    createFromIterable(underlyingList);
 
     List<Integer> iterElements = ImmutableList.copyOf(new RustIterAdapter<>(iter));
 
@@ -66,8 +63,7 @@ class ConfigurableRustIterTest {
 
   @Test
   void nextFailsIfModifiedBeforeFirstNext() {
-    Fork fork = createFork();
-    createFromIterable(emptyList(), fork);
+    createFromIterable(emptyList());
 
     notifyModified();
 
@@ -76,8 +72,7 @@ class ConfigurableRustIterTest {
 
   @Test
   void nextFailsIfModifiedAfterFirstNext() {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
+    createFromIterable(asList(1, 2));
 
     iter.next();  // 1st must succeed
 
@@ -88,9 +83,8 @@ class ConfigurableRustIterTest {
 
   @Test
   void nextFailsIfHandleClosed() {
-    Fork fork = createFork();
     NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
-    createFromIterable(nh, asList(1, 2), fork);
+    createFromIterable(nh, asList(1, 2));
 
     // Close the native handle.
     nh.close();
@@ -100,8 +94,7 @@ class ConfigurableRustIterTest {
 
   @Test
   void viewModificationResultsInTerminalState() {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
+    createFromIterable(asList(1, 2));
 
     notifyModified();
 
@@ -110,23 +103,15 @@ class ConfigurableRustIterTest {
     assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
-  /**
-   * Creates a mock of a fork.
-   */
-  private Fork createFork() {
-    return mock(Fork.class);
-  }
-
-  private void createFromIterable(Iterable<Integer> it, View dbView) {
+  private void createFromIterable(Iterable<Integer> it) {
     NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
-    createFromIterable(nh, it, dbView);
+    createFromIterable(nh, it);
   }
 
-  private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it, View dbView) {
+  private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it) {
     Iterator<Integer> iterator = it.iterator();
     iter = new ConfigurableRustIter<>(nativeHandle,
         (h) -> iterator.hasNext() ? iterator.next() : null,
-        dbView,
         modCounter);
   }
 
