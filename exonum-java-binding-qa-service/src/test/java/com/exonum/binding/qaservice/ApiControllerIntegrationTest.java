@@ -689,6 +689,21 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
+  void getNonexistentBlockByHeight(VertxTestContext context) {
+    long blockHeight = 1L;
+
+    when(qaService.getBlockByHeight(blockHeight)).thenThrow(new IndexOutOfBoundsException());
+
+    get(BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_BAD_REQUEST);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
   void getBlockById(VertxTestContext context) {
     Block block = createBlock(1L);
 
@@ -719,21 +734,6 @@ class ApiControllerIntegrationTest {
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_NOT_FOUND);
-
-          context.completeNow();
-        })));
-  }
-
-  @Test
-  void getNonexistentBlock(VertxTestContext context) {
-    long blockHeight = 1L;
-
-    when(qaService.getBlockByHeight(blockHeight)).thenThrow(new IndexOutOfBoundsException());
-
-    get(BLOCKCHAIN_BLOCK_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode())
-              .isEqualTo(HTTP_BAD_REQUEST);
 
           context.completeNow();
         })));
