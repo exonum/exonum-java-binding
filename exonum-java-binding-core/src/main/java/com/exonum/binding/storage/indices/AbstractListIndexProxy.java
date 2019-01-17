@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * An abstract class for list indices implementing {@link ListIndex} interface.
@@ -119,7 +120,9 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   @Override
   public Stream<T> stream() {
-    return null;
+    boolean immutable = !dbView.canModify();
+    ListSpliterator<T> spliterator = new ListSpliterator<>(this, modCounter, immutable);
+    return StreamSupport.stream(spliterator, false);
   }
 
   abstract void nativeAdd(long nativeHandle, byte[] e);

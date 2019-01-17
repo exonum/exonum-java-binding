@@ -70,6 +70,6 @@ public final class Fork extends View {
    * @param nativeHandle a handle of the native Fork object
    */
   private Fork(NativeHandle nativeHandle, Cleaner cleaner) {
-    super(nativeHandle, cleaner, new IncrementalModificationCounter());
+    super(nativeHandle, cleaner, new IncrementalModificationCounter(), true);
   }
 }

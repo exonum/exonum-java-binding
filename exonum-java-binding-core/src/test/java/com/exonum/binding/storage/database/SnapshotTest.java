@@ -16,6 +16,7 @@
 
 package com.exonum.binding.storage.database;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -75,5 +76,11 @@ class SnapshotTest {
       ModificationCounter c = s.getModificationCounter();
       assertThrows(IllegalStateException.class, c::notifyModified);
     }
+  }
+
+  @Test
+  void cannotModify() {
+    Snapshot s = Snapshot.newInstance(0x0A, false, new Cleaner());
+    assertFalse(s.canModify());
   }
 }
