@@ -30,7 +30,6 @@ import com.exonum.binding.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -59,7 +58,6 @@ final class ApiController {
 
   private final CryptocurrencyService service;
 
-  @Inject
   ApiController(CryptocurrencyService service) {
     this.service = service;
   }

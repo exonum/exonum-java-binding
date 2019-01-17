@@ -1,13 +1,13 @@
 use exonum::blockchain::Service;
 use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
-use jni::{self, JavaVM};
+use jni::{self, InitArgs, InitArgsBuilder, JavaVM, Result};
 
 use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, GenerateNodeConfig};
-use runtime::config::{self, Config, JvmConfig, ServiceConfig};
+use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
+use runtime::config::{self, Config, EjbConfig, JvmConfig, ServiceConfig};
 use utils::unwrap_jni;
 use MainExecutor;
 
@@ -34,7 +34,7 @@ impl JavaServiceRuntime {
         unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(config.jvm_config);
+                let java_vm = Self::create_java_vm(config.jvm_config, config.ejb_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
                 let service_proxy = Self::create_service(config.service_config, executor.clone());
                 let runtime = JavaServiceRuntime {
@@ -60,23 +60,72 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(config: JvmConfig) -> JavaVM {
+    fn create_java_vm(jvm_config: JvmConfig, ejb_config: EjbConfig) -> JavaVM {
+        let args = Self::build_jvm_arguments(jvm_config, ejb_config)
+            .expect("Unable to build arguments for JVM");
+        jni::JavaVM::new(args).unwrap()
+    }
+
+    /// Builds arguments for JVM initialization.
+    fn build_jvm_arguments(jvm_config: JvmConfig, ejb_config: EjbConfig) -> Result<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
-        for param in &config.user_parameters {
-            let option = config::validate_and_convert(param).unwrap();
+        let args_prepend = jvm_config.args_prepend.clone();
+        let args_append = jvm_config.args_append.clone();
+
+        // Prepend extra user arguments
+        args_builder = Self::add_user_arguments(args_builder, args_prepend);
+
+        // Add required arguments
+        args_builder = Self::add_required_arguments(args_builder, ejb_config);
+
+        // Add optional arguments
+        args_builder = Self::add_optional_arguments(args_builder, jvm_config);
+
+        // Append extra user arguments
+        args_builder = Self::add_user_arguments(args_builder, args_append);
+
+        args_builder.build()
+    }
+
+    /// Adds extra user arguments (optional) to JVM configuration
+    fn add_user_arguments<I>(mut args_builder: InitArgsBuilder, user_args: I) -> InitArgsBuilder
+    where
+        I: IntoIterator<Item = String>,
+    {
+        for param in user_args {
+            let option = config::validate_and_convert(&param).unwrap();
             args_builder = args_builder.option(&option);
         }
+        args_builder
+    }
 
-        args_builder = args_builder.option(&format!("-Djava.class.path={}", config.class_path));
-        args_builder = args_builder.option(&format!("-Djava.library.path={}", config.lib_path));
-        args_builder = args_builder.option(&format!(
-            "-Dlog4j.configurationFile={}",
-            config.log_config_path
-        ));
+    /// Adds required EJB-related arguments to JVM configuration
+    fn add_required_arguments(
+        args_builder: InitArgsBuilder,
+        ejb_config: EjbConfig,
+    ) -> InitArgsBuilder {
+        args_builder
+            .option(&format!("-Djava.class.path={}", ejb_config.class_path))
+            .option(&format!("-Djava.library.path={}", ejb_config.lib_path))
+            .option(&format!(
+                "-Dlog4j.configurationFile={}",
+                ejb_config.log_config_path
+            ))
+    }
 
-        let args = args_builder.build().unwrap();
-        jni::JavaVM::new(args).unwrap()
+    /// Adds optional user arguments to JVM configuration
+    fn add_optional_arguments(
+        mut args_builder: InitArgsBuilder,
+        jvm_config: JvmConfig,
+    ) -> InitArgsBuilder {
+        if let Some(socket) = jvm_config.jvm_debug_socket {
+            args_builder = args_builder.option(&format!(
+                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
+                socket
+            ));
+        }
+        args_builder
     }
 
     /// Creates service proxy for interaction with Java side.
@@ -127,6 +176,7 @@ impl ServiceFactory for JavaServiceFactory {
         match command {
             v if v == fabric::GenerateNodeConfig.name() => Some(Box::new(GenerateNodeConfig)),
             v if v == fabric::Finalize.name() => Some(Box::new(Finalize)),
+            v if v == fabric::Run.name() => Some(Box::new(Run)),
             _ => None,
         }
     }
@@ -138,7 +188,7 @@ impl ServiceFactory for JavaServiceFactory {
                 .get(keys::NODE_CONFIG)
                 .expect("Unable to read node configuration.")
                 .services_configs
-                .get(super::cmd::EJB_CONFIG_NAME)
+                .get(super::cmd::EJB_CONFIG_SECTION_NAME)
                 .expect("Unable to read EJB configuration.")
                 .clone()
                 .try_into()
