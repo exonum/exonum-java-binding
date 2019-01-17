@@ -46,7 +46,7 @@ public interface ModificationCounter {
    * Notifies this counter that the source object is modified, updating its current value.
    *
    * @throws IllegalStateException if this counter corresponds to a read-only (immutable) object,
-   *    i.e., must reject any modification events
+   *     i.e., must reject any modification events
    */
   void notifyModified();
 }
