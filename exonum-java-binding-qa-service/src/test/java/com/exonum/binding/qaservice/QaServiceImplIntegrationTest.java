@@ -421,7 +421,7 @@ class QaServiceImplIntegrationTest {
   void getBlock() {
     withNodeFake(() -> {
       long blockHeight = 0L;
-      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlock(blockHeight));
+      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlockByHeight(blockHeight));
       assertThat(t.getMessage()).contains(NO_GENESIS_BLOCK_ERROR_MESSAGE);
     });
   }

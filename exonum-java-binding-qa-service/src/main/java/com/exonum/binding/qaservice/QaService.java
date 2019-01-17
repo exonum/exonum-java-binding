@@ -72,7 +72,9 @@ public interface QaService extends Service {
 
   Map<HashCode, Block> getBlocks();
 
-  Block getBlock(long height);
+  Block getBlockByHeight(long height);
+
+  Optional<Block> getBlockById(HashCode blockId);
 
   Block getLastBlock();
 
