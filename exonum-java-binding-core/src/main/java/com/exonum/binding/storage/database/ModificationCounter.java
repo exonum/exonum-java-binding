@@ -17,10 +17,12 @@
 package com.exonum.binding.storage.database;
 
 /**
- * A counter of events-modifications of some objects (e.g., a collection, or a database view).
- * It is updated each time the event source notifies of an event. The clients that need
+ * A counter of modification events of some objects (e.g., a collection, or a database view).
+ * It is updated each time the object notifies of an event. The clients that need
  * to detect modifications must save the current value of the counter, and check if it has changed
  * to determine if the corresponding source object is modified.
+ *
+ * <p>Implementations must reliably detect up to 4 billion modifications (2^32-1).
  *
  * <p>Implementations are not required to be thread-safe.
  */
@@ -34,7 +36,6 @@ public interface ModificationCounter {
    */
   boolean isModifiedSince(int lastValue);
 
-  // todo: We _might_ consider adding a special type for this timestamp, but at the moment it feels like an overkill
   /**
    * Returns the current value of the counter. No assumptions must be made on how it changes
    * when a notification is received.
