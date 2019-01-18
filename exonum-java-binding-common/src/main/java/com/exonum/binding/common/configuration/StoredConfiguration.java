@@ -50,6 +50,8 @@ public abstract class StoredConfiguration {
 
   /**
    * List of validators consensus and service public keys.
+   *
+   * @see <a href="https://exonum.com/doc/version/latest/architecture/configuration/#genesisvalidator_keys">Validator keys configuration section</a>
    */
   @SerializedName("validator_keys")
   public abstract List<ValidatorKey> validatorKeys();

@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.Transaction;
 import java.util.function.Function;
@@ -24,7 +25,6 @@ import java.util.function.Function;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-// todo: a better name?
 public interface Node {
 
   /**
@@ -52,9 +52,12 @@ public interface Node {
   <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction);
 
   /**
-   * Returns the public key of this node.
+   * Returns the service public key of this node. The corresponding private key is used
+   * for signing transactions in {@link #submitTransaction(RawTransaction)}.
+   *
+   * <p>This key is stored under "service_public_key" key in the node configuration file.
    *
    * @throws IllegalStateException if the node proxy is closed
    */
-  byte[] getPublicKey();
+  PublicKey getPublicKey();
 }
