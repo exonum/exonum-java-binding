@@ -17,11 +17,8 @@
 package com.exonum.binding.storage.database;
 
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.exonum.binding.proxy.Cleaner;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,22 +28,16 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest({
     Views.class,
-    ViewModificationCounter.class,
 })
 @Disabled
-// TODO Won't run on Java 10 till Powermock is updated [ECR-1614].
+// TODO Won't run on Junit 5 till Powermock is updated [ECR-1614].
 class ForkTest {
 
   private Fork fork;
 
-  private ViewModificationCounter modCounter;
-
   @BeforeEach
   void setUp() {
     mockStatic(Views.class);
-    mockStatic(ViewModificationCounter.class);
-    modCounter = mock(ViewModificationCounter.class);
-    when(ViewModificationCounter.getInstance()).thenReturn(modCounter);
   }
 
   @Test
@@ -55,8 +46,6 @@ class ForkTest {
     try (Cleaner cleaner = new Cleaner()) {
       fork = Fork.newInstance(nativeHandle, true, cleaner);
     }
-
-    verify(modCounter).remove(fork);
 
     verifyStatic(Views.class);
     Views.nativeFree(nativeHandle);
@@ -69,8 +58,6 @@ class ForkTest {
     try (Cleaner cleaner = new Cleaner()) {
       fork = Fork.newInstance(nativeHandle, false, cleaner);
     }
-
-    verify(modCounter).remove(fork);
 
     verifyStatic(Views.class, never());
     Views.nativeFree(nativeHandle);

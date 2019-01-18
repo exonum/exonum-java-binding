@@ -20,13 +20,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of core schema API. (#548, #549, #571, #573)
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
-- Support of Json serialization in a common way. (#611)  
+- Support of Json serialization in a common way. (#611)
+- Added the `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
 - Support of separated messages format Exonum v0.10. (#574)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
   `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
   to use this implementation of `MapEntry`.
+- The `--ejb-jvm-args` command line argument has been substituted with `--jvm-args-prepend` and
+  `--jvm-args-append` arguments that can now be passed at the `Run` stage instead of
+  `Generate-Config`. Also, the value of `--jvm-args-append` is not saved to any of the configuration
+  files. (#629)
+- `Node#getPublicKey` to return `PublicKey` instead of `byte[]`. (#651)
 - `com.exonum.binding.transaction.Transaction#execute` now accepts 
   `com.exonum.binding.transaction.TransactionContext`
   instead of `com.exonum.binding.storage.database.View`  
@@ -34,6 +40,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
+- `ViewModificationCounter` replaced with per-`View` modification counters to simplify
+  their relationship and testing. (#658)
 - Exonum v0.9 message format related classes.
   
 ### Fixed

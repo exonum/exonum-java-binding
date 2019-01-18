@@ -21,19 +21,15 @@ use std::fmt;
 pub struct Config {
     /// JVM configuration.
     pub jvm_config: JvmConfig,
+    /// EJB configuration
+    pub ejb_config: EjbConfig,
     /// Java service configuration.
     pub service_config: ServiceConfig,
 }
 
-/// JVM configuration.
+/// EJB-specific configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JvmConfig {
-    /// Additional parameters for JVM.
-    ///
-    /// Passed directly to JVM while initializing EJB runtime.
-    /// Parameters must not have dash at the beginning.
-    /// Some parameters are forbidden for setting up by user.
-    pub user_parameters: Vec<String>,
+pub struct EjbConfig {
     /// Java service classpath. Must include all its dependencies.
     ///
     /// Includes java_bindings internal dependencies as well as user service dependencies.
@@ -44,6 +40,22 @@ pub struct JvmConfig {
     pub lib_path: String,
     /// Path to `log4j` configuration file.
     pub log_config_path: String,
+}
+
+/// JVM configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JvmConfig {
+    /// Additional parameters for JVM.
+    ///
+    /// Passed directly to JVM while initializing EJB runtime.
+    /// Parameters must not have dash at the beginning.
+    /// Some parameters are forbidden for setting up by user.
+    /// Parameters that are prepended to the rest.
+    pub args_prepend: Vec<String>,
+    /// Parameters that get appended to the rest.
+    pub args_append: Vec<String>,
+    /// Socket address for JVM debugging
+    pub jvm_debug_socket: Option<String>,
 }
 
 /// Java service configuration.

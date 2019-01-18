@@ -18,7 +18,6 @@ package com.exonum.binding.storage.database;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.proxy.CleanAction;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -26,8 +25,10 @@ import com.exonum.binding.proxy.ProxyDestructor;
 /**
  * A fork is a database view, allowing both read and write operations.
  *
- * <p>A fork allows to perform a transaction: a number of independent writes to a database,
- * which then may be <em>atomically</em> applied to the database state.
+ * <p>A fork allows to perform
+ * a {@linkplain com.exonum.binding.transaction.Transaction transaction}: a number of independent
+ * writes to the database, which then may be <em>atomically</em> applied (i.e. committed)
+ * to the database and change the database state.
  */
 public final class Fork extends View {
 
@@ -60,15 +61,7 @@ public final class Fork extends View {
       }
     });
 
-    // Create the fork
-    Fork f = new Fork(h, cleaner);
-
-    // Add the action that unregisters the fork separately so that it is always invoked.
-    cleaner.add(CleanAction.from(() -> ViewModificationCounter.getInstance().remove(f),
-        "Fork in modification counter")
-    );
-
-    return f;
+    return new Fork(h, cleaner);
   }
 
   /**
@@ -77,6 +70,6 @@ public final class Fork extends View {
    * @param nativeHandle a handle of the native Fork object
    */
   private Fork(NativeHandle nativeHandle, Cleaner cleaner) {
-    super(nativeHandle, cleaner);
+    super(nativeHandle, cleaner, new IncrementalModificationCounter());
   }
 }
