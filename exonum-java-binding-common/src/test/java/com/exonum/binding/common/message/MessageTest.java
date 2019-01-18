@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 class MessageTest {
 
-
   @Test
   void messageSize_emptyBody() {
     assertThat(Message.messageSize(0),

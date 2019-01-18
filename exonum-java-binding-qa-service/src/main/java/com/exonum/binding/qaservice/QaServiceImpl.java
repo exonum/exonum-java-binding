@@ -111,7 +111,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
-    // Add an afterCommit counter that will be incremented after each block commited event.
+    // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
 
     return Optional.of(INITIAL_SERVICE_CONFIGURATION);

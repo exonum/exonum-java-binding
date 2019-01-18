@@ -59,7 +59,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
-import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
@@ -81,7 +80,6 @@ final class ApiController {
 
   private final QaService service;
 
-  @Inject
   ApiController(QaService service) {
     this.service = service;
   }

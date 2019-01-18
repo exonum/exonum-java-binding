@@ -29,22 +29,28 @@ import com.exonum.binding.proxy.NativeHandle;
  *   <li>A fork, which is a <em>read-write</em> view.</li>
  * </ul>
  *
+ * <p>As in some cases the clients need to detect any changes made to a database, a view also
+ * holds a modification counter, which any clients changing the database state must notify.
+ *
  * @see Snapshot
  * @see Fork
  */
 public abstract class View extends AbstractNativeProxy {
 
   private final Cleaner cleaner;
+  private final ModificationCounter modCounter;
 
   /**
    * Create a new view proxy.
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
    * @param cleaner a cleaner of resources
+   * @param modCounter a modification counter
    */
-  View(NativeHandle nativeHandle, Cleaner cleaner) {
+  View(NativeHandle nativeHandle, Cleaner cleaner, ModificationCounter modCounter) {
     super(nativeHandle);
     this.cleaner = cleaner;
+    this.modCounter = modCounter;
   }
 
   /**
@@ -61,5 +67,13 @@ public abstract class View extends AbstractNativeProxy {
    */
   public Cleaner getCleaner() {
     return cleaner;
+  }
+
+  /**
+   * Returns a modification counter, corresponding to this view. The clients, trying to modify
+   * a collection using this view, must notify the counter first.
+   */
+  public ModificationCounter getModificationCounter() {
+    return modCounter;
   }
 }
