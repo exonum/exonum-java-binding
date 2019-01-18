@@ -443,7 +443,7 @@ class QaServiceImplIntegrationTest {
     withNodeFake(() -> {
       Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
       assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the"
-          + "genesis block.");
+          + " genesis block.");
     });
   }
 
