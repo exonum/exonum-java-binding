@@ -21,16 +21,12 @@ import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.proxy.NativeHandle;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.database.ViewModificationCounter;
+import com.exonum.binding.storage.database.ModificationCounter;
 import com.google.common.collect.ImmutableList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -44,36 +40,21 @@ class ConfigurableRustIterTest {
 
   private static final long DEFAULT_NATIVE_HANDLE = 0x05;
 
-  private ViewModificationCounter modCounter;
+  private ModificationCounter modCounter;
 
   private ConfigurableRustIter<Integer> iter;
 
   @BeforeEach
   void setUp() {
-    modCounter = mock(ViewModificationCounter.class);
-    when(modCounter.getModificationCount(any(View.class)))
+    modCounter = mock(ModificationCounter.class);
+    when(modCounter.getCurrentValue())
         .thenReturn(INITIAL_MOD_COUNT);
   }
 
   @Test
   void nextGoesThroughAllElements() {
-    Fork fork = createFork();
     List<Integer> underlyingList = asList(1, 2, 3);
-    createFromIterable(underlyingList, fork);
-
-    List<Integer> iterElements = ImmutableList.copyOf(new RustIterAdapter<>(iter));
-
-    assertThat(iterElements, equalTo(underlyingList));
-  }
-
-  @Test
-  void nextIsNotAffectedByUnrelatedModifications() {
-    Snapshot view = createSnapshot();
-    List<Integer> underlyingList = asList(1, 2);
-    createFromIterable(underlyingList, view);
-
-    Fork unrelatedFork = createFork();
-    notifyModified(unrelatedFork);
+    createFromIterable(underlyingList);
 
     List<Integer> iterElements = ImmutableList.copyOf(new RustIterAdapter<>(iter));
 
@@ -82,31 +63,28 @@ class ConfigurableRustIterTest {
 
   @Test
   void nextFailsIfModifiedBeforeFirstNext() {
-    Fork fork = createFork();
-    createFromIterable(emptyList(), fork);
+    createFromIterable(emptyList());
 
-    notifyModified(fork);
+    notifyModified();
 
     assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
   @Test
   void nextFailsIfModifiedAfterFirstNext() {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
+    createFromIterable(asList(1, 2));
 
     iter.next();  // 1st must succeed
 
-    notifyModified(fork);
+    notifyModified();
 
     assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
   @Test
   void nextFailsIfHandleClosed() {
-    Fork fork = createFork();
     NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
-    createFromIterable(nh, asList(1, 2), fork);
+    createFromIterable(nh, asList(1, 2));
 
     // Close the native handle.
     nh.close();
@@ -116,45 +94,29 @@ class ConfigurableRustIterTest {
 
   @Test
   void viewModificationResultsInTerminalState() {
-    Fork fork = createFork();
-    createFromIterable(asList(1, 2), fork);
-    ConcurrentModificationException e = assertThrows(ConcurrentModificationException.class, () -> {
-      notifyModified(fork);
-      iter.next();
-    });
+    createFromIterable(asList(1, 2));
 
+    notifyModified();
+
+    // Any subsequent call to #next must throw
+    assertThrows(ConcurrentModificationException.class, () -> iter.next());
     assertThrows(ConcurrentModificationException.class, () -> iter.next());
   }
 
-  /**
-   * Creates a mock of a fork.
-   */
-  private Fork createFork() {
-    return mock(Fork.class);
-  }
-
-  /**
-   * Creates a mock of a snapshot.
-   */
-  private Snapshot createSnapshot() {
-    return mock(Snapshot.class);
-  }
-
-  private void createFromIterable(Iterable<Integer> it, View dbView) {
+  private void createFromIterable(Iterable<Integer> it) {
     NativeHandle nh = new NativeHandle(DEFAULT_NATIVE_HANDLE);
-    createFromIterable(nh, it, dbView);
+    createFromIterable(nh, it);
   }
 
-  private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it, View dbView) {
+  private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it) {
     Iterator<Integer> iterator = it.iterator();
     iter = new ConfigurableRustIter<>(nativeHandle,
         (h) -> iterator.hasNext() ? iterator.next() : null,
-        dbView,
         modCounter);
   }
 
-  private void notifyModified(Fork fork) {
-    when(modCounter.isModifiedSince(eq(fork), eq(INITIAL_MOD_COUNT)))
+  private void notifyModified() {
+    when(modCounter.isModifiedSince(eq(INITIAL_MOD_COUNT)))
         .thenReturn(true);
   }
 

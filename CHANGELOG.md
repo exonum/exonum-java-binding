@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
+- `ViewModificationCounter` replaced with per-`View` modification counters to simplify
+  their relationship and testing. (#658)
   
 ### Fixed
 - A bug in the cryptocurrency demo frontend that sometimes resulted in rejected transactions and/or
