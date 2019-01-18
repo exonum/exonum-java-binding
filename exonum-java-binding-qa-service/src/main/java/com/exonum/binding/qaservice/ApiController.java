@@ -210,8 +210,9 @@ final class ApiController {
       HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
       getBlockById(rc, blockId);
     } else {
-      respondBadRequest(rc, "Get block request was invalid. Expected format is"
-          + " /blockchain/block?blockId={blockId} or /blockchain/block?blockHeight={blockHeight}");
+      respondBadRequest(rc, "Get block request was invalid. Expected format is "
+          + BLOCKCHAIN_BLOCK_PATH + "?blockId={blockId} or "
+          + BLOCKCHAIN_BLOCK_PATH + "?blockHeight={blockHeight}");
     }
   }
 
@@ -239,9 +240,9 @@ final class ApiController {
       HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
       getBlockTransactionsByBlockId(rc, blockId);
     } else {
-      respondBadRequest(rc, "Get block transactions request was invalid. Expected format is"
-          + " /blockchain/block/transactions?blockId={blockId} or"
-          + " /blockchain/block/transactions?blockHeight={blockHeight}");
+      respondBadRequest(rc, "Get block transactions request was invalid. Expected format is "
+          + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockId={blockId} or "
+          + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockHeight={blockHeight}");
     }
   }
 
