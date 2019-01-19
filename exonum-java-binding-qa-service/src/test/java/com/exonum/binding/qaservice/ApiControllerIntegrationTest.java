@@ -19,8 +19,7 @@ package com.exonum.binding.qaservice;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_LAST_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
@@ -452,13 +451,13 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void getBlockTransactions(VertxTestContext context) {
+  void getBlockTransactionsByHeight(VertxTestContext context) {
     List<HashCode> transactionHashes = Arrays
         .asList(HASH_1, HASH_2);
 
     when(qaService.getBlockTransactions(anyLong())).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH.replace(":" + BLOCK_HEIGHT_PARAM, "123"))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH).setQueryParam(BLOCK_HEIGHT_PARAM, "123")
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -481,7 +480,7 @@ class ApiControllerIntegrationTest {
     HashCode blockId = HashCode.fromString(HASH_STRING);
     when(qaService.getBlockTransactions(blockId)).thenReturn(transactionHashes);
 
-    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH.replace(":" + BLOCK_ID_PARAM, HASH_STRING))
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH).setQueryParam(BLOCK_ID_PARAM, HASH_STRING)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -491,6 +490,17 @@ class ApiControllerIntegrationTest {
               .fromJson(body, new TypeToken<List<HashCode>>() {
               }.getType());
           assertThat(actualHashes).isEqualTo(transactionHashes);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlockTransactions_InvalidRequest(VertxTestContext context) {
+    get(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_BAD_REQUEST);
 
           context.completeNow();
         })));
@@ -666,13 +676,13 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void getBlock(VertxTestContext context) {
+  void getBlockByHeight(VertxTestContext context) {
     Block block = createBlock(1L);
 
     long blockHeight = block.getHeight();
-    when(qaService.getBlock(blockHeight)).thenReturn(block);
+    when(qaService.getBlockByHeight(blockHeight)).thenReturn(block);
 
-    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+    get(BLOCKCHAIN_BLOCK_PATH).setQueryParam(BLOCK_HEIGHT_PARAM, String.valueOf(blockHeight))
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
@@ -688,12 +698,59 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void getNonexistentBlock(VertxTestContext context) {
+  void getNonexistentBlockByHeight(VertxTestContext context) {
     long blockHeight = 1L;
 
-    when(qaService.getBlock(blockHeight)).thenThrow(new IndexOutOfBoundsException());
+    when(qaService.getBlockByHeight(blockHeight)).thenThrow(new IndexOutOfBoundsException());
 
-    get(BLOCKCHAIN_BLOCK_PATH.replace(":" + BLOCK_HEIGHT_PARAM, Long.toString(blockHeight)))
+    get(BLOCKCHAIN_BLOCK_PATH).setQueryParam(BLOCK_HEIGHT_PARAM, String.valueOf(blockHeight))
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_BAD_REQUEST);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlockById(VertxTestContext context) {
+    Block block = createBlock(1L);
+
+    HashCode blockId = HashCode.fromString(HASH_STRING);
+    when(qaService.getBlockById(blockId)).thenReturn(Optional.of(block));
+
+    get(BLOCKCHAIN_BLOCK_PATH).setQueryParam(BLOCK_ID_PARAM, HASH_STRING)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualBlock = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Block>() {
+              }.getType());
+          assertThat(actualBlock).isEqualTo(block);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getNonexistentBlockById(VertxTestContext context) {
+    HashCode blockId = HashCode.fromString(HASH_STRING);
+    when(qaService.getBlockById(blockId)).thenReturn(Optional.empty());
+
+    get(BLOCKCHAIN_BLOCK_PATH).setQueryParam(BLOCK_ID_PARAM, HASH_STRING)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_NOT_FOUND);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getBlock_InvalidRequest(VertxTestContext context) {
+    get(BLOCKCHAIN_BLOCK_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_BAD_REQUEST);

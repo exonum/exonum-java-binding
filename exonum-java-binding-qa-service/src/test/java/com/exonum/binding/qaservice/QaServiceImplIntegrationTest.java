@@ -418,11 +418,21 @@ class QaServiceImplIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void getBlock() {
+  void getBlockByHeight() {
     withNodeFake(() -> {
       long blockHeight = 0L;
-      Throwable t = assertThrows(RuntimeException.class, () -> service.getBlock(blockHeight));
+      Throwable t =
+          assertThrows(RuntimeException.class, () -> service.getBlockByHeight(blockHeight));
       assertThat(t.getMessage()).contains(NO_GENESIS_BLOCK_ERROR_MESSAGE);
+    });
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getBlockById() {
+    withNodeFake(() -> {
+      HashCode blockId = HashCode.fromString("ab");
+      assertThat(service.getBlockById(blockId)).isEmpty();
     });
   }
 
@@ -431,7 +441,8 @@ class QaServiceImplIntegrationTest {
   void getLastBlock() {
     withNodeFake(() -> {
       Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
-      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the genesis block.");
+      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the"
+          + " genesis block.");
     });
   }
 

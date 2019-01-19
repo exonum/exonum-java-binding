@@ -20,8 +20,7 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_LAST_BLOCK_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
@@ -107,9 +106,7 @@ final class ApiController {
             .put(BLOCKCHAIN_BLOCKS_PATH, this::getBlocks)
             .put(BLOCKCHAIN_BLOCK_PATH, this::getBlock)
             .put(BLOCKCHAIN_LAST_BLOCK_PATH, this::getLastBlock)
-            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH, this::getBlockTransactionsByHeight)
-            .put(
-                BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH, this::getBlockTransactionsByBlockId)
+            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH, this::getBlockTransactions)
             .put(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH, this::getTransactionMessages)
             .put(BLOCKCHAIN_TRANSACTION_RESULTS_PATH, this::getTransactionResults)
             .put(BLOCKCHAIN_TRANSACTION_RESULT_PATH, this::getTransactionResult)
@@ -203,10 +200,27 @@ final class ApiController {
   }
 
   private void getBlock(RoutingContext rc) {
-    Long blockHeight = getRequiredParameter(rc.request().params(), BLOCK_HEIGHT_PARAM,
-        Long::parseLong);
+    MultiMap queryParams = rc.queryParams();
+    if (queryParams.contains(BLOCK_HEIGHT_PARAM)) {
+      long blockHeight = Long.parseLong(queryParams.get(BLOCK_HEIGHT_PARAM));
+      getBlockByHeight(rc, blockHeight);
+    } else if (queryParams.contains(BLOCK_ID_PARAM)) {
+      HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
+      getBlockById(rc, blockId);
+    } else {
+      respondBadRequest(rc, "Get block request was invalid. Expected format is "
+          + BLOCKCHAIN_BLOCK_PATH + "?blockId={blockId} or "
+          + BLOCKCHAIN_BLOCK_PATH + "?blockHeight={blockHeight}");
+    }
+  }
 
-    Block block = service.getBlock(blockHeight);
+  private void getBlockByHeight(RoutingContext rc, long blockHeight) {
+    Block block = service.getBlockByHeight(blockHeight);
+    respondWithJson(rc, block);
+  }
+
+  private void getBlockById(RoutingContext rc, HashCode blockId) {
+    Optional<Block> block = service.getBlockById(blockId);
     respondWithJson(rc, block);
   }
 
@@ -215,18 +229,27 @@ final class ApiController {
     respondWithJson(rc, block);
   }
 
-  private void getBlockTransactionsByHeight(RoutingContext rc) {
-    Long height = getRequiredParameter(rc.request().params(), BLOCK_HEIGHT_PARAM,
-        Long::parseLong);
+  private void getBlockTransactions(RoutingContext rc) {
+    MultiMap queryParams = rc.queryParams();
+    if (queryParams.contains(BLOCK_HEIGHT_PARAM)) {
+      long blockHeight = Long.parseLong(queryParams.get(BLOCK_HEIGHT_PARAM));
+      getBlockTransactionsByHeight(rc, blockHeight);
+    } else if (queryParams.contains(BLOCK_ID_PARAM)) {
+      HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
+      getBlockTransactionsByBlockId(rc, blockId);
+    } else {
+      respondBadRequest(rc, "Get block transactions request was invalid. Expected format is "
+          + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockId={blockId} or "
+          + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockHeight={blockHeight}");
+    }
+  }
 
-    List<HashCode> hashes = service.getBlockTransactions(height);
+  private void getBlockTransactionsByHeight(RoutingContext rc, long blockHeight) {
+    List<HashCode> hashes = service.getBlockTransactions(blockHeight);
     respondWithJson(rc, hashes);
   }
 
-  private void getBlockTransactionsByBlockId(RoutingContext rc) {
-    HashCode blockId = getRequiredParameter(rc.request().params(), BLOCK_ID_PARAM,
-        HashCode::fromString);
-
+  private void getBlockTransactionsByBlockId(RoutingContext rc, HashCode blockId) {
     List<HashCode> hashes = service.getBlockTransactions(blockId);
     respondWithJson(rc, hashes);
   }
@@ -311,9 +334,7 @@ final class ApiController {
     if (requestFailure != null) {
       Optional<String> badRequest = badRequestDescription(requestFailure);
       if (badRequest.isPresent()) {
-        rc.response()
-            .setStatusCode(HTTP_BAD_REQUEST)
-            .end(badRequest.get());
+        respondBadRequest(rc, badRequest.get());
       } else {
         logger.error("Request error:", requestFailure);
         rc.response()
@@ -346,6 +367,13 @@ final class ApiController {
     rc.response()
         .setStatusCode(HTTP_NOT_FOUND)
         .end();
+  }
+
+  private void respondBadRequest(RoutingContext rc, String description) {
+    rc.response()
+        .setStatusCode(HTTP_BAD_REQUEST)
+        .putHeader("Content-Type", "text/plain")
+        .end(description);
   }
 
   /**
@@ -406,23 +434,20 @@ final class ApiController {
     @VisibleForTesting
     static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
     @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/block";
+    static final String BLOCKCHAIN_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/blocks";
     @VisibleForTesting
     static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
     @VisibleForTesting
     static final String BLOCK_HEIGHT_PARAM = "blockHeight";
     @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/:" + BLOCK_HEIGHT_PARAM;
-    @VisibleForTesting
-    static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/lastBlock";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/block/:"
-        + BLOCK_HEIGHT_PARAM + "/transactionsByHeight";
-    @VisibleForTesting
     static final String BLOCK_ID_PARAM = "blockId";
     @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_BY_BLOCK_ID_PATH = BLOCKCHAIN_ROOT
-        + "/block/:" + BLOCK_ID_PARAM + "/transactionsByBlockId";
+    static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/last";
+    @VisibleForTesting
+    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH = BLOCKCHAIN_ROOT + "/block"
+        + "/transactions";
     @VisibleForTesting
     static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
     @VisibleForTesting
