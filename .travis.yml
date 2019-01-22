@@ -7,7 +7,7 @@ branches:
   only:
     - master
     - ejb-app-configuration
-    # TODO: remove
+    # TODO: remove after merging this branch into master
     - new-message-format-1
     # Also build tagged revisions, e.g. v1.2.3-beta
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/

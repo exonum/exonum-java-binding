@@ -23,7 +23,6 @@ extern crate exonum_testkit;
 extern crate serde_derive;
 
 use integration_tests::{
-    executor::create_executor_with_cache_initialized,
     mock::{service::ServiceMockBuilder, transaction::create_empty_raw_transaction},
     test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE},
     vm::create_vm_for_tests_with_fake_classes,
@@ -48,7 +47,7 @@ use exonum_testkit::TestKitBuilder;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = create_executor_with_cache_initialized(VM.clone());
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 const EXCEPTION_CLASS: &str = "java/lang/RuntimeException";

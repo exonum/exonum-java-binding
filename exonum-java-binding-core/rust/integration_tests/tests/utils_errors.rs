@@ -19,9 +19,7 @@ extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::{
-    executor::create_executor_with_cache_initialized, vm::create_vm_for_tests_with_fake_classes,
-};
+use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{
     jni::{objects::JThrowable, JNIEnv, JavaVM},
     utils::{
@@ -41,7 +39,7 @@ const CUSTOM_EXCEPTION_MESSAGE: &str = "Test exception message";
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = create_executor_with_cache_initialized(VM.clone());
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 #[test]
