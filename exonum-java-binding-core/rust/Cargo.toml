@@ -15,8 +15,9 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = "0.10"
-failure = "0.1.1"
+#exonum = "0.10"
+exonum = { version = "0.10", git = "https://github.com/skletsun/exonum", branch = "updated-rocksdb" }
+failure = "0.1"
 toml = "0.4.6"
 jni = { version = "0.10.1", git = "https://github.com/alexander-irbis/jni-rs", branch = "clone-jnienv", features = ["invocation"] }
 lazy_static = "1.2.0"

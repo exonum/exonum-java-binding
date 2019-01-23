@@ -18,7 +18,7 @@ extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
-extern crate exonum_testkit;
+//extern crate exonum_testkit;
 #[macro_use]
 extern crate serde_derive;
 
@@ -43,7 +43,7 @@ use java_bindings::{
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 
-use exonum_testkit::TestKitBuilder;
+//use exonum_testkit::TestKitBuilder;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
@@ -203,73 +203,73 @@ fn service_can_modify_db_on_initialize() {
     assert_eq!(INITIAL_ENTRY_VALUE, value);
 }
 
-#[test]
-#[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
-fn after_commit_throwing() {
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .after_commit_throwing(TEST_EXCEPTION_CLASS)
-        .build();
+//#[test]
+//#[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
+//fn after_commit_throwing() {
+//    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+//        .after_commit_throwing(TEST_EXCEPTION_CLASS)
+//        .build();
+//
+//    // It turned out that it is MUCH easier to use testkit in order to trigger the after_commit()
+//    // callback than calling it by hands providing manually constructed ServiceContext entity.
+//    let mut testkit = TestKitBuilder::validator()
+//        .with_service(service.clone())
+//        .create();
+//
+//    testkit.create_block();
+//}
+//
+//#[test]
+//fn after_commit_validator() {
+//    let (builder, interactor) =
+//        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
+//
+//    let service = builder.build();
+//    let mut testkit = TestKitBuilder::validator()
+//        .with_service(service.clone())
+//        .create();
+//
+//    testkit.create_block();
+//    testkit.create_block();
+//
+//    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
+//    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
+//
+//    assert_eq!(after_commit_args.len(), 2);
+//
+//    let item: &AfterCommitArgs = &after_commit_args[0];
+//    assert_ne!(item.handle, 0);
+//    assert_eq!(item.validator, 0);
+//    assert_eq!(item.height, 1);
+//
+//    let item: &AfterCommitArgs = &after_commit_args[1];
+//    assert_ne!(item.handle, 0);
+//    assert_eq!(item.validator, 0);
+//    assert_eq!(item.height, 2);
+//}
 
-    // It turned out that it is MUCH easier to use testkit in order to trigger the after_commit()
-    // callback than calling it by hands providing manually constructed ServiceContext entity.
-    let mut testkit = TestKitBuilder::validator()
-        .with_service(service.clone())
-        .create();
-
-    testkit.create_block();
-}
-
-#[test]
-fn after_commit_validator() {
-    let (builder, interactor) =
-        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
-
-    let service = builder.build();
-    let mut testkit = TestKitBuilder::validator()
-        .with_service(service.clone())
-        .create();
-
-    testkit.create_block();
-    testkit.create_block();
-
-    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
-    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
-
-    assert_eq!(after_commit_args.len(), 2);
-
-    let item: &AfterCommitArgs = &after_commit_args[0];
-    assert_ne!(item.handle, 0);
-    assert_eq!(item.validator, 0);
-    assert_eq!(item.height, 1);
-
-    let item: &AfterCommitArgs = &after_commit_args[1];
-    assert_ne!(item.handle, 0);
-    assert_eq!(item.validator, 0);
-    assert_eq!(item.height, 2);
-}
-
-#[test]
-fn after_commit_auditor() {
-    let (builder, interactor) =
-        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
-
-    let service = builder.build();
-    let mut testkit = TestKitBuilder::auditor()
-        .with_service(service.clone())
-        .create();
-
-    testkit.create_block();
-
-    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
-    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
-
-    assert_eq!(after_commit_args.len(), 1);
-
-    let item: &AfterCommitArgs = &after_commit_args[0];
-    assert_ne!(item.handle, 0);
-    assert_eq!(item.validator, -1);
-    assert_eq!(item.height, 1);
-}
+//#[test]
+//fn after_commit_auditor() {
+//    let (builder, interactor) =
+//        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
+//
+//    let service = builder.build();
+//    let mut testkit = TestKitBuilder::auditor()
+//        .with_service(service.clone())
+//        .create();
+//
+//    testkit.create_block();
+//
+//    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
+//    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
+//
+//    assert_eq!(after_commit_args.len(), 1);
+//
+//    let item: &AfterCommitArgs = &after_commit_args[0];
+//    assert_ne!(item.handle, 0);
+//    assert_eq!(item.validator, -1);
+//    assert_eq!(item.height, 1);
+//}
 
 // Helper methods. Gets the JSON representation of interaction with mock.
 fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {

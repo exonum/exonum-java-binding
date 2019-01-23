@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
-use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
+//use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
+//use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
 use java_bindings::JavaServiceFactory;
 use toml;
@@ -37,14 +37,14 @@ struct ServicesToEnable {
 
 fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     let mut service_factories = HashMap::new();
-    service_factories.insert(
-        CONFIGURATION_SERVICE.to_owned(),
-        Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
-    );
-    service_factories.insert(
-        BTC_ANCHORING_SERVICE.to_owned(),
-        Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
-    );
+//    service_factories.insert(
+//        CONFIGURATION_SERVICE.to_owned(),
+//        Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
+//    );
+//    service_factories.insert(
+//        BTC_ANCHORING_SERVICE.to_owned(),
+//        Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
+//    );
     service_factories.insert(
         EJB_SERVICE.to_owned(),
         Box::new(JavaServiceFactory) as Box<ServiceFactory>,

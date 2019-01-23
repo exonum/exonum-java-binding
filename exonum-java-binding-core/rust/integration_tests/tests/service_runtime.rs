@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-extern crate exonum_testkit;
+//extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
 
-use exonum_testkit::TestKitBuilder;
+//use exonum_testkit::TestKitBuilder;
 use integration_tests::vm::{get_fakes_classpath, get_libpath};
 use java_bindings::{Config, EjbConfig, JavaServiceRuntime, JvmConfig, ServiceConfig};
 
@@ -50,9 +50,9 @@ fn bootstrap() {
         service_config,
     });
 
-    let mut testkit = TestKitBuilder::validator()
-        .with_service(service_runtime.service_proxy())
-        .create();
-
-    testkit.create_block();
+//    let mut testkit = TestKitBuilder::validator()
+//        .with_service(service_runtime.service_proxy())
+//        .create();
+//
+//    testkit.create_block();
 }

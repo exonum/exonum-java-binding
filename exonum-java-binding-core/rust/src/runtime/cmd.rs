@@ -251,7 +251,7 @@ fn update_node_config(context: &mut Context, value: Value) {
 }
 
 /// Extracts the `NodeConfig` from `Context` for further processing
-fn get_node_config(context: &Context) -> NodeConfig {
+fn get_node_config(context: &Context) -> NodeConfig<::std::path::PathBuf> {
     context
         .get(keys::NODE_CONFIG)
         .expect("Unable to read node configuration.")
