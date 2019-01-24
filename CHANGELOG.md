@@ -20,7 +20,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of core schema API. (#548, #549, #571, #573)
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
-- Support of Json serialization in a common way. (#611)  
+- Support of Json serialization in a common way. (#611)
+- Support of Time oracle.
+
+  To enable this service put `ejb_app_services.toml` file into EJB App's directory
+  with the following content:
+  ```toml
+  services = ["configuration", "(TODO: add time service name)"]
+  ``` (TODO: number of PR)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package

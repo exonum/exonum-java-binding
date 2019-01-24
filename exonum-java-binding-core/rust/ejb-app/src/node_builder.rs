@@ -1,5 +1,6 @@
 use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
+use exonum_time::TimeServiceFactory as TimeServiceFactory;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
 use java_bindings::JavaServiceFactory;
 use toml;
@@ -12,6 +13,7 @@ use std::path::Path;
 const PATH_TO_SERVICES_TO_ENABLE: &str = "ejb_app_services.toml";
 const CONFIGURATION_SERVICE: &str = "configuration";
 const BTC_ANCHORING_SERVICE: &str = "btc-anchoring";
+const TIME_SERVICE: &str = "time";
 const EJB_SERVICE: &str = "ejb-service";
 
 #[derive(Serialize, Deserialize)]
@@ -28,6 +30,10 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     service_factories.insert(
         BTC_ANCHORING_SERVICE.to_owned(),
         Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
+    );
+    service_factories.insert(
+        TIME_SERVICE.to_owned(),
+        Box::new(TimeServiceFactory) as Box<ServiceFactory>,
     );
     service_factories.insert(
         EJB_SERVICE.to_owned(),
@@ -133,13 +139,14 @@ mod tests {
     fn all_services() {
         let cfg = create_config(
             "all.toml",
-            "services = [\"configuration\", \"btc-anchoring\"]",
+            "services = [\"configuration\", \"btc-anchoring\", \"time\"]",
         );
         let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 3);
+        assert_eq!(services_to_enable.len(), 4);
         assert!(services_to_enable.contains(EJB_SERVICE));
         assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
         assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
+        assert!(services_to_enable.contains(TIME_SERVICE));
 
         let service_factories = service_factories();
         for service in &services_to_enable {
