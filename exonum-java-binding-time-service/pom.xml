@@ -11,17 +11,13 @@
     <artifactId>exonum-java-binding-time-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>Exonum Service</name>
+    <name>Exonum Time Service</name>
     <url>https://exonum.com/</url>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.compiler.source>8</java.compiler.source>
-        <java.compiler.target>8</java.compiler.target>
+        <ejb-core.nativeLibPath>${project.parent.basedir}/exonum-java-binding-core/rust/target/debug
+        </ejb-core.nativeLibPath>
         <junit.jupiter.version>5.3.2</junit.jupiter.version>
-        <hamcrest.version>1.3</hamcrest.version>
-        <mockito-core.version>2.23.0</mockito-core.version>
         <exonum.version>0.4-SNAPSHOT</exonum.version>
     </properties>
 
@@ -70,22 +66,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <showWarnings>true</showWarnings>
-                    <source>${java.compiler.source}</source>
-                    <target>${java.compiler.target}</target>
-                </configuration>
             </plugin>
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
                 <configuration>
                     <argLine>
-                        <!-- TODO: Replace with a path to the libjava_bindings.so to enable
-                             integration tests that require a native library. -->
-                        -Djava.library.path=${project.basedir}/exonum-java-binding-core/rust/target/debug
+                        ${jacoco.args}
+                        -Djava.library.path=${ejb-core.nativeLibPath}
+                        ${java.vm.assertionFlag}
                     </argLine>
                 </configuration>
             </plugin>

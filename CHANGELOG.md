@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   To enable this service put `ejb_app_services.toml` file into EJB App's directory
   with the following content:
   ```toml
-  services = ["configuration", "(TODO: add time service name)"]
+  services = ["configuration", "time"]
   ``` (TODO: number of PR)
 
 ### Changed
