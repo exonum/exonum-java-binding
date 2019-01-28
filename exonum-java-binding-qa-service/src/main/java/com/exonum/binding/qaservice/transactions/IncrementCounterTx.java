@@ -16,11 +16,11 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
@@ -53,7 +53,10 @@ public final class IncrementCounterTx implements Transaction {
    * @param counterId counter id, a hash of the counter name
    */
   public IncrementCounterTx(long seed, HashCode counterId) {
-    checkArgument(counterId.bits() == Hashing.DEFAULT_HASH_SIZE_BITS);
+    int size = counterId.bits();
+    checkArgument(size == DEFAULT_HASH_SIZE_BITS,
+        "Counter [%s] has %s bits size but required size is %s",
+        counterId, size, DEFAULT_HASH_SIZE_BITS);
     this.seed = seed;
     this.counterId = counterId;
   }
