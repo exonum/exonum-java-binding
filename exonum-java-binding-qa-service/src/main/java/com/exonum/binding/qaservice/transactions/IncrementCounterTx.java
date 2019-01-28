@@ -55,7 +55,7 @@ public final class IncrementCounterTx implements Transaction {
   public IncrementCounterTx(long seed, HashCode counterId) {
     int size = counterId.bits();
     checkArgument(size == DEFAULT_HASH_SIZE_BITS,
-        "Counter [%s] has %s bytes size but required size is %s",
+        "Counter [%s] has %s bits size but required size is %s",
         counterId, size, DEFAULT_HASH_SIZE_BITS);
     this.seed = seed;
     this.counterId = counterId;
