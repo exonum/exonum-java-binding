@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.database;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
@@ -68,6 +68,6 @@ class ForkTest {
   @Test
   void canModify() {
     Fork fork = Fork.newInstance(0x0A, false, new Cleaner());
-    assertFalse(fork.canModify());
+    assertTrue(fork.canModify());
   }
 }
