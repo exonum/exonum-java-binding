@@ -16,7 +16,7 @@
 
 /**
  * The Exonum light client.
- * Can be used to sign transactions before sending to blockchain.
+ * Can be used to create and submit transactions to blockchain.
  * TODO: add examples and links
  */
 package com.exonum.client;
