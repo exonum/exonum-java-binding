@@ -77,7 +77,6 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
 
     // Initialize JNI cache for testing with fakes
     if with_fakes {
-        // Current implementation of JavaVM#new() detaches current thread so we have to re-attach it
         let env = vm.attach_current_thread().unwrap();
         jni_cache::init_cache(&env);
     }

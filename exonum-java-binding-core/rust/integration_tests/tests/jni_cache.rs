@@ -53,9 +53,3 @@ fn concurrent_cache_read() {
         jh.join().unwrap();
     }
 }
-
-#[test]
-#[should_panic(expected = "Cache is not initialized")]
-fn cache_not_initialized() {
-    jni_cache::transaction_adapter::execute_id();
-}
