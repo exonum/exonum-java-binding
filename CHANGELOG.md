@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
 - Support of Json serialization in a common way. (#611)
-- Added the `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
+- `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
+- `ListIndexProxy#stream` to enable stream processing of list elements. (#661)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
