@@ -24,7 +24,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Blockchain Consensus algorithm parameters.
  *
- * <p>See <a href="https://exonum.com/doc/architecture/configuration/">Exonum configuration</a> for
+ * <p>See <a href="https://exonum.com/doc/version/latest/architecture/configuration/">Exonum configuration</a> for
  * Consensus configuration details.
  */
 @AutoValue

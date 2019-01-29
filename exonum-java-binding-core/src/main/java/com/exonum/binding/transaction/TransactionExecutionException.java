@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
  *
  * <p>An external client will get the error code and description when requests a transaction
  * status of a failed transaction. See
- * <a href="https://exonum.com/doc/advanced/node-management/#transaction">the API endpoint documentation</a>
+ * <a href="https://exonum.com/doc/version/latest/advanced/node-management/#transaction">the API endpoint documentation</a>
  * for more information.
  */
 public class TransactionExecutionException extends Exception {
