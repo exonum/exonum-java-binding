@@ -20,6 +20,7 @@ import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.storage.indices.TestStorageItems.V3;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -314,7 +314,7 @@ abstract class BaseListIndexIntegrationTestable
       l.addAll(elements);
 
       List<String> streamElements = l.stream()
-          .collect(Collectors.toList());
+          .collect(toList());
 
       assertThat(streamElements, equalTo(elements));
     });
