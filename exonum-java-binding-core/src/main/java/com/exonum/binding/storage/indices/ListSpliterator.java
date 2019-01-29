@@ -39,10 +39,7 @@ import java.util.function.Consumer;
  */
 /*
  * todo: Can’t we make a spliterator that is resilient to modifications of unrelated collections?
- *  I think we can as we use indices into list.
- *
- * todo: Shall we use the iterator (from a certain index) that Rust can provide? Is it more
- *   efficient?
+ *  I think we can as we use indices into list: ECR-2849
  */
 class ListSpliterator<ElementT> implements Spliterator<ElementT> {
 
@@ -145,7 +142,7 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
       return;
     }
     // todo: It also detects non-structural interference (e.g., replacing an element),
-    //   isn't it a false-positive?
+    //   isn't it a false-positive? [ECR-2850]
     if (counter.isModifiedSince(initialCounterValue)) {
       throw new ConcurrentModificationException(
           "The source (" + list + ") has been modified since the bind-time");
