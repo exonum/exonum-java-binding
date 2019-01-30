@@ -47,9 +47,9 @@ matrix:
       env: CHECK_RUST=false
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
-      # Specify the image containing JDK 8
+      # Specify the image containing JDK 8 (temporary switched to Java 11)
       # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
-      osx_image: xcode9.3
+      osx_image: xcode10.1
       env: CHECK_RUST=false
     - name: "Linux JDK 11 CHECK_RUST=false"
       os: linux
