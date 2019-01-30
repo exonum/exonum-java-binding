@@ -23,7 +23,6 @@ use std::{
     thread::spawn,
 };
 
-
 #[test]
 // NOTE: This test is not supposed to reliably catch synchronization errors.
 fn concurrent_cache_read() {

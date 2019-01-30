@@ -20,12 +20,8 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate test;
 
-use integration_tests::{
-    executor::create_executor_with_cache_initialized,
-    mock::transaction::create_mock_transaction_proxy, vm::create_vm_for_benchmarks_with_fakes,
-};
+use integration_tests::vm::create_vm_for_benchmarks_with_fakes;
 use java_bindings::{
-    exonum::blockchain::Transaction,
     jni::{
         objects::{JObject, JValue},
         JNIEnv, JavaVM,
@@ -42,7 +38,7 @@ const TX_EXEC_EXCEPTION_CLASS: &str =
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();
-    pub static ref EXECUTOR: MainExecutor = create_executor_with_cache_initialized(VM.clone());
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 // Returns a class name of an obj as a `String`. It's a simulation of old non cached implementation.
