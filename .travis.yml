@@ -85,7 +85,7 @@ before_install:
   - cargo install --list
   # Install OSX requirements
   # TODO: Temporary fix, the problem is described here: https://jira.bf.local/browse/ECR-2795
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install "$OSX_PACKAGES" || brew install "$OSX_PACKAGES"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install $OSX_PACKAGES || brew install $OSX_PACKAGES; fi
   # force building instead of using from apt.
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
