@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.exonum.binding</groupId>
+  <artifactId>exonum-java-binding-parent</artifactId>
+  <version>0.4-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Exonum Java Binding Parent</name>
+  <description>
+    The Exonum Java Binding library.
+  </description>
+  <!--TODO: change after the repo renaming-->
+  <url>https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding-parent</url>
+  <organization>
+    <name>Exonum</name>
+    <url>https://exonum.com/</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>dmitry-timofeev</id>
+      <name>Dmitry Timofeev</name>
+      <url>https://github.com/dmitry-timofeev</url>
+    </developer>
+
+    <developer>
+      <id>alexander-irbis</id>
+      <name>Alexander Semichenkov</name>
+      <url>https://github.com/alexander-irbis</url>
+    </developer>
+
+    <developer>
+      <id>MakarovS</id>
+      <name>Sergei Makarov</name>
+      <url>https://github.com/MakarovS</url>
+    </developer>
+
+    <developer>
+      <id>vitvakatu</id>
+      <name>Ilya Bogdanov</name>
+      <url>https://github.com/vitvakatu</url>
+    </developer>
+  </developers>
+
+  <modules>
+    <module>exonum-java-binding-bom</module>
+    <module>exonum-java-testing</module>
+    <module>exonum-java-binding-common</module>
+    <module>exonum-java-binding-core</module>
+    <module>exonum-java-binding-fakes</module>
+    <module>exonum-java-binding-qa-service</module>
+    <module>exonum-java-binding-cryptocurrency-demo</module>
+    <module>exonum-java-binding-service-archetype</module>
+  </modules>
+
+  <scm>
+    <connection>scm:git:https://github.com/exonum/exonum-java-binding.git</connection>
+    <developerConnection>scm:git:git@github.com:/exonum/exonum-java-binding.git</developerConnection>
+    <url>https://github.com/exonum/exonum-java-binding</url>
+    <tag>HEAD</tag>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/exonum/exonum-java-binding/issues</url>
+  </issueManagement>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.compiler.source>8</java.compiler.source>
+    <java.compiler.target>8</java.compiler.target>
+    <!-- Enables Java assertions, used in unit and integration tests -->
+    <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
+    <!-- Skip generating Javadocs by default. Some profiles override this.  -->
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+
+    <assertj.version>3.11.1</assertj.version>
+    <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
+    <checkstyle.severity>warning</checkstyle.severity>
+    <guice.version>4.2.2</guice.version>
+    <log4j.version>2.11.1</log4j.version>
+    <hamcrest.version>2.0.0.0</hamcrest.version>
+    <junit.version>4.12</junit.version>
+    <junit.jupiter.version>5.3.2</junit.jupiter.version>
+    <powermock.version>2.0.0</powermock.version>
+    <protobuf.version>3.6.1</protobuf.version>
+    <mockito-core.version>2.23.4</mockito-core.version>
+    <guava.version>27.0.1-jre</guava.version>
+    <vertx.version>3.5.4</vertx.version>
+    <equalsverifier.version>3.1.4</equalsverifier.version>
+    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
+    <gson.version>2.8.5</gson.version>
+    <auto-value-gson.version>0.8.0</auto-value-gson.version>
+    <!-- A flag controlling whether Java ITs requiring the native library shall be skipped
+         during the build. Sub-modules define to which tests this flag applies depending
+         on where the native library is used.
+
+         This property shall be removed once the loading bug is fixed.
+
+         See ECR-942. -->
+    <project.skipJavaITs>false</project.skipJavaITs>
+    <!-- Default values of properties set by Jacoco when coverage is enabled.
+         Passed to the JVM running tests. -->
+    <jacoco.args></jacoco.args>
+    <jacoco.it.args></jacoco.it.args>
+    <excludeTags>slow-test</excludeTags>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${log4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.ryanharter.auto.value</groupId>
+        <artifactId>auto-value-gson-annotations</artifactId>
+        <version>${auto-value-gson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.ryanharter.auto.value</groupId>
+        <artifactId>auto-value-gson</artifactId>
+        <version>${auto-value-gson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>java-hamcrest</artifactId>
+        <version>${hamcrest.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>nl.jqno.equalsverifier</groupId>
+        <artifactId>equalsverifier</artifactId>
+        <version>${equalsverifier.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito-core.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito2</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava-testlib</artifactId>
+        <version>${guava.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <!-- Shared test dependencies of all sub-modules. -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>java-hamcrest</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!--JUnit5-->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Needed to fix @Generated annotation java 8 - 11 issue, Javadoc generation with JDK 9 -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>${javax-annotation-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+          <configuration>
+            <showWarnings>true</showWarnings>
+            <source>${java.compiler.source}</source>
+            <target>${java.compiler.target}</target>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.xolstice.maven.plugins</groupId>
+          <artifactId>protobuf-maven-plugin</artifactId>
+          <version>0.6.1</version>
+        </plugin>
+
+        <!-- Checkstyle plugin is run during validate phase (before javac) -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.0.0</version>
+          <configuration>
+            <configLocation>${checkstyle.configLocation}</configLocation>
+            <propertyExpansion>checkstyle.severity=${checkstyle.severity}</propertyExpansion>
+            <linkXRef>false</linkXRef>
+          </configuration>
+          <executions>
+            <execution>
+              <id>validate</id>
+              <phase>validate</phase>
+              <configuration>
+                <encoding>UTF-8</encoding>
+                <consoleOutput>true</consoleOutput>
+                <failsOnError>true</failsOnError>
+                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+              </configuration>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>8.16</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>tidy-maven-plugin</artifactId>
+          <version>1.1.0</version>
+        </plugin>
+
+        <!-- Use newer version of the standard plugins by default. -->
+        <plugin>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.0.0-M2</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+          <configuration>
+            <excludedGroups>
+              ${excludeTags}
+            </excludedGroups>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.1.1</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.1</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+
+        <!-- You may explicitly run `mvn spotbugs:spotbugs` from the command line,
+             but it’s not bound to any phases in the default profile.
+             See: https://spotbugs.readthedocs.io/en/latest/maven.html
+           -->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>3.1.10</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.0.1</version>
+          <configuration>
+            <doclint>none</doclint>
+            <detectOfflineLinks>false</detectOfflineLinks>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.0.1</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.6</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check-build-prerequisites</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>[3.5,)</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>[1.8,)</version>
+                  <message>Java 8 is the minimum supported version.</message>
+                </requireJavaVersion>
+                <requireOS>
+                  <!-- If we *do* support Windows and still rely on RUSTFLAGS (see the rule below
+                       and 'tests_profile'), update the instructions. -->
+                  <family>!windows</family>
+                  <message>Java Binding cannot be built on Windows at the moment.
+                    You are welcome to hack on ECR-446 and ECR-587!</message>
+                </requireOS>
+                <requireEnvironmentVariable>
+                  <variableName>RUSTFLAGS</variableName>
+                  <message>
+                    RUSTFLAGS with proper runtime paths are required to run most integration tests.
+                    Use 'source tests_profile' in your terminal to set the required
+                    environment variables. See also CONTRIBUTING.md.
+                  </message>
+                </requireEnvironmentVariable>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checks that the POMs match the code convention:
+           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
+
+           Use `mvn tidy:pom` to fix any style issues -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check-pom-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- A build profile for a build performed on a CI server:
+            - Fails if the code has style issues
+            - Collects test coverage information
+     -->
+    <profile>
+      <id>ci-build</id>
+      <properties>
+        <checkstyle.severity>error</checkstyle.severity>
+        <jacoco.args>${argLine}</jacoco.args>
+        <jacoco.it.args>${itCoverageAgent}</jacoco.it.args>
+        <excludeTags>none</excludeTags>
+      </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.2</version>
+            <configuration>
+              <!-- Generated files are excluded. -->
+              <excludes>
+                <exclude>**/*AutoValue*</exclude>
+                <exclude>**/TxMessageProtos*</exclude>
+                <exclude>**/WalletProtos*</exclude>
+                <exclude>**/CoreProtos*</exclude>
+              </excludes>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-jacoco-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>prepare-jacoco-it-agent</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
+                  <propertyName>itCoverageAgent</propertyName>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-it-report</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>report-integration</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+            <version>4.3.0</version>
+            <configuration>
+              <repoToken>${env.COVERALLS_TOKEN}</repoToken>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Profile used during deploy:
+           - Generates Javadocs.
+           - Signs the artefacts.
+           - Deploys them to the remote repository. -->
+    <profile>
+      <id>deploy-sign-artifacts</id>
+      <properties>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <!--It is needed for correct gpg signing with gpg 2.1-->
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default-deploy</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Skip integration tests requiring the native library on Linux until the loading bug
+         is fixed (ECR-942). -->
+    <profile>
+      <id>skip-ITs-on-linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <name>linux</name>
+        </os>
+      </activation>
+      <properties>
+        <project.skipJavaITs>true</project.skipJavaITs>
+      </properties>
+    </profile>
+  </profiles>
+</project>

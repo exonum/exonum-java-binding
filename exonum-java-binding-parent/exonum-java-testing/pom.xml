@@ -38,7 +38,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
-          <configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
+          <configLocation>${project.parent.basedir}/../checkstyle.xml</configLocation>
         </configuration>
       </plugin>
 
