@@ -50,6 +50,7 @@ lazy_static! {
 }
 
 #[test]
+// TODO: reenable these tests after ECR-2789
 #[ignore]
 fn execute_valid_transaction() {
     let db = MemoryDB::new();

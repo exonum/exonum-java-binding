@@ -62,6 +62,7 @@ lazy_static! {
 }
 
 #[test]
+// TODO: reenable these tests after ECR-2789
 #[ignore]
 fn service_id() {
     let service_id: u16 = 24;
