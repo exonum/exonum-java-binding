@@ -33,7 +33,7 @@ public interface Node {
    * the {@linkplain #getPublicKey() node service key}, and then submits it into Exonum network.
    * This node does <em>not</em> execute the transaction immediately, but broadcasts it to all
    * the nodes in the network. Then each node adds the transaction to
-   * the <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
+   * the <a href="https://exonum.com/doc/version/latest/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
    *
    * <p/><em>Be aware that each node has its own service key pair, therefore
