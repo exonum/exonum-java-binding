@@ -50,6 +50,7 @@ lazy_static! {
 }
 
 #[test]
+#[ignore]
 fn execute_valid_transaction() {
     let db = MemoryDB::new();
     {
@@ -83,6 +84,7 @@ fn execute_valid_transaction() {
 }
 
 #[test]
+#[ignore]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn execute_should_panic_if_java_error_occurred() {
     let (panic_tx, raw) = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
@@ -93,6 +95,7 @@ fn execute_should_panic_if_java_error_occurred() {
 }
 
 #[test]
+#[ignore]
 #[should_panic(expected = "Java exception: java.lang.ArithmeticException")]
 fn execute_should_panic_if_java_exception_occurred() {
     let (panic_tx, raw) =
@@ -104,6 +107,7 @@ fn execute_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
+#[ignore]
 fn execute_should_return_err_if_tx_exec_exception_occurred() {
     let err_code: i8 = 1;
     let err_message = "Expected exception";
@@ -125,6 +129,7 @@ fn execute_should_return_err_if_tx_exec_exception_occurred() {
 }
 
 #[test]
+#[ignore]
 fn execute_should_return_err_if_tx_exec_exception_subclass_occurred() {
     let err_code: i8 = 2;
     let err_message = "Expected exception subclass";
@@ -146,6 +151,7 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred() {
 }
 
 #[test]
+#[ignore]
 fn execute_should_return_err_if_tx_exec_exception_occurred_no_message() {
     let err_code: i8 = 3;
     let (invalid_tx, raw) = create_throwing_exec_exception_mock_transaction_proxy(
@@ -166,6 +172,7 @@ fn execute_should_return_err_if_tx_exec_exception_occurred_no_message() {
 }
 
 #[test]
+#[ignore]
 fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message() {
     let err_code: i8 = 4;
     let (invalid_tx, raw) = create_throwing_exec_exception_mock_transaction_proxy(
@@ -186,6 +193,7 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
 }
 
 #[test]
+#[ignore]
 fn passing_transaction_context() {
     let db = MemoryDB::new();
     let (tx_hash, author_pk) = {
