@@ -16,6 +16,7 @@
 
 package com.exonum.binding.service;
 
+import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Snapshot;
@@ -32,9 +33,12 @@ public interface Node {
    * Creates a transaction from the given parameters, signs it with
    * the {@linkplain #getPublicKey() node service key}, and then submits it into Exonum network.
    * This node does <em>not</em> execute the transaction immediately, but broadcasts it to all
-   * the nodes in the network. Then each node adds the transaction to
+   * the nodes in the network. Then each node verifies the transaction and, if it is correct, adds it to
    * the <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
+   *
+   * <p>Incorrect transactions (e.g., the payload of which cannot be deserialized by the target service, or which
+   * have unknown message id) are rejected by the network.
    *
    * <p/><em>Be aware that each node has its own service key pair, therefore
    * invocations of this method on different nodes will produce different transactions.</em>
@@ -43,6 +47,7 @@ public interface Node {
    * @return hash of the transaction message created by the framework
    * @throws InternalServerError if this node failed to process the transaction
    * @throws NullPointerException if the transaction is null
+   * @see Blockchain#getTxMessages()
    */
   HashCode submitTransaction(RawTransaction rawTransaction)
       throws InternalServerError;
