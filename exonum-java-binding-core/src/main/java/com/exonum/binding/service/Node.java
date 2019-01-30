@@ -31,7 +31,7 @@ public interface Node {
    * Submits a transaction into Exonum network. This node does <em>not</em> execute
    * the transaction immediately, but verifies it and, if it is valid,
    * broadcasts it to all the nodes in the network. Then each node adds the transaction to a
-   * <a href="https://exonum.com/doc/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
+   * <a href="https://exonum.com/doc/version/latest/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
    *
    * @param transaction a transaction to send

@@ -26,8 +26,8 @@ import com.exonum.binding.storage.database.Fork;
  * <p>You shall usually extend {@link AbstractTransaction} rather than implementing
  * this interface.
  *
- * @see <a href="https://exonum.com/doc/architecture/transactions">Exonum Transactions</a>
- * @see <a href="https://exonum.com/doc/architecture/services">Exonum Services</a>
+ * @see <a href="https://exonum.com/doc/version/latest/architecture/transactions">Exonum Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/latest/architecture/services">Exonum Services</a>
  */
 public interface Transaction {
 

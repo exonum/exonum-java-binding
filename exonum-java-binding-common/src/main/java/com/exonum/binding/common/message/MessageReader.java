@@ -24,7 +24,7 @@ import java.nio.ByteOrder;
 /**
  * A reader of binary Exonum messages.
  *
- * <p>See <a href=https://exonum.com/doc/architecture/serialization/#message-serialization>the definition of the message format</a>.
+ * <p>See <a href=https://exonum.com/doc/version/latest/architecture/serialization/#message-serialization>the definition of the message format</a>.
  */
 public final class MessageReader implements BinaryMessage {
 
