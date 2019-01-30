@@ -84,33 +84,12 @@ before_install:
   # Install OSX requirements
   # TODO: Temporary fix, the problem is described here: https://jira.bf.local/browse/ECR-2795
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install "$OSX_PACKAGES" || brew install "$OSX_PACKAGES"; fi
-#  # force building instead of using from apt.
-#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
+  # force building instead of using from apt.
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
-#install: true  # Skip the installation step, as Maven requires
-#               # several extra properties when run on a CI server (see below).
-install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y gdb; fi # install gdb
-
-before_script:
-  - ulimit -c unlimited -S
+install: true  # Skip the installation step, as Maven requires
+               # several extra properties when run on a CI server (see below).
 
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
-
-after_script:
-#  - find "$TRAVIS_BUILD_DIR" -name "service_proxy*"
-#  - find "$TRAVIS_BUILD_DIR" -name "service_runtime*"
-  - find "$EJB_RUST_BUILD_DIR/target/debug/deps" -name "transaction_proxy-*"
-
-after_failure:
-  - COREFILE=$(find "$TRAVIS_BUILD_DIR" -name core | head -n 1) # find core file
-  - ls -l "$COREFILE"
-#  - EXEFILE=$(find "$EJB_RUST_BUILD_DIR/target/debug/deps" -name "service_proxy-*" | head -n 1)
-#  - EXEFILE="/home/travis/build/exonum/exonum-java-binding/exonum-java-binding-core/rust/target/debug/deps/service_proxy-2044b6bf673e2c95"
-#  - EXEFILE="/home/travis/build/exonum/exonum-java-binding/exonum-java-binding-core/rust/target/debug/deps/service_runtime-e225faf0fc016b62"
-#  - EXEFILE=$(find "$EJB_RUST_BUILD_DIR/target/debug/deps" -name "transaction_proxy-*" | head -n 2 | tail -n 1)
-  - EXEFILE="/home/travis/build/exonum/exonum-java-binding/exonum-java-binding-core/rust//target/debug/deps/transaction_proxy-9580d82563f65eb5"
-  - ls -l "$EXEFILE"
-  - if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" "$EXEFILE" -ex "thread apply all bt" -ex "set pagination 0" -batch; fi

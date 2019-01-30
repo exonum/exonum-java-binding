@@ -15,21 +15,15 @@ if [ "$CHECK_RUST" = true ]
 then
     # Install cargo-audit if it's not already.
     cargo audit --version || cargo install cargo-audit --force
-    # Install nightly rust version and clippy.
-#    rustup toolchain install $RUST_STABLE_VERSION
-#    cargo +$RUST_STABLE_VERSION clippy -V | grep $RUST_CLIPPY_VERSION || cargo +$RUST_STABLE_VERSION install clippy --vers $RUST_CLIPPY_VERSION --force
-    # TODO: use stable rust everywhere when ECR-1839 fixed.
-    # Install the stable toolchain and rustfmt.
-    rustup toolchain install stable
+    # Install clippy and rustfmt.
     rustup component add clippy
-#    rustup component add rustfmt-preview --toolchain stable
     rustup component add rustfmt
-#    rustup run stable rustfmt -V
+    rustfmt -V
+    clippy -V
 
     echo 'Performing checks over the rust code'
     cd "${EJB_RUST_BUILD_DIR}"
     # Check the formatting.
-#    cargo +stable fmt --all -- --check
     cargo fmt -- --check
 
     # Run clippy static analysis.
