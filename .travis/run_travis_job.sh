@@ -19,7 +19,7 @@ then
     rustup component add clippy
     rustup component add rustfmt
     rustfmt -V
-    clippy -V
+    cargo clippy -V
 
     echo 'Performing checks over the rust code'
     cd "${EJB_RUST_BUILD_DIR}"
