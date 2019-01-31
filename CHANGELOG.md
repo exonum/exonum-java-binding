@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of Json serialization in a common way. (#611)
 - `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
 - Support of separated messages format Exonum v0.10. (#574)
-- `ListIndexP roxy#stream` to enable stream processing of list elements. (#661)
+- `ListIndexProxy#stream` to enable stream processing of list elements. (#661)
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
