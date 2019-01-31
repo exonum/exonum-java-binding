@@ -29,7 +29,8 @@ fn concurrent_cache_read() {
     const THREAD_NUM: usize = 8;
     let mut threads = Vec::new();
 
-    create_vm_for_tests_with_fake_classes();
+    // Create a VM, initializing the JNI cache
+    let _jvm = create_vm_for_tests_with_fake_classes();
 
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
 
