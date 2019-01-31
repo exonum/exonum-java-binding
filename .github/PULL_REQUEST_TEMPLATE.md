@@ -6,7 +6,7 @@ See: https://jira.bf.local/browse/ECR-XYZ
 
 ### Definition of Done
 
-- [ ] There are no TODOs left in the code
+- [ ] There is no TODOs left in the code
 - [ ] Change is covered by automated [tests](https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#tests)
 - [ ] The [coding guidelines](https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#the-code-style) are followed
 - [ ] Public API has Javadoc
