@@ -142,7 +142,7 @@ class ListSpliteratorTest {
   @ParameterizedTest
   @MethodSource("bindingOperations")
   void spliteratorFailsFast(Consumer<Spliterator<Integer>> bindingOperation) {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     ModificationCounter counter = mock(ModificationCounter.class);
 
     // Create a spliterator
@@ -175,7 +175,7 @@ class ListSpliteratorTest {
 
   @Test
   void spliteratorRemainsBoundToTheSourceAfterSplit() {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     when(list.size()).thenReturn(10L);
     ModificationCounter counter = new IncrementalModificationCounter();
 
@@ -196,7 +196,7 @@ class ListSpliteratorTest {
 
   @Test
   void spliteratorIsLateBinding() {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     long size = 10;
     when(list.size()).thenReturn(size);
     ModificationCounter counter = new IncrementalModificationCounter();
@@ -221,7 +221,7 @@ class ListSpliteratorTest {
   @Test
   @DisplayName("spliterator uses the list size at bind time, allowing for structural modifications")
   void spliteratorIsLateBindingUsesProperSize() {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     long size = 10;
     long initialSize = size - 1;
     when(list.size()).thenReturn(initialSize);
@@ -250,7 +250,7 @@ class ListSpliteratorTest {
   @ParameterizedTest
   @ValueSource(longs = {0, 1, 2})
   void estimateSizeAtBindTime(long listSize) {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     when(list.size()).thenReturn(listSize);
     ModificationCounter counter = mock(ModificationCounter.class);
     Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
@@ -261,7 +261,7 @@ class ListSpliteratorTest {
   @ParameterizedTest
   @ValueSource(longs = {1, 2, 3})
   void estimateSizeAfterSingleSuccessfulAdvance(long listSize) {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     when(list.size()).thenReturn(listSize);
     ModificationCounter counter = mock(ModificationCounter.class);
     Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
@@ -274,7 +274,7 @@ class ListSpliteratorTest {
 
   @Test
   void estimateSizeIsZeroAfterSpliteratorIsConsumed() {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     long listSize = 5;
     when(list.size()).thenReturn(listSize);
     ModificationCounter counter = mock(ModificationCounter.class);
@@ -287,7 +287,7 @@ class ListSpliteratorTest {
   }
 
   private static Spliterator<Integer> createSpliteratorOf(int[] source) {
-    ListIndex<Integer> list = mock(ListIndex.class);
+    ListIndex<Integer> list = createListMock();
     lenient().when(list.get(anyLong())).thenAnswer((Answer<Integer>) invocation -> {
       Long index = invocation.getArgument(0);
       return source[Math.toIntExact(index)];
@@ -299,5 +299,11 @@ class ListSpliteratorTest {
         .thenReturn(false);
 
     return new ListSpliterator<>(list, modCounter, true);
+  }
+
+  // Don't warn of unchecked assignment of mock of parameterized class
+  @SuppressWarnings("unchecked")
+  private static ListIndex<Integer> createListMock() {
+    return mock(ListIndex.class);
   }
 }
