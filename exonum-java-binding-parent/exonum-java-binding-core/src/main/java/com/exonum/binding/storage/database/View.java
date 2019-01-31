@@ -39,6 +39,7 @@ public abstract class View extends AbstractNativeProxy {
 
   private final Cleaner cleaner;
   private final ModificationCounter modCounter;
+  private final boolean canModify;
 
   /**
    * Create a new view proxy.
@@ -46,11 +47,22 @@ public abstract class View extends AbstractNativeProxy {
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
    * @param cleaner a cleaner of resources
    * @param modCounter a modification counter
+   * @param canModify if the view allows modifications
    */
-  View(NativeHandle nativeHandle, Cleaner cleaner, ModificationCounter modCounter) {
+  View(NativeHandle nativeHandle, Cleaner cleaner, ModificationCounter modCounter,
+      boolean canModify) {
     super(nativeHandle);
     this.cleaner = cleaner;
     this.modCounter = modCounter;
+    this.canModify = canModify;
+  }
+
+  /**
+   * Returns true if this view allows modifications to the database state; false if it is
+   * immutable.
+   */
+  public boolean canModify() {
+    return canModify;
   }
 
   /**
