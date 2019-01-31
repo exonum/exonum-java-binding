@@ -25,7 +25,6 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
