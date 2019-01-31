@@ -19,8 +19,8 @@ package com.exonum.binding.transaction;
 /**
  * An Exonum transaction.
  *
- * @see <a href="https://exonum.com/doc/architecture/transactions">Exonum Transactions</a>
- * @see <a href="https://exonum.com/doc/architecture/services">Exonum Services</a>
+ * @see <a href="https://exonum.com/doc/version/latest/architecture/transactions">Exonum Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/latest/architecture/services">Exonum Services</a>
  */
 @FunctionalInterface
 public interface Transaction {

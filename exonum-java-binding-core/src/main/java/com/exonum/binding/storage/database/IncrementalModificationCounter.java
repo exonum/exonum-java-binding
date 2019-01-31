@@ -16,7 +16,7 @@
 
 package com.exonum.binding.storage.database;
 
-final class IncrementalModificationCounter implements ModificationCounter {
+public final class IncrementalModificationCounter implements ModificationCounter {
 
   private int counter = 0;
 

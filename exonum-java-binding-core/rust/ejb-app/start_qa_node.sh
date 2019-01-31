@@ -45,7 +45,7 @@ echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-export RUST_LIB_DIR="$(rustup run nightly rustc --print sysroot)/lib"
+export RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
