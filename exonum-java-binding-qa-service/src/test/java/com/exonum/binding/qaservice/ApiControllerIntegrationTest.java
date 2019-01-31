@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
@@ -33,8 +34,6 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONF
 import static com.exonum.binding.qaservice.ApiController.QaPaths.MESSAGE_HASH_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_THROWING_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
@@ -75,7 +74,6 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.service.InternalServerError;
-import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -104,6 +102,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -116,8 +115,7 @@ class ApiControllerIntegrationTest {
 
   private static final String HOST = "0.0.0.0";
 
-  private static final HashCode EXPECTED_TX_HASH = Hashing.sha256()
-      .hashInt(1);
+  private static final HashCode EXPECTED_TX_HASH = sha256().hashInt(1);
 
   private static final String HASH_STRING = "ab";
   private static final HashCode HASH_1 = HashCode.fromInt(0x00);
@@ -129,9 +127,8 @@ class ApiControllerIntegrationTest {
       .registerTypeAdapterFactory(TransactionResultAdapterFactory.create())
       .create();
 
+  @Mock
   QaService qaService;
-
-  ApiController controller;
 
   HttpServer httpServer;
 
@@ -141,14 +138,11 @@ class ApiControllerIntegrationTest {
 
   @BeforeEach
   void setup(Vertx vertx, VertxTestContext context) {
-    qaService = mock(QaService.class);
-    controller = new ApiController(qaService);
-
     httpServer = vertx.createHttpServer();
     webClient = WebClient.create(vertx);
 
     Router router = Router.router(vertx);
-    controller.mountApi(router);
+    new ApiController(qaService).mountApi(router);
 
     httpServer.requestHandler(router::accept)
         .listen(0, context.succeeding(result -> {
@@ -187,28 +181,6 @@ class ApiControllerIntegrationTest {
 
             assertThat(response.bodyAsString())
                 .contains("No required key (name) in request parameters:");
-
-            context.completeNow();
-          });
-        }));
-  }
-
-  @Test
-  void submitCreateCounter_InvalidTransaction(VertxTestContext context) {
-    String counterName = "counter 1";
-    MultiMap params = multiMap("name", counterName);
-
-    Throwable error = wrappingChecked(InvalidTransactionException.class);
-    when(qaService.submitCreateCounter(counterName))
-        .thenThrow(error);
-
-    post(SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(response -> {
-          context.verify(() -> {
-            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-
-            assertThat(response.bodyAsString())
-                .startsWith("Transaction is not valid:");
 
             context.completeNow();
           });
@@ -261,24 +233,6 @@ class ApiControllerIntegrationTest {
 
     post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
         .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
-  }
-
-  @Test
-  void submitInvalidTx(VertxTestContext context) {
-    Throwable error = wrappingChecked(InvalidTransactionException.class);
-    when(qaService.submitInvalidTx()).thenThrow(error);
-
-    post(SUBMIT_INVALID_TX_PATH)
-        .send(checkInvalidTransaction(context));
-  }
-
-  @Test
-  void submitInvalidThrowingTx(VertxTestContext context) {
-    Throwable error = wrappingChecked(InvalidTransactionException.class);
-    when(qaService.submitInvalidThrowingTx()).thenThrow(error);
-
-    post(SUBMIT_INVALID_THROWING_TX_PATH)
-        .send(checkInvalidTransaction(context));
   }
 
   @Test
@@ -905,19 +859,6 @@ class ApiControllerIntegrationTest {
           );
           context.completeNow();
         }));
-  }
-
-  private Handler<AsyncResult<HttpResponse<Buffer>>> checkInvalidTransaction(
-      VertxTestContext context) {
-    return context.succeeding(
-        response -> context.verify(() -> {
-          assertAll(
-              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
-              () -> assertThat(response.bodyAsString()).startsWith("Transaction is not valid")
-          );
-          context.completeNow();
-        })
-    );
   }
 
   private static TransactionMessage transactionMessageSource(String payloadString) {

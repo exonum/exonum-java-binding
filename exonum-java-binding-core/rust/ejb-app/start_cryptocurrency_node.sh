@@ -47,7 +47,7 @@ EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
 EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-RUST_LIB_DIR="$(rustup run 1.27.2 rustc --print sysroot)/lib"
+RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
 echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
 
 export LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$JVM_LIB_PATH"
@@ -74,4 +74,4 @@ cargo run -- finalize testnet/sec.toml testnet/node.toml \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"
-cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 0.0.0.0:3000

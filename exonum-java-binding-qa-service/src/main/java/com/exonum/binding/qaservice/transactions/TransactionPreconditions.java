@@ -18,39 +18,35 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.PromoteToCore;
 import com.exonum.binding.qaservice.QaService;
+import com.exonum.binding.transaction.RawTransaction;
 
 @PromoteToCore("You have to check these preconditions all the time!")
 final class TransactionPreconditions {
 
   private static final short SERVICE_ID = QaService.ID;
 
-  static <MessageT extends Message> MessageT checkTransaction(MessageT message,
-                                                              short expectedTxId) {
-    short serviceId = message.getServiceId();
-    checkArgument(serviceId == SERVICE_ID,
-        "This message (%s) does not belong to this service: wrong service id (%s), must be %s",
-        message, serviceId, SERVICE_ID);
+  static void checkTransaction(RawTransaction transaction, short expectedTxId) {
+    checkServiceId(transaction);
 
-    short txId = message.getMessageType();
+    short txId = transaction.getTransactionId();
     checkArgument(txId == expectedTxId,
-        "This message (%s) has wrong transaction id (%s), must be %s", message, txId, expectedTxId);
-
-    return message;
+        "This transaction (%s) has wrong transaction id (%s), must be %s",
+        transaction, txId, expectedTxId);
   }
 
-  static <MessageT extends Message> MessageT checkMessageSize(MessageT message,
-                                                              int expectedBodySize) {
-    checkArgument(0 <= expectedBodySize, "You cannot expect negative size, can you?");
+  static void checkPayloadSize(RawTransaction transaction, int expectedSize) {
+    checkArgument(transaction.getPayload().length == expectedSize,
+        "The payload of this transaction (%s) has wrong size (%s), expected %s bytes",
+        transaction, transaction.getPayload().length, expectedSize);
+  }
 
-    int expectedSize = Message.messageSize(expectedBodySize);
-    checkArgument(message.size() == expectedSize,
-        "This message (%s) has wrong size (%s), expected %s bytes", message, message.size(),
-        expectedSize);
-
-    return message;
+  static void checkServiceId(RawTransaction transaction) {
+    short serviceId = transaction.getServiceId();
+    checkArgument(serviceId == SERVICE_ID,
+        "This transaction (%s) does not belong to this service: wrong service id (%s), must be %s",
+        transaction, serviceId, SERVICE_ID);
   }
 
   private TransactionPreconditions() {

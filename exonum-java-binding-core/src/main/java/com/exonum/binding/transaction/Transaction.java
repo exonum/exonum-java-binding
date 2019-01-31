@@ -16,47 +16,29 @@
 
 package com.exonum.binding.transaction;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.storage.database.Fork;
-
 /**
  * An Exonum transaction.
- *
- * <p>You shall usually extend {@link AbstractTransaction} rather than implementing
- * this interface.
  *
  * @see <a href="https://exonum.com/doc/version/latest/architecture/transactions">Exonum Transactions</a>
  * @see <a href="https://exonum.com/doc/version/latest/architecture/services">Exonum Services</a>
  */
+@FunctionalInterface
 public interface Transaction {
-
-  /**
-   * Returns true if this transaction is valid: its data holds the invariants,
-   * it has a correct signature, etc.
-   *
-   * <p>This method is intended to check the <em>internal</em> consistency of a transaction.
-   * You shall <strong>not</strong> access any external objects in this method
-   * (e.g., files, network resources, databases).
-   *
-   * <p>If this method returns false, the transaction is considered incorrect,
-   * and Exonum discards it. Exonum never records invalid transactions into a blockchain.
-   */
-  boolean isValid();
 
   /**
    * Execute the transaction, possibly modifying the blockchain state.
    *
-   * @param view a database view, which allows to modify the blockchain state
+   * @param context a transaction execution context, which allows to access the information about
+   *        this transaction and modify the blockchain state through the included database fork
    * @throws TransactionExecutionException if the transaction cannot be executed normally
    *     and has to be rolled back. The transaction will be committed as failed (status "error"),
    *     the error code with the optional description will be saved into the storage. The client
-   *     can request the error code to know the reason of the failure.
+   *     can request the error code to know the reason of the failure
    * @throws RuntimeException if an unexpected error occurs. A correct transaction implementation
    *     must not throw such exceptions. The transaction will be committed as failed
-   *     (status "panic").
+   *     (status "panic")
    */
-  void execute(Fork view) throws TransactionExecutionException;
+  void execute(TransactionContext context) throws TransactionExecutionException;
 
   /**
    * Returns some information about this transaction in JSON format.
@@ -65,17 +47,4 @@ public interface Transaction {
     return "";
   }
 
-  /**
-   * Returns a hash of this transaction — a SHA-256 hash of the transaction message.
-   *
-   * @implSpec Default implementation returns {@code getMessage().hash()}.
-   */
-  default HashCode hash() {
-    return getMessage().hash();
-  }
-
-  /**
-   * Returns this transaction as a binary Exonum message.
-   */
-  BinaryMessage getMessage();
 }

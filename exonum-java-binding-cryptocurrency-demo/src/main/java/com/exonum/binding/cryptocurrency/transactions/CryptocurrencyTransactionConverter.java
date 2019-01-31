@@ -18,9 +18,9 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.service.TransactionConverter;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.Function;
@@ -28,28 +28,28 @@ import java.util.function.Function;
 /** A converter of cryptocurrency service transaction messages. */
 public final class CryptocurrencyTransactionConverter implements TransactionConverter {
 
-  private static final ImmutableMap<Short, Function<BinaryMessage, Transaction>>
+  private static final ImmutableMap<Short, Function<RawTransaction, Transaction>>
       TRANSACTION_FACTORIES =
           ImmutableMap.of(
-              CreateWalletTx.ID, CreateWalletTx::fromMessage,
-              TransferTx.ID, TransferTx::fromMessage);
+              CreateWalletTx.ID, CreateWalletTx::fromRawTransaction,
+              TransferTx.ID, TransferTx::fromRawTransaction);
 
   @Override
-  public Transaction toTransaction(BinaryMessage message) {
-    checkServiceId(message);
+  public Transaction toTransaction(RawTransaction rawTransaction) {
+    checkServiceId(rawTransaction);
 
-    short txId = message.getMessageType();
+    short txId = rawTransaction.getTransactionId();
     return TRANSACTION_FACTORIES
         .getOrDefault(
             txId,
             (m) -> {
               throw new IllegalArgumentException("Unknown transaction id: " + txId);
             })
-        .apply(message);
+        .apply(rawTransaction);
   }
 
-  private static void checkServiceId(BinaryMessage message) {
-    short serviceId = message.getServiceId();
+  private static void checkServiceId(RawTransaction rawTransaction) {
+    short serviceId = rawTransaction.getServiceId();
     checkArgument(
         serviceId == CryptocurrencyService.ID,
         "Wrong service id (%s), must be %s",

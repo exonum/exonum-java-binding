@@ -36,8 +36,6 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PAT
 import static com.exonum.binding.qaservice.ApiController.QaPaths.MESSAGE_HASH_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_THROWING_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INVALID_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
@@ -53,7 +51,6 @@ import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.service.InvalidTransactionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -95,8 +92,6 @@ final class ApiController {
         ImmutableMap.<String, Handler<RoutingContext>>builder()
             .put(SUBMIT_CREATE_COUNTER_TX_PATH, this::submitCreateCounter)
             .put(SUBMIT_INCREMENT_COUNTER_TX_PATH, this::submitIncrementCounter)
-            .put(SUBMIT_INVALID_TX_PATH, this::submitInvalidTx)
-            .put(SUBMIT_INVALID_THROWING_TX_PATH, this::submitInvalidThrowingTx)
             .put(SUBMIT_VALID_THROWING_TX_PATH, this::submitValidThrowingTx)
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
@@ -134,16 +129,6 @@ final class ApiController {
     HashCode counterId = getRequiredParameter(parameters, COUNTER_ID_PARAM, HashCode::fromString);
 
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
-    replyTxSubmitted(rc, txHash);
-  }
-
-  private void submitInvalidTx(RoutingContext rc) {
-    HashCode txHash = service.submitInvalidTx();
-    replyTxSubmitted(rc, txHash);
-  }
-
-  private void submitInvalidThrowingTx(RoutingContext rc) {
-    HashCode txHash = service.submitInvalidThrowingTx();
     replyTxSubmitted(rc, txHash);
   }
 
@@ -389,13 +374,6 @@ final class ApiController {
       return Optional.of(message);
     }
 
-    // Check for checked InvalidTransactionExceptions — they are wrapped in RuntimeExceptions.
-    Throwable cause = requestFailure.getCause();
-    if (cause instanceof InvalidTransactionException) {
-      String description = Strings.nullToEmpty(cause.getLocalizedMessage());
-      String message = String.format("Transaction is not valid: %s", description);
-      return Optional.of(message);
-    }
     // This throwable must correspond to an internal server error.
     return Optional.empty();
   }

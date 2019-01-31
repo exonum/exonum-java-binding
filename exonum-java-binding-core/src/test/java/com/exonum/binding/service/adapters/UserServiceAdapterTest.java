@@ -22,6 +22,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
+import static org.hamcrest.collection.IsArrayWithSize.emptyArray;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,13 +34,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
-import com.exonum.binding.common.message.TemplateMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.test.Bytes;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import io.vertx.ext.web.Router;
@@ -73,56 +74,49 @@ class UserServiceAdapterTest {
   private UserServiceAdapter serviceAdapter;
 
   private static final short SERVICE_ID = (short) 0xA103;
+  private static final short TRANSACTION_ID = 0x05;
   private static final long SNAPSHOT_HANDLE = 0x0A;
   private static final long HEIGHT = 1;
   private static final int VALIDATOR_ID = 1;
 
   @Test
   void convertTransaction_ThrowsIfNull() {
-    assertThrows(NullPointerException.class, () -> serviceAdapter.convertTransaction(null));
+    assertThrows(NullPointerException.class, () ->
+        serviceAdapter.convertTransaction(TRANSACTION_ID, null));
   }
 
   @Test
   void convertTransaction() {
     Transaction expectedTransaction = mock(Transaction.class);
-    when(service.getId()).thenReturn(SERVICE_ID);
-    when(service.convertToTransaction(any(BinaryMessage.class)))
+    when(service.convertToTransaction(any(RawTransaction.class)))
         .thenReturn(expectedTransaction);
+    when(service.getId()).thenReturn(SERVICE_ID);
+    byte[] payload = Bytes.bytes(0x00, 0x01);
 
-    byte[] message = getServiceMessage(SERVICE_ID)
-        .getSignedMessage()
-        .array();
-
-    UserTransactionAdapter transactionAdapter = serviceAdapter.convertTransaction(message);
-
+    UserTransactionAdapter transactionAdapter =
+        serviceAdapter.convertTransaction(TRANSACTION_ID, payload);
     assertThat(transactionAdapter.transaction, equalTo(expectedTransaction));
+
+    RawTransaction expectedRawTransaction = RawTransaction.newBuilder()
+        .serviceId(SERVICE_ID)
+        .transactionId(TRANSACTION_ID)
+        .payload(payload)
+        .build();
+    verify(service).convertToTransaction(expectedRawTransaction);
   }
 
   @Test
   void convertTransaction_InvalidServiceImplReturningNull() {
-    when(service.getId()).thenReturn(SERVICE_ID);
-    when(service.convertToTransaction(any(BinaryMessage.class)))
+    when(service.convertToTransaction(any(RawTransaction.class)))
         // Such service impl. is not valid
         .thenReturn(null);
 
-    byte[] message = getServiceMessage(SERVICE_ID)
-        .getSignedMessage()
-        .array();
+    byte[] payload = Bytes.bytes(0x00, 0x01);
 
     NullPointerException thrown = assertThrows(NullPointerException.class,
-        () -> serviceAdapter.convertTransaction(message));
+        () -> serviceAdapter.convertTransaction(TRANSACTION_ID, payload));
     assertThat(thrown.getLocalizedMessage(), containsString("Invalid service implementation: "
         + "Service#convertToTransaction must never return null."));
-  }
-
-  /**
-   * Returns some transaction of the given service.
-   */
-  private BinaryMessage getServiceMessage(short serviceId) {
-    return new Message.Builder()
-        .mergeFrom(TemplateMessage.TEMPLATE_MESSAGE)
-        .setServiceId(serviceId)
-        .buildRaw();
   }
 
   @Test
@@ -135,7 +129,7 @@ class UserServiceAdapterTest {
 
     byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
-    assertThat(hashes.length, equalTo(0));
+    assertThat(hashes, emptyArray());
   }
 
   @Test
@@ -149,7 +143,7 @@ class UserServiceAdapterTest {
 
     byte[][] hashes = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
-    assertThat(hashes.length, equalTo(1));
+    assertThat(hashes, arrayWithSize(1));
     assertThat(hashes[0], equalTo(h1));
   }
 
@@ -177,7 +171,7 @@ class UserServiceAdapterTest {
 
   @Test
   void getStateHashes_ClosesCleaner() {
-    byte[][] ignored = serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
+    serviceAdapter.getStateHashes(SNAPSHOT_HANDLE);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
     verify(viewFactory).createSnapshot(eq(SNAPSHOT_HANDLE), ac.capture());
@@ -190,7 +184,7 @@ class UserServiceAdapterTest {
   @Test
   void initialize_ClosesCleaner() {
     long forkHandle = 0x0A;
-    String ignored = serviceAdapter.initialize(forkHandle);
+    serviceAdapter.initialize(forkHandle);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
     verify(viewFactory).createFork(eq(forkHandle), ac.capture());

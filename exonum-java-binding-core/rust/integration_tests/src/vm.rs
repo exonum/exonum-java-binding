@@ -1,4 +1,21 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
+use java_bindings::utils::jni_cache;
 
 use std::fs::File;
 use std::io::Read;
@@ -56,7 +73,15 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         .build()
         .unwrap_or_else(|e| panic!("{:#?}", e));
 
-    JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
+    let vm = JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e));
+
+    // Initialize JNI cache for testing with fakes
+    if with_fakes {
+        let env = vm.attach_current_thread().unwrap();
+        jni_cache::init_cache(&env);
+    }
+
+    vm
 }
 
 /// Creates a configured `JavaVM` for tests with the limited size of the heap.

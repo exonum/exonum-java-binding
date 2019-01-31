@@ -30,8 +30,6 @@ public enum QaTransaction {
   INCREMENT_COUNTER(1),
 
   // Badly-behaved transactions, do some crazy things.
-  INVALID(10),
-  INVALID_THROWING(11),
   VALID_THROWING(12),
   VALID_ERROR(13);
 

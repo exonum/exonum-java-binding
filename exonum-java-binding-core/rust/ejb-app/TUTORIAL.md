@@ -34,7 +34,7 @@ You can use the following script for this purpose:
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
 LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
-RUST_LIB_PATH="$(rustup run 1.27.2 rustc --print sysroot)/lib"
+RUST_LIB_PATH="$(rustup run stable rustc --print sysroot)/lib"
 
 export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
 

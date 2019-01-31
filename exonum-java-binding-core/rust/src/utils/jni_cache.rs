@@ -28,7 +28,6 @@ static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
 
 static mut TRANSACTION_ADAPTER_EXECUTE: Option<JMethodID> = None;
 static mut TRANSACTION_ADAPTER_INFO: Option<JMethodID> = None;
-static mut TRANSACTION_ADAPTER_VERIFY: Option<JMethodID> = None;
 
 static mut SERVICE_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
 static mut SERVICE_ADAPTER_CONVERT_TRANSACTION: Option<JMethodID> = None;
@@ -64,19 +63,13 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         "com/exonum/binding/service/adapters/UserTransactionAdapter",
         "execute",
-        "(J)V",
+        "(J[B[B)V",
     );
     TRANSACTION_ADAPTER_INFO = get_method_id(
         &env,
         "com/exonum/binding/service/adapters/UserTransactionAdapter",
         "info",
         "()Ljava/lang/String;",
-    );
-    TRANSACTION_ADAPTER_VERIFY = get_method_id(
-        &env,
-        "com/exonum/binding/service/adapters/UserTransactionAdapter",
-        "isValid",
-        "()Z",
     );
     SERVICE_ADAPTER_STATE_HASHES = get_method_id(
         &env,
@@ -88,7 +81,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         "com/exonum/binding/service/adapters/UserServiceAdapter",
         "convertTransaction",
-        "([B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
+        "(S[B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
     );
     JAVA_LANG_ERROR = env
         .new_global_ref(env.find_class("java/lang/Error").unwrap().into())
@@ -107,7 +100,6 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && THROWABLE_GET_MESSAGE.is_some()
             && TRANSACTION_ADAPTER_EXECUTE.is_some()
             && TRANSACTION_ADAPTER_INFO.is_some()
-            && TRANSACTION_ADAPTER_VERIFY.is_some()
             && SERVICE_ADAPTER_STATE_HASHES.is_some()
             && SERVICE_ADAPTER_CONVERT_TRANSACTION.is_some()
             && JAVA_LANG_ERROR.is_some()
@@ -146,12 +138,6 @@ pub mod transaction_adapter {
     pub fn info_id() -> JMethodID<'static> {
         check_cache_initalized();
         unsafe { TRANSACTION_ADAPTER_INFO.unwrap() }
-    }
-
-    /// Returns cached `JMethodID` for `UserTransactionAdapter.isValid()`.
-    pub fn verify_id() -> JMethodID<'static> {
-        check_cache_initalized();
-        unsafe { TRANSACTION_ADAPTER_VERIFY.unwrap() }
     }
 }
 

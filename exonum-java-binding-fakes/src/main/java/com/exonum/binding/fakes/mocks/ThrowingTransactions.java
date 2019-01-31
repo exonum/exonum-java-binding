@@ -20,8 +20,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import java.lang.reflect.Constructor;
 import javax.annotation.Nullable;
@@ -88,7 +88,7 @@ public final class ThrowingTransactions {
       TransactionExecutionException e = isSubclass
               ? new TestTxExecException(errorCode, description)
               : new TransactionExecutionException(errorCode, description);
-      doThrow(e).when(tx).execute(any(Fork.class));
+      doThrow(e).when(tx).execute(any(TransactionContext.class));
     } catch (TransactionExecutionException e2) {
       throw new AssertionError("Supposedly unreachable", e2);
     }
