@@ -56,9 +56,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  // to easily inject a mock of a calculatedRootHash function.
-  @VisibleForTesting
-  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
+  private ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
       HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
