@@ -16,15 +16,16 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
+import static com.exonum.binding.test.Bytes.bytes;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,71 +52,55 @@ class QaTransactionConverterTest {
     short id = tx.id();
 
     assertThat(QaTransactionConverter.TRANSACTION_FACTORIES)
-            .as("No entry for transaction %s with id=%d", tx, id)
-            .containsKey(id);
+        .as("No entry for transaction %s with id=%d", tx, id)
+        .containsKey(id);
   }
 
   @Test
   void toTransactionTransactionOfAnotherService() {
-    BinaryMessage message = new Message.Builder()
-        .setServiceId((short) (QaService.ID + 1))
-        .setMessageType(QaTransaction.INCREMENT_COUNTER.id())
-        .setBody(ByteBuffer.allocate(0))
-        .setSignature(new byte[Message.SIGNATURE_SIZE])
-        .buildRaw();
+    RawTransaction tx = RawTransaction.newBuilder()
+        .serviceId((short) (QaService.ID + 1))
+        .transactionId(QaTransaction.INCREMENT_COUNTER.id())
+        .payload(bytes())
+        .build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> converter.toTransaction(message));
-    assertThat(e).hasMessageMatching("Wrong service id \\(\\d+\\), must be "
-        + QaService.ID);
+        () -> converter.toTransaction(tx));
+    assertThat(e).hasMessageMatching("This transaction \\(.+\\) does not belong "
+        + "to this service: wrong service id \\(\\d+\\), must be " + QaService.ID);
   }
 
   @Test
   void toTransactionUnknownTransaction() {
-    UnknownTx unknownTx = new UnknownTx();
-    BinaryMessage message = unknownTx.getMessage();
+    RawTransaction raw = UnknownTx.createRawTransaction();
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> converter.toTransaction(message));
+        () -> converter.toTransaction(raw));
     assertThat(e).hasMessageStartingWith("Unknown transaction");
   }
 
   @ParameterizedTest
-  @MethodSource("transactionMessages")
-  void toTransaction(Class<? extends Transaction> expectedType, Message messageTemplate) {
-    // Check the converter converts a valid binary message of each known type
-    // to the expected executable transaction type.
-    BinaryMessage message = new Message.Builder()
-        .mergeFrom(messageTemplate)
-        .buildRaw();
+  @MethodSource("transactions")
+  void toTransaction(Class<? extends Transaction> expectedType, RawTransaction tx) {
+    Transaction transaction = converter.toTransaction(tx);
 
-    Transaction transaction = converter.toTransaction(message);
-
-    assertThat(transaction)
-        .isInstanceOf(expectedType);
+    assertThat(transaction).isInstanceOf(expectedType);
   }
 
-  private static Collection<Arguments> transactionMessages() {
-    List<Arguments> transactionTemplates = Arrays.asList(
+  private static Collection<Arguments> transactions() {
+    List<Arguments> transactionTemplates = asList(
         Arguments.of(CreateCounterTx.class,
-            CreateCounterTxIntegrationTest.MESSAGE_TEMPLATE),
+            new CreateCounterTx("name").toRawTransaction()),
 
         Arguments.of(IncrementCounterTx.class,
-            IncrementCounterTxIntegrationTest.MESSAGE_TEMPLATE),
+            new IncrementCounterTx(10L, defaultHashFunction().hashString("name", UTF_8))
+                .toRawTransaction()),
 
-        Arguments.of(InvalidThrowingTx.class, new Message.Builder()
-            .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-            .setMessageType(QaTransaction.INVALID_THROWING.id())
-            .buildRaw()),
+        Arguments.of(ThrowingTx.class,
+            new ThrowingTx(10L).toRawTransaction()),
 
-        Arguments.of(InvalidTx.class, new Message.Builder()
-            .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-            .setMessageType(QaTransaction.INVALID.id())
-            .buildRaw()),
-
-        Arguments.of(ValidThrowingTx.class, ValidThrowingTxIntegrationTest.MESSAGE_TEMPLATE),
-
-        Arguments.of(ValidErrorTx.class, ValidErrorTxIntegrationTest.MESSAGE_TEMPLATE)
+        Arguments.of(ErrorTx.class,
+            new ErrorTx(10L, (byte) 1, "some error").toRawTransaction())
     );
 
     // Check that the test data includes all known transactions.
@@ -123,4 +108,5 @@ class QaTransactionConverterTest {
 
     return transactionTemplates;
   }
+
 }

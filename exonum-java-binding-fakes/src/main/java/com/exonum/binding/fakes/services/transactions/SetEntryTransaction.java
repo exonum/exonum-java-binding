@@ -16,55 +16,58 @@
 
 package com.exonum.binding.fakes.services.transactions;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.hash;
+import static com.exonum.binding.common.serialization.StandardSerializers.publicKey;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A transaction whose behaviour can be configured. It's not a mock: it writes a given value
- * into the database in its {@link #execute(Fork)}.
+ * into the database in its {@link #execute(TransactionContext)}.
  *
  * <p>Such transaction is supposed to be used in TransactionProxy integration tests.
  */
 public final class SetEntryTransaction implements Transaction {
 
+  @VisibleForTesting
   static final String ENTRY_NAME = "test_entry";
+  @VisibleForTesting
+  static final String TX_HASH_NAME = "tx_hash";
+  @VisibleForTesting
+  static final String AUTHOR_PK_NAME = "author_pk";
 
-  private final boolean valid;
   private final String value;
   private final String info;
 
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
-   * @param valid whether a transaction has to be valid (i.e., return true
-   *              in its {@link Transaction#isValid()} method)
    * @param value a value to put into an entry {@link #ENTRY_NAME}
    * @param info a value to be returned as this transaction text representation
    *     {@link Transaction#info()}
    */
-  public SetEntryTransaction(boolean valid, String value, String info) {
-    this.valid = valid;
+  public SetEntryTransaction(String value, String info) {
     this.value = checkNotNull(value);
     this.info = checkNotNull(info);
   }
 
   @Override
-  public boolean isValid() {
-    return valid;
-  }
-
-  @Override
-  public void execute(Fork view) {
-    checkState(valid, "Cannot execute an invalid transaction");
-
-    EntryIndexProxy<String> entry = createEntry(view);
+  public void execute(TransactionContext context) {
+    Fork fork = context.getFork();
+    EntryIndexProxy<String> entry = createTestEntry(fork);
     entry.set(value);
+    EntryIndexProxy<HashCode> txHash = createTxHashEntry(fork);
+    txHash.set(context.getTransactionMessageHash());
+    EntryIndexProxy<PublicKey> authorPk = createAuthorPkEntry(fork);
+    authorPk.set(context.getAuthorPk());
   }
 
   @Override
@@ -72,13 +75,15 @@ public final class SetEntryTransaction implements Transaction {
     return info;
   }
 
-  @Override
-  public BinaryMessage getMessage() {
-    // Not needed for transaction ITs.
-    throw new UnsupportedOperationException("Transaction#getMessage is not implemented");
+  private EntryIndexProxy<String> createTestEntry(Fork view) {
+    return EntryIndexProxy.newInstance(ENTRY_NAME, view, string());
   }
 
-  private EntryIndexProxy<String> createEntry(Fork view) {
-    return EntryIndexProxy.newInstance(ENTRY_NAME, view, StandardSerializers.string());
+  private EntryIndexProxy<HashCode> createTxHashEntry(Fork view) {
+    return EntryIndexProxy.newInstance(TX_HASH_NAME, view, hash());
+  }
+
+  private EntryIndexProxy<PublicKey> createAuthorPkEntry(Fork view) {
+    return EntryIndexProxy.newInstance(AUTHOR_PK_NAME, view, publicKey());
   }
 }

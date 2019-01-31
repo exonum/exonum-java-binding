@@ -17,26 +17,19 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.transaction.TransactionContext;
 import org.junit.jupiter.api.Test;
 
 class UnknownTxTest {
-
-  @Test
-  void isValid() {
-    UnknownTx tx = new UnknownTx();
-
-    assertTrue(tx.isValid());
-  }
 
   @Test
   void execute() {
     UnknownTx tx = new UnknownTx();
 
     assertThrows(AssertionError.class,
-        () -> tx.execute(mock(Fork.class)));
+        () -> tx.execute(mock(TransactionContext.class)));
   }
+
 }

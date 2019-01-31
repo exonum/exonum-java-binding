@@ -17,14 +17,16 @@
 package com.exonum.binding.service;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,14 +84,15 @@ public final class NodeFake implements Node {
   }
 
   /**
-   * A no-op.
+   * Returns a zero hash always, ignoring the transaction.
    *
    * @param transaction a transaction to send
    * @throws NullPointerException if the transaction is null
    */
   @Override
-  public void submitTransaction(Transaction transaction) {
+  public HashCode submitTransaction(RawTransaction transaction) {
     checkNotNull(transaction);
+    return HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
   }
 
   @Override

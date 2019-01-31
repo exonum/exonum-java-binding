@@ -40,10 +40,6 @@ public interface QaService extends Service {
 
   HashCode submitIncrementCounter(long requestSeed, HashCode counterId);
 
-  HashCode submitInvalidTx();
-
-  HashCode submitInvalidThrowingTx();
-
   HashCode submitValidThrowingTx(long requestSeed);
 
   HashCode submitValidErrorTx(long requestSeed, byte errorCode, @Nullable String description);

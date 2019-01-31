@@ -17,8 +17,9 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
 import java.util.function.Function;
 
 /**
@@ -28,19 +29,23 @@ import java.util.function.Function;
 public interface Node {
 
   /**
-   * Submits a transaction into Exonum network. This node does <em>not</em> execute
-   * the transaction immediately, but verifies it and, if it is valid,
-   * broadcasts it to all the nodes in the network. Then each node adds the transaction to a
-   * <a href="https://exonum.com/doc/version/latest/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
+   * Creates a transaction from the given parameters, signs it with
+   * the {@linkplain #getPublicKey() node service key}, and then submits it into Exonum network.
+   * This node does <em>not</em> execute the transaction immediately, but broadcasts it to all
+   * the nodes in the network. Then each node adds the transaction to
+   * the <a href="https://exonum.com/doc/version/latest/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
    *
-   * @param transaction a transaction to send
-   * @throws InvalidTransactionException if the transaction is not valid
+   * <p/><em>Be aware that each node has its own service key pair, therefore
+   * invocations of this method on different nodes will produce different transactions.</em>
+   *
+   * @param rawTransaction transaction parameters to include in transaction message
+   * @return hash of the transaction message created by the framework
    * @throws InternalServerError if this node failed to process the transaction
    * @throws NullPointerException if the transaction is null
    */
-  void submitTransaction(Transaction transaction)
-      throws InvalidTransactionException, InternalServerError;
+  HashCode submitTransaction(RawTransaction rawTransaction)
+      throws InternalServerError;
 
   /**
    * Performs a given function with a snapshot of the current database state.

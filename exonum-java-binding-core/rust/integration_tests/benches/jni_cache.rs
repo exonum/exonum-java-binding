@@ -20,11 +20,8 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate test;
 
-use integration_tests::{
-    mock::transaction::create_mock_transaction_proxy, vm::create_vm_for_benchmarks_with_fakes,
-};
+use integration_tests::vm::create_vm_for_benchmarks_with_fakes;
 use java_bindings::{
-    exonum::blockchain::Transaction,
     jni::{
         objects::{JObject, JValue},
         JNIEnv, JavaVM,
@@ -41,15 +38,7 @@ const TX_EXEC_EXCEPTION_CLASS: &str =
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();
-    pub static ref EXECUTOR: MainExecutor = {
-        let ex = MainExecutor::new(VM.clone());
-        ex.with_attached(|env| {
-            jni_cache::init_cache(env);
-            Ok(())
-        })
-        .unwrap();
-        ex
-    };
+    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
 // Returns a class name of an obj as a `String`. It's a simulation of old non cached implementation.
@@ -122,10 +111,4 @@ pub fn get_class_name_not_cached(b: &mut Bencher) {
             Ok(())
         })
         .unwrap();
-}
-
-#[bench]
-pub fn transaction_verify_cached(b: &mut Bencher) {
-    let tx = create_mock_transaction_proxy(EXECUTOR.clone(), true);
-    b.iter(move || black_box(assert!(tx.verify())));
 }

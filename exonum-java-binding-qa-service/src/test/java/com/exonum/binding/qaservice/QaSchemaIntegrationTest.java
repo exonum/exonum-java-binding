@@ -43,7 +43,6 @@ class QaSchemaIntegrationTest {
     try (Database db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = db.createSnapshot(cleaner);
-
       QaSchema schema = new QaSchema(snapshot);
 
       List<HashCode> stateHashes = schema.getStateHashes();

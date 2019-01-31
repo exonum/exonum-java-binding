@@ -16,23 +16,21 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
+import com.exonum.binding.transaction.TransactionContext;
 import java.util.Objects;
 
 /**
@@ -41,7 +39,8 @@ import java.util.Objects;
 public final class CreateCounterTx implements Transaction {
 
   private static final short ID = QaTransaction.CREATE_COUNTER.id();
-
+  private static final Serializer<CreateCounterTxBody> PROTO_SERIALIZER =
+      protobuf(CreateCounterTxBody.class);
   private final String name;
 
   public CreateCounterTx(String name) {
@@ -50,13 +49,8 @@ public final class CreateCounterTx implements Transaction {
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
-    QaSchema schema = new QaSchema(view);
+  public void execute(TransactionContext context) {
+    QaSchema schema = new QaSchema(context.getFork());
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
@@ -73,12 +67,11 @@ public final class CreateCounterTx implements Transaction {
 
   @Override
   public String info() {
-    return new QaTransactionGson().toJson(ID, this);
+    return QaTransactionJson.toJson(ID, this);
   }
 
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction toRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -98,41 +91,34 @@ public final class CreateCounterTx implements Transaction {
     return Objects.hashCode(name);
   }
 
-  static TransactionMessageConverter<CreateCounterTx> converter() {
-    return TransactionConverter.INSTANCE;
+  public static BiDirectionTransactionConverter<CreateCounterTx> converter() {
+    return Converter.INSTANCE;
   }
 
-  private enum TransactionConverter implements TransactionMessageConverter<CreateCounterTx> {
+  private enum Converter implements BiDirectionTransactionConverter<CreateCounterTx> {
     INSTANCE;
 
     @Override
-    public CreateCounterTx fromMessage(Message txMessage) {
-      checkTransaction(txMessage, ID);
-      ByteBuffer rawBody = txMessage.getBody();
-      try {
-        CreateCounterTxBody body = CreateCounterTxBody
-            .parseFrom(rawBody);
-        String name = body.getName();
+    public CreateCounterTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
+      CreateCounterTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
-        return new CreateCounterTx(name);
-      } catch (InvalidProtocolBufferException e) {
-        throw new IllegalArgumentException(e);
-      }
+      return new CreateCounterTx(body.getName());
     }
 
     @Override
-    public BinaryMessage toMessage(CreateCounterTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .setBody(serializeBody(transaction))
-          .buildRaw();
+    public RawTransaction toRawTransaction(CreateCounterTx transaction) {
+      byte[] payload = PROTO_SERIALIZER.toBytes(
+          CreateCounterTxBody.newBuilder()
+              .setName(transaction.name)
+              .build());
+
+      return RawTransaction.newBuilder()
+          .serviceId(QaService.ID)
+          .transactionId(CreateCounterTx.ID)
+          .payload(payload)
+          .build();
     }
   }
 
-  @VisibleForTesting
-  static byte[] serializeBody(CreateCounterTx tx) {
-    return CreateCounterTxBody.newBuilder()
-        .setName(tx.name)
-        .build()
-        .toByteArray();
-  }
 }

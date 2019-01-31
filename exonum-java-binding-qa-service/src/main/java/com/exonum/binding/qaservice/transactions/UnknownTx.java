@@ -16,12 +16,10 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.transaction.AbstractTransaction;
-import java.nio.ByteBuffer;
+import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 
 /**
  * A transaction that has QA service identifier, but an unknown transaction id.
@@ -34,32 +32,24 @@ import java.nio.ByteBuffer;
  * once they receive it as a message from this node. If multiple unknown transaction messages
  * need to be submitted, a seed might be added.
  */
-public final class UnknownTx extends AbstractTransaction {
+public final class UnknownTx implements Transaction {
 
-  static final short ID = 9999;
-
-  public UnknownTx() {
-    super(createMessage());
-  }
+  private static final short ID = 9999;
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
+  public void execute(TransactionContext context) {
     throw new AssertionError("Must never be executed by the framework: " + this);
   }
 
-  private static BinaryMessage createMessage() {
-    return new Message.Builder()
-        .setServiceId(QaService.ID)
-        .setMessageType(ID)
-        .setNetworkId((byte) 0)
-        .setVersion((byte) 0)
-        .setBody(ByteBuffer.allocate(0))
-        .setSignature(new byte[Message.SIGNATURE_SIZE])
-        .buildRaw();
+  /**
+   * Returns raw transaction.
+   */
+  public static RawTransaction createRawTransaction() {
+    return RawTransaction.newBuilder()
+        .serviceId(QaService.ID)
+        .transactionId(ID)
+        .payload(new byte[0])
+        .build();
   }
+
 }

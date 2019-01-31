@@ -21,10 +21,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.transaction.AbstractTransaction;
+import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -33,7 +33,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
-final class PutValueTransaction extends AbstractTransaction {
+final class PutValueTransaction implements Transaction {
 
   @SuppressWarnings("WeakerAccess")  // Might be used in native tests.
   static final short ID = 0x1234;
@@ -42,17 +42,18 @@ final class PutValueTransaction extends AbstractTransaction {
   private final String value;
   private final SchemaFactory<TestSchema> schemaFactory;
 
-  static PutValueTransaction from(BinaryMessage message, SchemaFactory<TestSchema> schemaFactory) {
-    checkArgument(message.getServiceId() == TestService.ID);
-    checkArgument(message.getMessageType() == PutValueTransaction.ID);
-    String value = getValue(message);
-    return new PutValueTransaction(message, value, checkNotNull(schemaFactory));
+  static PutValueTransaction from(RawTransaction rawTransaction,
+      SchemaFactory<TestSchema> schemaFactory) {
+    checkArgument(rawTransaction.getServiceId() == TestService.ID);
+    checkArgument(rawTransaction.getTransactionId() == PutValueTransaction.ID);
+    String value = getValue(rawTransaction);
+    return new PutValueTransaction(value, checkNotNull(schemaFactory));
   }
 
-  private static String getValue(BinaryMessage message) {
+  private static String getValue(RawTransaction rawTransaction) {
     try {
       CharsetDecoder utf8Decoder = createUtf8Decoder();
-      ByteBuffer body = message.getBody();
+      ByteBuffer body = ByteBuffer.wrap(rawTransaction.getPayload());
       CharBuffer result = utf8Decoder.decode(body);
       return result.toString();
     } catch (CharacterCodingException e) {
@@ -66,21 +67,15 @@ final class PutValueTransaction extends AbstractTransaction {
         .onUnmappableCharacter(CodingErrorAction.REPLACE);
   }
 
-  private PutValueTransaction(BinaryMessage message, String value,
-                              SchemaFactory<TestSchema> schemaFactory) {
-    super(message);
+  private PutValueTransaction(String value,
+      SchemaFactory<TestSchema> schemaFactory) {
     this.value = value;
     this.schemaFactory = schemaFactory;
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
-    TestSchema schema = schemaFactory.from(view);
+  public void execute(TransactionContext context) {
+    TestSchema schema = schemaFactory.from(context.getFork());
     ProofMapIndexProxy<HashCode, String> map = schema.testMap();
     map.put(getKey(), value);
   }

@@ -12,11 +12,11 @@ message IncrementCounterTxBody {
   bytes counterId = 2;
 }
 
-message ValidThrowingTxBody {
+message ThrowingTxBody {
   uint64 seed = 1;
 }
 
-message ValidErrorTxBody {
+message ErrorTxBody {
   uint64 seed = 1;
   // Effectively will always be stored as a single byte,
   // since it is in range [0; 127].

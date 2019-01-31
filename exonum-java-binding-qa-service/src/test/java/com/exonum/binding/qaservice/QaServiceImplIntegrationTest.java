@@ -16,9 +16,11 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.INITIAL_SERVICE_CONFIGURATION;
+import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.exonum.binding.test.Bytes.createPrefixed;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -28,21 +30,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.InvalidThrowingTx;
-import com.exonum.binding.qaservice.transactions.InvalidTx;
-import com.exonum.binding.qaservice.transactions.UnknownTx;
-import com.exonum.binding.qaservice.transactions.ValidThrowingTx;
+import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.BlockCommittedEventImpl;
 import com.exonum.binding.service.Node;
@@ -55,12 +54,12 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.junit5.VertxExtension;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,6 +78,7 @@ class QaServiceImplIntegrationTest {
 
   private static final String NO_GENESIS_BLOCK_ERROR_MESSAGE =
       "An attempt to get the actual `height` during creating the genesis block";
+  private static final HashCode DEFAULT_TX_MESSAGE_HASH = HashCode.fromString("a0a0a0a0");
 
   static {
     LibraryLoader.load();
@@ -124,7 +124,7 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void getStateHashesLogsThem() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
 
       List<HashCode> stateHashes = service.getStateHashes(view);
@@ -145,7 +145,7 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
       Optional<String> initialConfiguration = service.initialize(view);
 
@@ -157,8 +157,8 @@ class QaServiceImplIntegrationTest {
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode defaultCounterId = Hashing.sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
-      HashCode afterCommitCounterId = Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+      HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
+      HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
       assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
       assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
@@ -171,69 +171,58 @@ class QaServiceImplIntegrationTest {
   void submitCreateCounter() throws Exception {
     setServiceNode(node);
 
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
+
     String counterName = "bids";
     HashCode txHash = service.submitCreateCounter(counterName);
 
-    Transaction expectedTx = new CreateCounterTx(counterName);
+    CreateCounterTx expectedTx = new CreateCounterTx(counterName);
+    RawTransaction expectedRawTx = CreateCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(expectedTx));
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitIncrementCounter() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     long seed = 1L;
-    HashCode counterId = Hashing.sha256()
-        .hashString("Cats counter", StandardCharsets.UTF_8);
+    HashCode counterId = sha256()
+        .hashString("Cats counter", UTF_8);
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
 
-    Transaction expectedTx = new IncrementCounterTx(seed, counterId);
+    IncrementCounterTx expectedTx = new IncrementCounterTx(seed, counterId);
+    RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(expectedTx));
-  }
-
-  @Test
-  void submitInvalidTx() throws Exception {
-    setServiceNode(node);
-
-    service.submitInvalidTx();
-    verify(node).submitTransaction(any(InvalidTx.class));
-  }
-
-  @Test
-  void submitInvalidThrowingTx() throws Exception {
-    setServiceNode(node);
-
-    service.submitInvalidThrowingTx();
-    verify(node).submitTransaction(any(InvalidThrowingTx.class));
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitValidThrowingTx() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     long seed = 1L;
     HashCode txHash = service.submitValidThrowingTx(seed);
 
-    Transaction expectedTx = new ValidThrowingTx(seed);
+    ThrowingTx expectedTx = new ThrowingTx(seed);
+    RawTransaction expectedRawTx = ThrowingTx.converter().toRawTransaction(expectedTx);
 
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(eq(expectedTx));
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
+    verify(node).submitTransaction(eq(expectedRawTx));
   }
 
   @Test
   void submitUnknownTx() throws Exception {
     setServiceNode(node);
+    when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
 
     HashCode txHash = service.submitUnknownTx();
 
-    Transaction expectedTx = new UnknownTx();
-
-    assertThat(txHash).isEqualTo(expectedTx.hash());
-    verify(node).submitTransaction(any(UnknownTx.class));
+    assertThat(txHash).isEqualTo(DEFAULT_TX_MESSAGE_HASH);
   }
 
   @Test
@@ -254,14 +243,17 @@ class QaServiceImplIntegrationTest {
       String counterName = "bids";
       try (Cleaner cleaner = new Cleaner()) {
         Fork view = db.createFork(cleaner);
+
+        // Execute the transaction
+        TransactionContext context = newContext(view);
         new CreateCounterTx(counterName)
-            .execute(view);
+            .execute(context);
 
         db.merge(view);
       }
 
       // Check that the service returns expected value
-      HashCode counterId = Hashing.sha256().hashString(counterName, UTF_8);
+      HashCode counterId = sha256().hashString(counterName, UTF_8);
       Optional<Counter> counterValueOpt = service.getValue(counterId);
       Counter expectedCounter = new Counter(counterName, 0L);
       assertThat(counterValueOpt).hasValue(expectedCounter);
@@ -272,7 +264,7 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void getValueNoSuchCounter() {
     withNodeFake(() -> {
-      HashCode counterId = Hashing.sha256().hashString("Unknown counter", UTF_8);
+      HashCode counterId = sha256().hashString("Unknown counter", UTF_8);
       // Check there is no such counter
       assertThat(service.getValue(counterId)).isEmpty();
     });
@@ -316,9 +308,10 @@ class QaServiceImplIntegrationTest {
   @RequiresNativeLibrary
   void afterCommit() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       setServiceNode(node);
+      when(node.submitTransaction(any(RawTransaction.class))).thenReturn(DEFAULT_TX_MESSAGE_HASH);
       service.initialize(fork);
 
       Snapshot snapshot = db.createSnapshot(cleaner);
@@ -327,11 +320,11 @@ class QaServiceImplIntegrationTest {
           BlockCommittedEventImpl.valueOf(snapshot, OptionalInt.of(1), height);
       service.afterCommit(event);
 
-      HashCode counterId = Hashing.sha256()
-          .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
-      Transaction expectedTx = new IncrementCounterTx(height, counterId);
+      HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+      IncrementCounterTx expectedTx = new IncrementCounterTx(height, counterId);
+      RawTransaction expectedRawTx = IncrementCounterTx.converter().toRawTransaction(expectedTx);
 
-      verify(node).submitTransaction(eq(expectedTx));
+      verify(node).submitTransaction(eq(expectedRawTx));
     }
   }
 
@@ -441,7 +434,8 @@ class QaServiceImplIntegrationTest {
   void getLastBlock() {
     withNodeFake(() -> {
       Exception e = assertThrows(RuntimeException.class, () -> service.getLastBlock());
-      assertThat(e).hasMessageContaining("An attempt to get the `last_block` during creating the"
+      assertThat(e).hasMessageContaining(
+          "An attempt to get the `last_block` during creating the"
           + " genesis block.");
     });
   }

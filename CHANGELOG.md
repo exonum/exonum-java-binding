@@ -21,8 +21,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
 - Support of Json serialization in a common way. (#611)
+<<<<<<< list-stream
 - `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
 - `ListIndexProxy#stream` to enable stream processing of list elements. (#661)
+=======
+- Added the `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
+- Support of separated messages format Exonum v0.10. (#574)
+>>>>>>> master
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
@@ -33,12 +38,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `Generate-Config`. Also, the value of `--jvm-args-append` is not saved to any of the configuration
   files. (#629)
 - `Node#getPublicKey` to return `PublicKey` instead of `byte[]`. (#651)
+- `com.exonum.binding.transaction.Transaction#execute` now accepts 
+  `com.exonum.binding.transaction.TransactionContext`
+  instead of `com.exonum.binding.storage.database.View`  
 
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
   `com.exonum.binding.common.collect`.
 - `ViewModificationCounter` replaced with per-`View` modification counters to simplify
   their relationship and testing. (#658)
+- Exonum v0.9 message format related classes.
   
 ### Fixed
 - A bug in the cryptocurrency demo frontend that sometimes resulted in rejected transactions and/or

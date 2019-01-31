@@ -17,11 +17,11 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
@@ -69,16 +69,15 @@ public interface Service {
   }
 
   /**
-   * Converts an Exonum transaction message to an executable transaction of <em>this</em> service.
+   * Converts an Exonum raw transaction to an executable transaction of <em>this</em> service.
    *
-   * @param message a transaction message
-   *                (i.e., whose message type is a transaction and service id is set to the id of
-   *                this service)
+   * @param rawTransaction a raw transaction to be converted
    * @return an executable transaction
-   * @throws IllegalArgumentException if the message is not a transaction of this service
-   * @throws NullPointerException if message is null
+   * @throws IllegalArgumentException if the raw transaction is malformed
+   *         or it doesn't belong to this service
+   * @throws NullPointerException if raw transaction is null
    */
-  Transaction convertToTransaction(BinaryMessage message);
+  Transaction convertToTransaction(RawTransaction rawTransaction);
 
   /**
    * Returns a list of root hashes of all Merklized tables defined by this service,
