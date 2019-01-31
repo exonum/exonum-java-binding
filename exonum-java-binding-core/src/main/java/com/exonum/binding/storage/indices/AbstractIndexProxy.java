@@ -81,7 +81,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * @throws UnsupportedOperationException if view is read-only or null.
    */
   private void checkCanModify() {
-    if (!(dbView instanceof Fork)) {
+    if (!(dbView.canModify())) {
       throw new UnsupportedOperationException("Cannot modify the view: " + dbView
           + "\nUse a Fork to modify any collection.");
     }
