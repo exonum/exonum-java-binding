@@ -15,12 +15,15 @@
  */
 
 use example_proxy::AtomicIntegerProxy;
-use java_bindings::jni::sys::jint;
-use java_bindings::jni::JavaVM;
-use java_bindings::{JniErrorKind, JniExecutor};
+use java_bindings::{
+    jni::{sys::jint, JavaVM},
+    JniErrorKind, JniExecutor,
+};
 
-use std::sync::{Arc, Barrier};
-use std::thread::spawn;
+use std::{
+    sync::{Arc, Barrier},
+    thread::spawn,
+};
 
 /// Checks if detached native thread attaches and detaches as it should when calls to
 /// `with_attached` appears to be nested. After the nested function call ends, thread should stay

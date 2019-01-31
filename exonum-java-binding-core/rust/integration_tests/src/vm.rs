@@ -15,6 +15,7 @@
  */
 
 use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
+use java_bindings::utils::jni_cache;
 
 use std::fs::File;
 use std::io::Read;
@@ -72,7 +73,15 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         .build()
         .unwrap_or_else(|e| panic!("{:#?}", e));
 
-    JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
+    let vm = JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e));
+
+    // Initialize JNI cache for testing with fakes
+    if with_fakes {
+        let env = vm.attach_current_thread().unwrap();
+        jni_cache::init_cache(&env);
+    }
+
+    vm
 }
 
 /// Creates a configured `JavaVM` for tests with the limited size of the heap.

@@ -14,21 +14,14 @@
 
 extern crate integration_tests;
 extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
 
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::{jni::JavaVM, utils::jni_cache, JniExecutor, MainExecutor};
+use java_bindings::utils::jni_cache;
 
 use std::{
     sync::{Arc, Barrier},
     thread::spawn,
 };
-
-lazy_static! {
-    pub static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
-}
 
 #[test]
 // NOTE: This test is not supposed to reliably catch synchronization errors.
@@ -36,12 +29,8 @@ fn concurrent_cache_read() {
     const THREAD_NUM: usize = 8;
     let mut threads = Vec::new();
 
-    EXECUTOR
-        .with_attached(|env| {
-            jni_cache::init_cache(env);
-            Ok(())
-        })
-        .unwrap();
+    // Create a VM, initializing the JNI cache
+    let _jvm = create_vm_for_tests_with_fake_classes();
 
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
 
@@ -63,10 +52,4 @@ fn concurrent_cache_read() {
     for jh in threads {
         jh.join().unwrap();
     }
-}
-
-#[test]
-#[should_panic(expected = "Cache is not initialized")]
-fn cache_not_initialized() {
-    jni_cache::transaction_adapter::execute_id();
 }
