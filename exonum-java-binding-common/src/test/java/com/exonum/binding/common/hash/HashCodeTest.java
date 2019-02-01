@@ -32,8 +32,9 @@
 package com.exonum.binding.common.hash;
 
 import static com.google.common.io.BaseEncoding.base16;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -240,7 +241,7 @@ class HashCodeTest {
     HashCode hashCodeB = HashCode.fromBytes(bytesB);
 
     // They aren't equal...
-    assertFalse(hashCodeA.equals(hashCodeB));
+    assertNotEquals(hashCodeA, hashCodeB);
 
     // But they still have the same Object#hashCode() value.
     // Technically not a violation of the equals/hashCode contract, but...?
@@ -292,14 +293,14 @@ class HashCodeTest {
   void testIntWriteBytesTo() {
     byte[] dest = new byte[4];
     HashCode.fromInt(42).writeBytesTo(dest, 0, 4);
-    assertTrue(Arrays.equals(HashCode.fromInt(42).asBytes(), dest));
+    assertArrayEquals(HashCode.fromInt(42).asBytes(), dest);
   }
 
   @Test
   void testLongWriteBytesTo() {
     byte[] dest = new byte[8];
     HashCode.fromLong(42).writeBytesTo(dest, 0, 8);
-    assertTrue(Arrays.equals(HashCode.fromLong(42).asBytes(), dest));
+    assertArrayEquals(HashCode.fromLong(42).asBytes(), dest);
   }
 
   private static final HashCode HASH_ABCD =
@@ -309,35 +310,31 @@ class HashCodeTest {
   void testWriteBytesTo() {
     byte[] dest = new byte[4];
     HASH_ABCD.writeBytesTo(dest, 0, 4);
-    assertTrue(
-        Arrays.equals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd}, dest));
+    assertArrayEquals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd}, dest);
   }
 
   @Test
   void testWriteBytesToOversizedArray() {
     byte[] dest = new byte[5];
     HASH_ABCD.writeBytesTo(dest, 0, 4);
-    assertTrue(
-        Arrays.equals(
-            new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0x00}, dest));
+    assertArrayEquals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0x00},
+        dest);
   }
 
   @Test
   void testWriteBytesToOversizedArrayLongMaxLength() {
     byte[] dest = new byte[5];
     HASH_ABCD.writeBytesTo(dest, 0, 5);
-    assertTrue(
-        Arrays.equals(
-            new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0x00}, dest));
+    assertArrayEquals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0x00},
+        dest);
   }
 
   @Test
   void testWriteBytesToOversizedArrayShortMaxLength() {
     byte[] dest = new byte[5];
     HASH_ABCD.writeBytesTo(dest, 0, 3);
-    assertTrue(
-        Arrays.equals(
-            new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0x00, (byte) 0x00}, dest));
+    assertArrayEquals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0x00, (byte) 0x00},
+        dest);
   }
 
   @Test
@@ -356,7 +353,7 @@ class HashCodeTest {
   void testWriteBytesToUndersizedArrayShortMaxLength() {
     byte[] dest = new byte[3];
     HASH_ABCD.writeBytesTo(dest, 0, 2);
-    assertTrue(Arrays.equals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0x00}, dest));
+    assertArrayEquals(new byte[]{(byte) 0xaa, (byte) 0xbb, (byte) 0x00}, dest);
   }
 
   private static ClassSanityTester.FactoryMethodReturnValueTester sanityTester() {
@@ -368,10 +365,10 @@ class HashCodeTest {
   }
 
   private static void assertExpectedHashCode(ExpectedHashCode expectedHashCode, HashCode hash) {
-    assertTrue(Arrays.equals(expectedHashCode.bytes, hash.asBytes()));
+    assertArrayEquals(expectedHashCode.bytes, hash.asBytes());
     byte[] bb = new byte[hash.bits() / 8];
     hash.writeBytesTo(bb, 0, bb.length);
-    assertTrue(Arrays.equals(expectedHashCode.bytes, bb));
+    assertArrayEquals(expectedHashCode.bytes, bb);
     assertEquals(expectedHashCode.asInt, hash.asInt());
     if (expectedHashCode.asLong == null) {
       assertThrows(IllegalStateException.class, () -> hash.asLong());
@@ -387,7 +384,7 @@ class HashCodeTest {
     byte[] original = hash.asBytes();
     byte[] mutated = hash.asBytes();
     mutated[0]++;
-    assertTrue(Arrays.equals(original, hash.asBytes()));
+    assertArrayEquals(original, hash.asBytes());
   }
 
   private static void assertReadableBytes(HashCode hashCode) {
@@ -399,7 +396,7 @@ class HashCodeTest {
       byte[] bb = new byte[bytes];
       hashCode.writeBytesTo(bb, 0, bb.length);
 
-      assertTrue(Arrays.equals(Arrays.copyOf(hashBytes, bytes), bb));
+      assertArrayEquals(Arrays.copyOf(hashBytes, bytes), bb);
     }
   }
 

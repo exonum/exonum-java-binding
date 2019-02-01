@@ -25,7 +25,6 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -56,9 +55,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  // to easily inject a mock of a calculatedRootHash function.
-  @VisibleForTesting
-  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
+  private ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
       HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
