@@ -15,7 +15,6 @@
  */
 
 use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
-use exonum::messages::BinaryForm;
 use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{JavaType, Primitive};
@@ -26,11 +25,17 @@ use std::fmt;
 
 use storage::View;
 use utils::{
-    describe_java_exception, get_and_clear_java_exception, get_exception_message,
-    jni_cache::{classes_refs::transaction_execution_exception, transaction_adapter::execute_id},
+    check_error_on_exception, convert_to_string, describe_java_exception,
+    get_and_clear_java_exception, get_exception_message,
+    jni_cache::{
+        classes_refs::transaction_execution_exception,
+        transaction_adapter::{execute_id, info_id},
+    },
     to_handle, unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
+
+const RETVAL_TYPE_STRING: &str = "java/lang/String";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
@@ -72,12 +77,31 @@ impl serde::Serialize for TransactionProxy {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_bytes(
-            &self
-                .raw
-                .encode()
-                .expect("Could not serialize TransactionProxy"),
-        )
+        let res = unwrap_jni(self.exec.with_attached(|env| {
+            let res = unsafe {
+                env.call_method_unsafe(
+                    self.transaction.as_obj(),
+                    info_id(),
+                    JavaType::Object(RETVAL_TYPE_STRING.into()),
+                    &[],
+                )
+            };
+
+            Ok(check_error_on_exception(env, res).map(|json_string| {
+                unwrap_jni(json_string.l().and_then(|obj| convert_to_string(env, obj)))
+            }))
+        }));
+
+        match res {
+            Ok(json_str) => {
+                // A simple way of passing a value that is already serialized to JSON to the serialiser
+                let value: serde_json::Value = serde_json::from_str(&json_str)
+                    .expect(&format!("Unable to parse JSON string {}", &json_str));
+                value.serialize(serializer)
+            }
+            // Java exception has been thrown - return its description
+            Err(err_str) => serializer.serialize_str(&err_str),
+        }
     }
 }
 
