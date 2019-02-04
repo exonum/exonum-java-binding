@@ -9,7 +9,7 @@ set -eu -o pipefail
 # Import necessary environment variables (see the tests_profile header comment for details).
 source tests_profile
 
-cd exonum-java-binding-core/rust
+cd exonum-java-binding-parent/exonum-java-binding-core/rust
 
 cargo "+${RUST_COMPILER_VERSION}" test \
   --manifest-path ejb-app/Cargo.toml
