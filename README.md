@@ -7,5 +7,6 @@ The following projects are available:
 Java 8 or newer is required for building and using Exonum Java projects.
  
 ## License
-Apache 2.0 - See [LICENSE] for more information.  
+This project is licensed under the Apache License, Version 2.0.
+See [LICENSE](LICENSE) for details.
   
