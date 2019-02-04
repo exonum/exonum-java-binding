@@ -4,7 +4,7 @@ version = "0.4.0-SNAPSHOT"
 authors = ["Exonum team <exonum@bitfury.com>"]
 
 [dependencies]
-java_bindings = { path = "..", features = ["invocation"] }
+java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.10"
 exonum-btc-anchoring = "0.10"
 toml = "0.4.6"
