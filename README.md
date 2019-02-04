@@ -1,5 +1,5 @@
 # Exonum Library for Java
-This is a primary repository for Exonum projects for java.  
+This is a primary repository for Exonum projects in Java.  
 The following projects are available:
  - [Exonum Java Binding](exonum-java-binding-parent)
 
