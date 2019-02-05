@@ -11,3 +11,7 @@ in Java, configure a network of nodes and run the service in it.
 For more information see the relevant documentation on the tool:
   - [User Guide](https://exonum.com/doc/version/latest/get-started/java-binding/)
   - [Cryptocurrency Example Service](exonum-java-binding-cryptocurrency-demo)
+
+## License
+This project is licensed under the Apache License, Version 2.0.
+See [LICENSE](../LICENSE) for details.
