@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * associated with a given {@link com.exonum.binding.storage.database.Fork} is modified; not only
  * the source list.
  *
- * <p>This spliterator does not support specializations (e.g., {@link OfInt}).
+ * <p>This spliterator does not support specializations (e.g., {@link Spliterator.OfInt}).
  * If they are ever needed, see the Spliterator in an archived "exonum-serialization" project.
  *
  * @param <ElementT> the type of elements in the corresponding list this spliterator provides
