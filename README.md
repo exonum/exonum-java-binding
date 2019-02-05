@@ -21,3 +21,6 @@ For more information see the relevant documentation on the tool:
   - [Roadmap](ROADMAP.md)
   - [Contribution Guide](CONTRIBUTING.md)
   - [Code of Conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
+
+If you are using Exonum in your project and want to be listed on our website and
+GitHub list — write us a line to <exonum@bitfury.com>.
