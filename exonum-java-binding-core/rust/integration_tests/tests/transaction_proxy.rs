@@ -194,12 +194,14 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
 }
 
 #[test]
+#[ignore]
 fn json_serialize() {
     let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone());
     assert_eq!(serde_json::to_value(&valid_tx.0).unwrap(), *INFO_VALUE);
 }
 
 #[test]
+#[ignore]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn json_serialize_should_panic_if_java_error_occurred() {
     let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
@@ -207,6 +209,7 @@ fn json_serialize_should_panic_if_java_error_occurred() {
 }
 
 #[test]
+#[ignore]
 fn json_serialize_should_return_exception_details_if_java_exception_occurred() {
     let invalid_tx =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
