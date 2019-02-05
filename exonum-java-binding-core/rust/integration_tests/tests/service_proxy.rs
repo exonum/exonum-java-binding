@@ -194,6 +194,7 @@ fn initialize_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
+#[ignore]
 fn service_can_modify_db_on_initialize() {
     let db = MemoryDB::new();
     let service = create_test_service(EXECUTOR.clone());
