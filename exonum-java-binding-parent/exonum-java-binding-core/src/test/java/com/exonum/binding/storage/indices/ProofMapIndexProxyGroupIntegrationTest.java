@@ -25,7 +25,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 import com.google.common.collect.ImmutableMap;
 
-public class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<HashCode> {
+class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<HashCode> {
 
   private static final String GROUP_NAME = "proof_map_group_IT";
 

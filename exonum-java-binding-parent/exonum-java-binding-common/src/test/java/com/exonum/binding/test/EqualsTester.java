@@ -150,6 +150,6 @@ public final class EqualsTester {
    * Since it is a private inner class, the invoker can never pass in an instance to the tester
    */
   private enum NotAnInstance {
-    EQUAL_TO_NOTHING;
+    EQUAL_TO_NOTHING
   }
 }
