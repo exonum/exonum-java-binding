@@ -18,18 +18,21 @@ The following projects are available:
 ## Java version
 Java 8 or newer is required for building and using Exonum Java projects.
  
-## License
-This project is licensed under the Apache License, Version 2.0.
-See [LICENSE](LICENSE) for details.
-  
 ## Links
 For more information see the relevant documentation on the tool:
   - [What is Exonum?](https://exonum.com/doc/version/latest/get-started/what-is-exonum/)
   - [Roadmap](ROADMAP.md)
-  - [Contribution Guide](CONTRIBUTING.md)
   - [Code of Conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 
 If you are using Exonum in your project and want to be listed on our website and
 GitHub list — write us a line to <exonum@bitfury.com>.
+
+## Contributing
+Contributions to this library are always welcome and highly encouraged.
+See [CONTRIBUTING](CONTRIBUTING.md) for more information on how to get started.
+
+## License
+This project is licensed under the Apache License, Version 2.0.
+See [LICENSE](LICENSE) for details.
 
 [exonum]: https://github.com/exonum/exonum
