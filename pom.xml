@@ -9,7 +9,7 @@
 
   <name>Exonum Java Parent</name>
   <description>
-    The Exonum Java library.
+    The parent project of the Exonum Java libraries.
   </description>
   <!--TODO: change after the repo renaming-->
   <url>https://github.com/exonum/exonum-java-binding</url>
