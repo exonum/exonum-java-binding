@@ -12,8 +12,8 @@ The following projects are available:
  - [Exonum Java Binding](exonum-java-binding-parent). It is a framework for building blockchain 
  applications in Java which provides Exonum services runtime environment
  - [Light Client](exonum-java-light-client). It is a library for interaction with Exonum 
- on a client site that can be used for creating digital signatures,
- forming adn sending transactions ect
+ on a client side that can be used for creating digital signatures,
+ forming and sending transactions etc
 
 ## Java version
 Java 8 or newer is required for building and using Exonum Java projects.
