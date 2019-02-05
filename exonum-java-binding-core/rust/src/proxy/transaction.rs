@@ -19,7 +19,7 @@ use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{JavaType, Primitive};
 use jni::JNIEnv;
-use serde;
+use serde::{self, ser};
 
 use std::fmt;
 
@@ -87,9 +87,11 @@ impl serde::Serialize for TransactionProxy {
                 )
             };
 
-            Ok(check_error_on_exception(env, res).map(|json_string| {
-                unwrap_jni(json_string.l().and_then(|obj| convert_to_string(env, obj)))
-            }))
+            let res = check_error_on_exception(env, res).map(|java_json_value| {
+                let json_obj = unwrap_jni(java_json_value.l());
+                unwrap_jni(convert_to_string(env, json_obj))
+            });
+            Ok(res)
         }));
 
         match res {
@@ -100,7 +102,7 @@ impl serde::Serialize for TransactionProxy {
                 value.serialize(serializer)
             }
             // Java exception has been thrown - return its description
-            Err(err_str) => serializer.serialize_str(&err_str),
+            Err(err_str) => Err(ser::Error::custom(err_str)),
         }
     }
 }
