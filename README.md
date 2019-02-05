@@ -5,8 +5,15 @@
 [![Join the chat on https://gitter.im/exonum/exonum-java-binding](https://img.shields.io/gitter/room/exonum/exonum-java-binding.svg?label=Chat)](https://gitter.im/exonum/exonum-java-binding)
 
 This is a primary repository for Exonum projects in Java.  
+[Exonum][exonum] is an extensible open-source framework for creating blockchain applications.
+
+## Projects
 The following projects are available:
- - [Exonum Java Binding](exonum-java-binding-parent)
+ - [Exonum Java Binding](exonum-java-binding-parent). It is a framework for building blockchain 
+ applications in Java which provides Exonum services runtime environment
+ - [Light Client](exonum-java-light-client). It is a library for interaction with Exonum 
+ on a client site that can be used for creating digital signatures,
+ forming adn sending transactions ect
 
 ## Java version
 Java 8 or newer is required for building and using Exonum Java projects.
@@ -24,3 +31,5 @@ For more information see the relevant documentation on the tool:
 
 If you are using Exonum in your project and want to be listed on our website and
 GitHub list — write us a line to <exonum@bitfury.com>.
+
+[exonum]: https://github.com/exonum/exonum
