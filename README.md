@@ -1,4 +1,4 @@
-# Exonum Library for Java
+# Exonum Java Libraries
 
 [![Build Status](https://img.shields.io/travis/exonum/exonum-java-binding/master.svg)](https://travis-ci.com/exonum/exonum-java-binding)
 [![Coverage Status](https://coveralls.io/repos/github/exonum/exonum-java-binding/badge.svg?branch=master)](https://coveralls.io/github/exonum/exonum-java-binding?branch=master)
@@ -12,7 +12,7 @@ The following projects are available:
  - [Exonum Java Binding](exonum-java-binding-parent). It is a framework for building blockchain 
  applications in Java which provides Exonum services runtime environment.
  - [Light Client](exonum-java-light-client). It is a library for interaction with Exonum 
-  blockchain from external applications built on Java.
+  blockchain from external Java applications.
 
 ## Java version
 Java 8 or newer is required for building and using Exonum Java projects.
