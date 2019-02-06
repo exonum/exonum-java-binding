@@ -121,6 +121,7 @@
          Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
+    <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
   </properties>
 
@@ -322,12 +323,6 @@
           </dependencies>
         </plugin>
 
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>tidy-maven-plugin</artifactId>
-          <version>1.1.0</version>
-        </plugin>
-
         <!-- Use newer version of the standard plugins by default. -->
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
@@ -474,24 +469,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- Checks that the POMs match the code convention:
-           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
-
-           Use `mvn tidy:pom` to fix any style issues -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>tidy-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>check-pom-code-style</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -531,7 +508,7 @@
                   <goal>prepare-agent</goal>
                 </goals>
                 <configuration>
-                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                  <destFile>${jacoco.reports-path}/jacoco-unit.exec</destFile>
                 </configuration>
               </execution>
               <execution>
@@ -541,7 +518,7 @@
                   <goal>report</goal>
                 </goals>
                 <configuration>
-                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                  <dataFile>${jacoco.reports-path}/jacoco-unit.exec</dataFile>
                 </configuration>
               </execution>
               <execution>
@@ -551,7 +528,7 @@
                   <goal>prepare-agent</goal>
                 </goals>
                 <configuration>
-                  <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
+                  <destFile>${jacoco.reports-path}/jacoco-it.exec</destFile>
                   <propertyName>itCoverageAgent</propertyName>
                 </configuration>
               </execution>
@@ -562,19 +539,10 @@
                   <goal>report-integration</goal>
                 </goals>
                 <configuration>
-                  <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
+                  <dataFile>${jacoco.reports-path}/jacoco-it.exec</dataFile>
                 </configuration>
               </execution>
             </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
-            <version>4.3.0</version>
-            <configuration>
-              <repoToken>${env.COVERALLS_TOKEN}</repoToken>
-            </configuration>
           </plugin>
         </plugins>
       </build>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.exonum.client</groupId>
+  <artifactId>exonum-java-light-client</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Exonum Java Light Client</name>
+  <description>
+    The Exonum light client library to work with Exonum blockchain.
+    Can be used to create and submit transactions to blockchain.
+  </description>
+
+  <url>https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-light-client</url>
+  <organization>
+    <name>Exonum</name>
+    <url>https://exonum.com/</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>dmitry-timofeev</id>
+      <name>Dmitry Timofeev</name>
+      <url>https://github.com/dmitry-timofeev</url>
+    </developer>
+
+    <developer>
+      <id>bullet-tooth</id>
+      <name>Oleg Bondar</name>
+      <url>https://github.com/bullet-tooth</url>
+    </developer>
+  </developers>
+
+  <properties>
+    <ejb.version>0.4-SNAPSHOT</ejb.version>
+    <java.compiler.source>8</java.compiler.source>
+    <java.compiler.target>8</java.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- Checkstyle -->
+    <checkstyle.severity>warning</checkstyle.severity>
+    <!-- Default values of properties set by Jacoco when coverage is enabled.
+     Passed to the JVM running tests. -->
+    <jacoco.args></jacoco.args>
+    <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-common</artifactId>
+      <version>${ejb.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <showWarnings>true</showWarnings>
+          <source>${java.compiler.source}</source>
+          <target>${java.compiler.target}</target>
+        </configuration>
+      </plugin>
+
+      <!-- Checkstyle plugin is run during validate phase (before javac) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <configLocation>${project.basedir}/../checkstyle.xml</configLocation>
+          <propertyExpansion>checkstyle.severity=${checkstyle.severity}</propertyExpansion>
+          <linkXRef>false</linkXRef>
+        </configuration>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>8.16</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.1</version>
+        <configuration>
+          <argLine>
+            ${jacoco.args}
+          </argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <doclint>none</doclint>
+          <detectOfflineLinks>false</detectOfflineLinks>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- A build profile for a build performed on a CI server:
+        - Fails if the code has style issues
+        - Collects test coverage information
+ -->
+    <profile>
+      <id>ci-build</id>
+      <properties>
+        <checkstyle.severity>error</checkstyle.severity>
+        <jacoco.args>${argLine}</jacoco.args>
+      </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.3</version>
+            <executions>
+              <execution>
+                <id>prepare-jacoco-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${jacoco.reports-path}/jacoco-unit.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${jacoco.reports-path}/jacoco-unit.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
