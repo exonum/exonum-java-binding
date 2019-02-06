@@ -78,6 +78,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>tidy-maven-plugin</artifactId>
+        <version>1.1.0</version>
         <executions>
           <execution>
             <id>check-pom-code-style</id>
