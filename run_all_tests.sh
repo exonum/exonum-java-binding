@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Builds the project and runs all tests.
+# Builds the project and runs all tests in all sub-projects.
+# This file should be extended in case new custom (not maven) tests appear.
+# This file should be always synchronized with exonum-java-binding-parent/run_all_tests.sh for
+# correct work.
 #
 # A JVM will be selected by JAVA_HOME environment variable, or, if it is not set,
 # inferred from the java executable available on the path.
