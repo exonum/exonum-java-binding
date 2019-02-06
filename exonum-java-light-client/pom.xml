@@ -42,13 +42,16 @@
   </developers>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <ejb.version>0.4-SNAPSHOT</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
-    <ejb.version>0.4-SNAPSHOT</ejb.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Checkstyle -->
-    <checkstyle.severity>error</checkstyle.severity>
+    <checkstyle.severity>warning</checkstyle.severity>
+    <!-- Default values of properties set by Jacoco when coverage is enabled.
+     Passed to the JVM running tests. -->
+    <jacoco.args></jacoco.args>
   </properties>
 
   <dependencies>
@@ -110,6 +113,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.22.1</version>
+        <configuration>
+          <argLine>
+            ${jacoco.args}
+          </argLine>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -145,4 +153,49 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- A build profile for a build performed on a CI server:
+        - Fails if the code has style issues
+        - Collects test coverage information
+ -->
+    <profile>
+      <id>ci-build</id>
+      <properties>
+        <checkstyle.severity>error</checkstyle.severity>
+        <jacoco.args>${argLine}</jacoco.args>
+      </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.3</version>
+            <executions>
+              <execution>
+                <id>prepare-jacoco-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>generate-jacoco-report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
