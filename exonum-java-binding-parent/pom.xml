@@ -121,6 +121,7 @@
          Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.it.args></jacoco.it.args>
+    <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
   </properties>
 
@@ -507,7 +508,7 @@
                   <goal>prepare-agent</goal>
                 </goals>
                 <configuration>
-                  <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                  <destFile>${jacoco.reports-path}/jacoco-unit.exec</destFile>
                 </configuration>
               </execution>
               <execution>
@@ -517,7 +518,7 @@
                   <goal>report</goal>
                 </goals>
                 <configuration>
-                  <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                  <dataFile>${jacoco.reports-path}/jacoco-unit.exec</dataFile>
                 </configuration>
               </execution>
               <execution>
@@ -527,7 +528,7 @@
                   <goal>prepare-agent</goal>
                 </goals>
                 <configuration>
-                  <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
+                  <destFile>${jacoco.reports-path}/jacoco-it.exec</destFile>
                   <propertyName>itCoverageAgent</propertyName>
                 </configuration>
               </execution>
@@ -538,7 +539,7 @@
                   <goal>report-integration</goal>
                 </goals>
                 <configuration>
-                  <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
+                  <dataFile>${jacoco.reports-path}/jacoco-it.exec</dataFile>
                 </configuration>
               </execution>
             </executions>

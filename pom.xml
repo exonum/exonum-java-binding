@@ -52,6 +52,7 @@
 
   <modules>
     <module>exonum-java-binding-parent</module>
+    <module>exonum-java-light-client</module>
   </modules>
 
   <scm>
