@@ -5,8 +5,9 @@ authors = ["Exonum team <exonum@bitfury.com>"]
 
 [dependencies]
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
-# And it is required for the moment for early detection of possible issues in resources management
-# and accessing objects with pointers.
+# Although its primary goal is to detect _programming_ errors that shall not occur
+# in a correct application early, it is currently required in the application 
+# because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.10"
 exonum-btc-anchoring = "0.10"
