@@ -4,6 +4,9 @@ version = "0.4.0-SNAPSHOT"
 authors = ["Exonum team <exonum@bitfury.com>"]
 
 [dependencies]
+# Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
+# And it is required for the moment for early detection of possible issues in resources management
+# and accessing objects with pointers.
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.10"
 exonum-btc-anchoring = "0.10"
