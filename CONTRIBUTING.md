@@ -120,7 +120,7 @@ $ cargo fmt --all -- --write-mode=check
 
 ## Submitting Issues
 Use Github Issues to submit an issue, whether it is a question, some feedback, a bug or a feature request:
-https://github.com/exonum/exonum-java-binding/issues/new
+https://github.com/exonum/exonum-java/issues/new
 
 JIRA is for internal use so far and is not publicly available yet.
 

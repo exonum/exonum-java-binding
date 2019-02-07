@@ -11,8 +11,8 @@
   <description>
     The parent project of the Exonum Java libraries.
   </description>
-  <!--TODO: change after the repo renaming-->
-  <url>https://github.com/exonum/exonum-java-binding</url>
+
+  <url>https://github.com/exonum/exonum-java</url>
   <organization>
     <name>Exonum</name>
     <url>https://exonum.com/</url>
@@ -56,14 +56,14 @@
   </modules>
 
   <scm>
-    <connection>scm:git:https://github.com/exonum/exonum-java-binding.git</connection>
-    <developerConnection>scm:git:git@github.com:/exonum/exonum-java-binding.git</developerConnection>
-    <url>https://github.com/exonum/exonum-java-binding</url>
+    <connection>scm:git:https://github.com/exonum/exonum-java.git</connection>
+    <developerConnection>scm:git:git@github.com:/exonum/exonum-java.git</developerConnection>
+    <url>https://github.com/exonum/exonum-java</url>
     <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>github</system>
-    <url>https://github.com/exonum/exonum-java-binding/issues</url>
+    <url>https://github.com/exonum/exonum-java/issues</url>
   </issueManagement>
 
   <properties>

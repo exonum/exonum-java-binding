@@ -144,7 +144,7 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.3...HEAD
-[0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
-[0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2
-[0.1.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1...v0.1.2
+[Unreleased]: https://github.com/exonum/exonum-java/compare/v0.3...HEAD
+[0.3]: https://github.com/exonum/exonum-java/compare/v0.2...v0.3
+[0.2]: https://github.com/exonum/exonum-java/compare/v0.1.2...v0.2
+[0.1.2]: https://github.com/exonum/exonum-java/compare/v0.1...v0.1.2

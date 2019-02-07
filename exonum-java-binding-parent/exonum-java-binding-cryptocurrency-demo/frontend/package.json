@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/exonum/exonum-java-binding"
+    "url": "https://github.com/exonum/exonum-java"
   },
   "scripts": {
     "proto": "pbjs --keep-case -t static-module ../src/main/proto/transactions.proto ../src/main/proto/wallet.proto -o ./src/proto/proto.js",
