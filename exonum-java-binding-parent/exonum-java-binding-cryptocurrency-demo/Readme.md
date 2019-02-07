@@ -76,4 +76,4 @@ Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 - [Reference Documentation](https://exonum.com/doc/version/latest/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
-[app-tutorial]: https://github.com/exonum/exonum-java/blob/master/exonum-java-binding/exonum-java-binding-core/rust/ejb-app/TUTORIAL.md
+[app-tutorial]: https://github.com/exonum/exonum-java/blob/master/exonum-java-binding-parent/exonum-java-binding-core/rust/ejb-app/TUTORIAL.md

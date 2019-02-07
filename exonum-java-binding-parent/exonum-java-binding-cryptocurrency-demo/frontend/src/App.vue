@@ -9,7 +9,7 @@
           <div class="col-sm-12">
             <img src="images/exonum.png" width="41" height="36" class="float-left mt-sm-1 mr-3" alt="">
             <ul class="list-unstyled">
-              <li>Sources on <a href="https://github.com/exonum/exonum-java/tree/master/exonum-java-binding/exonum-java-binding-cryptocurrency-demo" target="_blank">GitHub</a></li>
+              <li>Sources on <a href="https://github.com/exonum/exonum-java/tree/master/exonum-java-binding-parent/exonum-java-binding-cryptocurrency-demo" target="_blank">GitHub</a></li>
               <li><a href="https://exonum.com/doc/version/latest/" target="_blank">Exonum docs</a></li>
             </ul>
           </div>

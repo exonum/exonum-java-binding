@@ -15,7 +15,7 @@
     Can be used to create and submit transactions to blockchain.
   </description>
 
-  <url>https://github.com/exonum/exonum-java/tree/master/exonum-java-binding/exonum-java-light-client</url>
+  <url>https://github.com/exonum/exonum-java/tree/master/exonum-java-light-client</url>
   <organization>
     <name>Exonum</name>
     <url>https://exonum.com/</url>

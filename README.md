@@ -14,7 +14,7 @@ in Java, configure a network of nodes and run the service in it.
 For more information see the relevant documentation on the tool:
   - [What is Exonum?](https://exonum.com/doc/version/latest/get-started/what-is-exonum/)
   - [User Guide](https://exonum.com/doc/version/latest/get-started/java-binding/)
-  - [Cryptocurrency Example Service](exonum-java-binding/exonum-java-binding-cryptocurrency-demo)
+  - [Cryptocurrency Example Service](exonum-java-binding-parent/exonum-java-binding-cryptocurrency-demo)
   - [Roadmap](ROADMAP.md)
   - [Contribution Guide](CONTRIBUTING.md)
   - [Code of Conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
