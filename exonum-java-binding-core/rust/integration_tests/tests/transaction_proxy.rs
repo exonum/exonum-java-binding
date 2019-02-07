@@ -22,8 +22,8 @@ extern crate lazy_static;
 use integration_tests::{
     mock::transaction::{
         create_mock_transaction_proxy, create_throwing_exec_exception_mock_transaction_proxy,
-        create_throwing_mock_transaction_proxy, AUTHOR_PK_ENTRY_NAME, ENTRY_VALUE, TEST_ENTRY_NAME,
-        TX_HASH_ENTRY_NAME,
+        create_throwing_mock_transaction_proxy, AUTHOR_PK_ENTRY_NAME, ENTRY_VALUE, INFO_VALUE,
+        TEST_ENTRY_NAME, TX_HASH_ENTRY_NAME,
     },
     vm::create_vm_for_tests_with_fake_classes,
 };
@@ -36,7 +36,7 @@ use java_bindings::{
         storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
     jni::JavaVM,
-    MainExecutor,
+    serde_json, MainExecutor,
 };
 
 use std::sync::Arc;
@@ -191,6 +191,33 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
         .expect_err("This transaction should be executed with an error!");
     assert_eq!(err.error_type(), TransactionErrorType::Code(err_code as u8));
     assert!(err.description().is_none());
+}
+
+#[cfg_attr(target_os = "linux", ignore)]
+#[test]
+fn json_serialize() {
+    let valid_tx = create_mock_transaction_proxy(EXECUTOR.clone());
+    assert_eq!(serde_json::to_value(&valid_tx.0).unwrap(), *INFO_VALUE);
+}
+
+#[cfg_attr(target_os = "linux", ignore)]
+#[test]
+#[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
+fn json_serialize_should_panic_if_java_error_occurred() {
+    let panic_tx = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
+    serde_json::to_string(&panic_tx.0).unwrap();
+}
+
+#[cfg_attr(target_os = "linux", ignore)]
+#[test]
+fn json_serialize_should_return_err_if_java_exception_occurred() {
+    let invalid_tx =
+        create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
+    let err = serde_json::to_value(invalid_tx.0)
+        .expect_err("This transaction should be serialized with an error!");
+    assert!(err
+        .to_string()
+        .starts_with("Java exception: java.lang.ArithmeticException",));
 }
 
 #[test]
