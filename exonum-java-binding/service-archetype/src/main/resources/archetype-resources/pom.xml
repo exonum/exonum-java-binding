@@ -60,7 +60,7 @@
                     <argLine>
                         <!-- TODO: Replace with a path to the libjava_bindings.so to enable
                              integration tests that require a native library. -->
-                        -Djava.library.path=${project.basedir}/exonum-java-binding-core/rust/target/debug
+                        -Djava.library.path=${project.basedir}/core/rust/target/debug
                     </argLine>
                 </configuration>
             </plugin>

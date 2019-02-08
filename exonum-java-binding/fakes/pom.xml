@@ -17,8 +17,7 @@
   </description>
 
   <properties>
-    <ejb-core.nativeLibPath>${project.basedir}/../exonum-java-binding-core/rust/target/debug
-    </ejb-core.nativeLibPath>
+    <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
   </properties>
 
   <dependencies>

@@ -52,13 +52,13 @@
 
   <modules>
     <module>bom</module>
-    <module>exonum-java-testing</module>
+    <module>testing</module>
     <module>common</module>
     <module>core</module>
-    <module>exonum-java-binding-fakes</module>
-    <module>exonum-java-binding-qa-service</module>
+    <module>fakes</module>
+    <module>qa-service</module>
     <module>cryptocurrency-demo</module>
-    <module>exonum-java-binding-service-archetype</module>
+    <module>service-archetype</module>
   </modules>
 
   <scm>

@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.exonum.client</groupId>
-  <artifactId>exonum-java-light-client</artifactId>
+  <artifactId>exonum-light-client</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 

@@ -28,7 +28,7 @@ import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-// Used in native code, see exonum-java-binding-core/rust/integration_tests
+// Used in native code, see exonum-java-binding/core/rust/integration_tests
 @SuppressWarnings("WeakerAccess")
 public final class TestService extends AbstractService {
 
