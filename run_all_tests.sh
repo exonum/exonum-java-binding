@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the project and runs all tests in all sub-projects.
 # This file should be extended in case new custom (not maven) tests appear.
-# This file should be always synchronized with exonum-java-binding-parent/run_all_tests.sh for
+# This file should be always synchronized with exonum-java-binding/run_all_tests.sh for
 # correct work.
 #
 # A JVM will be selected by JAVA_HOME environment variable, or, if it is not set,
@@ -11,7 +11,7 @@
 set -eu -o pipefail
 
 # Import necessary environment variables (see the tests_profile header comment for details).
-source exonum-java-binding-parent/tests_profile
+source exonum-java-binding/tests_profile
 
 echo "Start building the project with running all Java test"
 # Run unit and integration tests in ci-build profile. This profile includes:
@@ -26,7 +26,7 @@ mvn install \
   -Drust.compiler.version="${RUST_COMPILER_VERSION}"
 
 echo "Start running EJB native tests"
-cd exonum-java-binding-parent
+cd exonum-java-binding
 # Run native integration tests that require prepared classpaths for fake classes.
 ./run_native_integration_tests.sh --skip-compile
 ./run_ejb_app_tests.sh

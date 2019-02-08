@@ -35,7 +35,7 @@ $ source tests_profile
 
 $ mvn install
 
-$ cd exonum-java-binding-core/rust/ejb-app/
+$ cd core/rust/ejb-app/
 
 $ cargo build
 
@@ -47,7 +47,7 @@ $ ./start_cryptocurrency_node.sh
 Install frontend dependencies:
 
 ```sh
-$ cd ../../exonum-java-binding-cryptocurrency-demo/frontend/
+$ cd ../../cryptocurrency-demo/frontend/
 
 $ npm install
 ```
@@ -76,4 +76,4 @@ Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 - [Reference Documentation](https://exonum.com/doc/version/latest/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
-[app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding-core/rust/ejb-app/TUTORIAL.md
+[app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/ejb-app/TUTORIAL.md

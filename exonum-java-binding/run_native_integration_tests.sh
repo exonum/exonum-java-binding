@@ -24,7 +24,7 @@ else
   fi
 fi
 
-cd exonum-java-binding-core/rust
+cd core/rust
 
 cargo "+${RUST_COMPILER_VERSION}" test \
   --manifest-path integration_tests/Cargo.toml

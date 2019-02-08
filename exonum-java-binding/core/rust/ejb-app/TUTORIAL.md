@@ -36,7 +36,7 @@ LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
 RUST_LIB_PATH="$(rustup run stable rustc --print sysroot)/lib"
 
-export EJB_LIBPATH="${EJB_ROOT}/exonum-java-binding-core/rust/target/debug"
+export EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
 
 export LD_LIBRARY_PATH="${LIBJVM_PATH}:${RUST_LIB_PATH}:${EJB_LIBPATH}"
 ```

@@ -36,7 +36,7 @@ pub struct EjbConfig {
     pub class_path: String,
     /// Path to java-bindings shared library.
     ///
-    /// Should be path to exonum-java-binding-core/rust/target/{debug, release}
+    /// Should be path to core/rust/target/{debug, release}
     pub lib_path: String,
     /// Path to `log4j` configuration file.
     pub log_config_path: String,

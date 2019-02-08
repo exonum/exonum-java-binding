@@ -12,7 +12,7 @@
     The Exonum Java Binding library.
   </description>
   <!--TODO: change after the repo renaming-->
-  <url>https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding-parent</url>
+  <url>https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding</url>
   <organization>
     <name>Exonum</name>
     <url>https://exonum.com/</url>
