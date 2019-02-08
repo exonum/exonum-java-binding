@@ -27,8 +27,9 @@ If you are upgrading an existing Java service, consult the migration guide.
 - Support of new transaction message format added in Exonum 0.10. It allows service 
   developers to use any serialization format, and the framework to perform signature verification
   automatically. Both the service and client APIs are migrated. (#534, #574)
-- Support of core schema API, which allows services to read data, maintained by the framework
-  (blocks, transactions, transaction execution results, etc.). (#548, #549, #571, #573)
+- `com.exonum.binding.blockchain.Blockchain`, allowing services to read data, 
+  maintained by the framework (blocks, transaction messages, transaction execution results, etc.).
+  (#548, #549, #571, #573)
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
 - `com.exonum.binding.common.serialization.json.JsonSerializer` providing JSON serialization 
