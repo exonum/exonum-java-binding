@@ -6,13 +6,13 @@ If you are using Maven, add this to your pom.xml file
 ```xml
 <dependency>
   <groupId>com.exonum.client</groupId>
-  <artifactId>exonum-java-light-client</artifactId>
+  <artifactId>exonum-light-client</artifactId>
   <version>0.1-SNAPSHOT</version>
 </dependency>
 ```
 If you are using Gradle, add this to your dependencies
 ```Groovy
-compile 'com.exonum.client:exonum-java-light-client:0.1-SNAPSHOT'
+compile 'com.exonum.client:exonum-light-client:0.1-SNAPSHOT'
 ```
 
 ## Getting Started
