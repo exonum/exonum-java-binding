@@ -101,8 +101,7 @@ fn get_fakes_classpath_option() -> String {
 }
 
 pub fn get_fakes_classpath() -> String {
-    let classpath_txt_path =
-        project_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
+    let classpath_txt_path = project_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
 
     let mut class_path = String::new();
     File::open(classpath_txt_path)
