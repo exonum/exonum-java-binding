@@ -12,7 +12,7 @@ implementing your own Exonum service
 in the [user guide](https://exonum.com/doc/version/latest/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
-[cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding-cryptocurrency-demo
+[cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding/cryptocurrency-demo
 
 ## How to Run an Exonum Node
 

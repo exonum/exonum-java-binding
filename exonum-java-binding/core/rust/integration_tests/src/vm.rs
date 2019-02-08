@@ -102,7 +102,7 @@ fn get_fakes_classpath_option() -> String {
 
 pub fn get_fakes_classpath() -> String {
     let classpath_txt_path =
-        project_root_dir().join("exonum-java-binding-fakes/target/ejb-fakes-classpath.txt");
+        project_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
 
     let mut class_path = String::new();
     File::open(classpath_txt_path)
@@ -110,7 +110,7 @@ pub fn get_fakes_classpath() -> String {
         .read_to_string(&mut class_path)
         .expect("Failed to read classpath.txt");
 
-    let fakes_path = project_root_dir().join("exonum-java-binding-fakes/target/classes/");
+    let fakes_path = project_root_dir().join("fakes/target/classes/");
     let fakes_classes = fakes_path
         .to_str()
         .expect("Failed to convert FS path into utf-8");
