@@ -6,7 +6,6 @@ sudo: false
 branches:
   only:
     - master
-    - ejb-app-configuration
     # Also build tagged revisions, e.g. v1.2.3-beta
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
