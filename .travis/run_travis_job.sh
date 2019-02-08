@@ -22,6 +22,7 @@ then
     cargo clippy -V
 
     echo 'Performing checks over the rust code'
+    EJB_RUST_BUILD_DIR="${TRAVIS_BUILD_DIR}/exonum-java-binding/core/rust/"
     cd "${EJB_RUST_BUILD_DIR}"
     # Check the formatting.
     cargo fmt -- --check
