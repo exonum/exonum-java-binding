@@ -31,11 +31,11 @@ Be sure you installed necessary packages:
 Build the project:
 
 ```sh
-$ source tests_profile
+$ source exonum-java-binding/tests_profile
 
 $ mvn install
 
-$ cd core/rust/ejb-app/
+$ cd exonum-java-binding/core/rust/ejb-app/
 
 $ cargo build
 
