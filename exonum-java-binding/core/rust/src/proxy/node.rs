@@ -82,6 +82,14 @@ impl NodeContext {
     #[doc(hidden)]
     pub fn submit(&self, transaction: RawTransaction) -> Result<Hash, failure::Error> {
         let service_id = transaction.service_id();
+
+        if !self.blockchain.service_map().contains_key(&service_id) {
+            return Err(format_err!(
+                "Unable to broadcast transaction: no service with ID={} found",
+                service_id
+            ));
+        }
+
         let msg = Message::sign_transaction(
             transaction.service_transaction(),
             service_id,

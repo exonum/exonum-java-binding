@@ -54,14 +54,8 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(
-        exec: MainExecutor,
-        transaction: GlobalRef,
-    ) -> Self {
-        TransactionProxy {
-            exec,
-            transaction,
-        }
+    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef) -> Self {
+        TransactionProxy { exec, transaction }
     }
 }
 

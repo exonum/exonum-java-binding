@@ -45,41 +45,48 @@ lazy_static! {
     pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
+const TEST_TRANSACTION_ID: u16 = 0;
+const TEST_TRANSACTION_PAYLOAD: &[u8] = &[1, 2, 3];
+
 #[test]
 fn submit_transaction() {
-    let keypair = gen_keypair();
-    let (node, app_rx) = create_node(keypair.0, keypair.1);
+    let (tx_author, secret_key) = gen_keypair();
     let service_id = 0;
-    let transaction_id = 0;
-    let tx_payload = vec![1, 2, 3];
-    let service_transaction = ServiceTransaction::from_raw_unchecked(transaction_id, tx_payload);
-    let raw_transaction = RawTransaction::new(service_id, service_transaction);
+    let raw_transaction = create_raw_transaction(service_id);
+
+    let (node, app_rx) = create_node(tx_author, secret_key);
     node.submit(raw_transaction.clone()).unwrap();
     let sent_message = app_rx.wait().next().unwrap().unwrap();
+
     match sent_message {
         ExternalMessage::Transaction(sent) => {
-            let tx_payload = sent.payload();
-            let tx_author = sent.author();
-            assert_eq!(&raw_transaction, tx_payload);
-            assert_eq!(tx_author, keypair.0);
+            let message_payload = sent.payload();
+            let message_author = sent.author();
+            assert_eq!(&raw_transaction, message_payload);
+            assert_eq!(message_author, tx_author);
         }
         _ => panic!("Message is not Transaction"),
     }
 }
 
 #[test]
-#[ignore]
 fn submit_transaction_to_missing_service() {
-    let keypair = gen_keypair();
-    let (node, _) = create_node(keypair.0, keypair.1);
+    let (public_key, secret_key) = gen_keypair();
+    let (node, _) = create_node(public_key, secret_key);
     // invalid service_id
     let service_id = 1;
-    let transaction_id = 0;
-    let tx_payload = vec![1, 2, 3];
-    let service_transaction = ServiceTransaction::from_raw_unchecked(transaction_id, tx_payload);
-    let raw_transaction = RawTransaction::new(service_id, service_transaction);
+    let raw_transaction = create_raw_transaction(service_id);
+
     let res = node.submit(raw_transaction.clone());
     assert!(res.is_err());
+}
+
+fn create_raw_transaction(service_id: u16) -> RawTransaction {
+    let service_transaction = ServiceTransaction::from_raw_unchecked(
+        TEST_TRANSACTION_ID,
+        TEST_TRANSACTION_PAYLOAD.to_vec(),
+    );
+    RawTransaction::new(service_id, service_transaction)
 }
 
 fn create_node(
