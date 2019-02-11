@@ -15,7 +15,7 @@
     Can be used to create and submit transactions to blockchain.
   </description>
 
-  <url>https://github.com/exonum/exonum-java-binding/tree/master/exonum-light-client</url>
+  <url>https://github.com/exonum/exonum-java/tree/master/exonum-light-client</url>
   <organization>
     <name>Exonum</name>
     <url>https://exonum.com/</url>
@@ -40,6 +40,27 @@
       <url>https://github.com/bullet-tooth</url>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/exonum/exonum-java.git</connection>
+    <developerConnection>scm:git:git@github.com:/exonum/exonum-java.git</developerConnection>
+    <url>https://github.com/exonum/exonum-java</url>
+    <tag>HEAD</tag>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/exonum/exonum-java/issues</url>
+  </issueManagement>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <properties>
     <ejb.version>0.4-SNAPSHOT</ejb.version>
