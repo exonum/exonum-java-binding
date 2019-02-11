@@ -18,4 +18,5 @@ class SubmitTxResponse {
         .add("hash", hash)
         .toString();
   }
+
 }

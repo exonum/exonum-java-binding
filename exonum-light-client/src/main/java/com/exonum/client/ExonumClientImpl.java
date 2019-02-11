@@ -64,7 +64,6 @@ class ExonumClientImpl implements ExonumClient {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
   }
 
   private void createUrls() {

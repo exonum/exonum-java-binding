@@ -16,4 +16,5 @@ class ExonumClientBuilderTest {
     assertThrows(IllegalArgumentException.class,
         () -> ExonumClient.newBuilder().setExonumHost("invalid-url").build());
   }
+
 }
