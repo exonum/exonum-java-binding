@@ -227,12 +227,12 @@ fn passing_transaction_context() {
     let (tx_hash, author_pk) = {
         let mut fork = db.fork();
         let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
-        // get transaction hash and author public key from mock transaction
         let (tx_hash, author_pk) = {
             let context = create_transaction_context(&mut fork, raw);
             let (tx_hash, author_pk) = (context.tx_hash(), context.author());
 
-            // execute transaction
+            // Transaction will write passed tx_hash and author_PK to
+            // the database (into two `EntryIndex`es)
             valid_tx.execute(context).unwrap();
 
             (tx_hash, author_pk)
@@ -240,6 +240,9 @@ fn passing_transaction_context() {
         db.merge(fork.into_patch()).unwrap();
         (tx_hash, author_pk)
     };
+
+    // Checking that tx_hash and author_pk passed to the transaction context are
+    // the same as the ones received by transaction during its execution.
     let snapshot = db.snapshot();
     let tx_hash_entry: Entry<_, Hash> = Entry::new(TX_HASH_ENTRY_NAME, &snapshot);
     assert_eq!(tx_hash_entry.get().unwrap(), tx_hash);
