@@ -73,7 +73,7 @@ The complete list of changes is available in the [release changelog](https://git
 ### [Use the Core Schema][core-schema-docs]
 v0.4 provides access to some data stored by the framework in the database: transaction messages,
 execution results; blocks; node configuration, etc — take a look at [`Blockchain`][blockchain-jd] 
-to see if will simplify your service implementation.
+to see if it will simplify your service implementation.
 
 [core-schema-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#core-schema-api
 [blockchain-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/blockchain/Blockchain.html
@@ -108,5 +108,3 @@ on Github.
 
 [gitter]: https://gitter.im/exonum/exonum-java-binding
 [new-issue]: https://github.com/exonum/exonum-java-binding/issues/new
-
-  
