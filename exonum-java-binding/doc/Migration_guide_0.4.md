@@ -6,7 +6,8 @@ The most notable change in the format is that the public key of the transaction 
 is always included in the transaction message. This allows the framework to verify 
 the message signature with no conversion to an executable transaction.
 
-If the client application is in Java, use `com.exonum.binding.common.message.TransactionMessage`
+If the client application is in Java, 
+use [`com.exonum.binding.common.message.TransactionMessage`][tx-message-jd]
 from "[com.exonum.binding:exonum-java-binding-common:0.4][common-0.4]";
 if it is in Java Script, use the latest version of the JS 
 [light client](https://github.com/exonum/exonum-client).
@@ -14,21 +15,26 @@ if it is in Java Script, use the latest version of the JS
 The light client shall submit transactions directly to the core endpoint instead of a custom one
 in the service controller:
 `<public api IP address and port>/api/explorer/v1/transactions`
- <!-- TODO: Link the docs when/if they are available -->
+ <!-- TODO: Link the core docs when/if they are available -->
 
 [common-0.4]: https://search.maven.org/artifact/com.exonum.binding/exonum-java-binding-common/0.4/jar
+[tx-message-jd]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/message/TransactionMessage.html#builder()
 
 ## Update the service
 ### Use the new message format
 
 EJB 0.4 accepts the transactions via a system endpoint and passes the payload to the `Service`
-implementation to convert into an executable transaction. The `TransactionConverter` now accepts
+implementation to convert into an executable transaction. 
+The [`TransactionConverter`][tx-converter-jd] now accepts
 a `RawTransaction` that includes only the transaction identifiers (service id and transaction id)
 and its payload — the serialized transaction parameters (equivalent to `Message#getBody` from v0.3).
 
 Also, consider removing the public key of the transaction author from its _payload_ because
 it is now included in a standard field of the message, and is accessible in `Transaction#execute`
-from the passed context: `TransactionContext#getAuthorPk`.
+from the passed context: [`TransactionContext#getAuthorPk`][tx-context-author-jd].
+
+[tx-converter-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/service/TransactionConverter.html
+[tx-context-author-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/transaction/TransactionContext.html#getAuthorPk() 
 
 ### Update `Transaction`s
 The following methods are **removed** from `Transaction` interface:
@@ -39,15 +45,18 @@ The following methods are **removed** from `Transaction` interface:
   - `getMessage`. Transactions are no longer required to store the corresponding 
   `TransactionMessage`, which makes it easier to instantiate them in unit or integration tests.
   If your transaction code needs a whole message of this or _any_ other transaction,
-  use `com.exonum.binding.blockchain.Blockchain.getTxMessages`.
+  use [`com.exonum.binding.blockchain.Blockchain.getTxMessages`][blockchain-get-tx-messages-jd].
   - `hash`. You can access the SHA-256 hash of this transaction message in `Transaction#execute`
-  from the passed context: `TransactionContext#getTransactionMessageHash`. As a reminder,
-  it uniquely identifies the message in the system.
+  from the passed context: [`TransactionContext#getTransactionMessageHash`][tx-context-hash-jd]. 
+  As a reminder, it uniquely identifies the message in the system.
   
 That leaves `Transaction` interface with two methods: `execute` and `info`.
 The argument of `execute` changed too — it now accepts a `TransactionContext` that allows
 to access a `Fork` to modify the database state, as previously; and some information about 
 the corresponding transaction message: its hash and the public key of the author.
+
+[blockchain-get-tx-messages-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/blockchain/Blockchain.html#getTxMessages()
+[tx-context-hash-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/transaction/TransactionContext.html#getTransactionMessageHash()
 
 ### Update your controller
 As the v0.4 framework accepts binary transactions itself, remove the endpoint that accepted
@@ -58,26 +67,34 @@ We have updated all project dependencies to the most recent versions supporting 
 our internal system tests run on 11. 8 is still fine too.
 
 ## Explore the new features
+Here are the highlights of the added features, with links to the documentation sections.
+The complete list of changes is available in the [release changelog](https://github.com/exonum/exonum-java-binding/releases/tag/v0.4).
 
-### Use the Core Schema
+### [Use the Core Schema][core-schema-docs]
 v0.4 provides access to some data stored by the framework in the database: transaction messages,
-execution results; blocks; node configuration, etc — take a look at `Blockchain` to see if will
-simplify your service implementation. 
+execution results; blocks; node configuration, etc — take a look at [`Blockchain`][blockchain-jd] 
+to see if will simplify your service implementation.
 
-### Handle blockchain events
+[core-schema-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#core-schema-api
+[blockchain-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/blockchain/Blockchain.html
+
+### [Handle blockchain events][core-events-docs]
 v0.4 also brings `Service#afterCommit` handler which is invoked by the blockchain after each 
 block commit. For example, a service can create one or more transactions if a specific condition
-has occurred. <!-- TODO: Link the docs -->
+has occurred.
 
-### Sign and submit transactions
+[core-events-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#blockchain-events
+
+### [Sign and submit transactions][node-submit-docs]
 The framework now provides a method to create a transaction message and sign it with the
 _service key_. This allows service implementations to create new transactions and securely sign
 them, e.g., in their event handlers. But use with care — each node has its own service keypair.
-<!-- TODO: Some links would be welcome -->
+
+[node-submit-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#messages
 
 ## Use example
 See how the cryptocurrency service has changed since the last release to understand what
-changes might be needed in your service: <!-- TODO: diff link doesn't provide file filters -->
+changes might be needed in your service:
 
 ```sh
 $ git clone git@github.com:exonum/exonum-java-binding.git
