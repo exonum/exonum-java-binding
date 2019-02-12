@@ -213,7 +213,7 @@ fn convert_to_java_proof<'a>(
     let checked_proof = proof.check().unwrap();
     let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
 
-    create_java_unchecked_flat_map_proof(&env, proof_nodes, map_entries, missing_keys)
+    create_java_unchecked_map_proof(&env, proof_nodes, java_entries, missing_keys)
 }
 
 fn create_java_proof_nodes<'a>(
@@ -300,7 +300,7 @@ fn create_java_missing_keys<'a>(
     Ok(java_missing_keys.into())
 }
 
-fn create_java_unchecked_flat_map_proof<'a>(
+fn create_java_unchecked_map_proof<'a>(
     env: &'a JNIEnv,
     proof_nodes: JObject,
     map_entries: JObject,
