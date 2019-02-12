@@ -210,18 +210,8 @@ fn convert_to_java_proof<'a>(
 
     let native_entries: Vec<_> = proof.all_entries_unchecked().collect();
 
-    let mut missing_keys = Vec::with_capacity(native_entries.len());
-    let mut existing_entries = Vec::with_capacity(native_entries.len());
-
-    for entry in &native_entries {
-        match entry {
-            (key, Some(value)) => existing_entries.push((*key, *value)),
-            (key, None) => missing_keys.push(*key),
-        }
-    }
-
-    let missing_keys: JObject = create_java_missing_keys(&env, &missing_keys)?;
-    let map_entries: JObject = create_java_map_entries(&env, &existing_entries)?;
+    let map_entries: JObject = create_java_map_entries(&env, &native_entries)?;
+    let missing_keys: JObject = create_java_missing_keys(&env, &native_entries)?;
 
     create_java_unchecked_map_proof(&env, proof_nodes, map_entries, missing_keys)
 }
@@ -266,10 +256,19 @@ fn create_java_proof_node<'a>(
 
 fn create_java_map_entries<'a>(
     env: &'a JNIEnv,
-    entries: &[(&Key, &Value)],
+    entries: &[(&Key, Option<&Value>)],
 ) -> JniResult<JObject<'a>> {
-    let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
-    for (i, (key, value)) in entries.iter().enumerate() {
+    let existing_entries: Vec<(&Key, &Value)> = entries
+        .iter()
+        .filter_map(|e| match e {
+            (key, Some(value)) => Some((*key, *value)),
+            _ => None,
+        })
+        .collect();
+    let java_entries =
+        env.new_object_array(existing_entries.len() as jsize, MAP_ENTRY, JObject::null())?;
+
+    for (i, (key, value)) in existing_entries.iter().enumerate() {
         // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
         //   consider using a single frame
         env.with_local_frame(8, || {
@@ -294,9 +293,20 @@ fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniRe
     .l()
 }
 
-fn create_java_missing_keys<'a>(env: &'a JNIEnv, missing_keys: &[&Key]) -> JniResult<JObject<'a>> {
+fn create_java_missing_keys<'a>(
+    env: &'a JNIEnv,
+    entries: &[(&Key, Option<&Value>)],
+) -> JniResult<JObject<'a>> {
+    let missing_keys: Vec<&Key> = entries
+        .iter()
+        .filter_map(|e| match e {
+            (key, None) => Some(*key),
+            _ => None,
+        })
+        .collect();
     let java_missing_keys =
         env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
+
     for (i, key) in missing_keys.iter().enumerate() {
         let java_key = env.byte_array_from_slice(key.as_ref())?.into();
         env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
