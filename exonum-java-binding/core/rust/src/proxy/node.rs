@@ -85,7 +85,7 @@ impl NodeContext {
 
         if !self.blockchain.service_map().contains_key(&service_id) {
             return Err(format_err!(
-                "Unable to broadcast transaction: no service with ID={} found",
+                "Unable to broadcast transaction: service(ID={}) not found",
                 service_id
             ));
         }
