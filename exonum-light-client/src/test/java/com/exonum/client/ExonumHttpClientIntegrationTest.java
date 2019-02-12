@@ -23,8 +23,6 @@ import static com.exonum.client.ExonumHttpClient.HEX_ENCODER;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
@@ -37,7 +35,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ExonumHttpClientTest {
+class ExonumHttpClientIntegrationTest {
   private MockWebServer server;
   private ExonumClient exonumClient;
 
@@ -58,34 +56,30 @@ class ExonumHttpClientTest {
 
   @Test
   void submitTransactionTest() throws InterruptedException {
-    String hash = "f128c720e04b8243";
-    String body = "{\"tx_hash\":\"" + hash + "\"}";
-    server.enqueue(new MockResponse().setBody(body));
-
-    TransactionMessage txMessage = mock(TransactionMessage.class);
-    when(txMessage.toBytes()).thenReturn(new byte[]{0x00});
-
-    HashCode hashCode = exonumClient.submitTransaction(txMessage);
-    assertThat(hashCode, is(HashCode.fromString(hash)));
-
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getMethod(), is("POST"));
-    assertThat(recordedRequest.getPath(), is(SUBMIT_TRANSACTION));
-  }
-
-  @Test
-  void encodingTransactionMessageTest() throws InterruptedException {
+    // Create request
     KeyPair keys = ed25519().generateKeyPair();
     TransactionMessage txMessage = TransactionMessage.builder()
         .serviceId((short) 1)
         .transactionId((short) 2)
         .payload(new byte[]{0x00, 0x01, 0x02})
         .sign(keys, ed25519());
-    server.enqueue(new MockResponse().setBody("{\"tx_hash\":\"abcd\"}"));
+    // Mock response
+    String hash = "f128c720e04b8243";
+    String mockResponse = "{\"tx_hash\":\"" + hash + "\"}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
 
-    exonumClient.submitTransaction(txMessage);
+    // Call submitTransaction
+    HashCode hashCode = exonumClient.submitTransaction(txMessage);
 
+    // Assert response decoding
+    assertThat(hashCode, is(HashCode.fromString(hash)));
+
+    // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("POST"));
+    assertThat(recordedRequest.getPath(), is(SUBMIT_TRANSACTION));
+
+    // Assert request encoding
     String json = recordedRequest.getBody().readUtf8();
     SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
     String encodedTxMessage = actualRequest.body;
