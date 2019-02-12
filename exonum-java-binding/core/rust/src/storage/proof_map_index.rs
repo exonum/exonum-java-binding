@@ -21,8 +21,8 @@ use std::ptr;
 
 use exonum::crypto::Hash;
 use exonum::storage::proof_map_index::{
-    CheckedMapProof, MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues,
-    ProofPath, PROOF_MAP_KEY_SIZE,
+    MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
+    PROOF_MAP_KEY_SIZE,
 };
 use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 
@@ -207,13 +207,23 @@ fn convert_to_java_proof<'a>(
     proof: MapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
     let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
-    let missing_keys: JObject = create_java_missing_keys(&env, &proof)?;
 
-    // TODO: avoid checking proofs (ECR-1802) and reorder the surrounding operations
-    let checked_proof = proof.check().unwrap();
-    let map_entries: JObject = create_java_map_entries(&env, &checked_proof)?;
+    let native_entries: Vec<_> = proof.all_entries_unchecked().collect();
 
-    create_java_unchecked_map_proof(&env, proof_nodes, java_entries, missing_keys)
+    let mut missing_keys = Vec::with_capacity(native_entries.len());
+    let mut existing_entries = Vec::with_capacity(native_entries.len());
+
+    for entry in &native_entries {
+        match entry {
+            (key, Some(value)) => existing_entries.push((*key, *value)),
+            (key, None) => missing_keys.push(*key),
+        }
+    }
+
+    let missing_keys: JObject = create_java_missing_keys(&env, &missing_keys)?;
+    let map_entries: JObject = create_java_map_entries(&env, &existing_entries)?;
+
+    create_java_unchecked_map_proof(&env, proof_nodes, map_entries, missing_keys)
 }
 
 fn create_java_proof_nodes<'a>(
@@ -256,9 +266,8 @@ fn create_java_proof_node<'a>(
 
 fn create_java_map_entries<'a>(
     env: &'a JNIEnv,
-    checked_proof: &CheckedMapProof<Key, Value>,
+    entries: &[(&Key, &Value)],
 ) -> JniResult<JObject<'a>> {
-    let entries: Vec<(&Key, &Value)> = checked_proof.entries().collect();
     let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
     for (i, (key, value)) in entries.iter().enumerate() {
         // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
@@ -285,11 +294,7 @@ fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniRe
     .l()
 }
 
-fn create_java_missing_keys<'a>(
-    env: &'a JNIEnv,
-    map_proof: &MapProof<Key, Value>,
-) -> JniResult<JObject<'a>> {
-    let missing_keys = map_proof.missing_keys_unchecked().collect::<Vec<_>>();
+fn create_java_missing_keys<'a>(env: &'a JNIEnv, missing_keys: &[&Key]) -> JniResult<JObject<'a>> {
     let java_missing_keys =
         env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
     for (i, key) in missing_keys.iter().enumerate() {
