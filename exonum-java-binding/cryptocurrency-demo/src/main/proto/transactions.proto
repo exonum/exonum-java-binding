@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.cryptocurrency.transactions";
+option java_outer_classname = "TxMessageProtos";
+
+message TransferTx {
+  int64 seed = 1;
+  bytes toWallet = 2;
+  int64 sum = 3;
+}
+
+message CreateWalletTx {
+  int64 initialBalance = 1;
+}

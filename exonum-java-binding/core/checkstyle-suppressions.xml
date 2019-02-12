@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <!-- fixme: remove both below when https://github.com/checkstyle/checkstyle/issues/5088 is resolved -->
+    <suppress files="Node.*\.java" checks="JavadocMethod"/>
+    <suppress files="Transaction\.java" checks="JavadocMethod"/>
+
+    <!-- Allow multiple classes per file in tests -->
+    <suppress files="test.+Test.java" checks="OneTopLevelClass"/>
+
+    <!-- Do not require Javadoc for native adapters -->
+    <suppress files="service/adapters.+.java" checks="JavadocMethod"/>
+
+    <!-- Allow `aBlock` name -->
+    <suppress files="BlockchainIntegrationTest\.java" checks="MethodName"/>
+</suppressions>

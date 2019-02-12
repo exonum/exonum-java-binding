@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.qaservice.transactions";
+option java_outer_classname = "TxMessageProtos";
+
+message CreateCounterTxBody {
+  string name = 1;
+}
+
+message IncrementCounterTxBody {
+  uint64 seed = 1;
+  bytes counterId = 2;
+}
+
+message ThrowingTxBody {
+  uint64 seed = 1;
+}
+
+message ErrorTxBody {
+  uint64 seed = 1;
+  // Effectively will always be stored as a single byte,
+  // since it is in range [0; 127].
+  int32 errorCode = 2;
+  string errorDescription = 3;
+}

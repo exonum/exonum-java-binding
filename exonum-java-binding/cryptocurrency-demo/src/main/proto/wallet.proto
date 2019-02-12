@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.cryptocurrency";
+option java_outer_classname = "WalletProtos";
+
+message Wallet {
+    int64 balance = 1;
+}
