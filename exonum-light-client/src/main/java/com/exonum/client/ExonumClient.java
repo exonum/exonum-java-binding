@@ -17,6 +17,8 @@
 
 package com.exonum.client;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import java.net.MalformedURLException;
@@ -24,16 +26,17 @@ import java.net.URL;
 import okhttp3.OkHttpClient;
 
 /**
- * Main class to start using Exonum Light client.
+ * Main interface for Exonum Light client.
  * Provides a convenient way for interaction with Exonum framework APIs.
- * It uses {@linkplain OkHttpClient} internally for REST API communication with Exonum node.
+ * <p/><i>Implementations of that interface are required to be thread-safe</i>.
  **/
 public interface ExonumClient {
 
   /**
    * Submits the transaction message to an Exonum node.
    * @return transaction message hash
-   * @throws RuntimeException if network request fails
+   * @throws RuntimeException if the client is unable to submit the transaction
+   *        (e.g., in case of connectivity problems)
    */
   HashCode submitTransaction(TransactionMessage tx);
 
@@ -57,7 +60,7 @@ public interface ExonumClient {
      * Sets Exonum host url.
      */
     public Builder setExonumHost(URL exonumHost) {
-      this.exonumHost = exonumHost;
+      this.exonumHost = checkNotNull(exonumHost);
       return this;
     }
 
@@ -66,8 +69,9 @@ public interface ExonumClient {
      * @throws IllegalArgumentException if the url is malformed
      */
     public Builder setExonumHost(String exonumHost) {
+      String host = checkNotNull(exonumHost);
       try {
-        return setExonumHost(new URL(exonumHost));
+        return setExonumHost(new URL(host));
       } catch (MalformedURLException e) {
         throw new IllegalArgumentException(e);
       }
@@ -80,7 +84,7 @@ public interface ExonumClient {
      * or request/response logging.
      */
     public Builder setHttpClient(OkHttpClient client) {
-      this.httpClient = client;
+      this.httpClient = checkNotNull(client);
       return this;
     }
 
@@ -90,7 +94,7 @@ public interface ExonumClient {
      */
     public ExonumClient build() {
       checkRequiredFieldsSet();
-      return new ExonumClientImpl(httpClient, exonumHost);
+      return new ExonumHttpClient(httpClient, exonumHost);
     }
 
     private void checkRequiredFieldsSet() {

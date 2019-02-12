@@ -17,50 +17,50 @@
 
 package com.exonum.client;
 
+import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.client.ExonumHttpClient.HEX_ENCODER;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ExonumClientImplTest {
-  private static final MockWebServer SERVER = new MockWebServer();
-
+class ExonumHttpClientTest {
+  private MockWebServer server;
   private ExonumClient exonumClient;
 
-  @BeforeAll
-  static void start() throws IOException {
-    SERVER.start();
-  }
-
-  @AfterAll
-  static void shutdown() throws IOException {
-    SERVER.shutdown();
-  }
-
   @BeforeEach
-  void setup() {
+  void start() throws IOException {
+    server = new MockWebServer();
+    server.start();
+
     exonumClient = ExonumClient.newBuilder()
-        .setExonumHost(SERVER.url("/").url())
+        .setExonumHost(server.url("/").url())
         .build();
   }
 
+  @AfterEach
+  void shutdown() throws IOException {
+    server.shutdown();
+  }
+
   @Test
-  void submitTransaction() throws InterruptedException {
+  void submitTransactionTest() throws InterruptedException {
     String hash = "f128c720e04b8243";
     String body = "{\"tx_hash\":\"" + hash + "\"}";
-    SERVER.enqueue(new MockResponse().setBody(body));
+    server.enqueue(new MockResponse().setBody(body));
 
     TransactionMessage txMessage = mock(TransactionMessage.class);
     when(txMessage.toBytes()).thenReturn(new byte[]{0x00});
@@ -68,9 +68,31 @@ class ExonumClientImplTest {
     HashCode hashCode = exonumClient.submitTransaction(txMessage);
     assertThat(hashCode, is(HashCode.fromString(hash)));
 
-    RecordedRequest recordedRequest = SERVER.takeRequest();
+    RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("POST"));
     assertThat(recordedRequest.getPath(), is(SUBMIT_TRANSACTION));
+  }
+
+  @Test
+  void encodingTransactionMessageTest() throws InterruptedException {
+    KeyPair keys = ed25519().generateKeyPair();
+    TransactionMessage txMessage = TransactionMessage.builder()
+        .serviceId((short) 1)
+        .transactionId((short) 2)
+        .payload(new byte[]{0x00, 0x01, 0x02})
+        .sign(keys, ed25519());
+    server.enqueue(new MockResponse().setBody("{\"tx_hash\":\"abcd\"}"));
+
+    exonumClient.submitTransaction(txMessage);
+
+    RecordedRequest recordedRequest = server.takeRequest();
+    String json = recordedRequest.getBody().readUtf8();
+    SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
+    String encodedTxMessage = actualRequest.body;
+    byte[] actualMessageBytes = HEX_ENCODER.decode(encodedTxMessage);
+    TransactionMessage actualTxMessage = TransactionMessage.fromBytes(actualMessageBytes);
+
+    assertThat(actualTxMessage, is(txMessage));
   }
 
 }

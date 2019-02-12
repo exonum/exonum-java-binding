@@ -22,6 +22,7 @@ import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,26 +33,28 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-class ExonumClientImpl implements ExonumClient {
-  private static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
+/**
+ * Implementation of the {@linkplain ExonumClient} which works over HTTP REST API.
+ * It uses {@linkplain OkHttpClient} internally for REST API communication with Exonum node.
+ */
+class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
+  @VisibleForTesting
+  static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
 
   private final OkHttpClient httpClient;
   private final URL exonumHost;
 
-  private URL submitTxUrl;
-
-  ExonumClientImpl(OkHttpClient httpClient, URL exonumHost) {
+  ExonumHttpClient(OkHttpClient httpClient, URL exonumHost) {
     this.httpClient = httpClient;
     this.exonumHost = exonumHost;
-    createUrls();
   }
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
     String msg = toHex(transactionMessage.toBytes());
 
-    Request request = createRequest(submitTxUrl, new SubmitTxRequest(msg));
+    Request request = createRequest(toFullUrl(SUBMIT_TRANSACTION), new SubmitTxRequest(msg));
     SubmitTxResponse result = blockingExecuteWithResponse(request, SubmitTxResponse.class);
 
     return result.hash;
@@ -70,6 +73,14 @@ class ExonumClientImpl implements ExonumClient {
         .build();
   }
 
+  private URL toFullUrl(String relativeUrl) {
+    try {
+      return new URL(exonumHost, relativeUrl);
+    } catch (MalformedURLException e) {
+      throw new AssertionError("Should never happen", e);
+    }
+  }
+
   private <T> T blockingExecuteWithResponse(Request request, Class<T> responseObject) {
     try (Response response = httpClient.newCall(request).execute()) {
       if (!response.isSuccessful()) {
@@ -80,14 +91,6 @@ class ExonumClientImpl implements ExonumClient {
       return json().fromJson(responseJson, responseObject);
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  private void createUrls() {
-    try {
-      this.submitTxUrl = new URL(exonumHost, SUBMIT_TRANSACTION);
-    } catch (MalformedURLException e) {
-      throw new AssertionError("Should never happen", e);
     }
   }
 
