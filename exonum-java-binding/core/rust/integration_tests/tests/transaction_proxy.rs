@@ -31,8 +31,8 @@ use integration_tests::{
 use java_bindings::{
     exonum::{
         blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
-        crypto::{Hash, PublicKey},
-        messages::RawTransaction,
+        crypto::{self, Hash, PublicKey},
+        messages::{Message, RawTransaction},
         storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
     jni::JavaVM,
@@ -259,12 +259,7 @@ where
 
 fn create_transaction_context(fork: &mut Fork, raw: RawTransaction) -> TransactionContext {
     let (service_id, service_transaction) = (raw.service_id(), raw.service_transaction());
-    let (pk, sk) = java_bindings::exonum::crypto::gen_keypair();
-    let signed_transaction = java_bindings::exonum::messages::Message::sign_transaction(
-        service_transaction,
-        service_id,
-        pk,
-        &sk,
-    );
+    let (pk, sk) = crypto::gen_keypair();
+    let signed_transaction = Message::sign_transaction(service_transaction, service_id, pk, &sk);
     TransactionContext::new(fork, &signed_transaction)
 }
