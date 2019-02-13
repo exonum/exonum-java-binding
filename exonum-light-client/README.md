@@ -3,25 +3,15 @@ Java client for [Exonum blockchain][exonum].
 
 ## Overview
 Exonum light client is Java library for working with Exonum blockchain
-from the client side and can be easily integrated to existing 
+from the client side and can be easily integrated to an existing 
 Java application.  
-Also, Exonum light client provides an access to [common utils][ejb-common]
+Also, Exonum light client provides access to [common utils][ejb-common]
 toolkit which contains some helpful functions for _hashing_,
-_serialization_ ect. 
+_cryptography_, _serialization_ etc. 
 
 ## Prerequisites
 - Java 8 or above is required for using this client
 - Maven 3.5 or above (only if you need to build it locally)
-
-## How to build
-To build the client locally, clone the repository, and
-run next command from the project's root 
-i.e. _exonum-java-binding_ directory:
-```bash
-mvn install -pl exonum-light-client -am
-```
-It'll build Exonum Light client within the `exonum-java-binding-common` artifact 
-which is required for the client.
 
 ## QuickStart
 If you are using Maven, add this to your _pom.xml_ file
@@ -60,7 +50,25 @@ The next example shows how to use a custom configuration of the _http-client_:
         .build();
 
 ```
-
+### Creating transaction message
+The following example shows how to create the transaction message.
+In addition please read about [transaction message structure][exonum-tx-message].
+```java
+    TransactionMessage txMessage = TransactionMessage.builder()
+        .serviceId((short) 1)
+        .transactionId((short) 2)
+        .payload(data)
+        .sign(keys, CryptoFunctions.ed25519());
+```
+* `data` is a bytes array which contains transactional information.
+It can be any object which should be serialized to bytes in advance.
+We recommend to use [Google Protobuf][protobuf] for serialization,
+but it is always an option of your choice.
+Also, _common_ package provides [Standard Serializers][standard-serializers]
+utility class which can be helpful for serialization.  
+* `keys` is a key pair of private and public keys which is used for message signature.  
+* `ed25519` is the cryptographic function for signing.
+ 
 ### Sending transaction
 To send the transaction just call a `submitTransaction`.  
 Make notice that it works in a blocking way i.e. your thread will be 
@@ -73,8 +81,22 @@ uncommitted transactions and dosn't wait for the transaction
 acceptance to a new block.* 
  
 
+## How to build
+To build the client locally, clone the repository, and
+run next command from the project's root 
+i.e. _exonum-java-binding_ directory:
+```bash
+source exonum-java-binding/tests_profile
+mvn install -pl exonum-light-client -am
+```
+It'll build Exonum Light client and the `exonum-java-binding-common` artifact 
+which is required for the client.
+
 ## License
 Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 
 [exonum]: https://github.com/exonum/exonum
 [ejb-common]: https://exonum.com/doc/api/java-binding-common/0.4/
+[exonum-tx-message]: https://exonum.com/doc/version/latest/architecture/serialization/#message-serialization
+[protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
+[standard-serializers]: ../exonum-java-binding/common/src/main/java/com/exonum/binding/common/serialization/StandardSerializers.java
