@@ -127,7 +127,7 @@ impl HackyExecutor {
     const LIMIT_EXHAUSTED: jint = 0;
 
     /// Creates `HackyExecutor`.
-    #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
+    #[allow(clippy::mutex_atomic)]
     pub fn new(vm: Arc<JavaVM>, attach_limit: usize) -> Self {
         let num_attached_threads = Arc::new(Mutex::new(0));
         HackyExecutor {

@@ -34,7 +34,7 @@ then
 #    cargo +${RUST_STABLE_VERSION} clean -p java_bindings
 #    cargo +${RUST_STABLE_VERSION} clippy --all --tests --all-features -- -D warnings
 # TODO: Commented until ECR-2755 is fixed
-#    cargo clippy --all --tests --all-features -- -D warnings
+    cargo clippy --all --tests --all-features -- -D warnings
 
     # Run audit of vulnerable dependencies.
     # TODO: enable when vulnerabilities will be fixed
