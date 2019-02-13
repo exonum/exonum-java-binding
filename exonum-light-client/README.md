@@ -9,6 +9,14 @@ Also, Exonum light client provides access to [common utils][ejb-common]
 toolkit which contains some helpful functions for _hashing_,
 _cryptography_, _serialization_ etc. 
 
+## Compatibility
+The following table shows versions compatibility:  
+
+| Light Client | Exonum | Exonum Java |
+|--------------|--------|-------------|
+| 0.1          | 0.10.+ | 0.4         |
+
+
 ## Prerequisites
 - Java 8 or above is required for using this client
 - Maven 3.5 or above (only if you need to build it locally)
