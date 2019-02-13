@@ -392,6 +392,7 @@
           <configuration>
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
+            <additionalJOption>--no-module-directories</additionalJOption>
           </configuration>
           <executions>
             <execution>
