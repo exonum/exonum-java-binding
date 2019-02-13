@@ -53,8 +53,6 @@ matrix:
     # Flaky service_runtime IT: ECR-1734
     - os: linux
       jdk: openjdk11
-    # Broken everything in Rust: ECR-2750
-#    - env: CHECK_RUST=true
   # Report the result of the build as it is ready.
   fast_finish: true
 
