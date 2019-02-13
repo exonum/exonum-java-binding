@@ -159,7 +159,7 @@ final class RelationshipTester<T> {
   }
 
   private Item<T> getItem(int groupNumber, int itemNumber) {
-    return new Item<T>(groups.get(groupNumber).get(itemNumber), groupNumber, itemNumber);
+    return new Item<>(groups.get(groupNumber).get(itemNumber), groupNumber, itemNumber);
   }
 
   static final class Item<T> {

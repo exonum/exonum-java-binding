@@ -20,6 +20,7 @@ import com.exonum.binding.storage.database.Fork;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 /**
  * A list index proxy is a contiguous list of elements.
@@ -121,4 +122,17 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
    */
   @Override
   Iterator<T> iterator();
+
+  /**
+   * Returns a stream of elements in this list.
+   * The returned stream is <em>fail-fast</em> and <em>late-binding</em>;
+   * the stream can be used as long as the source list is valid.
+   *
+   * <p>Any destructive operation on the same {@link Fork} this list uses
+   * (but not necessarily on <em>this list</em>) will invalidate the corresponding
+   * spliterator.
+   *
+   * @throws IllegalStateException if this list is not valid
+   */
+  Stream<T> stream();
 }

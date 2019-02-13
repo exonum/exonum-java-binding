@@ -23,19 +23,21 @@ Be sure you installed necessary packages:
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
-- The [system dependencies](https://exonum.com/doc/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
-- [Rust compiler](https://rustup.rs/)
+- The [system dependencies](https://exonum.com/doc/version/latest/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
+- [Stable Rust](https://rustup.rs/).
 
 #### Install and run
 
 Build the project:
 
 ```sh
+$ source tests_profile
+
 $ mvn install
 
 $ cd exonum-java-binding-core/rust/ejb-app/
 
-$ cargo install --debug
+$ cargo build
 
 $ ./start_cryptocurrency_node.sh
 ```
@@ -71,7 +73,7 @@ $ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http
 Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
-- [Reference Documentation](https://exonum.com/doc/get-started/java-binding).
-- [Instructions][app-tutorial] explaining how to configure and run any Java service.  
+- [Reference Documentation](https://exonum.com/doc/version/latest/get-started/java-binding).
+- [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding-core/rust/ejb-app/TUTORIAL.md

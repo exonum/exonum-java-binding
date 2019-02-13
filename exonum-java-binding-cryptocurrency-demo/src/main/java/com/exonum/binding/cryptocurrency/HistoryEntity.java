@@ -26,15 +26,15 @@ public class HistoryEntity {
   private final PublicKey walletFrom;
   private final PublicKey walletTo;
   private final long amount;
-  private final HashCode transactionHash;
+  private final HashCode txMessageHash;
 
   private HistoryEntity(long seed, PublicKey walletFrom,
-      PublicKey walletTo, long amount, HashCode transactionHash) {
+      PublicKey walletTo, long amount, HashCode txMessageHash) {
     this.seed = seed;
     this.walletFrom = walletFrom;
     this.walletTo = walletTo;
     this.amount = amount;
-    this.transactionHash = transactionHash;
+    this.txMessageHash = txMessageHash;
   }
 
   public long getSeed() {
@@ -53,8 +53,8 @@ public class HistoryEntity {
     return amount;
   }
 
-  public HashCode getTransactionHash() {
-    return transactionHash;
+  public HashCode getTxMessageHash() {
+    return txMessageHash;
   }
 
   @Override
@@ -70,12 +70,12 @@ public class HistoryEntity {
         && amount == that.amount
         && Objects.equal(walletFrom, that.walletFrom)
         && Objects.equal(walletTo, that.walletTo)
-        && Objects.equal(transactionHash, that.transactionHash);
+        && Objects.equal(txMessageHash, that.txMessageHash);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(seed, walletFrom, walletTo, amount, transactionHash);
+    return Objects.hashCode(seed, walletFrom, walletTo, amount, txMessageHash);
   }
 
   @Override
@@ -85,8 +85,12 @@ public class HistoryEntity {
         .add("walletFrom", walletFrom)
         .add("walletTo", walletTo)
         .add("amount", amount)
-        .add("transactionHash", transactionHash)
+        .add("txMessageHash", txMessageHash)
         .toString();
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
   }
 
   public static final class Builder {
@@ -94,13 +98,9 @@ public class HistoryEntity {
     private PublicKey walletFrom;
     private PublicKey walletTo;
     private long amount;
-    private HashCode transactionHash;
+    private HashCode txMessageHash;
 
     private Builder() {
-    }
-
-    public static Builder newBuilder() {
-      return new Builder();
     }
 
     public Builder setSeed(long seed) {
@@ -123,13 +123,13 @@ public class HistoryEntity {
       return this;
     }
 
-    public Builder setTransactionHash(HashCode transactionHash) {
-      this.transactionHash = transactionHash;
+    public Builder setTxMessageHash(HashCode txMessageHash) {
+      this.txMessageHash = txMessageHash;
       return this;
     }
 
     public HistoryEntity build() {
-      return new HistoryEntity(seed, walletFrom, walletTo, amount, transactionHash);
+      return new HistoryEntity(seed, walletFrom, walletTo, amount, txMessageHash);
     }
   }
 }

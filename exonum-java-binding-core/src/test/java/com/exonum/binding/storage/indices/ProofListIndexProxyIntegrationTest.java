@@ -21,31 +21,26 @@ import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
-public class ProofListIndexProxyIntegrationTest {
+class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   /**
    * An empty list root hash: an all-zero hash code.
@@ -53,36 +48,27 @@ public class ProofListIndexProxyIntegrationTest {
   private static final HashCode EMPTY_LIST_ROOT_HASH =
       HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
 
-  static {
-    LibraryLoader.load();
-  }
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  private Database database;
-
   private static final String LIST_NAME = "test_proof_list";
 
-  @Before
-  public void setUp() {
-    database = MemoryDb.newInstance();
+  @Override
+  ProofListIndexProxy<String> create(String name, View view) {
+    return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
-  @After
-  public void tearDown() {
-    database.close();
+  @Override
+  Object getAnyElement(AbstractListIndexProxy<String> index) {
+    return index.get(0L);
   }
 
   @Test
-  public void getRootHashEmptyList() {
+  void getRootHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
       assertThat(list.getRootHash(), equalTo(EMPTY_LIST_ROOT_HASH));
     });
   }
 
   @Test
-  public void getRootHashSingletonList() {
+  void getRootHashSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -93,15 +79,13 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getProofFailsIfEmptyList() {
-    runTestWithView(database::createSnapshot, (list) -> {
-      expectedException.expect(IndexOutOfBoundsException.class);
-      list.getProof(0);
-    });
+  void getProofFailsIfEmptyList() {
+    runTestWithView(database::createSnapshot,
+        (list) -> assertThrows(IndexOutOfBoundsException.class, () -> list.getProof(0)));
   }
 
   @Test
-  public void getProofSingletonList() {
+  void getProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -110,7 +94,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofSingletonList() {
+  void getRangeProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -119,7 +103,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getProofMultipleItemList() {
+  void getProofMultipleItemList() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
 
@@ -132,7 +116,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofMultipleItemList_FullRange() {
+  void getRangeProofMultipleItemList_FullRange() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -142,7 +126,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofMultipleItemList_1stHalf() {
+  void getRangeProofMultipleItemList_1stHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -154,7 +138,7 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   @Test
-  public void getRangeProofMultipleItemList_2ndHalf() {
+  void getRangeProofMultipleItemList_2ndHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -166,12 +150,12 @@ public class ProofListIndexProxyIntegrationTest {
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                               Consumer<ProofListIndexProxy<String>> listTest) {
+      Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                               BiConsumer<View, ProofListIndexProxy<String>> listTest) {
+      BiConsumer<View, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,

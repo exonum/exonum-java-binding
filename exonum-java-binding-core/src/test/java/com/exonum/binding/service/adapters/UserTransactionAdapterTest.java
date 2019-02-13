@@ -16,8 +16,11 @@
 
 package com.exonum.binding.service.adapters;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertTrue;
+import static com.exonum.binding.test.Bytes.randomBytes;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -28,72 +31,68 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class UserTransactionAdapterTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class UserTransactionAdapterTest {
+  private static final long FORK_HANDLE = 0x0B;
+  private static final byte[] TX_HASH = randomBytes(10);
+  private static final byte[] AUTHOR_PK = randomBytes(10);
 
   @Mock
   private Transaction transaction;
-
   @Mock
   private ViewFactory viewFactory;
+  @Mock
+  private Fork fork;
 
   @InjectMocks
   private UserTransactionAdapter transactionAdapter;
 
   @Test
-  public void execute_closesCleanerAfterExecution() throws TransactionExecutionException {
-    long forkHandle = 0x0B;
-    transactionAdapter.execute(forkHandle);
+  void execute_closesCleanerAfterExecution() throws TransactionExecutionException {
+    when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
+
+    transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK);
 
     ArgumentCaptor<Cleaner> ac = ArgumentCaptor.forClass(Cleaner.class);
-    verify(viewFactory).createFork(eq(forkHandle), ac.capture());
+    verify(viewFactory).createFork(eq(FORK_HANDLE), ac.capture());
 
     Cleaner cleaner = ac.getValue();
     assertTrue(cleaner.isClosed());
   }
 
   @Test
-  public void execute_rethrowsExecutionException() throws TransactionExecutionException {
-    long forkHandle = 0x0A;
-    byte errorCode = 1;
-    TransactionExecutionException txError = new TransactionExecutionException(errorCode);
+  void execute_rethrowsExecutionException() throws TransactionExecutionException {
+    when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
 
-    Fork fork = setupViewFactory(forkHandle);
-    doThrow(txError).when(transaction).execute(eq(fork));
+    TransactionExecutionException txError = mock(TransactionExecutionException.class);
 
-    expectedException.expect(equalTo(txError));
-    transactionAdapter.execute(forkHandle);
+    doThrow(txError).when(transaction).execute(any(TransactionContext.class));
+
+    TransactionExecutionException thrown = assertThrows(TransactionExecutionException.class,
+        () -> transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK));
+    assertThat(thrown, is(txError));
   }
 
   @Test
-  public void execute_rethrowsRuntimeExceptions() throws TransactionExecutionException {
-    long forkHandle = 0x0A;
-    RuntimeException unexpectedTxError = new NullPointerException("foo");
+  void execute_rethrowsRuntimeExceptions() throws TransactionExecutionException {
+    when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
 
-    Fork fork = setupViewFactory(forkHandle);
-    doThrow(unexpectedTxError).when(transaction).execute(eq(fork));
+    RuntimeException unexpectedTxError = mock(RuntimeException.class);
 
-    expectedException.expect(equalTo(unexpectedTxError));
-    transactionAdapter.execute(forkHandle);
+    doThrow(unexpectedTxError).when(transaction).execute(any(TransactionContext.class));
+
+    RuntimeException thrown = assertThrows(RuntimeException.class,
+        () -> transactionAdapter.execute(FORK_HANDLE, TX_HASH, AUTHOR_PK));
+    assertThat(thrown, is(unexpectedTxError));
   }
 
-  private Fork setupViewFactory(long forkHandle) {
-    Fork fork = mock(Fork.class);
-    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
-    return fork;
-  }
 }

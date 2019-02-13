@@ -20,12 +20,12 @@ import static com.exonum.binding.storage.indices.MapTestEntry.absentEntry;
 import static com.exonum.binding.storage.indices.MapTestEntry.presentEntry;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.map.CheckedFlatMapProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.MapEntry;
 import com.exonum.binding.common.proofs.map.MapProofStatus;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
@@ -33,9 +33,9 @@ import java.util.Collections;
 import java.util.List;
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CheckedMapProofMatcherTest {
+class CheckedMapProofMatcherTest {
 
   private static final HashCode TEST_KEY1 = HashCode.fromString("ab");
   private static final HashCode TEST_KEY2 = HashCode.fromString("cd");
@@ -45,7 +45,7 @@ public class CheckedMapProofMatcherTest {
   private static final HashCode ROOT_HASH = HashCode.fromString("123456ef");
 
   @Test
-  public void matchesInvalidProof() {
+  void matchesInvalidProof() {
     CheckedMapProofMatcher matcher =
         CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
@@ -56,11 +56,11 @@ public class CheckedMapProofMatcherTest {
   }
 
   @Test
-  public void matchesValidProof() {
+  void matchesValidProof() {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
-    MapEntry entry =
-        new MapEntry(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
+    MapEntry<ByteString, ByteString> entry =
+        MapEntry.valueOf(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         ROOT_HASH,
@@ -71,7 +71,7 @@ public class CheckedMapProofMatcherTest {
   }
 
   @Test
-  public void describeMismatchSafelyCorrectProof() {
+  void describeMismatchSafelyCorrectProof() {
     HashCode presentKey = HashCode.fromString("ab");
     HashCode absentKey = HashCode.fromString("cd");
     String expectedValue = "different value";
@@ -80,7 +80,8 @@ public class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
     ByteString actualValue = ByteString.copyFromUtf8("hello");
-    MapEntry entry = new MapEntry(toByteString(presentKey), actualValue);
+    MapEntry<ByteString, ByteString> entry = MapEntry.valueOf(toByteString(presentKey),
+        actualValue);
     HashCode rootHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
         rootHash,
@@ -95,12 +96,11 @@ public class CheckedMapProofMatcherTest {
   }
 
   @Test
-  public void describeMismatchSafelyInvalidProof() {
+  void describeMismatchSafelyInvalidProof() {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
     CheckedMapProof proof = CheckedFlatMapProof.invalid(
         MapProofStatus.DUPLICATE_PATH);
-
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);

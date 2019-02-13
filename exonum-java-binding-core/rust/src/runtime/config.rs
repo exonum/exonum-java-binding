@@ -1,8 +1,26 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use std::fmt;
 
 /// JavaServiceRuntime configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// JVM configuration.
+    pub jvm_config: JvmConfig,
     /// Private part of the EJB configuration parameters.
     pub private_config: PrivateConfig,
     /// Public part of the EJB configuration parameters.
@@ -16,25 +34,39 @@ pub struct Config {
 pub struct InternalConfig {
     /// EJB system classpath.
     pub system_class_path: String,
+    /// EJB service classpath.
+    pub service_class_path: String,
     /// EJB library path.
     pub system_lib_path: Option<String>,
+    // Path to `log4j` configuration file.
+    pub log_config_path: String,
 }
 
 /// Private EJB configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PrivateConfig {
-    /// Additional parameters for JVM.
-    ///
-    /// Passed directly to JVM while initializing EJB runtime.
-    /// Parameters must not have dash at the beginning.
-    /// Some parameters are forbidden for setting up by user.
-    pub user_parameters: Vec<String>,
     /// Java service classpath.
     pub service_class_path: String,
     /// Path to `log4j` configuration file.
     pub log_config_path: String,
     /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
     pub port: i32,
+}
+
+/// JVM configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JvmConfig {
+    /// Additional parameters for JVM.
+    ///
+    /// Passed directly to JVM while initializing EJB runtime.
+    /// Parameters must not have dash at the beginning.
+    /// Some parameters are forbidden for setting up by user.
+    /// Parameters that are prepended to the rest.
+    pub args_prepend: Vec<String>,
+    /// Parameters that get appended to the rest.
+    pub args_append: Vec<String>,
+    /// Socket address for JVM debugging
+    pub jvm_debug_socket: Option<String>,
 }
 
 /// Public EJB configuration.
@@ -106,14 +138,14 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Trying to specify JVM parameter")]
-    fn class_path() {
-        validate_and_convert("Djava.class.path=target").unwrap();
+    fn library_path() {
+        validate_and_convert("Djava.library.path=.").unwrap();
     }
 
     #[test]
     #[should_panic(expected = "Trying to specify JVM parameter")]
-    fn library_path() {
-        validate_and_convert("Djava.library.path=some-dir").unwrap();
+    fn class_path() {
+        validate_and_convert("Djava.class.path=target").unwrap();
     }
 
     #[test]

@@ -16,23 +16,21 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.QaTransactionTemplate.newQaTransactionBuilder;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.qaservice.QaSchema;
+import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
-import com.google.common.annotations.VisibleForTesting;
+import com.exonum.binding.transaction.TransactionContext;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -42,6 +40,8 @@ import java.util.Objects;
 public final class IncrementCounterTx implements Transaction {
 
   private static final short ID = QaTransaction.INCREMENT_COUNTER.id();
+  private static final Serializer<IncrementCounterTxBody> PROTO_SERIALIZER =
+      StandardSerializers.protobuf(IncrementCounterTxBody.class);
 
   private final long seed;
   private final HashCode counterId;
@@ -53,19 +53,17 @@ public final class IncrementCounterTx implements Transaction {
    * @param counterId counter id, a hash of the counter name
    */
   public IncrementCounterTx(long seed, HashCode counterId) {
-    checkArgument(counterId.bits() == Hashing.DEFAULT_HASH_SIZE_BITS);
+    int size = counterId.bits();
+    checkArgument(size == DEFAULT_HASH_SIZE_BITS,
+        "Counter [%s] has %s bits size but required size is %s",
+        counterId, size, DEFAULT_HASH_SIZE_BITS);
     this.seed = seed;
     this.counterId = counterId;
   }
 
   @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void execute(Fork view) {
-    QaSchema schema = new QaSchema(view);
+  public void execute(TransactionContext context) {
+    QaSchema schema = new QaSchema(context.getFork());
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
     // Increment the counter if there is such.
     if (counters.containsKey(counterId)) {
@@ -76,12 +74,11 @@ public final class IncrementCounterTx implements Transaction {
 
   @Override
   public String info() {
-    return new QaTransactionGson().toJson(ID, this);
+    return QaTransactionJson.toJson(ID, this);
   }
 
-  @Override
-  public BinaryMessage getMessage() {
-    return converter().toMessage(this);
+  public RawTransaction toRawTransaction() {
+    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -102,53 +99,42 @@ public final class IncrementCounterTx implements Transaction {
     return Objects.hash(seed, counterId);
   }
 
-  static TransactionMessageConverter<IncrementCounterTx> converter() {
-    return MessageConverter.INSTANCE;
+  public static BiDirectionTransactionConverter<IncrementCounterTx> converter() {
+    return Converter.INSTANCE;
   }
 
-  private enum MessageConverter implements TransactionMessageConverter<IncrementCounterTx> {
+  private enum Converter implements BiDirectionTransactionConverter<IncrementCounterTx> {
     INSTANCE;
 
     @Override
-    public IncrementCounterTx fromMessage(Message message) {
-      checkMessage(message);
+    public IncrementCounterTx fromRawTransaction(RawTransaction rawTransaction) {
+      checkMessage(rawTransaction);
 
-      // Unpack the message.
-      ByteBuffer rawBody = message.getBody();
-      try {
-        IncrementCounterTxBody body = IncrementCounterTxBody.parseFrom(rawBody);
-        long seed = body.getSeed();
-        byte[] rawCounterId = body.getCounterId().toByteArray();
-        HashCode counterId = HashCode.fromBytes(rawCounterId);
+      IncrementCounterTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+      long seed = body.getSeed();
+      byte[] rawCounterId = body.getCounterId().toByteArray();
+      HashCode counterId = HashCode.fromBytes(rawCounterId);
 
-        return new IncrementCounterTx(seed, counterId);
-      } catch (InvalidProtocolBufferException e) {
-        throw new IllegalArgumentException(e);
-      }
+      return new IncrementCounterTx(seed, counterId);
     }
 
     @Override
-    public BinaryMessage toMessage(IncrementCounterTx transaction) {
-      return newQaTransactionBuilder(ID)
-          .setBody(serializeBody(transaction))
-          .buildRaw();
+    public RawTransaction toRawTransaction(IncrementCounterTx transaction) {
+      byte[] payload = PROTO_SERIALIZER.toBytes(IncrementCounterTxBody.newBuilder()
+          .setSeed(transaction.seed)
+          .setCounterId(ByteString.copyFrom(transaction.counterId.asBytes()))
+          .build());
+
+      return RawTransaction.newBuilder()
+          .serviceId(QaService.ID)
+          .transactionId(ID)
+          .payload(payload)
+          .build();
     }
 
-    private void checkMessage(Message message) {
-      checkTransaction(message, ID);
+    private void checkMessage(RawTransaction rawTransaction) {
+      checkTransaction(rawTransaction, ID);
     }
   }
 
-  @VisibleForTesting
-  static byte[] serializeBody(IncrementCounterTx transaction) {
-    return IncrementCounterTxBody.newBuilder()
-        .setSeed(transaction.seed)
-        .setCounterId(toByteString(transaction.counterId))
-        .build()
-        .toByteArray();
-  }
-
-  private static ByteString toByteString(HashCode hash) {
-    return ByteString.copyFrom(hash.asBytes());
-  }
 }

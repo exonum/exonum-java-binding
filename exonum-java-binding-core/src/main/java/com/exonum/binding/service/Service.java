@@ -17,11 +17,11 @@
 package com.exonum.binding.service;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
@@ -51,7 +51,7 @@ public interface Service {
    * and is supposed to
    * <ul>
    *   <li>(a) initialize the database schema of this service, and</li>
-   *   <li>(b) provide an initial <a href="https://exonum.com/doc/architecture/services/#global-configuration">global configuration</a>
+   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/latest/architecture/services/#global-configuration">global configuration</a>
    * of the service.</li>
    * </ul>
    *
@@ -62,23 +62,22 @@ public interface Service {
    * @param fork a database fork to apply changes to. Not valid after this method returns
    * @return a global configuration of the service, or {@code Optional.empty()} if the service
    *         does not have any configuration parameters.
-   * @see <a href="https://exonum.com/doc/architecture/services/#genesis-block-handler">Genesis block handler</a>
+   * @see <a href="https://exonum.com/doc/version/latest/architecture/services/#genesis-block-handler">Genesis block handler</a>
    */
   default Optional<String> initialize(Fork fork) {
     return Optional.empty();
   }
 
   /**
-   * Converts an Exonum transaction message to an executable transaction of <em>this</em> service.
+   * Converts an Exonum raw transaction to an executable transaction of <em>this</em> service.
    *
-   * @param message a transaction message
-   *                (i.e., whose message type is a transaction and service id is set to the id of
-   *                this service)
+   * @param rawTransaction a raw transaction to be converted
    * @return an executable transaction
-   * @throws IllegalArgumentException if the message is not a transaction of this service
-   * @throws NullPointerException if message is null
+   * @throws IllegalArgumentException if the raw transaction is malformed
+   *         or it doesn't belong to this service
+   * @throws NullPointerException if raw transaction is null
    */
-  Transaction convertToTransaction(BinaryMessage message);
+  Transaction convertToTransaction(RawTransaction rawTransaction);
 
   /**
    * Returns a list of root hashes of all Merklized tables defined by this service,
@@ -118,4 +117,20 @@ public interface Service {
    * @param router a router responsible for handling requests to this service
    */
   void createPublicApiHandlers(Node node, Router router);
+
+  /**
+   * Handles read-only block commit event. This handler is an optional callback method which is
+   * invoked by the blockchain after each block commit. For example, a service can create one or
+   * more transactions if a specific condition has occurred.
+   *
+   * <p>This method is invoked synchronously from the thread that commits the block, therefore,
+   * implementations of this method must not perform any blocking or long-running operations.
+   *
+   * <p>Any exceptions in this method will be swallowed and will not affect the processing of
+   * transactions or blocks.
+   *
+   * @param event the read-only context allowing to access the blockchain state as of that committed
+   *     block
+   */
+  default void afterCommit(BlockCommittedEvent event) {}
 }

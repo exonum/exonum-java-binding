@@ -16,13 +16,17 @@
 
 package com.exonum.binding.service;
 
+import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.RawTransaction;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,7 +61,7 @@ public final class NodeFake implements Node {
 
   private final MemoryDb database;
 
-  private final byte[] publicKey;
+  private final PublicKey publicKey;
 
   /**
    * Creates a new node fake with the given database and an empty public key.
@@ -65,7 +69,7 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    */
   public NodeFake(MemoryDb database) {
-    this(database, new byte[0]);
+    this(database, PublicKey.fromBytes(new byte[PUBLIC_KEY_BYTES]));
   }
 
   /**
@@ -74,20 +78,21 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    * @param publicKey a public key of the node
    */
-  public NodeFake(MemoryDb database, byte[] publicKey) {
+  public NodeFake(MemoryDb database, PublicKey publicKey) {
     this.database = checkNotNull(database);
-    this.publicKey = publicKey.clone();
+    this.publicKey = publicKey;
   }
 
   /**
-   * A no-op.
+   * Returns a zero hash always, ignoring the transaction.
    *
    * @param transaction a transaction to send
    * @throws NullPointerException if the transaction is null
    */
   @Override
-  public void submitTransaction(Transaction transaction) {
+  public HashCode submitTransaction(RawTransaction transaction) {
     checkNotNull(transaction);
+    return HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
   }
 
   @Override
@@ -102,8 +107,8 @@ public final class NodeFake implements Node {
   }
 
   @Override
-  public byte[] getPublicKey() {
-    return publicKey.clone();
+  public PublicKey getPublicKey() {
+    return publicKey;
   }
 
   /**

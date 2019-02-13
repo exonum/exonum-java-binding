@@ -16,52 +16,40 @@
 
 package com.exonum.binding.service;
 
-import static com.exonum.binding.common.message.TemplateMessage.TEMPLATE_MESSAGE;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
-import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.transaction.AbstractTransaction;
+import com.exonum.binding.test.Bytes;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
-import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-public class ServiceBootstrapIntegrationTest {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+class ServiceBootstrapIntegrationTest {
 
   @Test
-  public void startService() {
+  void startService() {
     UserServiceAdapter service = ServiceBootstrap.startService(
         UserModule.class.getCanonicalName(), 0);
 
     // Check the service and its dependencies work as expected.
     assertThat(service.getId(), equalTo(UserService.ID));
     assertThat(service.getName(), equalTo(UserService.NAME));
-    BinaryMessage message = new Message.Builder()
-        .mergeFrom(TEMPLATE_MESSAGE)
-        .setServiceId(service.getId())
-        .buildRaw();
-    byte[] messageBytes = message.getSignedMessage().array();
+    short transactionId = 1;
+    byte[] payload = Bytes.bytes(0x00, 0x01);
 
-    UserTransactionAdapter transactionAdapter = service.convertTransaction(messageBytes);
-    assertTrue(transactionAdapter.isValid());
+    UserTransactionAdapter transactionAdapter = service.convertTransaction(
+        transactionId, payload);
 
+    assertNotNull(transactionAdapter);
     // Check that once startService returns, the native library is loaded. If it’s not,
     // we’ll get an UnsatisfiedLinkError.
     try (MemoryDb database = MemoryDb.newInstance()) {
@@ -70,13 +58,14 @@ public class ServiceBootstrapIntegrationTest {
   }
 
   @Test
-  public void startServiceNotModule() {
+  void startServiceNotModule() {
     String invalidModuleName = Object.class.getCanonicalName();
 
-    expectedException.expectMessage("class java.lang.Object is not a sub-class "
-        + "of com.google.inject.Module");
-    expectedException.expect(IllegalArgumentException.class);
-    ServiceBootstrap.startService(invalidModuleName, 0);
+    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        () -> ServiceBootstrap.startService(invalidModuleName, 0));
+    assertThat(thrown.getLocalizedMessage(),
+        containsString("class java.lang.Object is not a sub-class "
+            + "of com.google.inject.Module"));
   }
 }
 
@@ -88,18 +77,7 @@ class UserModule extends AbstractModule {
         .to(UserService.class);
 
     bind(TransactionConverter.class)
-        .toInstance((m) -> new AbstractTransaction(m) {
-
-          @Override
-          public boolean isValid() {
-            return true;
-          }
-
-          @Override
-          public void execute(Fork view) {
-            System.out.println("Transaction#execute");
-          }
-        });
+        .toInstance((m) -> (context) -> System.out.println("Transaction#execute"));
   }
 }
 
@@ -115,13 +93,7 @@ class UserService extends AbstractService {
 
   @Override
   protected Schema createDataSchema(View view) {
-    return new Schema() {
-
-      @Override
-      public List<HashCode> getStateHashes() {
-        return Collections.emptyList();
-      }
-    };
+    return Collections::emptyList;
   }
 
   @Override

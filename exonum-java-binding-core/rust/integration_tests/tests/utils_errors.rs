@@ -1,11 +1,27 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
 
-use integration_tests::vm::create_vm_for_tests;
+use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{
-    jni::{JNIEnv, JavaVM},
+    jni::{objects::JThrowable, JNIEnv, JavaVM},
     utils::{
         check_error_on_exception, get_and_clear_java_exception, get_class_name,
         get_exception_message, panic_on_exception,
@@ -22,7 +38,7 @@ const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 const CUSTOM_EXCEPTION_MESSAGE: &str = "Test exception message";
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = create_vm_for_tests();
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
     pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
 }
 
@@ -33,7 +49,8 @@ fn panic_on_exception_catch_exact_class() {
         .with_attached(|env: &JNIEnv| {
             panic_on_exception(env, throw(env, EXCEPTION_CLASS));
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -43,7 +60,8 @@ fn panic_on_exception_catch_subclass() {
         .with_attached(|env: &JNIEnv| {
             panic_on_exception(env, throw(env, ARITHMETIC_EXCEPTION_CLASS));
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -53,7 +71,8 @@ fn panic_on_exception_catch_jni_error() {
         .with_attached(|env: &JNIEnv| {
             panic_on_exception(env, make_jni_error());
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -62,7 +81,8 @@ fn panic_on_exception_dont_catch_good_result() {
         .with_attached(|env: &JNIEnv| {
             panic_on_exception(env, Ok(()));
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -80,7 +100,8 @@ fn check_error_on_exception_catch_java_error_subclass() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
             Ok(check_error_on_exception(env, throw(env, OOM_ERROR_CLASS)))
-        }).unwrap()
+        })
+        .unwrap()
         .unwrap();
 }
 
@@ -92,7 +113,8 @@ fn check_error_on_exception_catch_java_exception_exact_class() {
                 .map_err(|e| assert!(e.starts_with("Java exception: java.lang.Exception")))
                 .expect_err("An exception should lead to an error");
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -100,11 +122,13 @@ fn check_error_on_exception_catch_java_exception_subclass() {
     EXECUTOR
         .with_attached(|env: &JNIEnv| {
             check_error_on_exception(env, throw(env, ARITHMETIC_EXCEPTION_CLASS))
-                .map_err(|e| {
-                    assert!(e.starts_with("Java exception: java.lang.ArithmeticException"))
-                }).expect_err("An exception should lead to an error");
+                .map_err(
+                    |e| assert!(e.starts_with("Java exception: java.lang.ArithmeticException")),
+                )
+                .expect_err("An exception should lead to an error");
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -137,7 +161,8 @@ fn get_and_clear_java_exception_if_exception_occurred() {
             );
             assert!(!env.exception_check()?);
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -147,7 +172,8 @@ fn get_exception_message_without_message() {
             let exception = env.new_object(ARITHMETIC_EXCEPTION_CLASS, "()V", &[])?;
             assert_eq!(get_exception_message(env, exception)?, None);
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -162,7 +188,8 @@ fn get_exception_message_with_message() {
                 Some(CUSTOM_EXCEPTION_MESSAGE.to_string())
             );
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[test]
@@ -172,12 +199,13 @@ fn get_and_clear_java_exception_if_no_exception_occurred() {
         .with_attached(|env: &JNIEnv| {
             let _exception = get_and_clear_java_exception(env);
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 fn throw(env: &JNIEnv, exception_class: &str) -> JniResult<()> {
-    // FIXME throw an exception without a stub message https://jira.bf.local/browse/ECR-1998
-    env.throw((exception_class, ""))?;
+    let ex: JThrowable = env.new_object(exception_class, "()V", &[])?.into();
+    env.throw(ex)?;
     Err(JniErrorKind::JavaException.into())
 }
 

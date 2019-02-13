@@ -9,7 +9,7 @@ of the Contribution Guide.
 You also need a ready-to-use Exonum Java service. You can use 
 [cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
 implementing your own Exonum service 
-in the [user guide](https://exonum.com/doc/get-started/java-binding/).
+in the [user guide](https://exonum.com/doc/version/latest/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
 [cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding-cryptocurrency-demo
@@ -81,10 +81,34 @@ There are two specific parameters here:
   Default config provided with EJB App prints to STDOUT.
 - `--ejb-port` for port that your service will use for communication.
   Java Binding does not use Exonum Core API port directly.
-
+- `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
+ append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
+- `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
+ of `HOSTNAME:PORT`. For example, `localhost:8000`.
+ 
 ```$sh
 $ ejb-app run -d testnet/db -c testnet/node.toml \
     --ejb-log-config-path "log4j.xml" \
     --ejb-port 6000 \
     --public-api-address 127.0.0.1:3000
+```
+
+#### Debugging the JVM
+
+To enable remote debugging of Java code on a running Exonum node, 
+pass `--jvm-debug` option with a socket address to connect to
+from a debugger:
+
+```sh
+$ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
+    --ejb-log-config-path "log4j.xml" \
+    --ejb-port 6000 \
+    --jvm-debug localhost:8000
+```
+
+Now you can debug the service using any JDWP client, such as command line
+JDB or a debugger built in your IDE:
+
+```sh
+$ jdb -attach localhost:8000 -sourcepath /path/to/source
 ```

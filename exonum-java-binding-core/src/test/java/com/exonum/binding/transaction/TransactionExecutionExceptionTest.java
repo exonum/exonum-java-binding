@@ -17,14 +17,14 @@
 package com.exonum.binding.transaction;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TransactionExecutionExceptionTest {
+class TransactionExecutionExceptionTest {
 
   @Test
-  public void toStringNoDescription() {
+  void toStringNoDescription() {
     byte errorCode = 2;
     TransactionExecutionException e = new TransactionExecutionException(errorCode);
 
@@ -33,7 +33,7 @@ public class TransactionExecutionExceptionTest {
   }
 
   @Test
-  public void toStringWithDescription() {
+  void toStringWithDescription() {
     byte errorCode = 2;
     String description = "Foo";
     TransactionExecutionException e = new TransactionExecutionException(errorCode, description);

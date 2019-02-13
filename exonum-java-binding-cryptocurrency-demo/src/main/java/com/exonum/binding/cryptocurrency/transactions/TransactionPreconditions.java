@@ -18,9 +18,8 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.exonum.binding.transaction.RawTransaction;
 
 final class TransactionPreconditions {
 
@@ -30,31 +29,28 @@ final class TransactionPreconditions {
     throw new AssertionError("Non-instantiable");
   }
 
-  @CanIgnoreReturnValue
-  static <MessageT extends Message> MessageT checkTransaction(
-      MessageT message, short expectedTxId) {
-    checkServiceId(message);
-    checkTransactionId(message, expectedTxId);
-    return message;
+  static void checkTransaction(RawTransaction transaction, short expectedTxId) {
+    checkServiceId(transaction);
+    checkTransactionId(transaction, expectedTxId);
   }
 
-  static <MessageT extends Message> void checkServiceId(MessageT message) {
-    short serviceId = message.getServiceId();
+  private static void checkServiceId(RawTransaction transaction) {
+    short serviceId = transaction.getServiceId();
     checkArgument(
         serviceId == SERVICE_ID,
-        "This message (%s) does not belong to this service: wrong service ID (%s), must be %s",
-        message,
+        "Transaction (%s) does not belong to this service: wrong service ID (%s), must be %s",
+        transaction,
         serviceId,
         SERVICE_ID);
   }
 
-  static <MessageT extends Message> void checkTransactionId(MessageT message,
-                                                            short expectedTxId) {
-    short txId = message.getMessageType();
+  private static void checkTransactionId(
+      RawTransaction transaction, short expectedTxId) {
+    short txId = transaction.getTransactionId();
     checkArgument(
         txId == expectedTxId,
-        "This message (%s) has wrong transaction ID (%s), must be %s",
-        message,
+        "Transaction (%s) has wrong transaction ID (%s), must be %s",
+        transaction,
         txId,
         expectedTxId);
   }

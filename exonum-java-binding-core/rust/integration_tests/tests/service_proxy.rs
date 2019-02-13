@@ -1,25 +1,49 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
+extern crate exonum_testkit;
+#[macro_use]
+extern crate serde_derive;
 
-use integration_tests::mock::service::ServiceMockBuilder;
-use integration_tests::mock::transaction::{create_mock_transaction, INFO_VALUE};
-use integration_tests::test_service::{
-    create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE,
+use integration_tests::{
+    mock::{service::ServiceMockBuilder, transaction::create_empty_raw_transaction},
+    test_service::{create_test_map, create_test_service, INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE},
+    vm::create_vm_for_tests_with_fake_classes,
 };
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
-use java_bindings::exonum::blockchain::Service;
-use java_bindings::exonum::crypto::hash;
-use java_bindings::exonum::encoding::Error as MessageError;
-use java_bindings::exonum::messages::RawTransaction;
-use java_bindings::exonum::storage::{Database, MemoryDB};
-use java_bindings::jni::JavaVM;
-use java_bindings::serde_json::Value;
-use java_bindings::utils::any_to_string;
-use java_bindings::MainExecutor;
+
+use java_bindings::{
+    exonum::{
+        blockchain::Service,
+        crypto::hash,
+        storage::{Database, MemoryDB},
+    },
+    jni::{objects::JObject, JavaVM},
+    serde_json::{self, Value},
+    utils::{any_to_string, convert_to_string, unwrap_jni},
+    JniExecutor, MainExecutor,
+};
+
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
+
+use exonum_testkit::TestKitBuilder;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
@@ -27,6 +51,7 @@ lazy_static! {
 }
 
 const EXCEPTION_CLASS: &str = "java/lang/RuntimeException";
+const TEST_EXCEPTION_CLASS: &str = "com/exonum/binding/fakes/mocks/TestException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 const TEST_CONFIG_JSON: &str = r#""test config""#;
@@ -37,6 +62,8 @@ lazy_static! {
 }
 
 #[test]
+// TODO: reenable these tests after ECR-2789
+#[cfg_attr(target_os = "linux", ignore)]
 fn service_id() {
     let service_id: u16 = 24;
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -46,6 +73,7 @@ fn service_id() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn service_id_negative() {
     // Check that value is converted between rust `u16` and java `short` without loss.
     let service_id: u16 = -24_i16 as u16; // 65512;
@@ -56,6 +84,7 @@ fn service_id_negative() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn service_name() {
     let service_name: &str = "test_service";
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -65,6 +94,7 @@ fn service_name() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn state_hash() {
     let db = MemoryDB::new();
     let snapshot = db.snapshot();
@@ -76,24 +106,10 @@ fn state_hash() {
 }
 
 #[test]
-fn tx_from_raw() {
-    let (java_transaction, raw_message) = create_mock_transaction(&EXECUTOR, true);
-    let service = ServiceMockBuilder::new(EXECUTOR.clone())
-        .convert_transaction(java_transaction)
-        .build();
-    let executable_transaction = service
-        .tx_from_raw(raw_message)
-        .expect("Failed to convert transaction");
-    assert_eq!(
-        executable_transaction.serialize_field().unwrap(),
-        *INFO_VALUE
-    );
-}
-
-#[test]
+#[cfg_attr(target_os = "linux", ignore)]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn tx_from_raw_should_panic_if_java_error_occurred() {
-    let raw = RawTransaction::from_vec(vec![]);
+    let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(OOM_ERROR_CLASS)
         .build();
@@ -101,22 +117,22 @@ fn tx_from_raw_should_panic_if_java_error_occurred() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn tx_from_raw_should_return_err_if_java_exception_occurred() {
-    let raw = RawTransaction::from_vec(vec![]);
+    let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .convert_transaction_throwing(EXCEPTION_CLASS)
         .build();
     let err = service
         .tx_from_raw(raw)
         .expect_err("This transaction should be de-serialized with an error!");
-    if let MessageError::Basic(ref s) = err {
-        assert!(s.starts_with("Java exception: java.lang.RuntimeException"));
-    } else {
-        panic!("Unexpected error message {:#?}", err);
-    }
+    assert!(err
+        .to_string()
+        .starts_with("Java exception: java.lang.RuntimeException"));
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn initialize_config() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -130,6 +146,7 @@ fn initialize_config() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn initialize_config_null() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -143,6 +160,7 @@ fn initialize_config_null() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn initialize_config_parse_error() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -162,6 +180,7 @@ fn initialize_config_parse_error() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 #[should_panic(expected = "Java exception: java.lang.RuntimeException")]
 fn initialize_should_panic_if_java_exception_occurred() {
     let db = MemoryDB::new();
@@ -175,6 +194,7 @@ fn initialize_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
+#[cfg_attr(target_os = "linux", ignore)]
 fn service_can_modify_db_on_initialize() {
     let db = MemoryDB::new();
     let service = create_test_service(EXECUTOR.clone());
@@ -193,4 +213,91 @@ fn service_can_modify_db_on_initialize() {
         .get(&key)
         .expect("Failed to find the entry created in the test service");
     assert_eq!(INITIAL_ENTRY_VALUE, value);
+}
+
+#[test]
+#[cfg_attr(target_os = "linux", ignore)]
+#[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
+fn after_commit_throwing() {
+    let service = ServiceMockBuilder::new(EXECUTOR.clone())
+        .after_commit_throwing(TEST_EXCEPTION_CLASS)
+        .build();
+
+    // It turned out that it is MUCH easier to use testkit in order to trigger the after_commit()
+    // callback than calling it by hands providing manually constructed ServiceContext entity.
+    let mut testkit = TestKitBuilder::validator()
+        .with_service(service.clone())
+        .create();
+
+    testkit.create_block();
+}
+
+#[test]
+#[cfg_attr(target_os = "linux", ignore)]
+fn after_commit_validator() {
+    let (builder, interactor) =
+        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
+
+    let service = builder.build();
+    let mut testkit = TestKitBuilder::validator()
+        .with_service(service.clone())
+        .create();
+
+    testkit.create_block();
+    testkit.create_block();
+
+    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
+    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
+
+    assert_eq!(after_commit_args.len(), 2);
+
+    let item: &AfterCommitArgs = &after_commit_args[0];
+    assert_ne!(item.handle, 0);
+    assert_eq!(item.validator, 0);
+    assert_eq!(item.height, 1);
+
+    let item: &AfterCommitArgs = &after_commit_args[1];
+    assert_ne!(item.handle, 0);
+    assert_eq!(item.validator, 0);
+    assert_eq!(item.height, 2);
+}
+
+#[test]
+#[cfg_attr(target_os = "linux", ignore)]
+fn after_commit_auditor() {
+    let (builder, interactor) =
+        ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
+
+    let service = builder.build();
+    let mut testkit = TestKitBuilder::auditor()
+        .with_service(service.clone())
+        .create();
+
+    testkit.create_block();
+
+    let result = get_mock_interaction_result(&EXECUTOR, interactor.as_obj());
+    let after_commit_args: Vec<AfterCommitArgs> = serde_json::from_str(&result).unwrap();
+
+    assert_eq!(after_commit_args.len(), 1);
+
+    let item: &AfterCommitArgs = &after_commit_args[0];
+    assert_ne!(item.handle, 0);
+    assert_eq!(item.validator, -1);
+    assert_eq!(item.height, 1);
+}
+
+// Helper methods. Gets the JSON representation of interaction with mock.
+fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {
+    unwrap_jni(exec.with_attached(|env| {
+        env.call_method(obj, "getInteractions", "()Ljava/lang/String;", &[])?
+            .l()
+            .and_then(|obj| convert_to_string(env, obj))
+    }))
+}
+
+#[derive(Serialize, Deserialize)]
+struct AfterCommitArgs {
+    handle: i64,
+    validator: i32,
+    height: i64,
 }

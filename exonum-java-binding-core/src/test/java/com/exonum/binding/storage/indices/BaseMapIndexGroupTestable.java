@@ -23,12 +23,12 @@ import com.exonum.binding.storage.database.View;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 abstract class BaseMapIndexGroupTestable<KeyT> extends BaseIndexGroupTestable {
 
   @Test
-  public void newInGroupUnsafe() {
+  void newInGroupUnsafe() {
     View view = db.createFork(cleaner);
 
     ImmutableMap<String, ImmutableMap<KeyT, String>> entriesById = getTestEntriesById();
@@ -61,10 +61,14 @@ abstract class BaseMapIndexGroupTestable<KeyT> extends BaseIndexGroupTestable {
     }
   }
 
-  /** Creates test entries to be put in maps indexed by their group identifier. */
+  /**
+   * Creates test entries to be put in maps indexed by their group identifier.
+   */
   abstract ImmutableMap<String, ImmutableMap<KeyT, String>> getTestEntriesById();
 
-  /** Creates a map-under-test in some group with the given id. */
+  /**
+   * Creates a map-under-test in some group with the given id.
+   */
   abstract MapIndex<KeyT, String> createInGroup(byte[] id, View view);
 
 }

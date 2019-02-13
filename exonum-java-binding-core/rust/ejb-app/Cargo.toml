@@ -1,12 +1,16 @@
 [package]
 name = "ejb-app"
-version = "0.2.0"
+version = "0.4.0-SNAPSHOT"
 authors = ["Exonum team <exonum@bitfury.com>"]
 
 [dependencies]
-java_bindings = { path = "..", features = ["invocation"] }
-exonum-configuration = "0.9.2"
-exonum-btc-anchoring = "0.9"
+# Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
+# Although its primary goal is to detect _programming_ errors that shall not occur
+# in a correct application early, it is currently required in the application
+# because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
+java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
+exonum-configuration = "0.10"
+exonum-btc-anchoring = "0.10"
 toml = "0.4.6"
 serde = "1.0"
 serde_derive = "1.0"

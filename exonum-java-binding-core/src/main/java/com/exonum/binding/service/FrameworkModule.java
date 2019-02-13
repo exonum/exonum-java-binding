@@ -16,14 +16,10 @@
 
 package com.exonum.binding.service;
 
-import static com.google.inject.matcher.Matchers.any;
-import static com.google.inject.matcher.Matchers.subclassesOf;
-
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
-import com.exonum.binding.util.LoggingInterceptor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
@@ -38,7 +34,6 @@ final class FrameworkModule extends AbstractModule {
     bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
     // todo: Consider providing an implementation of a Node —
     // requires changing its contract.
-    bindInterceptor(subclassesOf(UserServiceAdapter.class), any(), new LoggingInterceptor());
     bind(UserServiceAdapter.class);
   }
 }

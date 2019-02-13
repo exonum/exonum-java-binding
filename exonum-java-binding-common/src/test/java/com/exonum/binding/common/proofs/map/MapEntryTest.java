@@ -16,22 +16,28 @@
 
 package com.exonum.binding.common.proofs.map;
 
+import static com.google.common.testing.NullPointerTester.Visibility;
+
+import com.exonum.binding.common.collect.MapEntry;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 class MapEntryTest {
 
   @Test
-  void constructorRejectsNulls() {
+  void staticFactoryMethodsRejectsNulls() {
     new NullPointerTester()
-        .testAllPublicConstructors(MapEntry.class);
+        .testStaticMethods(MapEntry.class, Visibility.PUBLIC);
   }
 
   @Test
   void verifyEquals() {
     EqualsVerifier.forClass(MapEntry.class)
+        .usingGetClass()
+        .suppress(Warning.INHERITED_DIRECTLY_FROM_OBJECT)
         .withPrefabValues(
             ByteString.class, ByteString.copyFromUtf8("a"), ByteString.copyFromUtf8("b"))
         .verify();

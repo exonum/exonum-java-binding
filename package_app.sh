@@ -20,8 +20,7 @@ export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dir
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to locate libstd.
-# TODO: stable does not work well until ECR-1839 is resolved
-export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-1.27.2}"
+export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-stable}"
 echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 
 # Find the directory containing Rust libstd.

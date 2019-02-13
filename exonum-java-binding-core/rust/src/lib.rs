@@ -24,11 +24,13 @@
 #![allow(non_snake_case)]
 
 pub extern crate exonum;
+#[macro_use]
 extern crate failure;
 pub extern crate jni;
 extern crate toml;
 #[macro_use]
 extern crate log;
+extern crate parking_lot;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;

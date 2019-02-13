@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.BinaryMessage;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import java.util.List;
 
@@ -61,8 +61,8 @@ public abstract class AbstractService implements Service {
   }
 
   @Override
-  public Transaction convertToTransaction(BinaryMessage message) {
-    return transactionConverter.toTransaction(message);
+  public Transaction convertToTransaction(RawTransaction rawTransaction) {
+    return transactionConverter.toTransaction(rawTransaction);
   }
 
   @Override

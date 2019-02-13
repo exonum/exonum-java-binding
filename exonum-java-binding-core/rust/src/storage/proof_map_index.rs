@@ -35,10 +35,10 @@ type Index<T> = ProofMapIndex<T, Key, Value>;
 
 const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
 const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
-const MAP_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapEntry";
+const MAP_ENTRY: &str = "com/exonum/binding/common/collect/MapEntry";
 const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
 const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
-    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/proofs/map/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
+    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/collect/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
 const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
@@ -258,7 +258,7 @@ fn create_java_map_entries<'a>(
     env: &'a JNIEnv,
     checked_proof: &CheckedMapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
-    let entries: Vec<(&Key, &Value)> = checked_proof.entries();
+    let entries: Vec<(&Key, &Value)> = checked_proof.entries().collect();
     let java_entries = env.new_object_array(entries.len() as jsize, MAP_ENTRY, JObject::null())?;
     for (i, (key, value)) in entries.iter().enumerate() {
         // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
@@ -276,14 +276,20 @@ fn create_java_map_entries<'a>(
 fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
     let key: JObject = env.byte_array_from_slice(key)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
-    env.new_object(MAP_ENTRY, "([B[B)V", &[key.into(), value.into()])
+    env.call_static_method(
+        MAP_ENTRY,
+        "valueOf",
+        format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
+        &[key.into(), value.into()],
+    )?
+    .l()
 }
 
 fn create_java_missing_keys<'a>(
     env: &'a JNIEnv,
     map_proof: &MapProof<Key, Value>,
 ) -> JniResult<JObject<'a>> {
-    let missing_keys = map_proof.missing_keys_unchecked();
+    let missing_keys = map_proof.missing_keys_unchecked().collect::<Vec<_>>();
     let java_missing_keys =
         env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
     for (i, key) in missing_keys.iter().enumerate() {
@@ -504,7 +510,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[key.into(), value.into()],
-                    )?.into_inner())
+                    )?
+                    .into_inner())
             }
             None => Ok(ptr::null_mut()),
         }
@@ -595,6 +602,7 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
             let mut key = Key::default();
             key.copy_from_slice(bytes);
             key
-        }).collect();
+        })
+        .collect();
     Ok(keys)
 }

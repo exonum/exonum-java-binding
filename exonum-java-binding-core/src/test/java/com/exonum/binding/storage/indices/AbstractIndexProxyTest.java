@@ -16,54 +16,31 @@
 
 package com.exonum.binding.storage.indices;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.ModificationCounter;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.database.ViewModificationCounter;
 import java.util.regex.Pattern;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    ViewModificationCounter.class,
-})
-public class AbstractIndexProxyTest {
+class AbstractIndexProxyTest {
 
   private static final String INDEX_NAME = "index_name";
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @Mock
-  private ViewModificationCounter modCounter;
 
   private AbstractIndexProxy proxy;
 
-  @Before
-  public void setUp() {
-    mockStatic(ViewModificationCounter.class);
-    when(ViewModificationCounter.getInstance()).thenReturn(modCounter);
-  }
-
   @Test
-  public void testConstructor() {
+  void testConstructor() {
     View view = createFork();
     proxy = new IndexProxyImpl(view);
 
@@ -71,50 +48,62 @@ public class AbstractIndexProxyTest {
   }
 
   @Test
-  public void constructorFailsIfNullView() {
+  void constructorFailsIfNullView() {
     View dbView = null;
 
-    expectedException.expect(NullPointerException.class);
-    proxy = new IndexProxyImpl(dbView);
+    assertThrows(NullPointerException.class, () -> proxy = new IndexProxyImpl(dbView));
   }
 
   @Test
-  public void notifyModifiedThrowsIfSnapshotPassed() {
+  void notifyModifiedThrowsIfSnapshotPassed() {
     Snapshot dbView = createSnapshot();
+    ModificationCounter counter = dbView.getModificationCounter();
+    int initialValue = counter.getCurrentValue();
+
     proxy = new IndexProxyImpl(dbView);
+
+    UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
+        () -> proxy.notifyModified());
 
     Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
         + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
-    expectedException.expectMessage(matchesPattern(pattern));
-    expectedException.expect(UnsupportedOperationException.class);
-    proxy.notifyModified();
+    assertThat(thrown.getMessage(), matchesPattern(pattern));
+
+    assertFalse(counter.isModifiedSince(initialValue));
   }
 
   @Test
-  public void notifyModifiedAcceptsFork() {
+  void notifyModifiedAcceptsFork() {
     Fork dbView = createFork();
-    proxy = new IndexProxyImpl(dbView);
+    ModificationCounter counter = dbView.getModificationCounter();
+    int initialValue = counter.getCurrentValue();
 
+    proxy = new IndexProxyImpl(dbView);
     proxy.notifyModified();
-    verify(modCounter).notifyModified(eq(dbView));
+
+    assertTrue(counter.isModifiedSince(initialValue));
   }
 
   @Test
-  public void name() {
+  void name() {
     Snapshot dbView = createSnapshot();
     proxy = new IndexProxyImpl(dbView);
 
     assertThat(proxy.getName(), equalTo(INDEX_NAME));
   }
 
-  /** Create a mock of a fork. */
+  /**
+   * Create a non-owning fork.
+   */
   private Fork createFork() {
-    return mock(Fork.class);
+    return Fork.newInstance(0x01, false, new Cleaner());
   }
 
-  /** Create a mock of a snapshot. */
+  /**
+   * Create a non-owning snapshot.
+   */
   private Snapshot createSnapshot() {
-    return mock(Snapshot.class);
+    return Snapshot.newInstance(0x02, false, new Cleaner());
   }
 
   private static class IndexProxyImpl extends AbstractIndexProxy {

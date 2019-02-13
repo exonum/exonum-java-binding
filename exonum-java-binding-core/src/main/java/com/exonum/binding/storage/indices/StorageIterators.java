@@ -19,8 +19,8 @@ package com.exonum.binding.storage.indices;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
+import com.exonum.binding.storage.database.ModificationCounter;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.database.ViewModificationCounter;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -48,7 +48,7 @@ final class StorageIterators {
       LongFunction<NativeT> nextFunction,
       LongConsumer disposeOperation,
       View collectionView,
-      ViewModificationCounter modificationCounter,
+      ModificationCounter modificationCounter,
       Function<? super NativeT, ? extends ElementT> transformingFunction) {
 
     // Register the destructor first.
@@ -60,7 +60,6 @@ final class StorageIterators {
         new ConfigurableRustIter<>(
             handle,
             nextFunction,
-            collectionView,
             modificationCounter
         )
     );

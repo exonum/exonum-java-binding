@@ -16,10 +16,10 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -37,9 +37,8 @@ class TransactionJsonMessageTest {
         + "}, "
         + "\"signature\": \"cd\""
         + " }";
-    Gson gson = CryptocurrencyTransactionGson.instance();
 
-    TransactionJsonMessage tx = gson.fromJson(message,
+    TransactionJsonMessage tx = json().fromJson(message,
         new TypeToken<TransactionJsonMessage<Map<String, String>>>() {}.getType());
 
     assertThat(tx.getProtocolVersion()).isEqualTo((byte) 1);

@@ -16,19 +16,18 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.CreateCounterTx.serializeBody;
+import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
+import static com.exonum.binding.qaservice.transactions.CreateCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.message.BinaryMessage;
-import com.exonum.binding.common.message.Message;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
@@ -37,9 +36,11 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -50,30 +51,22 @@ class CreateCounterTxIntegrationTest {
     LibraryLoader.load();
   }
 
-  static final Message MESSAGE_TEMPLATE = new Message.Builder()
-      .mergeFrom(Transactions.QA_TX_MESSAGE_TEMPLATE)
-      .setMessageType(CREATE_COUNTER.id())
-      .setBody(serializeBody(new CreateCounterTx("Test counter")))
-      .buildPartial();
-
   @Test
-  void converterFromMessageRejectsWrongServiceId() {
-    BinaryMessage message = messageBuilder()
-        .setServiceId((short) (QaService.ID + 1))
-        .buildRaw();
+  void converterRejectsWrongServiceId() {
+    RawTransaction tx = txTemplate()
+        .serviceId((short) -1)
+        .build();
 
-    assertThrows(IllegalArgumentException.class,
-        () -> CreateCounterTx.converter().fromMessage(message));
+    assertThrows(IllegalArgumentException.class, () -> converter().fromRawTransaction(tx));
   }
 
   @Test
-  void converterFromMessageRejectsWrongTxId() {
-    BinaryMessage message = messageBuilder()
-        .setMessageType((short) (CREATE_COUNTER.id() + 1))
-        .buildRaw();
+  void converterRejectsWrongTxId() {
+    RawTransaction tx = txTemplate()
+        .transactionId((short) -1)
+        .build();
 
-    assertThrows(IllegalArgumentException.class,
-        () -> CreateCounterTx.converter().fromMessage(message));
+    assertThrows(IllegalArgumentException.class, () -> converter().fromRawTransaction(tx));
   }
 
   @Test
@@ -81,11 +74,10 @@ class CreateCounterTxIntegrationTest {
     String name = "counter";
     CreateCounterTx tx = new CreateCounterTx(name);
 
-    BinaryMessage message = tx.getMessage();
+    RawTransaction raw = converter().toRawTransaction(tx);
+    CreateCounterTx txFromRaw = converter().fromRawTransaction(raw);
 
-    CreateCounterTx txFromMessage = CreateCounterTx.converter().fromMessage(message);
-
-    assertThat(txFromMessage, equalTo(tx));
+    assertThat(txFromRaw, equalTo(tx));
   }
 
   @Test
@@ -98,14 +90,6 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  void isValid() {
-    String name = "counter";
-
-    CreateCounterTx tx = new CreateCounterTx(name);
-    assertTrue(tx.isValid());
-  }
-
-  @Test
   @RequiresNativeLibrary
   void executeNewCounter() throws CloseFailuresException {
     String name = "counter";
@@ -113,18 +97,19 @@ class CreateCounterTxIntegrationTest {
     CreateCounterTx tx = new CreateCounterTx(name);
 
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+
       // Execute the transaction
-      tx.execute(view);
+      TransactionContext context = newContext(view);
+      tx.execute(context);
 
       // Check it has added entries in both maps.
       QaSchema schema = new QaSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode nameHash = Hashing.defaultHashFunction()
-          .hashString(name, UTF_8);
+      HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
 
       assertThat(counters.get(nameHash), equalTo(0L));
       assertThat(counterNames.get(nameHash), equalTo(name));
@@ -135,19 +120,20 @@ class CreateCounterTxIntegrationTest {
   @RequiresNativeLibrary
   void executeAlreadyExistingCounter() throws CloseFailuresException {
     try (Database db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+
       String name = "counter";
       Long value = 100500L;
-      HashCode nameHash = Hashing.defaultHashFunction()
-          .hashString(name, UTF_8);
+      HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
 
       // Add a counter with the given name and initial value to both indices manually.
       createCounter(view, name, value);
 
       // Execute the transaction, that has the same name.
       CreateCounterTx tx = new CreateCounterTx(name);
-      tx.execute(view);
+      TransactionContext context = newContext(view);
+      tx.execute(context);
 
       // Check it has not changed the entries in the maps.
       QaSchema schema = new QaSchema(view);
@@ -166,8 +152,7 @@ class CreateCounterTxIntegrationTest {
 
     String info = tx.info();
 
-    Gson gson = QaTransactionGson.instance();
-    AnyTransaction<CreateCounterTx> txParams = gson.fromJson(info,
+    AnyTransaction<CreateCounterTx> txParams = json().fromJson(info,
         new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
     );
     assertThat(txParams.service_id, equalTo(QaService.ID));
@@ -175,25 +160,27 @@ class CreateCounterTxIntegrationTest {
     assertThat(txParams.body, equalTo(tx));
   }
 
+
   @Test
   void equals() {
     EqualsVerifier.forClass(CreateCounterTx.class)
         .verify();
   }
 
-  /** Creates a builder of create counter transaction message. */
-  private static Message.Builder messageBuilder() {
-    return new Message.Builder()
-        .mergeFrom(MESSAGE_TEMPLATE);
-  }
-
   /** Creates a counter in the storage with the given name and initial value. */
   static void createCounter(Fork view, String name, Long initialValue) {
-    HashCode nameHash = Hashing.defaultHashFunction().hashString(name, UTF_8);
+    HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
     QaSchema schema = new QaSchema(view);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
     counters.put(nameHash, initialValue);
     counterNames.put(nameHash, name);
+  }
+
+  private static RawTransaction.Builder txTemplate() {
+    return RawTransaction.newBuilder()
+        .transactionId(CREATE_COUNTER.id())
+        .serviceId(QaService.ID)
+        .payload(Bytes.bytes());
   }
 }

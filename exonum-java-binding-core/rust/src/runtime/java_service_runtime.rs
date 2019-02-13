@@ -1,8 +1,22 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use exonum::blockchain::Service;
-use exonum::helpers::fabric::{
-    self, Command, CommandExtension, CommandName, Context, ServiceFactory,
-};
-use jni::{self, JavaVM};
+use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
+use jni::{self, InitArgs, InitArgsBuilder, JavaVM, Result};
 
 use std::env;
 use std::fs;
@@ -10,7 +24,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateTemplate, Run};
-use runtime::config::{self, Config, InternalConfig, PrivateConfig};
+use runtime::config::{self, Config, InternalConfig, JvmConfig, PrivateConfig};
 use utils::{executable_directory, join_paths, unwrap_jni};
 use MainExecutor;
 
@@ -37,7 +51,7 @@ impl JavaServiceRuntime {
         unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(&config.private_config, internal);
+                let java_vm = Self::create_java_vm(&config.private_config, internal, config.jvm_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
                 let service_proxy = Self::create_service(
                     &config.public_config.module_name,
@@ -67,33 +81,83 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(config: &PrivateConfig, internal_config: InternalConfig) -> JavaVM {
+    fn create_java_vm(config: &PrivateConfig, internal_config: InternalConfig, jvm_config: JvmConfig) -> JavaVM {
+        let args = Self::build_jvm_arguments(jvm_config, internal_config)
+            .expect("Unable to build arguments for JVM");
+        jni::JavaVM::new(args).unwrap()
+    }
+
+    /// Builds arguments for JVM initialization.
+    fn build_jvm_arguments(jvm_config: JvmConfig, internal_config: InternalConfig) -> Result<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
-        for param in &config.user_parameters {
-            let option = config::validate_and_convert(param).unwrap();
+        let args_prepend = jvm_config.args_prepend.clone();
+        let args_append = jvm_config.args_append.clone();
+
+        // Prepend extra user arguments
+        args_builder = Self::add_user_arguments(args_builder, args_prepend);
+
+        // Add required arguments
+        args_builder = Self::add_required_arguments(args_builder, internal_config);
+
+        // Add optional arguments
+        args_builder = Self::add_optional_arguments(args_builder, jvm_config);
+
+        // Append extra user arguments
+        args_builder = Self::add_user_arguments(args_builder, args_append);
+
+        args_builder.build()
+    }
+
+    /// Adds extra user arguments (optional) to JVM configuration
+    fn add_user_arguments<I>(mut args_builder: InitArgsBuilder, user_args: I) -> InitArgsBuilder
+    where
+        I: IntoIterator<Item = String>,
+    {
+        for param in user_args {
+            let option = config::validate_and_convert(&param).unwrap();
             args_builder = args_builder.option(&option);
         }
+        args_builder
+    }
 
-        let class_path = join_paths(&[
-            &internal_config.system_class_path,
-            &config.service_class_path,
-        ]);
-
-        args_builder = args_builder.option(&format!("-Djava.class.path={}", class_path));
+    /// Adds required EJB-related arguments to JVM configuration
+    fn add_required_arguments(
+        mut args_builder: InitArgsBuilder,
+        internal_config: InternalConfig,
+    ) -> InitArgsBuilder {
         if internal_config.system_lib_path.is_some() {
             args_builder = args_builder.option(&format!(
                 "-Djava.library.path={}",
                 internal_config.system_lib_path.unwrap()
             ));
         }
-        args_builder = args_builder.option(&format!(
-            "-Dlog4j.configurationFile={}",
-            config.log_config_path
-        ));
 
-        let args = args_builder.build().unwrap();
-        jni::JavaVM::new(args).unwrap()
+        let class_path = join_paths(&[
+            &internal_config.system_class_path,
+            &internal_config.service_class_path,
+        ]);
+
+        args_builder
+            .option(&format!("-Djava.class.path={}", class_path))
+            .option(&format!(
+                "-Dlog4j.configurationFile={}",
+                internal_config.log_config_path
+            ))
+    }
+
+    /// Adds optional user arguments to JVM configuration
+    fn add_optional_arguments(
+        mut args_builder: InitArgsBuilder,
+        jvm_config: JvmConfig,
+    ) -> InitArgsBuilder {
+        if let Some(socket) = jvm_config.jvm_debug_socket {
+            args_builder = args_builder.option(&format!(
+                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
+                socket
+            ));
+        }
+        args_builder
     }
 
     /// Creates service proxy for interaction with Java side.
@@ -107,7 +171,8 @@ impl JavaServiceRuntime {
                     "startService",
                     START_SERVICE_SIGNATURE,
                     &[module_name.into(), port.into()],
-                )?.l()?;
+                )?
+                .l()?;
             env.new_global_ref(service)
         }));
         ServiceProxy::from_global_ref(executor, service)
@@ -167,7 +232,8 @@ impl ServiceFactory for JavaServiceFactory {
         "JAVA_SERVICE_FACTORY"
     }
 
-    fn command(&mut self, command: CommandName) -> Option<Box<CommandExtension>> {
+    fn command(&mut self, command: &str) -> Option<Box<CommandExtension>> {
+        use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
         match command {
             v if v == fabric::GenerateCommonConfig.name() => Some(Box::new(GenerateTemplate)),
@@ -184,14 +250,16 @@ impl ServiceFactory for JavaServiceFactory {
                 .get(keys::NODE_CONFIG)
                 .expect("Unable to read node configuration.")
                 .services_configs
-                .get(super::cmd::EJB_CONFIG_NAME)
+                .get(super::cmd::EJB_CONFIG_SECTION_NAME)
                 .expect("Unable to read EJB configuration.")
                 .clone()
                 .try_into()
                 .expect("Invalid EJB configuration format.");
             let internal_config = InternalConfig {
                 system_class_path: system_classpath(),
+                service_class_path: config.private_config.service_class_path.clone(),
                 system_lib_path: Some(absolute_library_path()),
+                log_config_path: config.private_config.log_config_path.clone(),
             };
             JavaServiceRuntime::get_or_create(config, internal_config)
         };

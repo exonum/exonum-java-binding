@@ -16,50 +16,71 @@
 
 package com.exonum.binding.storage.database;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import com.exonum.binding.proxy.Cleaner;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.exonum.binding.proxy.CloseFailuresException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest({
     Views.class,
 })
-@Ignore  // Won't run on Java 10 till Powermock is updated [ECR-1614]
-public class SnapshotTest {
+class SnapshotTest {
 
-  @Before
-  public void setUp() {
-    mockStatic(Views.class);
+  @Nested
+  @Disabled
+  // TODO Won't run with JUnit 5 till Powermock is updated [ECR-1614] (downgrade to 4?)
+  class DestroysPeersIfNeeded {
+    @BeforeEach
+    void setUp() {
+      mockStatic(Views.class);
+    }
+
+    @Test
+    void destroy_NotOwning() throws Exception {
+      try (Cleaner cleaner = new Cleaner()) {
+        Snapshot.newInstance(0x0A, false, cleaner);
+      }
+
+      verifyStatic(Views.class, never());
+      Views.nativeFree(anyLong());
+    }
+
+    @Test
+    void destroy_Owning() throws Exception {
+      int nativeHandle = 0x0A;
+
+      try (Cleaner cleaner = new Cleaner()) {
+        Snapshot.newInstance(nativeHandle, true, cleaner);
+      }
+
+      verifyStatic(Views.class);
+      Views.nativeFree(nativeHandle);
+    }
   }
 
   @Test
-  public void destroy_NotOwning() throws Exception {
+  void hasImmutableModificationCounter() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Snapshot.newInstance(0x0A, false, cleaner);
-    }
+      Snapshot s = Snapshot.newInstance(0x0A, false, cleaner);
 
-    verifyStatic(Views.class, never());
-    Views.nativeFree(anyLong());
+      ModificationCounter c = s.getModificationCounter();
+      assertThrows(IllegalStateException.class, c::notifyModified);
+    }
   }
 
   @Test
-  public void destroy_Owning() throws Exception {
-    int nativeHandle = 0x0A;
-
-    try (Cleaner cleaner = new Cleaner()) {
-      Snapshot.newInstance(nativeHandle, true, cleaner);
-    }
-
-    verifyStatic(Views.class);
-    Views.nativeFree(nativeHandle);
+  void cannotModify() {
+    Snapshot s = Snapshot.newInstance(0x0A, false, new Cleaner());
+    assertFalse(s.canModify());
   }
 }

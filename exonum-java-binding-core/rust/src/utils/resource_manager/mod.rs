@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// The main goal of resource manager is early detection of possible problems with resources
+/// management and accessing objects with pointers. Not required in production.
+
 #[cfg(not(feature = "resource-manager"))]
 #[path = "stub.rs"]
 mod imp;

@@ -48,7 +48,7 @@ public abstract class AbstractKey {
   }
 
   /**
-   * Returns the length of this key.
+   * Returns the length of this key in bytes.
    */
   public int size() {
     return rawKey.length;

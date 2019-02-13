@@ -16,66 +16,58 @@
 
 package com.exonum.binding.storage.database;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.exonum.binding.proxy.Cleaner;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest({
     Views.class,
-    ViewModificationCounter.class,
 })
-@Ignore  // Won't run on Java 10 till Powermock is updated [ECR-1614]
-public class ForkTest {
+@Disabled
+// TODO Won't run on Junit 5 till Powermock is updated [ECR-1614].
+class ForkTest {
 
   private Fork fork;
 
-  private ViewModificationCounter modCounter;
-
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     mockStatic(Views.class);
-    mockStatic(ViewModificationCounter.class);
-    modCounter = mock(ViewModificationCounter.class);
-    when(ViewModificationCounter.getInstance()).thenReturn(modCounter);
   }
 
   @Test
-  public void disposeInternal_OwningProxy() throws Exception {
+  void disposeInternal_OwningProxy() throws Exception {
     int nativeHandle = 0x0A;
     try (Cleaner cleaner = new Cleaner()) {
       fork = Fork.newInstance(nativeHandle, true, cleaner);
     }
-
-    verify(modCounter).remove(fork);
 
     verifyStatic(Views.class);
     Views.nativeFree(nativeHandle);
   }
 
   @Test
-  public void disposeInternal_NotOwningProxy() throws Exception {
+  void disposeInternal_NotOwningProxy() throws Exception {
     int nativeHandle = 0x0A;
 
     try (Cleaner cleaner = new Cleaner()) {
       fork = Fork.newInstance(nativeHandle, false, cleaner);
     }
 
-    verify(modCounter).remove(fork);
-
     verifyStatic(Views.class, never());
     Views.nativeFree(nativeHandle);
   }
 
+
+  @Test
+  void canModify() {
+    Fork fork = Fork.newInstance(0x0A, false, new Cleaner());
+    assertTrue(fork.canModify());
+  }
 }
