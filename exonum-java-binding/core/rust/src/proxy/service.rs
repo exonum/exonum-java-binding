@@ -112,7 +112,6 @@ impl Service for ServiceProxy {
 
     fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
         unwrap_jni(self.exec.with_attached(|env| {
-            let raw_clone = raw.clone();
             let (tx_id, payload) = raw.service_transaction().into_raw_parts();
             let payload = JObject::from(env.byte_array_from_slice(&payload)?);
 
@@ -133,7 +132,6 @@ impl Service for ServiceProxy {
                     let java_transaction_proxy = TransactionProxy::from_global_ref(
                         self.exec.clone(),
                         env.new_global_ref(java_transaction.l()?)?,
-                        raw_clone,
                     );
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
