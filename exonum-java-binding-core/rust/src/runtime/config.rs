@@ -19,31 +19,14 @@ use std::fmt;
 /// JavaServiceRuntime configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    /// JVM configuration.
-    pub jvm_config: JvmConfig,
     /// Private part of the EJB configuration parameters.
     pub private_config: PrivateConfig,
     /// Public part of the EJB configuration parameters.
     pub public_config: PublicConfig,
 }
 
-/// Internal EJB configuration.
-///
-/// Not visible by user, used internally while initializing runtime.
-#[doc(hidden)] // For testing purposes only.
-pub struct InternalConfig {
-    /// EJB system classpath.
-    pub system_class_path: String,
-    /// EJB service classpath.
-    pub service_class_path: String,
-    /// EJB library path.
-    pub system_lib_path: Option<String>,
-    // Path to `log4j` configuration file.
-    pub log_config_path: String,
-}
-
 /// Private EJB configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PrivateConfig {
     /// Java service classpath.
     pub service_class_path: String,
@@ -51,11 +34,6 @@ pub struct PrivateConfig {
     pub log_config_path: String,
     /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
     pub port: i32,
-}
-
-/// JVM configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JvmConfig {
     /// Additional parameters for JVM.
     ///
     /// Passed directly to JVM while initializing EJB runtime.
@@ -76,6 +54,17 @@ pub struct PublicConfig {
     ///
     /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
     pub module_name: String,
+}
+
+/// Internal EJB configuration.
+///
+/// Not visible by user, used internally while initializing runtime.
+#[doc(hidden)] // For testing purposes only.
+pub struct InternalConfig {
+    /// EJB system classpath.
+    pub system_class_path: String,
+    /// EJB library path.
+    pub system_lib_path: Option<String>,
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.

@@ -20,7 +20,9 @@ extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
 use integration_tests::vm::get_fakes_classpath;
-use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, PrivateConfig, PublicConfig};
+use java_bindings::{
+    Config, InternalConfig, JavaServiceRuntime, JvmConfig, PrivateConfig, PublicConfig,
+};
 
 const TEST_SERVICE_MODULE_NAME: &str =
     "com.exonum.binding.fakes.services.service.TestServiceModule";

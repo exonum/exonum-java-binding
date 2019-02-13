@@ -24,7 +24,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateTemplate, Run};
-use runtime::config::{self, Config, InternalConfig, JvmConfig, PrivateConfig};
+use runtime::config::{self, Config, InternalConfig, PrivateConfig};
 use utils::{executable_directory, join_paths, unwrap_jni};
 use MainExecutor;
 
@@ -51,8 +51,9 @@ impl JavaServiceRuntime {
         unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(&config.private_config, internal, config.jvm_config);
+                let java_vm = Self::create_java_vm(&config.private_config, internal);
                 let executor = MainExecutor::new(Arc::new(java_vm));
+
                 let service_proxy = Self::create_service(
                     &config.public_config.module_name,
                     config.private_config.port,
@@ -81,27 +82,30 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(config: &PrivateConfig, internal_config: InternalConfig, jvm_config: JvmConfig) -> JavaVM {
-        let args = Self::build_jvm_arguments(jvm_config, internal_config)
+    fn create_java_vm(config: &PrivateConfig, internal_config: InternalConfig) -> JavaVM {
+        let args = Self::build_jvm_arguments(config, internal_config)
             .expect("Unable to build arguments for JVM");
         jni::JavaVM::new(args).unwrap()
     }
 
     /// Builds arguments for JVM initialization.
-    fn build_jvm_arguments(jvm_config: JvmConfig, internal_config: InternalConfig) -> Result<InitArgs> {
+    fn build_jvm_arguments(
+        private_config: &PrivateConfig,
+        internal_config: InternalConfig,
+    ) -> Result<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
-        let args_prepend = jvm_config.args_prepend.clone();
-        let args_append = jvm_config.args_append.clone();
+        let args_prepend = private_config.args_prepend.clone();
+        let args_append = private_config.args_append.clone();
 
         // Prepend extra user arguments
         args_builder = Self::add_user_arguments(args_builder, args_prepend);
 
         // Add required arguments
-        args_builder = Self::add_required_arguments(args_builder, internal_config);
+        args_builder = Self::add_required_arguments(args_builder, private_config, internal_config);
 
         // Add optional arguments
-        args_builder = Self::add_optional_arguments(args_builder, jvm_config);
+        args_builder = Self::add_optional_arguments(args_builder, private_config);
 
         // Append extra user arguments
         args_builder = Self::add_user_arguments(args_builder, args_append);
@@ -124,6 +128,7 @@ impl JavaServiceRuntime {
     /// Adds required EJB-related arguments to JVM configuration
     fn add_required_arguments(
         mut args_builder: InitArgsBuilder,
+        private_config: &PrivateConfig,
         internal_config: InternalConfig,
     ) -> InitArgsBuilder {
         if internal_config.system_lib_path.is_some() {
@@ -135,23 +140,23 @@ impl JavaServiceRuntime {
 
         let class_path = join_paths(&[
             &internal_config.system_class_path,
-            &internal_config.service_class_path,
+            &private_config.service_class_path,
         ]);
 
         args_builder
             .option(&format!("-Djava.class.path={}", class_path))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
-                internal_config.log_config_path
+                private_config.log_config_path
             ))
     }
 
     /// Adds optional user arguments to JVM configuration
     fn add_optional_arguments(
         mut args_builder: InitArgsBuilder,
-        jvm_config: JvmConfig,
+        private_config: &PrivateConfig,
     ) -> InitArgsBuilder {
-        if let Some(socket) = jvm_config.jvm_debug_socket {
+        if let Some(ref socket) = private_config.jvm_debug_socket {
             args_builder = args_builder.option(&format!(
                 "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
                 socket
@@ -217,8 +222,8 @@ pub fn panic_if_java_options() {
              Due to the fact that it will overwrite any JVM settings, \
              including ones set by EJB internally, this variable is \
              forbidden for EJB applications.\n\
-             It is recommended to use `--ejb-jvm-args` command-line \
-             parameter for setting custom JVM parameters."
+             It is recommended to use `--jvm-args-append` and `--jvm-args-prepend` command-line \
+             parameters for setting custom JVM parameters."
         );
     }
 }
@@ -255,11 +260,10 @@ impl ServiceFactory for JavaServiceFactory {
                 .clone()
                 .try_into()
                 .expect("Invalid EJB configuration format.");
+
             let internal_config = InternalConfig {
                 system_class_path: system_classpath(),
-                service_class_path: config.private_config.service_class_path.clone(),
                 system_lib_path: Some(absolute_library_path()),
-                log_config_path: config.private_config.log_config_path.clone(),
             };
             JavaServiceRuntime::get_or_create(config, internal_config)
         };
