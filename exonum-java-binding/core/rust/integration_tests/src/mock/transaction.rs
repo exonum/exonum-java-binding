@@ -56,7 +56,7 @@ pub fn create_throwing_mock_transaction_proxy(
         })
         .unwrap();
 
-    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
+    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock);
     (tx_proxy, raw)
 }
 
@@ -94,14 +94,14 @@ pub fn create_throwing_exec_exception_mock_transaction_proxy(
         })
         .unwrap();
 
-    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
+    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock);
     (tx_proxy, raw)
 }
 
 /// Creates `TransactionProxy` with a mock transaction and an empty `RawMessage`.
 pub fn create_mock_transaction_proxy(executor: MainExecutor) -> (TransactionProxy, RawTransaction) {
     let (java_tx_mock, raw) = create_mock_transaction(&executor);
-    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock, raw.clone());
+    let tx_proxy = TransactionProxy::from_global_ref(executor, java_tx_mock);
     (tx_proxy, raw)
 }
 
