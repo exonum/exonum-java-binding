@@ -31,16 +31,16 @@ import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class ExonumHttpClientIntegrationTest {
-  private MockWebServer server;
-  private ExonumClient exonumClient;
+  private static MockWebServer server;
+  private static ExonumClient exonumClient;
 
-  @BeforeEach
-  void start() throws IOException {
+  @BeforeAll
+  static void start() throws IOException {
     server = new MockWebServer();
     server.start();
 
@@ -49,8 +49,8 @@ class ExonumHttpClientIntegrationTest {
         .build();
   }
 
-  @AfterEach
-  void shutdown() throws IOException {
+  @AfterAll
+  static void shutdown() throws IOException {
     server.shutdown();
   }
 
