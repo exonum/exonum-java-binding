@@ -11,9 +11,19 @@ _serialization_ ect.
 
 ## Prerequisites
 - Java 8 or above is required for using this client
+- Maven 3.5 or above (only if you need to build it locally)
+
+## How to build
+To build the client locally, clone the repository, and
+run next command from the project's root 
+i.e. _exonum-java-binding_ directory:
+```bash
+mvn install -pl exonum-light-client -am
+```
+It'll build Exonum Light client within the `exonum-java-binding-common` artifact 
+which is required for the client.
 
 ## QuickStart
-
 If you are using Maven, add this to your _pom.xml_ file
 ```xml
 <dependency>
