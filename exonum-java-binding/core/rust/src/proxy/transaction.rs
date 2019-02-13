@@ -15,7 +15,6 @@
  */
 
 use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
-use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{JavaType, Primitive};
 use jni::JNIEnv;
@@ -42,7 +41,6 @@ const RETVAL_TYPE_STRING: &str = "java/lang/String";
 pub struct TransactionProxy {
     exec: MainExecutor,
     transaction: GlobalRef,
-    raw: RawTransaction,
 }
 
 // `TransactionProxy` is immutable, so it can be safely used in different threads.
@@ -56,16 +54,8 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(
-        exec: MainExecutor,
-        transaction: GlobalRef,
-        raw: RawTransaction,
-    ) -> Self {
-        TransactionProxy {
-            exec,
-            transaction,
-            raw,
-        }
+    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef) -> Self {
+        TransactionProxy { exec, transaction }
     }
 }
 
