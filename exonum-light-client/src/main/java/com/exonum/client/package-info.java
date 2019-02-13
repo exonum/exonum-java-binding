@@ -16,7 +16,16 @@
 
 /**
  * The Exonum light client.
- * Can be used to create and submit transactions to blockchain.
- * TODO: add examples and links
+ * Can be used to submit transactions to the Exonum blockchain.
+ * The following example shows how to instantiate the client and submit transaction:
+ * <pre>
+ *   {@code
+ *       ExonumClient exonumClient = ExonumClient.newBuilder()
+ *         .setExonumHost("http://<host>:<port>")
+ *         .build();
+ *       exonumClient.submitTransaction(tx);
+ *   }
+ * </pre>
+ *
  */
 package com.exonum.client;
