@@ -88,7 +88,7 @@ impl serde::Serialize for TransactionProxy {
             Ok(json_str) => {
                 // A simple way of passing a value that is already serialized to JSON to the serialiser
                 let value: serde_json::Value = serde_json::from_str(&json_str)
-                    .expect(&format!("Unable to parse JSON string {}", &json_str));
+                    .unwrap_or_else(|_| panic!("Unable to parse JSON string {}", json_str));
                 value.serialize(serializer)
             }
             // Java exception has been thrown - return its description

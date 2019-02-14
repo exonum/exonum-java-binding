@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![cfg_attr(feature = "cargo-clippy", deny(needless_pass_by_value))]
 #![deny(non_snake_case)]
 
 mod conversion;
