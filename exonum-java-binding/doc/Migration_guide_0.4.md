@@ -92,12 +92,7 @@ them, e.g., in their event handlers. But use with care — each node has its own
 
 ## Use example
 See how the cryptocurrency service has changed since the last release to understand what
-changes might be needed in your service:
-
-```sh
-$ git clone git@github.com:exonum/exonum-java-binding.git
-$ git diff v0.3 v0.4 exonum-java-binding-cryptocurrency-demo/
-```
+changes might be needed in your service: [cryptocurrency-demo](../cryptocurrency-demo)
 
 ## Questions?
 
