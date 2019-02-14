@@ -87,7 +87,7 @@ HashCode txHash = exonumClient.submitTransaction(tx);
 *Be aware that this method submits the transaction to the pool of
 uncommitted transactions and dosn't wait for the transaction 
 acceptance to a new block.*  
- 
+<!-- TODO: Replace with a proper example --> 
 Also, you can take a look at the [integration test][send-tx-it]
 for the full example of how to create a transaction message and
 send it to Exonum node.
@@ -96,12 +96,7 @@ send it to Exonum node.
 To build the client locally, clone the repository, and
 run next commands from the project's root 
 i.e. _exonum-java-binding_ directory:
-```bash
-cd exonum-light-client
-mvn install
-```
-In case you need an unreleased version of the [`common`][common-mvn] module
-then run next commands from the project's root:
+<!-- TODO: Get rid of the RUSTFLAGS here --> 
 ```bash
 export RUSTFLAGS=none
 mvn install -pl exonum-light-client -am
@@ -116,6 +111,5 @@ Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 [ejb-common]: https://exonum.com/doc/api/java-binding-common/0.4/
 [exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/message/TransactionMessage.Builder.html
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
-[standard-serializers]: ../exonum-java-binding/common/src/main/java/com/exonum/binding/common/serialization/StandardSerializers.java
-[common-mvn]: https://mvnrepository.com/artifact/com.exonum.binding/exonum-java-binding-common
+[standard-serializers]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
