@@ -56,4 +56,4 @@ cp LICENSES-THIRD-PARTY.TXT core
 # Generate licenses for native dependencies.
 ./core/rust/generate_licenses.sh
 
-mvn package --activate-profiles app-packaging -pl exonum-java-binding-core -am
+mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am
