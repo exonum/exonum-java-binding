@@ -43,7 +43,7 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.5-SNAPSHOT</ejb.version>
+    <ejb.version>0.4.0</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
