@@ -59,7 +59,7 @@ The next example shows how to use a custom configuration of the _http-client_:
 ```
 ### Creating transaction message
 The following example shows how to create the transaction message.
-In addition please read about [transaction message structure][exonum-tx-message].
+In addition please read about [transaction message structure][exonum-tx-message-builder].
 ```java
     TransactionMessage txMessage = TransactionMessage.builder()
         .serviceId((short) 1)
@@ -91,10 +91,16 @@ acceptance to a new block.*
 
 ## How to build
 To build the client locally, clone the repository, and
-run next command from the project's root 
+run next commands from the project's root 
 i.e. _exonum-java-binding_ directory:
 ```bash
-source exonum-java-binding/tests_profile
+cd exonum-light-client
+mvn install
+```
+In case you need an unreleased version of the [`common`][common-mvn] module
+then run next commands from the project's root:
+```bash
+export RUSTFLAGS=none
 mvn install -pl exonum-light-client -am
 ```
 It'll build Exonum Light client and the `exonum-java-binding-common` artifact 
@@ -105,6 +111,7 @@ Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 
 [exonum]: https://github.com/exonum/exonum
 [ejb-common]: https://exonum.com/doc/api/java-binding-common/0.4/
-[exonum-tx-message]: https://exonum.com/doc/version/latest/architecture/serialization/#message-serialization
+[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/message/TransactionMessage.Builder.html
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
 [standard-serializers]: ../exonum-java-binding/common/src/main/java/com/exonum/binding/common/serialization/StandardSerializers.java
+[common-mvn]: https://mvnrepository.com/artifact/com.exonum.binding/exonum-java-binding-common
