@@ -1,0 +1,31 @@
+[package]
+name = "java_bindings"
+version = "0.5.0-SNAPSHOT"
+authors = ["Exonum Team <exonum@bitfury.com>"]
+
+[workspace]
+members = ["integration_tests", "ejb-app"]
+
+[lib]
+crate-type = ["dylib"]
+
+[features]
+# Enables native handles checking. Useful for debugging.
+resource-manager = []
+invocation = ["jni/invocation"]
+
+[dependencies]
+exonum = "0.10"
+failure = "0.1.1"
+toml = "0.4.6"
+# Point EJB to revision of master that introduces JNIEnv#clone()
+jni = { git = "https://github.com/jni-rs/jni-rs", rev = "e261b981", features = ["invocation"] }
+lazy_static = "1.2.0"
+log = "0.4.1"
+parking_lot = "0.6"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0.38"
+
+[profile.dev]
+rpath = true

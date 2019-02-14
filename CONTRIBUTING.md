@@ -1,13 +1,17 @@
-# Exonum Java Binding Contribution Guide
+# Exonum Java Contribution Guide
 
-Exonum Java Binding is open to any contributions, whether 
+Exonum Java is open to any contributions, whether 
 it is a feedback on existing features, a request for a new one, a bug report
 or a pull request. This document describes how to work with this project: 
   * how to [build](#how-to-build) it
   * how to [test](#tests) it
   * the [code style guidelines](#the-code-style)
   * how to [submit an issue](#submitting-issues)
-  * how to [submit a PR](#submitting-pull-requests).
+  * how to [submit a PR](#submitting-pull-requests)
+
+Such as this project has sub-projects with sub-modules it is possible
+to build the whole project as well as any of the sub-projects separately.
+This guide shows how to build the whole project only. 
 
 ## How to Build
 ### System Dependencies
@@ -24,7 +28,7 @@ You need to install the following dependencies:
 ### Building
 Set required environment variables, once in a shell you use to build the project:
 ```$sh
-$ source tests_profile
+$ source exonum-java-binding/tests_profile
 ```
 Then run:
 ```$sh
@@ -34,6 +38,7 @@ $ mvn install
 #### Building Java Binding App
 Run:
 ```$sh
+$ cd exonum-java-binding
 $ ./package_app.sh
 ```
 This command will build and package EJB App with all the necessary runtime dependencies
@@ -41,17 +46,18 @@ in a single `zip` archive in `exonum-java-binding-core/target` directory.
 
 **Automatic EJB App packaging is only supported on Linux platform.**
 
-## Modules
-The project is split into several modules. Here are the main ones:
-  * [`core`](exonum-java-binding-core) contains the APIs to define and implement an 
+## EJB Modules
+The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
+Here are the main ones:
+  * [`core`](exonum-java-binding/core) contains the APIs to define and implement an 
   [Exonum service](https://exonum.com/doc/version/latest/get-started/design-overview/#modularity-and-services).
-  * [`core-native`](exonum-java-binding-core/rust) contains the glue code between Java and Rust.
-  * [`app`](exonum-java-binding-core/rust/ejb-app) is an application that runs a node with Java 
+  * [`core-native`](exonum-java-binding/core/rust) contains the glue code between Java and Rust.
+  * [`app`](exonum-java-binding/core/rust/ejb-app) is an application that runs a node with Java 
   and Rust services.
-  * [`common`](exonum-java-binding-common) provides common functionality to Exonum core
+  * [`common`](exonum-java-binding/common) provides common functionality to Exonum core
   and light clients: [Exonum proofs](https://exonum.com/doc/version/latest/get-started/design-overview/#proofs),
   hashing and cryptographic operations, serialization support.
-  * [`exonum-service-archetype`](exonum-java-binding-service-archetype) implements an archetype
+  * [`exonum-service-archetype`](exonum-java-binding/service-archetype) implements an archetype
   generating a template project of Exonum Java service. 
   <!-- TODO: a link to a getting started guide/generating a project -->
 
@@ -62,9 +68,9 @@ There are several categories of tests:
   * Integration tests in Java, some of which require a native library.
   * Integration tests in Rust that require a JVM together with `ejb-core` 
     and `ejb-fakes` artefacts. Reside 
-    in [`core-native`](exonum-java-binding-core/rust/integration_tests).
+    in [`core-native`](exonum-java-binding/core/rust/integration_tests).
   * System tests — these are currently performed internally 
-    and use a [QA-service](exonum-java-binding-qa-service).
+    and use a [QA-service](exonum-java-binding/qa-service).
 
 ### Running Tests
 <!-- TODO: Shall we explain what `mvn install` runs, and what `run_all_tests`? -->
@@ -73,7 +79,8 @@ To run all tests, invoke this script:
 ```$sh
 $ ./run_all_tests.sh
 ```
-The following scripts can be run separately:
+The following scripts can be run separately 
+from the [EJB](exonum-java-binding) directory:
 * `./run_maven_tests.sh` - all tests in Java and unit tests in Rust.
 * `./run_native_integration_tests.sh` - integration tests in Rust.
 * `./run_ejb_app_tests.sh` - application tests in Rust.
@@ -94,7 +101,7 @@ which can be loaded with `LibraryLoader.load()`.
 IntelliJ IDEA infers the JVM arguments from the `pom.xml` and runs ITs just fine.
 If you use another IDE, configure it to pass `-Djava.library.path` system property 
 to the JVM when running tests. For more details, see the failsafe plugin 
-[configuration](exonum-java-binding-core/pom.xml).
+[configuration](exonum-java-binding/core/pom.xml).
 
 #### Rust
 All tests require several environment variables to be set.
@@ -119,7 +126,7 @@ Rust code follows the [Rust style guide](https://github.com/rust-lang-nursery/fm
 
 After installation, you can run it with
 ```$sh
-$ cd exonum-java-binding-core/rust
+$ cd exonum-java-binding/core/rust
 $ cargo fmt --all -- --write-mode=check
 ```
 
