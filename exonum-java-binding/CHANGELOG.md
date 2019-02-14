@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 This release is based on the latest Exonum version, 0.10, 
 and brings the features and improvements outlined below.
-If you are upgrading an existing Java service, consult the migration guide.
-<!-- TODO: Reference it -->
+
+**If you are upgrading an existing Java service, consult 
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/v0.4/exonum-java-binding/doc/Migration_guide_0.4.md).**
 
 ### Added
 - Support of new transaction message format added in Exonum 0.10. It allows service 
