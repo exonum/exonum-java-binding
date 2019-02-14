@@ -6,16 +6,13 @@ The most notable change in the format is that the public key of the transaction 
 is always included in the transaction message. This allows the framework to verify 
 the message signature with no conversion to an executable transaction.
 
-If the client application is in Java, 
-use [`com.exonum.binding.common.message.TransactionMessage`][tx-message-jd]
-from "[com.exonum.binding:exonum-java-binding-common:0.4][common-0.4]";
-if it is in Java Script, use the latest version of the JS 
-[light client](https://github.com/exonum/exonum-client).
+If the client application is in Java or Java Script, use the latest versions of light client 
+libraries:
+- Java Script [light client](https://github.com/exonum/exonum-client)
+- Java [light client](https://github.com/exonum/exonum-java-binding/tree/master/exonum-light-client)
 
-The light client shall submit transactions directly to the core endpoint instead of a custom one
-in the service controller:
-`<public api IP address and port>/api/explorer/v1/transactions`
- <!-- TODO: Link the core docs when/if they are available -->
+The light clients for Exonum Java 0.4 submit transactions directly to the core endpoint 
+instead of a custom one in the service controller.
 
 [common-0.4]: https://search.maven.org/artifact/com.exonum.binding/exonum-java-binding-common/0.4/jar
 [tx-message-jd]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/message/TransactionMessage.html#builder()
