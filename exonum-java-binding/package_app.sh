@@ -6,7 +6,7 @@
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
 
-EJB_RUST_DIR="${PWD}/exonum-java-binding-core/rust"
+EJB_RUST_DIR="${PWD}/core/rust"
 
 # Use active JVM.
 #
@@ -50,8 +50,8 @@ cargo +${RUST_COMPILER_VERSION} build --all
 cd ../..
 
 # Copy licenses so that the package tool can pick them up.
-cp LICENSE exonum-java-binding-core
-cp LICENSES-THIRD-PARTY.TXT exonum-java-binding-core
+cp LICENSE core
+cp LICENSES-THIRD-PARTY.TXT core
 
 # Generate licenses for native dependencies.
 exonum-java-binding-core/rust/generate_licenses.sh
