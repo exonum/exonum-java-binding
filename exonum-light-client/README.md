@@ -35,7 +35,6 @@ compile 'com.exonum.client:exonum-light-client:0.1-SNAPSHOT'
 ```
 
 ## Examples
-
 ### Exonum Client initialization
 The following example shows how to create the instance of exonum client
 which will work with Exonum node at `http://localhost:8080` address: 
@@ -57,6 +56,7 @@ The next example shows how to use a custom configuration of the _http-client_:
         .build();
 
 ```
+
 ### Creating transaction message
 The following example shows how to create the transaction message.
 In addition please read about [transaction message structure][exonum-tx-message-builder].
@@ -87,7 +87,6 @@ HashCode txHash = exonumClient.submitTransaction(tx);
 *Be aware that this method submits the transaction to the pool of
 uncommitted transactions and dosn't wait for the transaction 
 acceptance to a new block.* 
- 
 
 ## How to build
 To build the client locally, clone the repository, and
