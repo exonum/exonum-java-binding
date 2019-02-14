@@ -25,6 +25,7 @@ use jni::signature::JavaType;
 use serde_json;
 use serde_json::value::Value;
 use std::fmt;
+use std::str::FromStr;
 
 use proxy::node::NodeContext;
 use storage::View;
