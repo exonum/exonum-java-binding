@@ -86,7 +86,11 @@ HashCode txHash = exonumClient.submitTransaction(tx);
 ```
 *Be aware that this method submits the transaction to the pool of
 uncommitted transactions and dosn't wait for the transaction 
-acceptance to a new block.* 
+acceptance to a new block.*  
+ 
+Also, you can take a look at the [integration test][send-tx-it]
+for the full example of how to create a transaction message and
+send it to Exonum node.
 
 ## How to build
 To build the client locally, clone the repository, and
@@ -114,3 +118,4 @@ Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
 [standard-serializers]: ../exonum-java-binding/common/src/main/java/com/exonum/binding/common/serialization/StandardSerializers.java
 [common-mvn]: https://mvnrepository.com/artifact/com.exonum.binding/exonum-java-binding-common
+[send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
