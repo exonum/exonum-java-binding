@@ -15,8 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-<!-- TODO: Set release date -->
-## [0.4] - 2019-02-DD
+## [0.4] - 2019-02-18
 
 This release is based on the latest Exonum version, 0.10, 
 and brings the features and improvements outlined below.
