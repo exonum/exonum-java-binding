@@ -21,7 +21,8 @@ instead of a custom one in the service controller.
 ### Use the new message format
 
 EJB 0.4 accepts the transactions via a system endpoint and passes the payload to the `Service`
-implementation to convert into an executable transaction. 
+implementation to convert into an executable transaction, meaning there is [no need](#update-your-controller) 
+to create endpoints for accepting transactions anymore.
 The [`TransactionConverter`][tx-converter-jd] now accepts
 a `RawTransaction` that includes only the transaction identifiers (service id and transaction id)
 and its payload — the serialized transaction parameters (equivalent to `Message#getBody` from v0.3).
