@@ -14,7 +14,7 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
-| 0.1          | 0.10.+ | 0.4         |
+| 0.1          | 0.10.* | 0.4         |
 
 ## Prerequisites
 - Java 8 or above is required for using this client
