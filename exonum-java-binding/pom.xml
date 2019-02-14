@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.binding</groupId>
   <artifactId>exonum-java-binding-parent</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.4</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding Parent</name>
