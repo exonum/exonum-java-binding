@@ -16,7 +16,6 @@ The following table shows versions compatibility:
 |--------------|--------|-------------|
 | 0.1          | 0.10.+ | 0.4         |
 
-
 ## Prerequisites
 - Java 8 or above is required for using this client
 - Maven 3.5 or above (only if you need to build it locally)
@@ -68,11 +67,12 @@ In addition please read about [transaction message structure][exonum-tx-message]
         .payload(data)
         .sign(keys, CryptoFunctions.ed25519());
 ```
-* `data` is a bytes array which contains transactional information.
+* `data` is a bytes array which contains transactional information/parameters
+in a service-defined format.
 It can be any object which should be serialized to bytes in advance.
 We recommend to use [Google Protobuf][protobuf] for serialization,
 but it is always an option of your choice.
-Also, _common_ package provides [Standard Serializers][standard-serializers]
+Also, _common_ package provides [`StandardSerializers`][standard-serializers]
 utility class which can be helpful for serialization.  
 * `keys` is a key pair of private and public keys which is used for message signature.  
 * `ed25519` is the cryptographic function for signing.
