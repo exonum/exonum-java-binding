@@ -43,7 +43,7 @@ The following methods are **removed** from `Transaction` interface:
   - `getMessage`. Transactions are no longer required to store the corresponding 
   `TransactionMessage`, which makes it easier to instantiate them in unit or integration tests.
   If your transaction code needs a whole message of this or _any_ other transaction,
-  use [`com.exonum.binding.blockchain.Blockchain.getTxMessages`][blockchain-get-tx-messages-jd].
+  use [`Blockchain.getTxMessages`][blockchain-get-tx-messages-jd].
   - `hash`. You can access the SHA-256 hash of this transaction message in `Transaction#execute`
   from the passed context: [`TransactionContext#getTransactionMessageHash`][tx-context-hash-jd]. 
   As a reminder, it uniquely identifies the message in the system.
@@ -57,7 +57,7 @@ the corresponding transaction message: its hash and the public key of the author
 [tx-context-hash-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/transaction/TransactionContext.html#getTransactionMessageHash()
 
 ### Update your controller
-As the v0.4 framework accepts binary transactions itself, remove the endpoint that accepted
+As the v0.4 framework accepts binary transactions itself, remove the endpoints that accepted
 transactions from the clients.
 
 ### Use Java 11
