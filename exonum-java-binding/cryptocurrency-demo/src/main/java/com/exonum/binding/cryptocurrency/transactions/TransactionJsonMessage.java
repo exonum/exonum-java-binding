@@ -18,7 +18,7 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 /**
  * Data of a transaction message in JSON. Matches the
- * <a href="https://exonum.com/doc/version/latest/architecture/serialization/#message-serialization">Exonum serialization format</a>
+ * <a href="https://exonum.com/doc/version/0.10/architecture/serialization/#message-serialization">Exonum serialization format</a>
  * for messages.
  *
  * @param <BodyT> a type of object that is transferred as the message body

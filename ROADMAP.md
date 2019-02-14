@@ -5,7 +5,7 @@ Below are the features we intend to work on:
 * Better documentation — improved user guide and tutorials.
 * More example projects to hack with.
 * Pre-built packaged Exonum App.
-* Full support of Exonum proofs, including block proofs 
+* Full support of Exonum proofs, including block proofs
   for [blockchain clients](https://exonum.com/doc/version/latest/architecture/clients/).
 * [Time oracle](https://exonum.com/doc/version/latest/advanced/time/) service bundled in the app.
 * An SDK to ease integration with the blockchain application, including

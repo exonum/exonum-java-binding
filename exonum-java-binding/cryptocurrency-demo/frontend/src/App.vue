@@ -10,7 +10,7 @@
             <img src="images/exonum.png" width="41" height="36" class="float-left mt-sm-1 mr-3" alt="">
             <ul class="list-unstyled">
               <li>Sources on <a href="https://github.com/exonum/exonum-java-binding/tree/master/cryptocurrency-demo" target="_blank">GitHub</a></li>
-              <li><a href="https://exonum.com/doc/version/latest/" target="_blank">Exonum docs</a></li>
+              <li><a href="https://exonum.com/doc/version/0.10/" target="_blank">Exonum docs</a></li>
             </ul>
           </div>
         </div>
