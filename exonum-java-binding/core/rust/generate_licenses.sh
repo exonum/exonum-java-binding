@@ -8,7 +8,7 @@ cargo license -h &> /dev/null || cargo install cargo-license
 
 # Going to exonum-java-binding-core/rust directory.
 backup_dir=${PWD}
-script_dir=$(dirname $(readlink -f "$0")) # Directory of this script. Must be exonum-java-binding-core/rust
+script_dir=$(dirname $(readlink -f "$0")) # Directory of this script. Must be exonum-java-binding/core/rust
 cd ${script_dir}
 
 cargo license -da \

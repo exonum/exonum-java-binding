@@ -50,7 +50,7 @@ cargo +${RUST_COMPILER_VERSION} build --all
 cd ../..
 
 # Copy licenses so that the package tool can pick them up.
-cp LICENSE core
+cp ../LICENSE core
 cp LICENSES-THIRD-PARTY.TXT core
 
 # Generate licenses for native dependencies.
