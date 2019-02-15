@@ -16,11 +16,8 @@
 
 extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
+extern crate exonum_time;
 extern crate java_bindings;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate toml;
 
 #[cfg(test)]
 extern crate tempfile;

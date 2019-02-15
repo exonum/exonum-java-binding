@@ -34,9 +34,11 @@ extern crate serde;
 extern crate serde_derive;
 pub extern crate serde_json;
 
-#[cfg(feature = "resource-manager")]
 #[macro_use]
 extern crate lazy_static;
+
+#[cfg(test)]
+extern crate tempfile;
 
 mod error;
 mod init;
