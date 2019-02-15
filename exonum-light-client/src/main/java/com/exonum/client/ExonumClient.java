@@ -41,6 +41,29 @@ public interface ExonumClient {
   HashCode submitTransaction(TransactionMessage tx);
 
   /**
+   * Returns a number of unconfirmed transactions those are currently located in
+   * the memory pool and are waiting for acceptance to a block.
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  int getUnconfirmedTransactions();
+
+  /**
+   * Returns <b>true</b> if the node is connected to the other peers.
+   * And <b>false</b> otherwise.
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  boolean healthCheck();
+
+  /**
+   * Returns string containing information about Exonum, Rust and OS version.
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  String getUserAgentInfo();
+
+  /**
    * Returns Exonum client builder.
    */
   static Builder newBuilder() {

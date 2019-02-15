@@ -18,7 +18,10 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
+import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
+import static com.exonum.client.ExonumUrls.USER_AGENT;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -54,17 +57,50 @@ class ExonumHttpClient implements ExonumClient {
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
     String msg = toHex(transactionMessage.toBytes());
 
-    Request request = createRequest(toFullUrl(SUBMIT_TRANSACTION), new SubmitTxRequest(msg));
+    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION), new SubmitTxRequest(msg));
     SubmitTxResponse result = blockingExecuteWithResponse(request, SubmitTxResponse.class);
 
     return result.hash;
+  }
+
+  @Override
+  public int getUnconfirmedTransactions() {
+    Request request = getRequest(toFullUrl(MEMORY_POOL));
+    MemoryPoolResponse result = blockingExecuteWithResponse(request,
+        MemoryPoolResponse.class);
+
+    return result.size;
+  }
+
+  @Override
+  public boolean healthCheck() {
+    Request request = getRequest(toFullUrl(HEALTH_CHECK));
+    HealthCheckResponse result = blockingExecuteWithResponse(request,
+        HealthCheckResponse.class);
+
+    return result.connectivity;
+  }
+
+  @Override
+  public String getUserAgentInfo() {
+    Request request = getRequest(toFullUrl(USER_AGENT));
+    String result = blockingExecutePlainText(request);
+
+    return result;
   }
 
   private static String toHex(byte[] array) {
     return HEX_ENCODER.encode(array);
   }
 
-  private static Request createRequest(URL url, Object requestBody) {
+  private static Request getRequest(URL url) {
+    return new Request.Builder()
+        .url(url)
+        .get()
+        .build();
+  }
+
+  private static Request postRequest(URL url, Object requestBody) {
     String jsonBody = json().toJson(requestBody);
 
     return new Request.Builder()
@@ -81,17 +117,20 @@ class ExonumHttpClient implements ExonumClient {
     }
   }
 
-  private <T> T blockingExecuteWithResponse(Request request, Class<T> responseObject) {
+  private String blockingExecutePlainText(Request request) {
     try (Response response = httpClient.newCall(request).execute()) {
       if (!response.isSuccessful()) {
         throw new RuntimeException("Execution wasn't success: " + response.toString());
       }
-      String responseJson = response.body().string();
-
-      return json().fromJson(responseJson, responseObject);
+      return response.body().string();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private <T> T blockingExecuteWithResponse(Request request, Class<T> type) {
+    String response = blockingExecutePlainText(request);
+    return json().fromJson(response, type);
   }
 
 }
