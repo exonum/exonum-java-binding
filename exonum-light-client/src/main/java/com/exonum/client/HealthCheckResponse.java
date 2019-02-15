@@ -19,6 +19,9 @@ package com.exonum.client;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * Json object wrapper for health check response.
+ */
 class HealthCheckResponse {
   boolean connectivity;
 

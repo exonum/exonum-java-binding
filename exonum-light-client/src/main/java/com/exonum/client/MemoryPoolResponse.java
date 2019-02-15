@@ -19,6 +19,9 @@ package com.exonum.client;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * Json object wrapper for memory pool response.
+ */
 class MemoryPoolResponse {
   int size;
 
