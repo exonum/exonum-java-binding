@@ -16,24 +16,16 @@
 
 use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
+use exonum_time::TimeServiceFactory;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
+use java_bindings::utils::{
+    load_enabled_services, BTC_ANCHORING_SERVICE, CONFIGURATION_SERVICE, EJB_SERVICE,
+    PATH_TO_SERVICES_TO_ENABLE, TIME_SERVICE,
+};
 use java_bindings::JavaServiceFactory;
-use toml;
 
 use std::collections::{HashMap, HashSet};
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
-
-const PATH_TO_SERVICES_TO_ENABLE: &str = "ejb_app_services.toml";
-const CONFIGURATION_SERVICE: &str = "configuration";
-const BTC_ANCHORING_SERVICE: &str = "btc-anchoring";
-const EJB_SERVICE: &str = "ejb-service";
-
-#[derive(Serialize, Deserialize)]
-struct ServicesToEnable {
-    services: HashSet<String>,
-}
 
 fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     let mut service_factories = HashMap::new();
@@ -46,6 +38,10 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
         Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
     );
     service_factories.insert(
+        TIME_SERVICE.to_owned(),
+        Box::new(TimeServiceFactory) as Box<ServiceFactory>,
+    );
+    service_factories.insert(
         EJB_SERVICE.to_owned(),
         Box::new(JavaServiceFactory) as Box<ServiceFactory>,
     );
@@ -55,17 +51,11 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
 #[doc(hidden)]
 pub fn services_to_enable<P: AsRef<Path>>(path: P) -> HashSet<String> {
     // Return default list if config file not found.
-    let mut services = if let Ok(mut file) = File::open(path) {
-        let mut toml = String::new();
-        file.read_to_string(&mut toml).unwrap();
-        let ServicesToEnable { services } =
-            toml::from_str(&toml).expect("Invalid list of services to enable");
-        services
-    } else {
+    let mut services = load_enabled_services(path).unwrap_or_else(|_| {
         let mut services = HashSet::new();
         services.insert(CONFIGURATION_SERVICE.to_owned());
         services
-    };
+    });
 
     // Add EJB_SERVICE if it's missing
     services.insert(EJB_SERVICE.to_owned());
@@ -149,13 +139,14 @@ mod tests {
     fn all_services() {
         let cfg = create_config(
             "all.toml",
-            "services = [\"configuration\", \"btc-anchoring\"]",
+            "services = [\"configuration\", \"btc-anchoring\", \"time\"]",
         );
         let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 3);
+        assert_eq!(services_to_enable.len(), 4);
         assert!(services_to_enable.contains(EJB_SERVICE));
         assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
         assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
+        assert!(services_to_enable.contains(TIME_SERVICE));
 
         let service_factories = service_factories();
         for service in &services_to_enable {
