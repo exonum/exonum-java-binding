@@ -19,7 +19,7 @@ Below are the features we intend to work on:
   boilerplate code reduction.
 
 Feedback on this roadmap, the features you’d like to see is welcome&nbsp;—
-[open](https://github.com/exonum/exonum-java-binding/issues/new)
+[open](https://github.com/exonum/exonum-java/issues/new)
 an issue in our Github repository, [send](https://gitter.im/exonum/exonum-java-binding) us
 a message on Gitter, or mail to [exonum@bitfury.com](mailto:exonum@bitfury.com).
 

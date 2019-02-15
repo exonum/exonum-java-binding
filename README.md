@@ -1,7 +1,7 @@
 # Exonum Java Libraries
 
-[![Build Status](https://img.shields.io/travis/exonum/exonum-java-binding/master.svg)](https://travis-ci.com/exonum/exonum-java-binding)
-[![Coverage Status](https://coveralls.io/repos/github/exonum/exonum-java-binding/badge.svg?branch=master)](https://coveralls.io/github/exonum/exonum-java-binding?branch=master)
+[![Build Status](https://img.shields.io/travis/exonum/exonum-java/master.svg)](https://travis-ci.com/exonum/exonum-java)
+[![Coverage Status](https://coveralls.io/repos/github/exonum/exonum-java/badge.svg?branch=master)](https://coveralls.io/github/exonum/exonum-java?branch=master)
 [![Join the chat on https://gitter.im/exonum/exonum-java-binding](https://img.shields.io/gitter/room/exonum/exonum-java-binding.svg?label=Chat)](https://gitter.im/exonum/exonum-java-binding)
 
 This is a primary repository for Exonum projects in Java.  
