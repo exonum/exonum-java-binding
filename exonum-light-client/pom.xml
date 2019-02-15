@@ -6,7 +6,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -63,17 +63,29 @@
   </distributionManagement>
 
   <properties>
-    <ejb.version>0.4-SNAPSHOT</ejb.version>
+    <!-- Project configuration -->
+    <ejb.version>0.5-SNAPSHOT</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- Project dependencies -->
+    <okhttp.version>3.13.1</okhttp.version>
+    <!--Test dependencies-->
+    <junit.jupiter.version>5.4.0</junit.jupiter.version>
+    <mockito.version>2.24.0</mockito.version>
+    <hamcrest.version>2.0.0.0</hamcrest.version>
+
+    <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
     <!-- Default values of properties set by Jacoco when coverage is enabled.
-     Passed to the JVM running tests. -->
+    Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
+    <!-- Skip generating Javadocs by default. Some profiles override this.  -->
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+
   </properties>
 
   <dependencies>
@@ -82,8 +94,59 @@
       <artifactId>exonum-java-binding-common</artifactId>
       <version>${ejb.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>${okhttp.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>java-hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>${okhttp.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <plugins>
       <plugin>
@@ -219,5 +282,55 @@
         </plugins>
       </build>
     </profile>
+
+    <!-- Profile used during deploy:
+       - Generates Javadocs.
+       - Signs the artefacts.
+       - Deploys them to the remote repository. -->
+    <profile>
+      <id>deploy-sign-artifacts</id>
+      <properties>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <!--It is needed for correct gpg signing with gpg 2.1-->
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default-deploy</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
   </profiles>
 </project>
