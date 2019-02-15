@@ -132,7 +132,7 @@ class ExonumHttpClientIntegrationTest {
   }
 
   @Test
-  void name() throws InterruptedException {
+  void getUserAgentInfo() throws InterruptedException {
     // Mock response
     String mockResponse = "exonum 0.6.0/rustc 1.26.0-nightly (2789b067d 2018-03-06)\n\n/Mac OS10.13.3";
     server.enqueue(new MockResponse().setBody(mockResponse));
