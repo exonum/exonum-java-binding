@@ -17,16 +17,10 @@
 
 package com.exonum.client;
 
-import com.google.common.base.MoreObjects;
+import lombok.Value;
 
+@Value
 class HealthCheckResponse {
   boolean connectivity;
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("connectivity", connectivity)
-        .toString();
-  }
 
 }

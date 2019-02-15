@@ -78,7 +78,7 @@ class ExonumHttpClient implements ExonumClient {
     HealthCheckResponse result = blockingExecuteWithResponse(request,
         HealthCheckResponse.class);
 
-    return result.connectivity;
+    return result.isConnectivity();
   }
 
   @Override
