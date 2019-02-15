@@ -92,7 +92,6 @@ class ExonumHttpClientIntegrationTest {
     assertThat(actualTxMessage, is(txMessage));
   }
 
-
   @Test
   void getUnconfirmedTransactions() throws InterruptedException {
     // Mock response
