@@ -17,19 +17,12 @@
 
 package com.exonum.client;
 
-import com.google.common.base.MoreObjects;
+import lombok.Value;
 
 /**
  * Json object wrapper for health check response.
  */
+@Value
 class HealthCheckResponse {
   boolean connectivity;
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("connectivity", connectivity)
-        .toString();
-  }
-
 }

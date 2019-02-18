@@ -22,6 +22,7 @@ import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.exonum.client.NodeUserAgentResponseParser.parseFrom;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -64,29 +65,29 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public int getUnconfirmedTransactions() {
+  public int getUnconfirmedTransactionsCount() {
     Request request = getRequest(toFullUrl(MEMORY_POOL));
     MemoryPoolResponse result = blockingExecuteWithResponse(request,
         MemoryPoolResponse.class);
 
-    return result.size;
+    return result.getSize();
   }
 
   @Override
-  public boolean healthCheck() {
+  public boolean isNodeInNetwork() {
     Request request = getRequest(toFullUrl(HEALTH_CHECK));
     HealthCheckResponse result = blockingExecuteWithResponse(request,
         HealthCheckResponse.class);
 
-    return result.connectivity;
+    return result.isConnectivity();
   }
 
   @Override
-  public String getUserAgentInfo() {
+  public NodeUserAgentResponse getUserAgentInfo() {
     Request request = getRequest(toFullUrl(USER_AGENT));
     String result = blockingExecutePlainText(request);
 
-    return result;
+    return parseFrom(result);
   }
 
   private static String toHex(byte[] array) {

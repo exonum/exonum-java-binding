@@ -17,12 +17,19 @@
 
 package com.exonum.client;
 
+import lombok.Builder;
 import lombok.Value;
 
 /**
- * Json object wrapper for memory pool response.
- */
+ * Value class contains node user agent information.
+ **/
 @Value
-class MemoryPoolResponse {
-  int size;
+@Builder
+public class NodeUserAgentResponse {
+  /**
+   * Exonum framework version installed on the node
+   */
+  String exonumVersion;
+  String rustVersion;
+  String osVersion;
 }

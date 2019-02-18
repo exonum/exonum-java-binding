@@ -100,7 +100,7 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    int actualCount = exonumClient.getUnconfirmedTransactions();
+    int actualCount = exonumClient.getUnconfirmedTransactionsCount();
 
     // Assert response
     assertThat(actualCount, is(mockCount));
@@ -119,7 +119,7 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    boolean actualConnectivity = exonumClient.healthCheck();
+    boolean actualConnectivity = exonumClient.isNodeInNetwork();
 
     // Assert response
     assertThat(actualConnectivity, is(mockConnectivity));
@@ -137,10 +137,12 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    String actualResponse = exonumClient.getUserAgentInfo();
+    NodeUserAgentResponse actualResponse = exonumClient.getUserAgentInfo();
 
     // Assert response
-    assertThat(actualResponse, is(mockResponse));
+    assertThat(actualResponse.getExonumVersion(), is("0.6.0"));
+    assertThat(actualResponse.getRustVersion(), is("1.26.0 (2789b067d 2018-03-06)"));
+    assertThat(actualResponse.getOsVersion(), is("Mac OS10.13.3"));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();

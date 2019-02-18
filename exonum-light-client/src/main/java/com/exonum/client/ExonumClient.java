@@ -28,6 +28,9 @@ import okhttp3.OkHttpClient;
 /**
  * Main interface for Exonum Light client.
  * Provides a convenient way for interaction with Exonum framework APIs.
+ * All the methods of the interface work in a blocking way
+ * i.e. invoke underlying request immediately, and blocks until the response can be processed
+ * or is in error.
  * <p/><i>Implementations of that interface are required to be thread-safe</i>.
  **/
 public interface ExonumClient {
@@ -41,27 +44,27 @@ public interface ExonumClient {
   HashCode submitTransaction(TransactionMessage tx);
 
   /**
-   * Returns a number of unconfirmed transactions those are currently located in
-   * the memory pool and are waiting for acceptance to a block.
+   * Returns a number of unconfirmed transactions which are currently located in
+   * the unconfirmed transactions pool and are waiting for acceptance to a block.
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  int getUnconfirmedTransactions();
+  int getUnconfirmedTransactionsCount();
 
   /**
-   * Returns <b>true</b> if the node is connected to the other peers.
-   * And <b>false</b> otherwise.
+   * Returns <code>true</code> if the node is connected to the other peers;
+   * <code>false<code> — otherwise.
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  boolean healthCheck();
+  boolean isNodeInNetwork();
 
   /**
    * Returns string containing information about Exonum, Rust and OS version.
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  String getUserAgentInfo();
+  NodeUserAgentResponse getUserAgentInfo();
 
   /**
    * Returns Exonum client builder.
