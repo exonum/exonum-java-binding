@@ -17,19 +17,21 @@
 
 package com.exonum.client;
 
-import lombok.Builder;
 import lombok.Value;
 
 /**
  * Value class contains node user agent information.
  **/
 @Value
-@Builder
 public class NodeUserAgentResponse {
   /**
-   * Exonum framework version installed on the node
+   * Exonum framework version installed on the node.
    */
   String exonumVersion;
   String rustVersion;
   String osVersion;
+
+  static NodeUserAgentResponse of(String exonumVersion, String rustVersion, String osVersion) {
+    return new NodeUserAgentResponse(exonumVersion, rustVersion, osVersion);
+  }
 }

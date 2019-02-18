@@ -52,10 +52,10 @@ class NodeUserAgentResponseParserTest {
   private static List<Arguments> source() {
     return ImmutableList.of(
         Arguments.of("exonum 0.6.0/rustc 1.26.0 (2789b067d 2018-03-06)\n\n/Mac OS10.13.3",
-            new NodeUserAgentResponse("0.6.0", "1.26.0 (2789b067d 2018-03-06)",
+            NodeUserAgentResponse.of("0.6.0", "1.26.0 (2789b067d 2018-03-06)",
                 "Mac OS10.13.3")),
         Arguments.of("exonum 0.10.4/rustc 1.32.0 (9fda7c223 2019-01-16)\n\n/Mac OS10.14.3",
-            new NodeUserAgentResponse("0.10.4", "1.32.0 (9fda7c223 2019-01-16)",
+            NodeUserAgentResponse.of("0.10.4", "1.32.0 (9fda7c223 2019-01-16)",
                 "Mac OS10.14.3"))
     );
   }

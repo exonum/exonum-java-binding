@@ -32,7 +32,7 @@ class NodeUserAgentResponseParser {
       throw new IllegalArgumentException("Can't parse input string: " + input);
     }
 
-    return new NodeUserAgentResponse(
+    return NodeUserAgentResponse.of(
         matcher.group("exonum").trim(),
         matcher.group("rust").trim(),
         matcher.group("os").trim()
