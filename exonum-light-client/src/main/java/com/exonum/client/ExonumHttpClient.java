@@ -60,7 +60,7 @@ class ExonumHttpClient implements ExonumClient {
     Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION), new SubmitTxRequest(msg));
     SubmitTxResponse result = blockingExecuteWithResponse(request, SubmitTxResponse.class);
 
-    return result.hash;
+    return result.getHash();
   }
 
   @Override
