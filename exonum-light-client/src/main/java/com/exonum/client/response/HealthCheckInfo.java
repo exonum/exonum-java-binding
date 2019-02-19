@@ -15,16 +15,22 @@
  *
  */
 
-package com.exonum.client;
+package com.exonum.client.response;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.Value;
 
-/**
- * Json object wrapper for submit transaction request.
- */
 @Value
-class SubmitTxRequest {
-  @SerializedName("tx_body")
-  String body;
+public class HealthCheckInfo {
+  /**
+   * Shows information about whether it is possible to achieve the consensus between
+   * validators in the current state.
+   */
+  ConsensusStatus consensusStatus;
+
+  /**
+   * The number of peers that the node is connected to;
+   * {@code = 0} if the node is not connected to the network,
+   * or it's the single node network.
+   */
+  int connectionsNumber;
 }

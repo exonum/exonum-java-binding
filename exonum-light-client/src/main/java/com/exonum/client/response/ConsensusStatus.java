@@ -15,17 +15,23 @@
  *
  */
 
-package com.exonum.client;
-
-import com.exonum.binding.common.hash.HashCode;
-import com.google.gson.annotations.SerializedName;
-import lombok.Value;
+package com.exonum.client.response;
 
 /**
- * Json object wrapper for submit transaction response.
+ * Consensus status of a particular node.
  */
-@Value
-class SubmitTxResponse {
-  @SerializedName("tx_hash")
-  HashCode hash;
+public enum ConsensusStatus {
+  /**
+   * Shows that consensus is active
+   * i.e. it is enabled and the node has enough connected peers.
+   */
+  ACTIVE,
+  /**
+   * Shows that consensus is enabled on the node.
+   */
+  ENABLED,
+  /**
+   * Shows that consensus is disabled on the node.
+   */
+  DISABLED
 }
