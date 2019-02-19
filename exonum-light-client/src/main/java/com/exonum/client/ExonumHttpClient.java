@@ -22,7 +22,6 @@ import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
-import static com.exonum.client.NodeUserAgentResponseParser.parseFrom;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -83,11 +82,11 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public NodeUserAgentResponse getUserAgentInfo() {
+  public String getUserAgentInfo() {
     Request request = getRequest(toFullUrl(USER_AGENT));
     String result = blockingExecutePlainText(request);
 
-    return parseFrom(result);
+    return result;
   }
 
   private static String toHex(byte[] array) {

@@ -64,7 +64,7 @@ public interface ExonumClient {
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  NodeUserAgentResponse getUserAgentInfo();
+  String getUserAgentInfo();
 
   /**
    * Returns Exonum client builder.

@@ -137,12 +137,10 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    NodeUserAgentResponse actualResponse = exonumClient.getUserAgentInfo();
+    String actualResponse = exonumClient.getUserAgentInfo();
 
     // Assert response
-    assertThat(actualResponse.getExonumVersion(), is("0.6.0"));
-    assertThat(actualResponse.getRustVersion(), is("1.26.0 (2789b067d 2018-03-06)"));
-    assertThat(actualResponse.getOsVersion(), is("Mac OS10.13.3"));
+    assertThat(actualResponse, is(mockResponse));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
