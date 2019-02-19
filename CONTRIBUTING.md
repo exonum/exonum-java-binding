@@ -20,7 +20,7 @@ You need to install the following dependencies:
   * [JDK 1.8+](http://jdk.java.net/10/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Stable Rust](https://www.rust-lang.org/).
-  * The [system dependencies](https://exonum.com/doc/version/latest/get-started/install/) of Exonum. 
+  * The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
 
 ### Building
@@ -44,12 +44,12 @@ $ cargo build
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:
   * [`core`](exonum-java-binding/core) contains the APIs to define and implement an 
-  [Exonum service](https://exonum.com/doc/version/latest/get-started/design-overview/#modularity-and-services).
+  [Exonum service](https://exonum.com/doc/version/0.10/get-started/design-overview/#modularity-and-services).
   * [`core-native`](exonum-java-binding/core/rust) contains the glue code between Java and Rust.
   * [`app`](exonum-java-binding/core/rust/ejb-app) is an application that runs a node with Java 
   and Rust services.
   * [`common`](exonum-java-binding/common) provides common functionality to Exonum core
-  and light clients: [Exonum proofs](https://exonum.com/doc/version/latest/get-started/design-overview/#proofs),
+  and light clients: [Exonum proofs](https://exonum.com/doc/version/0.10/get-started/design-overview/#proofs),
   hashing and cryptographic operations, serialization support.
   * [`exonum-service-archetype`](exonum-java-binding/service-archetype) implements an archetype
   generating a template project of Exonum Java service. 

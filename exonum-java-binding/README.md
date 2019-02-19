@@ -9,7 +9,7 @@ The project is at alpha stage. Currently you can define a stateful Exonum Servic
 in Java, configure a network of nodes and run the service in it.
 
 For more information see the relevant documentation on the tool:
-  - [User Guide](https://exonum.com/doc/version/latest/get-started/java-binding/)
+  - [User Guide](https://exonum.com/doc/version/0.10/get-started/java-binding/)
   - [Cryptocurrency Example Service](cryptocurrency-demo)
 
 ## License
