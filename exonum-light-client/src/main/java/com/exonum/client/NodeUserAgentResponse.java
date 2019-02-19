@@ -25,10 +25,16 @@ import lombok.Value;
 @Value
 public class NodeUserAgentResponse {
   /**
-   * Exonum framework version installed on the node.
+   * Exonum framework version installed on a node.
    */
   String exonumVersion;
+  /**
+   * Rust compiler version installed on a node.
+   */
   String rustVersion;
+  /**
+   * Operating system installed on a node.
+   */
   String osVersion;
 
   static NodeUserAgentResponse of(String exonumVersion, String rustVersion, String osVersion) {

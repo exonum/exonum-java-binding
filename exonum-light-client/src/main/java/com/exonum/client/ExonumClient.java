@@ -29,8 +29,8 @@ import okhttp3.OkHttpClient;
  * Main interface for Exonum Light client.
  * Provides a convenient way for interaction with Exonum framework APIs.
  * All the methods of the interface work in a blocking way
- * i.e. invoke underlying request immediately, and blocks until the response can be processed
- * or is in error.
+ * i.e. invoke underlying request immediately, and block until the response can be processed
+ * or an error occurs.
  * <p/><i>Implementations of that interface are required to be thread-safe</i>.
  **/
 public interface ExonumClient {
