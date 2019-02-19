@@ -32,15 +32,15 @@ class SystemApiHelperTest {
 
   @ParameterizedTest
   @MethodSource("healthCheckSource")
-  void healthCheckJsonParser(String json, HealthCheckInfo expected) {
-    HealthCheckInfo actual = SystemApiHelper.healthCheckJsonParser(json);
+  void parseHealthCheckJson(String json, HealthCheckInfo expected) {
+    HealthCheckInfo actual = SystemApiHelper.parseHealthCheckJson(json);
     assertThat(actual, is(expected));
   }
 
   @ParameterizedTest
   @MethodSource("memoryPoolSource")
-  void memoryPoolJsonParser(String json, int expected) {
-    int actual = SystemApiHelper.memoryPoolJsonParser(json);
+  void parseMemoryPoolJson(String json, int expected) {
+    int actual = SystemApiHelper.parseMemoryPoolJson(json);
     assertThat(actual, is(expected));
   }
 

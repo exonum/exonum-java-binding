@@ -18,7 +18,7 @@
 package com.exonum.client.response;
 
 /**
- * Consensus status.
+ * Consensus status of a particular node.
  */
 public enum ConsensusStatus {
   /**

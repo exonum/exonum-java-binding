@@ -31,7 +31,7 @@ import lombok.Value;
  */
 final class SystemApiHelper {
 
-  static HealthCheckInfo healthCheckJsonParser(String json) {
+  static HealthCheckInfo parseHealthCheckJson(String json) {
     // TODO: ECR-2925 (core dependency) change after the response format update
     HealthCheckResponse response = json().fromJson(json, HealthCheckResponse.class);
     String consensusStatus = response.getConsensusStatus().toUpperCase();
@@ -47,7 +47,7 @@ final class SystemApiHelper {
     }
   }
 
-  static int memoryPoolJsonParser(String json) {
+  static int parseMemoryPoolJson(String json) {
     MemoryPoolResponse response = json().fromJson(json, MemoryPoolResponse.class);
     return response.getSize();
   }

@@ -58,23 +58,23 @@ class ExonumHttpClient implements ExonumClient {
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
     String msg = toHex(transactionMessage.toBytes());
     Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
-        ExplorerApiHelper.submitTxBody(msg));
+        ExplorerApiHelper.createSubmitTxBody(msg));
 
-    return blockingExecuteAndParse(request, ExplorerApiHelper::submitTxParser);
+    return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
   }
 
   @Override
   public int getUnconfirmedTransactionsCount() {
     Request request = getRequest(toFullUrl(MEMORY_POOL));
 
-    return blockingExecuteAndParse(request, SystemApiHelper::memoryPoolJsonParser);
+    return blockingExecuteAndParse(request, SystemApiHelper::parseMemoryPoolJson);
   }
 
   @Override
   public HealthCheckInfo healthCheck() {
     Request request = getRequest(toFullUrl(HEALTH_CHECK));
 
-    return blockingExecuteAndParse(request, SystemApiHelper::healthCheckJsonParser);
+    return blockingExecuteAndParse(request, SystemApiHelper::parseHealthCheckJson);
   }
 
   @Override
