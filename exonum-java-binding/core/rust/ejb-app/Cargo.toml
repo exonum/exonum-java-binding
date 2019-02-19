@@ -9,8 +9,8 @@ authors = ["Exonum team <exonum@bitfury.com>"]
 # in a correct application early, it is currently required in the application 
 # because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
-exonum-configuration = "0.10"
-exonum-btc-anchoring = "0.10"
+exonum-configuration = { git = "https://github.com/vitvakatu/exonum", branch = "update-rocksdb" }
+exonum-btc-anchoring = { git = "https://github.com/vitvakatu/exonum-btc-anchoring", branch = "update-rocksdb" }
 toml = "0.4.6"
 serde = "1.0"
 serde_derive = "1.0"
