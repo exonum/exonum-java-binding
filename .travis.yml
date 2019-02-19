@@ -49,12 +49,6 @@ matrix:
       os: linux
       jdk: openjdk11
       env: CHECK_RUST=false
-  allow_failures:
-    # Flaky service_runtime IT: ECR-1734
-    - os: linux
-      jdk: openjdk11
-  # Report the result of the build as it is ready.
-  fast_finish: true
 
 cache:
   directories:
