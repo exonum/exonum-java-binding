@@ -32,6 +32,7 @@ import lombok.Value;
 final class SystemApiHelper {
 
   static HealthCheckInfo healthCheckJsonParser(String json) {
+    // TODO: ECR-2925 (core dependency) change after the response format update
     HealthCheckResponse response = json().fromJson(json, HealthCheckResponse.class);
     String consensusStatus = response.getConsensusStatus().toUpperCase();
     JsonElement connectivity = response.getConnectivity();
