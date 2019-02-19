@@ -15,14 +15,12 @@
  *
  */
 
-package com.exonum.client;
+package com.exonum.client.response;
 
 import lombok.Value;
 
-/**
- * Json object wrapper for memory pool response.
- */
 @Value
-class MemoryPoolResponse {
-  int size;
+public class HealthCheckInfo {
+  ConsensusStatus consensusStatus;
+  int connectionsNumber;
 }

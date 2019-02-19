@@ -15,14 +15,10 @@
  *
  */
 
-package com.exonum.client;
+package com.exonum.client.response;
 
-import lombok.Value;
-
-/**
- * Json object wrapper for health check response.
- */
-@Value
-class HealthCheckResponse {
-  boolean connectivity;
+public enum ConsensusStatus {
+  ACTIVE,
+  ENABLED,
+  DISABLED
 }

@@ -30,6 +30,8 @@ import static org.hamcrest.Matchers.is;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.ConsensusStatus;
+import com.exonum.client.response.HealthCheckInfo;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -114,15 +116,15 @@ class ExonumHttpClientIntegrationTest {
   @Test
   void healthCheck() throws InterruptedException {
     // Mock response
-    boolean mockConnectivity = true;
-    String mockResponse = "{\"connectivity\": " + mockConnectivity + " }";
+    HealthCheckInfo expected = new HealthCheckInfo(ConsensusStatus.ENABLED, 0);
+    String mockResponse = "{\"consensus_status\": \"Enabled\", \"connectivity\": \"NotConnected\"}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    boolean actualConnectivity = exonumClient.isNodeInNetwork();
+    HealthCheckInfo actual = exonumClient.healthCheck();
 
     // Assert response
-    assertThat(actualConnectivity, is(mockConnectivity));
+    assertThat(actual, is(expected));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();

@@ -25,11 +25,13 @@ import static com.exonum.client.ExonumUrls.USER_AGENT;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.HealthCheckInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Function;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -66,27 +68,22 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public int getUnconfirmedTransactionsCount() {
     Request request = getRequest(toFullUrl(MEMORY_POOL));
-    MemoryPoolResponse result = blockingExecuteWithResponse(request,
-        MemoryPoolResponse.class);
 
-    return result.getSize();
+    return blockingExecuteAndParse(request, SystemApiHelper::memoryPoolJsonParser);
   }
 
   @Override
-  public boolean isNodeInNetwork() {
+  public HealthCheckInfo healthCheck() {
     Request request = getRequest(toFullUrl(HEALTH_CHECK));
-    HealthCheckResponse result = blockingExecuteWithResponse(request,
-        HealthCheckResponse.class);
 
-    return result.isConnectivity();
+    return blockingExecuteAndParse(request, SystemApiHelper::healthCheckJsonParser);
   }
 
   @Override
   public String getUserAgentInfo() {
     Request request = getRequest(toFullUrl(USER_AGENT));
-    String result = blockingExecutePlainText(request);
 
-    return result;
+    return blockingExecutePlainText(request);
   }
 
   private static String toHex(byte[] array) {
@@ -131,6 +128,11 @@ class ExonumHttpClient implements ExonumClient {
   private <T> T blockingExecuteWithResponse(Request request, Class<T> type) {
     String response = blockingExecutePlainText(request);
     return json().fromJson(response, type);
+  }
+
+  private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {
+    String response = blockingExecutePlainText(request);
+    return parser.apply(response);
   }
 
 }

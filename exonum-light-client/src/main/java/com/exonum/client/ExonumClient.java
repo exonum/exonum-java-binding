@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.HealthCheckInfo;
 import java.net.MalformedURLException;
 import java.net.URL;
 import okhttp3.OkHttpClient;
@@ -57,7 +58,7 @@ public interface ExonumClient {
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  boolean isNodeInNetwork();
+  HealthCheckInfo healthCheck();
 
   /**
    * Returns string containing information about Exonum, Rust and OS version.
