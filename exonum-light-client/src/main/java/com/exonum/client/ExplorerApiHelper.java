@@ -29,7 +29,7 @@ import lombok.Value;
  */
 final class ExplorerApiHelper {
 
-  static HashCode submitTxParser(String json) {
+  static HashCode parseSubmitTxResponse(String json) {
     SubmitTxResponse response = json().fromJson(json, SubmitTxResponse.class);
     return response.getHash();
   }
@@ -47,7 +47,7 @@ final class ExplorerApiHelper {
    * Json object wrapper for submit transaction response.
    */
   @Value
-  class SubmitTxResponse {
+  private static class SubmitTxResponse {
     @SerializedName("tx_hash")
     HashCode hash;
   }

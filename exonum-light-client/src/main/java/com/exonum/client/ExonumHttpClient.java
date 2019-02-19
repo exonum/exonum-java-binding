@@ -56,21 +56,21 @@ class ExonumHttpClient implements ExonumClient {
     Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
         new SubmitTxRequest(transactionMessage));
 
-    return blockingExecuteAndParse(request, ExplorerApiHelper::submitTxParser);
+    return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
   }
 
   @Override
   public int getUnconfirmedTransactionsCount() {
     Request request = getRequest(toFullUrl(MEMORY_POOL));
 
-    return blockingExecuteAndParse(request, SystemApiHelper::memoryPoolJsonParser);
+    return blockingExecuteAndParse(request, SystemApiHelper::parseMemoryPoolJson);
   }
 
   @Override
   public HealthCheckInfo healthCheck() {
     Request request = getRequest(toFullUrl(HEALTH_CHECK));
 
-    return blockingExecuteAndParse(request, SystemApiHelper::healthCheckJsonParser);
+    return blockingExecuteAndParse(request, SystemApiHelper::parseHealthCheckJson);
   }
 
   @Override

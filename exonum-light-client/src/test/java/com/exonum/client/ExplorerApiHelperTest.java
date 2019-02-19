@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
 class ExplorerApiHelperTest {
 
   @Test
-  void submitTxParser() {
+  void parseSubmitTxResponse() {
     String expected = "f128c720e04b8243";
     String json = "{\"tx_hash\":\"" + expected + "\"}";
 
-    HashCode actual = ExplorerApiHelper.submitTxParser(json);
+    HashCode actual = ExplorerApiHelper.parseSubmitTxResponse(json);
     assertThat(actual, equalTo(HashCode.fromString(expected)));
   }
 }
