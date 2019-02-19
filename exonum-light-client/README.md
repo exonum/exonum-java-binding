@@ -14,7 +14,7 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
-| 0.1          | 0.10.* | 0.4         |
+| 0.1.0        | 0.10.* | 0.4         |
 
 ## Prerequisites
 - Java 8 or above is required for using this client
@@ -26,12 +26,12 @@ If you are using Maven, add this to your _pom.xml_ file
 <dependency>
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 If you are using Gradle, add this to your dependencies
 ```Groovy
-compile 'com.exonum.client:exonum-light-client:0.1-SNAPSHOT'
+compile 'com.exonum.client:exonum-light-client:0.1.0'
 ```
 
 ## Examples
