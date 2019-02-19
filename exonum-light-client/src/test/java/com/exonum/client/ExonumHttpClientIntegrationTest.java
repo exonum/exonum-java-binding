@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.is;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
 import java.io.IOException;

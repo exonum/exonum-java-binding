@@ -17,7 +17,6 @@
 
 package com.exonum.client;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
@@ -58,11 +57,10 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
     String msg = toHex(transactionMessage.toBytes());
+    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
+        ExplorerApiHelper.submitTxBody(msg));
 
-    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION), new SubmitTxRequest(msg));
-    SubmitTxResponse result = blockingExecuteWithResponse(request, SubmitTxResponse.class);
-
-    return result.getHash();
+    return blockingExecuteAndParse(request, ExplorerApiHelper::submitTxParser);
   }
 
   @Override
@@ -97,9 +95,7 @@ class ExonumHttpClient implements ExonumClient {
         .build();
   }
 
-  private static Request postRequest(URL url, Object requestBody) {
-    String jsonBody = json().toJson(requestBody);
-
+  private static Request postRequest(URL url, String jsonBody) {
     return new Request.Builder()
         .url(url)
         .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))
@@ -123,11 +119,6 @@ class ExonumHttpClient implements ExonumClient {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private <T> T blockingExecuteWithResponse(Request request, Class<T> type) {
-    String response = blockingExecutePlainText(request);
-    return json().fromJson(response, type);
   }
 
   private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {

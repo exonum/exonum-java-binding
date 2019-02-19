@@ -17,8 +17,20 @@
 
 package com.exonum.client.response;
 
+/**
+ * Consensus status.
+ */
 public enum ConsensusStatus {
+  /**
+   * Shows that consensus is active.
+   */
   ACTIVE,
+  /**
+   * Shows that consensus is enabled but is not active.
+   */
   ENABLED,
+  /**
+   * Shows that consensus is disabled.
+   */
   DISABLED
 }

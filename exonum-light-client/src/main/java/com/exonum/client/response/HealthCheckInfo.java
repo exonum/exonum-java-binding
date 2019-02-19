@@ -21,6 +21,15 @@ import lombok.Value;
 
 @Value
 public class HealthCheckInfo {
+  /**
+   * Consensus status.
+   */
   ConsensusStatus consensusStatus;
+
+  /**
+   * The number of peers that the node is connected to;
+   * {@code = 0} if the node is not connected to the network,
+   * or it's the single node network.
+   */
   int connectionsNumber;
 }

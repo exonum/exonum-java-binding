@@ -27,7 +27,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Value;
 
 /**
- * Helper class for Exonum System APIs.
+ * Utility class for Exonum System API.
  */
 final class SystemApiHelper {
 

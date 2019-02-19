@@ -53,8 +53,7 @@ public interface ExonumClient {
   int getUnconfirmedTransactionsCount();
 
   /**
-   * Returns {@code true} if the node is connected to the other peers;
-   * {@code false} — otherwise.
+   * Returns the node health check information.
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
