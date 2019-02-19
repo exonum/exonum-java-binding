@@ -34,7 +34,7 @@ public interface Node {
    * the {@linkplain #getPublicKey() node service key}, and then submits it into Exonum network.
    * This node does <em>not</em> execute the transaction immediately, but broadcasts it to all
    * the nodes in the network. Then each node verifies the transaction and, if it is correct,
-   * adds it to the <a href="https://exonum.com/doc/version/latest/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
+   * adds it to the <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>.
    * The transaction is executed later asynchronously.
    *
    * <p>Incorrect transactions (e.g., the payload of which cannot be deserialized by the target

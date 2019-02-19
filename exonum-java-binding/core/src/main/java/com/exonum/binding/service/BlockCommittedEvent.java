@@ -27,9 +27,9 @@ import java.util.OptionalInt;
 public interface BlockCommittedEvent {
 
   /**
-   * If this node is a <a href="https://exonum.com/doc/version/latest/glossary/#validator">validator</a>,
+   * If this node is a <a href="https://exonum.com/doc/version/0.10/glossary/#validator">validator</a>,
    * returns its identifier.
-   * If this node is an <a href="https://exonum.com/doc/version/latest/glossary/#auditor">auditor</a>,
+   * If this node is an <a href="https://exonum.com/doc/version/0.10/glossary/#auditor">auditor</a>,
    * it will return {@code OptionalInt.empty()}.
    */
   OptionalInt getValidatorId();
