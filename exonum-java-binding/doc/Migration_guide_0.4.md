@@ -9,12 +9,12 @@ the message signature with no conversion to an executable transaction.
 If the client application is in Java or Java Script, use the latest versions of light client 
 libraries:
 - Java Script [light client](https://github.com/exonum/exonum-client)
-- Java [light client](https://github.com/exonum/exonum-java-binding/tree/master/exonum-light-client)
+- Java [light client](https://github.com/exonum/exonum-java-binding/tree/jlc/v0.1.0/exonum-light-client#overview)
 
 The light clients for Exonum Java 0.4 submit transactions directly to the core endpoint 
 instead of a custom one in the service controller.
 
-[common-0.4]: https://search.maven.org/artifact/com.exonum.binding/exonum-java-binding-common/0.4/jar
+[common-0.4]: https://search.maven.org/artifact/com.exonum.binding/exonum-java-binding-common/0.4.0/jar
 [tx-message-jd]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/message/TransactionMessage.html#builder()
 
 ## Update the service
