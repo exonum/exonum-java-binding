@@ -8,6 +8,8 @@ branches:
     - master
     # Also build tagged revisions, e.g. v1.2.3-beta
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    # … and release branches, e.g. jlc/v0.2.0-release
+    - /^.+-release$/
 
 addons:
   apt:
