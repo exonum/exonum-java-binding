@@ -15,22 +15,15 @@
  *
  */
 
-package com.exonum.client;
+package com.exonum.client.response;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import com.google.gson.annotations.SerializedName;
+import lombok.Value;
 
-import com.exonum.binding.common.hash.HashCode;
-import org.junit.jupiter.api.Test;
-
-class ExplorerApiHelperTest {
-
-  @Test
-  void submitTxParser() {
-    String expected = "f128c720e04b8243";
-    String json = "{\"tx_hash\":\"" + expected + "\"}";
-
-    HashCode actual = ExplorerApiHelper.submitTxParser(json);
-    assertThat(actual, equalTo(HashCode.fromString(expected)));
-  }
+@Value
+public class TransactionLocation {
+  @SerializedName("block_height")
+  long blockHeight;
+  @SerializedName("position_in_block")
+  int positionInBlock;
 }

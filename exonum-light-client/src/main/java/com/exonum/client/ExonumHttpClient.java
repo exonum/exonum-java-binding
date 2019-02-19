@@ -17,6 +17,7 @@
 
 package com.exonum.client;
 
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
@@ -24,9 +25,8 @@ import static com.exonum.client.ExonumUrls.USER_AGENT;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.HealthCheckInfo;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.BaseEncoding;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,9 +43,6 @@ import okhttp3.Response;
  */
 class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
-  @VisibleForTesting
-  static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
-
   private final OkHttpClient httpClient;
   private final URL exonumHost;
 
@@ -56,9 +53,8 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    String msg = toHex(transactionMessage.toBytes());
     Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
-        ExplorerApiHelper.submitTxBody(msg));
+        new SubmitTxRequest(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::submitTxParser);
   }
@@ -84,10 +80,6 @@ class ExonumHttpClient implements ExonumClient {
     return blockingExecutePlainText(request);
   }
 
-  private static String toHex(byte[] array) {
-    return HEX_ENCODER.encode(array);
-  }
-
   private static Request getRequest(URL url) {
     return new Request.Builder()
         .url(url)
@@ -95,7 +87,9 @@ class ExonumHttpClient implements ExonumClient {
         .build();
   }
 
-  private static Request postRequest(URL url, String jsonBody) {
+  private static Request postRequest(URL url, Object body) {
+    String jsonBody = json().toJson(body);
+
     return new Request.Builder()
         .url(url)
         .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))

@@ -20,7 +20,7 @@ package com.exonum.client;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.google.common.annotations.VisibleForTesting;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.google.gson.annotations.SerializedName;
 import lombok.Value;
 
@@ -28,11 +28,6 @@ import lombok.Value;
  * Utility class for Exonum Explorer API.
  */
 final class ExplorerApiHelper {
-
-  static String submitTxBody(String message) {
-    SubmitTxRequest request = new SubmitTxRequest(message);
-    return json().toJson(request);
-  }
 
   static HashCode submitTxParser(String json) {
     SubmitTxResponse response = json().fromJson(json, SubmitTxResponse.class);
@@ -43,10 +38,9 @@ final class ExplorerApiHelper {
    * Json object wrapper for submit transaction request.
    */
   @Value
-  @VisibleForTesting
   static class SubmitTxRequest {
     @SerializedName("tx_body")
-    String body;
+    TransactionMessage body;
   }
 
   /**

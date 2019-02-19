@@ -18,8 +18,6 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.client.ExonumHttpClient.HEX_ENCODER;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
@@ -30,7 +28,6 @@ import static org.hamcrest.Matchers.is;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
 import java.io.IOException;
@@ -84,15 +81,6 @@ class ExonumHttpClientIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("POST"));
     assertThat(recordedRequest.getPath(), is(SUBMIT_TRANSACTION));
-
-    // Assert request encoding
-    String json = recordedRequest.getBody().readUtf8();
-    SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
-    String encodedTxMessage = actualRequest.getBody();
-    byte[] actualMessageBytes = HEX_ENCODER.decode(encodedTxMessage);
-    TransactionMessage actualTxMessage = TransactionMessage.fromBytes(actualMessageBytes);
-
-    assertThat(actualTxMessage, is(txMessage));
   }
 
   @Test
