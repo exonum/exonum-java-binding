@@ -300,7 +300,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ValueSetIndexProx
                 let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(env
-                    .new_object_by_id(
+                    .new_object_unchecked(
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[hash.into(), value.into()],

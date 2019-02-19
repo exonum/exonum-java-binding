@@ -68,14 +68,12 @@ impl serde::Serialize for TransactionProxy {
         S: serde::Serializer,
     {
         let res = unwrap_jni(self.exec.with_attached(|env| {
-            let res = unsafe {
-                env.call_method_unsafe(
-                    self.transaction.as_obj(),
-                    info_id(),
-                    JavaType::Object(RETVAL_TYPE_STRING.into()),
-                    &[],
-                )
-            };
+            let res = env.call_method_unchecked(
+                self.transaction.as_obj(),
+                info_id(),
+                JavaType::Object(RETVAL_TYPE_STRING.into()),
+                &[],
+            );
 
             let res = check_error_on_exception(env, res).map(|java_json_value| {
                 let json_obj = unwrap_jni(java_json_value.l());
@@ -107,8 +105,8 @@ impl Transaction for TransactionProxy {
             let tx_hash = JObject::from(env.byte_array_from_slice(tx_hash.as_ref())?);
             let author_pk = JObject::from(env.byte_array_from_slice(author_pk.as_ref())?);
 
-            let res = unsafe {
-                env.call_method_unsafe(
+            let res = env
+                .call_method_unchecked(
                     self.transaction.as_obj(),
                     execute_id(),
                     JavaType::Primitive(Primitive::Void),
@@ -118,8 +116,7 @@ impl Transaction for TransactionProxy {
                         JValue::from(author_pk),
                     ],
                 )
-                .and_then(JValue::v)
-            };
+                .and_then(JValue::v);
 
             Ok(check_transaction_execution_result(env, res))
         });
