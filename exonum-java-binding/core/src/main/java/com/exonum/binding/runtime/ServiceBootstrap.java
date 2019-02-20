@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * A Java service bootstrap loader.
  */
+// TODO: Remove this class in/after ECR-2940
 final class ServiceBootstrap {
 
   private static final Logger logger = LogManager.getLogger(ServiceBootstrap.class);
@@ -77,8 +78,10 @@ final class ServiceBootstrap {
 
   /**
    * Creates a user module that configures the bindings of that module.
+   *
+   * @param moduleName a fully-qualified class name of the user service module
    */
-  private static Module createUserModule(String moduleName) {
+  static Module createUserModule(String moduleName) {
     try {
       Class<?> moduleClass = Class.forName(moduleName);
       Constructor constructor = moduleClass.getDeclaredConstructor();
