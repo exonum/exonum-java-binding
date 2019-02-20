@@ -20,7 +20,8 @@
       <artifactId>guava</artifactId>
     </dependency>
 
-    <!-- The Jupiter API is a _runtime_ dependency. -->
+    <!-- The Jupiter API is a _runtime_ dependency to be able to include annotations,
+         like @CiOnly, in this artifact. -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
