@@ -92,7 +92,7 @@
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <!-- Empty for all JDKs but 11-- >
+    <!-- Empty for all JDKs but 11 -->
     <maven.javadoc.joption></maven.javadoc.joption>
 
     <assertj.version>3.11.1</assertj.version>
