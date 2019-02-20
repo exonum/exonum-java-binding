@@ -18,22 +18,23 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.client.ExonumHttpClient.HEX_ENCODER;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
-import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
+import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
+import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -83,16 +84,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("POST"));
-    assertThat(recordedRequest.getPath(), is(SUBMIT_TRANSACTION));
-
-    // Assert request encoding
-    String json = recordedRequest.getBody().readUtf8();
-    SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
-    String encodedTxMessage = actualRequest.getBody();
-    byte[] actualMessageBytes = HEX_ENCODER.decode(encodedTxMessage);
-    TransactionMessage actualTxMessage = TransactionMessage.fromBytes(actualMessageBytes);
-
-    assertThat(actualTxMessage, is(txMessage));
+    assertThat(recordedRequest.getPath(), is(TRANSACTIONS));
   }
 
   @Test
@@ -150,4 +142,22 @@ class ExonumHttpClientIntegrationTest {
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), is(USER_AGENT));
   }
+
+  @Test
+  void getTransactionNotFound() throws InterruptedException {
+    // Mock response
+    server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
+
+    // Call
+    Optional<TransactionResponse> response = exonumClient.getTransaction(HashCode.fromInt(0x00));
+
+    // Assert response
+    assertFalse(response.isPresent());
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest.getPath(), is(TRANSACTIONS));
+  }
+
 }

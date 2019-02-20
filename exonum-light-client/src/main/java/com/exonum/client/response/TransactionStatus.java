@@ -12,20 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.exonum.client;
+package com.exonum.client.response;
+
+import com.google.gson.annotations.SerializedName;
 
 /**
- * Contains Exonum API URLs.
+ * Status of a particular transaction.
  */
-final class ExonumUrls {
-  private static final String EXPLORER_PATHS_PREFIX = "/api/explorer/v1";
-  private static final String SYS_PATHS_PREFIX = "/api/system/v1";
-  static final String TRANSACTIONS = EXPLORER_PATHS_PREFIX + "/transactions";
-  static final String MEMORY_POOL = SYS_PATHS_PREFIX + "/mempool";
-  static final String HEALTH_CHECK = SYS_PATHS_PREFIX + "/healthcheck";
-  static final String USER_AGENT = SYS_PATHS_PREFIX + "/user_agent";
-
+public enum TransactionStatus {
+  /**
+   * Shows that transaction is in unconfirmed transaction pool currently.
+   */
+  @SerializedName("in-pool")
+  IN_POOL,
+  /**
+   * Shows that transaction is committed to the blockchain.
+   */
+  @SerializedName("committed")
+  COMMITTED
 }

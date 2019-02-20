@@ -19,17 +19,18 @@ package com.exonum.client;
 
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
-import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
+import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.HealthCheckInfo;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.BaseEncoding;
+import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.function.Function;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -43,8 +44,6 @@ import okhttp3.Response;
  */
 class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
-  @VisibleForTesting
-  static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
 
   private final OkHttpClient httpClient;
   private final URL exonumHost;
@@ -56,9 +55,8 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    String msg = toHex(transactionMessage.toBytes());
-    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
-        ExplorerApiHelper.createSubmitTxBody(msg));
+    Request request = postRequest(toFullUrl(TRANSACTIONS),
+        ExplorerApiHelper.createSubmitTxBody(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
   }
@@ -84,8 +82,22 @@ class ExonumHttpClient implements ExonumClient {
     return blockingExecutePlainText(request);
   }
 
-  private static String toHex(byte[] array) {
-    return HEX_ENCODER.encode(array);
+  @Override
+  public Optional<TransactionResponse> getTransaction(HashCode id) {
+    Request request = getRequest(toFullUrl(TRANSACTIONS));
+
+    return blockingExecute(request, response -> {
+      if (response.code() == HTTP_NOT_FOUND) {
+        return Optional.empty();
+      } else if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't success: " + response.toString());
+      } else {
+        TransactionResponse txResponse = ExplorerApiHelper
+            .parseGetTxResponse(readBody(response));
+
+        return Optional.of(txResponse);
+      }
+    });
   }
 
   private static Request getRequest(URL url) {
@@ -110,20 +122,34 @@ class ExonumHttpClient implements ExonumClient {
     }
   }
 
-  private String blockingExecutePlainText(Request request) {
+  private <T> T blockingExecute(Request request, Function<Response, T> responseHandler) {
     try (Response response = httpClient.newCall(request).execute()) {
-      if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't success: " + response.toString());
-      }
-      return response.body().string();
+      return responseHandler.apply(response);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  private String blockingExecutePlainText(Request request) {
+    return blockingExecute(request, response -> {
+      if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't success: " + response.toString());
+      }
+      return readBody(response);
+    });
+  }
+
   private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {
     String response = blockingExecutePlainText(request);
     return parser.apply(response);
+  }
+
+  private static String readBody(Response response) {
+    try {
+      return response.body().string();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
