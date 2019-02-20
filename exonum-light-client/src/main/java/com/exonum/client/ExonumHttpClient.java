@@ -20,16 +20,19 @@ package com.exonum.client;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
-import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
+import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.function.Function;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -53,7 +56,7 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
+    Request request = postRequest(toFullUrl(TRANSACTIONS),
         new SubmitTxRequest(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
@@ -80,6 +83,24 @@ class ExonumHttpClient implements ExonumClient {
     return blockingExecutePlainText(request);
   }
 
+  @Override
+  public Optional<TransactionResponse> getTransaction(HashCode id) {
+    Request request = getRequest(toFullUrl(TRANSACTIONS));
+
+    return blockingExecute(request, response -> {
+      if (response.code() == HTTP_NOT_FOUND) {
+        return Optional.empty();
+      } else if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't success: " + response.toString());
+      } else {
+        TransactionResponse txResponse = ExplorerApiHelper
+            .parseGetTxResponse(readBody(response));
+
+        return Optional.of(txResponse);
+      }
+    });
+  }
+
   private static Request getRequest(URL url) {
     return new Request.Builder()
         .url(url)
@@ -104,20 +125,34 @@ class ExonumHttpClient implements ExonumClient {
     }
   }
 
-  private String blockingExecutePlainText(Request request) {
+  private <T> T blockingExecute(Request request, Function<Response, T> responseHandler) {
     try (Response response = httpClient.newCall(request).execute()) {
-      if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't success: " + response.toString());
-      }
-      return response.body().string();
+      return responseHandler.apply(response);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  private String blockingExecutePlainText(Request request) {
+    return blockingExecute(request, response -> {
+      if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't success: " + response.toString());
+      }
+      return readBody(response);
+    });
+  }
+
   private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {
     String response = blockingExecutePlainText(request);
     return parser.apply(response);
+  }
+
+  private static String readBody(Response response) {
+    try {
+      return response.body().string();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

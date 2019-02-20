@@ -57,7 +57,6 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.serialization.BlockAdapterFactory;
-import com.exonum.binding.blockchain.serialization.TransactionLocationAdapterFactory;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
@@ -70,6 +69,7 @@ import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
+import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
 import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
 import com.exonum.binding.common.transaction.TransactionLocation;
 import com.exonum.binding.common.transaction.TransactionResult;

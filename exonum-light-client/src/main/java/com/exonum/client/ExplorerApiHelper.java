@@ -21,7 +21,10 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.client.response.TransactionLocation;
+import com.exonum.binding.common.transaction.TransactionLocation;
+import com.exonum.binding.common.transaction.TransactionResult;
+import com.exonum.client.ExplorerApiHelper.GetTxResponse.ExecutionResult;
+import com.exonum.client.ExplorerApiHelper.GetTxResponse.ExecutionResult.Status;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.google.gson.JsonObject;
@@ -39,15 +42,29 @@ final class ExplorerApiHelper {
     return response.getHash();
   }
 
-  static TransactionResponse parseTxResponse(String json) {
+  static TransactionResponse parseGetTxResponse(String json) {
     GetTxResponse response = json().fromJson(json, GetTxResponse.class);
+    TransactionResult executionResult = getTransactionResult(response.getStatus());
 
     return new TransactionResponse(
         response.getType(),
         response.getContent().getMessage(),
-        "ok", //TODO
+        executionResult,
         response.getLocation()
     );
+  }
+
+  private static TransactionResult getTransactionResult(ExecutionResult executionStatus) {
+    if (executionStatus == null) {
+      return null;
+    } else if (executionStatus.getType() == Status.SUCCESS) {
+      return TransactionResult.successful();
+    } else if (executionStatus.getType() == Status.ERROR) {
+      return TransactionResult.error(executionStatus.getCode(), executionStatus.getDescription());
+    } else {
+      throw new IllegalArgumentException("Unexpected transaction execution status"
+          + executionStatus.getType());
+    }
   }
 
   /**
@@ -69,22 +86,36 @@ final class ExplorerApiHelper {
   }
 
   @Value
-  private static class GetTxResponse {
+  static class GetTxResponse {
     @NonNull
     TransactionStatus type;
     @NonNull
-    GetTxResponseContent content;
+    Content content;
     TransactionLocation location;
     @SerializedName("location_proof")
-    JsonObject locationProof;
-    JsonObject status;
-  }
+    JsonObject locationProof; //TODO: in scope of LC P3
+    ExecutionResult status;
 
-  @Value
-  private static class GetTxResponseContent {
-    JsonObject debug; // contains executable tx in json. currently not supported
-    @NonNull
-    TransactionMessage message;
+    @Value
+    static class Content {
+      JsonObject debug; // contains executable tx in json. currently not supported
+      @NonNull
+      TransactionMessage message;
+    }
+
+    @Value
+    static class ExecutionResult {
+      Status type;
+      int code;
+      String description;
+
+      enum Status {
+        @SerializedName("success")
+        SUCCESS,
+        @SerializedName("error")
+        ERROR
+      }
+    }
   }
 
   private ExplorerApiHelper() {

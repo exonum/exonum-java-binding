@@ -30,7 +30,7 @@ import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class TransactionMessageSerializationTest {
+class TransactionMessageJsonSerializerTest {
 
   @ParameterizedTest
   @MethodSource("source")

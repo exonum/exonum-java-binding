@@ -20,7 +20,6 @@ package com.exonum.binding.common.serialization.json;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.message.TransactionMessage;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -33,8 +32,7 @@ import java.lang.reflect.Type;
 
 final class TransactionMessageJsonSerializer implements JsonSerializer<TransactionMessage>,
     JsonDeserializer<TransactionMessage> {
-  @VisibleForTesting
-  static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
+  private static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
 
   @Override
   public JsonElement serialize(TransactionMessage src, Type typeOfSrc,

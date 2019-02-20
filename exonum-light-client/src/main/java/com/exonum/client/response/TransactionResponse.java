@@ -18,6 +18,8 @@
 package com.exonum.client.response;
 
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.transaction.TransactionLocation;
+import com.exonum.binding.common.transaction.TransactionResult;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -27,6 +29,6 @@ public class TransactionResponse {
   TransactionStatus status;
   @NonNull
   TransactionMessage message;
-  String executionStatus;
+  TransactionResult executionResult;
   TransactionLocation location;
 }
