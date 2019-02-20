@@ -17,16 +17,20 @@
 
 package com.exonum.client;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
+import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
+import static com.exonum.client.ExonumUrls.USER_AGENT;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.HealthCheckInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Function;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -53,20 +57,45 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
     String msg = toHex(transactionMessage.toBytes());
+    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
+        ExplorerApiHelper.createSubmitTxBody(msg));
 
-    Request request = createRequest(toFullUrl(SUBMIT_TRANSACTION), new SubmitTxRequest(msg));
-    SubmitTxResponse result = blockingExecuteWithResponse(request, SubmitTxResponse.class);
+    return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
+  }
 
-    return result.getHash();
+  @Override
+  public int getUnconfirmedTransactionsCount() {
+    Request request = getRequest(toFullUrl(MEMORY_POOL));
+
+    return blockingExecuteAndParse(request, SystemApiHelper::parseMemoryPoolJson);
+  }
+
+  @Override
+  public HealthCheckInfo healthCheck() {
+    Request request = getRequest(toFullUrl(HEALTH_CHECK));
+
+    return blockingExecuteAndParse(request, SystemApiHelper::parseHealthCheckJson);
+  }
+
+  @Override
+  public String getUserAgentInfo() {
+    Request request = getRequest(toFullUrl(USER_AGENT));
+
+    return blockingExecutePlainText(request);
   }
 
   private static String toHex(byte[] array) {
     return HEX_ENCODER.encode(array);
   }
 
-  private static Request createRequest(URL url, Object requestBody) {
-    String jsonBody = json().toJson(requestBody);
+  private static Request getRequest(URL url) {
+    return new Request.Builder()
+        .url(url)
+        .get()
+        .build();
+  }
 
+  private static Request postRequest(URL url, String jsonBody) {
     return new Request.Builder()
         .url(url)
         .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))
@@ -81,17 +110,20 @@ class ExonumHttpClient implements ExonumClient {
     }
   }
 
-  private <T> T blockingExecuteWithResponse(Request request, Class<T> responseObject) {
+  private String blockingExecutePlainText(Request request) {
     try (Response response = httpClient.newCall(request).execute()) {
       if (!response.isSuccessful()) {
         throw new RuntimeException("Execution wasn't success: " + response.toString());
       }
-      String responseJson = response.body().string();
-
-      return json().fromJson(responseJson, responseObject);
+      return response.body().string();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {
+    String response = blockingExecutePlainText(request);
+    return parser.apply(response);
   }
 
 }
