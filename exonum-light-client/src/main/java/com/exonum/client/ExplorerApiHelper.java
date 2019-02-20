@@ -21,7 +21,12 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.TransactionLocation;
+import com.exonum.client.response.TransactionResponse;
+import com.exonum.client.response.TransactionStatus;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import lombok.NonNull;
 import lombok.Value;
 
 /**
@@ -32,6 +37,17 @@ final class ExplorerApiHelper {
   static HashCode parseSubmitTxResponse(String json) {
     SubmitTxResponse response = json().fromJson(json, SubmitTxResponse.class);
     return response.getHash();
+  }
+
+  static TransactionResponse parseTxResponse(String json) {
+    GetTxResponse response = json().fromJson(json, GetTxResponse.class);
+
+    return new TransactionResponse(
+        response.getType(),
+        response.getContent().getMessage(),
+        "ok", //TODO
+        response.getLocation()
+    );
   }
 
   /**
@@ -50,6 +66,25 @@ final class ExplorerApiHelper {
   private static class SubmitTxResponse {
     @SerializedName("tx_hash")
     HashCode hash;
+  }
+
+  @Value
+  private static class GetTxResponse {
+    @NonNull
+    TransactionStatus type;
+    @NonNull
+    GetTxResponseContent content;
+    TransactionLocation location;
+    @SerializedName("location_proof")
+    JsonObject locationProof;
+    JsonObject status;
+  }
+
+  @Value
+  private static class GetTxResponseContent {
+    JsonObject debug; // contains executable tx in json. currently not supported
+    @NonNull
+    TransactionMessage message;
   }
 
   private ExplorerApiHelper() {

@@ -17,16 +17,11 @@
 
 package com.exonum.client.response;
 
-import com.exonum.binding.common.message.TransactionMessage;
-import lombok.NonNull;
-import lombok.Value;
+import com.google.gson.annotations.SerializedName;
 
-@Value
-public class TransactionResponse {
-  @NonNull
-  TransactionStatus status;
-  @NonNull
-  TransactionMessage message;
-  String executionStatus;
-  TransactionLocation location;
+public enum TransactionStatus {
+  @SerializedName("in-pool")
+  IN_POOL,
+  @SerializedName("committed")
+  COMMITTED
 }

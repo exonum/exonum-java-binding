@@ -73,7 +73,7 @@ public interface ExonumClient {
    * @throws RuntimeException if the client is unable to submit the transaction
    *        (e.g., in case of connectivity problems)
    */
-  //  Optional<TransactionResponse> getTransaction(HashCode id);
+  //    Optional<TransactionResponse> getTransaction(HashCode id);
 
   /**
    * Returns Exonum client builder.
