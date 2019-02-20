@@ -92,6 +92,8 @@
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
+    <!-- Empty for all JDKs but 11-->
+    <maven.javadoc.joption></maven.javadoc.joption>
 
     <assertj.version>3.11.1</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
@@ -382,7 +384,7 @@
           <configuration>
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
-            <additionalJOption>--no-module-directories</additionalJOption>
+            <additionalJOption>${maven.javadoc.joption}</additionalJOption>
           </configuration>
           <executions>
             <execution>
@@ -600,6 +602,17 @@
       </activation>
       <properties>
         <project.skipJavaITs>true</project.skipJavaITs>
+      </properties>
+    </profile>
+
+    <!-- Fill in needed property when generating Javadocs on JDK 11-->
+    <profile>
+      <id>generate-javadocs-jdk11</id>
+      <activation>
+        <jdk>11</jdk>
+      </activation>
+      <properties>
+        <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
       </properties>
     </profile>
   </profiles>
