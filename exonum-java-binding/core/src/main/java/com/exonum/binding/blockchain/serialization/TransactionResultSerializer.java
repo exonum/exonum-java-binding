@@ -16,13 +16,13 @@
 
 package com.exonum.binding.blockchain.serialization;
 
-import static com.exonum.binding.blockchain.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
-import static com.exonum.binding.blockchain.TransactionResult.SUCCESSFUL_RESULT_STATUS_CODE;
-import static com.exonum.binding.blockchain.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.exonum.binding.common.transaction.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
+import static com.exonum.binding.common.transaction.TransactionResult.SUCCESSFUL_RESULT_STATUS_CODE;
+import static com.exonum.binding.common.transaction.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
 
-import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.transaction.TransactionResult;
 
 public enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;

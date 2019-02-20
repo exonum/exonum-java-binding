@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.transaction;
 
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
