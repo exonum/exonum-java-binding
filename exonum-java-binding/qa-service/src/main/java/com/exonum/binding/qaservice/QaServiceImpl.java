@@ -22,12 +22,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.transaction.TransactionLocation;
+import com.exonum.binding.common.transaction.TransactionResult;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.ErrorTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;

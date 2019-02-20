@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,18 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.transaction;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
-
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
@@ -32,8 +31,6 @@ import javax.annotation.Nullable;
  * if execution has failed.
  * Errors might be either service-defined or unexpected. Service-defined errors consist of an error
  * code and an optional description. Unexpected errors include only a description.
- *
- * @see TransactionExecutionException
  */
 @AutoValue
 public abstract class TransactionResult {
@@ -60,9 +57,8 @@ public abstract class TransactionResult {
   }
 
   /**
-   * Creates a transaction result corresponding to a user-defined
-   * {@linkplain TransactionExecutionException exception} during transaction execution
-   * (or the corresponding Error in Rust services).
+   * Creates a transaction result corresponding to a user-defined exception
+   * during transaction execution (or the corresponding Error in Rust services).
    *
    * @param errorCode a user-defined error code; must be in range [0; 255]
    * @param errorDescription an optional error description; may be null, which is considered
@@ -124,7 +120,7 @@ public abstract class TransactionResult {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.blockchain.serialization.TransactionResultAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory
    */
   public static TypeAdapter<TransactionResult> typeAdapter(Gson gson) {
     return new AutoValue_TransactionResult.GsonTypeAdapter(gson);
