@@ -76,11 +76,13 @@ $ ejb-app finalize testnet/sec.toml testnet/node.toml \
 ```
 
 ### Step 3. Run Configured Node
-There are two specific parameters here:
+There are two required parameters here:
 - `--ejb-log-config-path` for path to `log4j` configuration file.
   Default config provided with EJB App prints to STDOUT.
 - `--ejb-port` for port that your service will use for communication.
   Java Binding does not use Exonum Core API port directly.
+
+There are also optional parameters useful for debugging purposes and JVM fine tuning:
 - `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
  append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form

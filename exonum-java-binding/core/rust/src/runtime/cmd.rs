@@ -29,11 +29,11 @@ use toml::Value;
 /// results to the persistent storage available on the specific step. Finally, after the `run` step
 /// we compose the `Config` structure that contains all required info for service initialization.
 
-// Generate-template command
+// Parameters for `generate-template` command
 const EJB_MODULE_NAME: &str = "EJB_MODULE_NAME";
-// Finalize command
+// Parameters for `finalize` command
 const EJB_SERVICE_CLASSPATH: &str = "EJB_SERVICE_CLASSPATH";
-// Run command
+// Parameters for `run` command
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_PORT: &str = "EJB_PORT";
 const JVM_DEBUG_SOCKET: &str = "JVM_DEBUG_SOCKET";

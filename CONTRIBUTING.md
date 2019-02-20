@@ -42,7 +42,7 @@ $ cd exonum-java-binding
 $ ./package_app.sh
 ```
 This command will build and package EJB App with all the necessary runtime dependencies
-in a single `zip` archive in `exonum-java-binding-core/target` directory.
+in a single `zip` archive in `exonum-java-binding/core/target` directory.
 
 **Automatic EJB App packaging is only supported on Linux platform.**
 
