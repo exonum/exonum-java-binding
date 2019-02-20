@@ -19,7 +19,7 @@ Java 8 or newer is required for building and using Exonum Java projects.
  
 ## Links
 For more information see the relevant documentation on the tool:
-  - [What is Exonum?](https://exonum.com/doc/version/latest/get-started/what-is-exonum/)
+  - [What is Exonum?](https://exonum.com/doc/version/0.10/get-started/what-is-exonum/)
   - [Roadmap](ROADMAP.md)
   - [Contribution Guide](CONTRIBUTING.md)
   - [Code of Conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)

@@ -25,6 +25,7 @@ use jni::signature::JavaType;
 use serde_json;
 use serde_json::value::Value;
 use std::fmt;
+use std::str::FromStr;
 
 use proxy::node::NodeContext;
 use storage::View;
@@ -196,6 +197,7 @@ impl Service for ServiceProxy {
 
     fn wire_api(&self, builder: &mut ServiceApiBuilder) {
         assert!(builder.blockchain().is_some());
+
         let node = NodeContext::new(
             self.exec.clone(),
             builder.blockchain().unwrap().clone(),

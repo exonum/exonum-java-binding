@@ -59,6 +59,7 @@
     <module>qa-service</module>
     <module>cryptocurrency-demo</module>
     <module>service-archetype</module>
+    <module>time-service</module>
   </modules>
 
   <scm>
@@ -96,13 +97,13 @@
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
-    <log4j.version>2.11.1</log4j.version>
+    <log4j.version>2.11.2</log4j.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.3.2</junit.jupiter.version>
+    <junit.jupiter.version>5.4.0</junit.jupiter.version>
     <powermock.version>2.0.0</powermock.version>
     <protobuf.version>3.6.1</protobuf.version>
-    <mockito-core.version>2.23.4</mockito-core.version>
+    <mockito-core.version>2.24.0</mockito-core.version>
     <guava.version>27.0.1-jre</guava.version>
     <vertx.version>3.5.4</vertx.version>
     <equalsverifier.version>3.1.4</equalsverifier.version>
@@ -241,22 +242,11 @@
       <scope>test</scope>
     </dependency>
 
-    <!--JUnit5-->
+    <!--JUnit5: junit-jupiter aggregates junit-jupiter-api and junit-jupiter-params +
+        a runtime dependency on junit-jupiter-engine -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
+      <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -376,7 +366,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>3.1.10</version>
+          <version>3.1.11</version>
         </plugin>
 
         <plugin>

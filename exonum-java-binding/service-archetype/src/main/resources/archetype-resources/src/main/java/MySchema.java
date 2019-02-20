@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@code MySchema} provides access to the tables of {@link $.MyService},
  * given a database state: a {@link View}.
  *
- * @see <a href="https://exonum.com/doc/version/latest/architecture/storage/#table-types">Exonum table types.</a>
+ * @see <a href="https://exonum.com/doc/version/0.10/architecture/storage/#table-types">Exonum table types.</a>
  */
 public final class MySchema implements Schema {
 
@@ -42,7 +42,7 @@ public final class MySchema implements Schema {
   public List<HashCode> getStateHashes() {
     // You shall usually return a list of the state hashes
     // of all Merklized collections of this service,
-    // see https://exonum.com/doc/version/latest/architecture/storage/#merkelized-indices
+    // see https://exonum.com/doc/version/0.10/architecture/storage/#merkelized-indices
     return Collections.emptyList();
   }
 }

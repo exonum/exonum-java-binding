@@ -8,6 +8,8 @@ branches:
     - master
     # Also build tagged revisions, e.g. v1.2.3-beta
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    # … and release branches, e.g. jlc/v0.2.0-release
+    - /^.+-release$/
 
 addons:
   apt:
@@ -49,14 +51,6 @@ matrix:
       os: linux
       jdk: openjdk11
       env: CHECK_RUST=false
-  allow_failures:
-    # Flaky service_runtime IT: ECR-1734
-    - os: linux
-      jdk: openjdk11
-    # Broken everything in Rust: ECR-2750
-    - env: CHECK_RUST=true
-  # Report the result of the build as it is ready.
-  fast_finish: true
 
 cache:
   directories:

@@ -18,8 +18,6 @@
 //! some default stub value still should be returned from the Rust side.
 
 #![deny(missing_docs)]
-// `JNIEnv` is passed by value to the extern functions.
-#![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
@@ -36,9 +34,11 @@ extern crate serde;
 extern crate serde_derive;
 pub extern crate serde_json;
 
-#[cfg(feature = "resource-manager")]
 #[macro_use]
 extern crate lazy_static;
+
+#[cfg(test)]
+extern crate tempfile;
 
 mod error;
 mod init;
