@@ -19,6 +19,7 @@ package com.exonum.binding.common.transaction;
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Transaction position in the blockchain. Enumeration begins from 0.
@@ -33,18 +34,20 @@ public abstract class TransactionLocation {
   /**
    * Height of the block where the transaction was committed.
    */
+  @SerializedName("block_height")
   public abstract long getHeight();
 
   /**
    * Zero-based position of this transaction in the block. Transactions executed in the ascending
    * order of these indices.
    */
+  @SerializedName("position_in_block")
   public abstract long getIndexInBlock();
 
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.blockchain.serialization.TransactionLocationAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory
    */
   public static TypeAdapter<TransactionLocation> typeAdapter(Gson gson) {
     return new AutoValue_TransactionLocation.GsonTypeAdapter(gson);
