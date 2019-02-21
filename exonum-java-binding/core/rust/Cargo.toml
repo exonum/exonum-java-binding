@@ -19,7 +19,7 @@ exonum = "0.10"
 exonum-time = "0.10"
 failure = "0.1.1"
 toml = "0.4.6"
-jni = { git = "https://github.com/skletsun/jni-rs", branch = "allow-methods-return-null", features = ["invocation"] }
+jni = "0.11.0"
 lazy_static = "1.2.0"
 log = "0.4.1"
 parking_lot = "0.6"
