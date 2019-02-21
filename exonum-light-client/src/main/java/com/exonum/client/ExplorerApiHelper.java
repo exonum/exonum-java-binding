@@ -66,7 +66,7 @@ final class ExplorerApiHelper {
     } else if (executionStatus.getType() == GetTxResponseExecutionStatus.ERROR) {
       return TransactionResult.error(executionStatus.getCode(), executionStatus.getDescription());
     } else {
-      throw new IllegalArgumentException("Unexpected transaction execution status"
+      throw new IllegalArgumentException("Unexpected transaction execution status: "
           + executionStatus.getType());
     }
   }

@@ -90,7 +90,7 @@ class ExonumHttpClient implements ExonumClient {
       if (response.code() == HTTP_NOT_FOUND) {
         return Optional.empty();
       } else if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't success: " + response.toString());
+        throw new RuntimeException("Execution wasn't successful: " + response.toString());
       } else {
         TransactionResponse txResponse = ExplorerApiHelper
             .parseGetTxResponse(readBody(response));
@@ -133,7 +133,7 @@ class ExonumHttpClient implements ExonumClient {
   private String blockingExecutePlainText(Request request) {
     return blockingExecute(request, response -> {
       if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't success: " + response.toString());
+        throw new RuntimeException("Execution wasn't successful: " + response.toString());
       }
       return readBody(response);
     });
