@@ -61,6 +61,7 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
             .insert(handle, HandleInfo::new(TypeId::of::<T>(), ownership))
             .is_none(),
         "Trying to add the same handle for the second time: {:X}",
+        handle
     )
 }
 
