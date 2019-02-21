@@ -18,21 +18,28 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
+import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.exonum.client.TestUtils.createTransactionMessage;
+import static com.exonum.client.TestUtils.toHex;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
+import com.exonum.client.response.TransactionStatus;
 import java.io.IOException;
 import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
@@ -85,6 +92,13 @@ class ExonumHttpClientIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("POST"));
     assertThat(recordedRequest.getPath(), is(TRANSACTIONS));
+
+    // Assert request encoding
+    String json = recordedRequest.getBody().readUtf8();
+    SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
+    TransactionMessage actualTxMessage = actualRequest.getBody();
+
+    assertThat(actualTxMessage, is(txMessage));
   }
 
   @Test
@@ -144,12 +158,49 @@ class ExonumHttpClientIntegrationTest {
   }
 
   @Test
+  void getTransaction() throws InterruptedException {
+    // Mock response
+    TransactionMessage expectedMessage = createTransactionMessage();
+    String mockResponse = "{\n"
+        + "    'type': 'in-pool',\n"
+        + "    'content': {\n"
+        + "        'debug': {\n"
+        + "            'to': {\n"
+        + "                'data': []\n"
+        + "            },\n"
+        + "            'amount': 10,\n"
+        + "            'seed': 9587307158524814255\n"
+        + "        },\n"
+        + "        'message': '" + toHex(expectedMessage) + "'\n"
+        + "    }\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    HashCode id = HashCode.fromInt(0x00);
+    Optional<TransactionResponse> response = exonumClient.getTransaction(id);
+
+    // Assert response
+    assertTrue(response.isPresent());
+    TransactionResponse actualResponse = response.get();
+    assertThat(actualResponse.getStatus(), is(TransactionStatus.IN_POOL));
+    assertThat(actualResponse.getMessage(), is(expectedMessage));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest.getPath(), startsWith(TRANSACTIONS));
+    assertThat(recordedRequest.getRequestUrl().queryParameter("hash"), is(id.toString()));
+  }
+
+  @Test
   void getTransactionNotFound() throws InterruptedException {
     // Mock response
     server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
     // Call
-    Optional<TransactionResponse> response = exonumClient.getTransaction(HashCode.fromInt(0x00));
+    HashCode id = HashCode.fromInt(0x00);
+    Optional<TransactionResponse> response = exonumClient.getTransaction(id);
 
     // Assert response
     assertFalse(response.isPresent());
@@ -157,7 +208,8 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest.getPath(), is(TRANSACTIONS));
+    assertThat(recordedRequest.getPath(), startsWith(TRANSACTIONS));
+    assertThat(recordedRequest.getRequestUrl().queryParameter("hash"), is(id.toString()));
   }
 
 }
