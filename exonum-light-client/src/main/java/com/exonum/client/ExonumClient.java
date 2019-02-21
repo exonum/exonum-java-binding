@@ -69,10 +69,10 @@ public interface ExonumClient {
   String getUserAgentInfo();
 
   /**
-   * Returns transaction with current status. Or {@code Optional.empty()} if
-   * the requested transaction is not found.
+   * Returns the information about the transaction; or {@code Optional.empty()}
+   * if the requested transaction is not found.
    * @param id transaction message hash
-   * @throws RuntimeException if the client is unable to submit the transaction
+   * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
   Optional<TransactionResponse> getTransaction(HashCode id);

@@ -39,12 +39,12 @@ public final class JsonSerializer {
    */
   public static GsonBuilder builder() {
     return new GsonBuilder()
+        .registerTypeHierarchyAdapter(TransactionMessage.class,
+            new TransactionMessageJsonSerializer())
         .registerTypeHierarchyAdapter(HashCode.class, new HashCodeJsonSerializer())
         .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
         .registerTypeAdapterFactory(StoredConfigurationAdapterFactory.create())
-        .setLongSerializationPolicy(LongSerializationPolicy.STRING)
-        .registerTypeHierarchyAdapter(TransactionMessage.class,
-            new TransactionMessageJsonSerializer());
+        .setLongSerializationPolicy(LongSerializationPolicy.STRING);
   }
 
   /**

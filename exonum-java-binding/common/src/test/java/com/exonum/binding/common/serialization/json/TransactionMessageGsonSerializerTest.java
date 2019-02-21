@@ -25,16 +25,28 @@ import static org.hamcrest.Matchers.is;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class TransactionMessageJsonSerializerTest {
+class TransactionMessageGsonSerializerTest {
+
+  private static Gson gson;
+
+  @BeforeAll
+  static void setup() {
+    gson = JsonSerializer.builder()
+        .registerTypeHierarchyAdapter(TransactionMessage.class,
+            new TransactionMessageJsonSerializer())
+        .create();
+  }
 
   @ParameterizedTest
   @MethodSource("source")
   void roundTripTest(TransactionMessage msg) {
-    String json = json().toJson(msg);
+    String json = gson.toJson(msg);
     TransactionMessage restoredMsg = json().fromJson(json, TransactionMessage.class);
 
     assertThat(restoredMsg, is(msg));

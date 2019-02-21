@@ -75,7 +75,7 @@ final class ExplorerApiHelper {
    * Json object wrapper for submit transaction request.
    */
   @Value
-  private static class SubmitTxRequest {
+  static class SubmitTxRequest {
     @SerializedName("tx_body")
     TransactionMessage body;
   }

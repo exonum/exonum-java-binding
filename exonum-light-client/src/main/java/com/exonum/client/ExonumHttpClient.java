@@ -21,6 +21,7 @@ import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -28,10 +29,10 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Function;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -84,7 +85,12 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public Optional<TransactionResponse> getTransaction(HashCode id) {
-    Request request = getRequest(toFullUrl(TRANSACTIONS));
+    HashCode hash = checkNotNull(id);
+    HttpUrl url = urlBuilder()
+        .encodedPath(TRANSACTIONS)
+        .addQueryParameter("hash", hash.toString())
+        .build();
+    Request request = getRequest(url);
 
     return blockingExecute(request, response -> {
       if (response.code() == HTTP_NOT_FOUND) {
@@ -100,26 +106,32 @@ class ExonumHttpClient implements ExonumClient {
     });
   }
 
-  private static Request getRequest(URL url) {
+  private static Request getRequest(HttpUrl url) {
     return new Request.Builder()
         .url(url)
         .get()
         .build();
   }
 
-  private static Request postRequest(URL url, String jsonBody) {
+  private static Request postRequest(HttpUrl url, String jsonBody) {
     return new Request.Builder()
         .url(url)
         .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))
         .build();
   }
 
-  private URL toFullUrl(String relativeUrl) {
-    try {
-      return new URL(exonumHost, relativeUrl);
-    } catch (MalformedURLException e) {
-      throw new AssertionError("Should never happen", e);
-    }
+  private HttpUrl toFullUrl(String relativeUrl) {
+    return urlBuilder()
+        .encodedPath(relativeUrl)
+        .build();
+  }
+
+  private HttpUrl.Builder urlBuilder() {
+
+    return new HttpUrl.Builder()
+        .scheme(exonumHost.getProtocol())
+        .host(exonumHost.getHost())
+        .port(exonumHost.getPort());
   }
 
   private <T> T blockingExecute(Request request, Function<Response, T> responseHandler) {
