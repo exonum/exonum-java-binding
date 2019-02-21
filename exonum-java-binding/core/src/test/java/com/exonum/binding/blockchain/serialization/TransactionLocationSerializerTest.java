@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.transaction.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionLocation;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

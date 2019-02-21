@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.transaction.TransactionLocation;
-import com.exonum.binding.common.transaction.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;

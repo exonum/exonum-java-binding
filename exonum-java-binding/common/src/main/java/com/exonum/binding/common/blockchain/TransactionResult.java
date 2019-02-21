@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.transaction;
+package com.exonum.binding.common.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

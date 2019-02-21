@@ -26,8 +26,8 @@ import static org.hamcrest.Matchers.is;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.common.transaction.TransactionLocation;
-import com.exonum.binding.common.transaction.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import org.junit.jupiter.api.Test;

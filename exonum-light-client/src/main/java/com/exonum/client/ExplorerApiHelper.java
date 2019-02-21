@@ -21,8 +21,8 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.common.transaction.TransactionLocation;
-import com.exonum.binding.common.transaction.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.google.gson.JsonObject;
