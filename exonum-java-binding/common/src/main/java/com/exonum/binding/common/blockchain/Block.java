@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain;
+package com.exonum.binding.common.blockchain;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.service.Schema;
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
@@ -33,8 +32,6 @@ import com.google.gson.TypeAdapter;
  *
  * <p>This structure only contains the amount of transactions and the transactions root hash as well
  * as other information, but not the transactions themselves.
- *
- * @see Blockchain
  */
 @AutoValue
 public abstract class Block {
@@ -71,14 +68,11 @@ public abstract class Block {
 
   /**
    * Root hash of the Merkle tree of transactions in this block.
-   * These transactions can be accessed with {@link Blockchain#getBlockTransactions(Block)}.
    */
   public abstract HashCode getTxRootHash();
 
   /**
    * Hash of the blockchain state after applying transactions in the block.
-   *
-   * @see Schema#getStateHashes()
    */
   public abstract HashCode getStateHash();
 
@@ -93,7 +87,7 @@ public abstract class Block {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.blockchain.serialization.BlockAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.BlockAdapterFactory
    */
   public static TypeAdapter<Block> typeAdapter(Gson gson) {
     return new AutoValue_Block.GsonTypeAdapter(gson);
@@ -139,8 +133,6 @@ public abstract class Block {
 
     /**
      * Sets the Merkle root hash of the collection holding all transactions in this block.
-     * This collection and transactions can be accessed with
-     * {@link Blockchain#getBlockTransactions(Block)}.
      */
     public abstract Builder txRootHash(HashCode txRootHash);
 
@@ -148,8 +140,6 @@ public abstract class Block {
     /**
      * Sets the blockchain state hash at the moment this block was committed. The blockchain
      * state hash reflects the state of each service in the database.
-     *
-     * @see Schema#getStateHashes()
      */
     public abstract Builder stateHash(HashCode blockchainStateHash);
 

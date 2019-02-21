@@ -19,8 +19,8 @@ package com.exonum.binding.blockchain.serialization;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blocks;
+import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;

@@ -18,7 +18,7 @@ package com.exonum.binding.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
-import com.exonum.binding.blockchain.Block;
+import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;

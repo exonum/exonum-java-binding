@@ -17,6 +17,7 @@
 package com.exonum.binding.blockchain;
 
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
+import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 

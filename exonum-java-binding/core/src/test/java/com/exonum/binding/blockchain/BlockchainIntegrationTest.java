@@ -25,8 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.blockchain.Block.Builder;
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
+import com.exonum.binding.common.blockchain.Block;
+import com.exonum.binding.common.blockchain.Block.Builder;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
