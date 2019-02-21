@@ -36,21 +36,9 @@ public class TimeSchemaProxy implements TimeSchema {
 
   private final View dbView;
 
-  private TimeSchemaProxy(View dbView) {
+  TimeSchemaProxy(View dbView) {
     checkIfEnabled();
     this.dbView = dbView;
-  }
-
-  /**
-   * Constructs a time schema for a given dbView.
-   *
-   * <p>Won't be constructed unless time service is enabled. To enable time service, put 'time'
-   * into 'ejb_app_services.toml' file.
-   *
-   * @throws IllegalStateException if time service is not enabled
-   */
-  static TimeSchemaProxy newInstance(View dbView) {
-    return new TimeSchemaProxy(dbView);
   }
 
   @Override
