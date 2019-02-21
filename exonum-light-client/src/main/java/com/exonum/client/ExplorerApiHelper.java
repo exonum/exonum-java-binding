@@ -65,6 +65,8 @@ final class ExplorerApiHelper {
       return TransactionResult.successful();
     } else if (executionStatus.getType() == GetTxResponseExecutionStatus.ERROR) {
       return TransactionResult.error(executionStatus.getCode(), executionStatus.getDescription());
+    } else if (executionStatus.getType() == GetTxResponseExecutionStatus.PANIC) {
+      return TransactionResult.unexpectedError(executionStatus.getDescription());
     } else {
       throw new IllegalArgumentException("Unexpected transaction execution status: "
           + executionStatus.getType());
@@ -134,7 +136,9 @@ final class ExplorerApiHelper {
     @SerializedName("success")
     SUCCESS,
     @SerializedName("error")
-    ERROR
+    ERROR,
+    @SerializedName("panic")
+    PANIC
   }
 
   private ExplorerApiHelper() {
