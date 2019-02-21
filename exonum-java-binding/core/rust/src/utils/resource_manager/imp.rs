@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use chashmap::CHashMap;
 use std::any::TypeId;
-use std::collections::HashMap;
-use std::sync::RwLock;
 
 use utils::Handle;
 
+const MAP_CAPACITY: usize = 512;
+
 lazy_static! {
-    static ref HANDLES_MAP: RwLock<HashMap<Handle, HandleInfo>> = RwLock::new(HashMap::new());
+    static ref HANDLES_MAP: CHashMap<Handle, HandleInfo> = CHashMap::with_capacity(MAP_CAPACITY);
 }
 
 /// Represents `Handle` ownership model.
@@ -57,12 +58,9 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
     assert_ne!(handle, 0);
     assert!(
         HANDLES_MAP
-            .write()
-            .expect("Unable to obtain write-lock")
             .insert(handle, HandleInfo::new(TypeId::of::<T>(), ownership))
             .is_none(),
         "Trying to add the same handle for the second time: {:X}",
-        handle
     )
 }
 
@@ -74,10 +72,7 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
 fn remove_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
     check_handle_impl::<T>(handle, Some(ownership));
     // Return value is ignored because `check_handle_impl` already checks that handle is present.
-    HANDLES_MAP
-        .write()
-        .expect("Unable to obtain write-lock")
-        .remove(&handle);
+    HANDLES_MAP.remove(&handle);
 }
 
 /// Checks given handle for validity.
@@ -86,11 +81,7 @@ fn remove_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType
 ///
 /// Panics if handle is unknown or its type or ownership model is wrong.
 fn check_handle_impl<T: 'static>(handle: Handle, ownership: Option<HandleOwnershipType>) {
-    match HANDLES_MAP
-        .read()
-        .expect("Unable to obtain read-lock")
-        .get(&handle)
-    {
+    match HANDLES_MAP.get(&handle) {
         Some(info) => {
             let actual_object_type = TypeId::of::<T>();
             assert_eq!(
@@ -159,10 +150,7 @@ pub fn check_handle<T: 'static>(handle: Handle) {
 
 /// Returns the number of known handles.
 pub fn known_handles() -> usize {
-    HANDLES_MAP
-        .read()
-        .expect("Unable to obtain read-lock")
-        .len()
+    HANDLES_MAP.len()
 }
 
 #[cfg(test)]
