@@ -6,6 +6,21 @@
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
 
+function build-ejb-app-macos() {
+    # Set RUSTFLAGS to adjust RUNPATH of the binary.
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
+    export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-Wl,-rpath,@executable_path/lib/native"
+    echo "RUSTFLAGS=${RUSTFLAGS}"
+    mvn package --activate-profiles app-packaging-macos -pl :exonum-java-binding-core -am -DskipTests
+}
+
+function build-ejb-app-linux() {
+# Set RUSTFLAGS to adjust RUNPATH of the binary.
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
+    echo "RUSTFLAGS=${RUSTFLAGS}"
+    mvn package --activate-profiles app-packaging-linux -pl :exonum-java-binding-core -am -DskipTests
+}
+
 EJB_RUST_DIR="${PWD}/core/rust"
 
 # Use active JVM.
@@ -32,28 +47,23 @@ if [[ "${RUSTFLAGS:-}" != "" ]]; then
     echo "Warning: the RUSTFLAGS variable will be overriden. Merge is not yet supported."
 fi
 
-# Set RUSTFLAGS to adjust RUNPATH of the binary.
-export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native"
-echo "RUSTFLAGS=${RUSTFLAGS}"
-
 # Set LD_LIBRARY_PATH as needed for building and testing.
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
 
 # Copy libstd to some known place.
-mkdir -p ${EJB_RUST_DIR}/target/prepackage
-cp $RUST_LIB_DIR/libstd* ${EJB_RUST_DIR}/target/prepackage
-
-# Recompile native part.
-cd ${EJB_RUST_DIR}
-cargo +${RUST_COMPILER_VERSION} build --all
-
-cd ../..
+PREPACKAGE_DIR="${EJB_RUST_DIR}/target/prepackage"
+mkdir -p "${PREPACKAGE_DIR}"
+cp ${RUST_LIB_DIR}/libstd* "${PREPACKAGE_DIR}"
 
 # Copy licenses so that the package tool can pick them up.
-cp ../LICENSE core
-cp LICENSES-THIRD-PARTY.TXT core
+cp ../LICENSE "${PREPACKAGE_DIR}"
+cp LICENSES-THIRD-PARTY.TXT "${PREPACKAGE_DIR}"
 
 # Generate licenses for native dependencies.
 ./core/rust/generate_licenses.sh
 
-mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am
+if [[ "$(uname)" == "Darwin" ]]; then
+    build-ejb-app-macos
+elif [[ "$(uname -s)" == Linux* ]]; then
+    build-ejb-app-linux
+fi

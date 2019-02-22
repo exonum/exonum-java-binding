@@ -209,6 +209,24 @@
             </goals>
           </execution>
 
+          <execution>
+            <id>build-ejb-app</id>
+            <phase>package</phase>
+            <configuration>
+              <arguments>
+                <argument>+${rust.compiler.version}</argument>
+                <argument>build</argument>
+                <argument>--package</argument>
+                <argument>ejb-app</argument>
+                <argument>--color</argument>
+                <argument>always</argument>
+              </arguments>
+            </configuration>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+
           <!-- Runs rust native tests without resource manager.
 
                todo: run on a CI server only
@@ -227,6 +245,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -248,6 +267,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -397,7 +417,7 @@
     </profile>
 
     <profile>
-      <id>app-packaging</id>
+      <id>app-packaging-linux</id>
       <build>
         <plugins>
           <plugin>
@@ -405,7 +425,7 @@
              <artifactId>maven-assembly-plugin</artifactId>
              <configuration>
                 <descriptors>
-                  <descriptor>app_assembly.xml</descriptor>
+                  <descriptor>app_assembly_linux.xml</descriptor>
                 </descriptors>
               </configuration>
               <executions>
@@ -417,6 +437,32 @@
                   </goals>
                 </execution>
               </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>app-packaging-macos</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptors>
+                <descriptor>app_assembly_macos.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <executions>
+              <execution>
+                <id>make-assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
