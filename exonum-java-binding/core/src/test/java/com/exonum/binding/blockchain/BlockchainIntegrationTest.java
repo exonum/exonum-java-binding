@@ -16,7 +16,7 @@
 
 package com.exonum.binding.blockchain;
 
-import static com.exonum.binding.blockchain.Blocks.withProperHash;
+import static com.exonum.binding.common.serialization.blockchain.BlockchainSerializers.block;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.blockchain.Block.Builder;
 import com.exonum.binding.common.hash.HashCode;
@@ -102,7 +101,7 @@ class BlockchainIntegrationTest {
 
       // Setup blocks
       MapIndex<HashCode, Block> blocks = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
-          StandardSerializers.hash(), BlockSerializer.INSTANCE);
+          StandardSerializers.hash(), block());
       int blockHeight = 1;
       block = withProperHash(aBlock(blockHeight)
           .numTransactions(expectedBlockTransactions.size())
@@ -206,14 +205,14 @@ class BlockchainIntegrationTest {
       try (Cleaner cleaner = new Cleaner()) {
         List<Block> blocks = LongStream.rangeClosed(0, blockchainHeight)
             .mapToObj(h -> aBlock(h).build())
-            .map(Blocks::withProperHash)
+            .map(BlockchainIntegrationTest::withProperHash)
             .collect(Collectors.toList());
 
         // Add the blocks
         // … to the map of blocks
         Fork fork = database.createFork(cleaner);
         MapIndex<HashCode, Block> blocksByHash = MapIndexProxy.newInstance(TEST_BLOCKS, fork,
-            StandardSerializers.hash(), BlockSerializer.INSTANCE);
+            StandardSerializers.hash(), block());
 
         for (Block b : blocks) {
           blocksByHash.put(b.getBlockHash(), b);
@@ -236,7 +235,7 @@ class BlockchainIntegrationTest {
     private void setupMocks(Snapshot snapshot) {
       when(coreSchema.getHeight()).thenReturn(HEIGHT);
       MapIndex<HashCode, Block> blocksByHash = MapIndexProxy.newInstance(TEST_BLOCKS, snapshot,
-          StandardSerializers.hash(), BlockSerializer.INSTANCE);
+          StandardSerializers.hash(), block());
       lenient().when(coreSchema.getBlocks()).thenReturn(blocksByHash);
       ListIndex<HashCode> blockHashes = ListIndexProxy.newInstance(TEST_BLOCK_HASHES, snapshot,
           StandardSerializers.hash());
@@ -290,5 +289,27 @@ class BlockchainIntegrationTest {
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
         .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8));
   }
+
+  /**
+   * Returns a new block that has its hash set up to the proper value — SHA-256 hash
+   * of its binary representation.
+   *
+   * @param block a block to process
+   */
+  private static Block withProperHash(Block block) {
+    byte[] blockBytes = block().toBytes(block);
+    HashCode actualBlockHash = Hashing.sha256()
+        .hashBytes(blockBytes);
+    return Block.builder()
+        .proposerId(block.getProposerId())
+        .height(block.getHeight())
+        .numTransactions(block.getNumTransactions())
+        .blockHash(actualBlockHash)
+        .previousBlockHash(block.getPreviousBlockHash())
+        .txRootHash(block.getTxRootHash())
+        .stateHash(block.getStateHash())
+        .build();
+  }
+
 
 }

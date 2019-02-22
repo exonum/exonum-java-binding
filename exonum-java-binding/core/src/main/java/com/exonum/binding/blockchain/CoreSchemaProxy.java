@@ -20,9 +20,6 @@ package com.exonum.binding.blockchain;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.blockchain.serialization.BlockSerializer;
-import com.exonum.binding.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.blockchain.serialization.TransactionResultSerializer;
 import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -31,6 +28,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.serialization.blockchain.BlockchainSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
@@ -53,11 +51,11 @@ final class CoreSchemaProxy {
 
   private final NativeHandle nativeHandle;
   private final View dbView;
-  private static final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
+  private static final Serializer<Block> blockSerializer = BlockchainSerializers.block();
   private static final Serializer<TransactionLocation> transactionLocationSerializer =
-      TransactionLocationSerializer.INSTANCE;
+      BlockchainSerializers.transactionLocation();
   private static final Serializer<TransactionResult> transactionResultSerializer =
-      TransactionResultSerializer.INSTANCE;
+      BlockchainSerializers.transactionResult();
   private static final Serializer<TransactionMessage> transactionMessageSerializer =
       StandardSerializers.transactionMessage();
 

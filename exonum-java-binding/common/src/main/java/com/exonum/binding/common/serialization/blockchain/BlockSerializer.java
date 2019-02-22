@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain.serialization;
+package com.exonum.binding.common.serialization.blockchain;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
@@ -24,15 +24,15 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.google.protobuf.ByteString;
 
-public enum BlockSerializer implements Serializer<Block> {
+enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
 
-  private static final Serializer<CoreProtos.Block> PROTO_SERIALIZER =
-      protobuf(CoreProtos.Block.class);
+  private static final Serializer<BlockchainProtos.Block> PROTO_SERIALIZER =
+      protobuf(BlockchainProtos.Block.class);
 
   @Override
   public byte[] toBytes(Block value) {
-    CoreProtos.Block block = CoreProtos.Block.newBuilder()
+    BlockchainProtos.Block block = BlockchainProtos.Block.newBuilder()
         .setProposerId(value.getProposerId())
         .setHeight(value.getHeight())
         .setTxCount(value.getNumTransactions())
@@ -46,7 +46,7 @@ public enum BlockSerializer implements Serializer<Block> {
   @Override
   public Block fromBytes(byte[] binaryBlock) {
     HashCode blockHash = Hashing.sha256().hashBytes(binaryBlock);
-    CoreProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
+    BlockchainProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
     return Block.builder()
         .proposerId(copiedBlocks.getProposerId())
         .height(copiedBlocks.getHeight())
@@ -58,14 +58,14 @@ public enum BlockSerializer implements Serializer<Block> {
         .build();
   }
 
-  private static CoreProtos.Hash toHashProto(HashCode hash) {
+  private static BlockchainProtos.Hash toHashProto(HashCode hash) {
     ByteString bytes = ByteString.copyFrom(hash.asBytes());
-    return CoreProtos.Hash.newBuilder()
+    return BlockchainProtos.Hash.newBuilder()
         .setData(bytes)
         .build();
   }
 
-  private static HashCode toHashCode(CoreProtos.Hash hash) {
+  private static HashCode toHashCode(BlockchainProtos.Hash hash) {
     ByteString bytes = hash.getData();
     return HashCode.fromBytes(bytes.toByteArray());
   }

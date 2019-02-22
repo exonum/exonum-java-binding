@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain.serialization;
+package com.exonum.binding.common.serialization.blockchain;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
-import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.serialization.Serializer;
 
-public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
+enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;
 
-  private static final Serializer<CoreProtos.TxLocation> PROTO_SERIALIZER =
-      protobuf(CoreProtos.TxLocation.class);
+  private static final Serializer<BlockchainProtos.TxLocation> PROTO_SERIALIZER =
+      protobuf(BlockchainProtos.TxLocation.class);
 
   @Override
   public byte[] toBytes(TransactionLocation value) {
-    CoreProtos.TxLocation txLocation =
-        CoreProtos.TxLocation.newBuilder()
+    BlockchainProtos.TxLocation txLocation =
+        BlockchainProtos.TxLocation.newBuilder()
             .setBlockHeight(value.getHeight())
             .setPositionInBlock(value.getIndexInBlock())
             .build();
@@ -39,7 +39,7 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
 
   @Override
   public TransactionLocation fromBytes(byte[] binaryTransactionLocation) {
-    CoreProtos.TxLocation copiedtxLocationProtos =
+    BlockchainProtos.TxLocation copiedtxLocationProtos =
         PROTO_SERIALIZER.fromBytes(binaryTransactionLocation);
     return TransactionLocation.valueOf(copiedtxLocationProtos.getBlockHeight(),
         copiedtxLocationProtos.getPositionInBlock());

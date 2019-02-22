@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain.serialization;
+package com.exonum.binding.common.serialization.blockchain;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

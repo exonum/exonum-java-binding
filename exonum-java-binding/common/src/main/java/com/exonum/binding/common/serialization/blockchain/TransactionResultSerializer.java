@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain.serialization;
+package com.exonum.binding.common.serialization.blockchain;
 
-import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.common.blockchain.TransactionResult.MAX_USER_DEFINED_ERROR_CODE;
 import static com.exonum.binding.common.blockchain.TransactionResult.SUCCESSFUL_RESULT_STATUS_CODE;
 import static com.exonum.binding.common.blockchain.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
-import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.serialization.Serializer;
 
-public enum TransactionResultSerializer implements Serializer<TransactionResult> {
+enum TransactionResultSerializer implements Serializer<TransactionResult> {
   INSTANCE;
 
-  private static final Serializer<CoreProtos.TransactionResult> PROTO_SERIALIZER =
-      protobuf(CoreProtos.TransactionResult.class);
+  private static final Serializer<BlockchainProtos.TransactionResult> PROTO_SERIALIZER =
+      protobuf(BlockchainProtos.TransactionResult.class);
 
   @Override
   public byte[] toBytes(TransactionResult value) {
     int status = convertToCoreStatusCode(value);
-    CoreProtos.TransactionResult txLocation =
-        CoreProtos.TransactionResult.newBuilder()
+    BlockchainProtos.TransactionResult txLocation =
+        BlockchainProtos.TransactionResult.newBuilder()
             .setStatus(status)
             .setDescription(value.getErrorDescription())
             .build();
@@ -43,7 +43,7 @@ public enum TransactionResultSerializer implements Serializer<TransactionResult>
 
   @Override
   public TransactionResult fromBytes(byte[] binaryTransactionResult) {
-    CoreProtos.TransactionResult copiedtxLocationProtos =
+    BlockchainProtos.TransactionResult copiedtxLocationProtos =
         PROTO_SERIALIZER.fromBytes(binaryTransactionResult);
     int status = copiedtxLocationProtos.getStatus();
     String description = copiedtxLocationProtos.getDescription();

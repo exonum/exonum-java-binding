@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain.serialization;
+package com.exonum.binding.common.serialization.blockchain;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.blockchain.Blocks;
 import com.exonum.binding.common.blockchain.Block;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +61,28 @@ class BlockSerializerTest {
         .build();
 
     return Stream.of(block1, block2)
-        .map(Blocks::withProperHash);
+        .map(BlockSerializerTest::withProperHash);
   }
+
+  /**
+   * Returns a new block that has its hash set up to the proper value — SHA-256 hash
+   * of its binary representation.
+   *
+   * @param block a block to process
+   */
+  private static Block withProperHash(Block block) {
+    byte[] blockBytes = BlockSerializer.INSTANCE.toBytes(block);
+    HashCode actualBlockHash = Hashing.sha256()
+        .hashBytes(blockBytes);
+    return Block.builder()
+        .proposerId(block.getProposerId())
+        .height(block.getHeight())
+        .numTransactions(block.getNumTransactions())
+        .blockHash(actualBlockHash)
+        .previousBlockHash(block.getPreviousBlockHash())
+        .txRootHash(block.getTxRootHash())
+        .stateHash(block.getStateHash())
+        .build();
+  }
+
 }

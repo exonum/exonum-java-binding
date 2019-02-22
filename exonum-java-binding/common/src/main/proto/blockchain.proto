@@ -16,8 +16,8 @@
 
 syntax = "proto3";
 
-option java_package = "com.exonum.binding.blockchain.serialization";
-option java_outer_classname = "CoreProtos";
+option java_package = "com.exonum.binding.common.serialization.blockchain";
+option java_outer_classname = "BlockchainProtos";
 
 message Block {
   uint32 proposer_id = 1;
@@ -38,4 +38,4 @@ message TransactionResult {
   string description = 2;
 }
 
-message Hash { bytes data = 1; }
+message Hash { bytes data = 1;}
