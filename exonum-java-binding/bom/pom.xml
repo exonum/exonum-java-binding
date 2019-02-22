@@ -28,7 +28,13 @@
         <artifactId>exonum-java-binding-common</artifactId>
         <version>${project.version}</version>
       </dependency>
-      
+
+      <dependency>
+        <groupId>com.exonum.binding</groupId>
+        <artifactId>exonum-java-binding-time-service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
       <!-- Exported third-party artefacts the services depend upon. -->
       <dependency>
         <groupId>io.vertx</groupId>
