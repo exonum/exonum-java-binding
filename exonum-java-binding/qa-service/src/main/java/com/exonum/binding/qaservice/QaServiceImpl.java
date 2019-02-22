@@ -25,6 +25,7 @@ import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -42,9 +43,12 @@ import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -52,6 +56,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -86,9 +91,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Nullable
   private Node node;
 
+  private TimeSchema timeSchema;
+
   @Inject
-  public QaServiceImpl(TransactionConverter transactionConverter) {
+  public QaServiceImpl(TransactionConverter transactionConverter, TimeSchema timeSchema) {
     super(ID, NAME, transactionConverter);
+    this.timeSchema = timeSchema;
   }
 
   @Override
@@ -332,6 +340,16 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
       return blockchain.getActualConfiguration();
     });
+  }
+
+  @Override
+  public EntryIndexProxy<ZonedDateTime> getTime() {
+    return timeSchema.getTime();
+  }
+
+  @Override
+  public ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes() {
+    return timeSchema.getValidatorsTimes();
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.

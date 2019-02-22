@@ -20,9 +20,13 @@ import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
 import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
+import com.exonum.binding.storage.indices.EntryIndexProxy;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,4 +79,8 @@ public interface QaService extends Service {
   Block getLastBlock();
 
   StoredConfiguration getActualConfiguration();
+
+  EntryIndexProxy<ZonedDateTime> getTime();
+
+  ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes();
 }

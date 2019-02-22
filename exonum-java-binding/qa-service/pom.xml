@@ -40,6 +40,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-time-service</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
       <scope>provided</scope>

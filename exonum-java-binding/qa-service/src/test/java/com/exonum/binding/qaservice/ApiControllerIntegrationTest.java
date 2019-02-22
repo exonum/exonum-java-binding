@@ -37,6 +37,8 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMEN
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -74,6 +76,7 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.service.InternalServerError;
+import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -93,6 +96,8 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -749,6 +754,48 @@ class ApiControllerIntegrationTest {
                     .fromJson(body, StoredConfiguration.class);
 
                 assertThat(storedConfiguration).isEqualTo(configuration);
+              });
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTime(VertxTestContext context) {
+    ZonedDateTime time = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    // TODO
+//    when(qaService.getTime()).thenReturn(EntryIndexProxy.newInstance());
+
+    get(TIME_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
+              () -> {
+                String body = response.bodyAsString();
+//                StoredConfiguration storedConfiguration = JSON_SERIALIZER
+//                    .fromJson(body, StoredConfiguration.class);
+//
+//                assertThat(storedConfiguration).isEqualTo(configuration);
+              });
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getValidatorsTimes(VertxTestContext context) {
+    // TODO
+//    ZonedDateTime time = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+//    when(qaService.getTime()).thenReturn(EntryIndexProxy.newInstance());
+
+    get(VALIDATORS_TIMES_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
+              () -> {
+                String body = response.bodyAsString();
+//                StoredConfiguration storedConfiguration = JSON_SERIALIZER
+//                    .fromJson(body, StoredConfiguration.class);
+//
+//                assertThat(storedConfiguration).isEqualTo(configuration);
               });
           context.completeNow();
         })));

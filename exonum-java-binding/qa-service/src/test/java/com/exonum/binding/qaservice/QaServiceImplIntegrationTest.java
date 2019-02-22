@@ -54,6 +54,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
@@ -92,7 +93,8 @@ class QaServiceImplIntegrationTest {
   @BeforeEach
   void setUp(Vertx vertx) {
     TransactionConverter transactionConverter = mock(TransactionConverter.class);
-    service = new QaServiceImpl(transactionConverter);
+    TimeSchema timeSchema = mock(TimeSchema.class);
+    service = new QaServiceImpl(transactionConverter, timeSchema);
     node = mock(Node.class);
     this.vertx = vertx;
     logAppender = getCapturingLogAppender();
@@ -437,6 +439,25 @@ class QaServiceImplIntegrationTest {
       assertThat(e).hasMessageContaining(
           "An attempt to get the `last_block` during creating the"
           + " genesis block.");
+    });
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTime() {
+    withNodeFake(() -> {
+      System.out.println(service.getTime());
+//      Exception e = assertThrows(RuntimeException.class, () -> service.getTime());
+//      assertThat(e).hasMessageContaining("TODO");
+    });
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getValidatorsTime() {
+    withNodeFake(() -> {
+      Exception e = assertThrows(RuntimeException.class, () -> service.getValidatorsTimes());
+      assertThat(e).hasMessageContaining("TODO");
     });
   }
 
