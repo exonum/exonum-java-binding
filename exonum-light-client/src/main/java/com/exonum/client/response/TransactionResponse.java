@@ -16,9 +16,9 @@
 
 package com.exonum.client.response;
 
-import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.message.TransactionMessage;
 import lombok.NonNull;
 import lombok.Value;
 
