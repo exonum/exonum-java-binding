@@ -32,21 +32,27 @@
     </developer>
 
     <developer>
-      <id>alexander-irbis</id>
-      <name>Alexander Semichenkov</name>
-      <url>https://github.com/alexander-irbis</url>
-    </developer>
-
-    <developer>
       <id>MakarovS</id>
       <name>Sergei Makarov</name>
       <url>https://github.com/MakarovS</url>
     </developer>
 
     <developer>
+      <id>bullet-tooth</id>
+      <name>Oleg Bondar</name>
+      <url>https://github.com/bullet-tooth</url>
+    </developer>
+
+    <developer>
       <id>vitvakatu</id>
       <name>Ilya Bogdanov</name>
       <url>https://github.com/vitvakatu</url>
+    </developer>
+
+    <developer>
+      <id>skletsun</id>
+      <name>Sergey Kletsun</name>
+      <url>https://github.com/skletsun</url>
     </developer>
   </developers>
 
