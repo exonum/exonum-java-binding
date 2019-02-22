@@ -19,10 +19,10 @@ package com.exonum.client;
 
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -64,8 +64,8 @@ class ExplorerApiHelperTest {
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.IN_POOL));
     assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(), nullValue());
-    assertThat(transactionResponse.getLocation(), nullValue());
+    assertThrows(IllegalStateException.class, transactionResponse::getExecutionResult);
+    assertThrows(IllegalStateException.class, transactionResponse::getLocation);
   }
 
   @Test
@@ -105,6 +105,8 @@ class ExplorerApiHelperTest {
   @Test
   void parseGetTxResponseCommittedWithError() {
     TransactionMessage expectedMessage = createTransactionMessage();
+    int errorCode = 2;
+    String errorDescription = "Receiver doesn't exist";
     String json = "{\n"
         + "    'type': 'committed',\n"
         + "    'content': {\n"
@@ -123,8 +125,8 @@ class ExplorerApiHelperTest {
         + "    },\n"
         + "    'status': {\n"
         + "        'type': 'error',\n"
-        + "        'code': 2,\n"
-        + "        'description': \"Receiver doesn't exist\"\n"
+        + "        'code': " + errorCode + ",\n"
+        + "        'description': \"" + errorDescription + "\""
         + "    }\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
@@ -132,7 +134,41 @@ class ExplorerApiHelperTest {
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
     assertThat(transactionResponse.getMessage(), is(expectedMessage));
     assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.error(2, "Receiver doesn't exist")));
+        is(TransactionResult.error(errorCode, errorDescription)));
+    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+  }
+
+  @Test
+  void parseGetTxResponseCommittedWithPanic() {
+    TransactionMessage expectedMessage = createTransactionMessage();
+    String errorDescription = "panic happens";
+    String json = "{\n"
+        + "    'type': 'committed',\n"
+        + "    'content': {\n"
+        + "        'debug': {\n"
+        + "            'amount': 1,\n"
+        + "            'seed': 5019726028924803177\n"
+        + "        },\n"
+        + "        'message': '" + toHex(expectedMessage) + "'\n"
+        + "    },\n"
+        + "    'location': {\n"
+        + "        'block_height': 1,\n"
+        + "        'position_in_block': 0\n"
+        + "    },\n"
+        + "    'location_proof': {\n"
+        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
+        + "    },\n"
+        + "    'status': {\n"
+        + "        'type': 'panic',\n"
+        + "        'description': \"" + errorDescription + "\""
+        + "    }\n"
+        + "}";
+    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
+
+    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
+    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getExecutionResult(),
+        is(TransactionResult.unexpectedError(errorDescription)));
     assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
   }
 

@@ -16,10 +16,12 @@
 
 package com.exonum.client.response;
 
-import com.exonum.binding.common.message.TransactionMessage;
+import static com.exonum.client.response.TransactionStatus.COMMITTED;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
-import lombok.NonNull;
+import com.exonum.binding.common.message.TransactionMessage;
 import lombok.Value;
 
 @Value
@@ -27,19 +29,37 @@ public class TransactionResponse {
   /**
    * Current status of the transaction.
    */
-  @NonNull
   TransactionStatus status;
   /**
    * Transaction message.
    */
-  @NonNull
   TransactionMessage message;
   /**
-   * Transaction execution result; {@code null} - for in-pool transactions.
+   * Transaction execution result.
    */
   TransactionResult executionResult;
   /**
-   * Transaction location; {@code null} - for in-pool transactions.
+   * Transaction location in the blockchain.
    */
   TransactionLocation location;
+
+  /**
+   * Returns transaction execution result.
+   * @throws IllegalStateException if the transaction is not committed yet
+   */
+  public TransactionResult getExecutionResult() {
+    checkState(status == COMMITTED,
+        "Transaction result is available for committed transactions only");
+    return executionResult;
+  }
+
+  /**
+   * Returns transaction location in the blockchain.
+   * @throws IllegalStateException if the transaction is not committed yet
+   */
+  public TransactionLocation getLocation() {
+    checkState(status == COMMITTED,
+        "Transaction location is available for committed transactions only");
+    return location;
+  }
 }
