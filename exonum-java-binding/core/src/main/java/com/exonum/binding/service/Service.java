@@ -80,12 +80,12 @@ public interface Service {
   Transaction convertToTransaction(RawTransaction rawTransaction);
 
   /**
-   * Returns a list of root hashes of all Merklized tables defined by this service,
-   * as of the given snapshot of the blockchain state. If the service doesn't have any Merklized
+   * Returns a list of root hashes of all Merkelized tables defined by this service,
+   * as of the given snapshot of the blockchain state. If the service doesn't have any Merkelized
    * tables, returns an empty list.
    *
    * <p>The core uses this list to aggregate hashes of tables defined by all services
-   * into a single Merklized meta-map.  The hash of this meta-map is considered the hash
+   * into a single Merkelized meta-map.  The hash of this meta-map is considered the hash
    * of the entire blockchain state and is recorded as such in blocks and Precommit messages.
    *
    * @param snapshot a snapshot of the blockchain state. Not valid after this method returns

@@ -27,14 +27,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionResultSerializerTest {
 
-  private static final Serializer<TransactionResult> serializer =
+  private static final Serializer<TransactionResult> SERIALIZER =
       TransactionResultSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(TransactionResult expected) {
-    byte[] bytes = serializer.toBytes(expected);
-    TransactionResult actual = serializer.fromBytes(bytes);
+    byte[] bytes = SERIALIZER.toBytes(expected);
+    TransactionResult actual = SERIALIZER.fromBytes(bytes);
 
     assertThat(actual, equalTo(expected));
   }

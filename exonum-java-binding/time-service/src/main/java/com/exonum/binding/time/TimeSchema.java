@@ -17,6 +17,7 @@
 package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
@@ -27,6 +28,18 @@ import java.time.ZonedDateTime;
  * @see <a href="https://exonum.com/doc/version/latest/advanced/time/">Time oracle documentation</a>
  */
 public interface TimeSchema {
+
+  /**
+   * Constructs a time schema for a given dbView.
+   *
+   * <p>Won't be constructed unless time service is enabled. To enable time service, put 'time'
+   * into 'ejb_app_services.toml' file.
+   *
+   * @throws IllegalStateException if time service is not enabled
+   */
+  static TimeSchema newInstance(View dbView) {
+    return new TimeSchemaProxy(dbView);
+  }
 
   /**
    * Returns consolidated time output by the service, which can be used by other business logic on

@@ -420,10 +420,6 @@ final class ApiController {
     @VisibleForTesting
     static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
     @VisibleForTesting
-    static final String SUBMIT_INVALID_TX_PATH = "/submit-invalid";
-    @VisibleForTesting
-    static final String SUBMIT_INVALID_THROWING_TX_PATH = "/submit-invalid-throwing";
-    @VisibleForTesting
     static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
     @VisibleForTesting
     static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
