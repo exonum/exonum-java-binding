@@ -27,7 +27,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 
 import java.time.ZonedDateTime;
 
-public class TimeSchemaProxy implements TimeSchema {
+class TimeSchemaProxy implements TimeSchema {
 
   private static final Serializer<PublicKey> PUBLIC_KEY_SERIALIZER =
       StandardSerializers.publicKey();
