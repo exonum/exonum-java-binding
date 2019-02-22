@@ -18,8 +18,8 @@ package com.exonum.binding.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
-import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.serialization.Serializer;
 
 public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;
