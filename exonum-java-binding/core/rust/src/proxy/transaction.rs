@@ -43,9 +43,6 @@ pub struct TransactionProxy {
     transaction: GlobalRef,
 }
 
-// `TransactionProxy` is immutable, so it can be safely used in different threads.
-unsafe impl Sync for TransactionProxy {}
-
 impl fmt::Debug for TransactionProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "TransactionProxy")
