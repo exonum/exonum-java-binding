@@ -74,7 +74,8 @@ public abstract class ServiceId {
    * @throws IllegalArgumentException if any component contains whitespace characters
    */
   public static ServiceId of(String groupId, String artifactId, String version) {
-    return new AutoValue_ServiceId(checkNoForbiddenChars(groupId), checkNoForbiddenChars(artifactId),
+    return new AutoValue_ServiceId(checkNoForbiddenChars(groupId),
+        checkNoForbiddenChars(artifactId),
         checkNoForbiddenChars(version));
   }
 
