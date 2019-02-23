@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A service artifact identifier. It consist of the three components that usually identify any
+ * A service artifact identifier. It consist of the three coordinates that usually identify any
  * Java artifact: groupId, artifactId and version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
@@ -55,23 +55,24 @@ public abstract class ServiceId {
    *
    * @param serviceId a string in format "groupId:artifactId:version". Whitespace characters,
    *     including preceding and trailing, are not allowed
-   * @return a ServiceId with the given components
+   * @return a ServiceId with the given coordinates
    * @throws IllegalArgumentException if the format is not correct
    */
   public static ServiceId parseFrom(String serviceId) {
-    String[] components = serviceId.split(DELIMITER, KEEP_EMPTY);
-    checkArgument(components.length == 3,
+    String[] coordinates = serviceId.split(DELIMITER, KEEP_EMPTY);
+    checkArgument(coordinates.length == 3,
         "Invalid serviceId (%s), must have 'groupId:artifactId:version' format", serviceId);
-    String groupId = components[0];
-    String artifactId = components[1];
-    String version = components[2];
+    String groupId = coordinates[0];
+    String artifactId = coordinates[1];
+    String version = coordinates[2];
     return of(groupId, artifactId, version);
   }
 
   /**
-   * Creates a new service id of the given components.
+   * Creates a new service id of the given coordinate. Each coordinate may be empty.
    *
-   * @throws IllegalArgumentException if any component contains whitespace characters
+   * @throws IllegalArgumentException if any coordinate contains forbidden characters: whitespace,
+   *     colon
    */
   public static ServiceId of(String groupId, String artifactId, String version) {
     return new AutoValue_ServiceId(checkNoForbiddenChars(groupId),
