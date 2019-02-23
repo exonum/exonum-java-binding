@@ -60,8 +60,8 @@ public abstract class ServiceId {
    */
   public static ServiceId parseFrom(String serviceId) {
     String[] components = serviceId.split(DELIMITER, KEEP_EMPTY);
-    checkArgument(components.length == 3, "Invalid serviceId: %s (%s components)",
-        serviceId, components.length);
+    checkArgument(components.length == 3,
+        "Invalid serviceId (%s), must have 'groupId:artifactId:version' format", serviceId);
     String groupId = components[0];
     String artifactId = components[1];
     String version = components[2];
