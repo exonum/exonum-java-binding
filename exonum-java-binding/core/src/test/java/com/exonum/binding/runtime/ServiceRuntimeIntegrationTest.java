@@ -39,7 +39,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.vertx.ext.web.Router;
-import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -74,8 +74,8 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
-    void loadArtifactNoOp() {
-      URI serviceArtifactLocation = URI.create("file:///tmp/foo.jar");
+    void loadArtifactNoOp() throws URISyntaxException {
+      String serviceArtifactLocation = "file:///tmp/foo-service.jar";
       String artifactId = serviceRuntime.loadArtifact(serviceArtifactLocation);
       assertThat(artifactId).isEqualTo("com.acme:any-service:1.0.0");
     }

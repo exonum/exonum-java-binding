@@ -16,20 +16,20 @@
 
 package com.exonum.binding.runtime;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-
 import java.net.URI;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.net.URISyntaxException;
 
 /**
- * A service runtime. It manages the services required for operation of Exonum services (e.g.,
- * a {@link Server}; allows the native code to load and unload artifacts (JAR archives
- * with Exonum services), create and stop services defined in the loaded artifacts.
+ * A service runtime. It manages the services required for operation of Exonum services (e.g., a
+ * {@link Server}; allows the native code to load and unload artifacts (JAR archives with Exonum
+ * services), create and stop services defined in the loaded artifacts.
  *
  * <p>This class is thread-safe and does not support client-side locking.
  */
@@ -40,7 +40,7 @@ final class ServiceRuntime {
   /**
    * Creates a new runtime with the given framework injector. Starts the server on instantiation.
    *
-   * @param frameworkInjector the injector that has been configured with the Exonum framework 
+   * @param frameworkInjector the injector that has been configured with the Exonum framework
    *     bindings. It serves as a parent for service injectors
    * @param serverPort a port for the web server providing transport to Java services
    */
@@ -60,20 +60,22 @@ final class ServiceRuntime {
         s1, s2);
   }
 
+  // todo: How much artifact verification are we willing to perform?
+
   /**
-   * Loads an artifact from the specified location. The loading involves verification
-   * of the artifact (i.e., that it is a valid service; includes a valid service factory).
-   * todo: How much verification are we willing to perform?
+   * Loads an artifact from the specified location. The loading involves verification of the
+   * artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
    *
-   * @param serviceArtifactLocation a location (e.g., a file or network resource) from which
-   *     to load the service artifact
+   * @param serviceArtifactUri a {@linkplain URI URI} from which to load the service artifact
+   *     (e.g., a file or network resource)
    * @return a unique service artifact identifier that must be specified in subsequent operations
    *     with it
-   * @throws RuntimeException if it failed to load an artifact; or if the given artifact
-   *     is already loaded
+   * @throws URISyntaxException if the URI is not valid
+   * @throws RuntimeException if it failed to load an artifact; or if the given artifact is
+   *     already loaded
    */
-  // TODO: An overload taking a serviceArtifactLocationUri as a String?
-  String loadArtifact(@SuppressWarnings("unused") URI serviceArtifactLocation) {
+  @SuppressWarnings("unused")
+  String loadArtifact(String serviceArtifactUri) throws URISyntaxException {
     return "com.acme:any-service:1.0.0";
   }
 
@@ -81,8 +83,8 @@ final class ServiceRuntime {
    * Creates a new service instance of the given type.
    *
    * @param artifactId a unique identifier of the loaded artifact
-   * @param moduleName *temp parameter* a fully-qualified class name of the service module
-   *     to instantiate
+   * @param moduleName *temp parameter* a fully-qualified class name of the service module to
+   *     instantiate
    * @return a new service
    * @throws IllegalArgumentException if the artifactId is unknown
    * @throws RuntimeException if it failed to instantiate the service
