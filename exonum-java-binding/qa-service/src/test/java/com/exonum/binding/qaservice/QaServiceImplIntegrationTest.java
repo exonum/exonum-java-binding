@@ -128,8 +128,8 @@ class QaServiceImplIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
 
       List<HashCode> stateHashes = service.getStateHashes(view);
-      int numMerklizedCollections = 1;
-      assertThat(stateHashes).hasSize(numMerklizedCollections);
+      int numMerkelizedCollections = 1;
+      assertThat(stateHashes).hasSize(numMerkelizedCollections);
 
       List<String> logMessages = logAppender.getMessages();
       int expectedNumMessages = 1;

@@ -75,7 +75,7 @@
     <!--Test dependencies-->
     <junit.jupiter.version>5.4.0</junit.jupiter.version>
     <mockito.version>2.24.0</mockito.version>
-    <hamcrest.version>2.0.0.0</hamcrest.version>
+    <hamcrest.version>2.1</hamcrest.version>
     <jsonpath.version>2.4.0</jsonpath.version>
     <!--Plugins-->
     <!-- Checkstyle -->
@@ -86,7 +86,8 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-
+    <!-- Empty for all JDKs but 11 -->
+    <maven.javadoc.joption></maven.javadoc.joption>
   </properties>
 
   <dependencies>
@@ -124,7 +125,7 @@
 
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
+      <artifactId>hamcrest</artifactId>
       <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
@@ -221,6 +222,7 @@
         <configuration>
           <doclint>none</doclint>
           <detectOfflineLinks>false</detectOfflineLinks>
+          <additionalJOption>${maven.javadoc.joption}</additionalJOption>
         </configuration>
         <executions>
           <execution>
@@ -341,5 +343,15 @@
       </build>
     </profile>
 
+    <!-- Fill in needed property when generating Javadocs on JDK 11 -->
+    <profile>
+      <id>generate-javadocs-jdk11</id>
+      <activation>
+        <jdk>11</jdk>
+      </activation>
+      <properties>
+        <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
+      </properties>
+    </profile>
   </profiles>
 </project>

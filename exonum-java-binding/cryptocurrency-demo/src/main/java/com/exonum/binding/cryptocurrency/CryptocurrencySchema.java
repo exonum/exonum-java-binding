@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * A schema of the cryptocurrency service.
  *
- * <p>Has one collection: Wallets (names and values) (Merklized)
+ * <p>Has one collection: Wallets (names and values) (Merkelized)
  */
 public final class CryptocurrencySchema implements Schema {
 
