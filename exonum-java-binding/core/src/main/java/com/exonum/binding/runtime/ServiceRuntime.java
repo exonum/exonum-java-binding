@@ -16,14 +16,15 @@
 
 package com.exonum.binding.runtime;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+
 import java.net.URI;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A service runtime. It manages the services required for operation of Exonum services (e.g.,
@@ -45,9 +46,6 @@ final class ServiceRuntime {
    */
   ServiceRuntime(Injector frameworkInjector, int serverPort) {
     this.frameworkInjector = checkNotNull(frameworkInjector);
-
-    // TODO: shall we start on instantiation, or provide a separate method? Or start lazily, when
-    //    first service is started?
 
     // Start the server
     checkServerIsSingleton(frameworkInjector);
