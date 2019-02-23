@@ -48,6 +48,12 @@
       <name>Ilya Bogdanov</name>
       <url>https://github.com/vitvakatu</url>
     </developer>
+
+    <developer>
+      <id>skletsun</id>
+      <name>Sergey Kletsun</name>
+      <url>https://github.com/skletsun</url>
+    </developer>
   </developers>
 
   <modules>
