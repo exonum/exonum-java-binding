@@ -27,14 +27,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionLocationSerializerTest {
 
-  private static final Serializer<TransactionLocation> serializer =
+  private static final Serializer<TransactionLocation> SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(TransactionLocation expected) {
-    byte[] bytes = serializer.toBytes(expected);
-    TransactionLocation actual = serializer.fromBytes(bytes);
+    byte[] bytes = SERIALIZER.toBytes(expected);
+    TransactionLocation actual = SERIALIZER.fromBytes(bytes);
 
     assertThat(actual, equalTo(expected));
   }

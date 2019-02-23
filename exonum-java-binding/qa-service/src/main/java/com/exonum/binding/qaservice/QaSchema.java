@@ -32,7 +32,7 @@ import java.util.List;
  * A schema of the QA service.
  *
  * <p>Has two collections:
- * (a) values of the counters (Merklized),
+ * (a) values of the counters (Merkelized),
  * (b) names of the counters.
  */
 public final class QaSchema implements Schema {
