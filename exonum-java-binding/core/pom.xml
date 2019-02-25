@@ -204,6 +204,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -222,7 +223,6 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
-              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
