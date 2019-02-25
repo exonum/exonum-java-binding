@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
@@ -76,6 +77,13 @@ public interface ExonumClient {
    *        (e.g., in case of connectivity problems)
    */
   Optional<TransactionResponse> getTransaction(HashCode id);
+
+  /**
+   * Returns the information about the block with transaction hashes included at this block.
+   * @param height blockchain height
+   * @return block information response
+   */
+  BlockResponse getBlockByHeight(long height);
 
   /**
    * Returns Exonum client builder.

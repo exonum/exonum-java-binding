@@ -17,6 +17,7 @@
 
 package com.exonum.client;
 
+import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
@@ -26,6 +27,7 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
@@ -104,6 +106,17 @@ class ExonumHttpClient implements ExonumClient {
         return Optional.of(txResponse);
       }
     });
+  }
+
+  @Override
+  public BlockResponse getBlockByHeight(long height) {
+    HttpUrl url = urlBuilder()
+        .encodedPath(BLOCK)
+        .addQueryParameter("height", String.valueOf(height))
+        .build();
+    Request request = getRequest(url);
+
+    return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlockResponse);
   }
 
   private static Request getRequest(HttpUrl url) {

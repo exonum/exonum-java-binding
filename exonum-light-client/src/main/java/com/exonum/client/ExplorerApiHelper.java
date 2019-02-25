@@ -23,10 +23,15 @@ import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.Block;
+import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -54,6 +59,17 @@ final class ExplorerApiHelper {
         response.getContent().getMessage(),
         executionResult,
         response.getLocation()
+    );
+  }
+
+  static BlockResponse parseGetBlockResponse(String json) {
+    GetBlockResponse response = json().fromJson(json, GetBlockResponse.class);
+    ZonedDateTime time = ZonedDateTime.parse(response.getTime());
+
+    return new BlockResponse(
+        response.getBlock(),
+        response.getTransactions(),
+        time
     );
   }
 
@@ -139,6 +155,15 @@ final class ExplorerApiHelper {
     ERROR,
     @SerializedName("panic")
     PANIC
+  }
+
+  @Value
+  private static class GetBlockResponse {
+    Block block;
+    JsonElement precommits; //TODO: in scope of LC P3
+    @SerializedName("txs")
+    List<HashCode> transactions;
+    String time;
   }
 
   private ExplorerApiHelper() {

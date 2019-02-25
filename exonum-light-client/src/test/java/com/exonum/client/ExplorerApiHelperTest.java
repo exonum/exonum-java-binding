@@ -20,6 +20,7 @@ package com.exonum.client;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,12 +29,13 @@ import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 class ExplorerApiHelperTest {
-
 
   @Test
   void parseSubmitTxResponse() {
@@ -170,6 +172,39 @@ class ExplorerApiHelperTest {
     assertThat(transactionResponse.getExecutionResult(),
         is(TransactionResult.unexpectedError(errorDescription)));
     assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+  }
+
+  @Test
+  void parseGetBlockResponse() {
+    String previousHash = "fd510fc923683a4bb77af8278cd51676fbd0fcb25e2437bd69513d468b874bbb";
+    String txHash = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
+    String stateHash = "79a6f0fa233cc2d7d2e96855ec14bdcc4c0e0bb1a99ccaa912a555441e3b7512";
+    String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
+    String time = "2019-02-14T14:12:52.037255Z";
+    String json = "{\n"
+        + "    \"block\": {\n"
+        + "        \"proposer_id\": 3,\n"
+        + "        \"height\": 1,\n"
+        + "        \"tx_count\": 1,\n"
+        + "        \"prev_hash\": \"" + previousHash + "\",\n"
+        + "        \"tx_hash\": \"" + txHash + "\",\n"
+        + "        \"state_hash\": \"" + stateHash + "\"\n"
+        + "    },\n"
+        + "    \"precommits\": [\"a410964c2c21199b48e2\"],\n"
+        + "    \"txs\": [\"" + tx1 + "\"],\n"
+        + "    \"time\": \"" + time + "\"\n"
+        + "}";
+
+    BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
+
+    assertThat(response.getBlock().getHeight(), is(1L));
+    assertThat(response.getBlock().getProposerId(), is(3));
+    assertThat(response.getBlock().getNumTransactions(), is(1));
+    assertThat(response.getBlock().getPreviousBlockHash(), is(HashCode.fromString(previousHash)));
+    assertThat(response.getBlock().getStateHash(), is(HashCode.fromString(stateHash)));
+    assertThat(response.getBlock().getTxRootHash(), is(HashCode.fromString(txHash)));
+    assertThat(response.getTime(), is(ZonedDateTime.parse(time)));
+    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
   }
 
 }
