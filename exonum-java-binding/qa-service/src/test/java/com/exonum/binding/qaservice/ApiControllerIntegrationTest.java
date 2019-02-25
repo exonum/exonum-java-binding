@@ -786,8 +786,8 @@ class ApiControllerIntegrationTest {
   @Test
   void getValidatorsTimes(VertxTestContext context) {
     Map<PublicKey, ZonedDateTime> validatorsTimes = ImmutableMap.of(
-        PublicKey.fromHexString("11"), ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 1000, ZoneOffset.UTC),
-        PublicKey.fromHexString("22"), ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 2000, ZoneOffset.UTC));
+        PublicKey.fromHexString("11"), ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
+        PublicKey.fromHexString("22"), ZonedDateTime.of(2018, 1, 1, 0, 0, 1, 0, ZoneOffset.UTC));
     when(qaService.getValidatorsTimes()).thenReturn(validatorsTimes);
 
     Map<PublicKey, String> expectedStringValidatorsTimes = convertValidatorsTimesValues(

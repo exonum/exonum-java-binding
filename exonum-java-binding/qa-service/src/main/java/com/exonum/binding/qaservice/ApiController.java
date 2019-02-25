@@ -473,7 +473,7 @@ final class ApiController {
     @VisibleForTesting
     static final String TIME_PATH = "/time";
     @VisibleForTesting
-    static final String VALIDATORS_TIMES_PATH = "/validatorsTimes";
+    static final String VALIDATORS_TIMES_PATH = TIME_PATH + "/validators";
   }
 
 }
