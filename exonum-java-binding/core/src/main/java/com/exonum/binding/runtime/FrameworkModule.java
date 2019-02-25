@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.runtime;
 
-import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
 import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
@@ -33,7 +32,6 @@ final class FrameworkModule extends AbstractModule {
     bind(Server.class).toProvider(Server::create).in(Singleton.class);
     bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
     // todo: Consider providing an implementation of a Node —
-    // requires changing its contract.
-    bind(UserServiceAdapter.class);
+    //   requires changing its contract.
   }
 }
