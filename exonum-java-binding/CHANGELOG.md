@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support of Time oracle. Instruction on how to enable built-in services can be found
   [here](https://exonum.com/doc/version/0.4/get-started/java-binding/#built-in-services). (#667)
 
+### Changed
+- `TransactionResult` and `TransactionLocation` classes moved to the common module. (#725)
+
 ## [0.4] - 2019-02-18
 
 This release is based on the latest Exonum version, 0.10, 

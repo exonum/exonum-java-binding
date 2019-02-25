@@ -22,8 +22,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import okhttp3.OkHttpClient;
 
 /**
@@ -65,6 +67,15 @@ public interface ExonumClient {
    *        (e.g., in case of connectivity problems)
    */
   String getUserAgentInfo();
+
+  /**
+   * Returns the information about the transaction; or {@code Optional.empty()}
+   * if the requested transaction is not found.
+   * @param id transaction message hash
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  Optional<TransactionResponse> getTransaction(HashCode id);
 
   /**
    * Returns Exonum client builder.
