@@ -21,7 +21,7 @@ extern crate java_bindings;
 use exonum_testkit::TestKitBuilder;
 use integration_tests::vm::get_fakes_classpath;
 use java_bindings::{
-    Config, InternalConfig, JavaServiceRuntime, JvmConfig, PrivateConfig, PublicConfig,
+    Config, InternalConfig, JavaServiceRuntime, PrivateConfig, PublicConfig,
 };
 
 const TEST_SERVICE_MODULE_NAME: &str =
@@ -36,23 +36,18 @@ fn bootstrap() {
     };
 
     let private_config = PrivateConfig {
-        user_parameters: Vec::new(),
         service_class_path: "".to_string(),
         log_config_path: "".to_owned(),
         port: 6000,
-    };
-
-    let jvm_config = JvmConfig {
-        args_prepend: Vec::new(),
-        args_append: Vec::new(),
-        jvm_debug_socket: None,
+        args_prepend: vec![],
+        args_append: vec![],
+        jvm_debug_socket: None
     };
 
     let service_runtime = JavaServiceRuntime::get_or_create(
         Config {
             public_config,
             private_config,
-            jvm_config,
         },
         InternalConfig {
             system_class_path: get_fakes_classpath(),
