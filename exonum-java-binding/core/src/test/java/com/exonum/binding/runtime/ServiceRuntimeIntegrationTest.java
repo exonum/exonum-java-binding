@@ -16,31 +16,22 @@
 
 package com.exonum.binding.runtime;
 
-import static com.exonum.binding.runtime.UserService2.ID;
-import static com.exonum.binding.runtime.UserService2.NAME;
+import static com.exonum.binding.runtime.TestService.ID;
+import static com.exonum.binding.runtime.TestService.NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.exonum.binding.service.AbstractService;
-import com.exonum.binding.service.Node;
-import com.exonum.binding.service.Schema;
-import com.exonum.binding.service.Service;
-import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.ViewFactory;
-import com.exonum.binding.storage.database.View;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import io.vertx.ext.web.Router;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,7 +73,7 @@ class ServiceRuntimeIntegrationTest {
 
     @Test
     void createService() {
-      String serviceModuleName = UserModule2.class.getName();
+      String serviceModuleName = TestServiceModule.class.getName();
       UserServiceAdapter service = serviceRuntime
           .createService("artifactId/not-relevant", serviceModuleName);
 
@@ -114,38 +105,5 @@ class TestFrameworkModule extends AbstractModule {
 
   private <T> void bindToSingletonMock(Class<T> type) {
     bind(type).toProvider(() -> mock(type)).in(Singleton.class);
-  }
-}
-
-class UserModule2 extends AbstractModule {
-
-  @Override
-  protected void configure() {
-    bind(Service.class)
-        .to(UserService2.class);
-
-    bind(TransactionConverter.class)
-        .toInstance((m) -> (context) -> System.out.println("Transaction#execute"));
-  }
-}
-
-class UserService2 extends AbstractService {
-
-  static final short ID = 1;
-  static final String NAME = "user-service";
-
-  @Inject
-  UserService2(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
-  }
-
-  @Override
-  protected Schema createDataSchema(View view) {
-    return Collections::emptyList;
-  }
-
-  @Override
-  public void createPublicApiHandlers(Node node, Router router) {
-    // no-op
   }
 }
