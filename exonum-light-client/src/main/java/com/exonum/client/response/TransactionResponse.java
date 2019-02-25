@@ -36,10 +36,12 @@ public class TransactionResponse {
   TransactionMessage message;
   /**
    * Transaction execution result.
+   * Not available unless the transaction is {@linkplain #isCommitted committed} to the blockchain.
    */
   TransactionResult executionResult;
   /**
    * Transaction location in the blockchain.
+   * Not available unless the transaction is {@linkplain #isCommitted committed} to the blockchain.
    */
   TransactionLocation location;
 
@@ -62,4 +64,13 @@ public class TransactionResponse {
         "Transaction location is available for committed transactions only");
     return location;
   }
+
+  /**
+   * Returns {@code true} when the transaction is {@linkplain TransactionStatus#COMMITTED committed}
+   * to the blockchain; or {@code false} — otherwise.
+   */
+  public boolean isCommitted() {
+    return status == COMMITTED;
+  }
+
 }

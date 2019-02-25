@@ -16,6 +16,7 @@
 
 package com.exonum.client.response;
 
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -29,6 +30,9 @@ public enum TransactionStatus {
   IN_POOL,
   /**
    * Shows that transaction is committed to the blockchain.
+   * Please note that a committed transaction has not necessarily completed
+   * successfully — use the {@linkplain TransactionResult execution result}
+   * to check that.
    */
   @SerializedName("committed")
   COMMITTED
