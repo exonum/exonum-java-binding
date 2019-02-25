@@ -19,8 +19,6 @@ package com.exonum.binding.qaservice;
 import com.exonum.binding.qaservice.transactions.QaTransactionConverter;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.time.TimeSchema;
-import com.exonum.binding.time.TimeSchemaProxy;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
@@ -35,7 +33,6 @@ public final class ServiceModule extends AbstractModule {
     bind(QaService.class).to(QaServiceImpl.class);
     // Make sure QaService remains a singleton.
     bind(QaServiceImpl.class).in(Singleton.class);
-    bind(TimeSchema.class).to(TimeSchemaProxy.class);
 
     bind(TransactionConverter.class).to(QaTransactionConverter.class);
   }

@@ -47,7 +47,6 @@ import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.annotations.VisibleForTesting;
@@ -91,12 +90,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Nullable
   private Node node;
 
+  @Nullable
   private TimeSchema timeSchema;
 
   @Inject
-  public QaServiceImpl(TransactionConverter transactionConverter, TimeSchema timeSchema) {
+  public QaServiceImpl(TransactionConverter transactionConverter) {
     super(ID, NAME, transactionConverter);
-    this.timeSchema = timeSchema;
   }
 
   @Override
@@ -343,13 +342,33 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public EntryIndexProxy<ZonedDateTime> getTime() {
-    return timeSchema.getTime();
+  public void initializeTimeSchema(View view) {
+    this.timeSchema = TimeSchema.newInstance(view);
   }
 
   @Override
-  public ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return timeSchema.getValidatorsTimes();
+  @SuppressWarnings("ConstantConditions") // TimeSchema is not null.
+  public Optional<ZonedDateTime> getTime() {
+    checkTimeSchemaInitialized();
+    EntryIndexProxy<ZonedDateTime> entry = timeSchema.getTime();
+    if (entry.isPresent()) {
+      return Optional.of(entry.get());
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  @SuppressWarnings("ConstantConditions") // TimeSchema is not null.
+  public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
+    checkTimeSchemaInitialized();
+    MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeSchema.getValidatorsTimes();
+
+    return Maps.toMap(validatorsTimes.keys(), validatorsTimes::get);
+  }
+
+  private void checkTimeSchemaInitialized() {
+    checkState(timeSchema != null, "TimeSchema was not initialized");
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.

@@ -24,8 +24,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
-import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.storage.database.View;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +79,9 @@ public interface QaService extends Service {
 
   StoredConfiguration getActualConfiguration();
 
-  EntryIndexProxy<ZonedDateTime> getTime();
+  void initializeTimeSchema(View view);
 
-  ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes();
+  Optional<ZonedDateTime> getTime();
+
+  Map<PublicKey, ZonedDateTime> getValidatorsTimes();
 }

@@ -54,8 +54,6 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -68,10 +66,13 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -82,6 +83,8 @@ final class ApiController {
   private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   private final QaService service;
+
+  private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
   ApiController(QaService service) {
     this.service = service;
@@ -287,13 +290,26 @@ final class ApiController {
   }
 
   private void getTime(RoutingContext rc) {
-    EntryIndexProxy<ZonedDateTime> time = service.getTime();
-    respondWithJson(rc, time);
+    Optional<ZonedDateTime> time = service.getTime();
+    respondWithJson(rc, time.map(ApiController::convertZDTToString));
   }
 
   private void getValidatorsTimes(RoutingContext rc) {
-    ProofMapIndexProxy<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
-    respondWithJson(rc, validatorsTimes);
+    Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
+    Map<PublicKey, String> stringValidatorsTimes = convertValidatorsTimesValues(validatorsTimes);
+    respondWithJson(rc, stringValidatorsTimes);
+  }
+
+  @VisibleForTesting
+  static Map<PublicKey, String> convertValidatorsTimesValues(
+      Map<PublicKey, ZonedDateTime> validatorsTimes) {
+    return validatorsTimes.entrySet().stream()
+        .collect(Collectors.toMap(Entry::getKey, t -> convertZDTToString(t.getValue())));
+  }
+
+  @VisibleForTesting
+  static String convertZDTToString(ZonedDateTime zonedDateTime) {
+    return DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).format(zonedDateTime);
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {
@@ -353,14 +369,6 @@ final class ApiController {
   }
 
   private <T> void respondWithJson(RoutingContext rc, Optional<T> responseBody) {
-    if (responseBody.isPresent()) {
-      respondWithJson(rc, responseBody.get());
-    } else {
-      respondNotFound(rc);
-    }
-  }
-
-  private <T> void respondWithJson(RoutingContext rc, EntryIndexProxy<T> responseBody) {
     if (responseBody.isPresent()) {
       respondWithJson(rc, responseBody.get());
     } else {
