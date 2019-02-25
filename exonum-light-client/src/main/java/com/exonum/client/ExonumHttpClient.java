@@ -17,21 +17,28 @@
 
 package com.exonum.client;
 
+import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumUrls.BLOCK;
+import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import okhttp3.HttpUrl;
@@ -117,6 +124,57 @@ class ExonumHttpClient implements ExonumClient {
     Request request = getRequest(url);
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlockResponse);
+  }
+
+  @Override
+  public BlocksResponse getBlocks(int count, boolean skipEmpty, Long heightMax,
+      boolean withBlocksTime) {
+    return doGetBlocks(count, skipEmpty, heightMax, withBlocksTime);
+  }
+
+  @Override
+  public BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withBlocksTime) {
+    return doGetBlocks(count, skipEmpty, null, withBlocksTime);
+  }
+
+  @Override
+  public Block getLastBlock() {
+    BlocksResponse response = doGetBlocks(1, false, null, false);
+
+    return response.getBlocks()
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Should never happen"));
+  }
+
+  @Override
+  public Optional<Block> getLastNotEmptyBlock() {
+    BlocksResponse response = doGetBlocks(1, true, null, false);
+
+    return response.getBlocks()
+        .stream()
+        .findFirst();
+  }
+
+  private BlocksResponse doGetBlocks(int count, boolean skipEmpty, Long heightMax,
+      boolean withBlocksTime) {
+    checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
+        "Requested number of blocks was {} but maximum allowed is {}",
+        count, MAX_BLOCKS_PER_REQUEST);
+    Map<String, String> query = new HashMap<>();
+    query.put("count", String.valueOf(count));
+    query.put("skip_empty_blocks", String.valueOf(skipEmpty));
+    query.put("add_blocks_time", String.valueOf(withBlocksTime));
+    if (heightMax != null) {
+      query.put("latest", String.valueOf(heightMax));
+    }
+
+    HttpUrl.Builder httpRequest = urlBuilder().encodedPath(BLOCKS);
+    query.forEach(httpRequest::addQueryParameter);
+
+    Request request = getRequest(httpRequest.build());
+
+    return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlocksResponse);
   }
 
   private static Request getRequest(HttpUrl url) {

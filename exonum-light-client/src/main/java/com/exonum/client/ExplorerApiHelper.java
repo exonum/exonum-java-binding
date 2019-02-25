@@ -18,6 +18,8 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -25,6 +27,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.google.gson.JsonElement;
@@ -70,6 +73,22 @@ final class ExplorerApiHelper {
         response.getBlock(),
         response.getTransactions(),
         time
+    );
+  }
+
+  static BlocksResponse parseGetBlocksResponse(String json) {
+    GetBlocksResponse response = json().fromJson(json, GetBlocksResponse.class);
+    List<ZonedDateTime> times = response.getTimes() == null ? emptyList() :
+        response.getTimes()
+            .stream()
+            .map(ZonedDateTime::parse)
+            .collect(toList());
+
+    return new BlocksResponse(
+        response.getBlocks(),
+        times,
+        response.getRange().getStart(),
+        response.getRange().getEnd()
     );
   }
 
@@ -164,6 +183,19 @@ final class ExplorerApiHelper {
     @SerializedName("txs")
     List<HashCode> transactions;
     String time;
+  }
+
+  @Value
+  private static class GetBlocksResponse {
+    List<Block> blocks;
+    GetBlocksResponseRange range;
+    List<String> times;
+  }
+
+  @Value
+  private static class GetBlocksResponseRange {
+    long start;
+    long end;
   }
 
   private ExplorerApiHelper() {
