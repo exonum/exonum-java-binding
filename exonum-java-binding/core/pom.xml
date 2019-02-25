@@ -211,24 +211,6 @@
             </goals>
           </execution>
 
-          <execution>
-            <id>build-ejb-app</id>
-            <phase>prepare-package</phase>
-            <configuration>
-              <arguments>
-                <argument>+${rust.compiler.version}</argument>
-                <argument>build</argument>
-                <argument>--package</argument>
-                <argument>ejb-app</argument>
-                <argument>--color</argument>
-                <argument>always</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-
           <!-- Runs rust native tests without resource manager.
 
                todo: run on a CI server only
@@ -419,41 +401,41 @@
     </profile>
 
     <profile>
-      <id>app-packaging-linux</id>
-      <properties>
-        <rust.libraryPath>${build.nativeLibPath}/libjava_bindings.so</rust.libraryPath>
-      </properties>
+      <id>app-packaging</id>
       <build>
         <plugins>
-          <plugin>
-             <groupId>org.apache.maven.plugins</groupId>
-             <artifactId>maven-assembly-plugin</artifactId>
-             <configuration>
-                <descriptors>
-                  <descriptor>app_assembly_linux.xml</descriptor>
-                </descriptors>
-              </configuration>
-              <executions>
-                <execution>
-                  <id>package-app-linux</id>
-                  <phase>package</phase>
-                  <goals>
-                    <goal>single</goal>
-                  </goals>
-                </execution>
-              </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
 
-    <profile>
-      <id>app-packaging-macos</id>
-      <properties>
-        <rust.libraryPath>${build.nativeLibPath}/libjava_bindings.dylib</rust.libraryPath>
-      </properties>
-      <build>
-        <plugins>
+          <!--Build EJB App-->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+            <configuration>
+              <executable>cargo</executable>
+              <workingDirectory>${project.basedir}/rust/</workingDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>build-ejb-app</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>--package</argument>
+                    <argument>ejb-app</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!--Package EJB App with necessary libraries and documentation-->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
@@ -464,7 +446,7 @@
             </configuration>
             <executions>
               <execution>
-                <id>package-app-macos</id>
+                <id>package--ejb-app</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>

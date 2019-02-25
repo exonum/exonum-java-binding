@@ -10,14 +10,16 @@ function build-ejb-app-macos() {
     # Set RUSTFLAGS to adjust RUNPATH of the binary.
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
     echo "RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles app-packaging-macos -pl :exonum-java-binding-core -am -DskipTests
+    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am -DskipTests \
+      -Drust.libraryPath="$(pwd)/core/rust/target/debug/libjava_bindings.dylib"
 }
 
 function build-ejb-app-linux() {
     # Set RUSTFLAGS to adjust RUNPATH of the binary.
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
     echo "RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles app-packaging-linux -pl :exonum-java-binding-core -am -DskipTests
+    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am -DskipTests \
+      -Drust.libraryPath="$(pwd)/core/rust/target/debug/libjava_bindings.so"
 }
 
 EJB_RUST_DIR="${PWD}/core/rust"
