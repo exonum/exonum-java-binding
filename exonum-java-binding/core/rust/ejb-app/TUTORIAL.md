@@ -9,7 +9,7 @@ of the Contribution Guide.
 You also need a ready-to-use Exonum Java service. You can use 
 [cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
 implementing your own Exonum service 
-in the [user guide](https://exonum.com/doc/version/latest/get-started/java-binding/).
+in the [user guide](https://exonum.com/doc/version/0.10/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
 [cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding/cryptocurrency-demo

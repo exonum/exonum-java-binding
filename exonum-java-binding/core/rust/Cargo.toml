@@ -16,10 +16,10 @@ invocation = ["jni/invocation"]
 
 [dependencies]
 exonum = "0.10"
+exonum-time = "0.10"
 failure = "0.1.1"
 toml = "0.4.6"
-# Point EJB to revision of master that introduces JNIEnv#clone()
-jni = { git = "https://github.com/jni-rs/jni-rs", rev = "e261b981", features = ["invocation"] }
+jni = { version = "0.11.0", features = ["invocation"] }
 lazy_static = "1.2.0"
 log = "0.4.1"
 parking_lot = "0.6"
@@ -29,3 +29,6 @@ serde_json = "1.0.38"
 
 [profile.dev]
 rpath = true
+
+[dev-dependencies]
+tempfile = "3"

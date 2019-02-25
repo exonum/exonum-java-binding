@@ -41,20 +41,42 @@
     </developer>
   </developers>
 
+  <scm>
+    <connection>scm:git:https://github.com/exonum/exonum-java-binding.git</connection>
+    <developerConnection>scm:git:git@github.com:/exonum/exonum-java-binding.git</developerConnection>
+    <url>https://github.com/exonum/exonum-java-binding</url>
+    <tag>HEAD</tag>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/exonum/exonum-java-binding/issues</url>
+  </issueManagement>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.5-SNAPSHOT</ejb.version>
+    <ejb.version>0.4.0</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
     <okhttp.version>3.13.1</okhttp.version>
+    <lombok.version>1.18.6</lombok.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.4.0</junit.jupiter.version>
     <mockito.version>2.24.0</mockito.version>
-    <hamcrest.version>2.0.0.0</hamcrest.version>
-
+    <hamcrest.version>2.1</hamcrest.version>
+    <jsonpath.version>2.4.0</jsonpath.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
@@ -64,7 +86,8 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-
+    <!-- Empty for all JDKs but 11 -->
+    <maven.javadoc.joption></maven.javadoc.joption>
   </properties>
 
   <dependencies>
@@ -81,14 +104,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
+      <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -101,7 +125,7 @@
 
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
+      <artifactId>hamcrest</artifactId>
       <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
@@ -110,6 +134,13 @@
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
       <version>${okhttp.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path-assert</artifactId>
+      <version>${jsonpath.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -191,6 +222,7 @@
         <configuration>
           <doclint>none</doclint>
           <detectOfflineLinks>false</detectOfflineLinks>
+          <additionalJOption>${maven.javadoc.joption}</additionalJOption>
         </configuration>
         <executions>
           <execution>
@@ -311,5 +343,15 @@
       </build>
     </profile>
 
+    <!-- Fill in needed property when generating Javadocs on JDK 11 -->
+    <profile>
+      <id>generate-javadocs-jdk11</id>
+      <activation>
+        <jdk>11</jdk>
+      </activation>
+      <properties>
+        <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
+      </properties>
+    </profile>
   </profiles>
 </project>

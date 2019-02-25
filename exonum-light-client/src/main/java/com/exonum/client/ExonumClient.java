@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.HealthCheckInfo;
 import java.net.MalformedURLException;
 import java.net.URL;
 import okhttp3.OkHttpClient;
@@ -28,6 +29,9 @@ import okhttp3.OkHttpClient;
 /**
  * Main interface for Exonum Light client.
  * Provides a convenient way for interaction with Exonum framework APIs.
+ * All the methods of the interface work in a blocking way
+ * i.e. invoke underlying request immediately, and block until the response can be processed
+ * or an error occurs.
  * <p/><i>Implementations of that interface are required to be thread-safe</i>.
  **/
 public interface ExonumClient {
@@ -39,6 +43,28 @@ public interface ExonumClient {
    *        (e.g., in case of connectivity problems)
    */
   HashCode submitTransaction(TransactionMessage tx);
+
+  /**
+   * Returns a number of unconfirmed transactions which are currently located in
+   * the unconfirmed transactions pool and are waiting for acceptance to a block.
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  int getUnconfirmedTransactionsCount();
+
+  /**
+   * Returns the node health check information.
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  HealthCheckInfo healthCheck();
+
+  /**
+   * Returns string containing information about Exonum, Rust and OS version.
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  String getUserAgentInfo();
 
   /**
    * Returns Exonum client builder.

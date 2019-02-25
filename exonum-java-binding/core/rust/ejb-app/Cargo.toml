@@ -11,6 +11,7 @@ authors = ["Exonum team <exonum@bitfury.com>"]
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.10"
 exonum-btc-anchoring = "0.10"
+exonum-time = "0.10"
 toml = "0.4.6"
 serde = "1.0"
 serde_derive = "1.0"

@@ -15,25 +15,22 @@
  *
  */
 
-package com.exonum.client;
+package com.exonum.client.response;
 
-import static com.google.common.base.MoreObjects.toStringHelper;
+import lombok.Value;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.google.gson.annotations.SerializedName;
+@Value
+public class HealthCheckInfo {
+  /**
+   * Shows information about whether it is possible to achieve the consensus between
+   * validators in the current state.
+   */
+  ConsensusStatus consensusStatus;
 
-/**
- * Json object wrapper for submit transaction response.
- */
-class SubmitTxResponse {
-  @SerializedName("tx_hash")
-  HashCode hash;
-
-  @Override
-  public String toString() {
-    return toStringHelper(this)
-        .add("hash", hash)
-        .toString();
-  }
-
+  /**
+   * The number of peers that the node is connected to;
+   * {@code = 0} if the node is not connected to the network,
+   * or it's the single node network.
+   */
+  int connectionsNumber;
 }

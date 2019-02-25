@@ -15,28 +15,23 @@
  *
  */
 
-package com.exonum.client;
-
-import static com.google.common.base.MoreObjects.toStringHelper;
-
-import com.google.gson.annotations.SerializedName;
+package com.exonum.client.response;
 
 /**
- * Json object wrapper for submit transaction request.
+ * Consensus status of a particular node.
  */
-class SubmitTxRequest {
-  @SerializedName("tx_body")
-  String body;
-
-  SubmitTxRequest(String body) {
-    this.body = body;
-  }
-
-  @Override
-  public String toString() {
-    return toStringHelper(this)
-        .add("body", body)
-        .toString();
-  }
-
+public enum ConsensusStatus {
+  /**
+   * Shows that consensus is active
+   * i.e. it is enabled and the node has enough connected peers.
+   */
+  ACTIVE,
+  /**
+   * Shows that consensus is enabled on the node.
+   */
+  ENABLED,
+  /**
+   * Shows that consensus is disabled on the node.
+   */
+  DISABLED
 }

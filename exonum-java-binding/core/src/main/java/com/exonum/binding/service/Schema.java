@@ -25,8 +25,8 @@ import java.util.List;
 public interface Schema {
 
   /**
-   * Returns the root hashes of Merklized tables in this database schema, as of the current
-   * state of the database. If there are no Merklized tables, returns an empty list.
+   * Returns the root hashes of Merkelized tables in this database schema, as of the current
+   * state of the database. If there are no Merkelized tables, returns an empty list.
    *
    * <p>This list of root hashes represents the current service state. Lists of these hashes
    * from each service are aggregated in a single <em>blockchain state hash</em> that reflects
