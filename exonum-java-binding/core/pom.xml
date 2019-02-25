@@ -26,6 +26,7 @@
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <packaging.basedir>${project.basedir}/rust/target/prepackage</packaging.basedir>
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
@@ -192,7 +193,7 @@
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
                  depend on the library -->
-            <id>build-rust-lib</id>
+            <id>build-rust-lib-for-tests</id>
             <phase>compile</phase>
             <configuration>
               <arguments>
@@ -211,7 +212,7 @@
 
           <execution>
             <id>build-ejb-app</id>
-            <phase>package</phase>
+            <phase>prepare-package</phase>
             <configuration>
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
@@ -221,6 +222,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -418,6 +420,9 @@
 
     <profile>
       <id>app-packaging-linux</id>
+      <properties>
+        <rust.libraryPath>${build.nativeLibPath}/libjava_bindings.so</rust.libraryPath>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -430,7 +435,7 @@
               </configuration>
               <executions>
                 <execution>
-                  <id>make-assembly</id>
+                  <id>package-app-linux</id>
                   <phase>package</phase>
                   <goals>
                     <goal>single</goal>
@@ -444,6 +449,9 @@
 
     <profile>
       <id>app-packaging-macos</id>
+      <properties>
+        <rust.libraryPath>${build.nativeLibPath}/libjava_bindings.dylib</rust.libraryPath>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -451,12 +459,12 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <configuration>
               <descriptors>
-                <descriptor>app_assembly_macos.xml</descriptor>
+                <descriptor>app_assembly.xml</descriptor>
               </descriptors>
             </configuration>
             <executions>
               <execution>
-                <id>make-assembly</id>
+                <id>package-app-macos</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
