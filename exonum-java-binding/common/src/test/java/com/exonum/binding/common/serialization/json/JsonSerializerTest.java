@@ -19,6 +19,7 @@ package com.exonum.binding.common.serialization.json;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.fromHex;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,6 +27,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import org.junit.jupiter.api.Test;
 
 class JsonSerializerTest {
@@ -55,6 +57,18 @@ class JsonSerializerTest {
     String json = json().toJson(new Wrapper<>(value));
 
     assertJsonValue(json, "000102");
+  }
+
+  @Test
+  void transactionMessageSerializesAsValue() {
+    String hex = "87095f09d413633626a4a5b903d7e8dbb7a9f54baa92eb77965c5ad0417d8d65000"
+        + "000007f0000010292a0d0ed9368a70984098519cef6bde555e85eaf8105c561a6c0b9599fae"
+        + "f4eb7b02155160f0c2598c97c42bc294599a2be34ce9ce66ba7baa11bfdaf06e5e0c";
+    TransactionMessage value = TransactionMessage.fromBytes(fromHex(hex));
+
+    String json = json().toJson(new Wrapper<>(value));
+
+    assertJsonValue(json, hex);
   }
 
   private static void assertJsonValue(String json, Object expectedValue) {
