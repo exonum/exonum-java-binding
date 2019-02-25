@@ -20,6 +20,16 @@ import com.exonum.binding.common.hash.HashCode;
 import com.google.gson.annotations.SerializedName;
 import lombok.Value;
 
+/**
+ * Exonum block header data structure.
+ *
+ * <p>A block is essentially a list of transactions, which is a result of the consensus algorithm
+ * (thus authenticated by the supermajority of validators) and is applied atomically to the
+ * blockchain state.
+ *
+ * <p>This structure only contains the amount of transactions and the transactions root hash as well
+ * as other information, but not the transactions themselves.
+ */
 @Value
 public class Block {
 
