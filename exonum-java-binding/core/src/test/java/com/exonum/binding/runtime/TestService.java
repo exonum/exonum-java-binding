@@ -27,8 +27,8 @@ import java.util.Collections;
 
 class TestService extends AbstractService {
 
-  static final short ID = 1;
-  static final String NAME = "user-service";
+  static final short ID = 2;
+  static final String NAME = "test-user-service";
 
   @Inject
   TestService(TransactionConverter transactionConverter) {
