@@ -26,6 +26,7 @@ import static com.exonum.binding.test.Bytes.createPrefixed;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -94,8 +95,6 @@ class QaServiceImplIntegrationTest {
   void setUp(Vertx vertx) {
     TransactionConverter transactionConverter = mock(TransactionConverter.class);
     service = new QaServiceImpl(transactionConverter);
-    View view = mock(View.class);
-    service.initializeTimeSchema(view);
     node = mock(Node.class);
     this.vertx = vertx;
     logAppender = getCapturingLogAppender();
@@ -446,13 +445,29 @@ class QaServiceImplIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void getTime() {
-    // TODO
+    withInitializedTimeSchema(() -> {
+      assertThat(service.getTime()).isEmpty();
+    });
   }
 
   @Test
   @RequiresNativeLibrary
   void getValidatorsTime() {
-    // TODO
+    withInitializedTimeSchema(() -> {
+      assertThat(service.getValidatorsTimes()).isEmpty();
+    });
+  }
+
+  private void withInitializedTimeSchema(Runnable test) {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      View view = db.createFork(cleaner);
+      service.initializeTimeSchema(view);
+
+      test.run();
+    } catch (CloseFailuresException e) {
+      fail(e.getLocalizedMessage());
+    }
   }
 
   /** Runs a test with a service with a node fake set. */
