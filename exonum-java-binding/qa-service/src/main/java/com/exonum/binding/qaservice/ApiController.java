@@ -46,8 +46,8 @@ import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -393,10 +393,6 @@ final class ApiController {
     static final String SUBMIT_CREATE_COUNTER_TX_PATH = "/submit-create-counter";
     @VisibleForTesting
     static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
-    @VisibleForTesting
-    static final String SUBMIT_INVALID_TX_PATH = "/submit-invalid";
-    @VisibleForTesting
-    static final String SUBMIT_INVALID_THROWING_TX_PATH = "/submit-invalid-throwing";
     @VisibleForTesting
     static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
     @VisibleForTesting

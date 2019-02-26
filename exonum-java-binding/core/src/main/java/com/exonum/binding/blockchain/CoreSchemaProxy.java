@@ -23,6 +23,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.blockchain.serialization.TransactionLocationSerializer;
 import com.exonum.binding.blockchain.serialization.TransactionResultSerializer;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -50,12 +52,12 @@ final class CoreSchemaProxy {
 
   private final NativeHandle nativeHandle;
   private final View dbView;
-  private static final Serializer<Block> blockSerializer = BlockSerializer.INSTANCE;
-  private static final Serializer<TransactionLocation> transactionLocationSerializer =
+  private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
+  private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
-  private static final Serializer<TransactionResult> transactionResultSerializer =
+  private static final Serializer<TransactionResult> TRANSACTION_RESULT_SERIALIZER =
       TransactionResultSerializer.INSTANCE;
-  private static final Serializer<TransactionMessage> transactionMessageSerializer =
+  private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
       StandardSerializers.transactionMessage();
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
@@ -118,7 +120,7 @@ final class CoreSchemaProxy {
    */
   MapIndex<HashCode, Block> getBlocks() {
     return MapIndexProxy.newInstance(
-        CoreIndex.BLOCKS, dbView, StandardSerializers.hash(), blockSerializer);
+        CoreIndex.BLOCKS, dbView, StandardSerializers.hash(), BLOCK_SERIALIZER);
   }
 
   /**
@@ -127,7 +129,7 @@ final class CoreSchemaProxy {
    * @throws RuntimeException if the "genesis block" was not created
    */
   Block getLastBlock() {
-    return blockSerializer.fromBytes(nativeGetLastBlock(nativeHandle.get()));
+    return BLOCK_SERIALIZER.fromBytes(nativeGetLastBlock(nativeHandle.get()));
   }
 
   /**
@@ -135,7 +137,7 @@ final class CoreSchemaProxy {
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
     return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbView, StandardSerializers.hash(),
-        transactionMessageSerializer);
+        TRANSACTION_MESSAGE_SERIALIZER);
   }
 
   /**
@@ -143,7 +145,7 @@ final class CoreSchemaProxy {
    */
   ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
     return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
-        StandardSerializers.hash(), transactionResultSerializer);
+        StandardSerializers.hash(), TRANSACTION_RESULT_SERIALIZER);
   }
 
   /**
@@ -152,7 +154,7 @@ final class CoreSchemaProxy {
    */
   MapIndex<HashCode, TransactionLocation> getTxLocations() {
     return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_LOCATIONS, dbView,
-        StandardSerializers.hash(), transactionLocationSerializer);
+        StandardSerializers.hash(), TRANSACTION_LOCATION_SERIALIZER);
   }
 
   /**

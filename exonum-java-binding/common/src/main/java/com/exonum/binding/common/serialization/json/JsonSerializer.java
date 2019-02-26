@@ -19,6 +19,7 @@ package com.exonum.binding.common.serialization.json;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
@@ -38,6 +39,8 @@ public final class JsonSerializer {
    */
   public static GsonBuilder builder() {
     return new GsonBuilder()
+        .registerTypeHierarchyAdapter(TransactionMessage.class,
+            new TransactionMessageJsonSerializer())
         .registerTypeHierarchyAdapter(HashCode.class, new HashCodeJsonSerializer())
         .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
         .registerTypeAdapterFactory(StoredConfigurationAdapterFactory.create())

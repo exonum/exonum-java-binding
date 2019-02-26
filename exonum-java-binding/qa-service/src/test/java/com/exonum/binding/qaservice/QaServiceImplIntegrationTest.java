@@ -33,8 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.proxy.Cleaner;
@@ -128,8 +128,8 @@ class QaServiceImplIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
 
       List<HashCode> stateHashes = service.getStateHashes(view);
-      int numMerklizedCollections = 1;
-      assertThat(stateHashes).hasSize(numMerklizedCollections);
+      int numMerkelizedCollections = 1;
+      assertThat(stateHashes).hasSize(numMerkelizedCollections);
 
       List<String> logMessages = logAppender.getMessages();
       int expectedNumMessages = 1;

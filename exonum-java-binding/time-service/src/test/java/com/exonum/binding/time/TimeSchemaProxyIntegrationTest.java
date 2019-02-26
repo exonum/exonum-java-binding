@@ -46,11 +46,11 @@ class TimeSchemaProxyIntegrationTest {
     assertSchema((schema) -> assertFalse(schema.getValidatorsTimes().entries().hasNext()));
   }
 
-  private static void assertSchema(Consumer<TimeSchemaProxy> assertion) {
+  private static void assertSchema(Consumer<TimeSchema> assertion) {
     try (MemoryDb db = MemoryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
-      assertion.accept(TimeSchemaProxy.newInstance(view));
+      assertion.accept(new TimeSchemaProxy(view));
     } catch (CloseFailuresException e) {
       fail(e.getLocalizedMessage());
     }

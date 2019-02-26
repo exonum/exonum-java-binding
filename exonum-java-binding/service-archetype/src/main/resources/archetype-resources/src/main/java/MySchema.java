@@ -41,7 +41,7 @@ public final class MySchema implements Schema {
   @Override
   public List<HashCode> getStateHashes() {
     // You shall usually return a list of the state hashes
-    // of all Merklized collections of this service,
+    // of all Merkelized collections of this service,
     // see https://exonum.com/doc/version/0.10/architecture/storage/#merkelized-indices
     return Collections.emptyList();
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.blockchain.serialization;
+package com.exonum.binding.common.serialization.json;
 
 import com.google.gson.TypeAdapterFactory;
 import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
@@ -24,15 +24,15 @@ import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
  * Note that you need to provide static factory method in your AutoValue class.
  *
  * <pre><code>
- *   public static TypeAdapter&lt;TransactionLocation&gt; typeAdapter(Gson gson) {
- *     return new AutoValue_TransactionLocation.GsonTypeAdapter(gson);
+ *   public static TypeAdapter&lt;TransactionResult&gt; typeAdapter(Gson gson) {
+ *     return new AutoValue_TransactionResult.GsonTypeAdapter(gson);
  *   }
  * </code></pre>
  */
 @GsonTypeAdapterFactory
-public abstract class TransactionLocationAdapterFactory implements TypeAdapterFactory {
+public abstract class TransactionResultAdapterFactory implements TypeAdapterFactory {
 
   public static TypeAdapterFactory create() {
-    return new AutoValueGson_TransactionLocationAdapterFactory();
+    return new AutoValueGson_TransactionResultAdapterFactory();
   }
 }

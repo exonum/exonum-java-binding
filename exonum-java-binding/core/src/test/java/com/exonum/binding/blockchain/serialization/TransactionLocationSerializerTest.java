@@ -19,7 +19,7 @@ package com.exonum.binding.blockchain.serialization;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,14 +27,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class TransactionLocationSerializerTest {
 
-  private static final Serializer<TransactionLocation> serializer =
+  private static final Serializer<TransactionLocation> SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(TransactionLocation expected) {
-    byte[] bytes = serializer.toBytes(expected);
-    TransactionLocation actual = serializer.fromBytes(bytes);
+    byte[] bytes = SERIALIZER.toBytes(expected);
+    TransactionLocation actual = SERIALIZER.fromBytes(bytes);
 
     assertThat(actual, equalTo(expected));
   }
