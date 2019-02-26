@@ -768,6 +768,7 @@ class ApiControllerIntegrationTest {
     when(qaService.getTime()).thenReturn(Optional.of(time));
 
     String expectedStringTime = convertZDTToString(time);
+
     get(TIME_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
