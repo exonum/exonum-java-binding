@@ -32,7 +32,7 @@
     </file>
     <!--Fallback configuration for a logger-->
     <file>
-      <source>rust/ejb-app/log4j.xml</source>
+      <source>rust/ejb-app/log4j-fallback.xml</source>
     </file>
     <!--Tutorial and licenses-->
     <file>
