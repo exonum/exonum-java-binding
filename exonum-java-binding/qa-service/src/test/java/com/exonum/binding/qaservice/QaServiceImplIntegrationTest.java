@@ -446,22 +446,13 @@ class QaServiceImplIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void getTime() {
-    withNodeFake(() -> {
-//      System.out.println(service.getTime());
-//      Exception e = assertThrows(RuntimeException.class, () -> service.getTime());
-      // TODO
-//      assertThat(e).hasMessageContaining("TODO");
-    });
+    // TODO
   }
 
   @Test
   @RequiresNativeLibrary
   void getValidatorsTime() {
-    withNodeFake(() -> {
-//      Exception e = assertThrows(RuntimeException.class, () -> service.getValidatorsTimes());
-      // TODO
-//      assertThat(e).hasMessageContaining("TODO");
-    });
+    // TODO
   }
 
   /** Runs a test with a service with a node fake set. */
