@@ -21,7 +21,7 @@ extern crate java_bindings;
 use exonum_testkit::TestKitBuilder;
 use integration_tests::vm::get_fakes_classpath;
 use java_bindings::{
-    Config, InternalConfig, JavaServiceRuntime, PrivateConfig, PublicConfig,
+    Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig, ServiceConfig,
 };
 
 const TEST_SERVICE_MODULE_NAME: &str =
@@ -31,23 +31,27 @@ const TEST_SERVICE_MODULE_NAME: &str =
 // TODO: reenable this test after ECR-2789
 #[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
-    let public_config = PublicConfig {
+    let service_config = ServiceConfig {
         module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
+        service_class_path: "".to_string(),
     };
 
-    let private_config = PrivateConfig {
-        service_class_path: "".to_string(),
-        log_config_path: "".to_owned(),
+    let runtime_config = RuntimeConfig {
+        log_config_path: "".to_string(),
         port: 6000,
+    };
+
+    let jvm_config = JvmConfig {
         args_prepend: vec![],
         args_append: vec![],
-        jvm_debug_socket: None
+        jvm_debug_socket: None,
     };
 
     let service_runtime = JavaServiceRuntime::get_or_create(
         Config {
-            public_config,
-            private_config,
+            runtime_config,
+            jvm_config,
+            service_config,
         },
         InternalConfig {
             system_class_path: get_fakes_classpath(),

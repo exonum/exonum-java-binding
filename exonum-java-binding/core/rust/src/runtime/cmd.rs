@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::{Config, PrivateConfig, PublicConfig};
+use super::{Config, JvmConfig, PublicConfig, RuntimeConfig, ServiceConfig};
 use exonum::helpers::fabric::keys;
 use exonum::helpers::fabric::Argument;
 use exonum::helpers::fabric::CommandExtension;
@@ -94,22 +94,16 @@ impl CommandExtension for Finalize {
         let service_class_path = context.arg(EJB_SERVICE_CLASSPATH)?;
 
         // Getting public config saved at first step out of common section of configuration.
-        let public_config = get_public_config(&context)?;
+        let PublicConfig { module_name } = get_public_config(&context)?;
 
         // Creating new private config.
-        let private_config = PrivateConfig {
+        let service_config = ServiceConfig {
             service_class_path,
-            ..Default::default()
-        };
-
-        // Forming full EJB config.
-        let config = Config {
-            public_config,
-            private_config,
+            module_name,
         };
 
         // Writing EJB config to the node services configuration section.
-        write_ejb_config(&mut context, Value::try_from(config)?);
+        write_ejb_config(&mut context, Value::try_from(service_config)?);
         Ok(context)
     }
 }
@@ -177,19 +171,24 @@ impl CommandExtension for Run {
         let jvm_debug_socket = context.arg(JVM_DEBUG_SOCKET).ok();
 
         // Getting full EJB config saved at finalize step.
-        let mut config = read_ejb_config(&context)?;
+        let service_config: ServiceConfig = read_ejb_config(&context)?;
 
-        // Filling out the rest of private configuration.
-        let private_config = PrivateConfig {
-            service_class_path: config.private_config.service_class_path,
-            log_config_path,
-            port,
-            args_append,
+        let jvm_config = JvmConfig {
             args_prepend,
+            args_append,
             jvm_debug_socket,
         };
 
-        config.private_config = private_config;
+        let runtime_config = RuntimeConfig {
+            log_config_path,
+            port,
+        };
+
+        let config = Config {
+            service_config,
+            jvm_config,
+            runtime_config,
+        };
 
         // Write the final EJB configuration.
         write_ejb_config(&mut context, Value::try_from(config)?);
@@ -218,7 +217,9 @@ fn get_public_config(context: &Context) -> Result<PublicConfig, toml::de::Error>
 }
 
 /// Returns the `ejb` section of service configs of `NodeConfig`.
-fn read_ejb_config(context: &Context) -> Result<Config, toml::de::Error> {
+fn read_ejb_config<T: serde::de::DeserializeOwned>(
+    context: &Context,
+) -> Result<T, toml::de::Error> {
     let node_config = get_node_config(context);
     node_config
         .services_configs
