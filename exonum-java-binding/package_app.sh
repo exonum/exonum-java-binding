@@ -10,7 +10,9 @@ function build-ejb-app-macos() {
     # Set RUSTFLAGS to adjust RUNPATH of the binary.
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
     echo "RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am -DskipTests \
+    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am \
+      -DskipTests \
+      -DdoNotBuildRustLib \
       -Drust.libraryPath="$(pwd)/core/rust/target/debug/libjava_bindings.dylib"
 }
 
@@ -18,34 +20,23 @@ function build-ejb-app-linux() {
     # Set RUSTFLAGS to adjust RUNPATH of the binary.
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
     echo "RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am -DskipTests \
+    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am \
+      -DskipTests \
+      -DdoNotBuildRustLib \
       -Drust.libraryPath="$(pwd)/core/rust/target/debug/libjava_bindings.so"
 }
 
 EJB_RUST_DIR="${PWD}/core/rust"
 
-# Use active JVM.
-#
-# Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
-# hence this a bit complex thing.
-export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')"
-echo "JAVA_HOME=${JAVA_HOME}"
-
-# Find the directory containing libjvm (the relative path has changed in Java 9).
-export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
-echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
-
-# Version of Rust used to locate libstd.
-export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-stable}"
-echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
-
-# Find the directory containing Rust libstd.
-export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
-echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
-
-# Checking if RUSTFLAGS has already been set.
-if [[ "${RUSTFLAGS:-}" != "" ]]; then
-    echo "Warning: the RUSTFLAGS variable will be overriden. Merge is not yet supported."
+# Run all tests before packaging the App. This is safe, but takes a long time.
+if [ "$#" -eq 0 ]; then
+  ./run_all_tests.sh
+else
+  if [ "$1" != "--skip-tests" ]; then
+    echo "Unknown option: $1"
+    exit 1
+  fi
+  source ./tests_profile
 fi
 
 # Set LD_LIBRARY_PATH as needed for building and testing.

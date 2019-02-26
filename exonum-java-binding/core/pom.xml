@@ -204,7 +204,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
-              <skip>${skipTests}</skip>
+              <skip>${doNotBuildRustLib}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -409,7 +409,6 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.6.0</version>
             <configuration>
               <executable>cargo</executable>
               <workingDirectory>${project.basedir}/rust/</workingDirectory>
@@ -446,7 +445,7 @@
             </configuration>
             <executions>
               <execution>
-                <id>package--ejb-app</id>
+                <id>package-ejb-app</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
