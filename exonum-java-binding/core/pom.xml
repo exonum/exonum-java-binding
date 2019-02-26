@@ -26,6 +26,7 @@
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <packaging.basedir>${project.basedir}/rust/target/prepackage</packaging.basedir>
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
@@ -192,7 +193,7 @@
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
                  depend on the library -->
-            <id>build-rust-lib</id>
+            <id>build-rust-lib-for-tests</id>
             <phase>compile</phase>
             <configuration>
               <arguments>
@@ -203,6 +204,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -227,6 +229,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -248,6 +251,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -400,23 +404,55 @@
       <id>app-packaging</id>
       <build>
         <plugins>
+
+          <!--Build EJB App-->
           <plugin>
-             <groupId>org.apache.maven.plugins</groupId>
-             <artifactId>maven-assembly-plugin</artifactId>
-             <configuration>
-                <descriptors>
-                  <descriptor>app_assembly.xml</descriptor>
-                </descriptors>
-              </configuration>
-              <executions>
-                <execution>
-                  <id>make-assembly</id>
-                  <phase>package</phase>
-                  <goals>
-                    <goal>single</goal>
-                  </goals>
-                </execution>
-              </executions>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+            <configuration>
+              <executable>cargo</executable>
+              <workingDirectory>${project.basedir}/rust/</workingDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>build-ejb-app</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>--package</argument>
+                    <argument>ejb-app</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!--Package EJB App with necessary libraries and documentation-->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptors>
+                <descriptor>app_assembly.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <executions>
+              <execution>
+                <id>package--ejb-app</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
