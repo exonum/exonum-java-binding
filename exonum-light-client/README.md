@@ -15,6 +15,8 @@ The following table shows versions compatibility:
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
 | 0.1.0        | 0.10.* | 0.4         |
+_Be noticed, that the table above includes release versions only
+and does not include snapshot versions_
 
 ## Prerequisites
 - Java 8 or above is required for using this client
@@ -92,6 +94,57 @@ Also, you can take a look at the [integration test][send-tx-it]
 for the full example of how to create a transaction message and
 send it to Exonum node.
 
+### Transaction info
+<!-- TODO: remove after release --> 
+_*Not available for Light Client v0.1_  
+The following method provides a possibility to get a transaction
+information, either committed or uncommitted, by the hash
+of the transaction:
+```java
+Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
+```
+* `txHash` is a hash of the transaction to search.
+
+### Block info
+<!-- TODO: remove after release --> 
+_*Not available for Light Client v0.1_  
+The following method provides a possibility to get a block
+information available by the specified blockchain height:
+```java
+BlockResponse response = exonumClient.getBlock(height);
+```
+* `height` is a number for the blockchain height starting from 0 (genesis block).
+
+### Blocks info
+<!-- TODO: remove after release --> 
+_*Not available for Light Client v0.1_  
+The following method provides a possibility to get an array of blocks
+by the specified range:
+```java
+BlocksResponse response = exonumClient.getBlocks(count, skipEmpty, maxHeight, showTimes);
+```
+* `count` is a number of blocks to return.
+* `skipEmpty` is a parameter to filter empty blocks i.e. blocks without transactions.
+* `maxHeight` is a number to filter blocks starting from the given value in descending order.
+* `showTimes` is a parameter indicates adding block acceptance times to the response.
+
+### Number of unconfirmed transactions
+<!-- TODO: remove after release --> 
+_*Not available for Light Client v0.1_  
+To get a number of currently unconfirmed transactions i.e.
+are waiting to be committed to the blockchain:
+```java
+int count = exonumClient.getUnconfirmedTransactionsCount();
+```
+
+### Node health check
+<!-- TODO: remove after release --> 
+_*Not available for Light Client v0.1_  
+To get the node health check information.
+```java
+HealthCheckInfo info = exonumClient.healthCheck();
+```
+  
 ## How to build
 To build the client locally, clone the repository, and
 run next commands from the project's root 
