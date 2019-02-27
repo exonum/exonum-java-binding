@@ -24,7 +24,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
-import com.exonum.binding.storage.database.View;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
