@@ -15,8 +15,6 @@ The following table shows versions compatibility:
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
 | 0.1.0        | 0.10.* | 0.4         |
-_Be noticed, that the table above includes release versions only
-and does not include snapshot versions_
 
 ## Prerequisites
 - Java 8 or above is required for using this client
@@ -126,13 +124,13 @@ BlocksResponse response = exonumClient.getBlocks(count, skipEmpty, maxHeight, sh
 * `count` is a number of blocks to return.
 * `skipEmpty` is a parameter to filter empty blocks i.e. blocks without transactions.
 * `maxHeight` is a number to filter blocks starting from the given value in descending order.
-* `showTimes` is a parameter indicates adding block acceptance times to the response.
+* `showTimes` is a parameter that indicates adding block acceptance times to the response.
 
 ### Number of unconfirmed transactions
 <!-- TODO: remove after release --> 
 _*Not available for Light Client v0.1_  
-To get a number of currently unconfirmed transactions i.e.
-are waiting to be committed to the blockchain:
+To get a number of currently unconfirmed transactions i.e.,
+that are waiting to be committed to the blockchain:
 ```java
 int count = exonumClient.getUnconfirmedTransactionsCount();
 ```
