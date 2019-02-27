@@ -31,7 +31,6 @@ import static com.exonum.client.Blocks.BLOCK_3_WITHOUT_TIME;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -101,13 +100,6 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertThat(recordedRequest.getPath(), startsWith(BLOCK));
     assertThat(recordedRequest.getRequestUrl().queryParameter("height"),
         is(String.valueOf(height)));
-  }
-
-  @Test
-  void getBlockNotFound() {
-    server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
-
-    assertThrows(RuntimeException.class, () -> exonumClient.getBlockByHeight(1L));
   }
 
   @ParameterizedTest
