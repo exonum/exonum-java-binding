@@ -25,6 +25,7 @@ public class BlocksResponse {
   /**
    * Blockchain blocks in descending order by height.
    * It is allowed to be empty if no blocks found.
+   * It may contain gaps.
    */
   List<Block> blocks;
 
@@ -35,12 +36,12 @@ public class BlocksResponse {
   List<ZonedDateTime> blockCommitTimes;
 
   /**
-   * The smallest height of the returned blocks.
+   * The smallest height of the returned blocks that match the search criteria.
    */
   long blocksRangeStart;
 
   /**
-   * The largest height of the returned blocks.
+   * The largest height of the returned blocks that match the search criteria.
    * if blocks have gaps then: {@code blocksRangeEnd - blocksRangeStart != blocks.size}
    */
   long blocksRangeEnd;
