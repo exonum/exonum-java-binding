@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.runtime;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,6 +22,11 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.service.AbstractService;
+import com.exonum.binding.service.Node;
+import com.exonum.binding.service.Schema;
+import com.exonum.binding.service.Service;
+import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.storage.database.MemoryDb;
@@ -84,7 +89,7 @@ class UserModule extends AbstractModule {
 class UserService extends AbstractService {
 
   static final short ID = 1;
-  static final String NAME = "UserService";
+  static final String NAME = "user-service";
 
   @Inject
   UserService(TransactionConverter transactionConverter) {

@@ -30,7 +30,7 @@ use MainExecutor;
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
-const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/service/ServiceBootstrap";
+const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceBootstrap";
 const START_SERVICE_SIGNATURE: &str =
     "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 

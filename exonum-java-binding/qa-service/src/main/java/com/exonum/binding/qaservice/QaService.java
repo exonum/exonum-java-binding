@@ -17,8 +17,8 @@
 package com.exonum.binding.qaservice;
 
 import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;

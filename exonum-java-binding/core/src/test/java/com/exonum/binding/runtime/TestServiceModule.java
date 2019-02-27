@@ -12,20 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.exonum.client;
+package com.exonum.binding.runtime;
 
-/**
- * Contains Exonum API URLs.
- */
-final class ExonumUrls {
-  private static final String EXPLORER_PATHS_PREFIX = "/api/explorer/v1";
-  private static final String SYS_PATHS_PREFIX = "/api/system/v1";
-  static final String TRANSACTIONS = EXPLORER_PATHS_PREFIX + "/transactions";
-  static final String MEMORY_POOL = SYS_PATHS_PREFIX + "/mempool";
-  static final String HEALTH_CHECK = SYS_PATHS_PREFIX + "/healthcheck";
-  static final String USER_AGENT = SYS_PATHS_PREFIX + "/user_agent";
+import com.exonum.binding.service.Service;
+import com.exonum.binding.service.TransactionConverter;
+import com.google.inject.AbstractModule;
 
+class TestServiceModule extends AbstractModule {
+
+  @Override
+  protected void configure() {
+    bind(Service.class)
+        .to(TestService.class);
+
+    bind(TransactionConverter.class)
+        .toInstance((m) -> (context) -> System.out.println("Transaction#execute"));
+  }
 }

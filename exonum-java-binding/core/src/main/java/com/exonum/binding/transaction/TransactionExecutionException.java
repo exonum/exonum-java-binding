@@ -31,6 +31,8 @@ import javax.annotation.Nullable;
  * status of a failed transaction. See
  * <a href="https://exonum.com/doc/version/0.10/advanced/node-management/#transaction">the API endpoint documentation</a>
  * for more information.
+ *
+ * @see com.exonum.binding.common.blockchain.TransactionResult
  */
 public class TransactionExecutionException extends Exception {
 
