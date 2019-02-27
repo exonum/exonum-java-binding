@@ -19,7 +19,6 @@ package com.exonum.client;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
@@ -28,7 +27,6 @@ import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,13 +36,11 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
-import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -214,51 +210,6 @@ class ExonumHttpClientIntegrationTest {
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(TRANSACTIONS));
     assertThat(recordedRequest.getRequestUrl().queryParameter("hash"), is(id.toString()));
-  }
-
-  @Test
-  void getBlockByHeight() throws InterruptedException {
-    // Mock response
-    String previousHash = "fd510fc923683a4bb77af8278cd51676fbd0fcb25e2437bd69513d468b874bbb";
-    String txHash = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String stateHash = "79a6f0fa233cc2d7d2e96855ec14bdcc4c0e0bb1a99ccaa912a555441e3b7512";
-    String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String time = "2019-02-14T14:12:52.037255Z";
-    String mockResponse = "{\n"
-        + "    \"block\": {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 1,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"" + previousHash + "\",\n"
-        + "        \"tx_hash\": \"" + txHash + "\",\n"
-        + "        \"state_hash\": \"" + stateHash + "\"\n"
-        + "    },\n"
-        + "    \"precommits\": [\"a410964c2c21199b48e2\"],\n"
-        + "    \"txs\": [\"" + tx1 + "\"],\n"
-        + "    \"time\": \"" + time + "\"\n"
-        + "}";
-    server.enqueue(new MockResponse().setBody(mockResponse));
-
-    // Call
-    long height = Long.MAX_VALUE;
-    BlockResponse response = exonumClient.getBlockByHeight(height);
-
-    // Assert response
-    assertThat(response.getBlock().getHeight(), is(1L));
-    assertThat(response.getBlock().getProposerId(), is(3));
-    assertThat(response.getBlock().getNumTransactions(), is(1));
-    assertThat(response.getBlock().getPreviousBlockHash(), is(HashCode.fromString(previousHash)));
-    assertThat(response.getBlock().getStateHash(), is(HashCode.fromString(stateHash)));
-    assertThat(response.getBlock().getTxRootHash(), is(HashCode.fromString(txHash)));
-    assertThat(response.getTime(), is(ZonedDateTime.parse(time)));
-    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
-
-    // Assert request params
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest.getPath(), startsWith(BLOCK));
-    assertThat(recordedRequest.getRequestUrl().queryParameter("height"),
-        is(String.valueOf(height)));
   }
 
 }
