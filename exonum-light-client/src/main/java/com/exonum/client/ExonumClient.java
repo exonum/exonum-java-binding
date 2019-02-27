@@ -100,6 +100,8 @@ public interface ExonumClient {
    * @return block information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
+   * @throws RuntimeException if block is not found by the requested height,
+   *        i.e. the requested height is greater then actual blockchain height
    * @throws IllegalArgumentException if the given height is negative
    */
   BlockResponse getBlockByHeight(long height);
