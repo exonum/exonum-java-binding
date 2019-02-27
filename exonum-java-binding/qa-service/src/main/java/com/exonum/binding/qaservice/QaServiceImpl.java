@@ -90,9 +90,6 @@ final class QaServiceImpl extends AbstractService implements QaService {
   @Nullable
   private Node node;
 
-  @Nullable
-  private TimeSchema timeSchema;
-
   @Inject
   public QaServiceImpl(TransactionConverter transactionConverter) {
     super(ID, NAME, transactionConverter);
@@ -342,15 +339,16 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public void initializeTimeSchema(View view) {
-    this.timeSchema = TimeSchema.newInstance(view);
+  @SuppressWarnings("ConstantConditions")  // Node is not null.
+  public Optional<ZonedDateTime> getTime() {
+    return node.withSnapshot(s -> {
+      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+      return toOptional(currentTime);
+    });
   }
 
-  @Override
-  @SuppressWarnings("ConstantConditions") // TimeSchema is not null.
-  public Optional<ZonedDateTime> getTime() {
-    checkTimeSchemaInitialized();
-    EntryIndexProxy<ZonedDateTime> entry = timeSchema.getTime();
+  private <T> Optional<T> toOptional(EntryIndexProxy<T> entry) {
     if (entry.isPresent()) {
       return Optional.of(entry.get());
     } else {
@@ -359,16 +357,17 @@ final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  @SuppressWarnings("ConstantConditions") // TimeSchema is not null.
+  @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    checkTimeSchemaInitialized();
-    MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeSchema.getValidatorsTimes();
-
-    return Maps.toMap(validatorsTimes.keys(), validatorsTimes::get);
+    return node.withSnapshot(s -> {
+      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
+      return toMap(validatorsTimes);
+    });
   }
 
-  private void checkTimeSchemaInitialized() {
-    checkState(timeSchema != null, "TimeSchema was not initialized");
+  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
+    return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.

@@ -26,7 +26,6 @@ import static com.exonum.binding.test.Bytes.createPrefixed;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -444,29 +443,13 @@ class QaServiceImplIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void getTime() {
-    withInitializedTimeSchema(() -> {
-      assertThat(service.getTime()).isEmpty();
-    });
+    withNodeFake(() -> assertThat(service.getTime()).isEmpty());
   }
 
   @Test
   @RequiresNativeLibrary
   void getValidatorsTime() {
-    withInitializedTimeSchema(() -> {
-      assertThat(service.getValidatorsTimes()).isEmpty();
-    });
-  }
-
-  private void withInitializedTimeSchema(Runnable test) {
-    try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
-      View view = db.createFork(cleaner);
-      service.initializeTimeSchema(view);
-
-      test.run();
-    } catch (CloseFailuresException e) {
-      fail(e.getLocalizedMessage());
-    }
+    withNodeFake(() -> assertThat(service.getValidatorsTimes()).isEmpty());
   }
 
   /** Runs a test with a service with a node fake set. */

@@ -46,6 +46,7 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.TransactionLocation;
@@ -72,7 +73,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -84,7 +84,8 @@ final class ApiController {
 
   private final QaService service;
 
-  private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
+      .ofPattern("yyyy-MM-dd HH:mm:ss Z");
 
   ApiController(QaService service) {
     this.service = service;
@@ -304,12 +305,12 @@ final class ApiController {
   static Map<PublicKey, String> convertValidatorsTimesValues(
       Map<PublicKey, ZonedDateTime> validatorsTimes) {
     return validatorsTimes.entrySet().stream()
-        .collect(Collectors.toMap(Entry::getKey, t -> convertZdtToString(t.getValue())));
+        .collect(toMap(Entry::getKey, t -> convertZdtToString(t.getValue())));
   }
 
   @VisibleForTesting
   static String convertZdtToString(ZonedDateTime zonedDateTime) {
-    return DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).format(zonedDateTime);
+    return DATE_TIME_FORMATTER.format(zonedDateTime);
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {

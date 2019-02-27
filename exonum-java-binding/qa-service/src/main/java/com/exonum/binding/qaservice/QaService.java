@@ -79,8 +79,6 @@ public interface QaService extends Service {
 
   StoredConfiguration getActualConfiguration();
 
-  void initializeTimeSchema(View view);
-
   Optional<ZonedDateTime> getTime();
 
   Map<PublicKey, ZonedDateTime> getValidatorsTimes();
