@@ -40,7 +40,7 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_TH
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.exonum.binding.qaservice.ApiController.convertValidatorsTimesValues;
-import static com.exonum.binding.qaservice.ApiController.convertZDTToString;
+import static com.exonum.binding.qaservice.ApiController.convertZdtToString;
 import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -102,9 +102,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -767,7 +765,7 @@ class ApiControllerIntegrationTest {
     ZonedDateTime time = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
     when(qaService.getTime()).thenReturn(Optional.of(time));
 
-    String expectedStringTime = convertZDTToString(time);
+    String expectedStringTime = convertZdtToString(time);
 
     get(TIME_PATH)
         .send(context.succeeding(response -> context.verify(() -> {

@@ -291,7 +291,7 @@ final class ApiController {
 
   private void getTime(RoutingContext rc) {
     Optional<ZonedDateTime> time = service.getTime();
-    respondWithJson(rc, time.map(ApiController::convertZDTToString));
+    respondWithJson(rc, time.map(ApiController::convertZdtToString));
   }
 
   private void getValidatorsTimes(RoutingContext rc) {
@@ -304,11 +304,11 @@ final class ApiController {
   static Map<PublicKey, String> convertValidatorsTimesValues(
       Map<PublicKey, ZonedDateTime> validatorsTimes) {
     return validatorsTimes.entrySet().stream()
-        .collect(Collectors.toMap(Entry::getKey, t -> convertZDTToString(t.getValue())));
+        .collect(Collectors.toMap(Entry::getKey, t -> convertZdtToString(t.getValue())));
   }
 
   @VisibleForTesting
-  static String convertZDTToString(ZonedDateTime zonedDateTime) {
+  static String convertZdtToString(ZonedDateTime zonedDateTime) {
     return DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).format(zonedDateTime);
   }
 
