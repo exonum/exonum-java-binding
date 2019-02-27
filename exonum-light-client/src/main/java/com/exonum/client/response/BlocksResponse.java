@@ -16,7 +16,6 @@
 
 package com.exonum.client.response;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Value;
 
@@ -28,12 +27,6 @@ public class BlocksResponse {
    * It may contain gaps.
    */
   List<Block> blocks;
-
-  /**
-   * Blockchain block commit times. It is allowed to be empty.
-   * The index of time elements corresponds to the index of blocks.
-   */
-  List<ZonedDateTime> blockCommitTimes;
 
   /**
    * The smallest height of the returned blocks that match the search criteria.

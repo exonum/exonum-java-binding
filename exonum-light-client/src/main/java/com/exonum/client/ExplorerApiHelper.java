@@ -18,8 +18,6 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -34,6 +32,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;
 import lombok.Value;
@@ -67,29 +66,43 @@ final class ExplorerApiHelper {
 
   static BlockResponse parseGetBlockResponse(String json) {
     GetBlockResponse response = json().fromJson(json, GetBlockResponse.class);
-    ZonedDateTime time = ZonedDateTime.parse(response.getTime());
+    String time = response.getTime();
+    Block block = toTimeBlock(response.getBlock(), time);
 
-    return new BlockResponse(
-        response.getBlock(),
-        response.getTransactions(),
-        time
-    );
+    return new BlockResponse(block, response.getTransactions());
   }
 
   static BlocksResponse parseGetBlocksResponse(String json) {
     GetBlocksResponse response = json().fromJson(json, GetBlocksResponse.class);
-    List<ZonedDateTime> times = response.getTimes() == null ? emptyList() :
-        response.getTimes()
-            .stream()
-            .map(ZonedDateTime::parse)
-            .collect(toList());
+    List<GetBlockResponseBlock> blocks = response.getBlocks();
+    List<String> times = response.getTimes();
+
+    List<Block> timeBlocks = new ArrayList<>(blocks.size());
+    for (int i = 0; i < blocks.size(); i++) {
+      GetBlockResponseBlock block = blocks.get(i);
+      String time = times == null ? null : times.get(i);
+      timeBlocks.add(toTimeBlock(block, time));
+    }
 
     return new BlocksResponse(
-        response.getBlocks(),
-        times,
+        timeBlocks,
         response.getRange().getStart(),
         response.getRange().getEnd()
     );
+  }
+
+  private static Block toTimeBlock(GetBlockResponseBlock block, String time) {
+    ZonedDateTime commitTime = time == null ? null : ZonedDateTime.parse(time);
+
+    return Block.builder()
+        .proposerId(block.getProposerId())
+        .numTransactions(block.getTxCount())
+        .height(block.getHeight())
+        .previousBlockHash(block.getPreviousBlockHash())
+        .stateHash(block.getStateHash())
+        .txRootHash(block.getTxRootHash())
+        .commitTime(commitTime)
+        .build();
   }
 
   private static TransactionResult getTransactionResult(
@@ -178,7 +191,7 @@ final class ExplorerApiHelper {
 
   @Value
   private static class GetBlockResponse {
-    Block block;
+    GetBlockResponseBlock block;
     JsonElement precommits; //TODO: in scope of LC P3
     @SerializedName("txs")
     List<HashCode> transactions;
@@ -186,8 +199,23 @@ final class ExplorerApiHelper {
   }
 
   @Value
+  private static class GetBlockResponseBlock {
+    @SerializedName("proposer_id")
+    int proposerId;
+    long height;
+    @SerializedName("tx_count")
+    int txCount;
+    @SerializedName("prev_hash")
+    HashCode previousBlockHash;
+    @SerializedName("tx_hash")
+    HashCode txRootHash;
+    @SerializedName("state_hash")
+    HashCode stateHash;
+  }
+
+  @Value
   private static class GetBlocksResponse {
-    List<Block> blocks;
+    List<GetBlockResponseBlock> blocks;
     GetBlocksResponseRange range;
     List<String> times;
   }

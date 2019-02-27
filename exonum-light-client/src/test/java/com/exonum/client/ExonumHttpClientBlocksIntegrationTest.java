@@ -16,16 +16,25 @@
 
 package com.exonum.client;
 
+import static com.exonum.client.Blocks.BLOCK_1;
+import static com.exonum.client.Blocks.BLOCK_1_JSON;
+import static com.exonum.client.Blocks.BLOCK_1_TIME;
+import static com.exonum.client.Blocks.BLOCK_1_WITHOUT_TIME;
+import static com.exonum.client.Blocks.BLOCK_2;
+import static com.exonum.client.Blocks.BLOCK_2_JSON;
+import static com.exonum.client.Blocks.BLOCK_2_TIME;
+import static com.exonum.client.Blocks.BLOCK_2_WITHOUT_TIME;
+import static com.exonum.client.Blocks.BLOCK_3;
+import static com.exonum.client.Blocks.BLOCK_3_JSON;
+import static com.exonum.client.Blocks.BLOCK_3_TIME;
+import static com.exonum.client.Blocks.BLOCK_3_WITHOUT_TIME;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,7 +46,6 @@ import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -70,23 +78,12 @@ class ExonumHttpClientBlocksIntegrationTest {
   @Test
   void getBlockByHeight() throws InterruptedException {
     // Mock response
-    String previousHash = "fd510fc923683a4bb77af8278cd51676fbd0fcb25e2437bd69513d468b874bbb";
-    String txHash = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String stateHash = "79a6f0fa233cc2d7d2e96855ec14bdcc4c0e0bb1a99ccaa912a555441e3b7512";
     String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String time = "2019-02-14T14:12:52.037255Z";
     String mockResponse = "{\n"
-        + "    \"block\": {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 1,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"" + previousHash + "\",\n"
-        + "        \"tx_hash\": \"" + txHash + "\",\n"
-        + "        \"state_hash\": \"" + stateHash + "\"\n"
-        + "    },\n"
-        + "    \"precommits\": [\"a410964c2c21199b48e2\"],\n"
-        + "    \"txs\": [\"" + tx1 + "\"],\n"
-        + "    \"time\": \"" + time + "\"\n"
+        + "    'block': " + BLOCK_1_JSON + ",\n"
+        + "    'precommits': ['a410964c2c21199b48e2'],\n"
+        + "    'txs': ['" + tx1 + "'],\n"
+        + "    'time': '" + BLOCK_1_TIME + "'\n"
         + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
@@ -94,17 +91,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     long height = Long.MAX_VALUE;
     BlockResponse response = exonumClient.getBlockByHeight(height);
 
-    Block expectedBlock = Block.builder()
-        .height(1L)
-        .proposerId(3)
-        .numTransactions(1)
-        .previousBlockHash(HashCode.fromString(previousHash))
-        .stateHash(HashCode.fromString(stateHash))
-        .txRootHash(HashCode.fromString(txHash))
-        .build();
     // Assert response
-    assertThat(response.getBlock(), is(expectedBlock));
-    assertThat(response.getTime(), is(ZonedDateTime.parse(time)));
+    assertThat(response.getBlock(), is(BLOCK_1));
     assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
 
     // Assert request params
@@ -131,27 +119,12 @@ class ExonumHttpClientBlocksIntegrationTest {
   @Test
   void getBlocks() throws InterruptedException {
     String mockResponse = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 288\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 288\n"
         + "    },\n"
-        + "    \"blocks\": [{\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 26,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"932470a22d37a5a995519e01c50eab7db9e0\",\n"
-        + "        \"tx_hash\": \"5cc41a2a7cf7c0d3a15ab6ca775b601208dba7\",\n"
-        + "        \"state_hash\": \"4d7bb34d7913e0784c24a1e440532e7290\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 6,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"dbec8f64a85ab56985c7ab7e63a191764f4d\",\n"
-        + "        \"tx_hash\": \"ffee3d630f137aecff95aece36cfe4dc1b42f6\",\n"
-        + "        \"state_hash\": \"8ac9f2af6266b8e9b61fa7f3fcdd170375\"\n"
-        + "    }],\n"
-        + "    \"times\": [\"2019-02-21T13:01:44.321051Z\", \n"
-        + "             \"2019-02-21T13:01:40.199265Z\"]\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
+        + "    'times': ['" + BLOCK_1_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_3_TIME + "']\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
@@ -163,8 +136,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksResponse response = exonumClient.getBlocks(blocksCount, skipEmpty, height, showTimes);
 
     // Assert response
-    assertThat(response.getBlocks(), hasSize(2));
-    assertThat(response.getBlockCommitTimes(), hasSize(2));
+    assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
 
@@ -178,26 +150,12 @@ class ExonumHttpClientBlocksIntegrationTest {
   @Test
   void getBlocksNoTime() throws InterruptedException {
     String mockResponse = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 288\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 288\n"
         + "    },\n"
-        + "    \"blocks\": [{\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 26,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"932470a22d37a5a995519e01c50eab7db9e0\",\n"
-        + "        \"tx_hash\": \"5cc41a2a7cf7c0d3a15ab6ca775b601208dba7\",\n"
-        + "        \"state_hash\": \"4d7bb34d7913e0784c24a1e440532e7290\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 6,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"dbec8f64a85ab56985c7ab7e63a191764f4d\",\n"
-        + "        \"tx_hash\": \"ffee3d630f137aecff95aece36cfe4dc1b42f6\",\n"
-        + "        \"state_hash\": \"8ac9f2af6266b8e9b61fa7f3fcdd170375\"\n"
-        + "    }],\n"
-        + "    \"times\": null\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
+        + "    'times': null\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
@@ -209,8 +167,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksResponse response = exonumClient.getBlocks(blocksCount, skipEmpty, height, showTimes);
 
     // Assert response
-    assertThat(response.getBlocks(), hasSize(2));
-    assertThat(response.getBlockCommitTimes(), empty());
+    assertThat(response.getBlocks(),
+        contains(BLOCK_1_WITHOUT_TIME, BLOCK_2_WITHOUT_TIME, BLOCK_3_WITHOUT_TIME));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
 
@@ -238,27 +196,12 @@ class ExonumHttpClientBlocksIntegrationTest {
   @Test
   void getLastBlocks() throws InterruptedException {
     String mockResponse = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 288\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 288\n"
         + "    },\n"
-        + "    \"blocks\": [{\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 26,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"932470a22d37a5a995519e01c50eab7db9e0\",\n"
-        + "        \"tx_hash\": \"5cc41a2a7cf7c0d3a15ab6ca775b601208dba7\",\n"
-        + "        \"state_hash\": \"4d7bb34d7913e0784c24a1e440532e7290\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 6,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"dbec8f64a85ab56985c7ab7e63a191764f4d\",\n"
-        + "        \"tx_hash\": \"ffee3d630f137aecff95aece36cfe4dc1b42f6\",\n"
-        + "        \"state_hash\": \"8ac9f2af6266b8e9b61fa7f3fcdd170375\"\n"
-        + "    }],\n"
-        + "    \"times\": [\"2019-02-21T13:01:44.321051Z\", \n"
-        + "             \"2019-02-21T13:01:40.199265Z\"]\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
+        + "    'times': ['" + BLOCK_1_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_3_TIME + "']\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
@@ -269,8 +212,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksResponse response = exonumClient.getLastBlocks(blocksCount, skipEmpty, showTimes);
 
     // Assert response
-    assertThat(response.getBlocks(), hasSize(2));
-    assertThat(response.getBlockCommitTimes(), hasSize(2));
+    assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
 
@@ -284,81 +226,71 @@ class ExonumHttpClientBlocksIntegrationTest {
   @Test
   void getLastBlock() throws InterruptedException {
     String mockResponse = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 7\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 7\n"
         + "    },\n"
-        + "    \"blocks\": [{\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 26,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"932470a22d37a5a995519e01c50eab7db9e0\",\n"
-        + "        \"tx_hash\": \"5cc41a2a7cf7c0d3a15ab6ca775b601208dba7\",\n"
-        + "        \"state_hash\": \"4d7bb34d7913e0784c24a1e440532e7290\"\n"
-        + "    }],\n"
-        + "    \"times\": null\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "],\n"
+        + "    'times': null\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Block block = exonumClient.getLastBlock();
+    boolean withTime = false;
+    Block block = exonumClient.getLastBlock(withTime);
 
     // Assert response
-    assertThat(block, notNullValue());
+    assertThat(block, is(BLOCK_1_WITHOUT_TIME));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 1, false, null, false);
+    assertBlockRequestParams(recordedRequest, 1, false, null, withTime);
   }
 
   @Test
   void getLastNotEmptyBlock() throws InterruptedException {
     String mockResponse = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 7\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 7\n"
         + "    },\n"
-        + "    \"blocks\": [{\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 26,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"932470a22d37a5a995519e01c50eab7db9e0\",\n"
-        + "        \"tx_hash\": \"5cc41a2a7cf7c0d3a15ab6ca775b601208dba7\",\n"
-        + "        \"state_hash\": \"4d7bb34d7913e0784c24a1e440532e7290\"\n"
-        + "    }],\n"
-        + "    \"times\": null\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "],\n"
+        + "    'times': null\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<Block> block = exonumClient.getLastNonEmptyBlock();
+    boolean withTime = false;
+    Optional<Block> block = exonumClient.getLastNonEmptyBlock(withTime);
 
     // Assert response
     assertTrue(block.isPresent());
+    assertThat(block.get(), is(BLOCK_1_WITHOUT_TIME));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 1, true, null, false);
+    assertBlockRequestParams(recordedRequest, 1, true, null, withTime);
   }
 
   @Test
   void getLastNotEmptyBlockNoBlock() throws InterruptedException {
     String mockResponse = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 7\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 7\n"
         + "    },\n"
-        + "    \"blocks\": [],\n"
-        + "    \"times\": null\n"
+        + "    'blocks': [],\n"
+        + "    'times': null\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<Block> block = exonumClient.getLastNonEmptyBlock();
+    boolean withTime = false;
+    Optional<Block> block = exonumClient.getLastNonEmptyBlock(withTime);
 
     // Assert response
     assertFalse(block.isPresent());
@@ -367,7 +299,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 1, true, null, false);
+    assertBlockRequestParams(recordedRequest, 1, true, null, withTime);
   }
 
   @Test
@@ -375,12 +307,12 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Mock response
     long height = 1600;
     String json = "{\n"
-        + "  \"range\": {\n"
-        + "    \"start\": 0,\n"
-        + "    \"end\": " + height + "\n"
+        + "  'range': {\n"
+        + "    'start': 0,\n"
+        + "    'end': " + height + "\n"
         + "  },\n"
-        + "  \"blocks\": [],\n"
-        + "  \"times\": null\n"
+        + "  'blocks': [],\n"
+        + "  'times': null\n"
         + "}\n";
     server.enqueue(new MockResponse().setBody(json));
 

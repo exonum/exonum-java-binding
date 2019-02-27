@@ -116,8 +116,8 @@ public interface ExonumClient {
    *        at least up to the <b>heightMax - count + 1</b>.
    *        If the <b>heightMax</b> is greater than actual blockchain height then
    *        the actual height will be used
-   * @param withBlocksTime if {@code true}, then includes block commit times in the response;
-   *        or an empty times {@code false}. See {@linkplain BlocksResponse#getBlockCommitTimes()}
+   * @param withTime if {@code true}, then includes block commit times in the response;
+   *        or an empty times {@code false}. See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
    * @return blocks information response
@@ -126,37 +126,45 @@ public interface ExonumClient {
    * @throws IllegalArgumentException if count is greater
    *        then {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
    */
-  BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax, boolean withBlocksTime);
+  BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax, boolean withTime);
 
   /**
    * Returns blockchain blocks information starting from the last block in the blockchain.
    * @param count Number of blocks to return.
    *        Should not be greater than {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
    * @param skipEmpty if {@code true}, then only non-empty blocks are returned
-   * @param withBlocksTime if {@code true}, then returns an array of
-   *        {@linkplain java.time.ZonedDateTime} objects; or an empty array if {@code false}.
+   * @param withTime if {@code true}, then includes block commit times in the response;
+   *        or an empty times {@code false}. See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withBlocksTime);
+  BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime);
 
   /**
    * Returns the last block in the blockchain.
+   * @param withTime if {@code true}, then includes block commit times in the response;
+   *        or an empty times {@code false}. See {@linkplain Block#getCommitTime()}.
+   *        The time value corresponds to the average time of submission of precommits by the
+   *        validators for every returned block
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  Block getLastBlock();
+  Block getLastBlock(boolean withTime);
 
   /**
    * Returns the last block in the blockchain which contains transactions;
    * or {@code Optional.empty()} if there are no blocks with transactions in the blockchain.
+   * @param withTime if {@code true}, then includes block commit times in the response;
+   *        or an empty times {@code false}. See {@linkplain Block#getCommitTime()}.
+   *        The time value corresponds to the average time of submission of precommits by the
+   *        validators for every returned block
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  Optional<Block> getLastNonEmptyBlock();
+  Optional<Block> getLastNonEmptyBlock(boolean withTime);
 
   /**
    * Returns Exonum client builder.

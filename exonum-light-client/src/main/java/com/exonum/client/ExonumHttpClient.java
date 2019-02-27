@@ -136,18 +136,18 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax,
-      boolean withBlocksTime) {
-    return doGetBlocks(count, skipEmpty, heightMax, withBlocksTime);
+      boolean withTime) {
+    return doGetBlocks(count, skipEmpty, heightMax, withTime);
   }
 
   @Override
-  public BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withBlocksTime) {
-    return doGetBlocks(count, skipEmpty, null, withBlocksTime);
+  public BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime) {
+    return doGetBlocks(count, skipEmpty, null, withTime);
   }
 
   @Override
-  public Block getLastBlock() {
-    BlocksResponse response = doGetBlocks(1, false, null, false);
+  public Block getLastBlock(boolean withTime) {
+    BlocksResponse response = doGetBlocks(1, false, null, withTime);
 
     return response.getBlocks()
         .stream()
@@ -156,8 +156,8 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public Optional<Block> getLastNonEmptyBlock() {
-    BlocksResponse response = doGetBlocks(1, true, null, false);
+  public Optional<Block> getLastNonEmptyBlock(boolean withTime) {
+    BlocksResponse response = doGetBlocks(1, true, null, withTime);
 
     return response.getBlocks()
         .stream()
@@ -165,7 +165,7 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   private BlocksResponse doGetBlocks(int count, boolean skipEmpty, Long heightMax,
-      boolean withBlocksTime) {
+      boolean withTime) {
     checkArgument(0 <= count, "Requested number of blocks can't be negative but was {}", count);
     checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
         "Requested number of blocks was {} but maximum allowed is {}",
@@ -176,7 +176,7 @@ class ExonumHttpClient implements ExonumClient {
     Map<String, String> query = new HashMap<>();
     query.put("count", String.valueOf(count));
     query.put("skip_empty_blocks", String.valueOf(skipEmpty));
-    query.put("add_blocks_time", String.valueOf(withBlocksTime));
+    query.put("add_blocks_time", String.valueOf(withTime));
     if (heightMax != null) {
       query.put("latest", String.valueOf(heightMax));
     }

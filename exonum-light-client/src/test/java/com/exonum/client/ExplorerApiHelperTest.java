@@ -17,12 +17,20 @@
 
 package com.exonum.client;
 
+import static com.exonum.client.Blocks.BLOCK_1;
+import static com.exonum.client.Blocks.BLOCK_1_JSON;
+import static com.exonum.client.Blocks.BLOCK_1_TIME;
+import static com.exonum.client.Blocks.BLOCK_2;
+import static com.exonum.client.Blocks.BLOCK_2_JSON;
+import static com.exonum.client.Blocks.BLOCK_2_TIME;
+import static com.exonum.client.Blocks.BLOCK_3;
+import static com.exonum.client.Blocks.BLOCK_3_JSON;
+import static com.exonum.client.Blocks.BLOCK_3_TIME;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,7 +42,6 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
-import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 class ExplorerApiHelperTest {
@@ -42,7 +49,7 @@ class ExplorerApiHelperTest {
   @Test
   void parseSubmitTxResponse() {
     String expected = "f128c720e04b8243";
-    String json = "{\"tx_hash\":\"" + expected + "\"}";
+    String json = "{'tx_hash':'" + expected + "'}";
 
     HashCode actual = ExplorerApiHelper.parseSubmitTxResponse(json);
     assertThat(actual, equalTo(HashCode.fromString(expected)));
@@ -164,7 +171,7 @@ class ExplorerApiHelperTest {
         + "    },\n"
         + "    'status': {\n"
         + "        'type': 'panic',\n"
-        + "        'description': \"" + errorDescription + "\""
+        + "        'description': '" + errorDescription + "'"
         + "    }\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
@@ -178,92 +185,35 @@ class ExplorerApiHelperTest {
 
   @Test
   void parseGetBlockResponse() {
-    String previousHash = "fd510fc923683a4bb77af8278cd51676fbd0fcb25e2437bd69513d468b874bbb";
-    String txHash = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String stateHash = "79a6f0fa233cc2d7d2e96855ec14bdcc4c0e0bb1a99ccaa912a555441e3b7512";
     String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String time = "2019-02-14T14:12:52.037255Z";
     String json = "{\n"
-        + "    \"block\": {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 1,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"" + previousHash + "\",\n"
-        + "        \"tx_hash\": \"" + txHash + "\",\n"
-        + "        \"state_hash\": \"" + stateHash + "\"\n"
-        + "    },\n"
-        + "    \"precommits\": [\"a410964c2c21199b48e2\"],\n"
-        + "    \"txs\": [\"" + tx1 + "\"],\n"
-        + "    \"time\": \"" + time + "\"\n"
+        + "    'block': " + BLOCK_1_JSON + ",\n"
+        + "    'precommits': ['a410964c2c21199b48e2'],\n"
+        + "    'txs': ['" + tx1 + "'],\n"
+        + "    'time': '" + BLOCK_1_TIME + "'\n"
         + "}";
 
     BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
 
-    assertThat(response.getBlock().getHeight(), is(1L));
-    assertThat(response.getBlock().getProposerId(), is(3));
-    assertThat(response.getBlock().getNumTransactions(), is(1));
-    assertThat(response.getBlock().getPreviousBlockHash(), is(HashCode.fromString(previousHash)));
-    assertThat(response.getBlock().getStateHash(), is(HashCode.fromString(stateHash)));
-    assertThat(response.getBlock().getTxRootHash(), is(HashCode.fromString(txHash)));
-    assertThat(response.getTime(), is(ZonedDateTime.parse(time)));
+    assertThat(response.getBlock(), is(BLOCK_1));
     assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
   }
-
 
   @Test
   void parseGetBlocksResponse() {
     String json = "{\n"
-        + "    \"range\": {\n"
-        + "        \"start\": 6,\n"
-        + "        \"end\": 288\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 288\n"
         + "    },\n"
-        + "    \"blocks\": [{\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 26,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"932470a22d37a5a995519e01c50eab7db9e0e978f5b1\",\n"
-        + "        \"tx_hash\": \"5cc41a2a7cf7c0d3a15ab6ca775b601208dba7d506e2\",\n"
-        + "        \"state_hash\": \"4d7bb34d7913e0784c24a1e440532e72900eb3801290\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 2,\n"
-        + "        \"height\": 21,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"aa4ec89740a4ec380e8bcab0aedd0f5449184eb33b65\",\n"
-        + "        \"tx_hash\": \"dcb05a3bd61f9b637335472802d8ab6026c8486dae3b\",\n"
-        + "        \"state_hash\": \"e4ea2c6118326c6b00cd14ec7b8fb4cbf198eb4e6514\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 1,\n"
-        + "        \"height\": 16,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"7183517c34e94ecc10a3e13269da2bfadb6e87eea864\",\n"
-        + "        \"tx_hash\": \"362bc50ed56d33944a0d33fbac2a25fc08ceb8dc1ace\",\n"
-        + "        \"state_hash\": \"00cca5682b677d4b4ac644d2ddae09ca5e260fb67c73\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 0,\n"
-        + "        \"height\": 11,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"9297ef66d1d9ec286c00aec779f2dc273b3371e792bb\",\n"
-        + "        \"tx_hash\": \"c7aa20695380846e3f274d3d51c68e864e66e46f2618\",\n"
-        + "        \"state_hash\": \"deb57ff0f82c9d2514dc51785675544e27b3054512ea\"\n"
-        + "    }, {\n"
-        + "        \"proposer_id\": 3,\n"
-        + "        \"height\": 6,\n"
-        + "        \"tx_count\": 1,\n"
-        + "        \"prev_hash\": \"dbec8f64a85ab56985c7ab7e63a191764f4d5c373c67\",\n"
-        + "        \"tx_hash\": \"ffee3d630f137aecff95aece36cfe4dc1b42f688d474\",\n"
-        + "        \"state_hash\": \"8ac9f2af6266b8e9b61fa7f3fcdd170375fb1bf8cc8d\"\n"
-        + "    }],\n"
-        + "    \"times\": [\"2019-02-21T13:01:44.321051Z\", \n"
-        + "             \"2019-02-21T13:01:43.287648Z\", \n"
-        + "             \"2019-02-21T13:01:42.251382Z\", \n"
-        + "             \"2019-02-21T13:01:41.228900Z\", \n"
-        + "             \"2019-02-21T13:01:40.199265Z\"]\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
+        + "    'times': ['" + BLOCK_1_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_3_TIME
+        + "']\n"
         + "}\n";
 
     BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);
 
-    assertThat(response.getBlocks(), hasSize(5));
-    assertThat(response.getBlockCommitTimes(), hasSize(5));
+    assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
   }
