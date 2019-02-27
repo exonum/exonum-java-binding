@@ -16,7 +16,7 @@
 
 use exonum::blockchain::Service;
 use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
-use jni::{self, InitArgs, InitArgsBuilder, JavaVM, Result};
+use jni::{self, objects::JObject, InitArgs, InitArgsBuilder, JavaVM, Result};
 
 use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
@@ -30,9 +30,11 @@ use MainExecutor;
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
-const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceBootstrap";
-const START_SERVICE_SIGNATURE: &str =
-    "(Ljava/lang/String;I)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
+const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeBootstrap";
+const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
+const LOAD_ARTIFACT_SIGNATURE: &str = "(Ljava/lang/String;)Ljava/lang/String;";
+const CREATE_SERVICE_SIGNATURE: &str =
+    "(Ljava/lang/String;Ljava/lang/String;)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
 #[allow(dead_code)]
@@ -149,12 +151,31 @@ impl JavaServiceRuntime {
         let service = unwrap_jni(executor.with_attached(|env| {
             let module_name = env.new_string(config.module_name).unwrap();
             let module_name: jni::objects::JObject = *module_name;
-            let service = env
+            let serviceRuntime = env
                 .call_static_method(
                     SERVICE_BOOTSTRAP_PATH,
-                    "startService",
-                    START_SERVICE_SIGNATURE,
-                    &[module_name.into(), config.port.into()],
+                    "createServiceRuntime",
+                    CREATE_RUNTIME_SIGNATURE,
+                    &[config.port.into()],
+                )?
+                .l()?;
+
+            // load artifact
+            let artifactURI: JObject = env.new_string("").unwrap().into();
+            let artifact_id = env.call_method(
+                serviceRuntime,
+                "loadArtifact",
+                LOAD_ARTIFACT_SIGNATURE,
+                &[artifactURI.into()],
+            )?;
+
+            // create service
+            let service = env
+                .call_method(
+                    serviceRuntime,
+                    "createService",
+                    CREATE_SERVICE_SIGNATURE,
+                    &[artifact_id, module_name.into()],
                 )?
                 .l()?;
             env.new_global_ref(service)
