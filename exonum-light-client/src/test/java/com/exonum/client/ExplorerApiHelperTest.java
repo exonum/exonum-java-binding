@@ -263,7 +263,7 @@ class ExplorerApiHelperTest {
     BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);
 
     assertThat(response.getBlocks(), hasSize(5));
-    assertThat(response.getTimes(), hasSize(5));
+    assertThat(response.getBlockCommitTimes(), hasSize(5));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
   }

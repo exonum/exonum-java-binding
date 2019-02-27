@@ -18,6 +18,7 @@ package com.exonum.client.response;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.google.gson.annotations.SerializedName;
+import lombok.Builder;
 import lombok.Value;
 
 /**
@@ -31,6 +32,7 @@ import lombok.Value;
  * as other information, but not the transactions themselves.
  */
 @Value
+@Builder
 public class Block {
 
   /**
@@ -45,7 +47,6 @@ public class Block {
    * the number of blocks plus one.
    *
    * <p>The height also identifies each block in the blockchain.
-   *
    */
   long height;
 

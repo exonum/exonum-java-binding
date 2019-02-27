@@ -17,6 +17,7 @@
 package com.exonum.client.response;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Value;
@@ -29,6 +30,7 @@ public class BlockResponse {
   Block block;
   /**
    * Transaction hashes included at this block.
+   * @see TransactionMessage#hash()
    */
   List<HashCode> transactionHashes;
   /**

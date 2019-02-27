@@ -23,21 +23,25 @@ import lombok.Value;
 @Value
 public class BlocksResponse {
   /**
-   * Blockchain blocks.
+   * Blockchain blocks in descending order by height.
+   * It is allowed to be empty if no blocks found.
    */
   List<Block> blocks;
-  /**
-   * Blockchain block commit times.
-   */
-  List<ZonedDateTime> times;
 
   /**
-   * The smallest heights of the returned blocks.
+   * Blockchain block commit times. It is allowed to be empty.
+   * The index of time elements corresponds to the index of blocks.
+   */
+  List<ZonedDateTime> blockCommitTimes;
+
+  /**
+   * The smallest height of the returned blocks.
    */
   long blocksRangeStart;
 
   /**
-   * The largest heights of the returned blocks.
+   * The largest height of the returned blocks.
+   * if blocks have gaps then: {@code blocksRangeEnd - blocksRangeStart != blocks.size}
    */
   long blocksRangeEnd;
 }

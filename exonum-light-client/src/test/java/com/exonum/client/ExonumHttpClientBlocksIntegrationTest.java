@@ -44,6 +44,8 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ExonumHttpClientBlocksIntegrationTest {
   private static MockWebServer server;
@@ -91,13 +93,16 @@ class ExonumHttpClientBlocksIntegrationTest {
     long height = Long.MAX_VALUE;
     BlockResponse response = exonumClient.getBlockByHeight(height);
 
+    Block expectedBlock = Block.builder()
+        .height(1L)
+        .proposerId(3)
+        .numTransactions(1)
+        .previousBlockHash(HashCode.fromString(previousHash))
+        .stateHash(HashCode.fromString(stateHash))
+        .txRootHash(HashCode.fromString(txHash))
+        .build();
     // Assert response
-    assertThat(response.getBlock().getHeight(), is(1L));
-    assertThat(response.getBlock().getProposerId(), is(3));
-    assertThat(response.getBlock().getNumTransactions(), is(1));
-    assertThat(response.getBlock().getPreviousBlockHash(), is(HashCode.fromString(previousHash)));
-    assertThat(response.getBlock().getStateHash(), is(HashCode.fromString(stateHash)));
-    assertThat(response.getBlock().getTxRootHash(), is(HashCode.fromString(txHash)));
+    assertThat(response.getBlock(), is(expectedBlock));
     assertThat(response.getTime(), is(ZonedDateTime.parse(time)));
     assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
 
@@ -145,7 +150,7 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Assert response
     assertThat(response.getBlocks(), hasSize(2));
-    assertThat(response.getTimes(), hasSize(2));
+    assertThat(response.getBlockCommitTimes(), hasSize(2));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
 
@@ -191,7 +196,7 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Assert response
     assertThat(response.getBlocks(), hasSize(2));
-    assertThat(response.getTimes(), empty());
+    assertThat(response.getBlockCommitTimes(), empty());
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
 
@@ -202,12 +207,18 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertBlockRequestParams(recordedRequest, blocksCount, skipEmpty, height, showTimes);
   }
 
-  @Test
-  void getBlocksMaxBlockCountExeeded() {
-    int blocksCount = MAX_BLOCKS_PER_REQUEST + 1;
-
+  @ParameterizedTest
+  @ValueSource(ints = {Integer.MIN_VALUE, -1, MAX_BLOCKS_PER_REQUEST + 1, Integer.MAX_VALUE})
+  void getBlocksWrongBlocksCount(int blocksCount) {
     assertThrows(IllegalArgumentException.class,
         () -> exonumClient.getBlocks(blocksCount, false, 1L, false));
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {Long.MIN_VALUE, -1L})
+  void getBlocksWrongHeight(long heightMax) {
+    assertThrows(IllegalArgumentException.class,
+        () -> exonumClient.getBlocks(1, false, heightMax, false));
   }
 
   @Test
@@ -245,7 +256,7 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Assert response
     assertThat(response.getBlocks(), hasSize(2));
-    assertThat(response.getTimes(), hasSize(2));
+    assertThat(response.getBlockCommitTimes(), hasSize(2));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
 
@@ -308,7 +319,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<Block> block = exonumClient.getLastNotEmptyBlock();
+    Optional<Block> block = exonumClient.getLastNonEmptyBlock();
 
     // Assert response
     assertTrue(block.isPresent());
@@ -333,7 +344,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<Block> block = exonumClient.getLastNotEmptyBlock();
+    Optional<Block> block = exonumClient.getLastNonEmptyBlock();
 
     // Assert response
     assertFalse(block.isPresent());
@@ -343,6 +354,33 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
     assertBlockRequestParams(recordedRequest, 1, true, null, false);
+  }
+
+  @Test
+  void getBlockchainHeight() throws InterruptedException {
+    // Mock response
+    long height = 1600;
+    String json = "{\n"
+        + "  \"range\": {\n"
+        + "    \"start\": 0,\n"
+        + "    \"end\": " + height + "\n"
+        + "  },\n"
+        + "  \"blocks\": [],\n"
+        + "  \"times\": null\n"
+        + "}\n";
+    server.enqueue(new MockResponse().setBody(json));
+
+    // Call
+    long actualHeight = exonumClient.getBlockchainHeight();
+
+    // Assert response
+    assertThat(actualHeight, is(height));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
+    assertBlockRequestParams(recordedRequest, 0, false, null, false);
   }
 
   private static void assertBlockRequestParams(RecordedRequest request, int count,

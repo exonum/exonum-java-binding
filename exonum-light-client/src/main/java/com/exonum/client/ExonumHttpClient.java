@@ -65,7 +65,7 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    Request request = postRequest(toFullUrl(TRANSACTIONS),
+    Request request = post(toFullUrl(TRANSACTIONS),
         ExplorerApiHelper.createSubmitTxBody(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
@@ -73,21 +73,21 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public int getUnconfirmedTransactionsCount() {
-    Request request = getRequest(toFullUrl(MEMORY_POOL));
+    Request request = get(toFullUrl(MEMORY_POOL));
 
     return blockingExecuteAndParse(request, SystemApiHelper::parseMemoryPoolJson);
   }
 
   @Override
   public HealthCheckInfo healthCheck() {
-    Request request = getRequest(toFullUrl(HEALTH_CHECK));
+    Request request = get(toFullUrl(HEALTH_CHECK));
 
     return blockingExecuteAndParse(request, SystemApiHelper::parseHealthCheckJson);
   }
 
   @Override
   public String getUserAgentInfo() {
-    Request request = getRequest(toFullUrl(USER_AGENT));
+    Request request = get(toFullUrl(USER_AGENT));
 
     return blockingExecutePlainText(request);
   }
@@ -99,7 +99,7 @@ class ExonumHttpClient implements ExonumClient {
         .encodedPath(TRANSACTIONS)
         .addQueryParameter("hash", hash.toString())
         .build();
-    Request request = getRequest(url);
+    Request request = get(url);
 
     return blockingExecute(request, response -> {
       if (response.code() == HTTP_NOT_FOUND) {
@@ -116,18 +116,26 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
+  public long getBlockchainHeight() {
+    BlocksResponse response = doGetBlocks(0, false, null, false);
+
+    return response.getBlocksRangeEnd();
+  }
+
+  @Override
   public BlockResponse getBlockByHeight(long height) {
+    checkArgument(0 <= height, "Height can't be negative, but was {}", height);
     HttpUrl url = urlBuilder()
         .encodedPath(BLOCK)
         .addQueryParameter("height", String.valueOf(height))
         .build();
-    Request request = getRequest(url);
+    Request request = get(url);
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlockResponse);
   }
 
   @Override
-  public BlocksResponse getBlocks(int count, boolean skipEmpty, Long heightMax,
+  public BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax,
       boolean withBlocksTime) {
     return doGetBlocks(count, skipEmpty, heightMax, withBlocksTime);
   }
@@ -144,11 +152,11 @@ class ExonumHttpClient implements ExonumClient {
     return response.getBlocks()
         .stream()
         .findFirst()
-        .orElseThrow(() -> new AssertionError("Should never happen"));
+        .orElseThrow(() -> new AssertionError("Should never happen, response: " + response));
   }
 
   @Override
-  public Optional<Block> getLastNotEmptyBlock() {
+  public Optional<Block> getLastNonEmptyBlock() {
     BlocksResponse response = doGetBlocks(1, true, null, false);
 
     return response.getBlocks()
@@ -158,9 +166,13 @@ class ExonumHttpClient implements ExonumClient {
 
   private BlocksResponse doGetBlocks(int count, boolean skipEmpty, Long heightMax,
       boolean withBlocksTime) {
+    checkArgument(0 <= count, "Requested number of blocks can't be negative but was {}", count);
     checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
         "Requested number of blocks was {} but maximum allowed is {}",
         count, MAX_BLOCKS_PER_REQUEST);
+    checkArgument(heightMax == null || 0 <= heightMax,
+        "Blockhain height can't be negative but was {}", heightMax);
+
     Map<String, String> query = new HashMap<>();
     query.put("count", String.valueOf(count));
     query.put("skip_empty_blocks", String.valueOf(skipEmpty));
@@ -172,19 +184,19 @@ class ExonumHttpClient implements ExonumClient {
     HttpUrl.Builder httpRequest = urlBuilder().encodedPath(BLOCKS);
     query.forEach(httpRequest::addQueryParameter);
 
-    Request request = getRequest(httpRequest.build());
+    Request request = get(httpRequest.build());
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlocksResponse);
   }
 
-  private static Request getRequest(HttpUrl url) {
+  private static Request get(HttpUrl url) {
     return new Request.Builder()
         .url(url)
         .get()
         .build();
   }
 
-  private static Request postRequest(HttpUrl url, String jsonBody) {
+  private static Request post(HttpUrl url, String jsonBody) {
     return new Request.Builder()
         .url(url)
         .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))
