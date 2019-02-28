@@ -137,11 +137,15 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax,
       boolean withTime) {
+    checkArgument(0 < count,
+        "Requested number of blocks should be positive number but was {}", count);
     return doGetBlocks(count, skipEmpty, heightMax, withTime);
   }
 
   @Override
   public BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime) {
+    checkArgument(0 < count,
+        "Requested number of blocks should be positive number but was {}", count);
     return doGetBlocks(count, skipEmpty, null, withTime);
   }
 
@@ -166,7 +170,6 @@ class ExonumHttpClient implements ExonumClient {
 
   private BlocksResponse doGetBlocks(int count, boolean skipEmpty, Long heightMax,
       boolean withTime) {
-    checkArgument(0 <= count, "Requested number of blocks can't be negative but was {}", count);
     checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
         "Requested number of blocks was {} but maximum allowed is {}",
         count, MAX_BLOCKS_PER_REQUEST);

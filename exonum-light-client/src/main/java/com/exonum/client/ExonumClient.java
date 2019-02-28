@@ -109,7 +109,8 @@ public interface ExonumClient {
   /**
    * Returns blockchain blocks information for the requested range.
    * @param count Number of blocks to return.
-   *        Should not be greater then {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
+   *        It should not be negative and should not be greater then
+   *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    * @param skipEmpty if {@code true}, then only non-empty blocks will be returned
    * @param heightMax maximum height of the returned blocks. The blocks are returned
    *        in reverse order, starting from the <b>heightMax</b> and
@@ -123,15 +124,15 @@ public interface ExonumClient {
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
-   * @throws IllegalArgumentException if count is greater
-   *        than {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
+   * @throws IllegalArgumentException if count is out of range
+   *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    */
   BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax, boolean withTime);
 
   /**
    * Returns blockchain blocks information starting from the last block in the blockchain.
    * @param count Number of blocks to return.
-   *        Should not be greater than {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
+   *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    * @param skipEmpty if {@code true}, then only non-empty blocks are returned
    * @param withTime if {@code true}, then includes block commit times in the response;
    *        or an empty times {@code false}. See {@linkplain Block#getCommitTime()}.
@@ -140,6 +141,8 @@ public interface ExonumClient {
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
+   * @throws IllegalArgumentException if count is out of range
+   *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    */
   BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime);
 
