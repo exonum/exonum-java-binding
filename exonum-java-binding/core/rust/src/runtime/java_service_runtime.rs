@@ -74,6 +74,46 @@ impl JavaServiceRuntime {
         }
     }
 
+    /// Loads an artifact from the specified location involving verification of the artifact.
+    /// Returns an unique service artifact identifier that must be specified in subsequent
+    /// operations with it.
+    pub fn load_artifact(&self, artifact_uri: &str) -> String {
+        unwrap_jni(self.executor.with_attached(|env| {
+            let artifact_uri: JObject = unwrap_jni(env.new_string(artifact_uri)).into();
+            let artifact_id: JObject = env
+                .call_method(
+                    self.service_runtime.as_obj(),
+                    "loadArtifact",
+                    LOAD_ARTIFACT_SIGNATURE,
+                    &[artifact_uri.into()],
+                )?
+                .l()?;
+            let result: String = JavaStr::from_env(env, artifact_id.into())?.into();
+            Ok(result)
+        }))
+    }
+
+    /// Creates a new service instance of the given type.
+    pub fn create_service(&self, artifact_id: &str, module: &str) -> ServiceProxy {
+        unwrap_jni(self.executor.with_attached(|env| {
+            let artifact_id: JObject = env.new_string(artifact_id)?.into();
+            let module_name: JObject = env.new_string(module)?.into();
+            let service = env
+                .call_method(
+                    self.service_runtime.as_obj(),
+                    "createService",
+                    CREATE_SERVICE_SIGNATURE,
+                    &[artifact_id.into(), module_name.into()],
+                )?
+                .l()?;
+            let service = env.new_global_ref(service).unwrap();
+            Ok(ServiceProxy::from_global_ref(
+                self.executor.clone(),
+                service,
+            ))
+        }))
+    }
+
     /// Initializes JVM with provided configuration.
     ///
     /// # Panics
@@ -159,44 +199,6 @@ impl JavaServiceRuntime {
                 )?
                 .l()?;
             env.new_global_ref(serviceRuntime)
-        }))
-    }
-
-    /// Loads an artifact from the specified location involving verification of the artifact.
-    pub fn load_artifact(&self, artifact_uri: &str) -> String {
-        unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_uri: JObject = unwrap_jni(env.new_string(artifact_uri)).into();
-            let artifact_id: JObject = env
-                .call_method(
-                    self.service_runtime.as_obj(),
-                    "loadArtifact",
-                    LOAD_ARTIFACT_SIGNATURE,
-                    &[artifact_uri.into()],
-                )?
-                .l()?;
-            let result: String = JavaStr::from_env(env, artifact_id.into())?.into();
-            Ok(result)
-        }))
-    }
-
-    /// Creates a new service instance of the given type.
-    pub fn create_service(&self, artifact_id: &str, module: &str) -> ServiceProxy {
-        unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_id: JObject = env.new_string(artifact_id)?.into();
-            let module_name: JObject = env.new_string(module)?.into();
-            let service = env
-                .call_method(
-                    self.service_runtime.as_obj(),
-                    "createService",
-                    CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id.into(), module_name.into()],
-                )?
-                .l()?;
-            let service = env.new_global_ref(service).unwrap();
-            Ok(ServiceProxy::from_global_ref(
-                self.executor.clone(),
-                service,
-            ))
         }))
     }
 }
