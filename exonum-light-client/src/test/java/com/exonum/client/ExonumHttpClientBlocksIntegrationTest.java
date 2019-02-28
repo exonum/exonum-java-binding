@@ -172,10 +172,17 @@ class ExonumHttpClientBlocksIntegrationTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {Integer.MIN_VALUE, -1, MAX_BLOCKS_PER_REQUEST + 1, Integer.MAX_VALUE})
+  @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, MAX_BLOCKS_PER_REQUEST + 1, Integer.MAX_VALUE})
   void getBlocksWrongBlocksCount(int blocksCount) {
     assertThrows(IllegalArgumentException.class,
         () -> exonumClient.getBlocks(blocksCount, false, 1L, false));
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, MAX_BLOCKS_PER_REQUEST + 1, Integer.MAX_VALUE})
+  void getLastBlocksWrongBlocksCount(int blocksCount) {
+    assertThrows(IllegalArgumentException.class,
+        () -> exonumClient.getLastBlocks(blocksCount, false, false));
   }
 
   @ParameterizedTest
