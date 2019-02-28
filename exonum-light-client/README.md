@@ -10,7 +10,7 @@ toolkit which contains some helpful functions for _hashing_,
 _cryptography_, _serialization_ etc. 
 
 ## Capabilities
-By using the client you are able to perform next operations:
+By using the client you are able to perform the following operations:
 - Submit transactions to the node
 - Receive transaction information 
 - Receive blockchain blocks information 
@@ -46,7 +46,6 @@ compile 'com.exonum.client:exonum-light-client:0.1.0'
 ```
 
 ## Examples
-Please be noticed that examples below contain most frequently used operations only.  
 
 ### Exonum Client initialization
 The following example shows how to create the instance of exonum client
