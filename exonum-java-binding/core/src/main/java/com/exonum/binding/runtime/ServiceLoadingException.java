@@ -18,4 +18,11 @@ package com.exonum.binding.runtime;
 
 class ServiceLoadingException extends Exception {
 
+  ServiceLoadingException(String message) {
+    super(message);
+  }
+
+  ServiceLoadingException(Throwable cause) {
+    super(cause);
+  }
 }

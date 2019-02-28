@@ -81,7 +81,7 @@ class Pf4jServiceLoaderTest {
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("PluginManager failed to load the plugin");
+    assertThat(e).hasMessageContaining("Failed to load the plugin at");
 
     // Check the definition is inaccessible
     ServiceId serviceId = ServiceId.parseFrom(pluginId);
@@ -103,11 +103,14 @@ class Pf4jServiceLoaderTest {
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("PluginManager failed to start the plugin");
+    assertThat(e).hasMessageContaining("Failed to start the plugin");
 
     // Check the definition is inaccessible
     ServiceId serviceId = ServiceId.parseFrom(pluginId);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
+
+    // Check it is unloaded if failed to start
+    verify(pluginManager).unloadPlugin(eq(pluginId));
   }
 
   @ParameterizedTest
@@ -118,17 +121,24 @@ class Pf4jServiceLoaderTest {
   })
   void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) {
     URI artifactLocation = URI.create("file:///tmp/service.jar");
-
     when(pluginManager.loadPlugin(eq(Paths.get(artifactLocation))))
         .thenReturn(invalidPluginId);
+    when(pluginManager.startPlugin(eq(invalidPluginId)))
+        .thenReturn(PluginState.STARTED);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Invalid plugin id: " + invalidPluginId
         + ", must be in format 'groupId:artifactId:version'");
+
+    // Check it is unloaded if failed to start
+    verify(pluginManager).unloadPlugin(eq(invalidPluginId));
   }
 
+  // todo: cannotLoadIfIncompatibleFrameworkVersion
+
+  // todo: cannotLoadDuplicates
 
   @Test
   void canLoadUnloadService() throws ServiceLoadingException {
@@ -139,6 +149,8 @@ class Pf4jServiceLoaderTest {
         .thenReturn(pluginId);
     when(pluginManager.startPlugin(eq(pluginId)))
         .thenReturn(PluginState.STARTED);
+    when(pluginManager.unloadPlugin(eq(pluginId)))
+        .thenReturn(true);
 
     // Try to load the service
     LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
