@@ -16,29 +16,38 @@
 
 use std::fmt;
 
-/// todo
+/// Full configuration of the EJB runtime, JVM and Java service.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// todo
+    /// Service-specific configuration parameters.
     pub service_config: ServiceConfig,
-    /// todo
+    /// JVM-specific configuration parameters.
     pub jvm_config: JvmConfig,
-    /// todo
+    /// EJB runtime-specific configuration parameters.
     pub runtime_config: RuntimeConfig,
 }
 
-/// todo
+/// Service-specific configuration parameters.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ServiceConfig {
     /// Java service classpath.
+    ///
+    /// Provided by the user on `finalize` configuration step.
+    /// Private configuration parameter, can be unique for every node.
     pub service_class_path: String,
     /// Fully qualified service module name.
     ///
     /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
+    ///
+    /// Provided by the user on `generate-template` configuration step.
+    /// Public configuration parameter, shared between all nodes in the network.
     pub module_name: String,
 }
 
-/// todo
+/// JVM-specific configuration parameters.
+///
+/// These parameters are provided by the user on `run` configuration step.
+/// These parameters are private and can be unique for every node.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JvmConfig {
     /// Additional parameters for JVM.
@@ -50,20 +59,25 @@ pub struct JvmConfig {
     pub args_prepend: Vec<String>,
     /// Parameters that get appended to the rest.
     pub args_append: Vec<String>,
-    /// Socket address for JVM debugging
+    /// Socket address for JVM debugging.
     pub jvm_debug_socket: Option<String>,
 }
 
-/// todo
+/// Runtime-specific configuration parameters.
+///
+/// These parameters are provided by the user on `run` configuration step.
+/// These parameters are private and can be unique for every node.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RuntimeConfig {
     /// Path to `log4j` configuration file.
     pub log_config_path: String,
-    /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
+    /// A port of the HTTP server for Java services.
+    /// Must be distinct from the ports used by Exonum.
     pub port: i32,
 }
 
-/// todo
+/// This is DTO for `module_name` parameter, used for storing `module_name`
+/// between `generate-template` and `finalize` configuration steps.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct PublicConfig {
     pub module_name: String,
