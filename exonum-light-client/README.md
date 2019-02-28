@@ -9,6 +9,17 @@ Also, Exonum light client provides access to [common utils][ejb-common]
 toolkit which contains some helpful functions for _hashing_,
 _cryptography_, _serialization_ etc. 
 
+## Capabilities
+By using the client you are able to perform next operations:
+- Submit transactions to the node
+- Receive transaction information 
+- Receive blockchain blocks information 
+- Receive node system information 
+- Receive node status information  
+<!-- TODO: replace by javadoc link when it will be available --> 
+_*Please refer to [the code][exonum-client] for details._  
+Also, see [examples](#examples). 
+
 ## Compatibility
 The following table shows versions compatibility:  
 
@@ -16,7 +27,7 @@ The following table shows versions compatibility:
 |--------------|--------|-------------|
 | 0.1.0        | 0.10.* | 0.4         |
 
-## Prerequisites
+## System Dependencies
 - Java 8 or above is required for using this client
 - Maven 3.5 or above (only if you need to build it locally)
 
@@ -35,6 +46,8 @@ compile 'com.exonum.client:exonum-light-client:0.1.0'
 ```
 
 ## Examples
+Please be noticed that examples below contain most frequently used operations only.  
+
 ### Exonum Client initialization
 The following example shows how to create the instance of exonum client
 which will work with Exonum node at `http://localhost:8080` address: 
@@ -102,46 +115,6 @@ of the transaction:
 Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
 ```
 * `txHash` is a hash of the transaction to search.
-
-### Block info
-<!-- TODO: remove after release --> 
-_*Not available for Light Client v0.1_  
-The following method provides a possibility to get a block
-information available by the specified blockchain height:
-```java
-BlockResponse response = exonumClient.getBlock(height);
-```
-* `height` is a number for the blockchain height starting from 0 (genesis block).
-
-### Blocks info
-<!-- TODO: remove after release --> 
-_*Not available for Light Client v0.1_  
-The following method provides a possibility to get an array of blocks
-by the specified range:
-```java
-BlocksResponse response = exonumClient.getBlocks(count, skipEmpty, maxHeight, showTimes);
-```
-* `count` is a number of blocks to return.
-* `skipEmpty` is a parameter to filter empty blocks i.e. blocks without transactions.
-* `maxHeight` is a number to filter blocks starting from the given value in descending order.
-* `showTimes` is a parameter that indicates adding block acceptance times to the response.
-
-### Number of unconfirmed transactions
-<!-- TODO: remove after release --> 
-_*Not available for Light Client v0.1_  
-To get a number of currently unconfirmed transactions i.e.,
-that are waiting to be committed to the blockchain:
-```java
-int count = exonumClient.getUnconfirmedTransactionsCount();
-```
-
-### Node health check
-<!-- TODO: remove after release --> 
-_*Not available for Light Client v0.1_  
-To get the node health check information.
-```java
-HealthCheckInfo info = exonumClient.healthCheck();
-```
   
 ## How to build
 To build the client locally, clone the repository, and
@@ -164,3 +137,4 @@ Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
 [standard-serializers]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
+[exonum-client]: ./src/main/java/com/exonum/client/ExonumClient.java
