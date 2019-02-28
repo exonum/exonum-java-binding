@@ -16,7 +16,12 @@
 
 use exonum::blockchain::Service;
 use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
-use jni::{self, objects::JObject, InitArgs, InitArgsBuilder, JavaVM, Result};
+use jni::{
+    self,
+    objects::{GlobalRef, JObject},
+    strings::JavaStr,
+    InitArgs, InitArgsBuilder, JavaVM, Result,
+};
 
 use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
@@ -41,7 +46,7 @@ const CREATE_SERVICE_SIGNATURE: &str =
 #[derive(Clone)]
 pub struct JavaServiceRuntime {
     executor: MainExecutor,
-    service_proxy: ServiceProxy,
+    service_runtime: GlobalRef,
 }
 
 impl JavaServiceRuntime {
@@ -54,10 +59,11 @@ impl JavaServiceRuntime {
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
                 let java_vm = Self::create_java_vm(config.jvm_config, config.ejb_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
-                let service_proxy = Self::create_service(config.service_config, executor.clone());
+                let service_runtime =
+                    Self::create_service_runtime(config.service_config, executor.clone());
                 let runtime = JavaServiceRuntime {
                     executor,
-                    service_proxy,
+                    service_runtime,
                 };
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             });
@@ -66,11 +72,6 @@ impl JavaServiceRuntime {
                 .clone()
                 .expect("Trying to return runtime, but it's uninitialized")
         }
-    }
-
-    /// Returns internal service proxy.
-    pub fn service_proxy(&self) -> ServiceProxy {
-        self.service_proxy.clone()
     }
 
     /// Initializes JVM with provided configuration.
@@ -146,11 +147,9 @@ impl JavaServiceRuntime {
         args_builder
     }
 
-    /// Creates service proxy for interaction with Java side.
-    fn create_service(config: ServiceConfig, executor: MainExecutor) -> ServiceProxy {
-        let service = unwrap_jni(executor.with_attached(|env| {
-            let module_name = env.new_string(config.module_name).unwrap();
-            let module_name: jni::objects::JObject = *module_name;
+    /// Creates service runtime that is responsible for services management.
+    fn create_service_runtime(config: ServiceConfig, executor: MainExecutor) -> GlobalRef {
+        unwrap_jni(executor.with_attached(|env| {
             let serviceRuntime = env
                 .call_static_method(
                     SERVICE_BOOTSTRAP_PATH,
@@ -159,28 +158,46 @@ impl JavaServiceRuntime {
                     &[config.port.into()],
                 )?
                 .l()?;
+            env.new_global_ref(serviceRuntime)
+        }))
+    }
 
-            // load artifact
-            let artifactURI: JObject = env.new_string("").unwrap().into();
-            let artifact_id = env.call_method(
-                serviceRuntime,
-                "loadArtifact",
-                LOAD_ARTIFACT_SIGNATURE,
-                &[artifactURI.into()],
-            )?;
-
-            // create service
-            let service = env
+    /// Loads an artifact from the specified location involving verification of the artifact.
+    pub fn load_artifact(&self, artifact_uri: &str) -> String {
+        unwrap_jni(self.executor.with_attached(|env| {
+            let artifact_uri: JObject = unwrap_jni(env.new_string(artifact_uri)).into();
+            let artifact_id: JObject = env
                 .call_method(
-                    serviceRuntime,
-                    "createService",
-                    CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id, module_name.into()],
+                    self.service_runtime.as_obj(),
+                    "loadArtifact",
+                    LOAD_ARTIFACT_SIGNATURE,
+                    &[artifact_uri.into()],
                 )?
                 .l()?;
-            env.new_global_ref(service)
-        }));
-        ServiceProxy::from_global_ref(executor, service)
+            let result: String = JavaStr::from_env(env, artifact_id.into())?.into();
+            Ok(result)
+        }))
+    }
+
+    /// Creates a new service instance of the given type.
+    pub fn create_service(&self, artifact_id: &str, module: &str) -> ServiceProxy {
+        unwrap_jni(self.executor.with_attached(|env| {
+            let artifact_id: JObject = env.new_string(artifact_id)?.into();
+            let module_name: JObject = env.new_string(module)?.into();
+            let service = env
+                .call_method(
+                    self.service_runtime.as_obj(),
+                    "createService",
+                    CREATE_SERVICE_SIGNATURE,
+                    &[artifact_id.into(), module_name.into()],
+                )?
+                .l()?;
+            let service = env.new_global_ref(service).unwrap();
+            Ok(ServiceProxy::from_global_ref(
+                self.executor.clone(),
+                service,
+            ))
+        }))
     }
 }
 
@@ -219,20 +236,21 @@ impl ServiceFactory for JavaServiceFactory {
     }
 
     fn make_service(&mut self, context: &Context) -> Box<Service> {
-        let runtime = {
-            use exonum::helpers::fabric::keys;
-            let config: Config = context
-                .get(keys::NODE_CONFIG)
-                .expect("Unable to read node configuration.")
-                .services_configs
-                .get(super::cmd::EJB_CONFIG_SECTION_NAME)
-                .expect("Unable to read EJB configuration.")
-                .clone()
-                .try_into()
-                .expect("Invalid EJB configuration format.");
-            JavaServiceRuntime::get_or_create(config)
-        };
+        use exonum::helpers::fabric::keys;
+        let config: Config = context
+            .get(keys::NODE_CONFIG)
+            .expect("Unable to read node configuration.")
+            .services_configs
+            .get(super::cmd::EJB_CONFIG_SECTION_NAME)
+            .expect("Unable to read EJB configuration.")
+            .clone()
+            .try_into()
+            .expect("Invalid EJB configuration format.");
+        let runtime = { JavaServiceRuntime::get_or_create(config.clone()) };
 
-        Box::new(runtime.service_proxy().clone())
+        let artifact_id = runtime.load_artifact("");
+        let service_proxy =
+            runtime.create_service(&artifact_id, &config.service_config.module_name);
+        Box::new(service_proxy)
     }
 }
