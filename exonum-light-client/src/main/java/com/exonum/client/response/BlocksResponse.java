@@ -22,9 +22,8 @@ import lombok.Value;
 @Value
 public class BlocksResponse {
   /**
-   * Blockchain blocks in descending order by height.
+   * Blockchain blocks in descending order (not necessarily continuous) by height.
    * It is allowed to be empty if no blocks found.
-   * It may contain gaps.
    */
   List<Block> blocks;
 

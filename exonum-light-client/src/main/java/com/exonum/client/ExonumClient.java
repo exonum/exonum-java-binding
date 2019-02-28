@@ -116,15 +116,15 @@ public interface ExonumClient {
    *        at least up to the <b>heightMax - count + 1</b>.
    *        If the <b>heightMax</b> is greater than actual blockchain height then
    *        the actual height will be used
-   * @param withTime if {@code true}, then includes block commit times in the response;
-   *        or an empty times {@code false}. See {@linkplain Block#getCommitTime()}.
+   * @param withTime indicates for filling {@linkplain Block#getCommitTime() block commit time}
+   *        if {@code true}; or left it {@linkplain Optional#empty() empty} if {@code false}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    * @throws IllegalArgumentException if count is greater
-   *        then {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
+   *        than {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}
    */
   BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax, boolean withTime);
 

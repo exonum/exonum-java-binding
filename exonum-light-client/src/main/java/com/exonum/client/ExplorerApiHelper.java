@@ -18,6 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -34,6 +35,7 @@ import com.google.gson.annotations.SerializedName;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -75,13 +77,21 @@ final class ExplorerApiHelper {
   static BlocksResponse parseGetBlocksResponse(String json) {
     GetBlocksResponse response = json().fromJson(json, GetBlocksResponse.class);
     List<GetBlockResponseBlock> blocks = response.getBlocks();
+    int blocksSize = blocks.size();
     List<String> times = response.getTimes();
+    if (times != null) {
+      int timesSize = times.size();
+      checkState(blocksSize == timesSize,
+          "Blocks size {} doesn't equal to commit times size {}", blocksSize, timesSize);
+    }
 
-    List<Block> timeBlocks = new ArrayList<>(blocks.size());
-    for (int i = 0; i < blocks.size(); i++) {
-      GetBlockResponseBlock block = blocks.get(i);
-      String time = times == null ? null : times.get(i);
-      timeBlocks.add(toTimeBlock(block, time));
+    List<Block> timeBlocks = new ArrayList<>(blocksSize);
+    for (int i = 0; i < blocksSize; i++) {
+      if (times == null) {
+        timeBlocks.add(toTimeBlock(blocks.get(i)));
+      } else {
+        timeBlocks.add(toTimeBlock(blocks.get(i), times.get(i)));
+      }
     }
 
     return new BlocksResponse(
@@ -91,7 +101,11 @@ final class ExplorerApiHelper {
     );
   }
 
-  private static Block toTimeBlock(GetBlockResponseBlock block, String time) {
+  private static Block toTimeBlock(GetBlockResponseBlock block) {
+    return toTimeBlock(block, null);
+  }
+
+  private static Block toTimeBlock(GetBlockResponseBlock block, @Nullable String time) {
     ZonedDateTime commitTime = time == null ? null : ZonedDateTime.parse(time);
 
     return Block.builder()
@@ -217,6 +231,7 @@ final class ExplorerApiHelper {
   private static class GetBlocksResponse {
     List<GetBlockResponseBlock> blocks;
     GetBlocksResponseRange range;
+    @Nullable
     List<String> times;
   }
 

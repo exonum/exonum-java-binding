@@ -75,7 +75,6 @@ public class Block {
    */
   ZonedDateTime commitTime;
 
-
   /**
    * Returns time when the block was committed to the blockchain.
    * Can be empty if show time parameter is not specified in the request.
