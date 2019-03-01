@@ -17,7 +17,7 @@ Include `exonum-java-binding-time-service` (TODO: change the module name first) 
 ```
 
 To use the time oracle, it needs to be enabled. To do that, include its name `time` in
-`ejb_app_services.toml` configuration file in the EJB App's directory:
+`ejb_app_services.toml` configuration file in the EJB App's directory with the following content:
 
 ```toml
 services = ["time"]
