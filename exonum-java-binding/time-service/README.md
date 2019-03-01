@@ -12,7 +12,7 @@ Include `exonum-java-binding-time-service` (TODO: change the module name first) 
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-binding-time-service</artifactId>
-      <version>0.4.0</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
 ```
 
@@ -25,9 +25,14 @@ services = ["time"]
 
 See more information on built-in services [here][built-in-services].
 
-Below is an example of a service method that uses time oracle to return the consolidated time. Note that at the time when a new blockchain is launched, the consolidated time is unknown. In that case the result will not contain a value.
+Below is an example of a service method that uses time oracle to return the consolidated time. Note
+that at the time when a new blockchain is launched, the consolidated time is unknown until the
+transactions from at least two thirds of validator nodes are processed. In that case the result
+will not contain a value. Validator nodes send the transactions after the commit of each block.
 
 ```java
+private final Node node;
+
 public Optional<ZonedDateTime> getTime() {
   return node.withSnapshot(s -> {
     TimeSchema timeOracle = TimeSchema.newInstance(s);
