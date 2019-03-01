@@ -37,5 +37,11 @@ public Optional<ZonedDateTime> getTime() {
 }
 ```
 
+## License
+
+`exonum-java-binding-time-service` (TODO: change the module name first) is licensed under the
+Apache License (Version 2.0).
+See [LICENSE](LICENSE) for details.
+
 [exonum-time]: https://exonum.com/doc/version/0.10/advanced/time/
 [built-in-services]: https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services
