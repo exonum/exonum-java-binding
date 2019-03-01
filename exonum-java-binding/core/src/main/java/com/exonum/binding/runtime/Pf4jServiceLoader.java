@@ -64,9 +64,9 @@ final class Pf4jServiceLoader implements ServiceLoader {
   public /* todo: specialize? */ LoadedServiceDefinition loadService(URI artifactLocation)
       throws ServiceLoadingException {
     Path artifactPath = Paths.get(artifactLocation);
-    // todo: prevent loading of duplicates at this point!
-    // fixme: The plugin manager might load duplicate plugins if they have different paths:
-    //    - Update PF4J when https://github.com/pf4j/pf4j/pull/287 lands
+    // fixme: prevent loading of duplicates at this point. The plugin manager might load duplicate
+    //  plugins if they have different paths. This problem is resolved
+    //  in https://github.com/pf4j/pf4j/pull/287 , update PF4J when the fix is released.
     String pluginId = pluginManager.loadPlugin(artifactPath);
     if (pluginId == null) {
       throw new ServiceLoadingException("Failed to load the plugin at "
