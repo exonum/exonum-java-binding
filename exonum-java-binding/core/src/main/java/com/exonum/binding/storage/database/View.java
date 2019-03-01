@@ -21,11 +21,11 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 
 /**
- * Represents a view of a database.
+ * Represents a view of the database.
  *
  * <p>There are two sub-types:
  * <ul>
- *   <li>A snapshot, which is a <em>read-only</em> view.</li>
+ *   <li>A snapshot, which is a <em>read-only</em> and immutable view.</li>
  *   <li>A fork, which is a <em>read-write</em> view.</li>
  * </ul>
  *

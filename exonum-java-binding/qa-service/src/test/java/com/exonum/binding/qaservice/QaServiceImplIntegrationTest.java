@@ -440,6 +440,18 @@ class QaServiceImplIntegrationTest {
     });
   }
 
+  @Test
+  @RequiresNativeLibrary
+  void getTime() {
+    withNodeFake(() -> assertThat(service.getTime()).isEmpty());
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getValidatorsTime() {
+    withNodeFake(() -> assertThat(service.getValidatorsTimes()).isEmpty());
+  }
+
   /** Runs a test with a service with a node fake set. */
   private void withNodeFake(Runnable test) {
     try (MemoryDb db = MemoryDb.newInstance()) {
