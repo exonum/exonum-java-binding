@@ -65,8 +65,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
       throws ServiceLoadingException {
     Path artifactPath = Paths.get(artifactLocation);
     // todo: prevent loading of duplicates at this point!
-    // fixme: The plugin manager might load duplicate plugins if they have different paths!
-    //   Submit an issue to fix that — it will silently load two.
+    // fixme: The plugin manager might load duplicate plugins if they have different paths:
+    //    - Update PF4J when https://github.com/pf4j/pf4j/pull/287 lands
     String pluginId = pluginManager.loadPlugin(artifactPath);
     if (pluginId == null) {
       throw new ServiceLoadingException("Failed to load the plugin at "
@@ -80,7 +80,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
             String.format("Failed to start the plugin %s, state=%s", pluginId, pluginState));
       }
 
-      ServiceId serviceId = ServiceId.parseFrom(pluginId);
+      ServiceId serviceId = extractServiceId(pluginId);
       LoadedServiceDefinition serviceDefinition =
           DefaultLoadedServiceDefinition.newInstance(serviceId);
 
@@ -96,6 +96,16 @@ final class Pf4jServiceLoader implements ServiceLoader {
     }
   }
 
+  private static ServiceId extractServiceId(String pluginId) throws ServiceLoadingException {
+    try {
+      return ServiceId.parseFrom(pluginId);
+    } catch (IllegalArgumentException e) {
+      throw new ServiceLoadingException(
+          String.format("Invalid plugin id (%s) is specified in service artifact metadata, "
+                  + "must be in format 'groupId:artifactId:version'", pluginId));
+    }
+  }
+
   @Override
   public Optional<LoadedServiceDefinition> findService(ServiceId serviceId) {
     return Optional.ofNullable(loadedServices.get(serviceId));
@@ -107,9 +117,9 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
     String pluginId = serviceId.toString();
     // Fixme: the docs don't say why it may fail to stop the plugin.
-    //   Fire an issue?
+    //   Follow: https://github.com/pf4j/pf4j/issues/291
     boolean stopped = pluginManager.unloadPlugin(pluginId);
-    checkState(stopped, "Unknown error whilst unloading the plugin");
+    checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
 
     loadedServices.remove(serviceId);
   }

@@ -129,8 +129,8 @@ class Pf4jServiceLoaderTest {
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("Invalid plugin id: " + invalidPluginId
-        + ", must be in format 'groupId:artifactId:version'");
+    assertThat(e).hasMessageContaining("Invalid plugin id");
+    assertThat(e).hasMessageContaining(invalidPluginId);
 
     // Check it is unloaded if failed to start
     verify(pluginManager).unloadPlugin(eq(invalidPluginId));
