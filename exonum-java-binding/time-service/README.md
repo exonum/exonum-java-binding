@@ -46,7 +46,7 @@ public Optional<ZonedDateTime> getTime() {
 
 `exonum-time-oracle` is licensed under the
 Apache License (Version 2.0).
-See [LICENSE](LICENSE) for details.
+See [LICENSE](../../LICENSE) for details.
 
 [exonum-time]: https://exonum.com/doc/version/0.10/advanced/time/
 [built-in-services]: https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services
