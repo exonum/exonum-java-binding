@@ -20,7 +20,7 @@ use jni::{
     self,
     objects::{GlobalRef, JObject},
     strings::JavaStr,
-    InitArgs, InitArgsBuilder, JavaVM, Result,
+    InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
 use std::env;
@@ -29,7 +29,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
 use runtime::config::{self, Config, EjbConfig, JvmConfig, ServiceConfig};
-use utils::unwrap_jni;
+use utils::{check_error_on_exception, unwrap_jni};
 use MainExecutor;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
@@ -74,26 +74,7 @@ impl JavaServiceRuntime {
         }
     }
 
-    /// Loads an artifact from the specified location involving verification of the artifact.
-    /// Returns an unique service artifact identifier that must be specified in subsequent
-    /// operations with it.
-    pub fn load_artifact(&self, artifact_uri: &str) -> String {
-        unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_uri: JObject = unwrap_jni(env.new_string(artifact_uri)).into();
-            let artifact_id: JObject = env
-                .call_method(
-                    self.service_runtime.as_obj(),
-                    "loadArtifact",
-                    LOAD_ARTIFACT_SIGNATURE,
-                    &[artifact_uri.into()],
-                )?
-                .l()?;
-            let result: String = JavaStr::from_env(env, artifact_id.into())?.into();
-            Ok(result)
-        }))
-    }
-
-    /// Creates a new service instance of the given type.
+    /// Creates a new service instance using the given artifact id.
     pub fn create_service(&self, artifact_id: &str, module: &str) -> ServiceProxy {
         unwrap_jni(self.executor.with_attached(|env| {
             let artifact_id: JObject = env.new_string(artifact_id)?.into();
@@ -114,6 +95,28 @@ impl JavaServiceRuntime {
         }))
     }
 
+    /// Loads an artifact from the specified location involving verification of the artifact.
+    /// Returns an unique service artifact identifier that must be specified in subsequent
+    /// operations with it.
+    pub fn load_artifact(&self, artifact_uri: &str) -> Result<String, String> {
+        unwrap_jni(self.executor.with_attached(|env| {
+            let res = {
+                let artifact_uri: JObject = env.new_string(artifact_uri)?.into();
+                let artifact_id: JObject = env
+                    .call_method(
+                        self.service_runtime.as_obj(),
+                        "loadArtifact",
+                        LOAD_ARTIFACT_SIGNATURE,
+                        &[artifact_uri.into()],
+                    )?
+                    .l()?;
+                let result: String = JavaStr::from_env(env, artifact_id.into())?.into();
+                Ok(result)
+            };
+            Ok(check_error_on_exception(env, res))
+        }))
+    }
+
     /// Initializes JVM with provided configuration.
     ///
     /// # Panics
@@ -126,7 +129,7 @@ impl JavaServiceRuntime {
     }
 
     /// Builds arguments for JVM initialization.
-    fn build_jvm_arguments(jvm_config: JvmConfig, ejb_config: EjbConfig) -> Result<InitArgs> {
+    fn build_jvm_arguments(jvm_config: JvmConfig, ejb_config: EjbConfig) -> JniResult<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
         let args_prepend = jvm_config.args_prepend.clone();
@@ -248,11 +251,9 @@ impl ServiceFactory for JavaServiceFactory {
             .clone()
             .try_into()
             .expect("Invalid EJB configuration format.");
-        let runtime = { JavaServiceRuntime::get_or_create(config.clone()) };
+        let runtime = JavaServiceRuntime::get_or_create(config.clone());
 
-        let artifact_id = runtime.load_artifact("");
-        let service_proxy =
-            runtime.create_service(&artifact_id, &config.service_config.module_name);
+        let service_proxy = runtime.create_service("", &config.service_config.module_name);
         Box::new(service_proxy)
     }
 }

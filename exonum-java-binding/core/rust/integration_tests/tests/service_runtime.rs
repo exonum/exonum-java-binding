@@ -52,8 +52,7 @@ fn bootstrap() {
         service_config,
     });
 
-    let artifact = service_runtime.load_artifact("");
-    let service = service_runtime.create_service(&artifact, TEST_SERVICE_MODULE_NAME);
+    let service = service_runtime.create_service("", TEST_SERVICE_MODULE_NAME);
 
     let mut testkit = TestKitBuilder::validator().with_service(service).create();
 
