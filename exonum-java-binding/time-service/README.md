@@ -6,7 +6,7 @@ its current value in the blockchain.
 
 ## Usage
 
-Include `exonum-java-binding-time-service` (TODO: change the module name first) as a dependency in your `pom.xml`:
+Include `exonum-time-oracle` as a dependency in your `pom.xml`:
 
 ``` xml
     <dependency>
@@ -44,7 +44,7 @@ public Optional<ZonedDateTime> getTime() {
 
 ## License
 
-`exonum-java-binding-time-service` (TODO: change the module name first) is licensed under the
+`exonum-time-oracle` is licensed under the
 Apache License (Version 2.0).
 See [LICENSE](LICENSE) for details.
 
