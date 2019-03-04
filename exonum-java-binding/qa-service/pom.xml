@@ -41,7 +41,7 @@
 
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-time-service</artifactId>
+      <artifactId>exonum-time-oracle</artifactId>
       <scope>provided</scope>
     </dependency>
 
