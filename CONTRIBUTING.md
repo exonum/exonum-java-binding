@@ -37,12 +37,21 @@ $ mvn install
 
 #### Building Java Binding App
 Run:
+
 ```$sh
 $ cd exonum-java-binding
 $ ./package_app.sh
 ```
+
 This command will build and package EJB App with all the necessary runtime dependencies
 in a single `zip` archive in `exonum-java-binding/core/target` directory.
+
+Before packaging, the script will also run all the tests to guarantee that the generated application
+will be valid. It may take a long time, so you can pass `--skip-tests` flag to skip this step:
+
+```$sh
+$ ./package_app.sh --skip-tests
+```
 
 **Automatic EJB App packaging is only supported on Linux platform.**
 

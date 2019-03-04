@@ -4,7 +4,8 @@ This document describes how to configure and run an Exonum node with a Java serv
 ## Prerequisites
 
 Build an application following the instructions in [“How to Build”][how-to-build] section
-of the Contribution Guide.
+of the Contribution Guide. Unpack the zip archive from `exonum-java-binding/core/target` directory to some known 
+location.
 
 You also need a ready-to-use Exonum Java service. You can use 
 [cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
@@ -18,7 +19,7 @@ in the [user guide](https://exonum.com/doc/version/0.10/get-started/java-binding
 
 ### Step 1. Configure Environment
 
-`EJB_ROOT` used in examples of this section corresponds to the Java Binding root directory.
+`APP_ROOT` used in examples of this section corresponds to the directory with unpacked EJB App.
 
 #### `LD_LIBRARY_PATH`
 
@@ -35,13 +36,12 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 ```
 
 #### CLASSPATH
-Classpath is used to locate Java classes of your service and its dependencies, including 
-the Exonum Java Binding.
+Classpath is used to locate Java classes of your service and its dependencies.
 
 You may package your service in an Uber JAR using 
 the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
 and pass a path to the service artefact during application configuration as `--ejb-service-classpath`
-parameter. Alternatively, you may assemble a classpath that includes the service and all of 
+parameter. Alternatively, you may assemble a classpath that includes the path to service and all of 
 its dependencies and pass it instead.
 
 ### Step 2. Generate Node Configuration
@@ -67,7 +67,7 @@ $ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml 
 
 #### Finalize Configuration
 
-Use `--ejb-classpath` for a [classpath](#CLASSPATH) of your service.
+Use `--ejb-service-classpath` for a [classpath](#CLASSPATH) of your service.
 
 ```$sh
 $ ejb-app finalize testnet/sec.toml testnet/node.toml \
@@ -78,7 +78,7 @@ $ ejb-app finalize testnet/sec.toml testnet/node.toml \
 ### Step 3. Run Configured Node
 There are two required parameters here:
 - `--ejb-log-config-path` for path to `log4j` configuration file.
-  Default config provided with EJB App prints to STDOUT.
+  Default config `log4j-fallback.xml` provided with EJB App prints to STDOUT.
 - `--ejb-port` for port that your service will use for communication.
   Java Binding does not use Exonum Core API port directly.
 
