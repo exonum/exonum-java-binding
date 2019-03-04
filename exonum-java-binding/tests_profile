@@ -49,7 +49,7 @@ export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dir
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to build tests.
-export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-stable}"
+export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-1.32.0}"
 echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 
 # Find the directory containing Rust libstd.

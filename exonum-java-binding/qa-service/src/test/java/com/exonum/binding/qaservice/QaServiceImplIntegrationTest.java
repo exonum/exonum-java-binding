@@ -33,8 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.proxy.Cleaner;
@@ -438,6 +438,18 @@ class QaServiceImplIntegrationTest {
           "An attempt to get the `last_block` during creating the"
           + " genesis block.");
     });
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getTime() {
+    withNodeFake(() -> assertThat(service.getTime()).isEmpty());
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void getValidatorsTime() {
+    withNodeFake(() -> assertThat(service.getValidatorsTimes()).isEmpty());
   }
 
   /** Runs a test with a service with a node fake set. */

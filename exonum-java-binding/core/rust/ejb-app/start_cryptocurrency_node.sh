@@ -43,7 +43,7 @@ EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/cryptocurrency-demo/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
 
-RUST_LIB_PATH="$(rustup run ${RUST_COMPILER_VERSION:-stable} rustc --print sysroot)/lib"
+RUST_LIB_PATH="$(rustup run ${RUST_COMPILER_VERSION:-1.32.0} rustc --print sysroot)/lib"
 echo "RUST_LIB_DIR: ${RUST_LIB_PATH}"
 
 export LD_LIBRARY_PATH="${EJB_ROOT}/core/rust/target/debug:$JVM_LIB_PATH:$RUST_LIB_PATH"

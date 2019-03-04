@@ -19,7 +19,7 @@ package com.exonum.binding.blockchain.serialization;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;

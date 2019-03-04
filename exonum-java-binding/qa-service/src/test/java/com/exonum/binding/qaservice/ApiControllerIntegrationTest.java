@@ -37,6 +37,10 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMEN
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
+import static com.exonum.binding.qaservice.ApiController.convertValidatorsTimesValues;
+import static com.exonum.binding.qaservice.ApiController.convertZdtToString;
 import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -56,11 +60,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
 import com.exonum.binding.blockchain.serialization.BlockAdapterFactory;
-import com.exonum.binding.blockchain.serialization.TransactionLocationAdapterFactory;
-import com.exonum.binding.blockchain.serialization.TransactionResultAdapterFactory;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
@@ -73,6 +75,8 @@ import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
+import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
+import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
 import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableMap;
@@ -93,6 +97,8 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -750,6 +756,53 @@ class ApiControllerIntegrationTest {
 
                 assertThat(storedConfiguration).isEqualTo(configuration);
               });
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getTime(VertxTestContext context) {
+    ZonedDateTime time = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    when(qaService.getTime()).thenReturn(Optional.of(time));
+
+    String expectedStringTime = convertZdtToString(time);
+
+    get(TIME_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualTime = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<String>() {
+              }.getType());
+          assertThat(actualTime).isEqualTo(expectedStringTime);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getValidatorsTimes(VertxTestContext context) {
+    Map<PublicKey, ZonedDateTime> validatorsTimes = ImmutableMap.of(
+        PublicKey.fromHexString("11"), ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
+        PublicKey.fromHexString("22"), ZonedDateTime.of(2018, 1, 1, 0, 0, 1, 0, ZoneOffset.UTC));
+    when(qaService.getValidatorsTimes()).thenReturn(validatorsTimes);
+
+    Map<PublicKey, String> expectedStringValidatorsTimes = convertValidatorsTimesValues(
+        validatorsTimes);
+
+    get(VALIDATORS_TIMES_PATH)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode())
+              .isEqualTo(HTTP_OK);
+
+          String body = response.bodyAsString();
+          Object actualValidatorsTimes = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<PublicKey, String>>() {
+              }.getType());
+          assertThat(actualValidatorsTimes).isEqualTo(expectedStringValidatorsTimes);
+
           context.completeNow();
         })));
   }

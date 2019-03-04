@@ -40,6 +40,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-time-oracle</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
       <scope>provided</scope>
@@ -195,7 +201,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.2</version>
       </extension>
     </extensions>
   </build>

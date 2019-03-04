@@ -43,7 +43,7 @@ echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
 EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-export RUST_LIB_DIR="$(rustup run ${RUST_COMPILER_VERSION:-stable} rustc --print sysroot)/lib"
+export RUST_LIB_DIR="$(rustup run ${RUST_COMPILER_VERSION:-1.32.0} rustc --print sysroot)/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"${EJB_ROOT}"/core/rust/target/debug:"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 

@@ -19,18 +19,20 @@ package com.exonum.client;
 
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
-import static com.exonum.client.ExonumUrls.SUBMIT_TRANSACTION;
+import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.HealthCheckInfo;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.BaseEncoding;
+import com.exonum.client.response.TransactionResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.function.Function;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -43,8 +45,6 @@ import okhttp3.Response;
  */
 class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
-  @VisibleForTesting
-  static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
 
   private final OkHttpClient httpClient;
   private final URL exonumHost;
@@ -56,9 +56,8 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    String msg = toHex(transactionMessage.toBytes());
-    Request request = postRequest(toFullUrl(SUBMIT_TRANSACTION),
-        ExplorerApiHelper.createSubmitTxBody(msg));
+    Request request = postRequest(toFullUrl(TRANSACTIONS),
+        ExplorerApiHelper.createSubmitTxBody(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
   }
@@ -84,46 +83,85 @@ class ExonumHttpClient implements ExonumClient {
     return blockingExecutePlainText(request);
   }
 
-  private static String toHex(byte[] array) {
-    return HEX_ENCODER.encode(array);
+  @Override
+  public Optional<TransactionResponse> getTransaction(HashCode id) {
+    HashCode hash = checkNotNull(id);
+    HttpUrl url = urlBuilder()
+        .encodedPath(TRANSACTIONS)
+        .addQueryParameter("hash", hash.toString())
+        .build();
+    Request request = getRequest(url);
+
+    return blockingExecute(request, response -> {
+      if (response.code() == HTTP_NOT_FOUND) {
+        return Optional.empty();
+      } else if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't successful: " + response.toString());
+      } else {
+        TransactionResponse txResponse = ExplorerApiHelper
+            .parseGetTxResponse(readBody(response));
+
+        return Optional.of(txResponse);
+      }
+    });
   }
 
-  private static Request getRequest(URL url) {
+  private static Request getRequest(HttpUrl url) {
     return new Request.Builder()
         .url(url)
         .get()
         .build();
   }
 
-  private static Request postRequest(URL url, String jsonBody) {
+  private static Request postRequest(HttpUrl url, String jsonBody) {
     return new Request.Builder()
         .url(url)
         .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))
         .build();
   }
 
-  private URL toFullUrl(String relativeUrl) {
-    try {
-      return new URL(exonumHost, relativeUrl);
-    } catch (MalformedURLException e) {
-      throw new AssertionError("Should never happen", e);
-    }
+  private HttpUrl toFullUrl(String relativeUrl) {
+    return urlBuilder()
+        .encodedPath(relativeUrl)
+        .build();
   }
 
-  private String blockingExecutePlainText(Request request) {
+  private HttpUrl.Builder urlBuilder() {
+
+    return new HttpUrl.Builder()
+        .scheme(exonumHost.getProtocol())
+        .host(exonumHost.getHost())
+        .port(exonumHost.getPort());
+  }
+
+  private <T> T blockingExecute(Request request, Function<Response, T> responseHandler) {
     try (Response response = httpClient.newCall(request).execute()) {
-      if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't success: " + response.toString());
-      }
-      return response.body().string();
+      return responseHandler.apply(response);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  private String blockingExecutePlainText(Request request) {
+    return blockingExecute(request, response -> {
+      if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't successful: " + response.toString());
+      }
+      return readBody(response);
+    });
+  }
+
   private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {
     String response = blockingExecutePlainText(request);
     return parser.apply(response);
+  }
+
+  private static String readBody(Response response) {
+    try {
+      return response.body().string();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
