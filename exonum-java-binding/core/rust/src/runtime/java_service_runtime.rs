@@ -19,7 +19,6 @@ use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory
 use jni::{
     self,
     objects::{GlobalRef, JObject},
-    strings::JavaStr,
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
@@ -29,7 +28,7 @@ use std::sync::{Arc, Once, ONCE_INIT};
 use proxy::{JniExecutor, ServiceProxy};
 use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
 use runtime::config::{self, Config, EjbConfig, JvmConfig, ServiceConfig};
-use utils::{check_error_on_exception, unwrap_jni};
+use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
@@ -102,7 +101,7 @@ impl JavaServiceRuntime {
         unwrap_jni(self.executor.with_attached(|env| {
             let res = {
                 let artifact_uri: JObject = env.new_string(artifact_uri)?.into();
-                let artifact_id: JObject = env
+                let artifact_id = env
                     .call_method(
                         self.service_runtime.as_obj(),
                         "loadArtifact",
@@ -110,8 +109,7 @@ impl JavaServiceRuntime {
                         &[artifact_uri.into()],
                     )?
                     .l()?;
-                let result: String = JavaStr::from_env(env, artifact_id.into())?.into();
-                Ok(result)
+                convert_to_string(env, artifact_id)
             };
             Ok(check_error_on_exception(env, res))
         }))
