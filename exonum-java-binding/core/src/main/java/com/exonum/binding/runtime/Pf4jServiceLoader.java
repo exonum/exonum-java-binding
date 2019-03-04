@@ -77,7 +77,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
       PluginState pluginState = pluginManager.startPlugin(pluginId);
       if (pluginState != PluginState.STARTED) {
         throw new ServiceLoadingException(
-            String.format("Failed to start the plugin %s, state=%s", pluginId, pluginState));
+            String.format("Failed to start the plugin %s, its state=%s", pluginId, pluginState));
       }
 
       ServiceId serviceId = extractServiceId(pluginId);
