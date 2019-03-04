@@ -24,7 +24,6 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {
@@ -53,12 +52,20 @@ class TimeSchemaProxy implements TimeSchema {
   }
 
   private void checkIfEnabled() {
+    // Skip if invoked in tests because the check relies on the state unavailable
+    // in integration tests. To be removed in ECR-2970 (Java Testkit)
+    if (!runningUnitTests()) {
+      checkState(isTimeServiceEnabled(), "Time service is not enabled. To enable it, put 'time' "
+          + "into 'ejb_app_services.toml' file.");
+    }
+  }
+
+  private static boolean runningUnitTests() {
     try {
-      // Pass the check if invoked in tests
       Class.forName("org.junit.jupiter.api.Test");
+      return true;
     } catch (ClassNotFoundException e) {
-      checkState(isTimeServiceEnabled(), "Time service is not enabled. To enable it, put 'time'" +
-          "into 'ejb_app_services.toml' file.");
+      return false;
     }
   }
 

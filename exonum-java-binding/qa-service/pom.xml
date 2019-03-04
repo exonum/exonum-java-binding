@@ -39,6 +39,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Time oracle is a compile-scoped dependency till Packaging is delivered. -->
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-time-oracle</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
@@ -195,7 +201,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.2</version>
       </extension>
     </extensions>
   </build>

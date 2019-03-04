@@ -25,6 +25,9 @@ import com.exonum.binding.proxy.ProxyDestructor;
 /**
  * A fork is a database view, allowing both read and write operations.
  *
+ * <p>A fork represents the database state at the time it was created <em>plus</em> any changes
+ * to the database made using this fork.
+ *
  * <p>A fork allows to perform
  * a {@linkplain com.exonum.binding.transaction.Transaction transaction}: a number of independent
  * writes to the database, which then may be <em>atomically</em> applied (i.e. committed)
