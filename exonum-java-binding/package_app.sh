@@ -7,9 +7,6 @@
 set -eu -o pipefail
 
 function build-ejb-app-macos() {
-    # Set RUSTFLAGS to adjust RUNPATH of the binary.
-    export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
-    echo "RUSTFLAGS=${RUSTFLAGS}"
     mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am \
       -DskipTests \
       -DdoNotBuildRustLib \
@@ -17,9 +14,6 @@ function build-ejb-app-macos() {
 }
 
 function build-ejb-app-linux() {
-    # Set RUSTFLAGS to adjust RUNPATH of the binary.
-    export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
-    echo "RUSTFLAGS=${RUSTFLAGS}"
     mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am \
       -DskipTests \
       -DdoNotBuildRustLib \
@@ -28,7 +22,7 @@ function build-ejb-app-linux() {
 
 EJB_RUST_DIR="${PWD}/core/rust"
 
-# Run all tests before packaging the App. This is safe, but takes a long time.
+# Run all tests before packaging the App. This is safer, but takes a long time.
 if [ "$#" -eq 0 ]; then
   ./run_all_tests.sh
 else
@@ -38,9 +32,6 @@ else
   fi
   source ./tests_profile
 fi
-
-# Set LD_LIBRARY_PATH as needed for building and testing.
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}:${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
 
 # Copy libstd to some known place.
 PREPACKAGE_DIR="${EJB_RUST_DIR}/target/prepackage"

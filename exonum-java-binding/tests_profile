@@ -49,8 +49,6 @@ export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dir
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to build tests.
-## Stable works well unless you want benchmarks.
-# TODO: stable does not work well until ECR-1839 is resolved
 export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-stable}"
 echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 
@@ -58,14 +56,18 @@ echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
-# Linking options with additional paths for the application and tests.
-# Note: `-C link-args` can be used only once, therefore, `-C link-arg` is used.
+# Export LD_LIBRARY_PATH which is necessary for running native integration tests and compiling the EJB App.
+export LD_LIBRARY_PATH="${RUST_LIB_DIR}:${JAVA_LIB_DIR}"
+
+# Linking options with additional paths for the application.
 # Currently we don't support stacking of RUSTFLAGS with a user environment RUSTFLAGS,
 # since this profile may be reused many times during a user session and because of this
 # RUSTFLAGS can accumulate old and irrelevant options values.
-NEW_RUSTFLAGS="\
- -C link-arg=-Wl,-rpath,${RUST_LIB_DIR}\
- -C link-arg=-Wl,-rpath,${JAVA_LIB_DIR}"
+if [[ "$(uname)" == "Darwin" ]]; then
+    NEW_RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
+elif [[ "$(uname -s)" == Linux* ]]; then
+    NEW_RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
+fi
 
 if [[ "${RUSTFLAGS:-}" != "" && "${RUSTFLAGS}" != "${NEW_RUSTFLAGS}" ]]; then
     echo "[WARNING]: RUSTFLAGS variable is set and will be overridden. If you need to pass \
