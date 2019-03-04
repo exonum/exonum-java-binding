@@ -36,18 +36,18 @@ echo "PROJ_ROOT=${EJB_ROOT}"
 
 header "PREPARE PATHS"
 
-CORE_TXT="core/target/ejb-core-classpath.txt"
 QA_SERVICE_TXT="qa-service/target/qa-service-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/core/target/classes"
+EJB_CLASSPATH="$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/qa-service/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
 EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
-export RUST_LIB_DIR="$(rustup run stable rustc --print sysroot)/lib"
+export RUST_LIB_DIR="$(rustup run ${RUST_COMPILER_VERSION:-stable} rustc --print sysroot)/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+
+ejb_app="${EJB_ROOT}/core/rust/target/debug/ejb-app"
 
 # Clear test dir
 rm -rf testnet
@@ -69,16 +69,15 @@ do
 done
 
 header "GENERATE COMMON CONFIG"
-ejb-app generate-template --validators-count $node_count testnet/common.toml
+"${ejb_app}" generate-template --validators-count $node_count testnet/common.toml \
+  --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule'
 
 header "GENERATE CONFIG"
 for i in $(seq 0 $((node_count - 1)))
 do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
-    ejb-app generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
-     --ejb-service-classpath $EJB_CLASSPATH \
-     --ejb-log-config-path $log_config_path \
+    "${ejb_app}" generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
      --peer-address 127.0.0.1:$peer_port
 done
 
@@ -86,9 +85,8 @@ header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
     ejb_port=$((6000 + i))
-    ejb-app finalize testnet/sec_$i.toml testnet/node_$i.toml \
-     --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule' \
-     --ejb-port $ejb_port \
+    "${ejb_app}" finalize testnet/sec_$i.toml testnet/node_$i.toml \
+     --ejb-service-classpath $EJB_CLASSPATH \
      --public-configs testnet/pub_*.toml
 done
 
@@ -98,9 +96,11 @@ for i in $(seq 0 $((node_count - 1)))
 do
 	port=$((3000 + i))
 	private_port=$((port + 100))
-	ejb-app run \
+	"${ejb_app}" run \
 	 -c testnet/node_$i.toml \
 	 -d testnet/db/$i \
+	 --ejb-port $ejb_port \
+	 --ejb-log-config-path $log_config_path \
 	 --public-api-address 0.0.0.0:${port} \
 	 --private-api-address 0.0.0.0:${private_port} &
 
