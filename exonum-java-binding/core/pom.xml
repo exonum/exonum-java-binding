@@ -282,6 +282,24 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-native-lib</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/rust/target/debug/lib/native</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/rust/target/debug</directory>
+                  <includes>
+                    <include>libjava_bindings.*</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
