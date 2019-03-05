@@ -30,6 +30,10 @@ final class TimeDto {
     this.time = time;
   }
 
+  ZonedDateTime getTime() {
+    return time;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

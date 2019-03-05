@@ -285,7 +285,7 @@ final class ApiController {
   }
 
   private void getTime(RoutingContext rc) {
-    Optional<TimeDto> time = service.getTime();
+    Optional<TimeDto> time = service.getTime().map(TimeDto::new);
     respondWithJson(rc, time);
   }
 

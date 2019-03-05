@@ -760,7 +760,7 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getTime(VertxTestContext context) {
-    TimeDto time = new TimeDto(ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC));
+    ZonedDateTime time = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
     when(qaService.getTime()).thenReturn(Optional.of(time));
 
     get(TIME_PATH)
@@ -770,9 +770,8 @@ class ApiControllerIntegrationTest {
 
           String body = response.bodyAsString();
           TimeDto actualTime = JSON_SERIALIZER
-              .fromJson(body, new TypeToken<TimeDto>() {
-              }.getType());
-          assertThat(actualTime).isEqualTo(time);
+              .fromJson(body, TimeDto.class);
+          assertThat(actualTime.getTime()).isEqualTo(time);
 
           context.completeNow();
         })));
