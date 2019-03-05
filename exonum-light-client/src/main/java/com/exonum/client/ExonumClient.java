@@ -21,6 +21,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.Block;
+import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
@@ -76,6 +79,90 @@ public interface ExonumClient {
    *        (e.g., in case of connectivity problems)
    */
   Optional<TransactionResponse> getTransaction(HashCode id);
+
+  /**
+   * Returns the <em>blockchain height</em> which is the height of the latest committed block
+   * in the blockchain. The block height is a distance between the last block
+   * and the "genesis", or initial, block. Therefore, the blockchain height is equal to the number
+   * of blocks plus one.
+   *
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  long getBlockchainHeight();
+
+  /**
+   * Returns the information about the block with transaction hashes included at this block.
+   * @param height blockchain height starting from 0 (genesis block)
+   * @return block information response
+   * @throws RuntimeException if block is not found by the requested height,
+   *        i.e. the requested height is greater than actual blockchain height
+   * @throws IllegalArgumentException if the given height is negative
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  BlockResponse getBlockByHeight(long height);
+
+  /**
+   * Returns blockchain blocks information for the requested range. The blocks are returned
+   * in reverse order, starting from the {@code heightMax}.
+   * @param count Number of blocks to return.
+   *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   * @param skipEmpty if {@code true}, then only non-empty blocks will be returned
+   * @param heightMax maximum height of the returned blocks.
+   *        If the {@code heightMax} is greater than actual blockchain height then
+   *        the actual height will be used
+   * @param withTime if {@code true}, then includes block commit times in the response.
+   *        See {@linkplain Block#getCommitTime()}.
+   *        The time value corresponds to the average time of submission of precommits by the
+   *        validators for every returned block
+   * @return blocks information response
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   * @throws IllegalArgumentException if count is out of range
+   *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   */
+  BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax, boolean withTime);
+
+  /**
+   * Returns blockchain blocks information starting from the last block in the blockchain.
+   * @param count Number of blocks to return.
+   *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   * @param skipEmpty if {@code true}, then only non-empty blocks are returned
+   * @param withTime if {@code true}, then includes block commit times in the response.
+   *        See {@linkplain Block#getCommitTime()}.
+   *        The time value corresponds to the average time of submission of precommits by the
+   *        validators for every returned block
+   * @return blocks information response
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   * @throws IllegalArgumentException if count is out of range
+   *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   */
+  BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime);
+
+  /**
+   * Returns the last block in the blockchain.
+   * @param withTime if {@code true}, then includes block commit times in the response.
+   *        See {@linkplain Block#getCommitTime()}.
+   *        The time value corresponds to the average time of submission of precommits by the
+   *        validators for every returned block
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  Block getLastBlock(boolean withTime);
+
+  /**
+   * Returns the last block in the blockchain which contains transactions;
+   * or {@code Optional.empty()} if there are no blocks with transactions in the blockchain.
+   * @param withTime if {@code true}, then includes block commit times in the response.
+   *        See {@linkplain Block#getCommitTime()}.
+   *        The time value corresponds to the average time of submission of precommits by the
+   *        validators for every returned block
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   */
+  Optional<Block> getLastNonEmptyBlock(boolean withTime);
 
   /**
    * Returns Exonum client builder.

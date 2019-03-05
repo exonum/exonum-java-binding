@@ -17,9 +17,19 @@
 
 package com.exonum.client;
 
+import static com.exonum.client.Blocks.BLOCK_1;
+import static com.exonum.client.Blocks.BLOCK_1_JSON;
+import static com.exonum.client.Blocks.BLOCK_1_TIME;
+import static com.exonum.client.Blocks.BLOCK_2;
+import static com.exonum.client.Blocks.BLOCK_2_JSON;
+import static com.exonum.client.Blocks.BLOCK_2_TIME;
+import static com.exonum.client.Blocks.BLOCK_3;
+import static com.exonum.client.Blocks.BLOCK_3_JSON;
+import static com.exonum.client.Blocks.BLOCK_3_TIME;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,17 +38,18 @@ import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import org.junit.jupiter.api.Test;
 
 class ExplorerApiHelperTest {
 
-
   @Test
   void parseSubmitTxResponse() {
     String expected = "f128c720e04b8243";
-    String json = "{\"tx_hash\":\"" + expected + "\"}";
+    String json = "{'tx_hash':'" + expected + "'}";
 
     HashCode actual = ExplorerApiHelper.parseSubmitTxResponse(json);
     assertThat(actual, equalTo(HashCode.fromString(expected)));
@@ -160,7 +171,7 @@ class ExplorerApiHelperTest {
         + "    },\n"
         + "    'status': {\n"
         + "        'type': 'panic',\n"
-        + "        'description': \"" + errorDescription + "\""
+        + "        'description': '" + errorDescription + "'"
         + "    }\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
@@ -170,6 +181,41 @@ class ExplorerApiHelperTest {
     assertThat(transactionResponse.getExecutionResult(),
         is(TransactionResult.unexpectedError(errorDescription)));
     assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+  }
+
+  @Test
+  void parseGetBlockResponse() {
+    String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
+    String json = "{\n"
+        + "    'block': " + BLOCK_1_JSON + ",\n"
+        + "    'precommits': ['a410964c2c21199b48e2'],\n"
+        + "    'txs': ['" + tx1 + "'],\n"
+        + "    'time': '" + BLOCK_1_TIME + "'\n"
+        + "}";
+
+    BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
+
+    assertThat(response.getBlock(), is(BLOCK_1));
+    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
+  }
+
+  @Test
+  void parseGetBlocksResponse() {
+    String json = "{\n"
+        + "    'range': {\n"
+        + "        'start': 6,\n"
+        + "        'end': 288\n"
+        + "    },\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
+        + "    'times': ['" + BLOCK_1_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_3_TIME
+        + "']\n"
+        + "}\n";
+
+    BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);
+
+    assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
+    assertThat(response.getBlocksRangeStart(), is(6L));
+    assertThat(response.getBlocksRangeEnd(), is(288L));
   }
 
 }
