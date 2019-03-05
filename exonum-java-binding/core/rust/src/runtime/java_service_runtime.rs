@@ -38,7 +38,7 @@ const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeB
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
 const LOAD_ARTIFACT_SIGNATURE: &str = "(Ljava/lang/String;)Ljava/lang/String;";
 const CREATE_SERVICE_SIGNATURE: &str =
-    "(Ljava/lang/String;Ljava/lang/String;)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
+    "(Ljava/lang/String;)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
 #[allow(dead_code)]

@@ -85,18 +85,22 @@ final class ServiceRuntime {
    * Creates a new service instance of the given type.
    *
    * @param artifactId a unique identifier of the loaded artifact
-   * @param moduleName *temp parameter* a fully-qualified class name of the service module to
-   *     instantiate
+   *
    * @return a new service
    * @throws IllegalArgumentException if the artifactId is unknown
    * @throws RuntimeException if it failed to instantiate the service
    */
-  UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId,
-      /* Temporary arg: remove */ String moduleName) {
-    Module serviceModule = createUserModule(moduleName);
+  UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId) {
+    // Temporary code for testing purposes: remove
+    Module serviceModule = createUserModule(artifactId.equals("artifactId/not-relevant")
+            ? "com.exonum.binding.runtime.TestServiceModule" :
+            "com.exonum.binding.fakes.services.service.TestServiceModule");
     Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
     return serviceInjector.getInstance(UserServiceAdapter.class);
   }
+
+
+
 
   /**
    * Creates a user module that configures the bindings of that module.
