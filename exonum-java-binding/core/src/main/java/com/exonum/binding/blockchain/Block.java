@@ -55,7 +55,6 @@ public abstract class Block {
    * the number of blocks plus one.
    *
    * <p>The height also identifies each block in the blockchain.
-   *
    */
   public abstract long getHeight();
 
