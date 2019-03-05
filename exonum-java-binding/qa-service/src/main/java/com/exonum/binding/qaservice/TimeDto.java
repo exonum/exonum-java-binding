@@ -23,10 +23,10 @@ import java.time.ZonedDateTime;
 /**
  * DTO class for JSON view.
  */
-final class TimeDTO {
+final class TimeDto {
   private final ZonedDateTime time;
 
-  TimeDTO(ZonedDateTime time) {
+  TimeDto(ZonedDateTime time) {
     this.time = time;
   }
 
@@ -38,7 +38,7 @@ final class TimeDTO {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TimeDTO timeDTO = (TimeDTO) o;
+    TimeDto timeDTO = (TimeDto) o;
     return Objects.equal(time, timeDTO.time);
   }
 

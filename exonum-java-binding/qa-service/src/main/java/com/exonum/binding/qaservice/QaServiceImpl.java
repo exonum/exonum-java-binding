@@ -340,12 +340,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
-  public Optional<TimeDTO> getTime() {
+  public Optional<TimeDto> getTime() {
     return node.withSnapshot(s -> {
       TimeSchema timeOracle = TimeSchema.newInstance(s);
       EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
       Optional<ZonedDateTime> optionalCurrentTime = toOptional(currentTime);
-      return optionalCurrentTime.map(TimeDTO::new);
+      return optionalCurrentTime.map(TimeDto::new);
     });
   }
 
