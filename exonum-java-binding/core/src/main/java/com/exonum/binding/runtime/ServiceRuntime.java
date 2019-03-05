@@ -23,6 +23,8 @@ import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -91,9 +93,33 @@ final class ServiceRuntime {
    */
   UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId,
       /* Temporary arg: remove */ String moduleName) {
-    Module serviceModule = ServiceBootstrap.createUserModule(moduleName);
+    Module serviceModule = createUserModule(moduleName);
     Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
     return serviceInjector.getInstance(UserServiceAdapter.class);
+  }
+
+  /**
+   * Creates a user module that configures the bindings of that module.
+   *
+   * @param moduleName a fully-qualified class name of the user service module
+   */
+  private static Module createUserModule(String moduleName) {
+    try {
+      Class<?> moduleClass = Class.forName(moduleName);
+      Constructor constructor = moduleClass.getDeclaredConstructor();
+      Object moduleObject = constructor.newInstance();
+      checkArgument(moduleObject instanceof Module, "%s is not a sub-class of %s",
+          moduleClass, Module.class.getCanonicalName());
+      return (Module) moduleObject;
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException("Module class cannot be found", e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalArgumentException("Cannot access the no-arg module constructor", e);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("No no-arg constructor", e);
+    } catch (InstantiationException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   // TODO: unloadArtifact and stopService, once they can be used/ECR-2275
