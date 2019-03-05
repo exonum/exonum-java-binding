@@ -28,6 +28,8 @@ import static org.hamcrest.Matchers.equalTo;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 class JsonSerializerTest {
@@ -57,6 +59,15 @@ class JsonSerializerTest {
     String json = json().toJson(new Wrapper<>(value));
 
     assertJsonValue(json, "000102");
+  }
+
+  @Test
+  void zonedDateTimeSerializesAsValue() {
+    ZonedDateTime value = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+
+    String json = json().toJson(new Wrapper<>(value));
+
+    assertJsonValue(json, "2000-01-01 01:01:01 +0000");
   }
 
   @Test
