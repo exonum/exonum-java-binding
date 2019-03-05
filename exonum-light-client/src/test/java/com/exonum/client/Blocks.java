@@ -23,16 +23,16 @@ import java.time.ZonedDateTime;
 final class Blocks {
   static final String BLOCK_1_JSON = "{\n"
       + "        'proposer_id': 3,\n"
-      + "        'height': 1,\n"
+      + "        'height': 100,\n"
       + "        'tx_count': 1,\n"
       + "        'prev_hash': 'abc8',\n"
       + "        'tx_hash': 'cd5a',\n"
       + "        'state_hash': 'efa2'\n"
       + "    }";
-  static final String BLOCK_1_TIME = "2019-02-14T14:12:52.037255Z";
+  static final String BLOCK_1_TIME = "2019-02-10T14:12:52.037255Z";
   static final Block BLOCK_1 = Block.builder()
       .proposerId(3)
-      .height(1)
+      .height(100)
       .numTransactions(1)
       .previousBlockHash(HashCode.fromString("abc8"))
       .txRootHash(HashCode.fromString("cd5a"))
@@ -41,7 +41,7 @@ final class Blocks {
       .build();
   static final Block BLOCK_1_WITHOUT_TIME = Block.builder()
       .proposerId(3)
-      .height(1)
+      .height(100)
       .numTransactions(1)
       .previousBlockHash(HashCode.fromString("abc8"))
       .txRootHash(HashCode.fromString("cd5a"))
@@ -50,16 +50,16 @@ final class Blocks {
 
   static final String BLOCK_2_JSON = "{\n"
       + "        'proposer_id': 2,\n"
-      + "        'height': 21,\n"
+      + "        'height': 50,\n"
       + "        'tx_count': 1,\n"
       + "        'prev_hash': 'aa4e',\n"
       + "        'tx_hash': 'dcb0',\n"
       + "        'state_hash': 'e4ea'\n"
       + "    }";
-  static final String BLOCK_2_TIME = "2019-02-21T13:01:44.321051Z";
+  static final String BLOCK_2_TIME = "2019-02-05T13:01:44.321051Z";
   static final Block BLOCK_2 = Block.builder()
       .proposerId(2)
-      .height(21)
+      .height(50)
       .numTransactions(1)
       .previousBlockHash(HashCode.fromString("aa4e"))
       .txRootHash(HashCode.fromString("dcb0"))
@@ -68,7 +68,7 @@ final class Blocks {
       .build();
   static final Block BLOCK_2_WITHOUT_TIME = Block.builder()
       .proposerId(2)
-      .height(21)
+      .height(50)
       .numTransactions(1)
       .previousBlockHash(HashCode.fromString("aa4e"))
       .txRootHash(HashCode.fromString("dcb0"))
@@ -83,7 +83,7 @@ final class Blocks {
       + "        'tx_hash': '362b',\n"
       + "        'state_hash': '00cc'\n"
       + "    }";
-  static final String BLOCK_3_TIME = "2019-02-21T13:01:43.287648Z";
+  static final String BLOCK_3_TIME = "2019-02-01T13:01:43.287648Z";
   static final Block BLOCK_3 = Block.builder()
       .proposerId(1)
       .height(16)

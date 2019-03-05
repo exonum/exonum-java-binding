@@ -20,6 +20,7 @@ import com.exonum.binding.common.hash.HashCode;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 
 /**
@@ -58,16 +59,19 @@ public class Block {
   /**
    * Hash link to the previous block in the blockchain.
    */
+  @NonNull
   HashCode previousBlockHash;
 
   /**
    * Root hash of the Merkle tree of transactions in this block.
    */
+  @NonNull
   HashCode txRootHash;
 
   /**
    * Hash of the blockchain state after applying transactions in the block.
    */
+  @NonNull
   HashCode stateHash;
 
   /**
