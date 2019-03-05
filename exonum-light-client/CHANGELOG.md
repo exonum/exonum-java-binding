@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Versions support
-- Exonum version, 0.10.4+?
+- Exonum version, 0.11
 - Exonum Java Binding version, 0.5-SNAPSHOT
 
 ### Added
