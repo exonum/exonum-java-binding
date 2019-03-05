@@ -780,11 +780,9 @@ class ApiControllerIntegrationTest {
 
   @Test
   void getValidatorsTimes(VertxTestContext context) {
-    Map<PublicKey, TimeDTO> validatorsTimes = ImmutableMap.of(
-        PublicKey.fromHexString("11"),
-        new TimeDTO(ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)),
-        PublicKey.fromHexString("22"),
-        new TimeDTO(ZonedDateTime.of(2018, 1, 1, 0, 0, 1, 0, ZoneOffset.UTC)));
+    Map<PublicKey, ZonedDateTime> validatorsTimes = ImmutableMap.of(
+        PublicKey.fromHexString("11"), ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
+        PublicKey.fromHexString("22"), ZonedDateTime.of(2018, 1, 1, 0, 0, 1, 0, ZoneOffset.UTC));
     when(qaService.getValidatorsTimes()).thenReturn(validatorsTimes);
 
     get(VALIDATORS_TIMES_PATH)
@@ -793,8 +791,8 @@ class ApiControllerIntegrationTest {
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Map<PublicKey, TimeDTO> actualValidatorsTimes = JSON_SERIALIZER
-              .fromJson(body, new TypeToken<Map<PublicKey, TimeDTO>>() {
+          Map<PublicKey, ZonedDateTime> actualValidatorsTimes = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<PublicKey, ZonedDateTime>>() {
               }.getType());
           assertThat(actualValidatorsTimes).isEqualTo(validatorsTimes);
 

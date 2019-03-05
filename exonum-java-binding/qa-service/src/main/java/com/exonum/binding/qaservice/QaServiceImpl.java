@@ -359,7 +359,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
-  public Map<PublicKey, TimeDTO> getValidatorsTimes() {
+  public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
     return node.withSnapshot(s -> {
       TimeSchema timeOracle = TimeSchema.newInstance(s);
       MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
@@ -367,8 +367,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
     });
   }
 
-  private Map<PublicKey, TimeDTO> toMap(MapIndex<PublicKey, ZonedDateTime> mapIndex) {
-    return Maps.toMap(mapIndex.keys(), v -> new TimeDTO(mapIndex.get(v)));
+  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
+    return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.

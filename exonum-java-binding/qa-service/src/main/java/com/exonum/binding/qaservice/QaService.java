@@ -24,6 +24,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.Service;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,5 +80,5 @@ public interface QaService extends Service {
 
   Optional<TimeDTO> getTime();
 
-  Map<PublicKey, TimeDTO> getValidatorsTimes();
+  Map<PublicKey, ZonedDateTime> getValidatorsTimes();
 }

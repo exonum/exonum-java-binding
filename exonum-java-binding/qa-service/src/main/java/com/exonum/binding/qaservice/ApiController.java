@@ -65,6 +65,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -289,7 +290,7 @@ final class ApiController {
   }
 
   private void getValidatorsTimes(RoutingContext rc) {
-    Map<PublicKey, TimeDTO> validatorsTimes = service.getValidatorsTimes();
+    Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
     respondWithJson(rc, validatorsTimes);
   }
 
