@@ -104,13 +104,12 @@ public interface ExonumClient {
   BlockResponse getBlockByHeight(long height);
 
   /**
-   * Returns blockchain blocks information for the requested range.
+   * Returns blockchain blocks information for the requested range. The blocks are returned
+   * in reverse order, starting from the {@code heightMax}.
    * @param count Number of blocks to return.
    *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    * @param skipEmpty if {@code true}, then only non-empty blocks will be returned
-   * @param heightMax maximum height of the returned blocks. The blocks are returned
-   *        in reverse order, starting from the {@code heightMax}
-   *        and up to the {@code heightMax - count + 1}.
+   * @param heightMax maximum height of the returned blocks.
    *        If the {@code heightMax} is greater than actual blockchain height then
    *        the actual height will be used
    * @param withTime if {@code true}, then includes block commit times in the response.
