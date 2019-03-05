@@ -19,19 +19,15 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::{get_fakes_classpath, get_libpath};
-use java_bindings::{Config, EjbConfig, JavaServiceRuntime, JvmConfig, ServiceConfig};
-
-const TEST_SERVICE_MODULE_NAME: &str =
-    "com.exonum.binding.fakes.services.service.TestServiceModule";
+use integration_tests::vm::get_fakes_classpath;
+use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig, ServiceConfig};
 
 #[test]
 // TODO: reenable this test after ECR-2789
 #[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
     let service_config = ServiceConfig {
-        module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
-        port: 6300,
+        artifact_uri: "".to_owned(),
     };
 
     let jvm_config = JvmConfig {
@@ -40,19 +36,25 @@ fn bootstrap() {
         jvm_debug_socket: None,
     };
 
-    let ejb_config = EjbConfig {
-        class_path: get_fakes_classpath(),
-        lib_path: get_libpath(),
+    let runtime_config = RuntimeConfig {
         log_config_path: "".to_owned(),
+        port: 6300,
+        system_class_path: get_fakes_classpath(),
+        system_lib_path: None,
     };
 
-    let service_runtime = JavaServiceRuntime::get_or_create(Config {
-        jvm_config,
-        ejb_config,
+    let config = Config {
         service_config,
-    });
+        jvm_config,
+        runtime_config,
+    };
 
-    let service = service_runtime.create_service("", TEST_SERVICE_MODULE_NAME);
+    let service_runtime = JavaServiceRuntime::get_or_create(config.clone());
+
+    let artifact_id = service_runtime
+        .load_artifact(&config.service_config.artifact_uri)
+        .expect("Unable to load artifact");
+    let service = service_runtime.create_service(&artifact_id);
 
     let mut testkit = TestKitBuilder::validator().with_service(service).create();
 

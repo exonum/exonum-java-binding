@@ -26,8 +26,8 @@ use std::env;
 use std::sync::{Arc, Once, ONCE_INIT};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, GenerateNodeConfig, Run};
-use runtime::config::{self, Config, EjbConfig, JvmConfig, ServiceConfig};
+use runtime::cmd::{Finalize, Run};
+use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 
@@ -56,10 +56,10 @@ impl JavaServiceRuntime {
         unsafe {
             // Initialize runtime if it wasn't created before.
             JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(config.jvm_config, config.ejb_config);
+                let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
                 let executor = MainExecutor::new(Arc::new(java_vm));
                 let service_runtime =
-                    Self::create_service_runtime(config.service_config, executor.clone());
+                    Self::create_service_runtime(config.runtime_config, executor.clone());
                 let runtime = JavaServiceRuntime {
                     executor,
                     service_runtime,
@@ -73,17 +73,31 @@ impl JavaServiceRuntime {
         }
     }
 
+    /// Creates service runtime that is responsible for services management.
+    fn create_service_runtime(config: RuntimeConfig, executor: MainExecutor) -> GlobalRef {
+        unwrap_jni(executor.with_attached(|env| {
+            let serviceRuntime = env
+                .call_static_method(
+                    SERVICE_BOOTSTRAP_PATH,
+                    "createServiceRuntime",
+                    CREATE_RUNTIME_SIGNATURE,
+                    &[config.port.into()],
+                )?
+                .l()?;
+            env.new_global_ref(serviceRuntime)
+        }))
+    }
+
     /// Creates a new service instance using the given artifact id.
-    pub fn create_service(&self, artifact_id: &str, module: &str) -> ServiceProxy {
+    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
         unwrap_jni(self.executor.with_attached(|env| {
             let artifact_id: JObject = env.new_string(artifact_id)?.into();
-            let module_name: JObject = env.new_string(module)?.into();
             let service = env
                 .call_method(
                     self.service_runtime.as_obj(),
                     "createService",
                     CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id.into(), module_name.into()],
+                    &[artifact_id.into()],
                 )?
                 .l()?;
             let service = env.new_global_ref(service).unwrap();
@@ -120,14 +134,17 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(jvm_config: JvmConfig, ejb_config: EjbConfig) -> JavaVM {
-        let args = Self::build_jvm_arguments(jvm_config, ejb_config)
+    fn create_java_vm(jvm_config: &JvmConfig, runtime_config: &RuntimeConfig) -> JavaVM {
+        let args = Self::build_jvm_arguments(jvm_config, runtime_config)
             .expect("Unable to build arguments for JVM");
         jni::JavaVM::new(args).unwrap()
     }
 
     /// Builds arguments for JVM initialization.
-    fn build_jvm_arguments(jvm_config: JvmConfig, ejb_config: EjbConfig) -> JniResult<InitArgs> {
+    fn build_jvm_arguments(
+        jvm_config: &JvmConfig,
+        runtime_config: &RuntimeConfig,
+    ) -> JniResult<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
         let args_prepend = jvm_config.args_prepend.clone();
@@ -137,7 +154,7 @@ impl JavaServiceRuntime {
         args_builder = Self::add_user_arguments(args_builder, args_prepend);
 
         // Add required arguments
-        args_builder = Self::add_required_arguments(args_builder, ejb_config);
+        args_builder = Self::add_required_arguments(args_builder, runtime_config);
 
         // Add optional arguments
         args_builder = Self::add_optional_arguments(args_builder, jvm_config);
@@ -162,45 +179,41 @@ impl JavaServiceRuntime {
 
     /// Adds required EJB-related arguments to JVM configuration
     fn add_required_arguments(
-        args_builder: InitArgsBuilder,
-        ejb_config: EjbConfig,
+        mut args_builder: InitArgsBuilder,
+        runtime_config: &RuntimeConfig,
     ) -> InitArgsBuilder {
+        // We do not use system library path in tests, because an absolute path to the native
+        // library will be provided at compile time using RPATH.
+        if runtime_config.system_lib_path.is_some() {
+            args_builder = args_builder.option(&format!(
+                "-Djava.library.path={}",
+                runtime_config.system_lib_path.clone().unwrap()
+            ));
+        }
+
         args_builder
-            .option(&format!("-Djava.class.path={}", ejb_config.class_path))
-            .option(&format!("-Djava.library.path={}", ejb_config.lib_path))
+            .option(&format!(
+                "-Djava.class.path={}",
+                runtime_config.system_class_path
+            ))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
-                ejb_config.log_config_path
+                runtime_config.log_config_path
             ))
     }
 
     /// Adds optional user arguments to JVM configuration
     fn add_optional_arguments(
         mut args_builder: InitArgsBuilder,
-        jvm_config: JvmConfig,
+        jvm_config: &JvmConfig,
     ) -> InitArgsBuilder {
-        if let Some(socket) = jvm_config.jvm_debug_socket {
+        if let Some(ref socket) = jvm_config.jvm_debug_socket {
             args_builder = args_builder.option(&format!(
                 "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
                 socket
             ));
         }
         args_builder
-    }
-
-    /// Creates service runtime that is responsible for services management.
-    fn create_service_runtime(config: ServiceConfig, executor: MainExecutor) -> GlobalRef {
-        unwrap_jni(executor.with_attached(|env| {
-            let serviceRuntime = env
-                .call_static_method(
-                    SERVICE_BOOTSTRAP_PATH,
-                    "createServiceRuntime",
-                    CREATE_RUNTIME_SIGNATURE,
-                    &[config.port.into()],
-                )?
-                .l()?;
-            env.new_global_ref(serviceRuntime)
-        }))
     }
 }
 
@@ -231,7 +244,6 @@ impl ServiceFactory for JavaServiceFactory {
         use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
         match command {
-            v if v == fabric::GenerateNodeConfig.name() => Some(Box::new(GenerateNodeConfig)),
             v if v == fabric::Finalize.name() => Some(Box::new(Finalize)),
             v if v == fabric::Run.name() => Some(Box::new(Run)),
             _ => None,
@@ -249,9 +261,12 @@ impl ServiceFactory for JavaServiceFactory {
             .clone()
             .try_into()
             .expect("Invalid EJB configuration format.");
-        let runtime = JavaServiceRuntime::get_or_create(config.clone());
 
-        let service_proxy = runtime.create_service("", &config.service_config.module_name);
+        let runtime = JavaServiceRuntime::get_or_create(config.clone());
+        let artifact_id = runtime
+            .load_artifact(&config.service_config.artifact_uri)
+            .expect("Unable to load artifact");
+        let service_proxy = runtime.create_service(&artifact_id);
         Box::new(service_proxy)
     }
 }

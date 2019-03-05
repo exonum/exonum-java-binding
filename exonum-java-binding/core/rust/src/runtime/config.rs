@@ -16,34 +16,31 @@
 
 use std::fmt;
 
-/// JavaServiceRuntime configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Full configuration of the EJB runtime, JVM and Java service.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// JVM configuration.
-    pub jvm_config: JvmConfig,
-    /// EJB configuration
-    pub ejb_config: EjbConfig,
-    /// Java service configuration.
+    /// Service-specific configuration parameters.
     pub service_config: ServiceConfig,
+    /// JVM-specific configuration parameters.
+    pub jvm_config: JvmConfig,
+    /// EJB runtime-specific configuration parameters.
+    pub runtime_config: RuntimeConfig,
 }
 
-/// EJB-specific configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EjbConfig {
-    /// Java service classpath. Must include all its dependencies.
+/// Service-specific configuration parameters.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ServiceConfig {
+    /// URI to the Java service artifact.
     ///
-    /// Includes java_bindings internal dependencies as well as user service dependencies.
-    pub class_path: String,
-    /// Path to java-bindings shared library.
-    ///
-    /// Should be path to core/rust/target/{debug, release}
-    pub lib_path: String,
-    /// Path to `log4j` configuration file.
-    pub log_config_path: String,
+    /// Provided by the user on the `finalize` configuration step.
+    pub artifact_uri: String,
 }
 
-/// JVM configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// JVM-specific configuration parameters.
+///
+/// These parameters are provided by the user on `run` configuration step.
+/// These parameters are private and can be unique for every node.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JvmConfig {
     /// Additional parameters for JVM.
     ///
@@ -54,19 +51,25 @@ pub struct JvmConfig {
     pub args_prepend: Vec<String>,
     /// Parameters that get appended to the rest.
     pub args_append: Vec<String>,
-    /// Socket address for JVM debugging
+    /// Socket address for JVM debugging.
     pub jvm_debug_socket: Option<String>,
 }
 
-/// Java service configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServiceConfig {
-    /// Fully qualified service module name.
-    ///
-    /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
-    pub module_name: String,
-    /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
+/// Runtime-specific configuration parameters.
+///
+/// These parameters are provided by the user on `run` configuration step.
+/// These parameters are private and can be unique for every node.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RuntimeConfig {
+    /// Path to `log4j` configuration file.
+    pub log_config_path: String,
+    /// A port of the HTTP server for Java services.
+    /// Must be distinct from the ports used by Exonum.
     pub port: i32,
+    /// EJB system classpath.
+    pub system_class_path: String,
+    /// EJB library path.
+    pub system_lib_path: Option<String>,
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.
@@ -120,10 +123,10 @@ mod tests {
 
     #[test]
     fn not_forbidden_user_parameter() {
-        let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
+        let validation_result = validate_and_convert("Duser.parameter=Djava.class.path");
         assert_eq!(
             validation_result,
-            Ok("-Duser.parameter=Djava.library.path".to_string())
+            Ok("-Duser.parameter=Djava.class.path".to_string())
         );
     }
 
