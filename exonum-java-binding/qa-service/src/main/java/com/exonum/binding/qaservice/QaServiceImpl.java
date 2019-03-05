@@ -25,6 +25,7 @@ import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -42,9 +43,11 @@ import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -52,6 +55,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -332,6 +336,38 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
       return blockchain.getActualConfiguration();
     });
+  }
+
+  @Override
+  @SuppressWarnings("ConstantConditions")  // Node is not null.
+  public Optional<ZonedDateTime> getTime() {
+    return node.withSnapshot(s -> {
+      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+      return toOptional(currentTime);
+    });
+  }
+
+  private <T> Optional<T> toOptional(EntryIndexProxy<T> entry) {
+    if (entry.isPresent()) {
+      return Optional.of(entry.get());
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  @SuppressWarnings("ConstantConditions")  // Node is not null.
+  public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
+    return node.withSnapshot(s -> {
+      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
+      return toMap(validatorsTimes);
+    });
+  }
+
+  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
+    return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.
