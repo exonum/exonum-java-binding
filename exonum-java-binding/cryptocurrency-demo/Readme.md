@@ -24,7 +24,10 @@ Be sure you installed necessary packages:
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
 - The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
-- [Stable Rust](https://rustup.rs/).
+- [Rust 1.32.0](https://rustup.rs/). To install a specific Rust version, you can use the following command:
+  ```bash
+  rustup install 1.32.0
+  ```
 
 #### Install and run
 

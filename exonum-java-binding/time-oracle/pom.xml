@@ -8,11 +8,11 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
 
-  <artifactId>exonum-java-binding-time-service</artifactId>
+  <artifactId>exonum-time-oracle</artifactId>
   <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Exonum Time Service</name>
+  <name>Exonum Time Oracle</name>
   <url>https://exonum.com/doc/version/latest/advanced/time/</url>
 
   <properties>
