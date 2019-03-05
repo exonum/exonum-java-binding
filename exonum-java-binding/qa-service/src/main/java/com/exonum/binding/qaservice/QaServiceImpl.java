@@ -340,11 +340,12 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
-  public Optional<ZonedDateTime> getTime() {
+  public Optional<TimeDTO> getTime() {
     return node.withSnapshot(s -> {
       TimeSchema timeOracle = TimeSchema.newInstance(s);
       EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
-      return toOptional(currentTime);
+      Optional<ZonedDateTime> optionalCurrentTime = toOptional(currentTime);
+      return optionalCurrentTime.map(TimeDTO::new);
     });
   }
 
@@ -358,7 +359,7 @@ final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
-  public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
+  public Map<PublicKey, TimeDTO> getValidatorsTimes() {
     return node.withSnapshot(s -> {
       TimeSchema timeOracle = TimeSchema.newInstance(s);
       MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
@@ -366,8 +367,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
     });
   }
 
-  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
-    return Maps.toMap(mapIndex.keys(), mapIndex::get);
+  private Map<PublicKey, TimeDTO> toMap(MapIndex<PublicKey, ZonedDateTime> mapIndex) {
+    return Maps.toMap(mapIndex.keys(), v -> new TimeDTO(mapIndex.get(v)));
   }
 
   @SuppressWarnings("ConstantConditions") // Node is not null.
