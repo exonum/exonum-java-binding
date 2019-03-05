@@ -47,7 +47,7 @@ compile 'com.exonum.client:exonum-light-client:0.1.0'
 
 ## Examples
 
-### Exonum Client initialization
+### Exonum Client Initialization
 The following example shows how to create the instance of exonum client
 which will work with Exonum node at `http://localhost:8080` address: 
 ```java
@@ -69,7 +69,7 @@ The next example shows how to use a custom configuration of the _http-client_:
 
 ```
 
-### Creating transaction message
+### Creating Transaction Message
 The following example shows how to create the transaction message.
 In addition please read about [transaction message structure][exonum-tx-message-builder].
 ```java
@@ -89,7 +89,7 @@ utility class which can be helpful for serialization.
 * `keys` is a key pair of private and public keys which is used for message signature.  
 * `ed25519` is the cryptographic function for signing.
  
-### Sending transaction
+### Sending Transaction
 To send the transaction just call a `submitTransaction`.  
 Make notice that it works in a blocking way i.e. your thread will be 
 blocked till the response is received.  
@@ -104,18 +104,19 @@ Also, you can take a look at the [integration test][send-tx-it]
 for the full example of how to create a transaction message and
 send it to Exonum node.
 
-### Transaction info
+### Transaction Info
 <!-- TODO: remove after release --> 
 _*Not available for Light Client v0.1_  
-The following method provides a possibility to get a transaction
-information, either committed or uncommitted, by the hash
-of the transaction:
+The following method provides a possibility to get information 
+on a transaction by its hash - status of the transaction, 
+details of the message containing the transaction and, 
+if available, transaction location and result:
 ```java
 Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
 ```
 * `txHash` is a hash of the transaction to search.
   
-## How to build
+## How to Build
 To build the client locally, clone the repository, and
 run next commands from the project's root 
 i.e. _exonum-java-binding_ directory:

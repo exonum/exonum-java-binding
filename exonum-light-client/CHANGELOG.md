@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-### Versions support
+### Versions Support
 - Exonum version, 0.11
 - Exonum Java Binding version, 0.5-SNAPSHOT
 
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 The first release of Exonum Java Light Client.
 
-### Versions support
+### Versions Support
 - Exonum version, 0.10
 - Exonum Java Binding version, 0.4
 
