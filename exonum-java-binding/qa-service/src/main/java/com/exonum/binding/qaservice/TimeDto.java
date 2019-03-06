@@ -42,8 +42,8 @@ final class TimeDto {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TimeDto timeDTO = (TimeDto) o;
-    return Objects.equal(time, timeDTO.time);
+    TimeDto other = (TimeDto) o;
+    return Objects.equal(this.time, other.time);
   }
 
   @Override

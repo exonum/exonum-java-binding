@@ -67,7 +67,7 @@ class JsonSerializerTest {
 
     String json = json().toJson(new Wrapper<>(value));
 
-    assertJsonValue(json, "2000-01-01 01:01:01 +0000");
+    assertJsonValue(json, "2000-01-01T01:01:01.000000001Z");
   }
 
   @Test

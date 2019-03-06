@@ -18,6 +18,7 @@
 package com.exonum.binding.common.serialization.json;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -39,8 +40,7 @@ import java.time.format.DateTimeFormatter;
 final class ZonedDateTimeJsonSerializer implements JsonSerializer<ZonedDateTime>,
     JsonDeserializer<ZonedDateTime> {
 
-  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
-      .ofPattern("yyyy-MM-dd HH:mm:ss Z");
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = ISO_ZONED_DATE_TIME;
 
   /**
    * Serialize ZonedDateTime to JsonElement.
