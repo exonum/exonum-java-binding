@@ -40,6 +40,7 @@ CORE_TXT="core/target/ejb-core-classpath.txt"
 QA_SERVICE_TXT="qa-service/target/qa-service-classpath.txt"
 EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/core/target/classes"
+#TODO: remove when service loader implemented https://jira.bf.local/browse/ECR-2953
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/qa-service/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
@@ -77,9 +78,6 @@ do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
     cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
-     --ejb-classpath $EJB_CLASSPATH \
-     --ejb-libpath $EJB_LIBPATH \
-     --ejb-log-config-path $log_config_path \
      --peer-address 127.0.0.1:$peer_port
 done
 
@@ -88,8 +86,7 @@ for i in $(seq 0 $((node_count - 1)))
 do
     ejb_port=$((6000 + i))
     cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
-     --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule' \
-     --ejb-port $ejb_port \
+     --ejb-artifact-uri qa_service.jar \
      --public-configs testnet/pub_*.toml
 done
 
@@ -102,6 +99,10 @@ do
 	cargo run -- run \
 	 -c testnet/node_$i.toml \
 	 -d testnet/db/$i \
+     --ejb-classpath $EJB_CLASSPATH \
+     --ejb-libpath $EJB_LIBPATH \
+     --ejb-port $ejb_port \
+     --ejb-log-config-path $log_config_path \
 	 --public-api-address 0.0.0.0:${port} \
 	 --private-api-address 0.0.0.0:${private_port} &
 
