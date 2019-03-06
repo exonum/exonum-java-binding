@@ -27,10 +27,10 @@ abstract class LoadedServiceDefinition {
    * The supplier will always return the same module corresponding to this service, but not
    * necessarily the same instance.
    */
-  public abstract Supplier<? extends ServiceModule> getModuleSupplier();
+  public abstract Supplier<ServiceModule> getModuleSupplier();
 
   static LoadedServiceDefinition newInstance(ServiceId serviceId,
-      Supplier<? extends ServiceModule> serviceModuleSupplier) {
+      Supplier<ServiceModule> serviceModuleSupplier) {
     return new AutoValue_LoadedServiceDefinition(serviceId, serviceModuleSupplier);
   }
 }

@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,8 +66,9 @@ class Pf4jServiceLoaderTest {
         .thenReturn(pluginId);
     when(pluginManager.startPlugin(pluginId))
         .thenReturn(PluginState.STARTED);
+    Class<TestModule1> moduleType = TestModule1.class;
     when(pluginManager.getExtensionClasses(ServiceModule.class, pluginId))
-        .thenReturn(modules(TestModule1.class));
+        .thenReturn(modules(moduleType));
 
     // Try to load the service
     LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
@@ -78,7 +80,8 @@ class Pf4jServiceLoaderTest {
     ServiceId serviceId = serviceDefinition.getId();
     ServiceId expectedId = ServiceId.parseFrom(pluginId);
     assertThat(serviceId).isEqualTo(expectedId);
-    // todo: check instantiation if we can?
+    Supplier<ServiceModule> moduleSupplier = serviceDefinition.getModuleSupplier();
+    assertThat(moduleSupplier.get()).isInstanceOf(moduleType);
 
     // Check the definition is accessible
     assertThat(serviceLoader.findService(serviceId)).hasValue(serviceDefinition);
