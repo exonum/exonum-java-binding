@@ -44,8 +44,7 @@ pub const EJB_CONFIG_SECTION_NAME: &str = "ejb";
 
 /// Encapsulates processing of extensions of the `finalize` command. At this step we gather some of
 /// the required parameters for private configuration. Also, at this step the node config
-/// creation happens, so we store there our newly created private configuration as well as the
-/// public EJB configuration created at `generate-template` step.
+/// creation happens, so we store our newly created private configuration there.
 pub struct Finalize;
 
 impl CommandExtension for Finalize {
