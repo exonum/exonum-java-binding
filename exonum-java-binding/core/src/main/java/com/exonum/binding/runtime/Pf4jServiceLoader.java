@@ -110,7 +110,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
     ServiceId serviceId = extractServiceId(pluginId);
     Supplier<ServiceModule> serviceModuleSupplier = findServiceModuleSupplier(pluginId);
     LoadedServiceDefinition serviceDefinition =
-        DefaultLoadedServiceDefinition.newInstance(serviceId, serviceModuleSupplier);
+        LoadedServiceDefinition.newInstance(serviceId, serviceModuleSupplier);
 
     assert !loadedServices.containsKey(serviceId);
     loadedServices.put(serviceId, serviceDefinition);
