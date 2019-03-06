@@ -54,6 +54,7 @@ interface ServiceLoader {
    *
    * @param serviceId the identifier of the loaded service
    * @throws IllegalStateException if the service identified by the given id is not currently loaded
+   *     TODO: Shall we throw or make a no-op?
    */
   void unloadService(ServiceId serviceId);
 }

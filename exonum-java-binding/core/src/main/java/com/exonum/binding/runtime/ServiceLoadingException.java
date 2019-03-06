@@ -25,4 +25,8 @@ class ServiceLoadingException extends Exception {
   ServiceLoadingException(Throwable cause) {
     super(cause);
   }
+
+  ServiceLoadingException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

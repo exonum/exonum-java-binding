@@ -32,7 +32,8 @@ import org.pf4j.ExtensionPoint;
  * <p>A service module implementation must be marked with {@link org.pf4j.Extension} annotation.
  *
  * <p>Implementations shall generally extend {@link AbstractServiceModule}.
+ * todo: Actually, we can easily allow several Guice modules per service for complex services.
+ *   However, is it needed?
  */
 public interface ServiceModule extends Module, ExtensionPoint {
-
 }

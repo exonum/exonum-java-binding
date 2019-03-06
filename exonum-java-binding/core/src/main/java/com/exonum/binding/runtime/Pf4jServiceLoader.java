@@ -20,21 +20,25 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
 /**
  * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in
- * a certain format ('groupId:artifactId:version'); have TODO:
+ * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
+ * an extension.
  *
  * @see <a href="https://pf4j.org/doc/getting-started.html">PF4J docs</a>
  */
@@ -57,36 +61,20 @@ final class Pf4jServiceLoader implements ServiceLoader {
   /**
    * Loads a service as PF4J artifact.
    *
-   * <p>Verification steps involve metadata validation, starting the plugin and
-   * TODO: do we instantiate any extensions? Or access extra metadata?
+   * <p>Verification steps involve metadata validation, starting the plugin and checking it provides
+   * a single ServiceModule as an extension.
    */
   @Override
-  public /* todo: specialize? */ LoadedServiceDefinition loadService(URI artifactLocation)
+  public LoadedServiceDefinition loadService(URI artifactLocation)
       throws ServiceLoadingException {
-    Path artifactPath = Paths.get(artifactLocation);
-    // fixme: prevent loading of duplicates at this point. The plugin manager might load duplicate
-    //  plugins if they have different paths. This problem is resolved
-    //  in https://github.com/pf4j/pf4j/pull/287 , update PF4J when the fix is released.
-    String pluginId = pluginManager.loadPlugin(artifactPath);
-    if (pluginId == null) {
-      throw new ServiceLoadingException("Failed to load the plugin at "
-          + artifactLocation);
-    }
-
+    // Load a plugin
+    String pluginId = loadPlugin(artifactLocation);
     try {
-      PluginState pluginState = pluginManager.startPlugin(pluginId);
-      if (pluginState != PluginState.STARTED) {
-        throw new ServiceLoadingException(
-            String.format("Failed to start the plugin %s, its state=%s", pluginId, pluginState));
-      }
+      // Start the plugin
+      startPlugin(pluginId);
 
-      ServiceId serviceId = extractServiceId(pluginId);
-      LoadedServiceDefinition serviceDefinition =
-          DefaultLoadedServiceDefinition.newInstance(serviceId);
-
-      loadedServices.put(serviceId, serviceDefinition);
-
-      return serviceDefinition;
+      // Load the service definition
+      return loadDefinition(pluginId);
     } catch (IllegalArgumentException e) {
       pluginManager.unloadPlugin(pluginId);
       throw new ServiceLoadingException(e);
@@ -96,13 +84,64 @@ final class Pf4jServiceLoader implements ServiceLoader {
     }
   }
 
+  private String loadPlugin(URI artifactLocation) throws ServiceLoadingException {
+    Path artifactPath = Paths.get(artifactLocation);
+    // fixme: prevent loading of duplicates at this point. The plugin manager might load duplicate
+    //  plugins if they have different paths. This problem is resolved
+    //  in https://github.com/pf4j/pf4j/pull/287 , update PF4J when the fix is released.
+    String pluginId = pluginManager.loadPlugin(artifactPath);
+    if (pluginId == null) {
+      throw new ServiceLoadingException("Failed to load the plugin from "
+          + artifactLocation);
+    }
+    return pluginId;
+  }
+
+  private void startPlugin(String pluginId) throws ServiceLoadingException {
+    PluginState pluginState = pluginManager.startPlugin(pluginId);
+    if (pluginState != PluginState.STARTED) {
+      throw new ServiceLoadingException(
+          String.format("Failed to start the plugin %s, its state=%s", pluginId, pluginState));
+    }
+  }
+
+  /** Loads the service definition from the already loaded plugin with the given id. */
+  private LoadedServiceDefinition loadDefinition(String pluginId) throws ServiceLoadingException {
+    ServiceId serviceId = extractServiceId(pluginId);
+    Supplier<ServiceModule> serviceModuleSupplier = findServiceModuleSupplier(pluginId);
+    LoadedServiceDefinition serviceDefinition =
+        DefaultLoadedServiceDefinition.newInstance(serviceId, serviceModuleSupplier);
+
+    assert !loadedServices.containsKey(serviceId);
+    loadedServices.put(serviceId, serviceDefinition);
+    return serviceDefinition;
+  }
+
   private static ServiceId extractServiceId(String pluginId) throws ServiceLoadingException {
     try {
       return ServiceId.parseFrom(pluginId);
     } catch (IllegalArgumentException e) {
       throw new ServiceLoadingException(
           String.format("Invalid plugin id (%s) is specified in service artifact metadata, "
-                  + "must be in format 'groupId:artifactId:version'", pluginId));
+              + "must be in format 'groupId:artifactId:version'", pluginId));
+    }
+  }
+
+  private Supplier<ServiceModule> findServiceModuleSupplier(String pluginId)
+      throws ServiceLoadingException {
+    List<Class<ServiceModule>> extensionClasses = pluginManager
+        .getExtensionClasses(ServiceModule.class, pluginId);
+    checkArgument(extensionClasses.size() == 1,
+        "A plugin (%s) must provide exactly one service module as an extension, "
+            + "but %s found: %s", pluginId, extensionClasses.size(), extensionClasses);
+
+    Class<ServiceModule> serviceModuleClass = extensionClasses.get(0);
+    try {
+      return new ReflectiveModuleSupplier(serviceModuleClass);
+    } catch (NoSuchMethodException | IllegalAccessException e) {
+      String message = String.format("Cannot load a plugin (%s): module (%s) is not valid",
+          pluginId, serviceModuleClass);
+      throw new ServiceLoadingException(message, e);
     }
   }
 
