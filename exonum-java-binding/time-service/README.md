@@ -27,8 +27,9 @@ See more information on built-in services [here][built-in-services].
 
 Below is an example of a service method that uses time oracle to return the consolidated time. Note
 that at the time when a new blockchain is launched, the consolidated time is unknown until the
-transactions from at least two thirds of validator nodes are processed. Before that, the result
-will not contain a value. Validator nodes send the transactions after the commit of each block.
+transactions containing time values from at least two thirds of validator nodes are processed.
+Before that, the method will return a result with an empty value. Validator nodes send the
+transactions after the commit of each block.
 
 ```java
 private final Node node;
