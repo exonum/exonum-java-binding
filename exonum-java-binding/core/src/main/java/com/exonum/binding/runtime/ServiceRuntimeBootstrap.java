@@ -20,11 +20,15 @@ import com.exonum.binding.util.LibraryLoader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Stage;
 
 /**
  * A bootstrap loader of the service runtime.
  */
 final class ServiceRuntimeBootstrap {
+
+  // TODO: Shall it be configurable (Stage.DEV in tests, Stage.PRODUCTION in prod)?
+  private static final Stage APP_STAGE = Stage.PRODUCTION;
 
   /**
    * Bootstraps a Java service runtime.
@@ -38,7 +42,8 @@ final class ServiceRuntimeBootstrap {
 
     // Create the framework injector
     Module frameworkModule = new FrameworkModule(serverPort);
-    Injector frameworkInjector = Guice.createInjector(frameworkModule);
+    Injector frameworkInjector = Guice.createInjector(APP_STAGE, frameworkModule);
+
     return frameworkInjector.getInstance(ServiceRuntime.class);
   }
 
