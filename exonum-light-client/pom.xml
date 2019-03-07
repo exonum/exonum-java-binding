@@ -76,7 +76,6 @@
     <junit.jupiter.version>5.4.0</junit.jupiter.version>
     <mockito.version>2.24.0</mockito.version>
     <hamcrest.version>2.1</hamcrest.version>
-    <jsonpath.version>2.4.0</jsonpath.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
