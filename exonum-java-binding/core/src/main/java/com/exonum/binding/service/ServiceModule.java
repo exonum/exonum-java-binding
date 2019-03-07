@@ -25,15 +25,15 @@ import org.pf4j.ExtensionPoint;
  *
  * <p>An implementation must at least configure the following bindings:
  * <ul>
- *   <li>{@link Service} in {@linkplain com.google.inject.Singleton singleton scope}.
- *   TODO: Is this scope *required* now?
+ *   <li>{@link Service}.
  * </ul>
  *
  * <p>A service module implementation must be marked with {@link org.pf4j.Extension} annotation.
  *
  * <p>Implementations shall generally extend {@link AbstractServiceModule}.
- * todo: Actually, we can easily allow several Guice modules per service for complex services.
- *   However, is it needed?
+ *
+ * <p>Currently, only a single module per service is supported; if you service needs several&nbsp;—
+ * please let us know.
  */
 public interface ServiceModule extends Module, ExtensionPoint {
 }
