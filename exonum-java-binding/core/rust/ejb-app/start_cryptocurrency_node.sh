@@ -41,7 +41,7 @@ CORE_TXT="core/target/ejb-core-classpath.txt"
 CRYPTOCURRENCY_TXT="cryptocurrency-demo/target/cryptocurrency-classpath.txt"
 EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/core/target/classes"
-#TODO: remove when service loader implemented https://jira.bf.local/browse/ECR-2953
+#TODO: remove when service loader implemented (ECR-2953)
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/cryptocurrency-demo/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
@@ -67,7 +67,7 @@ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.to
 
 header "FINALIZE"
 cargo run -- finalize testnet/sec.toml testnet/node.toml \
- --ejb-artifact-uri cryptocurrency_service.jar \
+ --ejb-artifact-uri 'file:///artifacts/cryptocurrency_service.jar' \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"

@@ -40,7 +40,7 @@ CORE_TXT="core/target/ejb-core-classpath.txt"
 QA_SERVICE_TXT="qa-service/target/qa-service-classpath.txt"
 EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/core/target/classes"
-#TODO: remove when service loader implemented https://jira.bf.local/browse/ECR-2953
+#TODO: remove when service loader implemented (ECR-2953)
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/qa-service/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
@@ -86,7 +86,7 @@ for i in $(seq 0 $((node_count - 1)))
 do
     ejb_port=$((6000 + i))
     cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
-     --ejb-artifact-uri qa_service.jar \
+     --ejb-artifact-uri file:///artifacts/qa_service.jar \
      --public-configs testnet/pub_*.toml
 done
 
