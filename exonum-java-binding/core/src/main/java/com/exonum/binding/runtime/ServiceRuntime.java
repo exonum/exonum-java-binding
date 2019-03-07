@@ -78,6 +78,12 @@ final class ServiceRuntime {
    */
   @SuppressWarnings("unused")
   String loadArtifact(String serviceArtifactUri) throws URISyntaxException {
+    // Temporary code for testing purposes: remove
+    if (serviceArtifactUri.equals("file:///artifacts/qa_service.jar")) {
+      return "com.exonum.qa_service:1.0.0";
+    } else if (serviceArtifactUri.equals("file:///artifacts/cryptocurrency_service.jar")) {
+      return "com.exonum.cryptocurrency_service:1.0.0";
+    }
     return "com.acme:any-service:1.0.0";
   }
 
@@ -92,9 +98,18 @@ final class ServiceRuntime {
    */
   UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId) {
     // Temporary code for testing purposes: remove
-    Module serviceModule = createUserModule(artifactId.equals("artifactId/not-relevant")
-            ? "com.exonum.binding.runtime.TestServiceModule" :
-            "com.exonum.binding.fakes.services.service.TestServiceModule");
+    String module;
+    if (artifactId.equals("com.exonum.qa_service:1.0.0")) {
+      module = "com.exonum.binding.qaservice.ServiceModule";
+    } else if (artifactId.equals("com.exonum.qa_service:1.0.0")) {
+      module = "com.exonum.binding.cryptocurrency.ServiceModule";
+    } else if (artifactId.equals("artifactId/not-relevant")) {
+      module = "com.exonum.binding.runtime.TestServiceModule";
+    } else {
+      module = "com.exonum.binding.fakes.services.service.TestServiceModule";
+    }
+
+    Module serviceModule = createUserModule(module);
     Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
     return serviceInjector.getInstance(UserServiceAdapter.class);
   }
