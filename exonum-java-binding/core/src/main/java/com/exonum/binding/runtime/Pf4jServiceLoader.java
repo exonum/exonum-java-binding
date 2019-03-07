@@ -153,12 +153,12 @@ final class Pf4jServiceLoader implements ServiceLoader {
     String message;
     if (numServiceModules == 0) {
       message = String.format("A plugin (%s) must provide exactly one service module as "
-          + "an extension, but no modules found.\nCheck that your %s implementation "
+          + "an extension, but no modules found.%nCheck that your %s implementation "
               + "is annotated with @%s",
           pluginId, ServiceModule.class.getSimpleName(), Extension.class.getSimpleName());
     } else {
       message = String.format("A plugin (%s) must provide exactly one service module as "
-              + "an extension, but %d modules found:\n%s.\nMultiple modules are not currently "
+              + "an extension, but %d modules found:%n%s.%nMultiple modules are not currently "
               + "supported, but please let us know if you need them.",
           pluginId, numServiceModules, extensions);
     }
