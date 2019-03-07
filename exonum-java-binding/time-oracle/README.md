@@ -34,9 +34,9 @@ transactions after the commit of each block.
 ```java
   public Optional<ZonedDateTime> getTime(View view) {
     TimeSchema timeSchema = TimeSchema.newInstance(view);
-    EntryIndexProxy<ZonedDateTime> time = timeSchema.getTime();
-    if (time.isPresent()) {
-      return Optional.of(time.get());
+    EntryIndexProxy<ZonedDateTime> currentTime = timeSchema.getTime();
+    if (currentTime.isPresent()) {
+      return Optional.of(currentTime.get());
     } else {
       return Optional.empty();
     }
