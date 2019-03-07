@@ -78,12 +78,6 @@ final class ServiceRuntime {
    */
   @SuppressWarnings("unused")
   String loadArtifact(String serviceArtifactUri) throws URISyntaxException {
-    // Temporary code for testing purposes: remove
-    if (serviceArtifactUri.equals("file:///artifacts/qa_service.jar")) {
-      return "com.exonum.qa_service:1.0.0";
-    } else if (serviceArtifactUri.equals("file:///artifacts/cryptocurrency_service.jar")) {
-      return "com.exonum.cryptocurrency_service:1.0.0";
-    }
     return "com.acme:any-service:1.0.0";
   }
 
@@ -91,31 +85,18 @@ final class ServiceRuntime {
    * Creates a new service instance of the given type.
    *
    * @param artifactId a unique identifier of the loaded artifact
-   *
+   * @param moduleName *temp parameter* a fully-qualified class name of the service module to
+   *     instantiate
    * @return a new service
    * @throws IllegalArgumentException if the artifactId is unknown
    * @throws RuntimeException if it failed to instantiate the service
    */
-  UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId) {
-    // Temporary code for testing purposes: remove
-    String module;
-    if (artifactId.equals("com.exonum.qa_service:1.0.0")) {
-      module = "com.exonum.binding.qaservice.ServiceModule";
-    } else if (artifactId.equals("com.exonum.qa_service:1.0.0")) {
-      module = "com.exonum.binding.cryptocurrency.ServiceModule";
-    } else if (artifactId.equals("artifactId/not-relevant")) {
-      module = "com.exonum.binding.runtime.TestServiceModule";
-    } else {
-      module = "com.exonum.binding.fakes.services.service.TestServiceModule";
-    }
-
-    Module serviceModule = createUserModule(module);
+  UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId,
+      /* Temporary arg: remove */ String moduleName) {
+    Module serviceModule = createUserModule(moduleName);
     Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
     return serviceInjector.getInstance(UserServiceAdapter.class);
   }
-
-
-
 
   /**
    * Creates a user module that configures the bindings of that module.

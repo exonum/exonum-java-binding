@@ -75,7 +75,7 @@ class ServiceRuntimeIntegrationTest {
     void createService() {
       String serviceModuleName = TestServiceModule.class.getName();
       UserServiceAdapter service = serviceRuntime
-          .createService("artifactId/not-relevant");
+          .createService("artifactId/not-relevant", serviceModuleName);
 
       assertNotNull(service, "service");
       assertThat(service.getId()).isEqualTo(ID);
