@@ -52,4 +52,4 @@ See [LICENSE](../../LICENSE) for details.
 
 [exonum-time]: https://exonum.com/doc/version/0.10/advanced/time/
 [built-in-services]: https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services
-[db-view]: https://exonum.com/doc/api/java-binding-core/latest/com/exonum/binding/storage/database/View.html
+[db-view]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/storage/database/View.html
