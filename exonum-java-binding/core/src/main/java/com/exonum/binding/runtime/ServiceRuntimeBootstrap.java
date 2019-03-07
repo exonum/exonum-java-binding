@@ -37,9 +37,9 @@ final class ServiceRuntimeBootstrap {
     LibraryLoader.load();
 
     // Create the framework injector
-    Module frameworkModule = new FrameworkModule();
+    Module frameworkModule = new FrameworkModule(serverPort);
     Injector frameworkInjector = Guice.createInjector(frameworkModule);
-    return new ServiceRuntime(frameworkInjector, serverPort);
+    return frameworkInjector.getInstance(ServiceRuntime.class);
   }
 
   private ServiceRuntimeBootstrap() {}

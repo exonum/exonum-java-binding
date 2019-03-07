@@ -16,6 +16,8 @@
 
 package com.exonum.binding.runtime;
 
+import static com.exonum.binding.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
+import static com.exonum.binding.runtime.ServiceRuntimeIntegrationTest.PORT;
 import static com.exonum.binding.runtime.TestService.ID;
 import static com.exonum.binding.runtime.TestService.NAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +33,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,7 +46,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ServiceRuntimeIntegrationTest {
 
-  private static final int PORT = 25000;
+  static final int PORT = 25000;
 
   @Nested
   class WithTestFrameworkModule {
@@ -54,7 +57,7 @@ class ServiceRuntimeIntegrationTest {
     @BeforeEach
     void setUp() {
       rootInjector = Guice.createInjector(new TestFrameworkModule());
-      serviceRuntime = new ServiceRuntime(rootInjector, PORT);
+      serviceRuntime = rootInjector.getInstance(ServiceRuntime.class);
     }
 
     @Test
@@ -90,7 +93,8 @@ class ServiceRuntimeIntegrationTest {
         bind(Server.class).toProvider(() -> mock(Server.class));
       }
     });
-    assertThrows(IllegalArgumentException.class, () -> new ServiceRuntime(injector, PORT));
+    Server s1 = mock(Server.class);
+    assertThrows(IllegalArgumentException.class, () -> new ServiceRuntime(injector, s1, PORT));
   }
 }
 
@@ -100,6 +104,8 @@ class TestFrameworkModule extends AbstractModule {
   protected void configure() {
     bindToSingletonMock(Server.class);
     bindToSingletonMock(ViewFactory.class);
+    bind(Integer.class).annotatedWith(Names.named(SERVICE_WEB_SERVER_PORT))
+        .toInstance(PORT);
   }
 
   private <T> void bindToSingletonMock(Class<T> type) {

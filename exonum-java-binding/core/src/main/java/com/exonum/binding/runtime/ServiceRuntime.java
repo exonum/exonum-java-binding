@@ -16,13 +16,17 @@
 
 package com.exonum.binding.runtime;
 
+import static com.exonum.binding.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -33,6 +37,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * <p>This class is thread-safe and does not support client-side locking.
  */
+@Singleton
 final class ServiceRuntime {
 
   private final Injector frameworkInjector;
@@ -42,19 +47,21 @@ final class ServiceRuntime {
    *
    * @param frameworkInjector the injector that has been configured with the Exonum framework
    *     bindings. It serves as a parent for service injectors
+//   * @param serviceLoader the loader of service artifacts
+   * @param server a web server providing transport to Java services
    * @param serverPort a port for the web server providing transport to Java services
    */
-  ServiceRuntime(Injector frameworkInjector, int serverPort) {
+  @Inject
+  ServiceRuntime(Injector frameworkInjector, Server server,
+      @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
     this.frameworkInjector = checkNotNull(frameworkInjector);
 
     // Start the server
-    checkServerIsSingleton(frameworkInjector);
-    Server server = frameworkInjector.getInstance(Server.class);
+    checkServerIsSingleton(server, frameworkInjector);
     server.start(serverPort);
   }
 
-  private void checkServerIsSingleton(Injector frameworkInjector) {
-    Server s1 = frameworkInjector.getInstance(Server.class);
+  private void checkServerIsSingleton(Server s1, Injector frameworkInjector) {
     Server s2 = frameworkInjector.getInstance(Server.class);
     checkArgument(s1.equals(s2), "%s is not configured as singleton: s1=%s, s2=%s", Server.class,
         s1, s2);

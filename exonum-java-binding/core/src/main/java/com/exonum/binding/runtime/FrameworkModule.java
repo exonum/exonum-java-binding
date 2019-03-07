@@ -21,15 +21,26 @@ import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 
 /**
  * A framework module which configures the system-wide bindings.
  */
 final class FrameworkModule extends AbstractModule {
 
+  static final String SERVICE_WEB_SERVER_PORT = "Service web server port";
+
+  private final int serviceWebServerPort;
+
+  FrameworkModule(int serviceWebServerPort) {
+    this.serviceWebServerPort = serviceWebServerPort;
+  }
+
   @Override
   protected void configure() {
     bind(Server.class).toProvider(Server::create).in(Singleton.class);
+    bind(Integer.class).annotatedWith(Names.named(SERVICE_WEB_SERVER_PORT))
+        .toInstance(serviceWebServerPort);
     bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
     // todo: Consider providing an implementation of a Node —
     //   requires changing its contract.
