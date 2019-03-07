@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Supplier;
+import org.pf4j.Extension;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
@@ -77,7 +78,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
       return loadDefinition(pluginId);
     } catch (IllegalArgumentException e) {
       pluginManager.unloadPlugin(pluginId);
-      throw new ServiceLoadingException(e);
+      throw new ServiceLoadingException(String.format("Failed to load plugin %s:", pluginId), e);
     } catch (Exception e) {
       pluginManager.unloadPlugin(pluginId);
       throw e;
@@ -131,9 +132,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
       throws ServiceLoadingException {
     List<Class<ServiceModule>> extensionClasses = pluginManager
         .getExtensionClasses(ServiceModule.class, pluginId);
-    checkArgument(extensionClasses.size() == 1,
-        "A plugin (%s) must provide exactly one service module as an extension, "
-            + "but %s found: %s", pluginId, extensionClasses.size(), extensionClasses);
+    checkServiceModules(pluginId, extensionClasses);
 
     Class<ServiceModule> serviceModuleClass = extensionClasses.get(0);
     try {
@@ -143,6 +142,27 @@ final class Pf4jServiceLoader implements ServiceLoader {
           pluginId, serviceModuleClass);
       throw new ServiceLoadingException(message, e);
     }
+  }
+
+  private void checkServiceModules(String pluginId, List<Class<ServiceModule>> extensions)
+      throws ServiceLoadingException {
+    int numServiceModules = extensions.size();
+    if (numServiceModules == 1) {
+      return;
+    }
+    String message;
+    if (numServiceModules == 0) {
+      message = String.format("A plugin (%s) must provide exactly one service module as "
+          + "an extension, but no modules found.\nCheck that your %s implementation "
+              + "is annotated with @%s",
+          pluginId, ServiceModule.class.getSimpleName(), Extension.class.getSimpleName());
+    } else {
+      message = String.format("A plugin (%s) must provide exactly one service module as "
+              + "an extension, but %d modules found:\n%s.\nMultiple modules are not currently "
+              + "supported, but please let us know if you need them.",
+          pluginId, numServiceModules, extensions);
+    }
+    throw new ServiceLoadingException(message);
   }
 
   @Override

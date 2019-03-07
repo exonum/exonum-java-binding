@@ -184,7 +184,7 @@ class Pf4jServiceLoaderTest {
     return ImmutableList.of(
         arguments(emptyList(), "must provide exactly one service module as an extension"),
         arguments(modules(TestModule1.class, TestModule2.class),
-            "must provide exactly one service module as an extension"),
+            "must provide exactly one service module as an extension.+2 modules found:"),
         arguments(modules(BadModuleInaccessibleCtor.class),
             "Cannot load a plugin.+module.+not valid")
     );
