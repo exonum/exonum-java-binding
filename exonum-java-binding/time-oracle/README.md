@@ -32,7 +32,7 @@ Before that, the method will return a result with an empty value. Validator node
 transactions after the commit of each block.
 
 ```java
-  public static Optional<ZonedDateTime> getTime(View view) {
+  public Optional<ZonedDateTime> getTime(View view) {
     TimeSchema timeSchema = TimeSchema.newInstance(view);
     EntryIndexProxy<ZonedDateTime> time = timeSchema.getTime();
     if (time.isPresent()) {
