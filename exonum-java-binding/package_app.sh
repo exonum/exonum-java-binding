@@ -7,6 +7,8 @@
 set -eu -o pipefail
 
 function build-ejb-app-macos() {
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
+    echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
     mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am \
       -DskipTests \
       -DdoNotBuildRustLib \
@@ -14,6 +16,8 @@ function build-ejb-app-macos() {
 }
 
 function build-ejb-app-linux() {
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
+    echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
     mvn package --activate-profiles app-packaging -pl :exonum-java-binding-core -am \
       -DskipTests \
       -DdoNotBuildRustLib \
