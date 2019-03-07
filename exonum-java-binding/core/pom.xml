@@ -459,25 +459,19 @@
       <id>app-packaging</id>
       <build>
         <plugins>
-
-          <!--Build EJB App-->
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <configuration>
-              <executable>cargo</executable>
-              <workingDirectory>${project.basedir}/rust/</workingDirectory>
-            </configuration>
             <executions>
               <execution>
-                <id>build-ejb-app</id>
-                <phase>prepare-package</phase>
+                <id>build-rust-lib</id>
+                <phase>compile</phase>
                 <configuration>
+                  <executable>cargo</executable>
+                  <workingDirectory>${project.basedir}/rust/</workingDirectory>
                   <arguments>
                     <argument>+${rust.compiler.version}</argument>
                     <argument>build</argument>
-                    <argument>--package</argument>
-                    <argument>ejb-app</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>
