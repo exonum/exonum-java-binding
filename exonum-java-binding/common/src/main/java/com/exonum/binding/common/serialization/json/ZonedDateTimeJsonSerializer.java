@@ -33,8 +33,8 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * {@link ZonedDateTime} string serializer. Used to serialize/deserialize ZonedDateTime values
- * from/to strings in the ISO-like date-time format with offset and zone, such as
- * '2011-12-03T10:15:30+01:00[Europe/Paris]' format {@link ISO_ZONED_DATE_TIME}.
+ * from/to strings in the {@link ISO_ZONED_DATE_TIME} date-time format with offset and zone, such
+ * as '2011-12-03T10:15:30+01:00[Europe/Paris]'.
  *
  * <p>All method arguments are non-null by default.
  */
