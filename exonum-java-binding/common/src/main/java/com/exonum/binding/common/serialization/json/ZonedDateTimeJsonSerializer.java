@@ -33,7 +33,8 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * {@link ZonedDateTime} string serializer. Used to serialize/deserialize ZonedDateTime values
- * from/to strings in 'yyyy-MM-dd HH:mm:ss Z' format.
+ * from/to strings in the ISO-like date-time format with offset and zone, such as
+ * '2011-12-03T10:15:30+01:00[Europe/Paris]' format {@link ISO_ZONED_DATE_TIME}.
  *
  * <p>All method arguments are non-null by default.
  */
@@ -42,11 +43,6 @@ final class ZonedDateTimeJsonSerializer implements JsonSerializer<ZonedDateTime>
 
   private static final DateTimeFormatter DATE_TIME_FORMATTER = ISO_ZONED_DATE_TIME;
 
-  /**
-   * Serialize ZonedDateTime to JsonElement.
-   *
-   * @throws NullPointerException in case of src is null
-   */
   @Override
   public JsonElement serialize(ZonedDateTime src, Type typeOfSrc,
       JsonSerializationContext context) {
@@ -55,11 +51,6 @@ final class ZonedDateTimeJsonSerializer implements JsonSerializer<ZonedDateTime>
     return new JsonPrimitive(DATE_TIME_FORMATTER.format(src));
   }
 
-  /**
-   * Deserialize ZonedDateTime from JsonElement.
-   *
-   * @throws NullPointerException in case of json element is null
-   */
   @Override
   public ZonedDateTime deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
