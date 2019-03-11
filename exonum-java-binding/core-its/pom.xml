@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>exonum-java-binding-parent</artifactId>
+    <groupId>com.exonum.binding</groupId>
+    <version>0.5-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>core-its</artifactId>
+
+  <properties>
+    <!--fixme: kind of fragile configuration -->
+    <fakeServicePath>${project.parent.basedir}/fake-service/target/fake-service-${project.version}-artifact.jar</fakeServicePath>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${jacoco.args}
+            ${java.vm.assertionFlag}
+            -Dexonum.fakeServicePath=${fakeServicePath}
+          </argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>fake-service</artifactId>
+      <version>${project.version}</version>
+      <!-- Depend on "POM" just to ensure fake-service is built before core-its. It won't appear
+           on the classpath as intended. -->
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+</project>

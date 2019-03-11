@@ -61,6 +61,7 @@
     <module>testing</module>
     <module>common</module>
     <module>core</module>
+    <module>core-its</module>
     <module>fakes</module>
     <module>fake-service</module>
     <module>qa-service</module>
