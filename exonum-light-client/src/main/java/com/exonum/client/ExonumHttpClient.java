@@ -124,7 +124,7 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public BlockResponse getBlockByHeight(long height) {
-    checkArgument(0 <= height, "Height can't be negative, but was {}", height);
+    checkArgument(0 <= height, "Height can't be negative, but was %s", height);
     HttpUrl url = urlBuilder()
         .encodedPath(BLOCK)
         .addQueryParameter("height", String.valueOf(height))
@@ -138,14 +138,14 @@ class ExonumHttpClient implements ExonumClient {
   public BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax,
       boolean withTime) {
     checkArgument(0 < count,
-        "Requested number of blocks should be positive number but was {}", count);
+        "Requested number of blocks should be positive number but was %s", count);
     return doGetBlocks(count, skipEmpty, heightMax, withTime);
   }
 
   @Override
   public BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime) {
     checkArgument(0 < count,
-        "Requested number of blocks should be positive number but was {}", count);
+        "Requested number of blocks should be positive number but was %s", count);
     return doGetBlocks(count, skipEmpty, null, withTime);
   }
 
@@ -171,10 +171,10 @@ class ExonumHttpClient implements ExonumClient {
   private BlocksResponse doGetBlocks(int count, boolean skipEmpty, Long heightMax,
       boolean withTime) {
     checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
-        "Requested number of blocks was {} but maximum allowed is {}",
+        "Requested number of blocks was %s but maximum allowed is %s",
         count, MAX_BLOCKS_PER_REQUEST);
     checkArgument(heightMax == null || 0 <= heightMax,
-        "Blockhain height can't be negative but was {}", heightMax);
+        "Blockhain height can't be negative but was %s", heightMax);
 
     Map<String, String> query = new HashMap<>();
     query.put("count", String.valueOf(count));

@@ -82,7 +82,7 @@ final class ExplorerApiHelper {
     if (times != null) {
       int timesSize = times.size();
       checkState(blocksSize == timesSize,
-          "Blocks size {} doesn't equal to commit times size {}", blocksSize, timesSize);
+          "Blocks size %s doesn't equal to commit times size %s", blocksSize, timesSize);
     }
 
     List<Block> timeBlocks = new ArrayList<>(blocksSize);

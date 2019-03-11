@@ -11,7 +11,7 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
 ```xml
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-time-service</artifactId>
+      <artifactId>exonum-time-oracle</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 ```
@@ -38,7 +38,11 @@ public Optional<ZonedDateTime> getTime() {
   return node.withSnapshot(s -> {
     TimeSchema timeOracle = TimeSchema.newInstance(s);
     EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
-    return toOptional(currentTime);
+    if (currentTime.isPresent()) {
+      return Optional.of(currentTime.get());
+    } else {
+      return Optional.empty();
+    }
   });
 }
 ```
