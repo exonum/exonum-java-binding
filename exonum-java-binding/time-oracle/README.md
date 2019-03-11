@@ -32,17 +32,20 @@ Before that, the method will return a result with an empty value. Validator node
 transactions after the commit of each block.
 
 ```java
-  public Optional<ZonedDateTime> getTime(View view) {
-    TimeSchema timeSchema = TimeSchema.newInstance(view);
-    EntryIndexProxy<ZonedDateTime> currentTime = timeSchema.getTime();
+private final Node node;
+
+public Optional<ZonedDateTime> getTime() {
+  return node.withSnapshot(s -> {
+    TimeSchema timeOracle = TimeSchema.newInstance(s);
+    EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
     if (currentTime.isPresent()) {
       return Optional.of(currentTime.get());
     } else {
       return Optional.empty();
     }
-  }
+  });
+}
 ```
-where [`view`][db-view] is used for database access.
 
 ## License
 
@@ -52,4 +55,3 @@ See [LICENSE](../../LICENSE) for details.
 
 [exonum-time]: https://exonum.com/doc/version/0.10/advanced/time/
 [built-in-services]: https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services
-[db-view]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/storage/database/View.html
