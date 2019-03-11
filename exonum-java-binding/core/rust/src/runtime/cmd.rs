@@ -150,7 +150,7 @@ impl CommandExtension for Run {
         let args_append: Vec<String> = context.arg_multiple(JVM_ARGS_APPEND).unwrap_or_default();
         let jvm_debug_socket = context.arg(JVM_DEBUG_SOCKET).ok();
         let system_class_path = context.arg(EJB_CLASSPATH_SYSTEM)?;
-        let system_lib_path = context.arg(EJB_LIBPATH).ok();
+        let system_lib_path = context.arg(EJB_LIBPATH)?;
 
         // Getting full EJB config saved at finalize step.
         let service_config: ServiceConfig = read_ejb_config(&context)?;

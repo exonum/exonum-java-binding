@@ -179,19 +179,14 @@ impl JavaServiceRuntime {
 
     /// Adds required EJB-related arguments to JVM configuration
     fn add_required_arguments(
-        mut args_builder: InitArgsBuilder,
+        args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
     ) -> InitArgsBuilder {
-        // We do not use system library path in tests, because an absolute path to the native
-        // library will be provided at compile time using RPATH.
-        if runtime_config.system_lib_path.is_some() {
-            args_builder = args_builder.option(&format!(
-                "-Djava.library.path={}",
-                runtime_config.system_lib_path.clone().unwrap()
-            ));
-        }
-
         args_builder
+            .option(&format!(
+                "-Djava.library.path={}",
+                runtime_config.system_lib_path
+            ))
             .option(&format!(
                 "-Djava.class.path={}",
                 runtime_config.system_class_path

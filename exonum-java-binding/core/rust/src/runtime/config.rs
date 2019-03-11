@@ -69,7 +69,7 @@ pub struct RuntimeConfig {
     /// EJB system classpath.
     pub system_class_path: String,
     /// EJB library path.
-    pub system_lib_path: Option<String>,
+    pub system_lib_path: String,
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.
@@ -123,10 +123,10 @@ mod tests {
 
     #[test]
     fn not_forbidden_user_parameter() {
-        let validation_result = validate_and_convert("Duser.parameter=Djava.class.path");
+        let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
         assert_eq!(
             validation_result,
-            Ok("-Duser.parameter=Djava.class.path".to_string())
+            Ok("-Duser.parameter=Djava.library.path".to_string())
         );
     }
 
