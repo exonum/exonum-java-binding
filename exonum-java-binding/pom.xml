@@ -62,6 +62,7 @@
     <module>common</module>
     <module>core</module>
     <module>fakes</module>
+    <module>fake-service</module>
     <module>qa-service</module>
     <module>cryptocurrency-demo</module>
     <module>service-archetype</module>
@@ -102,7 +103,7 @@
     <maven.javadoc.joption></maven.javadoc.joption>
 
     <assertj.version>3.12.1</assertj.version>
-    <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
+    <checkstyle.configLocation>${project.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
     <log4j.version>2.11.2</log4j.version>
@@ -149,7 +150,6 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
-        <scope>compile</scope>
       </dependency>
 
       <dependency>
