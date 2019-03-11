@@ -46,7 +46,6 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.common.blockchain.TransactionLocation;
@@ -67,10 +66,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -83,9 +80,6 @@ final class ApiController {
   private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   private final QaService service;
-
-  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
-      .ofPattern("yyyy-MM-dd HH:mm:ss Z");
 
   ApiController(QaService service) {
     this.service = service;
@@ -291,26 +285,13 @@ final class ApiController {
   }
 
   private void getTime(RoutingContext rc) {
-    Optional<ZonedDateTime> time = service.getTime();
-    respondWithJson(rc, time.map(ApiController::convertZdtToString));
+    Optional<TimeDto> time = service.getTime().map(TimeDto::new);
+    respondWithJson(rc, time);
   }
 
   private void getValidatorsTimes(RoutingContext rc) {
     Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
-    Map<PublicKey, String> stringValidatorsTimes = convertValidatorsTimesValues(validatorsTimes);
-    respondWithJson(rc, stringValidatorsTimes);
-  }
-
-  @VisibleForTesting
-  static Map<PublicKey, String> convertValidatorsTimesValues(
-      Map<PublicKey, ZonedDateTime> validatorsTimes) {
-    return validatorsTimes.entrySet().stream()
-        .collect(toMap(Entry::getKey, t -> convertZdtToString(t.getValue())));
-  }
-
-  @VisibleForTesting
-  static String convertZdtToString(ZonedDateTime zonedDateTime) {
-    return DATE_TIME_FORMATTER.format(zonedDateTime);
+    respondWithJson(rc, validatorsTimes);
   }
 
   private static String getRequiredParameter(MultiMap parameters, String key) {

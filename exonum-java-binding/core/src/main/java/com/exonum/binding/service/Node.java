@@ -40,7 +40,7 @@ public interface Node {
    * <p>Incorrect transactions (e.g., the payload of which cannot be deserialized by the target
    * service, or which have unknown message id) are rejected by the network.
    *
-   * <p/><em>Be aware that each node has its own service key pair, therefore
+   * <p><em>Be aware that each node has its own service key pair, therefore
    * invocations of this method on different nodes will produce different transactions.</em>
    *
    * @param rawTransaction transaction parameters to include in transaction message

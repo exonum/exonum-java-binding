@@ -10,6 +10,8 @@ branches:
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
     # … and release branches, e.g. jlc/v0.2.0-release
     - /^.+-release$/
+    # … and some feature branches
+    - multiple-services
 
 addons:
   apt:

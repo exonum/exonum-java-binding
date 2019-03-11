@@ -31,7 +31,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import java.net.URISyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -65,8 +64,8 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
-    void loadArtifactNoOp() throws URISyntaxException {
-      String serviceArtifactLocation = "file:///tmp/foo-service.jar";
+    void loadArtifactNoOp() {
+      String serviceArtifactLocation = "/tmp/foo-service.jar";
       String artifactId = serviceRuntime.loadArtifact(serviceArtifactLocation);
       assertThat(artifactId).isEqualTo("com.acme:any-service:1.0.0");
     }
