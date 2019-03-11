@@ -16,14 +16,14 @@
 
 package com.exonum.binding.fakes.services.service;
 
+import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
-import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
 /**
  * A module configuring {@link TestService}.
  */
-public final class TestServiceModule extends AbstractModule {
+public final class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {

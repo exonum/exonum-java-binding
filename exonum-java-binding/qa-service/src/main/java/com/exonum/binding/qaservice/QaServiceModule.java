@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency;
+package com.exonum.binding.qaservice;
 
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionConverter;
+import com.exonum.binding.qaservice.transactions.QaTransactionConverter;
+import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.TransactionConverter;
-import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import org.pf4j.Extension;
 
-@SuppressWarnings("unused") // Instantiated through reflection by Guice.
-public final class ServiceModule extends AbstractModule {
+/**
+ * A module of the QA service.
+ */
+@Extension
+public final class QaServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class).to(CryptocurrencyServiceImpl.class);
-    bind(CryptocurrencyService.class).to(CryptocurrencyServiceImpl.class).in(Singleton.class);
-    bind(TransactionConverter.class).to(CryptocurrencyTransactionConverter.class);
+    bind(Service.class).to(QaServiceImpl.class);
+    bind(QaService.class).to(QaServiceImpl.class);
+    // Make sure QaService remains a singleton.
+    bind(QaServiceImpl.class).in(Singleton.class);
+
+    bind(TransactionConverter.class).to(QaTransactionConverter.class);
   }
 }

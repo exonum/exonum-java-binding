@@ -60,11 +60,22 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
+      <!-- TODO: Shall we recommend using provided for Gson and Protobuf
+                 (i.e., specify that they are definitely available in the application)? /ECR-3006
+                 -->
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.pf4j</groupId>
+      <artifactId>pf4j</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -152,23 +163,31 @@
         </executions>
       </plugin>
 
-      <!-- Generates a runtime classpath file of ejb-cryptocurrency.
-           Bound to the default phase (generate-sources).
-           FIXME: a service may be packaged in a fat jar probably? -->
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <configuration>
-          <outputFile>${project.build.directory}/cryptocurrency-classpath.txt</outputFile>
-          <includeScope>runtime</includeScope>
-        </configuration>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>generate-classpath-file</id>
+            <id>package-service-artifact</id>
+            <phase>package</phase>
             <goals>
-              <goal>build-classpath</goal>
+              <goal>single</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <archive>
+            <manifestEntries>
+              <Plugin-Id>${project.groupId}:${project.artifactId}:${project.version}</Plugin-Id>
+              <Plugin-Version>${project.version}</Plugin-Version>
+              <Plugin-Provider>${project.groupId}</Plugin-Provider>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
 
       <!-- Skip the deployment of internal module as it is inherited from parent pom -->
