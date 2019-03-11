@@ -236,7 +236,7 @@ class Pf4jServiceLoaderTest {
    *</pre>
    * does not currently work.
    *
-   * <p>See issue TODO:
+   * <p>See issue https://github.com/pf4j/pf4j/issues/296
    */
   @SuppressWarnings("unchecked")
   @SafeVarargs

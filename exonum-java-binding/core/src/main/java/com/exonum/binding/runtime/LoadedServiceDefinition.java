@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 //    "service"-as instance of Service (or "service instance")?
 //    - Bundle (as in OSGi — short and not currently used)?
 //    - Plugin (I don't think it works in our case)?
+//    [ECR-3008]
 @AutoValue
 abstract class LoadedServiceDefinition {
 

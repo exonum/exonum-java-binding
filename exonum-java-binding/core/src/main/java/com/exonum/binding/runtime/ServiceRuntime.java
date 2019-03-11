@@ -60,8 +60,6 @@ final class ServiceRuntime {
         s1, s2);
   }
 
-  // todo: How much artifact verification are we willing to perform?
-
   /**
    * Loads an artifact from the specified location. The loading involves verification of the
    * artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
