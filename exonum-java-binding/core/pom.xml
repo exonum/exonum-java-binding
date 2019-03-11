@@ -213,7 +213,7 @@
 
           <execution>
             <id>build-ejb-app</id>
-            <phase>compile</phase>
+            <phase>prepare-package</phase>
             <configuration>
               <arguments>
                 <argument>+${rust.compiler.version}</argument>
@@ -295,6 +295,24 @@
                   <directory>${project.basedir}/target</directory>
                   <includes>
                     <include>exonum-java-binding-core-*.jar</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-native-lib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/rust/target/debug/lib/native</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/rust/target/debug</directory>
+                  <includes>
+                    <include>libjava_bindings.*</include>
                   </includes>
                 </resource>
               </resources>
@@ -462,16 +480,35 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>cargo</executable>
+              <workingDirectory>${project.basedir}/rust/</workingDirectory>
+            </configuration>
             <executions>
               <execution>
                 <id>build-rust-lib</id>
-                <phase>compile</phase>
+                <phase>prepare-package</phase>
                 <configuration>
-                  <executable>cargo</executable>
-                  <workingDirectory>${project.basedir}/rust/</workingDirectory>
                   <arguments>
                     <argument>+${rust.compiler.version}</argument>
                     <argument>build</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>build-ejb-app</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>--package</argument>
+                    <argument>ejb-app</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>
