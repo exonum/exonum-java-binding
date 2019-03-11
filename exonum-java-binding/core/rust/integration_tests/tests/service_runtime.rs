@@ -19,16 +19,21 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::get_fakes_classpath;
+use integration_tests::vm::{get_fakes_classpath, get_libpath};
 use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig, ServiceConfig};
 
 #[test]
+#[ignore]
+// Disabled till loading services with ServiceLoader is implemented ECR-3005
 // TODO: reenable this test after ECR-2789
-#[cfg_attr(target_os = "linux", ignore)]
+//#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
-    let service_config = ServiceConfig {
-        artifact_uri: "".to_owned(),
-    };
+    let artifact_uri = "".to_owned();
+    let system_class_path = get_fakes_classpath();
+    let system_lib_path = get_libpath();
+    let log_config_path = "".to_owned();
+
+    let service_config = ServiceConfig { artifact_uri };
 
     let jvm_config = JvmConfig {
         args_prepend: Vec::new(),
@@ -37,10 +42,10 @@ fn bootstrap() {
     };
 
     let runtime_config = RuntimeConfig {
-        log_config_path: "".to_owned(),
+        log_config_path,
         port: 6300,
-        system_class_path: get_fakes_classpath(),
-        system_lib_path: None,
+        system_class_path,
+        system_lib_path,
     };
 
     let config = Config {
