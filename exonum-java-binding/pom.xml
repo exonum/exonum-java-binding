@@ -191,12 +191,12 @@
         <scope>test</scope>
       </dependency>
 
-      <dependency>
-        <!-- An empty artifact, required while JUnit 4 is on the classpath to override its
-             dependency on hamcrest.
+      <!-- An empty artifact, required while JUnit 4 is on the classpath to override its
+           dependency on hamcrest.
 
-             See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
-             -->
+           See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+       -->
+      <dependency>
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest-core</artifactId>
         <version>${hamcrest.version}</version>
@@ -483,6 +483,25 @@
                 </requireEnvironmentVariable>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checks that the POMs match the code convention:
+           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
+
+           Use `mvn tidy:pom` to fix any style issues -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <executions>
+          <execution>
+            <id>check-pom-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
