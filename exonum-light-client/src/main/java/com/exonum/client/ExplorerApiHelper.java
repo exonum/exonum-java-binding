@@ -68,7 +68,7 @@ final class ExplorerApiHelper {
 
   static BlockResponse parseGetBlockResponse(String json) {
     GetBlockResponse response = json().fromJson(json, GetBlockResponse.class);
-    String time = response.getTime();
+    ZonedDateTime time = response.getTime();
     Block block = toTimeBlock(response.getBlock(), time);
 
     return new BlockResponse(block, response.getTransactions());
@@ -78,11 +78,11 @@ final class ExplorerApiHelper {
     GetBlocksResponse response = json().fromJson(json, GetBlocksResponse.class);
     List<GetBlockResponseBlock> blocks = response.getBlocks();
     int blocksSize = blocks.size();
-    List<String> times = response.getTimes();
+    List<ZonedDateTime> times = response.getTimes();
     if (times != null) {
       int timesSize = times.size();
       checkState(blocksSize == timesSize,
-          "Blocks size {} doesn't equal to commit times size {}", blocksSize, timesSize);
+          "Blocks size %s doesn't equal to commit times size %s", blocksSize, timesSize);
     }
 
     List<Block> timeBlocks = new ArrayList<>(blocksSize);
@@ -105,8 +105,7 @@ final class ExplorerApiHelper {
     return toTimeBlock(block, null);
   }
 
-  private static Block toTimeBlock(GetBlockResponseBlock block, @Nullable String time) {
-    ZonedDateTime commitTime = time == null ? null : ZonedDateTime.parse(time);
+  private static Block toTimeBlock(GetBlockResponseBlock block, @Nullable ZonedDateTime time) {
 
     return Block.builder()
         .proposerId(block.getProposerId())
@@ -115,7 +114,7 @@ final class ExplorerApiHelper {
         .previousBlockHash(block.getPreviousBlockHash())
         .stateHash(block.getStateHash())
         .txRootHash(block.getTxRootHash())
-        .commitTime(commitTime)
+        .commitTime(time)
         .build();
   }
 
@@ -209,7 +208,7 @@ final class ExplorerApiHelper {
     JsonElement precommits; //TODO: in scope of LC P3
     @SerializedName("txs")
     List<HashCode> transactions;
-    String time;
+    ZonedDateTime time;
   }
 
   @Value
@@ -232,7 +231,7 @@ final class ExplorerApiHelper {
     List<GetBlockResponseBlock> blocks;
     GetBlocksResponseRange range;
     @Nullable
-    List<String> times;
+    List<ZonedDateTime> times;
   }
 
   @Value

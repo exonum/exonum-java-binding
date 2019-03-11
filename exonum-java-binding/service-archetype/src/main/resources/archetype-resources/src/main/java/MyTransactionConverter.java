@@ -21,7 +21,7 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.service.TransactionConverter;
 
 /**
- * {@code MyTransactionConverter} converts raw transactions of {@link $.MyService}
+ * {@code MyTransactionConverter} converts raw transactions of {@link MyService}
  * into {@linkplain Transaction executable transactions} of this service.
  */
 public final class MyTransactionConverter implements TransactionConverter {

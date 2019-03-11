@@ -167,6 +167,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.ryanharter.auto.value</groupId>
         <artifactId>auto-value-gson-annotations</artifactId>
         <version>${auto-value-gson.version}</version>

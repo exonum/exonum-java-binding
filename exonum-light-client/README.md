@@ -9,6 +9,17 @@ Also, Exonum light client provides access to [common utils][ejb-common]
 toolkit which contains some helpful functions for _hashing_,
 _cryptography_, _serialization_ etc. 
 
+## Capabilities
+By using the client you are able to perform the following operations:
+- Submit transactions to the node
+- Receive transaction information 
+- Receive blockchain blocks information 
+- Receive node system information 
+- Receive node status information  
+<!-- TODO: replace by javadoc link when it will be available --> 
+_*Please refer to [the code][exonum-client] for details._  
+Also, see [examples](#examples). 
+
 ## Compatibility
 The following table shows versions compatibility:  
 
@@ -16,7 +27,7 @@ The following table shows versions compatibility:
 |--------------|--------|-------------|
 | 0.1.0        | 0.10.* | 0.4         |
 
-## Prerequisites
+## System Dependencies
 - Java 8 or above is required for using this client
 - Maven 3.5 or above (only if you need to build it locally)
 
@@ -35,7 +46,8 @@ compile 'com.exonum.client:exonum-light-client:0.1.0'
 ```
 
 ## Examples
-### Exonum Client initialization
+
+### Exonum Client Initialization
 The following example shows how to create the instance of exonum client
 which will work with Exonum node at `http://localhost:8080` address: 
 ```java
@@ -57,7 +69,7 @@ The next example shows how to use a custom configuration of the _http-client_:
 
 ```
 
-### Creating transaction message
+### Creating Transaction Message
 The following example shows how to create the transaction message.
 In addition please read about [transaction message structure][exonum-tx-message-builder].
 ```java
@@ -77,7 +89,7 @@ utility class which can be helpful for serialization.
 * `keys` is a key pair of private and public keys which is used for message signature.  
 * `ed25519` is the cryptographic function for signing.
  
-### Sending transaction
+### Sending Transaction
 To send the transaction just call a `submitTransaction`.  
 Make notice that it works in a blocking way i.e. your thread will be 
 blocked till the response is received.  
@@ -92,7 +104,19 @@ Also, you can take a look at the [integration test][send-tx-it]
 for the full example of how to create a transaction message and
 send it to Exonum node.
 
-## How to build
+### Transaction Info
+<!-- TODO: remove after release --> 
+_*Not available for Light Client v0.1_  
+The following method provides a possibility to get information 
+on a transaction by its hash - status of the transaction, 
+details of the message containing the transaction and, 
+if available, transaction location and result:
+```java
+Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
+```
+* `txHash` is a hash of the transaction to search.
+  
+## How to Build
 To build the client locally, clone the repository, and
 run next commands from the project's root 
 i.e. _exonum-java-binding_ directory:
@@ -113,3 +137,4 @@ Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
 [standard-serializers]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
+[exonum-client]: ./src/main/java/com/exonum/client/ExonumClient.java

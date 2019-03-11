@@ -25,7 +25,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * {@code MySchema} provides access to the tables of {@link $.MyService},
+ * {@code MySchema} provides access to the tables of {@link MyService},
  * given a database state: a {@link View}.
  *
  * @see <a href="https://exonum.com/doc/version/0.10/architecture/storage/#table-types">Exonum table types.</a>
