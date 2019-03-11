@@ -26,8 +26,9 @@ const TEST_SERVICE_MODULE_NAME: &str =
     "com.exonum.binding.fakes.services.service.TestServiceModule";
 
 #[test]
-// TODO: reenable this test after ECR-2789
-#[cfg_attr(target_os = "linux", ignore)]
+#[ignore] //TODO: use the configuration below after ECR-2979
+//// TODO: reenable this test after ECR-2789
+//#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
     let service_config = ServiceConfig {
         module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
