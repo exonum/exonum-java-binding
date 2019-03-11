@@ -37,7 +37,8 @@ import okhttp3.OkHttpClient;
  * All the methods of the interface work in a blocking way
  * i.e. invoke underlying request immediately, and block until the response can be processed
  * or an error occurs.
- * <p/><i>Implementations of that interface are required to be thread-safe</i>.
+ *
+ * <p><i>Implementations of that interface are required to be thread-safe</i>.
  **/
 public interface ExonumClient {
 
@@ -203,7 +204,8 @@ public interface ExonumClient {
 
     /**
      * Sets http client, optional. If not set a default instance of http client will be used.
-     * <p/>This method provides a flexibility for the Exonum client configuration.
+     *
+     * <p>This method provides a flexibility for the Exonum client configuration.
      * Can be helpful, for example, in case a network proxy configuration is needed
      * or request/response logging.
      */

@@ -132,6 +132,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
+    <pf4j.version>2.6.0</pf4j.version>
   </properties>
 
   <dependencyManagement>
@@ -182,6 +183,12 @@
         <artifactId>auto-value-gson</artifactId>
         <version>${auto-value-gson.version}</version>
         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.pf4j</groupId>
+        <artifactId>pf4j</artifactId>
+        <version>${pf4j.version}</version>
       </dependency>
 
       <dependency>
