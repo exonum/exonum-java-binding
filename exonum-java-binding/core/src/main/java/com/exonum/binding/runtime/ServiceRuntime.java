@@ -25,8 +25,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * A service runtime. It manages the services required for operation of Exonum services (e.g., a
@@ -68,16 +66,15 @@ final class ServiceRuntime {
    * Loads an artifact from the specified location. The loading involves verification of the
    * artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
    *
-   * @param serviceArtifactUri a {@linkplain URI URI} from which to load the service artifact
-   *     (e.g., a file or network resource)
+   * @param serviceArtifactPath a {@linkplain java.nio.file.Path filesystem path} from which
+   *     to load the service artifact
    * @return a unique service artifact identifier that must be specified in subsequent operations
    *     with it
-   * @throws URISyntaxException if the URI is not valid
    * @throws RuntimeException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
   @SuppressWarnings("unused")
-  String loadArtifact(String serviceArtifactUri) throws URISyntaxException {
+  String loadArtifact(String serviceArtifactPath) {
     return "com.acme:any-service:1.0.0";
   }
 

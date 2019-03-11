@@ -23,9 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
-import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -66,10 +64,10 @@ final class Pf4jServiceLoader implements ServiceLoader {
    * a single ServiceModule as an extension.
    */
   @Override
-  public LoadedServiceDefinition loadService(URI artifactLocation)
+  public LoadedServiceDefinition loadService(Path artifactPath)
       throws ServiceLoadingException {
     // Load a plugin
-    String pluginId = loadPlugin(artifactLocation);
+    String pluginId = loadPlugin(artifactPath);
     try {
       // Start the plugin
       startPlugin(pluginId);
@@ -85,12 +83,11 @@ final class Pf4jServiceLoader implements ServiceLoader {
     }
   }
 
-  private String loadPlugin(URI artifactLocation) throws ServiceLoadingException {
-    Path artifactPath = Paths.get(artifactLocation);
+  private String loadPlugin(Path artifactLocation) throws ServiceLoadingException {
     // fixme: prevent loading of duplicates at this point. The plugin manager might load duplicate
     //  plugins if they have different paths. This problem is resolved
     //  in https://github.com/pf4j/pf4j/pull/287 , update PF4J when the fix is released.
-    String pluginId = pluginManager.loadPlugin(artifactPath);
+    String pluginId = pluginManager.loadPlugin(artifactLocation);
     if (pluginId == null) {
       throw new ServiceLoadingException("Failed to load the plugin from "
           + artifactLocation);

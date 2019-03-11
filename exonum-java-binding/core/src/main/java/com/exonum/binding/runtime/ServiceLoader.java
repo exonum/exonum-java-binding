@@ -16,7 +16,7 @@
 
 package com.exonum.binding.runtime;
 
-import java.net.URI;
+import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -32,12 +32,12 @@ interface ServiceLoader {
    * <p>Upon successful completion of this method, the service is considered as loaded
    * and instances of this service can be created.
    *
-   * @param artifactLocation the location of the service artifact (a file, network resource, etc.)
+   * @param artifactPath the location of the service artifact file
    * @return a complete definition of a service from the artifact
    * @throws ServiceLoadingException in case the artifact cannot be loaded: not found or
    *     does not pass verification
    */
-  LoadedServiceDefinition loadService(URI artifactLocation) throws ServiceLoadingException;
+  LoadedServiceDefinition loadService(Path artifactPath) throws ServiceLoadingException;
 
   /**
    * Returns a loaded service with the given id; or {@link Optional#empty()} if there is no such.
@@ -46,7 +46,7 @@ interface ServiceLoader {
   Optional<LoadedServiceDefinition> findService(ServiceId serviceId);
 
   /**
-   * Unloads a previously {@linkplain #loadService(URI) loaded} service. The clients <b>must
+   * Unloads a previously {@linkplain #loadService(Path) loaded} service. The clients <b>must
    * not</b> unload the service while it is in use (there are active instances of it).
    *
    * <p>Once the service is unloaded, its definition shall no longer be used to create any new

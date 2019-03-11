@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.ServiceModule;
 import com.google.common.collect.ImmutableList;
-import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +51,9 @@ import org.pf4j.PluginState;
 @ExtendWith(MockitoExtension.class)
 class Pf4jServiceLoaderTest {
 
+  private static final Path ARTIFACT_LOCATION = Paths.get("/tmp/service.jar");
+  private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
+
   @Mock
   private PluginManager pluginManager;
 
@@ -59,10 +62,9 @@ class Pf4jServiceLoaderTest {
 
   @Test
   void canLoadService() throws ServiceLoadingException {
-    URI artifactLocation = URI.create("file:///tmp/service.jar");
-    String pluginId = "com.acme:foo-service:1.0.1";
+    String pluginId = PLUGIN_ID;
 
-    when(pluginManager.loadPlugin(Paths.get(artifactLocation)))
+    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
         .thenReturn(pluginId);
     when(pluginManager.startPlugin(pluginId))
         .thenReturn(PluginState.STARTED);
@@ -71,7 +73,7 @@ class Pf4jServiceLoaderTest {
         .thenReturn(modules(moduleType));
 
     // Try to load the service
-    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
+    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(ARTIFACT_LOCATION);
 
     // Verify the plugin is started
     verify(pluginManager).startPlugin(pluginId);
@@ -91,29 +93,25 @@ class Pf4jServiceLoaderTest {
   @DisplayName("Cannot load a plugin if the plugin manager returns `null` "
       + "(e.g., in case of an attempt to load a duplicate plugin or other errors)")
   void cannotLoadIfPluginManagerReturnsNull() {
-    URI artifactLocation = URI.create("file:///tmp/service.jar");
-    String pluginId = "com.acme:foo-service:1.0.1";
-
     // The 2.x PF4J API returns null to signal that the plugin cannot be loaded
-    when(pluginManager.loadPlugin(Paths.get(artifactLocation)))
+    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
         .thenReturn(null);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
     assertThat(e).hasMessageContaining("Failed to load the plugin from");
 
     // Check the definition is inaccessible
-    ServiceId serviceId = ServiceId.parseFrom(pluginId);
+    ServiceId serviceId = ServiceId.parseFrom(PLUGIN_ID);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
   }
 
   @Test
   void cannotLoadIfPluginFailedToStart() {
-    URI artifactLocation = URI.create("file:///tmp/service.jar");
-    String pluginId = "com.acme:foo-service:1.0.1";
+    String pluginId = PLUGIN_ID;
 
-    when(pluginManager.loadPlugin(Paths.get(artifactLocation)))
+    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
         .thenReturn(pluginId);
     // In the 2.x PF4J API a failed plugin start is communicated through a plugin state
     // that is not "STARTED"
@@ -122,7 +120,7 @@ class Pf4jServiceLoaderTest {
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
     assertThat(e).hasMessageContaining("Failed to start the plugin");
 
     // Check the definition is inaccessible
@@ -140,15 +138,14 @@ class Pf4jServiceLoaderTest {
       "com.acme:foo-service:1.0:extra-coordinate",
   })
   void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) {
-    URI artifactLocation = URI.create("file:///tmp/service.jar");
-    when(pluginManager.loadPlugin(Paths.get(artifactLocation)))
+    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
         .thenReturn(invalidPluginId);
     when(pluginManager.startPlugin(invalidPluginId))
         .thenReturn(PluginState.STARTED);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
     assertThat(e).hasMessageContaining("Invalid plugin id");
     assertThat(e).hasMessageContaining(invalidPluginId);
 
@@ -160,10 +157,9 @@ class Pf4jServiceLoaderTest {
   @MethodSource("invalidServiceModuleExtensions")
   void cannotLoadIfInvalidServiceModuleExtensions(List<Class<ServiceModule>> extensions,
       String expectedErrorPattern) {
-    URI artifactLocation = URI.create("file:///tmp/service.jar");
-    String pluginId = "com.acme:foo-service:1.0.1";
+    String pluginId = PLUGIN_ID;
 
-    when(pluginManager.loadPlugin(Paths.get(artifactLocation)))
+    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
         .thenReturn(pluginId);
     when(pluginManager.startPlugin(pluginId))
         .thenReturn(PluginState.STARTED);
@@ -172,7 +168,7 @@ class Pf4jServiceLoaderTest {
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
     assertThat(e).hasMessageContaining(pluginId);
     assertThat(e).hasMessageFindingMatch(expectedErrorPattern);
 
@@ -192,10 +188,9 @@ class Pf4jServiceLoaderTest {
 
   @Test
   void canLoadUnloadService() throws ServiceLoadingException {
-    URI artifactLocation = URI.create("file:///tmp/service.jar");
-    String pluginId = "com.acme:foo-service:1.0.1";
+    String pluginId = PLUGIN_ID;
 
-    when(pluginManager.loadPlugin(Paths.get(artifactLocation)))
+    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
         .thenReturn(pluginId);
     when(pluginManager.startPlugin(pluginId))
         .thenReturn(PluginState.STARTED);
@@ -205,7 +200,7 @@ class Pf4jServiceLoaderTest {
         .thenReturn(true);
 
     // Try to load the service
-    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
+    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(ARTIFACT_LOCATION);
 
     // Try to unload the service
     ServiceId serviceId = serviceDefinition.getId();
@@ -217,14 +212,14 @@ class Pf4jServiceLoaderTest {
 
   @Test
   void unloadServiceNonLoaded() {
-    ServiceId unknownPluginId = ServiceId.parseFrom("com.acme:foo-service:1.0.1");
+    ServiceId unknownPluginId = ServiceId.parseFrom(PLUGIN_ID);
     assertThrows(IllegalArgumentException.class,
         () -> serviceLoader.unloadService(unknownPluginId));
   }
 
   @Test
   void findServiceNonLoaded() {
-    ServiceId unknownPluginId = ServiceId.parseFrom("com.acme:foo-service:1.0.1");
+    ServiceId unknownPluginId = ServiceId.parseFrom(PLUGIN_ID);
     Optional<?> serviceDefinition = serviceLoader.findService(unknownPluginId);
     assertThat(serviceDefinition).isEmpty();
   }
