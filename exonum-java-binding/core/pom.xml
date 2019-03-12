@@ -88,12 +88,18 @@
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
       <artifactId>auto-value-gson-annotations</artifactId>
+      <!-- TODO: verify <scope>provided</scope>-->
     </dependency>
 
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
       <artifactId>auto-value-gson</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.pf4j</groupId>
+      <artifactId>pf4j</artifactId>
     </dependency>
 
     <dependency>

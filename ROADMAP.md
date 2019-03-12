@@ -7,7 +7,6 @@ Below are the features we intend to work on:
 * Pre-built packaged Exonum App.
 * Full support of Exonum proofs, including block proofs
   for [blockchain clients](https://exonum.com/doc/version/latest/architecture/clients/).
-* [Time oracle](https://exonum.com/doc/version/latest/advanced/time/) service bundled in the app.
 * An SDK to ease integration with the blockchain application, including
   support for creating and signing transaction messages and verification of proofs.
 * Easier testing with JUnit 5 extension for automatic life cycle management,

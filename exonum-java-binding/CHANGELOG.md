@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Support of Time oracle. Instruction on how to enable built-in services can be found
   [here](https://exonum.com/doc/version/0.4/get-started/java-binding/#built-in-services). (#667)
+- `com.exonum.binding.common.serialization.json.JsonSerializer` provides support for `ZonedDateTime`
+  JSON serialization in `java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME` format. (#762)
 
 ### Changed
 - `TransactionResult` and `TransactionLocation` classes moved to the common module. (#725)

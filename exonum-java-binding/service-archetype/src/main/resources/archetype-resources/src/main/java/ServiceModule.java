@@ -22,7 +22,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
 /**
- * A service module defines bindings required to create an instance of {@link $.MyService}.
+ * A service module defines bindings required to create an instance of {@link MyService}.
  */
 public final class ServiceModule extends AbstractModule {
 

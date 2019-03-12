@@ -28,25 +28,25 @@ impl ServiceFactory for JavaServiceFactory {
     }
 
     fn make_service(&mut self, context: &Context) -> Box<Service> {
-        let runtime = {
-            use exonum::helpers::fabric::keys;
-            let config: Config = context
-                .get(keys::NODE_CONFIG)
-                .expect("Unable to read node configuration.")
-                .services_configs
-                .get(super::cmd::EJB_CONFIG_SECTION_NAME)
-                .expect("Unable to read EJB configuration.")
-                .clone()
-                .try_into()
-                .expect("Invalid EJB configuration format.");
+        use exonum::helpers::fabric::keys;
+        let config: Config = context
+            .get(keys::NODE_CONFIG)
+            .expect("Unable to read node configuration.")
+            .services_configs
+            .get(super::cmd::EJB_CONFIG_SECTION_NAME)
+            .expect("Unable to read EJB configuration.")
+            .clone()
+            .try_into()
+            .expect("Invalid EJB configuration format.");
 
-            let internal_config = InternalConfig {
-                system_class_path: system_classpath(),
-                system_lib_path: Some(absolute_library_path()),
-            };
-            JavaServiceRuntime::get_or_create(config, internal_config)
+        let internal_config = InternalConfig {
+            system_class_path: system_classpath(),
+            system_lib_path: Some(absolute_library_path()),
         };
 
-        Box::new(runtime.service_proxy().clone())
+        let runtime = JavaServiceRuntime::get_or_create(config.clone(), internal_config);
+
+        let service_proxy = runtime.create_service("", &config.service_config.module_name);
+        Box::new(service_proxy)
     }
 }

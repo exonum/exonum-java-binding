@@ -39,8 +39,6 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ER
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
-import static com.exonum.binding.qaservice.ApiController.convertValidatorsTimesValues;
-import static com.exonum.binding.qaservice.ApiController.convertZdtToString;
 import static com.exonum.binding.qaservice.ApiController.hexEncodeTransactionMessages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -765,18 +763,15 @@ class ApiControllerIntegrationTest {
     ZonedDateTime time = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
     when(qaService.getTime()).thenReturn(Optional.of(time));
 
-    String expectedStringTime = convertZdtToString(time);
-
     get(TIME_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualTime = JSON_SERIALIZER
-              .fromJson(body, new TypeToken<String>() {
-              }.getType());
-          assertThat(actualTime).isEqualTo(expectedStringTime);
+          TimeDto actualTime = JSON_SERIALIZER
+              .fromJson(body, TimeDto.class);
+          assertThat(actualTime.getTime()).isEqualTo(time);
 
           context.completeNow();
         })));
@@ -789,19 +784,16 @@ class ApiControllerIntegrationTest {
         PublicKey.fromHexString("22"), ZonedDateTime.of(2018, 1, 1, 0, 0, 1, 0, ZoneOffset.UTC));
     when(qaService.getValidatorsTimes()).thenReturn(validatorsTimes);
 
-    Map<PublicKey, String> expectedStringValidatorsTimes = convertValidatorsTimesValues(
-        validatorsTimes);
-
     get(VALIDATORS_TIMES_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
               .isEqualTo(HTTP_OK);
 
           String body = response.bodyAsString();
-          Object actualValidatorsTimes = JSON_SERIALIZER
-              .fromJson(body, new TypeToken<Map<PublicKey, String>>() {
+          Map<PublicKey, ZonedDateTime> actualValidatorsTimes = JSON_SERIALIZER
+              .fromJson(body, new TypeToken<Map<PublicKey, ZonedDateTime>>() {
               }.getType());
-          assertThat(actualValidatorsTimes).isEqualTo(expectedStringValidatorsTimes);
+          assertThat(actualValidatorsTimes).isEqualTo(validatorsTimes);
 
           context.completeNow();
         })));
