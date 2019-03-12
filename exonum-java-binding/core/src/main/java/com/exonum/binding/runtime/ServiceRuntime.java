@@ -46,11 +46,12 @@ final class ServiceRuntime {
   private final ServiceLoader serviceLoader;
 
   /**
-   * Creates a new runtime with the given framework injector. Starts the server on instantiation.
+   * Creates a new runtime with the given framework injector. Starts the server on instantiation;
+   * never stops it.
    *
    * @param frameworkInjector the injector that has been configured with the Exonum framework
    *     bindings. It serves as a parent for service injectors
-   * @param serviceLoader the loader of service artifacts
+   * @param serviceLoader a loader of service artifacts
    * @param server a web server providing transport to Java services
    * @param serverPort a port for the web server providing transport to Java services
    */
