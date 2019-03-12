@@ -37,6 +37,7 @@ echo "PROJ_ROOT=${EJB_ROOT}"
 header "PREPARE PATHS"
 
 CORE_TXT="core/target/ejb-core-classpath.txt"
+# FIXME: Remove the QA_SERVICE_TXT as it is no longer generated/needed, see PR for ECR-3005
 QA_SERVICE_TXT="qa-service/target/qa-service-classpath.txt"
 EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/core/target/classes"
