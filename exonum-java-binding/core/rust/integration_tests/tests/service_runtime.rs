@@ -24,7 +24,7 @@ use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig, Servic
 
 #[test]
 #[ignore]
-// Disabled till loading services with ServiceLoader is implemented ECR-3005
+// Disabled till ECR-2999/ECR-3011
 // TODO: reenable this test after ECR-2789
 //#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
