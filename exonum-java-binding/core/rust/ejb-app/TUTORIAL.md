@@ -67,34 +67,34 @@ $ cargo run -- generate-template testnet/common.toml
 
 #### Generate Node Private and Public Configs
 
-- `--ejb-classpath` for a classpath of your service.
-- `--ejb-libpath` for a path to Java bindings native libraries.
-
 ```$sh
 $ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
-    --ejb-classpath $EJB_CLASSPATH \
-    --ejb-libpath $EJB_LIBPATH \
     --peer-address 127.0.0.1:5400
 ```
 
 #### Finalize Configuration
 
-There are two specific parameters here:
-- `--ejb-module-name` for fully qualified name of your `ServiceModule`.
-- `--ejb-port` for port that your service will use for communication.
-  Java Binding does not use Exonum Core ports directly.
+There is one specific parameter here:
+- `--ejb-artifact-uri` for the URI of Java service artifact.
 
 ```$sh
 $ cargo run -- finalize testnet/sec.toml testnet/node.toml \
-    --ejb-module-name 'com.<company-name>.<project-name>.ServiceModule' \
-    --ejb-port 6000 \
+    --ejb-artifact-uri 'path_to_your_service_artifact.jar' \
     --public-configs testnet/pub.toml
 ```
 
 ### Step 3. Run Configured Node
 
+- `--ejb-classpath` for a classpath of Java service runtime.
+- `--ejb-libpath` for a path to Java bindings native libraries.
+- `--ejb-port` for port that your service will use for communication.
+  Java Binding does not use Exonum Core ports directly.
+
 ```$sh
-$ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000
+$ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
+    --ejb-classpath $EJB_CLASSPATH \
+    --ejb-libpath $EJB_LIBPATH \
+    --ejb-port 6000
 ```
 
 There are few specific optional parameters here:
