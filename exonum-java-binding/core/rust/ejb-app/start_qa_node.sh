@@ -44,10 +44,8 @@ echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
 echo "EJB_LIBPATH=${EJB_LIBPATH}"
 export RUST_LIB_DIR="$(rustup run ${RUST_COMPILER_VERSION:-1.32.0} rustc --print sysroot)/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"${EJB_ROOT}"/core/rust/target/debug:"$EJB_LIBPATH":"$RUST_LIB_DIR"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
-
-ejb_app="${EJB_ROOT}/core/rust/target/debug/ejb-app"
 
 # Clear test dir
 rm -rf testnet
@@ -69,7 +67,7 @@ do
 done
 
 header "GENERATE COMMON CONFIG"
-"${ejb_app}" generate-template --validators-count $node_count testnet/common.toml \
+cargo run -- generate-template --validators-count $node_count testnet/common.toml \
   --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule'
 
 header "GENERATE CONFIG"
@@ -77,7 +75,7 @@ for i in $(seq 0 $((node_count - 1)))
 do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
-    "${ejb_app}" generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
+    cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
      --peer-address 127.0.0.1:$peer_port
 done
 
@@ -85,7 +83,7 @@ header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
     ejb_port=$((6000 + i))
-    "${ejb_app}" finalize testnet/sec_$i.toml testnet/node_$i.toml \
+    cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
      --ejb-service-classpath $EJB_CLASSPATH \
      --public-configs testnet/pub_*.toml
 done
@@ -96,7 +94,7 @@ for i in $(seq 0 $((node_count - 1)))
 do
 	port=$((3000 + i))
 	private_port=$((port + 100))
-	"${ejb_app}" run \
+	cargo run -- run \
 	 -c testnet/node_$i.toml \
 	 -d testnet/db/$i \
 	 --ejb-port $ejb_port \

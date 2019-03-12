@@ -53,23 +53,21 @@ echo "Final LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 rm -rf testnet
 mkdir testnet
 
-ejb_app="${EJB_ROOT}/core/rust/target/debug/ejb-app"
-
 header "GENERATE COMMON CONFIG"
-"${ejb_app}" generate-template --validators-count=1 testnet/common.toml \
+cargo run -- generate-template --validators-count=1 testnet/common.toml \
  --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule'
 
 header "GENERATE CONFIG"
-"${ejb_app}" generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-"${ejb_app}" finalize testnet/sec.toml testnet/node.toml \
+cargo run -- finalize testnet/sec.toml testnet/node.toml \
  --ejb-service-classpath $EJB_CLASSPATH \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"
-"${ejb_app}" run -d testnet/db -c testnet/node.toml \
+cargo run -- run -d testnet/db -c testnet/node.toml \
  --public-api-address 127.0.0.1:3000 \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
  --ejb-port 6000
