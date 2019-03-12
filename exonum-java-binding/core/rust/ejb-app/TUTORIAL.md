@@ -19,8 +19,6 @@ in the [user guide](https://exonum.com/doc/version/0.10/get-started/java-binding
 
 ### Step 1. Configure Environment
 
-`APP_ROOT` used in examples of this section corresponds to the directory with unpacked EJB App.
-
 #### `LD_LIBRARY_PATH`
 
 `LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
