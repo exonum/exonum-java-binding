@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::{Config, JvmConfig, RuntimeConfig, ServiceConfig};
+use super::{Config, JvmConfig, RuntimeConfig};
 use exonum::helpers::fabric::keys;
 use exonum::helpers::fabric::Argument;
 use exonum::helpers::fabric::CommandExtension;
@@ -29,8 +29,6 @@ use toml::Value;
 /// persistent storage available on the specific step. Finally, after the `run` step we compose the
 /// `Config` structure that contains all required info for service initialization.
 
-// Parameters for `finalize` command
-const EJB_ARTIFACT_URI: &str = "EJB_ARTIFACT_URI";
 // Parameters for `run` command
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_CLASSPATH_SYSTEM: &str = "EJB_CLASSPATH_SYSTEM";
@@ -41,36 +39,6 @@ const JVM_ARGS_PREPEND: &str = "JVM_ARGS_PREPEND";
 const JVM_ARGS_APPEND: &str = "JVM_ARGS_APPEND";
 // TOML keys for EJB configuration
 pub const EJB_CONFIG_SECTION_NAME: &str = "ejb";
-
-/// Encapsulates processing of extensions of the `finalize` command. At this step we gather some of
-/// the required parameters for private configuration. Also, at this step the node config
-/// creation happens, so we store our newly created private configuration there.
-pub struct Finalize;
-
-impl CommandExtension for Finalize {
-    fn args(&self) -> Vec<Argument> {
-        vec![Argument::new_named(
-            EJB_ARTIFACT_URI,
-            true,
-            "An URI of an EJB service artifact.",
-            None,
-            "ejb-artifact-uri",
-            false,
-        )]
-    }
-
-    fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        // Getting the artifact's URI
-        let artifact_uri = context.arg(EJB_ARTIFACT_URI)?;
-
-        // Creating new EJB service config.
-        let service_config = ServiceConfig { artifact_uri };
-
-        // Writing EJB config to the node services configuration section.
-        write_ejb_config(&mut context, Value::try_from(service_config)?);
-        Ok(context)
-    }
-}
 
 /// Encapsulates processing of extensions of the `run` command. At this step we gather additional
 /// private parameters for service configuration and optional parameters for JVM configuration and
@@ -152,9 +120,6 @@ impl CommandExtension for Run {
         let system_class_path = context.arg(EJB_CLASSPATH_SYSTEM)?;
         let system_lib_path = context.arg(EJB_LIBPATH)?;
 
-        // Getting full EJB config saved at finalize step.
-        let service_config: ServiceConfig = read_ejb_config(&context)?;
-
         let jvm_config = JvmConfig {
             args_prepend,
             args_append,
@@ -169,7 +134,6 @@ impl CommandExtension for Run {
         };
 
         let config = Config {
-            service_config,
             jvm_config,
             runtime_config,
         };
@@ -178,19 +142,6 @@ impl CommandExtension for Run {
         write_ejb_config(&mut context, Value::try_from(config)?);
         Ok(context)
     }
-}
-
-/// Returns the `ejb` section of service configs of `NodeConfig`.
-fn read_ejb_config<T: serde::de::DeserializeOwned>(
-    context: &Context,
-) -> Result<T, toml::de::Error> {
-    let node_config = get_node_config(context);
-    node_config
-        .services_configs
-        .get(EJB_CONFIG_SECTION_NAME)
-        .expect("EJB config not found")
-        .clone()
-        .try_into()
 }
 
 /// Updates the `ejb` section of service configs of `NodeConfig` with `value` and puts updated

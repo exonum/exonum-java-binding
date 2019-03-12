@@ -18,11 +18,11 @@ use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use exonum_time::TimeServiceFactory;
 use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
-use java_bindings::utils::{
-    load_enabled_services, BTC_ANCHORING_SERVICE, CONFIGURATION_SERVICE, EJB_SERVICE,
-    PATH_TO_SERVICES_TO_ENABLE, TIME_SERVICE,
+use java_bindings::utils::services::{
+    load_services_definition, EjbAppServices, BTC_ANCHORING_SERVICE, CONFIGURATION_SERVICE,
+    PATH_TO_SERVICES_DEFINITION, TIME_SERVICE,
 };
-use java_bindings::JavaServiceFactory;
+use java_bindings::JavaServiceFactoryAdapter;
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -41,30 +41,19 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
         TIME_SERVICE.to_owned(),
         Box::new(TimeServiceFactory) as Box<ServiceFactory>,
     );
-    service_factories.insert(
-        EJB_SERVICE.to_owned(),
-        Box::new(JavaServiceFactory) as Box<ServiceFactory>,
-    );
     service_factories
 }
 
-#[doc(hidden)]
-pub fn services_to_enable<P: AsRef<Path>>(path: P) -> HashSet<String> {
-    // Return default list if config file not found.
-    let mut services = load_enabled_services(path).unwrap_or_else(|_| {
+pub fn create() -> fabric::NodeBuilder {
+    let svcs = load_services_definition(PATH_TO_SERVICES_DEFINITION)
+        .expect("Unable to load services definition");
+
+    let services = svcs.enabled_services.unwrap_or_else(|| {
         let mut services = HashSet::new();
         services.insert(CONFIGURATION_SERVICE.to_owned());
         services
     });
 
-    // Add EJB_SERVICE if it's missing
-    services.insert(EJB_SERVICE.to_owned());
-
-    services
-}
-
-pub fn create() -> fabric::NodeBuilder {
-    let services = services_to_enable(PATH_TO_SERVICES_TO_ENABLE);
     let mut service_factories = service_factories();
 
     let mut builder = fabric::NodeBuilder::new();
@@ -76,9 +65,16 @@ pub fn create() -> fabric::NodeBuilder {
             None => panic!("Found unknown service name {}", service_name),
         }
     }
+
+    for (name, artifact_uri) in svcs.user_services {
+        builder =
+            builder.with_service(Box::new(JavaServiceFactoryAdapter::new(name, artifact_uri)));
+    }
+
     builder
 }
 
+/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -94,19 +90,19 @@ mod tests {
     #[test]
     fn no_config() {
         let services_to_enable = services_to_enable("");
-        assert_eq!(services_to_enable.len(), 2);
-        assert!(services_to_enable.contains(EJB_SERVICE));
+        assert_eq!(services_to_enable.len(), 1);
         assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
     }
 
-    #[test]
-    fn empty_list() {
-        let cfg = create_config("empty_list.toml", "services = []");
-        let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 1);
-        assert!(services_to_enable.contains(EJB_SERVICE));
-    }
+//    #[test]
+//    fn empty_list() {
+//        let cfg = create_config("empty_list.toml", "services = []");
+//        let services_to_enable = services_to_enable(cfg);
+//        assert_eq!(services_to_enable.len(), 1);
+//        assert!(services_to_enable.contains(EJB_SERVICE));
+//    }
 
+    // TODO: move tests to the services.rs
     #[test]
     fn duplicated() {
         let cfg = create_config(
@@ -114,13 +110,12 @@ mod tests {
             "services = [\"btc-anchoring\", \"btc-anchoring\"]",
         );
         let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 2);
-        assert!(services_to_enable.contains(EJB_SERVICE));
+        assert_eq!(services_to_enable.len(), 1);
         assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
     }
 
     #[test]
-    #[should_panic(expected = "Invalid list of services to enable")]
+    #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn broken_config() {
         let cfg = create_config("broken.toml", "not_list = 1");
         let _services_to_enable = services_to_enable(cfg);
@@ -130,8 +125,7 @@ mod tests {
     fn with_anchoring() {
         let cfg = create_config("anchoring.toml", "services = [\"btc-anchoring\"]");
         let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 2);
-        assert!(services_to_enable.contains(EJB_SERVICE));
+        assert_eq!(services_to_enable.len(), 1);
         assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
     }
 
@@ -142,8 +136,7 @@ mod tests {
             "services = [\"configuration\", \"btc-anchoring\", \"time\"]",
         );
         let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 4);
-        assert!(services_to_enable.contains(EJB_SERVICE));
+        assert_eq!(services_to_enable.len(), 3);
         assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
         assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
         assert!(services_to_enable.contains(TIME_SERVICE));
@@ -153,4 +146,4 @@ mod tests {
             assert!(service_factories.get(service).is_some())
         }
     }
-}
+}*/

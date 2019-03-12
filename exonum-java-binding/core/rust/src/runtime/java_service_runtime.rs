@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-use exonum::blockchain::Service;
-use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
 use jni::{
     self,
     objects::{GlobalRef, JObject},
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use std::env;
-use std::sync::{Arc, Once, ONCE_INIT};
+use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
+use std::{env, sync::Arc};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, Run};
-use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
-
-static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
-static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
@@ -49,27 +42,14 @@ pub struct JavaServiceRuntime {
 }
 
 impl JavaServiceRuntime {
-    /// Creates new runtime from provided config or returns the one created earlier.
-    ///
-    /// There can be only one `JavaServiceRuntime` instance at a time.
-    pub fn get_or_create(config: Config) -> Self {
-        unsafe {
-            // Initialize runtime if it wasn't created before.
-            JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
-                let executor = MainExecutor::new(Arc::new(java_vm));
-                let service_runtime =
-                    Self::create_service_runtime(config.runtime_config, executor.clone());
-                let runtime = JavaServiceRuntime {
-                    executor,
-                    service_runtime,
-                };
-                JAVA_SERVICE_RUNTIME = Some(runtime);
-            });
-            // Return global runtime.
-            JAVA_SERVICE_RUNTIME
-                .clone()
-                .expect("Trying to return runtime, but it's uninitialized")
+    /// Creates new runtime from provided config.
+    pub fn create_java_runtime(config: Config) -> Self {
+        let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
+        let executor = MainExecutor::new(Arc::new(java_vm));
+        let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
+        JavaServiceRuntime {
+            executor,
+            service_runtime,
         }
     }
 
@@ -223,45 +203,5 @@ pub fn panic_if_java_options() {
              It is recommended to use `--ejb-jvm-args` command-line \
              parameter for setting custom JVM parameters."
         );
-    }
-}
-
-/// Factory for particular Java service.
-/// Initializes EJB runtime and creates `ServiceProxy`.
-pub struct JavaServiceFactory;
-
-impl ServiceFactory for JavaServiceFactory {
-    fn service_name(&self) -> &str {
-        "JAVA_SERVICE_FACTORY"
-    }
-
-    fn command(&mut self, command: &str) -> Option<Box<CommandExtension>> {
-        use exonum::helpers::fabric;
-        // Execute EJB configuration steps along with standard Exonum Core steps.
-        match command {
-            v if v == fabric::Finalize.name() => Some(Box::new(Finalize)),
-            v if v == fabric::Run.name() => Some(Box::new(Run)),
-            _ => None,
-        }
-    }
-
-    fn make_service(&mut self, context: &Context) -> Box<Service> {
-        use exonum::helpers::fabric::keys;
-        let config: Config = context
-            .get(keys::NODE_CONFIG)
-            .expect("Unable to read node configuration.")
-            .services_configs
-            .get(super::cmd::EJB_CONFIG_SECTION_NAME)
-            .expect("Unable to read EJB configuration.")
-            .clone()
-            .try_into()
-            .expect("Invalid EJB configuration format.");
-
-        let runtime = JavaServiceRuntime::get_or_create(config.clone());
-        let artifact_id = runtime
-            .load_artifact(&config.service_config.artifact_uri)
-            .expect("Unable to load artifact");
-        let service_proxy = runtime.create_service(&artifact_id);
-        Box::new(service_proxy)
     }
 }
