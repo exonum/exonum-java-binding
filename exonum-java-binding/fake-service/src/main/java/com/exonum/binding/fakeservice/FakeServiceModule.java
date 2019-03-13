@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.fakes.services.service;
+package com.exonum.binding.fakeservice;
 
 import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
-import com.google.inject.TypeLiteral;
+import com.exonum.binding.service.TransactionConverter;
+import com.google.inject.Singleton;
+import org.pf4j.Extension;
 
 /**
- * A module configuring {@link TestService}.
+ * A module configuring {@link FakeService}.
  */
-public final class TestServiceModule extends AbstractServiceModule {
+@Extension
+public final class FakeServiceModule extends AbstractServiceModule {
+
+  private static final TransactionConverter THROWING_TX_CONVERTER = (tx) -> {
+    throw new IllegalStateException("No transactions in this service: " + tx);
+  };
 
   @Override
   protected void configure() {
-    bind(Service.class).to(TestService.class);
-    bind(new TypeLiteral<SchemaFactory<TestSchema>>(){})
-        .toInstance(TestSchema::new);
+    bind(Service.class).to(FakeService.class)
+        .in(Singleton.class);
+    bind(TransactionConverter.class).toInstance(THROWING_TX_CONVERTER);
   }
 }
