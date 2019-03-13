@@ -18,7 +18,7 @@
     <junit.jupiter.version>5.4.0</junit.jupiter.version>
     <hamcrest.version>2.1</hamcrest.version>
     <mockito.version>2.24.0</mockito.version>
-    <exonum.version>0.5-SNAPSHOT</exonum.version>
+    <exonum.version>0.6.0-SNAPSHOT</exonum.version>
   </properties>
 
   <dependencyManagement>
