@@ -24,7 +24,6 @@ You need to install the following dependencies:
   * The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
   * For automatic packaging of the EJB App you also need `CMake` installed in your system. 
-  **Automatic EJB App packaging is only supported on Linux platform at the moment**. 
 
 ### Building
 Set required environment variables, once in a shell you use to build the project:
