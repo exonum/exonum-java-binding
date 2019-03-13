@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.5] - 2019-03-TBD
+## [0.5.0] - 2019-03-TBD
 
 ### Added
 - Support of Time oracle. Instruction on how to enable built-in services can be found
@@ -170,8 +170,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.5...HEAD
-[0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.4...v0.5
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...HEAD
+[0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0
 [0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
 [0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
 [0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2
