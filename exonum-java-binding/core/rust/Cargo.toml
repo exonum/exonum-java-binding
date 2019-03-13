@@ -15,6 +15,7 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
+chashmap = "2.2.2"
 exonum = "0.10"
 exonum-time = "0.10"
 failure = "0.1.1"

@@ -21,6 +21,7 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
+extern crate chashmap;
 pub extern crate exonum;
 #[macro_use]
 extern crate failure;
