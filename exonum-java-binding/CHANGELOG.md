@@ -17,9 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.5.0] - 2019-03-TBD
 
+### Overview
+
+This release brings support of Exonum Time Oracle. It is based on Exonum 0.10.3.
+
 ### Added
 - Support of Time oracle. Instruction on how to enable built-in services can be found
-  [here](https://exonum.com/doc/version/0.4/get-started/java-binding/#built-in-services). (#667)
+  [here](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services). (#667)
 - [`JsonSerializer`][json-serializer-0.5.0] provides support for `ZonedDateTime`
   JSON serialization in [`ISO_ZONED_DATE_TIME`][iso-zdt-format] format. (#762)
 
