@@ -15,7 +15,7 @@ futures = "0.1"
 failure = "0.1"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855)
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
-exonum-testkit = { git = "https://github.com/vitvakatu/exonum", branch = "update-rocksdb" }
+exonum-testkit = "0.10"
 lazy_static = "1.2"
 serde = "1.0"
 serde_derive = "1.0"
