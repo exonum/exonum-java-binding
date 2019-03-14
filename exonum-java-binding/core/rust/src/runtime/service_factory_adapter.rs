@@ -7,6 +7,7 @@ use std::sync::{Once, ONCE_INIT};
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
+static JAVA_SERVICE_CREATE_COMMAND: Once = ONCE_INIT;
 
 /// Adapts current single-service interface of core to multiple EJB services until dynamic services
 /// are implemented.
@@ -64,13 +65,16 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
         &self.name
     }
 
-    fn command(&mut self, command: &str) -> Option<Box<CommandExtension>> {
+    fn command(&mut self, command_name: &str) -> Option<Box<CommandExtension>> {
         use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
-        match command {
-            v if v == fabric::Run.name() => Some(Box::new(Run)),
-            _ => None,
+        let mut command_ext: Option<Box<CommandExtension>> = None;
+        if command_name == fabric::Run.name() {
+            // We return command extension only once for all instances of ServiceFactory otherwise
+            // the `clap` backend will complain about non-unique argument names
+            JAVA_SERVICE_CREATE_COMMAND.call_once(|| command_ext = Some(Box::new(Run)));
         }
+        command_ext
     }
 
     fn make_service(&mut self, context: &Context) -> Box<Service> {
