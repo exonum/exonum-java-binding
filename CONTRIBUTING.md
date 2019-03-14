@@ -23,7 +23,8 @@ You need to install the following dependencies:
   To install a specific Rust version, use `rustup install 1.32.0` command.
   * The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
-  * For automatic packaging of the EJB App you also need `CMake` installed in your system. 
+  * For automatic packaging of the EJB App you also need `CMake` installed in your system. Also on 
+  Mac you need a `coreutils` package installed.
 
 ### Building
 Set required environment variables, once in a shell you use to build the project:
