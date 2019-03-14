@@ -9,7 +9,7 @@ of the Contribution Guide.
 You also need a ready-to-use Exonum Java service. You can use 
 [cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
 implementing your own Exonum service 
-in the [user guide](https://exonum.com/doc/version/latest/get-started/java-binding/).
+in the [user guide](https://exonum.com/doc/version/0.10/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
 [cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding/cryptocurrency-demo
@@ -34,7 +34,7 @@ You can use the following script for this purpose:
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
 LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
-RUST_LIB_PATH="$(rustup run stable rustc --print sysroot)/lib"
+RUST_LIB_PATH="$(rustup run 1.32.0 rustc --print sysroot)/lib"
 
 export EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
 

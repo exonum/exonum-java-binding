@@ -31,8 +31,8 @@ use integration_tests::{
 use java_bindings::{
     exonum::{
         blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
-        crypto::{Hash, PublicKey},
-        messages::RawTransaction,
+        crypto::{self, Hash, PublicKey, SecretKey},
+        messages::{Message, RawTransaction},
         storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
     jni::JavaVM,
@@ -52,30 +52,20 @@ lazy_static! {
 #[test]
 fn execute_valid_transaction() {
     let db = MemoryDB::new();
+    let snapshot = db.snapshot();
+    let entry = create_test_entry(&*snapshot);
+    assert_eq!(None, entry.get());
+
+    // Execute transaction which will write value into the entry index
+    let mut fork = db.fork();
+    let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
     {
-        let snapshot = db.snapshot();
-        let entry = create_test_entry(&*snapshot);
-        assert_eq!(None, entry.get());
+        let keypair = crypto::gen_keypair();
+        let tx_context = create_transaction_context(&mut fork, raw, keypair);
+        valid_tx.execute(tx_context).unwrap();
     }
-    {
-        let mut fork = db.fork();
-        let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
-        {
-            let tx_context = create_transaction_context(&mut fork, raw);
-            valid_tx
-                .execute(tx_context)
-                .map_err(TransactionError::from)
-                .unwrap_or_else(|err| {
-                    panic!(
-                        "Execution error: {:?}; {}",
-                        err.error_type(),
-                        err.description().unwrap_or_default()
-                    )
-                });
-        }
-        db.merge(fork.into_patch())
-            .expect("Failed to merge transaction");
-    }
+    db.merge(fork.into_patch()).unwrap();
+
     // Check the transaction has successfully written the expected value into the entry index.
     let snapshot = db.snapshot();
     let entry = create_test_entry(&*snapshot);
@@ -88,7 +78,8 @@ fn execute_should_panic_if_java_error_occurred() {
     let (panic_tx, raw) = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let tx_context = create_transaction_context(&mut fork, raw);
+    let keypair = crypto::gen_keypair();
+    let tx_context = create_transaction_context(&mut fork, raw, keypair);
     panic_tx.execute(tx_context).unwrap();
 }
 
@@ -99,7 +90,8 @@ fn execute_should_panic_if_java_exception_occurred() {
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let tx_context = create_transaction_context(&mut fork, raw);
+    let keypair = crypto::gen_keypair();
+    let tx_context = create_transaction_context(&mut fork, raw, keypair);
     panic_tx.execute(tx_context).unwrap();
 }
 
@@ -115,7 +107,8 @@ fn execute_should_return_err_if_tx_exec_exception_occurred() {
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let tx_context = create_transaction_context(&mut fork, raw);
+    let keypair = crypto::gen_keypair();
+    let tx_context = create_transaction_context(&mut fork, raw, keypair);
     let err = invalid_tx
         .execute(tx_context)
         .map_err(TransactionError::from)
@@ -136,7 +129,8 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred() {
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let tx_context = create_transaction_context(&mut fork, raw);
+    let keypair = crypto::gen_keypair();
+    let tx_context = create_transaction_context(&mut fork, raw, keypair);
     let err = invalid_tx
         .execute(tx_context)
         .map_err(TransactionError::from)
@@ -156,7 +150,8 @@ fn execute_should_return_err_if_tx_exec_exception_occurred_no_message() {
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let tx_context = create_transaction_context(&mut fork, raw);
+    let keypair = crypto::gen_keypair();
+    let tx_context = create_transaction_context(&mut fork, raw, keypair);
     let err = invalid_tx
         .execute(tx_context)
         .map_err(TransactionError::from)
@@ -176,7 +171,8 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
     );
     let db = MemoryDB::new();
     let mut fork = db.fork();
-    let tx_context = create_transaction_context(&mut fork, raw);
+    let keypair = crypto::gen_keypair();
+    let tx_context = create_transaction_context(&mut fork, raw, keypair);
     let err = invalid_tx
         .execute(tx_context)
         .map_err(TransactionError::from)
@@ -212,22 +208,22 @@ fn json_serialize_should_return_err_if_java_exception_occurred() {
 #[test]
 fn passing_transaction_context() {
     let db = MemoryDB::new();
-    let (tx_hash, author_pk) = {
-        let mut fork = db.fork();
+    let keypair = crypto::gen_keypair();
+    let author_pk = keypair.0;
+    let tx_hash: Hash;
+
+    // Execute transaction which will write passed `tx_hash` and `author_pk` into the entry index
+    let mut fork = db.fork();
+    {
         let (valid_tx, raw) = create_mock_transaction_proxy(EXECUTOR.clone());
-        // get transaction hash and author public key from mock transaction
-        let (tx_hash, author_pk) = {
-            let context = create_transaction_context(&mut fork, raw);
-            let (tx_hash, author_pk) = (context.tx_hash(), context.author());
+        let context = create_transaction_context(&mut fork, raw, keypair);
+        tx_hash = context.tx_hash();
+        valid_tx.execute(context).unwrap();
+    }
+    db.merge(fork.into_patch()).unwrap();
 
-            // execute transaction
-            valid_tx.execute(context).unwrap();
-
-            (tx_hash, author_pk)
-        };
-        db.merge(fork.into_patch()).unwrap();
-        (tx_hash, author_pk)
-    };
+    // Checking that tx_hash and author_pk passed to the transaction context are
+    // the same as the ones received by transaction during its execution.
     let snapshot = db.snapshot();
     let tx_hash_entry: Entry<_, Hash> = Entry::new(TX_HASH_ENTRY_NAME, &snapshot);
     assert_eq!(tx_hash_entry.get().unwrap(), tx_hash);
@@ -242,14 +238,12 @@ where
     Entry::new(TEST_ENTRY_NAME, view)
 }
 
-fn create_transaction_context(fork: &mut Fork, raw: RawTransaction) -> TransactionContext {
+fn create_transaction_context(
+    fork: &mut Fork,
+    raw: RawTransaction,
+    (pk, sk): (PublicKey, SecretKey),
+) -> TransactionContext {
     let (service_id, service_transaction) = (raw.service_id(), raw.service_transaction());
-    let (pk, sk) = java_bindings::exonum::crypto::gen_keypair();
-    let signed_transaction = java_bindings::exonum::messages::Message::sign_transaction(
-        service_transaction,
-        service_id,
-        pk,
-        &sk,
-    );
+    let signed_transaction = Message::sign_transaction(service_transaction, service_id, pk, &sk);
     TransactionContext::new(fork, &signed_transaction)
 }

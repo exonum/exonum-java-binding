@@ -23,8 +23,11 @@ Be sure you installed necessary packages:
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
-- The [system dependencies](https://exonum.com/doc/version/latest/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
-- [Stable Rust](https://rustup.rs/).
+- The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
+- [Rust 1.32.0](https://rustup.rs/). To install a specific Rust version, you can use the following command:
+  ```bash
+  rustup install 1.32.0
+  ```
 
 #### Install and run
 
@@ -73,7 +76,7 @@ $ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http
 Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
-- [Reference Documentation](https://exonum.com/doc/version/latest/get-started/java-binding).
+- [Reference Documentation](https://exonum.com/doc/version/0.10/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/ejb-app/TUTORIAL.md

@@ -280,7 +280,7 @@ fn create_java_map_entries<'a>(
     Ok(java_entries.into())
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
+#[allow(clippy::ptr_arg)]
 fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
     let key: JObject = env.byte_array_from_slice(key)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
@@ -521,7 +521,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
                 let key: JObject = env.byte_array_from_slice(&val.0)?.into();
                 let value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(env
-                    .new_object_by_id(
+                    .new_object_unchecked(
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
                         &[key.into(), value.into()],

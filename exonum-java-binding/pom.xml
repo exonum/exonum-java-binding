@@ -32,21 +32,27 @@
     </developer>
 
     <developer>
-      <id>alexander-irbis</id>
-      <name>Alexander Semichenkov</name>
-      <url>https://github.com/alexander-irbis</url>
-    </developer>
-
-    <developer>
       <id>MakarovS</id>
       <name>Sergei Makarov</name>
       <url>https://github.com/MakarovS</url>
     </developer>
 
     <developer>
+      <id>bullet-tooth</id>
+      <name>Oleg Bondar</name>
+      <url>https://github.com/bullet-tooth</url>
+    </developer>
+
+    <developer>
       <id>vitvakatu</id>
       <name>Ilya Bogdanov</name>
       <url>https://github.com/vitvakatu</url>
+    </developer>
+
+    <developer>
+      <id>skletsun</id>
+      <name>Sergey Kletsun</name>
+      <url>https://github.com/skletsun</url>
     </developer>
   </developers>
 
@@ -59,6 +65,7 @@
     <module>qa-service</module>
     <module>cryptocurrency-demo</module>
     <module>service-archetype</module>
+    <module>time-oracle</module>
   </modules>
 
   <scm>
@@ -91,21 +98,23 @@
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
+    <!-- Empty for all JDKs but 11 -->
+    <maven.javadoc.joption></maven.javadoc.joption>
 
-    <assertj.version>3.11.1</assertj.version>
+    <assertj.version>3.12.1</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
-    <log4j.version>2.11.1</log4j.version>
-    <hamcrest.version>2.0.0.0</hamcrest.version>
+    <log4j.version>2.11.2</log4j.version>
+    <hamcrest.version>2.1</hamcrest.version>
     <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.3.2</junit.jupiter.version>
+    <junit.jupiter.version>5.4.0</junit.jupiter.version>
     <powermock.version>2.0.0</powermock.version>
     <protobuf.version>3.6.1</protobuf.version>
-    <mockito-core.version>2.23.4</mockito-core.version>
+    <mockito-core.version>2.24.5</mockito-core.version>
     <guava.version>27.0.1-jre</guava.version>
     <vertx.version>3.5.4</vertx.version>
-    <equalsverifier.version>3.1.4</equalsverifier.version>
+    <equalsverifier.version>3.1.5</equalsverifier.version>
     <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
     <gson.version>2.8.5</gson.version>
     <auto-value-gson.version>0.8.0</auto-value-gson.version>
@@ -123,6 +132,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
+    <pf4j.version>2.6.0</pf4j.version>
   </properties>
 
   <dependencyManagement>
@@ -157,6 +167,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.ryanharter.auto.value</groupId>
         <artifactId>auto-value-gson-annotations</artifactId>
         <version>${auto-value-gson.version}</version>
@@ -170,16 +186,34 @@
       </dependency>
 
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
+        <groupId>org.pf4j</groupId>
+        <artifactId>pf4j</artifactId>
+        <version>${pf4j.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.hamcrest</groupId>
-        <artifactId>java-hamcrest</artifactId>
+        <artifactId>hamcrest</artifactId>
         <version>${hamcrest.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- An empty artifact, required while JUnit 4 is on the classpath to override its
+           dependency on hamcrest.
+
+           See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+       -->
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>${hamcrest.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
         <scope>test</scope>
       </dependency>
 
@@ -234,38 +268,27 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <!-- Shared test dependencies of all sub-modules. -->
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!--JUnit5-->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!-- Needed to fix @Generated annotation java 8 - 11 issue, Javadoc generation with JDK 9 -->
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
       <version>${javax-annotation-api.version}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <!-- Shared test dependencies of all sub-modules. -->
+    <!--JUnit5: junit-jupiter aggregates junit-jupiter-api and junit-jupiter-params +
+        a runtime dependency on junit-jupiter-engine -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -318,7 +341,7 @@
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>8.17</version>
+              <version>8.18</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -376,7 +399,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>3.1.10</version>
+          <version>3.1.11</version>
         </plugin>
 
         <plugin>
@@ -392,6 +415,7 @@
           <configuration>
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
+            <additionalJOption>${maven.javadoc.joption}</additionalJOption>
           </configuration>
           <executions>
             <execution>
@@ -466,6 +490,25 @@
                 </requireEnvironmentVariable>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checks that the POMs match the code convention:
+           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
+
+           Use `mvn tidy:pom` to fix any style issues -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <executions>
+          <execution>
+            <id>check-pom-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -609,6 +652,17 @@
       </activation>
       <properties>
         <project.skipJavaITs>true</project.skipJavaITs>
+      </properties>
+    </profile>
+
+    <!-- Fill in needed property when generating Javadocs on JDK 11 -->
+    <profile>
+      <id>generate-javadocs-jdk11</id>
+      <activation>
+        <jdk>11</jdk>
+      </activation>
+      <properties>
+        <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
       </properties>
     </profile>
   </profiles>

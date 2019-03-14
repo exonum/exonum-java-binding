@@ -28,8 +28,9 @@ import com.exonum.binding.proxy.ProxyDestructor;
  * <p>A snapshot represents database state at the time it was created. Immutability implies that:
  * <ul>
  *   <li>Write operations are prohibited; an attempt to perform a modifying operation
- *       will result in an {@link UnsupportedOperationException}</li>
- *   <li>Database state will not change whilst a snapshot is alive.
+ *       will result in an {@link UnsupportedOperationException}.
+ *   <li>Database state <em>represented by this snapshot</em> does not change. Newly created
+ *   snapshots, however, might correspond to a new database state.
  * </ul>
  *
  * @see Fork

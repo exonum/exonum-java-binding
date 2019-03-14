@@ -25,6 +25,7 @@ use jni::signature::JavaType;
 use serde_json;
 use serde_json::value::Value;
 use std::fmt;
+use std::str::FromStr;
 
 use proxy::node::NodeContext;
 use storage::View;
@@ -42,9 +43,6 @@ pub struct ServiceProxy {
     id: u16,
     name: String,
 }
-
-// `ServiceProxy` is immutable, so it can be safely used in different threads.
-unsafe impl Sync for ServiceProxy {}
 
 impl fmt::Debug for ServiceProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -91,14 +89,15 @@ impl Service for ServiceProxy {
     fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let java_service_hashes = panic_on_exception(env, unsafe {
-                env.call_method_unsafe(
+            let java_service_hashes = panic_on_exception(
+                env,
+                env.call_method_unchecked(
                     self.service.as_obj(),
                     service_adapter::state_hashes_id(),
                     JavaType::from_str("[[B").unwrap(),
                     &[JValue::from(view_handle)],
-                )
-            });
+                ),
+            );
             let byte_array_array = java_service_hashes.l()?.into_inner();
             let len = env.get_array_length(byte_array_array)?;
             let mut hashes: Vec<Hash> = Vec::with_capacity(len as usize);
@@ -112,20 +111,17 @@ impl Service for ServiceProxy {
 
     fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
         unwrap_jni(self.exec.with_attached(|env| {
-            let raw_clone = raw.clone();
             let (tx_id, payload) = raw.service_transaction().into_raw_parts();
             let payload = JObject::from(env.byte_array_from_slice(&payload)?);
 
-            let res = unsafe {
-                env.call_method_unsafe(
-                    self.service.as_obj(),
-                    service_adapter::convert_transaction_id(),
-                    JavaType::Object(
-                        "com/exonum/binding/service/adapters/UserTransactionAdapter".into(),
-                    ),
-                    &[JValue::from(tx_id), JValue::from(payload)],
-                )
-            };
+            let res = env.call_method_unchecked(
+                self.service.as_obj(),
+                service_adapter::convert_transaction_id(),
+                JavaType::Object(
+                    "com/exonum/binding/service/adapters/UserTransactionAdapter".into(),
+                ),
+                &[JValue::from(tx_id), JValue::from(payload)],
+            );
             // TODO consider whether `NullPointerException` should raise a panic:
             // [https://jira.bf.local/browse/ECR-944]
             Ok(match check_error_on_exception(env, res) {
@@ -133,7 +129,6 @@ impl Service for ServiceProxy {
                     let java_transaction_proxy = TransactionProxy::from_global_ref(
                         self.exec.clone(),
                         env.new_global_ref(java_transaction.l()?)?,
-                        raw_clone,
                     );
                     Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
                 }
@@ -198,6 +193,7 @@ impl Service for ServiceProxy {
 
     fn wire_api(&self, builder: &mut ServiceApiBuilder) {
         assert!(builder.blockchain().is_some());
+
         let node = NodeContext::new(
             self.exec.clone(),
             builder.blockchain().unwrap().clone(),

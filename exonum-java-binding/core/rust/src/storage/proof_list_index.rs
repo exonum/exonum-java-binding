@@ -385,7 +385,7 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
 }
 
 // TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
-#[cfg_attr(feature = "cargo-clippy", allow(ptr_arg))]
+#[allow(clippy::ptr_arg)]
 fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
     let value = env.auto_local(env.byte_array_from_slice(value)?.into());
     env.new_object(

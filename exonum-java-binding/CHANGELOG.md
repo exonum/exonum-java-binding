@@ -16,27 +16,51 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Support of new transaction message format added in Exonum 0.10. (#534)
-- Support of core schema API. (#548, #549, #571, #573)
+- Support of Time oracle. Instruction on how to enable built-in services can be found
+  [here](https://exonum.com/doc/version/0.4/get-started/java-binding/#built-in-services). (#667)
+- `com.exonum.binding.common.serialization.json.JsonSerializer` provides support for `ZonedDateTime`
+  JSON serialization in `java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME` format. (#762)
+
+### Changed
+- `TransactionResult` and `TransactionLocation` classes moved to the common module. (#725)
+
+## [0.4] - 2019-02-18
+
+This release is based on the latest Exonum version, 0.10, 
+and brings the features and improvements outlined below.
+
+**If you are upgrading an existing Java service, consult 
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/v0.4/exonum-java-binding/doc/Migration_guide_0.4.md).**
+
+### Added
+- Support of new transaction message format added in Exonum 0.10. It allows service 
+  developers to use any serialization format, and the framework to perform signature verification
+  automatically. Both the service and client APIs are migrated. (#534, #574)
+- `com.exonum.binding.blockchain.Blockchain`, allowing services to read data, 
+  maintained by the framework (blocks, transaction messages, transaction execution results, etc.).
+  (#548, #549, #571, #573)
 - Support of `Service#afterCommit(BlockCommittedEvent event)` method
   that is invoked after each block commit event. (#550)
-- Support of Json serialization in a common way. (#611)
-- `--jvm-debug` command line argument that allows JDWP debugging of node. (#629)
-- Support of separated messages format Exonum v0.10. (#574)
+- `com.exonum.binding.common.serialization.json.JsonSerializer` providing JSON serialization 
+  support of any objects, including Exonum built-in types. (#611)
+- Support of passing arbitrary arguments to the JVM when the node is launched via
+  `--jvm-args-prepend` and `--jvm-args-append` CLI flags. (#629)
+- `--jvm-debug` application command line argument that allows JDWP debugging of a node. (#629)
 - `ListIndexProxy#stream` to enable stream processing of list elements. (#661)
+- Support of running services on Java 11 runtime.
 
 ### Changed
 - `com.exonum.binding.storage.indices.MapEntry` moved to package
-  `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated 
+  `com.exonum.binding.common.collect`. `FlatMapProof` and `MapIndex` are updated
   to use this implementation of `MapEntry`.
 - The `--ejb-jvm-args` command line argument has been substituted with `--jvm-args-prepend` and
   `--jvm-args-append` arguments that can now be passed at the `Run` stage instead of
-  `Generate-Config`. Also, the value of `--jvm-args-append` is not saved to any of the configuration
+  `Generate-Config`. Also, these JVM arguments are not saved to any of the configuration
   files. (#629)
 - `Node#getPublicKey` to return `PublicKey` instead of `byte[]`. (#651)
-- `com.exonum.binding.transaction.Transaction#execute` now accepts 
+- `com.exonum.binding.transaction.Transaction#execute` now accepts
   `com.exonum.binding.transaction.TransactionContext`
-  instead of `com.exonum.binding.storage.database.View`  
+  instead of `com.exonum.binding.storage.database.View`
 
 ### Removed
 - `com.exonum.binding.common.proofs.map.MapEntry` — moved to package
@@ -44,7 +68,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `ViewModificationCounter` replaced with per-`View` modification counters to simplify
   their relationship and testing. (#658)
 - Exonum v0.9 message format related classes.
-  
+
 ### Fixed
 - A bug in the cryptocurrency demo frontend that sometimes resulted in rejected transactions and/or
 wrong response code (#621).
@@ -144,7 +168,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.3...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.4...HEAD
+[0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
 [0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
 [0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2
 [0.1.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1...v0.1.2

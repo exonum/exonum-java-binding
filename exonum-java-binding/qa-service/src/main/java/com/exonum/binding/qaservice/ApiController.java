@@ -39,6 +39,8 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMEN
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -46,9 +48,10 @@ import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.TransactionLocation;
-import com.exonum.binding.blockchain.TransactionResult;
+import com.exonum.binding.common.blockchain.TransactionLocation;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.google.common.annotations.VisibleForTesting;
@@ -62,6 +65,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,6 +112,8 @@ final class ApiController {
             .put(BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH, this::getTransactionLocations)
             .put(BLOCKCHAIN_TRANSACTION_LOCATION_PATH, this::getTransactionLocation)
             .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
+            .put(TIME_PATH, this::getTime)
+            .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -278,6 +284,16 @@ final class ApiController {
     respondWithJson(rc, configuration);
   }
 
+  private void getTime(RoutingContext rc) {
+    Optional<TimeDto> time = service.getTime().map(TimeDto::new);
+    respondWithJson(rc, time);
+  }
+
+  private void getValidatorsTimes(RoutingContext rc) {
+    Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
+    respondWithJson(rc, validatorsTimes);
+  }
+
   private static String getRequiredParameter(MultiMap parameters, String key) {
     return getRequiredParameter(parameters, key, String::toString);
   }
@@ -394,10 +410,6 @@ final class ApiController {
     @VisibleForTesting
     static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
     @VisibleForTesting
-    static final String SUBMIT_INVALID_TX_PATH = "/submit-invalid";
-    @VisibleForTesting
-    static final String SUBMIT_INVALID_THROWING_TX_PATH = "/submit-invalid-throwing";
-    @VisibleForTesting
     static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
     @VisibleForTesting
     static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
@@ -440,6 +452,10 @@ final class ApiController {
     @VisibleForTesting
     static final String BLOCKCHAIN_TRANSACTION_LOCATION_PATH = BLOCKCHAIN_ROOT + "/txLocation/:"
         + MESSAGE_HASH_PARAM;
+    @VisibleForTesting
+    static final String TIME_PATH = "/time";
+    @VisibleForTesting
+    static final String VALIDATORS_TIMES_PATH = TIME_PATH + "/validators";
   }
 
 }

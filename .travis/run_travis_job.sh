@@ -28,17 +28,10 @@ then
     cargo fmt -- --check
 
     # Run clippy static analysis.
-    # TODO Remove when clippy is fixed https://github.com/rust-lang-nursery/rust-clippy/issues/2831
-    # Next 2 lines are a workaround to prevent clippy checking dependencies.
-#    cargo +${RUST_STABLE_VERSION} check
-#    cargo +${RUST_STABLE_VERSION} clean -p java_bindings
-#    cargo +${RUST_STABLE_VERSION} clippy --all --tests --all-features -- -D warnings
-# TODO: Commented until ECR-2755 is fixed
-#    cargo clippy --all --tests --all-features -- -D warnings
+    cargo clippy --all --tests --all-features -- -D warnings
 
     # Run audit of vulnerable dependencies.
-    # TODO: enable when vulnerabilities will be fixed
-    cargo audit || true
+    cargo audit
 
     # Check silently for updates of Maven dependencies.
     # TODO Disabled until ECR-2252 is fixed.

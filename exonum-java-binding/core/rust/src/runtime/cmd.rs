@@ -273,10 +273,12 @@ where
     // Retrieve config by key
     let config = service_config
         .get(key)
-        .expect(&format!(
-            "Unable to read config with key [{}] from node configuration",
-            key
-        ))
+        .unwrap_or_else(|| {
+            panic!(
+                "Unable to read config with key [{}] from node configuration",
+                key
+            )
+        })
         .clone()
         .try_into()?;
 

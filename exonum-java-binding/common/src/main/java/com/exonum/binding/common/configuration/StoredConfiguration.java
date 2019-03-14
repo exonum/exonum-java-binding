@@ -27,7 +27,7 @@ import java.util.List;
  * Represents a blockchain configuration which is a set of values that determine
  * the network access parameters of a node and behavior of the node while operating in the network.
  *
- * <p>See <a href="https://exonum.com/doc/version/latest/architecture/configuration/">Exonum configuration</a> for
+ * <p>See <a href="https://exonum.com/doc/version/0.10/architecture/configuration/">Exonum configuration</a> for
  * configuration details.
  *
  * <p>Services configuration parameters would be available after
@@ -51,7 +51,7 @@ public abstract class StoredConfiguration {
   /**
    * List of validators consensus and service public keys.
    *
-   * @see <a href="https://exonum.com/doc/version/latest/architecture/configuration/#genesisvalidator_keys">Validator keys configuration section</a>
+   * @see <a href="https://exonum.com/doc/version/0.10/architecture/configuration/#genesisvalidator_keys">Validator keys configuration section</a>
    */
   @SerializedName("validator_keys")
   public abstract List<ValidatorKey> validatorKeys();

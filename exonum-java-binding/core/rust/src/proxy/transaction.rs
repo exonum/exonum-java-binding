@@ -15,7 +15,6 @@
  */
 
 use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
-use exonum::messages::RawTransaction;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{JavaType, Primitive};
 use jni::JNIEnv;
@@ -42,11 +41,7 @@ const RETVAL_TYPE_STRING: &str = "java/lang/String";
 pub struct TransactionProxy {
     exec: MainExecutor,
     transaction: GlobalRef,
-    raw: RawTransaction,
 }
-
-// `TransactionProxy` is immutable, so it can be safely used in different threads.
-unsafe impl Sync for TransactionProxy {}
 
 impl fmt::Debug for TransactionProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -56,16 +51,8 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(
-        exec: MainExecutor,
-        transaction: GlobalRef,
-        raw: RawTransaction,
-    ) -> Self {
-        TransactionProxy {
-            exec,
-            transaction,
-            raw,
-        }
+    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef) -> Self {
+        TransactionProxy { exec, transaction }
     }
 }
 
@@ -78,14 +65,12 @@ impl serde::Serialize for TransactionProxy {
         S: serde::Serializer,
     {
         let res = unwrap_jni(self.exec.with_attached(|env| {
-            let res = unsafe {
-                env.call_method_unsafe(
-                    self.transaction.as_obj(),
-                    info_id(),
-                    JavaType::Object(RETVAL_TYPE_STRING.into()),
-                    &[],
-                )
-            };
+            let res = env.call_method_unchecked(
+                self.transaction.as_obj(),
+                info_id(),
+                JavaType::Object(RETVAL_TYPE_STRING.into()),
+                &[],
+            );
 
             let res = check_error_on_exception(env, res).map(|java_json_value| {
                 let json_obj = unwrap_jni(java_json_value.l());
@@ -98,7 +83,7 @@ impl serde::Serialize for TransactionProxy {
             Ok(json_str) => {
                 // A simple way of passing a value that is already serialized to JSON to the serialiser
                 let value: serde_json::Value = serde_json::from_str(&json_str)
-                    .expect(&format!("Unable to parse JSON string {}", &json_str));
+                    .unwrap_or_else(|_| panic!("Unable to parse JSON string {}", json_str));
                 value.serialize(serializer)
             }
             // Java exception has been thrown - return its description
@@ -117,8 +102,8 @@ impl Transaction for TransactionProxy {
             let tx_hash = JObject::from(env.byte_array_from_slice(tx_hash.as_ref())?);
             let author_pk = JObject::from(env.byte_array_from_slice(author_pk.as_ref())?);
 
-            let res = unsafe {
-                env.call_method_unsafe(
+            let res = env
+                .call_method_unchecked(
                     self.transaction.as_obj(),
                     execute_id(),
                     JavaType::Primitive(Primitive::Void),
@@ -128,8 +113,7 @@ impl Transaction for TransactionProxy {
                         JValue::from(author_pk),
                     ],
                 )
-                .and_then(JValue::v)
-            };
+                .and_then(JValue::v);
 
             Ok(check_transaction_execution_result(env, res))
         });
