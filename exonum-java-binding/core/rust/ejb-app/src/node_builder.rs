@@ -25,7 +25,6 @@ use java_bindings::utils::services::{
 use java_bindings::JavaServiceFactoryAdapter;
 
 use std::collections::{HashMap, HashSet};
-use std::path::Path;
 
 fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     let mut service_factories = HashMap::new();
@@ -45,10 +44,13 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
 }
 
 pub fn create() -> fabric::NodeBuilder {
-    let svcs = load_services_definition(PATH_TO_SERVICES_DEFINITION)
+    let EjbAppServices {
+        enabled_services,
+        user_services,
+    } = load_services_definition(PATH_TO_SERVICES_DEFINITION)
         .expect("Unable to load services definition");
 
-    let services = svcs.enabled_services.unwrap_or_else(|| {
+    let services = enabled_services.unwrap_or_else(|| {
         let mut services = HashSet::new();
         services.insert(CONFIGURATION_SERVICE.to_owned());
         services
@@ -66,7 +68,7 @@ pub fn create() -> fabric::NodeBuilder {
         }
     }
 
-    for (name, artifact_uri) in svcs.user_services {
+    for (name, artifact_uri) in user_services {
         builder =
             builder.with_service(Box::new(JavaServiceFactoryAdapter::new(name, artifact_uri)));
     }
