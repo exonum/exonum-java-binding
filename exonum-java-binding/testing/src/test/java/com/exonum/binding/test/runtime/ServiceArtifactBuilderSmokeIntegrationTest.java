@@ -44,15 +44,13 @@ class ServiceArtifactBuilderSmokeIntegrationTest {
 
     String pluginId = "test-plugin";
     String version = "1.0.1";
+    Class<?> pluginClass = TestPlugin.class;
     new ServiceArtifactBuilder()
         .setPluginId(pluginId)
         .setPluginVersion(version)
-        .setManifestEntry("Plugin-Class", TestPlugin.class.getName())
-        .addClasses(
-            TestPlugin.class,
-            TestServiceExtensionImpl.class
-        )
-        .addExtensionEntry(TestServiceExtensionImpl.class.getName())
+        .setManifestEntry("Plugin-Class", pluginClass.getName())
+        .addClass(pluginClass)
+        .addExtensionClass(TestServiceExtensionImpl.class)
         .writeTo(pluginPath);
 
     PluginManager pluginManager = new DefaultPluginManager();
@@ -64,7 +62,7 @@ class ServiceArtifactBuilderSmokeIntegrationTest {
     // Check it has correct version
     PluginWrapper plugin = pluginManager.getPlugin(pluginId);
     assertThat(plugin.getDescriptor().getVersion()).isEqualTo(version);
-    assertNamesEqual(plugin.getPlugin().getClass(), TestPlugin.class);
+    assertNamesEqual(plugin.getPlugin().getClass(), pluginClass);
 
     // Try to start
     PluginState pluginState = pluginManager.startPlugin(pluginId);
