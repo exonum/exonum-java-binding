@@ -4,11 +4,6 @@
   <formats>
     <format>zip</format>
   </formats>
-  <dependencySets>
-    <dependencySet>
-      <outputDirectory>lib/java</outputDirectory>
-    </dependencySet>
-  </dependencySets>
   <!--Maven Assembly Plugin does not support regular expressions in `files`, so we use `fileSets`-->
   <fileSets>
     <!--Rust std library-->
@@ -19,11 +14,18 @@
         <include>%regex[libstd.*]</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>${packaging.rust}/target/debug/lib/java</directory>
+      <outputDirectory>lib/java</outputDirectory>
+      <includes>
+        <include>*.*</include>
+      </includes>
+    </fileSet>
   </fileSets>
   <files>
     <!--Main EJB App executable-->
     <file>
-      <source>rust/target/debug/ejb-app</source>
+      <source>${packaging.rust}/target/debug/ejb-app</source>
     </file>
     <!--libjava_bindings.[so|dylib]-->
     <file>
@@ -32,11 +34,11 @@
     </file>
     <!--Fallback configuration for a logger-->
     <file>
-      <source>rust/ejb-app/log4j-fallback.xml</source>
+      <source>${packaging.rust}/ejb-app/log4j-fallback.xml</source>
     </file>
     <!--Tutorial and licenses-->
     <file>
-      <source>rust/ejb-app/TUTORIAL.md</source>
+      <source>${packaging.rust}/ejb-app/TUTORIAL.md</source>
     </file>
     <file>
       <source>${packaging.basedir}/LICENSES-THIRD-PARTY.TXT</source>

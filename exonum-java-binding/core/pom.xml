@@ -217,24 +217,6 @@
             </goals>
           </execution>
 
-          <execution>
-            <id>build-ejb-app</id>
-            <phase>prepare-package</phase>
-            <configuration>
-              <arguments>
-                <argument>+${rust.compiler.version}</argument>
-                <argument>build</argument>
-                <argument>--package</argument>
-                <argument>ejb-app</argument>
-                <argument>--color</argument>
-                <argument>always</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-
           <!-- Runs rust native tests without resource manager.
 
                todo: run on a CI server only
@@ -288,24 +270,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
-          <execution>
-            <id>copy-core-jar</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.basedir}/rust/target/debug/lib/java</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/target</directory>
-                  <includes>
-                    <include>exonum-java-binding-core-*.jar</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
           <execution>
             <id>copy-native-lib</id>
             <phase>package</phase>
@@ -406,6 +370,23 @@
             <goals>
               <goal>build-classpath</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>copy-core-jar</id>
+            <phase>install</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/rust/target/debug/lib/java</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.exonum.binding</groupId>
+                  <artifactId>exonum-java-binding-core</artifactId>
+                  <version>0.5-SNAPSHOT</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
           </execution>
           <execution>
             <id>copy-core-dependencies</id>
@@ -521,26 +502,6 @@
                 </configuration>
                 <goals>
                   <goal>exec</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-          <!--Package EJB App with necessary libraries and documentation-->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-              <descriptors>
-                <descriptor>app_assembly.xml</descriptor>
-              </descriptors>
-            </configuration>
-            <executions>
-              <execution>
-                <id>package-ejb-app</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>single</goal>
                 </goals>
               </execution>
             </executions>

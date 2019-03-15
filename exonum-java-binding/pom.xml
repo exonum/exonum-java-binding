@@ -66,6 +66,7 @@
     <module>cryptocurrency-demo</module>
     <module>service-archetype</module>
     <module>time-oracle</module>
+    <module>packaging</module>
   </modules>
 
   <scm>
