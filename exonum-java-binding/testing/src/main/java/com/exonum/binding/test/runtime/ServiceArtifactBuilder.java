@@ -38,7 +38,8 @@ import java.util.zip.ZipEntry;
 
 /**
  * A builder of service artifacts in PF4J format. Intended to be used in various integration tests.
- * Allows to create malformed artifacts (with missing classes, extensions, incorrect metadata).
+ * Allows to create malformed artifacts (with missing classes, extensions, incorrect or incomplete
+ * metadata).
  */
 public final class ServiceArtifactBuilder {
 
