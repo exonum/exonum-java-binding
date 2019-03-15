@@ -94,7 +94,7 @@ public final class ServiceArtifactBuilder {
    * Adds classes to the archive.
    * @param artifactClasses classes to add
    */
-  public ServiceArtifactBuilder addClasses(Iterable<Class<?>> artifactClasses) {
+  public ServiceArtifactBuilder addClasses(Iterable<? extends Class<?>> artifactClasses) {
     artifactClasses.forEach(this::addClass);
     return this;
   }
