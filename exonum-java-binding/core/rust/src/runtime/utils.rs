@@ -2,7 +2,9 @@ use std::{env, fs};
 
 use utils::executable_directory;
 
-/// Returns path to <ejb-app location>/lib directory in an absolute form.
+/// Returns a path to the `<ejb-app location>/lib/native` directory in an absolute form.
+/// This directory contains `libjava_bindings.so` so JVM is able to load native functions
+/// from the library.
 pub fn absolute_library_path() -> String {
     let library_path = {
         let mut executable_directory = executable_directory();
@@ -12,6 +14,9 @@ pub fn absolute_library_path() -> String {
     library_path.to_string_lossy().into_owned()
 }
 
+/// Returns a collection of paths to all Java classes of EJB Core and its dependencies.
+/// These classes are placed inside `<ejb-app location>/lib/java` directory.
+/// The returned value is colon- or semicolon-separated list of absolute paths to files.
 pub fn system_classpath() -> String {
     let mut jars = Vec::new();
     let jars_directory = {
