@@ -189,7 +189,7 @@ class ServiceArtifactBuilderTest {
 
   @SuppressWarnings({"UnstableApiUsage", "ConstantConditions"})
   private static byte[] readClass(Class<?> c) throws IOException {
-    // Instead of duplicating of code reading a class we could alternatively add some
+    // Instead of duplicating the code reading a class we could alternatively add some
     // `ClassWriter` or `ClassReader` interface, and inject a mock of it in ServiceArtifactBuilder
     // in tests, but the former seems easier.
     String classPath = getPath(c);
