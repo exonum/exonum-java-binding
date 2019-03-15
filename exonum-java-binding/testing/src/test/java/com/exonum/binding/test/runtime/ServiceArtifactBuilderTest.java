@@ -18,6 +18,7 @@ package com.exonum.binding.test.runtime;
 
 import static com.exonum.binding.test.runtime.ServiceArtifactBuilder.EXTENSIONS_INDEX_NAME;
 import static com.exonum.binding.test.runtime.ServiceArtifactBuilder.PLUGIN_ID_ATTRIBUTE_NAME;
+import static com.exonum.binding.test.runtime.ServiceArtifactBuilder.PLUGIN_VERSION_ATTRIBUTE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -40,6 +41,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,15 +50,20 @@ class ServiceArtifactBuilderTest {
 
   private static final String TEST_JAR_NAME = "test.jar";
 
+  private Path jarPath;
+
+  @BeforeEach
+  void setUp(@TempDir Path tempDir, TestReporter reporter) {
+    jarPath = tempDir.resolve(TEST_JAR_NAME);
+    reporter.publishEntry("test JAR path", jarPath.toString());
+  }
+
   @Test
-  void createArtifactSingleClass(@TempDir Path tempDir, TestReporter reporter) throws IOException {
-    Path jarPath = tempDir.resolve(TEST_JAR_NAME);
+  void createArtifactSingleClass() throws IOException {
     Class<TestService> testClass = TestService.class;
     new ServiceArtifactBuilder()
         .addClass(testClass)
         .writeTo(jarPath);
-
-    reporter.publishEntry("test JAR path", jarPath.toString());
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -64,15 +71,11 @@ class ServiceArtifactBuilderTest {
   }
 
   @Test
-  void createArtifactSingleInnerClass(@TempDir Path tempDir, TestReporter reporter)
-      throws IOException {
-    Path jarPath = tempDir.resolve(TEST_JAR_NAME);
+  void createArtifactSingleInnerClass() throws IOException {
     Class<Inner> testClass = Inner.class;
     new ServiceArtifactBuilder()
         .addClass(testClass)
         .writeTo(jarPath);
-
-    reporter.publishEntry("test JAR path", jarPath.toString());
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -81,15 +84,11 @@ class ServiceArtifactBuilderTest {
   }
 
   @Test
-  void createArtifactSeveralClasses(@TempDir Path tempDir, TestReporter reporter)
-      throws IOException {
-    Path jarPath = tempDir.resolve(TEST_JAR_NAME);
+  void createArtifactSeveralClasses() throws IOException {
     new ServiceArtifactBuilder()
         .addClass(ImmutableList.class)
         .addClasses(TestService.class, Bytes.class)
         .writeTo(jarPath);
-
-    reporter.publishEntry("test JAR path", jarPath.toString());
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -109,13 +108,9 @@ class ServiceArtifactBuilderTest {
   }
 
   @Test
-  void createArtifactEmptyExtensions(@TempDir Path tempDir, TestReporter reporter)
-      throws IOException {
-    Path jarPath = tempDir.resolve(TEST_JAR_NAME);
+  void createArtifactEmptyExtensions() throws IOException {
     new ServiceArtifactBuilder()
         .writeTo(jarPath);
-
-    reporter.publishEntry("test JAR path", jarPath.toString());
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -124,15 +119,11 @@ class ServiceArtifactBuilderTest {
   }
 
   @Test
-  void createArtifactSeveralExtensions(@TempDir Path tempDir, TestReporter reporter)
-      throws IOException {
-    Path jarPath = tempDir.resolve(TEST_JAR_NAME);
+  void createArtifactSeveralExtensions() throws IOException {
     new ServiceArtifactBuilder()
         .addExtensionEntry("e1")
         .addExtensionEntry("e2")
         .writeTo(jarPath);
-
-    reporter.publishEntry("test JAR path", jarPath.toString());
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -144,21 +135,19 @@ class ServiceArtifactBuilderTest {
   }
 
   @Test
-  void createArtifactWithManifestFields(@TempDir Path tempDir, TestReporter reporter)
-      throws IOException {
-    Path jarPath = tempDir.resolve(TEST_JAR_NAME);
+  void createArtifactWithManifestFields() throws IOException {
     new ServiceArtifactBuilder()
-        .setManifestEntry("Exonum-Version", "3.1.0")
         .setPluginId("foo-service")
+        .setPluginVersion("1.0.2")
+        .setManifestEntry("Exonum-Version", "3.1.0")
         .writeTo(jarPath);
-
-    reporter.publishEntry("test JAR path", jarPath.toString());
 
     Manifest manifest = readJarManifest(jarPath);
 
     Attributes mainAttributes = manifest.getMainAttributes();
-    assertThat(mainAttributes.getValue("Exonum-Version")).isEqualTo("3.1.0");
     assertThat(mainAttributes.getValue(PLUGIN_ID_ATTRIBUTE_NAME)).isEqualTo("foo-service");
+    assertThat(mainAttributes.getValue(PLUGIN_VERSION_ATTRIBUTE_NAME)).isEqualTo("1.0.2");
+    assertThat(mainAttributes.getValue("Exonum-Version")).isEqualTo("3.1.0");
   }
 
   @SuppressWarnings("UnstableApiUsage")
