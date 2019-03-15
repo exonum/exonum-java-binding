@@ -20,7 +20,6 @@ import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.fakes.mocks.ThrowingTransactions;
 import com.exonum.binding.fakes.mocks.UserServiceAdapterMockBuilder;
-import com.exonum.binding.fakes.services.service.TestSchema;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.fakes.services.transactions.SetEntryTransaction;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
@@ -114,7 +113,7 @@ public final class NativeFacade {
    */
   public static UserServiceAdapter createTestService() {
     Server server = createServerMock();
-    TestService service = new TestService(TestSchema::new);
+    TestService service = new TestService();
     return new UserServiceAdapter(service, server, VIEW_FACTORY);
   }
 
