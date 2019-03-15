@@ -41,10 +41,6 @@ EJB_CLASSPATH="$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
 EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/qa-service/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 
-EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
-echo "EJB_LIBPATH=${EJB_LIBPATH}"
-export RUST_LIB_DIR="$(rustup run ${RUST_COMPILER_VERSION:-1.32.0} rustc --print sysroot)/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
@@ -82,7 +78,6 @@ done
 header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
-    ejb_port=$((6000 + i))
     cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
      --ejb-service-classpath $EJB_CLASSPATH \
      --public-configs testnet/pub_*.toml
@@ -94,10 +89,11 @@ for i in $(seq 0 $((node_count - 1)))
 do
 	port=$((3000 + i))
 	private_port=$((port + 100))
+	ejb_port=$((6000 + i))
 	cargo run -- run \
 	 -c testnet/node_$i.toml \
 	 -d testnet/db/$i \
-	 --ejb-port $ejb_port \
+	 --ejb-port ${ejb_port} \
 	 --ejb-log-config-path $log_config_path \
 	 --public-api-address 0.0.0.0:${port} \
 	 --private-api-address 0.0.0.0:${private_port} &
