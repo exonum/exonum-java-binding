@@ -30,6 +30,8 @@
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
+    <!-- Skip building Rust library for tests -->
+    <doNotBuildRustLib>false</doNotBuildRustLib>
   </properties>
 
   <dependencies>
@@ -282,7 +284,8 @@
                 <resource>
                   <directory>${project.basedir}/rust/target/debug</directory>
                   <includes>
-                    <include>libjava_bindings.*</include>
+                    <include>libjava_bindings.so</include>
+                    <include>libjava_bindings.dylib</include>
                   </includes>
                 </resource>
               </resources>
