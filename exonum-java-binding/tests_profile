@@ -56,7 +56,8 @@ echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
-# Linking options with additional paths for the application.
+# Linking options with additional paths for the application and tests.
+# Note: `-C link-args` can be used only once, therefore, `-C link-arg` is used.
 # Currently we don't support stacking of RUSTFLAGS with a user environment RUSTFLAGS,
 # since this profile may be reused many times during a user session and because of this
 # RUSTFLAGS can accumulate old and irrelevant options values.

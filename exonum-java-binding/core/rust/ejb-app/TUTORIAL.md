@@ -42,6 +42,8 @@ and pass a path to the service artefact during application configuration as `--e
 parameter. Alternatively, you may assemble a classpath that includes the path to service and all of 
 its dependencies and pass it instead.
 
+The service must use `provided` scope for all Exonum dependencies because they are included in the application.
+
 ### Step 2. Generate Node Configuration
 
 EJB App configuration is pretty similar to configuration of any other Exonum service,
