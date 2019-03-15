@@ -18,6 +18,7 @@ package com.exonum.binding.test.runtime;
 
 import static com.exonum.binding.test.runtime.ServiceArtifactBuilder.EXTENSIONS_INDEX_NAME;
 import static com.exonum.binding.test.runtime.ServiceArtifactBuilder.PLUGIN_ID_ATTRIBUTE_NAME;
+import static com.exonum.binding.test.runtime.ServiceArtifactBuilder.PLUGIN_VERSION_ATTRIBUTE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -148,8 +149,9 @@ class ServiceArtifactBuilderTest {
       throws IOException {
     Path jarPath = tempDir.resolve(TEST_JAR_NAME);
     new ServiceArtifactBuilder()
-        .setManifestEntry("Exonum-Version", "3.1.0")
         .setPluginId("foo-service")
+        .setPluginVersion("1.0.2")
+        .setManifestEntry("Exonum-Version", "3.1.0")
         .writeTo(jarPath);
 
     reporter.publishEntry("test JAR path", jarPath.toString());
@@ -157,8 +159,9 @@ class ServiceArtifactBuilderTest {
     Manifest manifest = readJarManifest(jarPath);
 
     Attributes mainAttributes = manifest.getMainAttributes();
-    assertThat(mainAttributes.getValue("Exonum-Version")).isEqualTo("3.1.0");
     assertThat(mainAttributes.getValue(PLUGIN_ID_ATTRIBUTE_NAME)).isEqualTo("foo-service");
+    assertThat(mainAttributes.getValue(PLUGIN_VERSION_ATTRIBUTE_NAME)).isEqualTo("1.0.2");
+    assertThat(mainAttributes.getValue("Exonum-Version")).isEqualTo("3.1.0");
   }
 
   @SuppressWarnings("UnstableApiUsage")

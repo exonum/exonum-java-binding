@@ -33,6 +33,13 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- For an integration test only -->
+    <dependency>
+      <groupId>org.pf4j</groupId>
+      <artifactId>pf4j</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

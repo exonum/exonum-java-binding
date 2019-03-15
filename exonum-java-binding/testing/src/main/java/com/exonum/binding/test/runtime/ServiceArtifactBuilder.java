@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -40,10 +41,16 @@ import java.util.zip.ZipEntry;
  * A builder of service artifacts in PF4J format. Intended to be used in various integration tests.
  * Allows to create malformed artifacts (with missing classes, extensions, incorrect or incomplete
  * metadata).
+ *
+ * <p>Methods are non-null by default.
  */
 public final class ServiceArtifactBuilder {
 
+  @VisibleForTesting
   static final String PLUGIN_ID_ATTRIBUTE_NAME = "Plugin-Id";
+  @VisibleForTesting
+  static final String PLUGIN_VERSION_ATTRIBUTE_NAME = "Plugin-Version";
+  @VisibleForTesting
   static final String EXTENSIONS_INDEX_NAME = "META-INF/extensions.idx";
 
   private final Manifest manifest;
@@ -68,6 +75,15 @@ public final class ServiceArtifactBuilder {
    */
   public ServiceArtifactBuilder setPluginId(String pluginId) {
     return setManifestEntry(PLUGIN_ID_ATTRIBUTE_NAME, pluginId);
+  }
+
+  /**
+   * Sets a PF4J plugin version.
+   * @param version a plugin version to set
+   * @see <a href="https://pf4j.org/doc/plugins.html#how-plugin-metadata-is-defined">Plugin meta data</a>
+   */
+  public ServiceArtifactBuilder setPluginVersion(String version) {
+    return setManifestEntry(PLUGIN_VERSION_ATTRIBUTE_NAME, version);
   }
 
   /**
