@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn not_forbidden_user_parameter() {
-        let validation_result = validate_and_convert("Duser.parameter=Djava.class.path");
+        let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
         assert_eq!(
             validation_result,
             Ok("-Duser.parameter=Djava.class.path".to_string())
