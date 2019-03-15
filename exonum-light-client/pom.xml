@@ -171,7 +171,7 @@
         </configuration>
         <executions>
           <execution>
-            <id>validate</id>
+            <id>check-java-code-style</id>
             <phase>validate</phase>
             <configuration>
               <encoding>UTF-8</encoding>
