@@ -74,21 +74,18 @@ $ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.
 
 #### Finalize Configuration
 
-There is one specific parameter here:
-- `--ejb-artifact-uri` for the URI of Java service artifact.
-
 ```$sh
 $ cargo run -- finalize testnet/sec.toml testnet/node.toml \
-    --ejb-artifact-uri 'path_to_your_service_artifact.jar' \
     --public-configs testnet/pub.toml
 ```
 
 ### Step 3. Run Configured Node
 
+There are several required parameters here:
 - `--ejb-classpath` for a classpath of Java service runtime.
 - `--ejb-libpath` for a path to Java bindings native libraries.
 - `--ejb-port` for port that your service will use for communication.
-  Java Binding does not use Exonum Core ports directly.
+ Java Binding does not use Exonum Core ports directly.
 
 ```$sh
 $ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
@@ -97,11 +94,12 @@ $ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0
     --ejb-port 6000
 ```
 
-There are few specific optional parameters here:
+There are few optional parameters here:
 - `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
  append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
+- `--ejb-log-config-path`: Path to log4j configuration file.
 
 #### Debugging the JVM
 
