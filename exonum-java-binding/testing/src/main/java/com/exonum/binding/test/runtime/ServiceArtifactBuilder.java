@@ -73,7 +73,8 @@ public final class ServiceArtifactBuilder {
    * Sets a manifest entry in the {@linkplain Manifest main section} of the manifest.
    * @param name an attribute name
    * @param value an attribute value
-   * @throws IllegalArgumentException if the attribute name is {@linkplain java.util.jar.Attributes invalid}
+   * @throws IllegalArgumentException if the attribute name is
+   *     {@linkplain java.util.jar.Attributes invalid}
    */
   public ServiceArtifactBuilder setManifestEntry(String name, String value) {
     manifest.getMainAttributes().putValue(name, value);
