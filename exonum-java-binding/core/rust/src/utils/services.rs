@@ -30,7 +30,7 @@ pub struct EjbAppServices {
 
 type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 
-/// Loads service names from a specific TOML configuration file.
+/// Loads services definition from a specific TOML configuration file.
 pub fn load_services_definition<P: AsRef<Path>>(path: P) -> Result<EjbAppServices> {
     let mut file = File::open(path)?;
     let mut toml = String::new();
