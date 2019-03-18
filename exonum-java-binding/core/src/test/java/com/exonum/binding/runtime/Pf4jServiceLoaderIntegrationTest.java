@@ -16,74 +16,74 @@
 
 package com.exonum.binding.runtime;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.ServiceModule;
+import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.pf4j.DefaultPluginManager;
+import org.pf4j.Plugin;
 import org.pf4j.PluginManager;
-import org.pf4j.PluginState;
 
-@SuppressWarnings("WeakerAccess")
-@ExtendWith(MockitoExtension.class)
-class Pf4jServiceLoaderTest {
+class Pf4jServiceLoaderIntegrationTest {
 
-  private static final Path ARTIFACT_LOCATION = Paths.get("/tmp/service.jar");
   private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
 
-  @Mock
   private PluginManager pluginManager;
-
-  @InjectMocks
   private Pf4jServiceLoader serviceLoader;
+  private Path artifactLocation;
+
+  @BeforeEach
+  void setUp(@TempDir Path tmp) {
+    pluginManager = spy(new DefaultPluginManager());
+    serviceLoader = new Pf4jServiceLoader(pluginManager);
+    artifactLocation = tmp.resolve("service.jar");
+  }
 
   @Test
-  void canLoadService() throws ServiceLoadingException {
+  void canLoadService() throws ServiceLoadingException, IOException {
     String pluginId = PLUGIN_ID;
+    Class<?> moduleType = TestServiceModule1.class;
 
-    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
-        .thenReturn(pluginId);
-    when(pluginManager.startPlugin(pluginId))
-        .thenReturn(PluginState.STARTED);
-    Class<TestModule1> moduleType = TestModule1.class;
-    when(pluginManager.getExtensionClasses(ServiceModule.class, pluginId))
-        .thenReturn(modules(moduleType));
+    anArtifact()
+        .setPluginId(pluginId)
+        .addExtensionClass(moduleType)
+        .writeTo(artifactLocation);
 
     // Try to load the service
-    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(ARTIFACT_LOCATION);
-
-    // Verify the plugin is started
-    verify(pluginManager).startPlugin(pluginId);
+    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
 
     // Check the definition
     ServiceId serviceId = serviceDefinition.getId();
     ServiceId expectedId = ServiceId.parseFrom(pluginId);
     assertThat(serviceId).isEqualTo(expectedId);
     Supplier<ServiceModule> moduleSupplier = serviceDefinition.getModuleSupplier();
-    assertThat(moduleSupplier.get()).isInstanceOf(moduleType);
+    ServiceModule module = moduleSupplier.get();
+    assertNotNull(module);
+    // We can't check for class equality because the classloaders are different.
+    assertNamesEqual(module.getClass(), moduleType);
 
     // Check the definition is accessible
     assertThat(serviceLoader.findService(serviceId)).hasValue(serviceDefinition);
@@ -92,14 +92,16 @@ class Pf4jServiceLoaderTest {
   @Test
   @DisplayName("Cannot load a plugin if the plugin manager returns `null` "
       + "(e.g., in case of an attempt to load a duplicate plugin or other errors)")
-  void cannotLoadIfPluginManagerReturnsNull() {
-    // The 2.x PF4J API returns null to signal that the plugin cannot be loaded
-    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
-        .thenReturn(null);
+  void cannotLoadIfPluginManagerFailsToLoad() throws IOException {
+    anArtifact()
+        .setPluginId(PLUGIN_ID)
+        // Set invalid version to fail the loading
+        .setPluginVersion("")
+        .writeTo(artifactLocation);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
+        () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Failed to load the plugin from");
 
     // Check the definition is inaccessible
@@ -108,19 +110,28 @@ class Pf4jServiceLoaderTest {
   }
 
   @Test
-  void cannotLoadIfPluginFailedToStart() {
-    String pluginId = PLUGIN_ID;
+  void cannotLoadIfNoArtifact() {
+    // Try to load the service
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceLoader.loadService(artifactLocation));
+    assertThat(e).hasMessageContaining("does not exist");
+    assertThat(e).hasMessageContaining(artifactLocation.toString());
+  }
 
-    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
-        .thenReturn(pluginId);
-    // In the 2.x PF4J API a failed plugin start is communicated through a plugin state
-    // that is not "STARTED"
-    when(pluginManager.startPlugin(pluginId))
-        .thenReturn(PluginState.DISABLED);
+
+  @Test
+  void cannotLoadIfPluginFailedToStart() throws IOException {
+    String pluginId = PLUGIN_ID;
+    Class<? extends Plugin> evilPlugin = EvilPluginFailingToStart.class;
+    anArtifact()
+        .setPluginId(pluginId)
+        .addClass(evilPlugin)
+        .setManifestEntry("Plugin-Class", evilPlugin.getName())
+        .writeTo(artifactLocation);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
+        () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Failed to start the plugin");
 
     // Check the definition is inaccessible
@@ -133,19 +144,17 @@ class Pf4jServiceLoaderTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "",
       "foo-service",
       "com.acme:foo-service:1.0:extra-coordinate",
   })
-  void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) {
-    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
-        .thenReturn(invalidPluginId);
-    when(pluginManager.startPlugin(invalidPluginId))
-        .thenReturn(PluginState.STARTED);
+  void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) throws IOException {
+    anArtifact()
+        .setPluginId(invalidPluginId)
+        .writeTo(artifactLocation);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
+        () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Invalid plugin id");
     assertThat(e).hasMessageContaining(invalidPluginId);
 
@@ -155,20 +164,19 @@ class Pf4jServiceLoaderTest {
 
   @ParameterizedTest
   @MethodSource("invalidServiceModuleExtensions")
-  void cannotLoadIfInvalidServiceModuleExtensions(List<Class<ServiceModule>> extensions,
-      String expectedErrorPattern) {
+  void cannotLoadIfInvalidServiceModuleExtensions(
+      List<Class<? extends ServiceModule>> extensionClasses, String expectedErrorPattern)
+      throws IOException {
     String pluginId = PLUGIN_ID;
 
-    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
-        .thenReturn(pluginId);
-    when(pluginManager.startPlugin(pluginId))
-        .thenReturn(PluginState.STARTED);
-    when(pluginManager.getExtensionClasses(ServiceModule.class, pluginId))
-        .thenReturn(extensions);
+    anArtifact()
+        .setPluginId(pluginId)
+        .setExtensionClasses(extensionClasses)
+        .writeTo(artifactLocation);
 
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(ARTIFACT_LOCATION));
+        () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining(pluginId);
     assertThat(e).hasMessageFindingMatch(expectedErrorPattern);
 
@@ -179,28 +187,23 @@ class Pf4jServiceLoaderTest {
   private static Collection<Arguments> invalidServiceModuleExtensions() {
     return ImmutableList.of(
         arguments(emptyList(), "must provide exactly one service module as an extension"),
-        arguments(modules(TestModule1.class, TestModule2.class),
+        arguments(asList(TestServiceModule1.class, TestServiceModule2.class),
             "must provide exactly one service module as an extension.+2 modules found:"),
-        arguments(modules(BadModuleInaccessibleCtor.class),
+        arguments(singletonList(TestServiceModuleInaccessibleCtor.class),
             "Cannot load a plugin.+module.+not valid")
     );
   }
 
   @Test
-  void canLoadUnloadService() throws ServiceLoadingException {
+  void canLoadUnloadService() throws ServiceLoadingException, IOException {
     String pluginId = PLUGIN_ID;
 
-    when(pluginManager.loadPlugin(ARTIFACT_LOCATION))
-        .thenReturn(pluginId);
-    when(pluginManager.startPlugin(pluginId))
-        .thenReturn(PluginState.STARTED);
-    when(pluginManager.getExtensionClasses(ServiceModule.class, pluginId))
-        .thenReturn(modules(TestModule1.class));
-    when(pluginManager.unloadPlugin(pluginId))
-        .thenReturn(true);
+    anArtifact()
+        .setPluginId(pluginId)
+        .writeTo(artifactLocation);
 
     // Try to load the service
-    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(ARTIFACT_LOCATION);
+    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
 
     // Try to unload the service
     ServiceId serviceId = serviceDefinition.getId();
@@ -225,25 +228,14 @@ class Pf4jServiceLoaderTest {
   }
 
   /**
-   * Converts a variable argument parameter of {@code Class<? extends T>} to
-   * a {@code List<Class<T>>}. It is required because that is what
-   * {@link PluginManager#getExtensionClasses(Class)} returns.
-   *
-   * <p>A simple
-   * <pre>
-   *    when(pluginManager.getExtensionClasses(ServiceModule.class, pluginId))
-   *        .thenReturn(ImmutableList.of(TestModule1.class));
-   *</pre>
-   * does not currently work.
-   *
-   * <p>See issue https://github.com/pf4j/pf4j/issues/296
+   * Creates a builder producing a valid artifact with some default values.
    */
-  @SuppressWarnings("unchecked")
-  @SafeVarargs
-  private static <T> List<Class<T>> modules(Class<? extends T>... modules) {
-    return Arrays.stream(modules)
-        .map(moduleClass -> (Class<T>) moduleClass)
-        .collect(toList());
+  private static ServiceArtifactBuilder anArtifact() {
+    Class<?> serviceModule = TestServiceModule1.class;
+    return new ServiceArtifactBuilder()
+        .setPluginId(PLUGIN_ID)
+        .setPluginVersion("1.0.3")
+        .addExtensionClass(serviceModule);
   }
 
   private void verifyUnloaded(String pluginId) {
@@ -253,11 +245,7 @@ class Pf4jServiceLoaderTest {
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
   }
 
-  static final class TestModule1 extends AbstractServiceModule {}
-
-  static final class TestModule2 extends AbstractServiceModule {}
-
-  static final class BadModuleInaccessibleCtor extends AbstractServiceModule {
-    private BadModuleInaccessibleCtor() {}
+  private static void assertNamesEqual(Class<?> actual, Class<?> expected) {
+    assertThat(actual.getName()).isEqualTo(expected.getName());
   }
 }

@@ -48,14 +48,12 @@ import org.junit.jupiter.api.io.TempDir;
 
 class ServiceArtifactBuilderTest {
 
-  private static final String TEST_JAR_NAME = "test.jar";
-
   private Path jarPath;
 
   @BeforeEach
   void setUp(@TempDir Path tempDir, TestReporter reporter) {
-    jarPath = tempDir.resolve(TEST_JAR_NAME);
-    reporter.publishEntry("test JAR path", jarPath.toString());
+    jarPath = tempDir.resolve("test.jar");
+    reporter.publishEntry("Test JAR path", jarPath.toString());
   }
 
   @Test
@@ -108,6 +106,27 @@ class ServiceArtifactBuilderTest {
   }
 
   @Test
+  void createArtifactWithExtensionClass() throws IOException {
+    new ServiceArtifactBuilder()
+        .addExtensionClass(TestService.class)
+        .addExtensionClasses(ImmutableList.class)
+        .writeTo(jarPath);
+
+    Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
+
+    assertThat(allJarEntries).containsAllEntriesOf(ImmutableMap.of(
+        getPath(TestService.class), readClass(TestService.class),
+        getPath(ImmutableList.class), readClass(ImmutableList.class)));
+
+    assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
+    String allExtensions = getExtensionsIndex(allJarEntries);
+
+    String expectedExtensions = TestService.class.getName() + "\n"
+        + ImmutableList.class.getName() + "\n";
+    assertThat(allExtensions).isEqualTo(expectedExtensions);
+  }
+
+  @Test
   void createArtifactEmptyExtensions() throws IOException {
     new ServiceArtifactBuilder()
         .writeTo(jarPath);
@@ -128,10 +147,25 @@ class ServiceArtifactBuilderTest {
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
     assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
-    String allExtensions = new String(allJarEntries.get(EXTENSIONS_INDEX_NAME),
-        StandardCharsets.UTF_8);
+    String allExtensions = getExtensionsIndex(allJarEntries);
 
     assertThat(allExtensions).isEqualTo("e1\ne2\n");
+  }
+
+  @Test
+  void setExtensionClassesOverwritesPreviouslySet() throws IOException {
+    new ServiceArtifactBuilder()
+        .addExtensionEntry("already added extension")
+        .addExtensionClass(TestService.class)
+        .setExtensionClasses(ImmutableList.of(ImmutableList.class))
+        .writeTo(jarPath);
+
+    Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
+
+    assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
+    String allExtensions = getExtensionsIndex(allJarEntries);
+
+    assertThat(allExtensions).isEqualTo(ImmutableList.class.getName() + '\n');
   }
 
   @Test
@@ -195,5 +229,10 @@ class ServiceArtifactBuilderTest {
         new FileInputStream(jarPath.toFile())))) {
       return in.getManifest();
     }
+  }
+
+  private String getExtensionsIndex(Map<String, byte[]> allJarEntries) {
+    return new String(allJarEntries.get(EXTENSIONS_INDEX_NAME),
+        StandardCharsets.UTF_8);
   }
 }

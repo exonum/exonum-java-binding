@@ -125,6 +125,49 @@ public final class ServiceArtifactBuilder {
     return this;
   }
 
+  /**
+   * <em>Replaces</em> extension classes with the given list. All previously added extension
+   * entries will be <em>removed</em>.
+   * @param extensionClasses extension classes to set
+   * @see #addExtensionClass(Class)
+   */
+  public ServiceArtifactBuilder setExtensionClasses(Iterable<? extends Class<?>> extensionClasses) {
+    extensions.clear();
+    extensionClasses.forEach(this::addExtensionClass);
+    return this;
+  }
+
+  /**
+   * Adds classes providing extensions.
+   * @param extensionClasses extension classes to add
+   * @see #addExtensionClass(Class)
+   */
+  public ServiceArtifactBuilder addExtensionClasses(Class<?>... extensionClasses) {
+    return addExtensionClasses(asList(extensionClasses));
+  }
+
+  /**
+   * Adds classes providing extensions.
+   * @param extensionClasses extension classes to add
+   * @see #addExtensionClass(Class)
+   */
+  public ServiceArtifactBuilder addExtensionClasses(Iterable<? extends Class<?>> extensionClasses) {
+    extensionClasses.forEach(this::addExtensionClass);
+    return this;
+  }
+
+  /**
+   * Adds a class that provides an extension.
+   * @param extensionClass an extension class to add
+   * @see #addClass(Class)
+   * @see #addExtensionEntry(String)
+   */
+  public ServiceArtifactBuilder addExtensionClass(Class<?> extensionClass) {
+    addClasses(extensionClass);
+    String extensionEntry = extensionClass.getName();
+    return addExtensionEntry(extensionEntry);
+  }
+
   private static void checkValidClass(Class<?> artifactClass) {
     checkArgument(!(artifactClass.isPrimitive() || artifactClass.isArray()),
         "Cannot write %s to the archive", artifactClass);
