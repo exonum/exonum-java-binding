@@ -19,7 +19,7 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::{get_fakes_classpath, get_libpath, get_fake_service_artifact_path};
+use integration_tests::vm::{get_fake_service_artifact_path, get_fakes_classpath, get_libpath};
 use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]

@@ -112,9 +112,7 @@ pub fn get_fakes_classpath() -> String {
         .expect("Failed to read classpath.txt");
 
     let fakes_path = project_root_dir().join("fakes/target/classes/");
-    let fakes_classes = fakes_path
-        .to_str()
-        .expect(CONV_FAILED);
+    let fakes_classes = fakes_path.to_str().expect(CONV_FAILED);
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
     format!("{}:{}", class_path, fakes_classes)
@@ -132,10 +130,7 @@ pub fn get_libpath() -> String {
             "Target path not found, but there should be \
              the libjava_bindings dynamically loading library",
         );
-    library_path
-        .to_str()
-        .expect(CONV_FAILED)
-        .to_owned()
+    library_path.to_str().expect(CONV_FAILED).to_owned()
 }
 
 pub fn get_fake_service_artifact_path() -> String {
