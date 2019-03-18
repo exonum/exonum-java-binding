@@ -91,16 +91,16 @@ impl JavaServiceRuntime {
     /// Loads an artifact from the specified location involving verification of the artifact.
     /// Returns an unique service artifact identifier that must be specified in subsequent
     /// operations with it.
-    pub fn load_artifact(&self, artifact_uri: &str) -> Result<String, String> {
+    pub fn load_artifact(&self, artifact_path: &str) -> Result<String, String> {
         unwrap_jni(self.executor.with_attached(|env| {
             let res = {
-                let artifact_uri: JObject = env.new_string(artifact_uri)?.into();
+                let artifact_path: JObject = env.new_string(artifact_path)?.into();
                 let artifact_id = env
                     .call_method(
                         self.service_runtime.as_obj(),
                         "loadArtifact",
                         LOAD_ARTIFACT_SIGNATURE,
-                        &[artifact_uri.into()],
+                        &[artifact_path.into()],
                     )?
                     .l()?;
                 convert_to_string(env, artifact_id)

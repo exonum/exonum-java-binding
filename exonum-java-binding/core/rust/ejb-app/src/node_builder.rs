@@ -64,9 +64,9 @@ pub fn create() -> fabric::NodeBuilder {
         }
     }
 
-    for (name, artifact_uri) in user_services {
+    for (name, artifact_path) in user_services {
         builder =
-            builder.with_service(Box::new(JavaServiceFactoryAdapter::new(name, artifact_uri)));
+            builder.with_service(Box::new(JavaServiceFactoryAdapter::new(name, artifact_path)));
     }
 
     builder

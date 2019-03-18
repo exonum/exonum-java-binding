@@ -19,10 +19,10 @@ pub struct JavaServiceFactoryAdapter {
 
 impl JavaServiceFactoryAdapter {
     /// Creates new instance with given service name and path to the artifact.
-    pub fn new<S: AsRef<str>>(name: S, artifact_uri: S) -> Self {
+    pub fn new<S: AsRef<str>>(name: S, artifact_path: S) -> Self {
         JavaServiceFactoryAdapter {
             name: name.as_ref().to_owned(),
-            artifact_path: artifact_uri.as_ref().to_owned(),
+            artifact_path: artifact_path.as_ref().to_owned(),
         }
     }
 

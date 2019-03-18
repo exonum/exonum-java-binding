@@ -26,7 +26,7 @@ use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 // TODO: reenable this test after ECR-2789
 //#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
-    let artifact_uri = get_fake_service_artifact_path();
+    let artifact_path = get_fake_service_artifact_path();
     let system_class_path = get_fakes_classpath();
     let system_lib_path = get_libpath();
     let log_config_path = "".to_owned();
@@ -52,7 +52,7 @@ fn bootstrap() {
     let service_runtime = JavaServiceRuntime::create_java_runtime(config);
 
     let artifact_id = service_runtime
-        .load_artifact(&artifact_uri)
+        .load_artifact(&artifact_path)
         .expect("Unable to load artifact");
     let service = service_runtime.create_service(&artifact_id);
 
