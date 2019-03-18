@@ -19,14 +19,14 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::{get_fakes_classpath, get_libpath};
+use integration_tests::vm::{get_fakes_classpath, get_libpath, get_fake_service_artifact_path};
 use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
-#[ignore]
-// TODO: Reenable after ECR-2999/ECR-3011
+// TODO: reenable this test after ECR-2789
+//#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
-    let artifact_uri = "".to_owned();
+    let artifact_uri = get_fake_service_artifact_path();
     let system_class_path = get_fakes_classpath();
     let system_lib_path = get_libpath();
     let log_config_path = "".to_owned();

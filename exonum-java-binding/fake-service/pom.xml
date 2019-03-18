@@ -84,7 +84,7 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <finalName>${project.artifactId}-artifact</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <attach>false</attach>
           <archive>

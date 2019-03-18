@@ -27,6 +27,8 @@ pub const KIB: usize = 1024;
 /// Mebibyte
 pub const MIB: usize = KIB * KIB;
 
+const CONV_FAILED: &str = "Failed to convert FS path into utf-8";
+
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
 #[allow(dead_code)]
@@ -112,7 +114,7 @@ pub fn get_fakes_classpath() -> String {
     let fakes_path = project_root_dir().join("fakes/target/classes/");
     let fakes_classes = fakes_path
         .to_str()
-        .expect("Failed to convert FS path into utf-8");
+        .expect(CONV_FAILED);
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
     format!("{}:{}", class_path, fakes_classes)
@@ -132,7 +134,15 @@ pub fn get_libpath() -> String {
         );
     library_path
         .to_str()
-        .expect("Failed to convert FS path into utf-8")
+        .expect(CONV_FAILED)
+        .to_owned()
+}
+
+pub fn get_fake_service_artifact_path() -> String {
+    project_root_dir()
+        .join("fake-service/target/fake-service-artifact.jar")
+        .to_str()
+        .expect(CONV_FAILED)
         .to_owned()
 }
 
