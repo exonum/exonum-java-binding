@@ -30,14 +30,18 @@ pub struct EjbAppServices {
 
 type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 
-/// Loads service names from a specific TOML configuration file
-pub fn load_services_definition<P: AsRef<Path>>(path: P) -> Result<EjbAppServices> /*Result<(Option<HashSet<String>>, HashMap<String, String>)>*/
-{
+/// Loads service names from a specific TOML configuration file.
+pub fn load_services_definition<P: AsRef<Path>>(path: P) -> Result<EjbAppServices> {
     let mut file = File::open(path)?;
     let mut toml = String::new();
     file.read_to_string(&mut toml)?;
+    parse_services(toml)
+}
+
+// Produces the EjbAppServices structure from string representation in TOML format.
+fn parse_services(data: String) -> Result<EjbAppServices> {
     let services: EjbAppServices =
-        toml::from_str(&toml).expect("Invalid format of the file with EJB services definition");
+        toml::from_str(&data).expect("Invalid format of the file with EJB services definition");
     Ok(services)
 }
 
@@ -59,72 +63,65 @@ mod tests {
     use tempfile::{Builder, TempPath};
 
     #[test]
-    fn no_config() {
-        let res = load_services_definition("nonexistent");
-        assert!(res.is_err());
-    }
-
-    #[test]
     fn missed_enabled_services_section() {
-        let cfg = create_config(
-            "missed_enabled_services_test.toml",
-            "[user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'",
-        );
-
-        let res = load_services_definition(cfg);
+        let cfg = "[user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'".to_owned();
+        let res = parse_services(cfg);
         assert!(res.is_ok());
     }
 
     #[test]
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn missed_user_services_section() {
-        let cfg = create_config(
-            "missed_user_services_test.toml",
-            "enabled_services = [\"configuration\", \"btc-anchoring\", \"time\"]",
-        );
-
-        let _result = load_services_definition(cfg);
-    }
-
-    #[test]
-    fn all_services() {
-        let cfg = create_config(
-            "all_services_test.toml",
-            "enabled_services = [\"configuration\", \"btc-anchoring\", \"time\"]\n\
-            [user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'",
-        );
-
-        let res = load_services_definition(cfg);
-        assert!(res.is_ok());
-
-        let services = res.unwrap();
-        let services_to_enable = services.enabled_services.unwrap();
-        let user_services = services.user_services;
-
-        assert_eq!(services_to_enable.len(), 3);
-        assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
-        assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
-        assert!(services_to_enable.contains(TIME_SERVICE));
-
-        assert_eq!(user_services.len(), 2);
-        assert_eq!(
-            user_services.get("service_name1").unwrap(),
-            "/path/to/artifact1"
-        );
-        assert_eq!(
-            user_services.get("service_name2").unwrap(),
-            "/path/to/artifact2"
-        );
+        let cfg = "enabled_services = [\"configuration\", \"btc-anchoring\", \"time\"]".to_owned();
+        let _result = parse_services(cfg);
     }
 
     #[test]
     fn empty_list() {
-        let cfg = create_config("empty_list.toml", "enabled_services = []\n[user_services]");
-        let res = load_services_definition(cfg);
+        let cfg = "enabled_services = []\n[user_services]".to_owned();
+        let res = parse_services(cfg);
         assert!(res.is_ok());
         let services = res.unwrap();
         assert_eq!(services.enabled_services.unwrap().len(), 0);
         assert_eq!(services.user_services.len(), 0);
+    }
+
+    #[test]
+    fn duplicated() {
+        let cfg = "enabled_services = [\"btc-anchoring\", \"btc-anchoring\"]\n[user_services]\n"
+            .to_owned();
+        let res = parse_services(cfg);
+        assert!(res.is_ok());
+        let EjbAppServices {
+            enabled_services, ..
+        } = res.unwrap();
+        assert!(enabled_services.is_some());
+        let enabled_services = enabled_services.unwrap();
+        assert_eq!(enabled_services.len(), 1);
+        assert!(enabled_services.contains(BTC_ANCHORING_SERVICE));
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid format of the file with EJB services definition")]
+    fn broken_config() {
+        let cfg = "wrong_format = 1".to_owned();
+        let _result = parse_services(cfg);
+    }
+
+    #[test]
+    fn no_config_file() {
+        let res = load_services_definition("nonexistent");
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn config_file_ok() {
+        let cfg = create_config(
+            "services_list_ok.toml",
+            "enabled_services = []\n[user_services]",
+        );
+        let res = load_services_definition(cfg);
+        assert!(res.is_ok());
     }
 
     #[test]
@@ -145,6 +142,7 @@ mod tests {
         assert!(is_service_enabled_in_config_file(TIME_SERVICE, &cfg));
     }
 
+    // Creates temporary config file
     fn create_config(filename: &str, cfg: &str) -> TempPath {
         let mut cfg_file = Builder::new().prefix(filename).tempfile().unwrap();
         writeln!(cfg_file, "{}", cfg).unwrap();

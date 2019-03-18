@@ -50,11 +50,7 @@ pub fn create() -> fabric::NodeBuilder {
     } = load_services_definition(PATH_TO_SERVICES_DEFINITION)
         .expect("Unable to load services definition");
 
-    let services = enabled_services.unwrap_or_else(|| {
-        let mut services = HashSet::new();
-        services.insert(CONFIGURATION_SERVICE.to_owned());
-        services
-    });
+    let services = validate_services(enabled_services);
 
     let mut service_factories = service_factories();
 
@@ -76,76 +72,76 @@ pub fn create() -> fabric::NodeBuilder {
     builder
 }
 
-/*
+// Extracts defined services or inserts the configuration service otherwise.
+fn validate_services(services: Option<HashSet<String>>) -> HashSet<String> {
+    services.unwrap_or_else(|| {
+        let mut services = HashSet::new();
+        services.insert(CONFIGURATION_SERVICE.to_owned());
+        services
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::io::Write;
     use tempfile::{Builder, TempPath};
 
-    fn create_config(filename: &str, cfg: &str) -> TempPath {
-        let mut cfg_file = Builder::new().prefix(filename).tempfile().unwrap();
-        writeln!(cfg_file, "{}", cfg).unwrap();
-        cfg_file.into_temp_path()
+    #[test]
+    fn validate_services_empty() {
+        let services = validate_services(None);
+        assert_eq!(services.len(), 1);
+        assert!(services.contains(CONFIGURATION_SERVICE));
     }
 
     #[test]
-    fn no_config() {
-        let services_to_enable = services_to_enable("");
-        assert_eq!(services_to_enable.len(), 1);
-        assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
-    }
-
-//    #[test]
-//    fn empty_list() {
-//        let cfg = create_config("empty_list.toml", "services = []");
-//        let services_to_enable = services_to_enable(cfg);
-//        assert_eq!(services_to_enable.len(), 1);
-//        assert!(services_to_enable.contains(EJB_SERVICE));
-//    }
-
-    // TODO: move tests to the services.rs
-    #[test]
-    fn duplicated() {
-        let cfg = create_config(
-            "duplicated.toml",
-            "services = [\"btc-anchoring\", \"btc-anchoring\"]",
-        );
-        let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 1);
-        assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
-    }
-
-    #[test]
-    #[should_panic(expected = "Invalid format of the file with EJB services definition")]
-    fn broken_config() {
-        let cfg = create_config("broken.toml", "not_list = 1");
-        let _services_to_enable = services_to_enable(cfg);
-    }
-
-    #[test]
-    fn with_anchoring() {
-        let cfg = create_config("anchoring.toml", "services = [\"btc-anchoring\"]");
-        let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 1);
-        assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
+    fn validate_services_ok() {
+        let mut services = HashSet::new();
+        services.insert(BTC_ANCHORING_SERVICE.to_owned());
+        services.insert(TIME_SERVICE.to_owned());
+        let services = validate_services(Some(services));
+        assert_eq!(services.len(), 2);
+        assert!(services.contains(BTC_ANCHORING_SERVICE));
+        assert!(services.contains(TIME_SERVICE));
     }
 
     #[test]
     fn all_services() {
         let cfg = create_config(
             "all.toml",
-            "services = [\"configuration\", \"btc-anchoring\", \"time\"]",
+            "enabled_services = [\"configuration\", \"btc-anchoring\", \"time\"]\n\
+            [user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'",
         );
-        let services_to_enable = services_to_enable(cfg);
-        assert_eq!(services_to_enable.len(), 3);
-        assert!(services_to_enable.contains(CONFIGURATION_SERVICE));
-        assert!(services_to_enable.contains(BTC_ANCHORING_SERVICE));
-        assert!(services_to_enable.contains(TIME_SERVICE));
+        let EjbAppServices {
+            enabled_services,
+            user_services,
+        } = load_services_definition(cfg).unwrap();
+        let enabled_services = enabled_services.unwrap();
+        assert_eq!(enabled_services.len(), 3);
+        assert!(enabled_services.contains(CONFIGURATION_SERVICE));
+        assert!(enabled_services.contains(BTC_ANCHORING_SERVICE));
+        assert!(enabled_services.contains(TIME_SERVICE));
 
         let service_factories = service_factories();
-        for service in &services_to_enable {
-            assert!(service_factories.get(service).is_some())
+        for service in enabled_services {
+            assert!(service_factories.get(&service).is_some())
         }
+
+        assert_eq!(user_services.len(), 2);
+        assert_eq!(
+            user_services.get("service_name1").unwrap(),
+            "/path/to/artifact1"
+        );
+        assert_eq!(
+            user_services.get("service_name2").unwrap(),
+            "/path/to/artifact2"
+        );
     }
-}*/
+
+    // Creates temporary config file
+    fn create_config(filename: &str, cfg: &str) -> TempPath {
+        let mut cfg_file = Builder::new().prefix(filename).tempfile().unwrap();
+        writeln!(cfg_file, "{}", cfg).unwrap();
+        cfg_file.into_temp_path()
+    }
+}
