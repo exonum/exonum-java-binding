@@ -130,14 +130,8 @@ mod tests {
         }
 
         assert_eq!(user_services.len(), 2);
-        assert_eq!(
-            user_services.get("service_name1").unwrap(),
-            "/path/to/artifact1"
-        );
-        assert_eq!(
-            user_services.get("service_name2").unwrap(),
-            "/path/to/artifact2"
-        );
+        assert_eq!(&user_services["service_name1"], "/path/to/artifact1");
+        assert_eq!(&user_services["service_name2"], "/path/to/artifact2");
     }
 
     // Creates temporary config file
