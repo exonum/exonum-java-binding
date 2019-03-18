@@ -23,9 +23,10 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
 
 /**
- * Exonum time service database schema.
+ * Exonum time service database schema. It provides read-only access to the state
+ * of the time oracle for a given {@linkplain View database view}.
  *
- * @see <a href="https://exonum.com/doc/version/latest/advanced/time/">Time oracle documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.10/advanced/time/">Time oracle documentation</a>
  */
 public interface TimeSchema {
 

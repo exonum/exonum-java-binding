@@ -26,8 +26,6 @@ const TEST_SERVICE_MODULE_NAME: &str =
     "com.exonum.binding.fakes.services.service.TestServiceModule";
 
 #[test]
-// TODO: reenable this test after ECR-2789
-#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
     let service_config = ServiceConfig {
         module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
@@ -52,9 +50,9 @@ fn bootstrap() {
         service_config,
     });
 
-    let mut testkit = TestKitBuilder::validator()
-        .with_service(service_runtime.service_proxy())
-        .create();
+    let service = service_runtime.create_service("", TEST_SERVICE_MODULE_NAME);
+
+    let mut testkit = TestKitBuilder::validator().with_service(service).create();
 
     testkit.create_block();
 }

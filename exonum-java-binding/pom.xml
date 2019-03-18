@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.binding</groupId>
   <artifactId>exonum-java-binding-parent</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding Parent</name>
@@ -65,7 +65,7 @@
     <module>qa-service</module>
     <module>cryptocurrency-demo</module>
     <module>service-archetype</module>
-    <module>time-service</module>
+    <module>time-oracle</module>
   </modules>
 
   <scm>
@@ -101,7 +101,7 @@
     <!-- Empty for all JDKs but 11 -->
     <maven.javadoc.joption></maven.javadoc.joption>
 
-    <assertj.version>3.12.0</assertj.version>
+    <assertj.version>3.12.1</assertj.version>
     <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
@@ -132,6 +132,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
+    <pf4j.version>2.6.0</pf4j.version>
   </properties>
 
   <dependencyManagement>
@@ -166,6 +167,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.ryanharter.auto.value</groupId>
         <artifactId>auto-value-gson-annotations</artifactId>
         <version>${auto-value-gson.version}</version>
@@ -179,18 +186,24 @@
       </dependency>
 
       <dependency>
+        <groupId>org.pf4j</groupId>
+        <artifactId>pf4j</artifactId>
+        <version>${pf4j.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest</artifactId>
         <version>${hamcrest.version}</version>
         <scope>test</scope>
       </dependency>
 
-      <dependency>
-        <!-- An empty artifact, required while JUnit 4 is on the classpath to override its
-             dependency on hamcrest.
+      <!-- An empty artifact, required while JUnit 4 is on the classpath to override its
+           dependency on hamcrest.
 
-             See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
-             -->
+           See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+       -->
+      <dependency>
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest-core</artifactId>
         <version>${hamcrest.version}</version>
@@ -311,7 +324,7 @@
           </configuration>
           <executions>
             <execution>
-              <id>validate</id>
+              <id>check-java-code-style</id>
               <phase>validate</phase>
               <configuration>
                 <encoding>UTF-8</encoding>
@@ -328,7 +341,7 @@
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>8.17</version>
+              <version>8.18</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -477,6 +490,25 @@
                 </requireEnvironmentVariable>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checks that the POMs match the code convention:
+           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
+
+           Use `mvn tidy:pom` to fix any style issues -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <executions>
+          <execution>
+            <id>check-pom-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

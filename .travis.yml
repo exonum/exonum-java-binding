@@ -16,9 +16,12 @@ addons:
     sources:
       - sourceline: 'ppa:chris-lea/libsodium'
       - sourceline: 'ppa:maarten-fonville/protobuf'
+      - sourceline: 'ppa:exonum/rocksdb'
     packages:
       - build-essential
       - libsodium-dev
+      - librocksdb5.17
+      - libsnappy-dev
       - libssl-dev
       - pkg-config
       - protobuf-compiler
@@ -26,8 +29,10 @@ addons:
 
 env:
   global:
-    - RUST_COMPILER_VERSION=stable
+    - RUST_COMPILER_VERSION=1.32.0
     - OSX_PACKAGES="libsodium rocksdb pkg-config protobuf"
+    - ROCKSDB_LIB_DIR=/usr/lib
+    - SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
     # REPO_TOKEN used for integration with coveralls is encoded here
     - secure: Fp22iaJpttsIArAyWmdCGNtljIALTYRVKO7O+H2hgBkwHHqrU7+15sbaq3xzhz4YNWNfuFMIkFUBgd/KYHgAuNDDrtm2agib13C0lQT1NFQO9ccmNCJNsXQrYrXGwpnNqPKp0YmfBfgNwzEpBerlbtvzV/T/RZukT/403XxwxU9y5tHfQokwVLibqP2jJsxdihTfCKIOs+o6hBfArmsn+e+panEv17ZrCjOmBIM/W70Rf2rEM26wFnYsfnAUTCkpl4Ong0SYNpZZxNMtw61W8ApDY8bpz7cKUxCv7SmD3kO7Y+TTHWfWYx6FNXtUpE1vCi6I7fZAY16rViTWOX55NCeFQz56XER7ArJQZtC/nC1lZ9tGKtcofu2Rq7WUoRuTwvLTaf6VzAP/CUj0DUxkV+8WUggl3s/Im7Y9rn8Aqvh8LReZmqzTY+dJ0hFG4DLoLtl71eTEnNoumi5UleBhJPaei3wPNPHg1WlOmhFyhRCsbIIGiyFtSj/faLmdc7tN/sBFANb0g4Exl0mRNvB0IfS1gM6XouEGUTlVree68p11PnsGJGs/QaUB9F9AAGVKTZ2kz7sqkCDdGmLxzbdidYDHZtYWfOIYSJCQsA09n2Txi0fwNByKfl/spdyMmtI1uGeT803rhN9vu0NGrQFG3mU7mqO33fUDEStIQ6/xn0A=
 
@@ -74,8 +79,6 @@ before_install:
   # Install OSX requirements
   # TODO: Temporary fix, the problem is described here: https://jira.bf.local/browse/ECR-2795
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install $OSX_PACKAGES || brew install $OSX_PACKAGES; fi
-  # force building instead of using from apt.
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export ROCKSDB_BUILD=1; export SNAPPY_BUILD=1; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).

@@ -15,9 +15,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.0] - 2019-03-13
+
+### Overview
+
+This release brings support of Exonum Time Oracle. It is based on Exonum 0.10.3.
+
 ### Added
 - Support of Time oracle. Instruction on how to enable built-in services can be found
-  [here](https://exonum.com/doc/version/0.4/get-started/java-binding/#built-in-services). (#667)
+  [here](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services). (#667)
+- [`JsonSerializer`][json-serializer-0.5.0] provides support for `ZonedDateTime`
+  JSON serialization in [`ISO_ZONED_DATE_TIME`][iso-zdt-format] format. (#762)
+
+[json-serializer-0.5.0]: https://exonum.com/doc/api/java-binding-common/0.5.0/com/exonum/binding/common/serialization/json/JsonSerializer.html
+[iso-zdt-format]: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html#ISO_ZONED_DATE_TIME
 
 ### Changed
 - `TransactionResult` and `TransactionLocation` classes moved to the common module. (#725)
@@ -166,7 +177,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/v0.4...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...HEAD
+[0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0
 [0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
 [0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
 [0.2]: https://github.com/exonum/exonum-java-binding/compare/v0.1.2...v0.2

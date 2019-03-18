@@ -18,15 +18,24 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.Block;
+import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nullable;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -55,6 +64,58 @@ final class ExplorerApiHelper {
         executionResult,
         response.getLocation()
     );
+  }
+
+  static BlockResponse parseGetBlockResponse(String json) {
+    GetBlockResponse response = json().fromJson(json, GetBlockResponse.class);
+    ZonedDateTime time = response.getTime();
+    Block block = toTimeBlock(response.getBlock(), time);
+
+    return new BlockResponse(block, response.getTransactions());
+  }
+
+  static BlocksResponse parseGetBlocksResponse(String json) {
+    GetBlocksResponse response = json().fromJson(json, GetBlocksResponse.class);
+    List<GetBlockResponseBlock> blocks = response.getBlocks();
+    int blocksSize = blocks.size();
+    List<ZonedDateTime> times = response.getTimes();
+    if (times != null) {
+      int timesSize = times.size();
+      checkState(blocksSize == timesSize,
+          "Blocks size %s doesn't equal to commit times size %s", blocksSize, timesSize);
+    }
+
+    List<Block> timeBlocks = new ArrayList<>(blocksSize);
+    for (int i = 0; i < blocksSize; i++) {
+      if (times == null) {
+        timeBlocks.add(toTimeBlock(blocks.get(i)));
+      } else {
+        timeBlocks.add(toTimeBlock(blocks.get(i), times.get(i)));
+      }
+    }
+
+    return new BlocksResponse(
+        timeBlocks,
+        response.getRange().getStart(),
+        response.getRange().getEnd()
+    );
+  }
+
+  private static Block toTimeBlock(GetBlockResponseBlock block) {
+    return toTimeBlock(block, null);
+  }
+
+  private static Block toTimeBlock(GetBlockResponseBlock block, @Nullable ZonedDateTime time) {
+
+    return Block.builder()
+        .proposerId(block.getProposerId())
+        .numTransactions(block.getTxCount())
+        .height(block.getHeight())
+        .previousBlockHash(block.getPreviousBlockHash())
+        .stateHash(block.getStateHash())
+        .txRootHash(block.getTxRootHash())
+        .commitTime(time)
+        .build();
   }
 
   private static TransactionResult getTransactionResult(
@@ -139,6 +200,44 @@ final class ExplorerApiHelper {
     ERROR,
     @SerializedName("panic")
     PANIC
+  }
+
+  @Value
+  private static class GetBlockResponse {
+    GetBlockResponseBlock block;
+    JsonElement precommits; //TODO: in scope of LC P3
+    @SerializedName("txs")
+    List<HashCode> transactions;
+    ZonedDateTime time;
+  }
+
+  @Value
+  private static class GetBlockResponseBlock {
+    @SerializedName("proposer_id")
+    int proposerId;
+    long height;
+    @SerializedName("tx_count")
+    int txCount;
+    @SerializedName("prev_hash")
+    HashCode previousBlockHash;
+    @SerializedName("tx_hash")
+    HashCode txRootHash;
+    @SerializedName("state_hash")
+    HashCode stateHash;
+  }
+
+  @Value
+  private static class GetBlocksResponse {
+    List<GetBlockResponseBlock> blocks;
+    GetBlocksResponseRange range;
+    @Nullable
+    List<ZonedDateTime> times;
+  }
+
+  @Value
+  private static class GetBlocksResponseRange {
+    long start;
+    long end;
   }
 
   private ExplorerApiHelper() {

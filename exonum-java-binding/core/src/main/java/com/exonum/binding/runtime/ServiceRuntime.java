@@ -23,8 +23,8 @@ import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * A service runtime. It manages the services required for operation of Exonum services (e.g., a
@@ -60,22 +60,19 @@ final class ServiceRuntime {
         s1, s2);
   }
 
-  // todo: How much artifact verification are we willing to perform?
-
   /**
    * Loads an artifact from the specified location. The loading involves verification of the
    * artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
    *
-   * @param serviceArtifactUri a {@linkplain URI URI} from which to load the service artifact
-   *     (e.g., a file or network resource)
+   * @param serviceArtifactPath a {@linkplain java.nio.file.Path filesystem path} from which
+   *     to load the service artifact
    * @return a unique service artifact identifier that must be specified in subsequent operations
    *     with it
-   * @throws URISyntaxException if the URI is not valid
    * @throws RuntimeException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
   @SuppressWarnings("unused")
-  String loadArtifact(String serviceArtifactUri) throws URISyntaxException {
+  String loadArtifact(String serviceArtifactPath) {
     return "com.acme:any-service:1.0.0";
   }
 
@@ -91,9 +88,33 @@ final class ServiceRuntime {
    */
   UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId,
       /* Temporary arg: remove */ String moduleName) {
-    Module serviceModule = ServiceBootstrap.createUserModule(moduleName);
+    Module serviceModule = createUserModule(moduleName);
     Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
     return serviceInjector.getInstance(UserServiceAdapter.class);
+  }
+
+  /**
+   * Creates a user module that configures the bindings of that module.
+   *
+   * @param moduleName a fully-qualified class name of the user service module
+   */
+  private static Module createUserModule(String moduleName) {
+    try {
+      Class<?> moduleClass = Class.forName(moduleName);
+      Constructor constructor = moduleClass.getDeclaredConstructor();
+      Object moduleObject = constructor.newInstance();
+      checkArgument(moduleObject instanceof Module, "%s is not a sub-class of %s",
+          moduleClass, Module.class.getCanonicalName());
+      return (Module) moduleObject;
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException("Module class cannot be found", e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalArgumentException("Cannot access the no-arg module constructor", e);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("No no-arg constructor", e);
+    } catch (InstantiationException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   // TODO: unloadArtifact and stopService, once they can be used/ECR-2275
