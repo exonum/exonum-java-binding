@@ -43,7 +43,7 @@ public final class TestService extends AbstractService {
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
 
-  private final static SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
+  private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
 
   public TestService() {
     super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, SCHEMA_FACTORY));
