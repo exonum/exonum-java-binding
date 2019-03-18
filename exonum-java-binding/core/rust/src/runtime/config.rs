@@ -148,7 +148,7 @@ mod tests {
         let validation_result = validate_and_convert("Duser.parameter=Djava.library.path");
         assert_eq!(
             validation_result,
-            Ok("-Duser.parameter=Djava.class.path".to_string())
+            Ok("-Duser.parameter=Djava.library.path".to_string())
         );
     }
 
