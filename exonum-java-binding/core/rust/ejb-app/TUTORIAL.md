@@ -42,14 +42,29 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}:${RUST_LIB_PATH}:${EJB_LIBPATH}"
 ```
 
 #### CLASSPATH
-Classpath is used to locate Java classes of your service and its dependencies, including 
-the Exonum Java Binding.
+Classpath is used to locate Java classes of the Exonum Java Binding and its dependencies.
+ Note, that classpath has nothing to do with classes of user services. 
 
-You may package your service in an Uber JAR using 
-the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
-and pass a path to the service artefact during application configuration as `--ejb-classpath`
-parameter. Alternatively, you may assemble a classpath that includes the service and all of 
-its dependencies and pass it instead.
+#### Services definition
+Services are loaded as `jar` artifacts and should be described in the 
+[ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/) 
+file located in the working directory. The configuration file consists of two sections:
+- The optional `enabled_services` section is used to enable built-in Exonum services. If 
+not specified - only Configuration service is enabled. Possible variants for the moment are: 
+`configuration`, `btc-anchoring`, `time`.
+- The `user_services` section enumerates services in form of `name = artifact`, where `name` 
+is one-word description of the service and `artifact` is full path to the service's artifact. 
+At least one service must be defined.
+
+The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
+and two user services:
+```toml
+enabled_services = ["configuration", "btc-anchoring", "time"]
+
+[user_services]
+service_name1 = '/path/to/service1_artifact.jar'
+service_name2 = '/path/to/service2_artifact.jar'
+```
 
 ### Step 2. Generate Node Configuration
 
