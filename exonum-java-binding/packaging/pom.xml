@@ -10,6 +10,7 @@
 
   <artifactId>exonum-java-binding-packaging</artifactId>
   <version>0.5-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <properties>
     <packaging.basedir>${project.parent.basedir}/core/rust/target/prepackage</packaging.basedir>
