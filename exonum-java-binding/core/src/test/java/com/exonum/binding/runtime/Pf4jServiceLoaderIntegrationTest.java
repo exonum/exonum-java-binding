@@ -38,24 +38,20 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.Plugin;
 import org.pf4j.PluginManager;
 
-@ExtendWith(MockitoExtension.class)
 class Pf4jServiceLoaderIntegrationTest {
 
   private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
 
   private PluginManager pluginManager;
-
   private Pf4jServiceLoader serviceLoader;
   private Path artifactLocation;
 
