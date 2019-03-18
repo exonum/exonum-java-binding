@@ -33,13 +33,13 @@ import java.util.stream.Stream;
 
 class UtcZonedDateTimeSerializerTest {
 
-  private Serializer<ZonedDateTime> serializer = UtcZonedDateTimeSerializer.INSTANCE;
+  private final Serializer<ZonedDateTime> SERIALIZER = UtcZonedDateTimeSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
   void roundTrip(ZonedDateTime key) {
-    byte[] bytes = serializer.toBytes(key);
-    ZonedDateTime actual = serializer.fromBytes(bytes);
+    byte[] bytes = SERIALIZER.toBytes(key);
+    ZonedDateTime actual = SERIALIZER.fromBytes(bytes);
 
     assertThat(actual, equalTo(key));
   }
@@ -47,13 +47,13 @@ class UtcZonedDateTimeSerializerTest {
   @Test
   void deserializeInvalidValue() {
     byte[] invalidValue = Bytes.bytes();
-    assertThrows(IllegalArgumentException.class, () -> serializer.fromBytes(invalidValue));
+    assertThrows(IllegalArgumentException.class, () -> SERIALIZER.fromBytes(invalidValue));
   }
 
   @Test
   void serializeNonUtcValue() {
     ZonedDateTime value = ZonedDateTime.now(ZoneId.of("Europe/Amsterdam"));
-    assertThrows(IllegalArgumentException.class, () -> serializer.toBytes(value));
+    assertThrows(IllegalArgumentException.class, () -> SERIALIZER.toBytes(value));
   }
 
   private static Stream<ZonedDateTime> testSource() {

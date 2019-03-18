@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.binding</groupId>
   <artifactId>exonum-java-binding-parent</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding Parent</name>
@@ -324,7 +324,7 @@
           </configuration>
           <executions>
             <execution>
-              <id>validate</id>
+              <id>check-java-code-style</id>
               <phase>validate</phase>
               <configuration>
                 <encoding>UTF-8</encoding>
