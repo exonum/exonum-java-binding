@@ -32,7 +32,13 @@ import java.nio.file.Path;
  */
 public final class ServiceArtifacts {
 
-  // todo: docs, and native facade
+  /**
+   * Writes a valid service artifact to the specified location. A valid service artifact
+   * can be loaded by the {@link com.exonum.binding.runtime.ServiceRuntime} and
+   * the service can be instantiated.
+   * @param artifactLocation a path to write the artifact to
+   * @throws IOException if it is unable to write the JAR to the given location
+   */
   public static void createValidArtifact(Path artifactLocation) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId("com.exonum.binding:valid-test-service:1.0.0")
@@ -43,6 +49,13 @@ public final class ServiceArtifacts {
         .writeTo(artifactLocation);
   }
 
+  /**
+   * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
+   * during an attempt
+   * to {@linkplain com.exonum.binding.runtime.ServiceRuntime#loadArtifact(String) load} it.
+   * @param artifactLocation a path to write the artifact to
+   * @throws IOException if it is unable to write the JAR to the given location
+   */
   public static void createUnloadableArtifact(Path artifactLocation) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId("com.exonum.binding:unloadable-test-service:1.0.0")
@@ -51,6 +64,12 @@ public final class ServiceArtifacts {
         .writeTo(artifactLocation);
   }
 
+  /**
+   * Writes a service artifact that can be loaded, but with a service that cannot be
+   * {@linkplain com.exonum.binding.runtime.ServiceRuntime#createService(String) instantiated}.
+   * @param artifactLocation a path to write the artifact to
+   * @throws IOException if it is unable to write the JAR to the given location
+   */
   public static void createWithUninstantiableService(Path artifactLocation) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId("com.exonum.binding:non-instantiable-test-service:1.0.0")

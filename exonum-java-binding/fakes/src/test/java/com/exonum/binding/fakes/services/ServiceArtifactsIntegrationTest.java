@@ -33,15 +33,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 @CiOnly
-class ServiceArtifactsTest {
+class ServiceArtifactsIntegrationTest {
 
-  // todo: Is it OK to make the things public?
+  // todo: Is it OK to make the things (ServiceRuntime, ServiceRuntimeBootstrap, etc) public?
   private Path artifactLocation;
   private ServiceRuntime serviceRuntime;
 
   @BeforeEach
   void setUp(@TempDir Path tmp) {
-    artifactLocation = tmp.resolve("service.jar");
+    artifactLocation = tmp.resolve("test-service.jar");
     serviceRuntime = ServiceRuntimeBootstrap.createServiceRuntime(0);
   }
 
