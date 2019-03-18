@@ -62,8 +62,6 @@ lazy_static! {
 }
 
 #[test]
-// TODO: reenable these tests after ECR-2789
-#[cfg_attr(target_os = "linux", ignore)]
 fn service_id() {
     let service_id: u16 = 24;
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -73,7 +71,6 @@ fn service_id() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn service_id_negative() {
     // Check that value is converted between rust `u16` and java `short` without loss.
     let service_id: u16 = -24_i16 as u16; // 65512;
@@ -84,7 +81,6 @@ fn service_id_negative() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn service_name() {
     let service_name: &str = "test_service";
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -94,7 +90,6 @@ fn service_name() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn state_hash() {
     let db = MemoryDB::new();
     let snapshot = db.snapshot();
@@ -106,7 +101,6 @@ fn state_hash() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn tx_from_raw_should_panic_if_java_error_occurred() {
     let raw = create_empty_raw_transaction();
@@ -117,7 +111,6 @@ fn tx_from_raw_should_panic_if_java_error_occurred() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn tx_from_raw_should_return_err_if_java_exception_occurred() {
     let raw = create_empty_raw_transaction();
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -132,7 +125,6 @@ fn tx_from_raw_should_return_err_if_java_exception_occurred() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn initialize_config() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -146,7 +138,6 @@ fn initialize_config() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn initialize_config_null() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -160,7 +151,6 @@ fn initialize_config_null() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn initialize_config_parse_error() {
     let db = MemoryDB::new();
     let mut fork = db.fork();
@@ -180,7 +170,6 @@ fn initialize_config_parse_error() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 #[should_panic(expected = "Java exception: java.lang.RuntimeException")]
 fn initialize_should_panic_if_java_exception_occurred() {
     let db = MemoryDB::new();
@@ -194,7 +183,6 @@ fn initialize_should_panic_if_java_exception_occurred() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn service_can_modify_db_on_initialize() {
     let db = MemoryDB::new();
     let service = create_test_service(EXECUTOR.clone());
@@ -216,7 +204,6 @@ fn service_can_modify_db_on_initialize() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 #[should_panic(expected = "Java exception: com.exonum.binding.fakes.mocks.TestException")]
 fn after_commit_throwing() {
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -233,7 +220,6 @@ fn after_commit_throwing() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn after_commit_validator() {
     let (builder, interactor) =
         ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
@@ -263,7 +249,6 @@ fn after_commit_validator() {
 }
 
 #[test]
-#[cfg_attr(target_os = "linux", ignore)]
 fn after_commit_auditor() {
     let (builder, interactor) =
         ServiceMockBuilder::new(EXECUTOR.clone()).get_mock_interaction_after_commit();
