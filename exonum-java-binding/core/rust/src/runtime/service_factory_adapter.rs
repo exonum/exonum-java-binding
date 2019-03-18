@@ -9,26 +9,25 @@ static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 static JAVA_SERVICE_CREATE_COMMAND: Once = ONCE_INIT;
 
-/// Adapts current single-service interface of core to multiple EJB services until dynamic services
-/// are implemented.
+/// Adapts current single-service interface of Exonum to multiple EJB services until dynamic
+/// services are implemented. Tracks the `JavaServiceRuntime` instantiation and command extension
+/// and represents factory for every user service relying on current `ServiceFactory` interface.
 pub struct JavaServiceFactoryAdapter {
     name: String,
-    artifact_uri: String,
+    artifact_path: String,
 }
 
 impl JavaServiceFactoryAdapter {
-    /// TODO: write doc
+    /// Creates new instance with given service name and path to the artifact.
     pub fn new<S: AsRef<str>>(name: S, artifact_uri: S) -> Self {
         JavaServiceFactoryAdapter {
             name: name.as_ref().to_owned(),
-            artifact_uri: artifact_uri.as_ref().to_owned(),
+            artifact_path: artifact_uri.as_ref().to_owned(),
         }
     }
 
-    // TODO: update doc
-    /// Creates new runtime from provided config or returns the one created earlier.
-    ///
-    /// There can be only one `JavaServiceRuntime` instance at a time.
+    // Creates new runtime from provided config or returns the one created earlier. There can be
+    // only one `JavaServiceRuntime` instance at a time.
     fn get_or_create_java_service_runtime(context: &Context) -> JavaServiceRuntime {
         // Initialize runtime if it wasn't created before.
         JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
@@ -80,8 +79,9 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
     fn make_service(&mut self, context: &Context) -> Box<Service> {
         let runtime = Self::get_or_create_java_service_runtime(context);
 
+        // load service from artifact and create corresponding proxy
         let artifact_id = runtime
-            .load_artifact(&self.artifact_uri)
+            .load_artifact(&self.artifact_path)
             .expect("Unable to load artifact");
         let service_proxy = runtime.create_service(&artifact_id);
         Box::new(service_proxy)
