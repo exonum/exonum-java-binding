@@ -12,6 +12,9 @@
   <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <name>Exonum Java Binding: Packaging</name>
+  <description>A fake module used for packaging EJB App</description>
+
   <properties>
     <packaging.basedir>${project.parent.basedir}/core/rust/target/prepackage</packaging.basedir>
     <packaging.rust>${project.parent.basedir}/core/rust</packaging.rust>

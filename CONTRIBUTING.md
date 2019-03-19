@@ -45,7 +45,7 @@ $ ./package_app.sh
 ```
 
 This command will build and package EJB App with all the necessary runtime dependencies
-in a single `zip` archive in `exonum-java-binding/core/target` directory.
+in a single `zip` archive in `exonum-java-binding/packaging/target` directory.
 
 Before packaging, the script will also run all the tests to guarantee that the generated application
 is valid. It may take a long time, so you can pass `--skip-tests` flag to skip tests running:
