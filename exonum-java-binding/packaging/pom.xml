@@ -16,8 +16,11 @@
   <description>A fake module used for packaging EJB App</description>
 
   <properties>
+    <!--A directory used for storing immediate files while packaging the App-->
     <packaging.basedir>${project.parent.basedir}/core/rust/target/prepackage</packaging.basedir>
+    <!--A directory containing Java dependencies of the App-->
     <packaging.rust>${project.parent.basedir}/core/rust</packaging.rust>
+    <!--A directory containing native dynamic libraries used by the App-->
     <packaging.java>${project.parent.basedir}/core/rust/target/debug/lib/java</packaging.java>
   </properties>
 
@@ -58,6 +61,52 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <!--We need to explicitly copy EJB Core and Time Oracle JARs because we use `type=pom` dependencies-->
+        <!--TODO: remove after ECR-3039-->
+        <executions>
+          <execution>
+            <id>copy-core-and-time-oracle-jars</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${packaging.java}</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>exonum-java-binding-core</artifactId>
+                  <version>${project.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>exonum-time-oracle</artifactId>
+                  <version>${project.version}</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <!--We copy all Java dependencies needed by the App to the <ejb-app-location>/lib/java directory-->
+          <execution>
+            <id>copy-java-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${packaging.java}</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -66,49 +115,6 @@
       <id>app-packaging</id>
       <build>
         <plugins>
-          <plugin>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <configuration>
-              <includeScope>runtime</includeScope>
-            </configuration>
-            <executions>
-              <execution>
-                <id>copy-core-and-time-oracle-jars</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>copy</goal>
-                </goals>
-                <configuration>
-                  <outputDirectory>${packaging.java}</outputDirectory>
-                  <artifactItems>
-                    <artifactItem>
-                      <groupId>${project.groupId}</groupId>
-                      <artifactId>exonum-java-binding-core</artifactId>
-                      <version>${project.version}</version>
-                    </artifactItem>
-                    <artifactItem>
-                      <groupId>${project.groupId}</groupId>
-                      <artifactId>exonum-time-oracle</artifactId>
-                      <version>${project.version}</version>
-                    </artifactItem>
-                  </artifactItems>
-                </configuration>
-              </execution>
-              <execution>
-                <id>copy-java-dependencies</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                  <outputDirectory>${packaging.java}</outputDirectory>
-                  <overWriteReleases>true</overWriteReleases>
-                  <overWriteSnapshots>true</overWriteSnapshots>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
           <!--Package EJB App with necessary libraries and documentation-->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
