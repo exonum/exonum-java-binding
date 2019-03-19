@@ -47,7 +47,7 @@ Classpath is used to locate Java classes of the Exonum Java Binding and its depe
 
 #### Services definition
 Services are loaded as `jar` artifacts and should be described in the 
-[ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/) 
+[ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
 file located in the working directory. The configuration file consists of two sections:
 - The optional `enabled_services` section is used to enable built-in Exonum services. If 
 not specified - only Configuration service is enabled. Possible variants for the moment are: 
@@ -97,7 +97,7 @@ $ cargo run -- finalize testnet/sec.toml testnet/node.toml \
 ### Step 3. Run Configured Node
 
 There are several required parameters here:
-- `--ejb-classpath` for a classpath of Java service runtime.
+- `--ejb-classpath` for a classpath of Java service runtime. Shall not include paths to service artifacts.
 - `--ejb-libpath` for a path to Java bindings native libraries.
 - `--ejb-port` for port that your service will use for communication.
  Java Binding does not use Exonum Core ports directly.
