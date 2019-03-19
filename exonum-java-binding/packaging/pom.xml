@@ -6,12 +6,11 @@
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
     <version>0.5-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>exonum-java-binding-packaging</artifactId>
   <version>0.5-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <packaging.basedir>${project.parent.basedir}/core/rust/target/prepackage</packaging.basedir>
@@ -23,14 +22,14 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-binding-core</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
 
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
@@ -80,14 +79,14 @@
                   <outputDirectory>${packaging.java}</outputDirectory>
                   <artifactItems>
                     <artifactItem>
-                      <groupId>com.exonum.binding</groupId>
+                      <groupId>${project.groupId}</groupId>
                       <artifactId>exonum-java-binding-core</artifactId>
-                      <version>0.5-SNAPSHOT</version>
+                      <version>${project.version}</version>
                     </artifactItem>
                     <artifactItem>
-                      <groupId>com.exonum.binding</groupId>
+                      <groupId>${project.groupId}</groupId>
                       <artifactId>exonum-time-oracle</artifactId>
-                      <version>0.5-SNAPSHOT</version>
+                      <version>${project.version}</version>
                     </artifactItem>
                   </artifactItems>
                 </configuration>

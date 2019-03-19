@@ -103,7 +103,7 @@ from a debugger:
 
 ```sh
 $ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
-    --ejb-log-config-path "log4j.xml" \
+    --ejb-log-config-path "log4j-fallback.xml" \
     --ejb-port 6000 \
     --jvm-debug localhost:8000
 ```

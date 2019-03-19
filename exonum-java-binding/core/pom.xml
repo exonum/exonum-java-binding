@@ -27,6 +27,8 @@
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
     <packaging.basedir>${project.basedir}/rust/target/prepackage</packaging.basedir>
+    <packaging.java>${project.basedir}/rust/target/debug/lib/java</packaging.java>
+    <packaging.native>${project.basedir}/rust/target/debug/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
@@ -279,10 +281,10 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.basedir}/rust/target/debug/lib/native</outputDirectory>
+              <outputDirectory>${packaging.native}</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${project.basedir}/rust/target/debug</directory>
+                  <directory>${build.nativeLibPath}</directory>
                   <includes>
                     <include>libjava_bindings.so</include>
                     <include>libjava_bindings.dylib</include>
@@ -381,24 +383,24 @@
               <goal>copy</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.basedir}/rust/target/debug/lib/java</outputDirectory>
+              <outputDirectory>${packaging.java}</outputDirectory>
               <artifactItems>
                 <artifactItem>
-                  <groupId>com.exonum.binding</groupId>
-                  <artifactId>exonum-java-binding-core</artifactId>
-                  <version>0.5-SNAPSHOT</version>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
                 </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
           <execution>
             <id>copy-core-dependencies</id>
-            <phase>process-classes</phase>
+            <phase>install</phase>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.basedir}/rust/target/debug/lib/java</outputDirectory>
+              <outputDirectory>${packaging.java}</outputDirectory>
               <overWriteReleases>true</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
             </configuration>
