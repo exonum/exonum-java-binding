@@ -45,12 +45,12 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
 
 pub fn create() -> fabric::NodeBuilder {
     let EjbAppServices {
-        enabled_services,
+        system_services,
         user_services,
     } = load_services_definition(PATH_TO_SERVICES_DEFINITION)
         .expect("Unable to load services definition");
 
-    let services = validate_services(enabled_services);
+    let services = validate_services(system_services);
 
     let mut service_factories = service_factories();
 
@@ -111,21 +111,21 @@ mod tests {
     fn all_services() {
         let cfg = create_config(
             "all.toml",
-            "enabled_services = [\"configuration\", \"btc-anchoring\", \"time\"]\n\
+            "system_services = [\"configuration\", \"btc-anchoring\", \"time\"]\n\
             [user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'",
         );
         let EjbAppServices {
-            enabled_services,
+            system_services,
             user_services,
         } = load_services_definition(cfg).unwrap();
-        let enabled_services = enabled_services.unwrap();
-        assert_eq!(enabled_services.len(), 3);
-        assert!(enabled_services.contains(CONFIGURATION_SERVICE));
-        assert!(enabled_services.contains(BTC_ANCHORING_SERVICE));
-        assert!(enabled_services.contains(TIME_SERVICE));
+        let system_services = system_services.unwrap();
+        assert_eq!(system_services.len(), 3);
+        assert!(system_services.contains(CONFIGURATION_SERVICE));
+        assert!(system_services.contains(BTC_ANCHORING_SERVICE));
+        assert!(system_services.contains(TIME_SERVICE));
 
         let service_factories = service_factories();
-        for service in enabled_services {
+        for service in system_services {
             assert!(service_factories.get(&service).is_some())
         }
 

@@ -49,7 +49,7 @@ Classpath is used to locate Java classes of the Exonum Java Binding and its depe
 Services are loaded as `jar` artifacts and should be described in the 
 [ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
 file located in the working directory. The configuration file consists of two sections:
-- The optional `enabled_services` section is used to enable built-in Exonum services. If 
+- The optional `system_services` section is used to enable built-in Exonum services. If 
 not specified - only Configuration service is enabled. Possible variants for the moment are: 
 `configuration`, `btc-anchoring`, `time`.
 - The `user_services` section enumerates services in form of `name = artifact`, where `name` 
@@ -59,7 +59,7 @@ At least one service must be defined.
 The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
 and two user services:
 ```toml
-enabled_services = ["configuration", "btc-anchoring", "time"]
+system_services = ["configuration", "btc-anchoring", "time"]
 
 [user_services]
 service_name1 = '/path/to/service1_artifact.jar'

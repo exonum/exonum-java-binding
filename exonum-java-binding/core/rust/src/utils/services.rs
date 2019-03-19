@@ -24,7 +24,7 @@ pub const TIME_SERVICE: &str = "time";
 
 #[derive(Serialize, Deserialize)]
 pub struct EjbAppServices {
-    pub enabled_services: Option<HashSet<String>>,
+    pub system_services: Option<HashSet<String>>,
     pub user_services: HashMap<String, String>,
 }
 
@@ -48,7 +48,7 @@ fn parse_services(data: String) -> Result<EjbAppServices> {
 /// Determines whether particular service name is defined in the specific TOML configuration file.
 pub fn is_service_enabled_in_config_file<P: AsRef<Path>>(service_name: &str, path: P) -> bool {
     match load_services_definition(path) {
-        Ok(services) => match services.enabled_services {
+        Ok(services) => match services.system_services {
             Some(services_to_enable) => services_to_enable.contains(service_name),
             None => false,
         },
@@ -63,7 +63,7 @@ mod tests {
     use tempfile::{Builder, TempPath};
 
     #[test]
-    fn missed_enabled_services_section() {
+    fn missed_system_services_section() {
         let cfg = "[user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'".to_owned();
         let res = parse_services(cfg);
         assert!(res.is_ok());
@@ -72,33 +72,33 @@ mod tests {
     #[test]
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn missed_user_services_section() {
-        let cfg = "enabled_services = [\"configuration\", \"btc-anchoring\", \"time\"]".to_owned();
+        let cfg = "system_services = [\"configuration\", \"btc-anchoring\", \"time\"]".to_owned();
         let _result = parse_services(cfg);
     }
 
     #[test]
     fn empty_list() {
-        let cfg = "enabled_services = []\n[user_services]".to_owned();
+        let cfg = "system_services = []\n[user_services]".to_owned();
         let res = parse_services(cfg);
         assert!(res.is_ok());
         let services = res.unwrap();
-        assert_eq!(services.enabled_services.unwrap().len(), 0);
+        assert_eq!(services.system_services.unwrap().len(), 0);
         assert_eq!(services.user_services.len(), 0);
     }
 
     #[test]
     fn duplicated() {
-        let cfg = "enabled_services = [\"btc-anchoring\", \"btc-anchoring\"]\n[user_services]\n"
+        let cfg = "system_services = [\"btc-anchoring\", \"btc-anchoring\"]\n[user_services]\n"
             .to_owned();
         let res = parse_services(cfg);
         assert!(res.is_ok());
         let EjbAppServices {
-            enabled_services, ..
+            system_services, ..
         } = res.unwrap();
-        assert!(enabled_services.is_some());
-        let enabled_services = enabled_services.unwrap();
-        assert_eq!(enabled_services.len(), 1);
-        assert!(enabled_services.contains(BTC_ANCHORING_SERVICE));
+        assert!(system_services.is_some());
+        let system_services = system_services.unwrap();
+        assert_eq!(system_services.len(), 1);
+        assert!(system_services.contains(BTC_ANCHORING_SERVICE));
     }
 
     #[test]
@@ -118,7 +118,7 @@ mod tests {
     fn config_file_ok() {
         let cfg = create_config(
             "services_list_ok.toml",
-            "enabled_services = []\n[user_services]",
+            "system_services = []\n[user_services]",
         );
         let res = load_services_definition(cfg);
         assert!(res.is_ok());
@@ -128,7 +128,7 @@ mod tests {
     fn check_service_enabled() {
         let cfg = create_config(
             "service_enabled_test.toml",
-            "enabled_services = [\"time\"]\n[user_services]\nservice_name1 = '/path/to/artifact1.jar'",
+            "system_services = [\"time\"]\n[user_services]\nservice_name1 = '/path/to/artifact1.jar'",
         );
 
         assert!(!is_service_enabled_in_config_file(
