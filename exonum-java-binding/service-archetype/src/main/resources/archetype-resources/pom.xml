@@ -45,10 +45,10 @@
          in the service artifact. Some of transitive dependencies of Exonum are safe
          and recommended to use in a service in 'provided' scope as well, because they will not
          be changed in an incompatible way in a compatible release of Exonum. Such dependencies
-         are listed in exonum-java-binding-bom (e.g., guava, guice, gson, vertx, pf4j).
-         You can either use them implicitly as transitive dependencies (no extra POM modifications
-         needed) or define explicitly below with 'provided' scope and NO version — it will be
-         inherited from exonum-java-binding-bom.
+         are listed in exonum-java-binding-bom (e.g., guava, guice, gson, vertx, pf4j,
+         protobuf-java). You can either use them implicitly as transitive dependencies
+         (no extra POM modifications needed) or define explicitly below with 'provided' scope
+         and NO version — it will be inherited from exonum-java-binding-bom.
 
          See also https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies
          -->
