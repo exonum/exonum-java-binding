@@ -21,11 +21,12 @@ package com.exonum.client.request;
  */
 public enum BlockFilteringOption {
   /**
-   * Identifies to skip empty blocks and non-empty blocks only will be returned in a response.
+   * Skip empty blocks (containing no transactions).
+   * Only non-empty blocks will be returned in a response.
    */
   SKIP_EMPTY,
   /**
-   * Identifies to return all (either empty and non-empty) blocks in a response.
+   * Include all blocks in a response (both empty and non-empty).
    */
   INCLUDE_EMPTY
 }

@@ -111,11 +111,12 @@ public interface ExonumClient {
    * in reverse order, starting from the {@code heightMax}.
    * @param count Number of blocks to return.
    *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
-   * @param blockFilter blocks filtering option identifies to skip or include empty blocks
+   * @param blockFilter controls whether to skip blocks with no transactions
    * @param heightMax maximum height of the returned blocks.
    *        If the {@code heightMax} is greater than actual blockchain height then
    *        the actual height will be used
-   * @param timeOption block commit time option identifies to include or not block commit time.
+   * @param timeOption controls whether to include the block commit time.
+   *        See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
    * @return blocks information response
@@ -131,8 +132,8 @@ public interface ExonumClient {
    * Returns blockchain blocks information starting from the last block in the blockchain.
    * @param count Number of blocks to return.
    *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
-   * @param blockFilter blocks filtering option identifies to skip or include empty blocks
-   * @param timeOption block commit time option identifies to include or not block commit time.
+   * @param blockFilter controls whether to skip blocks with no transactions
+   * @param timeOption controls whether to include the block commit time.
    *        See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block

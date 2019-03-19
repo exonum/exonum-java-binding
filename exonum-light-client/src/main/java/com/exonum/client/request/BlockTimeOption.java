@@ -20,15 +20,15 @@ import com.exonum.client.response.Block;
 
 /**
  * Request option for block commit time.
- * See {@linkplain Block#getCommitTime()}.
+ * See {@link Block#getCommitTime()}.
  */
 public enum BlockTimeOption {
   /**
-   * Identifies to do not include block commit times in a response.
+   * Do not include block commit times in a response.
    */
   NO_COMMIT_TIME,
   /**
-   * Identifies to include block commit times in a response.
+   * Include block commit times in a response.
    */
   INCLUDE_COMMIT_TIME
 }
