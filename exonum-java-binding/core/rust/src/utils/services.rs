@@ -45,11 +45,11 @@ fn parse_services(data: String) -> Result<EjbAppServices> {
     Ok(services)
 }
 
-/// Determines whether particular service name is defined in the specific TOML configuration file.
+/// Determines whether particular system service is defined in the specific EJB services configuration file.
 pub fn is_service_enabled_in_config_file<P: AsRef<Path>>(service_name: &str, path: P) -> bool {
     match load_services_definition(path) {
         Ok(services) => match services.system_services {
-            Some(services_to_enable) => services_to_enable.contains(service_name),
+            Some(system_services) => system_services.contains(service_name),
             None => false,
         },
         Err(_) => false,
