@@ -23,7 +23,7 @@ import java.util.Optional;
  * A dynamic loader of Exonum service artifacts. It allows to load and unload service artifacts and
  * keeps track of already loaded services.
  */
-interface ServiceLoader {
+public interface ServiceLoader {
 
   /**
    * Loads the service artifact. The loading also involves verification of the artifact, e.g.,

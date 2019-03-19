@@ -35,7 +35,6 @@ import org.junit.jupiter.api.io.TempDir;
 @CiOnly
 class ServiceArtifactsIntegrationTest {
 
-  // todo: Is it OK to make the things (ServiceRuntime, ServiceRuntimeBootstrap, etc) public?
   private Path artifactLocation;
   private ServiceRuntime serviceRuntime;
 

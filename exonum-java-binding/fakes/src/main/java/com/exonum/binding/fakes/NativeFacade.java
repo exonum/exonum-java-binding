@@ -146,7 +146,6 @@ public final class NativeFacade {
     ServiceArtifacts.createUnloadableArtifact(Paths.get(path));
   }
 
-  // todo: a shorter yet descriptive name?
   /**
    * Writes a service artifact that can be loaded, but with a service that cannot be
    * {@linkplain com.exonum.binding.runtime.ServiceRuntime#createService(String) instantiated}.

@@ -16,6 +16,9 @@
 
 package com.exonum.binding.runtime;
 
+/**
+ * Indicates that a service runtime failed to load the service artifact.
+ */
 public class ServiceLoadingException extends Exception {
 
   public ServiceLoadingException(String message) {
