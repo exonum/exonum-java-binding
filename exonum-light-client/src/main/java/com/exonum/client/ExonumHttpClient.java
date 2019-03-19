@@ -24,12 +24,18 @@ import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
+import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
+import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
+import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.request.BlockFilteringOption;
+import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
@@ -117,7 +123,7 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public long getBlockchainHeight() {
-    BlocksResponse response = doGetBlocks(0, false, null, false);
+    BlocksResponse response = doGetBlocks(0, INCLUDE_EMPTY, null, NO_COMMIT_TIME);
 
     return response.getBlocksRangeEnd();
   }
@@ -135,23 +141,24 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax,
-      boolean withTime) {
+  public BlocksResponse getBlocks(int count, BlockFilteringOption blockFilter, long heightMax,
+      BlockTimeOption timeOption) {
     checkArgument(0 < count,
         "Requested number of blocks should be positive number but was %s", count);
-    return doGetBlocks(count, skipEmpty, heightMax, withTime);
+    return doGetBlocks(count, blockFilter, heightMax, timeOption);
   }
 
   @Override
-  public BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime) {
+  public BlocksResponse getLastBlocks(int count, BlockFilteringOption blockFilter,
+      BlockTimeOption timeOption) {
     checkArgument(0 < count,
         "Requested number of blocks should be positive number but was %s", count);
-    return doGetBlocks(count, skipEmpty, null, withTime);
+    return doGetBlocks(count, blockFilter, null, timeOption);
   }
 
   @Override
-  public Block getLastBlock(boolean withTime) {
-    BlocksResponse response = doGetBlocks(1, false, null, withTime);
+  public Block getLastBlock() {
+    BlocksResponse response = doGetBlocks(1, INCLUDE_EMPTY, null, INCLUDE_COMMIT_TIME);
 
     return response.getBlocks()
         .stream()
@@ -160,22 +167,24 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public Optional<Block> getLastNonEmptyBlock(boolean withTime) {
-    BlocksResponse response = doGetBlocks(1, true, null, withTime);
+  public Optional<Block> getLastNonEmptyBlock() {
+    BlocksResponse response = doGetBlocks(1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
 
     return response.getBlocks()
         .stream()
         .findFirst();
   }
 
-  private BlocksResponse doGetBlocks(int count, boolean skipEmpty, Long heightMax,
-      boolean withTime) {
+  private BlocksResponse doGetBlocks(int count, BlockFilteringOption blockFilter, Long heightMax,
+      BlockTimeOption timeOption) {
     checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
         "Requested number of blocks was %s but maximum allowed is %s",
         count, MAX_BLOCKS_PER_REQUEST);
     checkArgument(heightMax == null || 0 <= heightMax,
         "Blockhain height can't be negative but was %s", heightMax);
 
+    boolean skipEmpty = blockFilter == SKIP_EMPTY;
+    boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
     Map<String, String> query = new HashMap<>();
     query.put("count", String.valueOf(count));
     query.put("skip_empty_blocks", String.valueOf(skipEmpty));
