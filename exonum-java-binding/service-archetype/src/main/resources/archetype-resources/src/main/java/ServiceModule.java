@@ -16,15 +16,17 @@
 
 package ${groupId};
 
+import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.TransactionConverter;
-import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import org.pf4j.Extension;
 
 /**
  * A service module defines bindings required to create an instance of {@link MyService}.
  */
-public final class ServiceModule extends AbstractModule {
+@Extension
+public final class ServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
