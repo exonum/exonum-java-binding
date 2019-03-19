@@ -23,7 +23,6 @@ import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -44,17 +43,15 @@ public final class TestService extends AbstractService {
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
 
-  private final SchemaFactory<TestSchema> schemaFactory;
+  private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
 
-  @Inject
-  public TestService(SchemaFactory<TestSchema> schemaFactory) {
-    super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, schemaFactory));
-    this.schemaFactory = schemaFactory;
+  public TestService() {
+    super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, SCHEMA_FACTORY));
   }
 
   @Override
   protected TestSchema createDataSchema(View view) {
-    return schemaFactory.from(view);
+    return SCHEMA_FACTORY.from(view);
   }
 
   /**

@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.runtime;
+package com.exonum.binding.fakes.services.service;
 
-/**
- * Indicates that a service runtime failed to load the service artifact.
- */
-public class ServiceLoadingException extends Exception {
+import com.exonum.binding.service.AbstractServiceModule;
+import com.exonum.binding.service.Service;
+import com.google.inject.Singleton;
 
-  public ServiceLoadingException(String message) {
-    super(message);
-  }
+public class TestServiceModule extends AbstractServiceModule {
 
-  public ServiceLoadingException(String message, Throwable cause) {
-    super(message, cause);
+  @Override
+  protected void configure() {
+    bind(Service.class).to(TestService.class)
+        .in(Singleton.class);
   }
 }
