@@ -50,7 +50,7 @@ pub fn create() -> fabric::NodeBuilder {
     } = load_services_definition(PATH_TO_SERVICES_DEFINITION)
         .expect("Unable to load services definition");
 
-    let services = validate_services(system_services);
+    let services = extract_services(system_services);
 
     let mut service_factories = service_factories();
 
@@ -75,7 +75,7 @@ pub fn create() -> fabric::NodeBuilder {
 }
 
 // Extracts defined services or inserts the configuration service otherwise.
-fn validate_services(services: Option<HashSet<String>>) -> HashSet<String> {
+fn extract_services(services: Option<HashSet<String>>) -> HashSet<String> {
     services.unwrap_or_else(|| {
         let mut services = HashSet::new();
         services.insert(CONFIGURATION_SERVICE.to_owned());
@@ -90,18 +90,18 @@ mod tests {
     use tempfile::{Builder, TempPath};
 
     #[test]
-    fn validate_services_empty() {
-        let services = validate_services(None);
+    fn extract_services_default() {
+        let services = extract_services(None);
         assert_eq!(services.len(), 1);
         assert!(services.contains(CONFIGURATION_SERVICE));
     }
 
     #[test]
-    fn validate_services_ok() {
+    fn extract_services_ok() {
         let mut services = HashSet::new();
         services.insert(BTC_ANCHORING_SERVICE.to_owned());
         services.insert(TIME_SERVICE.to_owned());
-        let services = validate_services(Some(services));
+        let services = extract_services(Some(services));
         assert_eq!(services.len(), 2);
         assert!(services.contains(BTC_ANCHORING_SERVICE));
         assert!(services.contains(TIME_SERVICE));
