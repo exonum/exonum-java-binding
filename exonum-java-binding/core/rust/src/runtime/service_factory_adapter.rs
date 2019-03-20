@@ -99,7 +99,14 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
             .unwrap_or_else(|error| {
                 panic!("Unable to load artifact {}: {}", &self.artifact_path, error)
             });
-        let service_proxy = runtime.create_service(&artifact_id);
+        let service_proxy = runtime
+            .create_service(&artifact_id)
+            .unwrap_or_else(|err_msg| {
+                panic!(
+                    "Unable to create service for artifact id {}: {}",
+                    artifact_id, err_msg
+                )
+            });
         Box::new(service_proxy)
     }
 }

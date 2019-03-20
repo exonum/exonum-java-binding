@@ -69,22 +69,25 @@ impl JavaServiceRuntime {
     }
 
     /// Creates a new service instance using the given artifact id.
-    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
+    pub fn create_service(&self, artifact_id: &str) -> Result<ServiceProxy, String> {
         unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_id: JObject = env.new_string(artifact_id)?.into();
-            let service = env
-                .call_method(
-                    self.service_runtime.as_obj(),
-                    "createService",
-                    CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id.into()],
-                )?
-                .l()?;
-            let service = env.new_global_ref(service).unwrap();
-            Ok(ServiceProxy::from_global_ref(
-                self.executor.clone(),
-                service,
-            ))
+            let res = {
+                let artifact_id: JObject = env.new_string(artifact_id)?.into();
+                let service = env
+                    .call_method(
+                        self.service_runtime.as_obj(),
+                        "createService",
+                        CREATE_SERVICE_SIGNATURE,
+                        &[artifact_id.into()],
+                    )?
+                    .l()?;
+                let service = env.new_global_ref(service)?;
+                Ok(ServiceProxy::from_global_ref(
+                    self.executor.clone(),
+                    service,
+                ))
+            };
+            Ok(check_error_on_exception(env, res))
         }))
     }
 

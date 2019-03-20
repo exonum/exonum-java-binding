@@ -54,7 +54,9 @@ fn bootstrap() {
     let artifact_id = service_runtime
         .load_artifact(&artifact_path)
         .expect("Unable to load artifact");
-    let service = service_runtime.create_service(&artifact_id);
+    let service = service_runtime
+        .create_service(&artifact_id)
+        .expect("Unable to create service");
 
     let mut testkit = TestKitBuilder::validator().with_service(service).create();
 
