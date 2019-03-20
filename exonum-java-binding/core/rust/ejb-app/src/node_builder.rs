@@ -111,8 +111,12 @@ mod tests {
     fn all_services() {
         let cfg = create_config(
             "all.toml",
-            "system_services = [\"configuration\", \"btc-anchoring\", \"time\"]\n\
-            [user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'",
+            r#"
+                system_services = ["configuration", "btc-anchoring", "time"]
+                [user_services]
+                service_name1 = "/path/to/artifact1"
+                service_name2 = "/path/to/artifact2"
+             "#,
         );
         let EjbAppServices {
             system_services,

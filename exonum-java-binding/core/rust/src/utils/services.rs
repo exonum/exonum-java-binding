@@ -64,7 +64,12 @@ mod tests {
 
     #[test]
     fn missed_system_services_section() {
-        let cfg = "[user_services]\nservice_name1 = '/path/to/artifact1'\nservice_name2 = '/path/to/artifact2'".to_owned();
+        let cfg = r#"
+            [user_services]
+            service_name1 = "/path/to/artifact1"
+            service_name2 = "/path/to/artifact2"
+        "#
+        .to_owned();
         let res = parse_services(cfg);
         assert!(res.is_ok());
     }
@@ -72,13 +77,20 @@ mod tests {
     #[test]
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn missed_user_services_section() {
-        let cfg = "system_services = [\"configuration\", \"btc-anchoring\", \"time\"]".to_owned();
+        let cfg = r#"
+            system_services = ["configuration", "btc-anchoring", "time"]
+        "#
+        .to_owned();
         let _result = parse_services(cfg);
     }
 
     #[test]
     fn empty_list() {
-        let cfg = "system_services = []\n[user_services]".to_owned();
+        let cfg = r#"
+            system_services = []
+            [user_services]
+        "#
+        .to_owned();
         let res = parse_services(cfg);
         assert!(res.is_ok());
         let services = res.unwrap();
@@ -88,8 +100,11 @@ mod tests {
 
     #[test]
     fn duplicated() {
-        let cfg = "system_services = [\"btc-anchoring\", \"btc-anchoring\"]\n[user_services]\n"
-            .to_owned();
+        let cfg = r#"
+            system_services = ["btc-anchoring", "btc-anchoring"]
+            [user_services]
+        "#
+        .to_owned();
         let res = parse_services(cfg);
         assert!(res.is_ok());
         let EjbAppServices {
@@ -118,7 +133,10 @@ mod tests {
     fn config_file_ok() {
         let cfg = create_config(
             "services_list_ok.toml",
-            "system_services = []\n[user_services]",
+            r#"
+                system_services = []
+                [user_services]
+            "#,
         );
         let res = load_services_definition(cfg);
         assert!(res.is_ok());
@@ -128,7 +146,11 @@ mod tests {
     fn check_service_enabled() {
         let cfg = create_config(
             "service_enabled_test.toml",
-            "system_services = [\"time\"]\n[user_services]\nservice_name1 = '/path/to/artifact1.jar'",
+            r#"
+                system_services = ["time"]
+                [user_services]
+                service_name1 = "/path/to/artifact1.jar"
+            "#,
         );
 
         assert!(!is_service_enabled_in_config_file(
