@@ -96,7 +96,9 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
         // load service from artifact and create corresponding proxy
         let artifact_id = runtime
             .load_artifact(&self.artifact_path)
-            .expect(&format!("Unable to load artifact {}", &self.artifact_path));
+            .unwrap_or_else(|error| {
+                panic!("Unable to load artifact {}: {}", &self.artifact_path, error)
+            });
         let service_proxy = runtime.create_service(&artifact_id);
         Box::new(service_proxy)
     }
