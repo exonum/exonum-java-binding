@@ -374,45 +374,6 @@
           <outputFile>${project.build.directory}/ejb-core-classpath.txt</outputFile>
           <includeScope>runtime</includeScope>
         </configuration>
-        <executions>
-          <!--<execution>-->
-            <!--<id>generate-classpath-file</id>-->
-            <!--<goals>-->
-              <!--<goal>build-classpath</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-          <!--&lt;!&ndash;We copy exonum-java-binding-core-${version}.jar to the <ejb-app-location>/lib/java directory&ndash;&gt;-->
-          <!--<execution>-->
-            <!--<id>copy-core-jar</id>-->
-            <!--<phase>install</phase>-->
-            <!--<goals>-->
-              <!--<goal>copy</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<outputDirectory>${packaging.java}</outputDirectory>-->
-              <!--<artifactItems>-->
-                <!--<artifactItem>-->
-                  <!--<groupId>${project.groupId}</groupId>-->
-                  <!--<artifactId>${project.artifactId}</artifactId>-->
-                  <!--<version>${project.version}</version>-->
-                <!--</artifactItem>-->
-              <!--</artifactItems>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-          <!--&lt;!&ndash;We copy all Java dependencies of the EJB Core to the <ejb-app-location>/lib/java directory as well&ndash;&gt;-->
-          <!--<execution>-->
-            <!--<id>copy-core-dependencies</id>-->
-            <!--<phase>install</phase>-->
-            <!--<goals>-->
-              <!--<goal>copy-dependencies</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<outputDirectory>${packaging.java}</outputDirectory>-->
-              <!--<overWriteReleases>true</overWriteReleases>-->
-              <!--<overWriteSnapshots>true</overWriteSnapshots>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        </executions>
       </plugin>
 
       <plugin>
