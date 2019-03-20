@@ -49,7 +49,7 @@ fn bootstrap() {
         runtime_config,
     };
 
-    let service_runtime = JavaServiceRuntime::create_java_runtime(config);
+    let service_runtime = JavaServiceRuntime::new(config);
 
     let artifact_id = service_runtime
         .load_artifact(&artifact_path)

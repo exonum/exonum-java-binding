@@ -33,10 +33,10 @@ pub struct JavaServiceFactoryAdapter {
 
 impl JavaServiceFactoryAdapter {
     /// Creates new instance with given service name and path to the artifact.
-    pub fn new<S: AsRef<str>>(name: S, artifact_path: S) -> Self {
+    pub fn new(name: String, artifact_path: String) -> Self {
         JavaServiceFactoryAdapter {
-            name: name.as_ref().to_owned(),
-            artifact_path: artifact_path.as_ref().to_owned(),
+            name,
+            artifact_path,
         }
     }
 
@@ -48,7 +48,7 @@ impl JavaServiceFactoryAdapter {
             // Prepare config for service runtime configuration
             let config = Self::extract_config(context);
 
-            let runtime = JavaServiceRuntime::create_java_runtime(config);
+            let runtime = JavaServiceRuntime::new(config);
             unsafe {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             }
