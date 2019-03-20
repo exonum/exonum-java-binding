@@ -62,8 +62,8 @@ and two user services:
 system_services = ["configuration", "btc-anchoring", "time"]
 
 [user_services]
-service_name1 = '/path/to/service1_artifact.jar'
-service_name2 = '/path/to/service2_artifact.jar'
+service_name1 = "/path/to/service1_artifact.jar"
+service_name2 = "/path/to/service2_artifact.jar"
 ```
 
 ### Step 2. Generate Node Configuration
