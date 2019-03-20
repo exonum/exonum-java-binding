@@ -46,14 +46,14 @@ Classpath is used to locate Java classes of the Exonum Java Binding and its depe
  Note, that classpath has nothing to do with classes of user services. 
 
 #### Services definition
-Services are loaded as `jar` artifacts and should be described in the 
-[ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
-file located in the working directory. The configuration file consists of two sections:
+Services must be defined in the [ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
+file in order to be available in the network. The configuration file consists of two sections:
 - The optional `system_services` section is used to enable built-in Exonum services. If 
 not specified - only Configuration service is enabled. Possible variants for the moment are: 
 `configuration`, `btc-anchoring`, `time`.
-- The `user_services` section enumerates services in form of `name = artifact`, where `name` 
-is one-word description of the service and `artifact` is full path to the service's artifact. 
+- The `user_services` section is used to enumerate user services that are loaded from artifacts 
+in the JAR format. It takes a line per service in form of `name = artifact`, where `name` 
+is one-word description of the service and `artifact` is a full path to the service's artifact. 
 At least one service must be defined.
 
 The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
