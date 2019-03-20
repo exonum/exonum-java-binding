@@ -23,11 +23,9 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
-/// This code encapsulates the logic of processing of our extensions to the node's binary command
-/// line arguments. The general idea: we have extensions to two regular commands of the node -
-/// `finalize` and `run`. We process them on every step and store intermediate results to the
-/// persistent storage available on the specific step. Finally, after the `run` step we compose the
-/// `Config` structure that contains all required info for service initialization.
+/// This code encapsulates our extension to the node's binary command line arguments. We extend the
+/// regular `run` command of the node with processing of custom EJB arguments and compose the
+/// `Config` structure that contains all required data for initialization of service runtime.
 
 // Parameters for `run` command
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
