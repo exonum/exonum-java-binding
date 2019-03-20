@@ -60,11 +60,14 @@
         <version>${vertx.version}</version>
       </dependency>
 
-      <!-- TODO: Guava doesn’t seem to appear in our APIs (unlike Gson, Guice or Vertx), but
-              it is a great candidate for a 'provided' dependency because of its considerable size.
-              Specifying it as such, however, makes it impossible to release a compatible version
-              of Exonum with incompatible Guava version (the Guava team, however, guarantees to keep
-              compatibility since 21.0: https://groups.google.com/forum/#!topic/guava-discuss/rX-QXo-67ZU ) -->
+      <!-- Guava does not appear in our APIs (unlike Gson, Guice or Vertx), but
+           it is a great candidate for a 'provided' dependency because of its considerable size.
+           Specifying it as such, however, makes it impossible to release a compatible version
+           of Exonum with incompatible Guava version (the Guava team, however, guarantees to keep
+           compatibility since 21.0 for non-@Beta APIs: https://groups.google.com/forum/#!topic/guava-discuss/rX-QXo-67ZU )
+
+           If users need to package their own (which seems to be rarely needed), it must work.
+            -->
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
