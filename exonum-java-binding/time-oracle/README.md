@@ -12,7 +12,7 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.6.0-SNAPSHOT</version>
     </dependency>
 ```
 
@@ -25,6 +25,7 @@ services = ["time"]
 
 See more information on built-in services [here][built-in-services].
 
+[`TimeSchema`][time-schema-javadoc] allows to access the state of time oracle.
 Below is an example of a service method that uses time oracle to return the consolidated time. Note
 that at the time when a new blockchain is launched, the consolidated time is unknown until the
 transactions containing time values from at least two thirds of validator nodes are processed.
@@ -55,3 +56,4 @@ See [LICENSE](../../LICENSE) for details.
 
 [exonum-time]: https://exonum.com/doc/version/0.10/advanced/time/
 [built-in-services]: https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services
+[time-schema-javadoc]: https://exonum.com/doc/api/java-time-oracle/0.5.0/com/exonum/binding/time/TimeSchema.html
