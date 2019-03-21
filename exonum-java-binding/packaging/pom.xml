@@ -16,11 +16,12 @@
   <description>A fake module used for packaging EJB App</description>
 
   <properties>
-    <!--A directory used for storing immediate files while packaging the App-->
+    <!--A directory used for storing temporary files while packaging the App-->
     <packaging.basedir>${project.parent.basedir}/core/rust/target/prepackage</packaging.basedir>
-    <!--A directory containing Java dependencies of the App-->
-    <packaging.rust>${project.parent.basedir}/core/rust</packaging.rust>
     <!--A directory containing native dynamic libraries used by the App-->
+    <!--This property is only used in app_assembly.xml configuration-->
+    <packaging.rust>${project.parent.basedir}/core/rust</packaging.rust>
+    <!--A directory containing Java dependencies of the App-->
     <packaging.java>${project.parent.basedir}/core/rust/target/debug/lib/java</packaging.java>
   </properties>
 
