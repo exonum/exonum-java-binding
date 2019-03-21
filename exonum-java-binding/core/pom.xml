@@ -27,10 +27,6 @@
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <!--A directory containing libjava_bindings native library-->
     <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
-    <!--A directory used for storing immediate files while packaging the App-->
-    <packaging.basedir>${project.basedir}/rust/target/prepackage</packaging.basedir>
-    <!--A directory containing Java dependencies of the App-->
-    <packaging.java>${project.basedir}/rust/target/debug/lib/java</packaging.java>
     <!--A directory containing native dynamic libraries used by the App-->
     <packaging.native>${project.basedir}/rust/target/debug/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
