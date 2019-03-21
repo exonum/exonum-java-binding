@@ -17,12 +17,15 @@
 
   <properties>
     <!--A directory used for storing temporary files while packaging the App-->
-    <packaging.basedir>${project.parent.basedir}/core/rust/target/prepackage</packaging.basedir>
-    <!--A directory containing native dynamic libraries used by the App-->
-    <!--This property is only used in app_assembly.xml configuration-->
-    <packaging.rust>${project.parent.basedir}/core/rust</packaging.rust>
-    <!--A directory containing Java dependencies of the App-->
-    <packaging.java>${project.parent.basedir}/core/rust/target/debug/lib/java</packaging.java>
+    <packaging.basedir>${project.parent.basedir}/core/rust/target/debug</packaging.basedir>
+    <!--A directory containing licenses, TUTORIAL.md and fallback logger configuration-->
+    <!--This property is used by app_assembly.xml configuration-->
+    <packaging.etc>${packaging.basedir}/etc</packaging.etc>
+    <!--A directory containing native dynamic libraries used by the App when running from target directory-->
+    <!--This property is used by app_assembly.xml configuration-->
+    <packaging.native>${packaging.basedir}/lib/native</packaging.native>
+    <!--A directory containing Java dependencies of the App used when running from target directory-->
+    <packaging.java>${packaging.basedir}/lib/java</packaging.java>
   </properties>
 
   <dependencies>
