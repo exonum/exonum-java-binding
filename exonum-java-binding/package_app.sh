@@ -36,8 +36,8 @@ else
     echo "Unknown option: $1"
     exit 1
   fi
-  source ./tests_profile
 fi
+source ./tests_profile
 
 # Copy libstd to some known place.
 PREPACKAGE_DIR="${EJB_RUST_DIR}/target/prepackage"
