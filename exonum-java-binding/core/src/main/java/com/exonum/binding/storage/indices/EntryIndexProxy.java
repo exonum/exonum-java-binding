@@ -166,7 +166,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   }
 
   /**
-   * Converts the entry to to {@link java.util.Optional}.
+   * Converts the entry to {@link java.util.Optional}.
    *
    * <p>Be aware that this method represents a state of the entry at the time
    * of calling. And the returned value won't reflect the entry changes:
