@@ -180,7 +180,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    * </pre>
    *
    * @return {@code Optional.of(value)} if value is present in the entry,
-   *        otherwise, returns {@code Optional.empty()}
+   *        otherwise returns {@code Optional.empty()}
    */
   public Optional<T> toOptional() {
     if (isPresent()) {
