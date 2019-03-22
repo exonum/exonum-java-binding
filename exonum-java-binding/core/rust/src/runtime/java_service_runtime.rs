@@ -24,6 +24,7 @@ use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
 use std::{env, sync::Arc};
 
 use proxy::{JniExecutor, ServiceProxy};
+use std::path::Path;
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 
@@ -69,46 +70,58 @@ impl JavaServiceRuntime {
     }
 
     /// Creates a new service instance using the given artifact id.
-    pub fn create_service(&self, artifact_id: &str) -> Result<ServiceProxy, String> {
+    ///
+    /// Panics if there are errors on Java side.
+    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
         unwrap_jni(self.executor.with_attached(|env| {
-            let res = {
-                let artifact_id: JObject = env.new_string(artifact_id)?.into();
-                let service = env
-                    .call_method(
-                        self.service_runtime.as_obj(),
-                        "createService",
-                        CREATE_SERVICE_SIGNATURE,
-                        &[artifact_id.into()],
-                    )?
-                    .l()?;
-                let service = env.new_global_ref(service)?;
-                Ok(ServiceProxy::from_global_ref(
-                    self.executor.clone(),
-                    service,
-                ))
-            };
-            Ok(check_error_on_exception(env, res))
+            let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
+            let service = check_error_on_exception(
+                env,
+                env.call_method(
+                    self.service_runtime.as_obj(),
+                    "createService",
+                    CREATE_SERVICE_SIGNATURE,
+                    &[artifact_id_obj.into()],
+                ),
+            )
+            .unwrap_or_else(|err_msg| {
+                panic!(
+                    "Unable to create service for artifact_id [{}]: {}",
+                    artifact_id, err_msg
+                )
+            })
+            .l()?;
+            let service = env.new_global_ref(service)?;
+            Ok(ServiceProxy::from_global_ref(
+                self.executor.clone(),
+                service,
+            ))
         }))
     }
 
     /// Loads an artifact from the specified location involving verification of the artifact.
     /// Returns an unique service artifact identifier that must be specified in subsequent
     /// operations with it.
-    pub fn load_artifact(&self, artifact_path: &str) -> Result<String, String> {
+    ///
+    /// Panics if there are errors on Java side.
+    pub fn load_artifact<P: AsRef<Path>>(&self, artifact_path: P) -> String {
         unwrap_jni(self.executor.with_attached(|env| {
-            let res = {
-                let artifact_path: JObject = env.new_string(artifact_path)?.into();
-                let artifact_id = env
-                    .call_method(
-                        self.service_runtime.as_obj(),
-                        "loadArtifact",
-                        LOAD_ARTIFACT_SIGNATURE,
-                        &[artifact_path.into()],
-                    )?
-                    .l()?;
-                convert_to_string(env, artifact_id)
-            };
-            Ok(check_error_on_exception(env, res))
+            let artifact_path = artifact_path.as_ref().to_str().unwrap();
+            let artifact_path_obj: JObject = env.new_string(artifact_path)?.into();
+            let artifact_id = check_error_on_exception(
+                env,
+                env.call_method(
+                    self.service_runtime.as_obj(),
+                    "loadArtifact",
+                    LOAD_ARTIFACT_SIGNATURE,
+                    &[artifact_path_obj.into()],
+                ),
+            )
+            .unwrap_or_else(|err_msg| {
+                panic!("Unable to load artifact {}: {}", artifact_path, err_msg)
+            })
+            .l()?;
+            convert_to_string(env, artifact_id)
         }))
     }
 
