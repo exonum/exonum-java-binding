@@ -23,8 +23,6 @@ use integration_tests::vm::{get_fake_service_artifact_path, get_fakes_classpath,
 use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
-// TODO: reenable this test after ECR-2789
-//#[cfg_attr(target_os = "linux", ignore)]
 fn bootstrap() {
     let artifact_path = get_fake_service_artifact_path();
     let system_class_path = get_fakes_classpath();
@@ -51,12 +49,8 @@ fn bootstrap() {
 
     let service_runtime = JavaServiceRuntime::new(config);
 
-    let artifact_id = service_runtime
-        .load_artifact(&artifact_path)
-        .expect("Unable to load artifact");
-    let service = service_runtime
-        .create_service(&artifact_id)
-        .expect("Unable to create service");
+    let artifact_id = service_runtime.load_artifact(&artifact_path);
+    let service = service_runtime.create_service(&artifact_id);
 
     let mut testkit = TestKitBuilder::validator().with_service(service).create();
 
