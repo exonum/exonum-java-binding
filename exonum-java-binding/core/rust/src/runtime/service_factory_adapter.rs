@@ -83,7 +83,7 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
         // Execute EJB configuration steps along with standard Exonum Core steps.
         // We extend the `Run` command only, any other commands are ignored.
         if command_name == fabric::Run.name() {
-            // This callback gets called for every instance of ServiceFactory, but we have to do 
+            // This callback gets called for every instance of ServiceFactory, but we have to do
             // this extension only once otherwise the underlying `clap` backend will complain about
             // non-unique argument names
             return extend_command_once();
