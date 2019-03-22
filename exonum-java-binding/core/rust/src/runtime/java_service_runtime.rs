@@ -44,6 +44,8 @@ pub struct JavaServiceRuntime {
 
 impl JavaServiceRuntime {
     /// Creates new runtime from provided config.
+    ///
+    /// There can be only one `JavaServiceRuntime` instance at a time.
     pub fn new(config: Config) -> Self {
         let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
         let executor = MainExecutor::new(Arc::new(java_vm));

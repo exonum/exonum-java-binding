@@ -108,7 +108,7 @@ mod tests {
     }
 
     #[test]
-    fn all_services() {
+    fn load_services_definitions() {
         let cfg = create_config(
             "all.toml",
             r#"
@@ -127,11 +127,6 @@ mod tests {
         assert!(system_services.contains(CONFIGURATION_SERVICE));
         assert!(system_services.contains(BTC_ANCHORING_SERVICE));
         assert!(system_services.contains(TIME_SERVICE));
-
-        let service_factories = service_factories();
-        for service in system_services {
-            assert!(service_factories.get(&service).is_some())
-        }
 
         assert_eq!(user_services.len(), 2);
         assert_eq!(&user_services["service_name1"], "/path/to/artifact1");
