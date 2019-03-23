@@ -39,11 +39,7 @@ public Optional<ZonedDateTime> getTime() {
   return node.withSnapshot(s -> {
     TimeSchema timeOracle = TimeSchema.newInstance(s);
     EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
-    if (currentTime.isPresent()) {
-      return Optional.of(currentTime.get());
-    } else {
-      return Optional.empty();
-    }
+    return currentTime.toOptional();
   });
 }
 ```

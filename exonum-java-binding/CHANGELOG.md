@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `toOptional()` method to `EntryIndexProxy`. (#790) 
+
 ## [0.5.0] - 2019-03-13
 
 ### Overview

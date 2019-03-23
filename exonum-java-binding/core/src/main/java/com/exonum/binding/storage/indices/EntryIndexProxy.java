@@ -29,6 +29,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.google.protobuf.MessageLite;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * An Entry is a database index that can contain no or a single value.
@@ -106,7 +107,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   }
 
   private EntryIndexProxy(NativeHandle nativeHandle, String name, View view,
-                          CheckingSerializerDecorator<T> serializer) {
+      CheckingSerializerDecorator<T> serializer) {
     super(nativeHandle, name, view);
     this.serializer = serializer;
   }
@@ -162,6 +163,31 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   public void remove() {
     notifyModified();
     nativeRemove(getNativeHandle());
+  }
+
+  /**
+   * Converts the entry to {@link java.util.Optional}.
+   *
+   * <p>Be aware that this method represents a state of the entry at the time
+   * of calling. And the returned value won't reflect the entry changes:
+   * <pre>
+   *  {@code
+   *    entry.set("foo");
+   *    Optional<String> optionalEntry = entry.toOptional();
+   *    entry.remove();
+   *    optionalEntry.get(); // -> returns "foo"
+   *  }
+   * </pre>
+   *
+   * @return {@code Optional.of(value)} if value is present in the entry,
+   *        otherwise returns {@code Optional.empty()}
+   */
+  public Optional<T> toOptional() {
+    if (isPresent()) {
+      return Optional.of(get());
+    } else {
+      return Optional.empty();
+    }
   }
 
   private static native long nativeCreate(String name, long viewNativeHandle);
