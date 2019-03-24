@@ -19,8 +19,8 @@ use toml;
 
 pub const PATH_TO_SERVICES_DEFINITION: &str = "ejb_app_services.toml";
 pub const CONFIGURATION_SERVICE: &str = "configuration";
-pub const BTC_ANCHORING_SERVICE: &str = "btc-anchoring";
-pub const TIME_SERVICE: &str = "time";
+pub const BTC_ANCHORING_SERVICE: &str = "btc_anchoring";
+pub const TIME_SERVICE: &str = "exonum_time";
 
 #[derive(Serialize, Deserialize)]
 pub struct EjbAppServices {
@@ -78,7 +78,7 @@ mod tests {
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn missed_user_services_section() {
         let cfg = r#"
-            system_services = ["configuration", "btc-anchoring", "time"]
+            system_services = ["configuration", "btc_anchoring", "exonum_time"]
         "#
         .to_owned();
         let _result = parse_services(cfg);
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn duplicated() {
         let cfg = r#"
-            system_services = ["btc-anchoring", "btc-anchoring"]
+            system_services = ["btc_anchoring", "btc_anchoring"]
             [user_services]
         "#
         .to_owned();
@@ -147,7 +147,7 @@ mod tests {
         let cfg = create_config(
             "service_enabled_test.toml",
             r#"
-                system_services = ["time"]
+                system_services = ["exonum_time"]
                 [user_services]
                 service_name1 = "/path/to/artifact1.jar"
             "#,

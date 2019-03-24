@@ -17,15 +17,80 @@
 use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use exonum_time::TimeServiceFactory;
-use java_bindings::exonum::helpers::fabric::{self, ServiceFactory};
-use java_bindings::utils::services::{
-    load_services_definition, EjbAppServices, BTC_ANCHORING_SERVICE, CONFIGURATION_SERVICE,
-    PATH_TO_SERVICES_DEFINITION, TIME_SERVICE,
+use java_bindings::{
+    exonum::helpers::fabric::{self, ServiceFactory},
+    utils::services::{
+        load_services_definition, EjbAppServices, BTC_ANCHORING_SERVICE, CONFIGURATION_SERVICE,
+        PATH_TO_SERVICES_DEFINITION, TIME_SERVICE,
+    },
+    JavaServiceFactoryAdapter,
 };
-use java_bindings::JavaServiceFactoryAdapter;
 
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
+/// Creates `NodeBuilder` using services configuration from `ejb_app_services.toml` located in the working directory.
+pub fn create() -> fabric::NodeBuilder {
+    let service_factories = prepare_service_factories(PATH_TO_SERVICES_DEFINITION);
+    let mut builder = fabric::NodeBuilder::new();
+    for service_factory in service_factories {
+        builder = builder.with_service(service_factory);
+    }
+    builder
+}
+
+// Prepares vector of `ServiceFactory` from services configuration file located at given path.
+// Panics in case of problems with reading/validating of service configuration file.
+fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFactory>> {
+    // Read services definition from file.
+    let EjbAppServices {
+        system_services,
+        user_services,
+    } = load_services_definition(path).expect("Unable to load services definition");
+
+    // Make sure there is at least one user service defined.
+    if user_services.is_empty() {
+        panic!("At least one user service should be defined in the \"ejb_app_services.toml\" file");
+    }
+
+    // Check whether we have system services defined or insert the configuration service otherwise.
+    let system_services = system_services.unwrap_or_else(|| {
+        let mut services = HashSet::new();
+        services.insert(CONFIGURATION_SERVICE.to_owned());
+        services
+    });
+
+    // Prepare list of service factories from system and user services
+    let mut resulting_factories = Vec::new();
+
+    // Process system services first
+    let mut all_system_service_factories = service_factories();
+    for service_name in system_services {
+        match all_system_service_factories.remove(&service_name) {
+            Some(factory) => {
+                resulting_factories.push(factory);
+            }
+            None => panic!(
+                "Unknown system service name {} has been found",
+                service_name
+            ),
+        }
+    }
+
+    // Process user services
+    for (name, artifact_path) in user_services {
+        resulting_factories.push(Box::new(JavaServiceFactoryAdapter::new(
+            name,
+            artifact_path,
+        )));
+    }
+
+    resulting_factories
+}
+
+// Returns map of all system service factories
 fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     let mut service_factories = HashMap::new();
     service_factories.insert(
@@ -43,46 +108,6 @@ fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
     service_factories
 }
 
-pub fn create() -> fabric::NodeBuilder {
-    let EjbAppServices {
-        system_services,
-        user_services,
-    } = load_services_definition(PATH_TO_SERVICES_DEFINITION)
-        .expect("Unable to load services definition");
-
-    let services = extract_services(system_services);
-
-    let mut service_factories = service_factories();
-
-    let mut builder = fabric::NodeBuilder::new();
-    for service_name in &services {
-        match service_factories.remove(service_name) {
-            Some(factory) => {
-                builder = builder.with_service(factory);
-            }
-            None => panic!("Found unknown service name {}", service_name),
-        }
-    }
-
-    for (name, artifact_path) in user_services {
-        builder = builder.with_service(Box::new(JavaServiceFactoryAdapter::new(
-            name,
-            artifact_path,
-        )));
-    }
-
-    builder
-}
-
-// Extracts defined services or inserts the configuration service otherwise.
-fn extract_services(services: Option<HashSet<String>>) -> HashSet<String> {
-    services.unwrap_or_else(|| {
-        let mut services = HashSet::new();
-        services.insert(CONFIGURATION_SERVICE.to_owned());
-        services
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -90,53 +115,91 @@ mod tests {
     use tempfile::{Builder, TempPath};
 
     #[test]
-    fn extract_services_default() {
-        let services = extract_services(None);
-        assert_eq!(services.len(), 1);
-        assert!(services.contains(CONFIGURATION_SERVICE));
+    #[should_panic(expected = "Unable to load services definition")]
+    fn nonexistent_file() {
+        prepare_service_factories("nonexistent");
     }
 
     #[test]
-    fn extract_services_ok() {
-        let mut services = HashSet::new();
-        services.insert(BTC_ANCHORING_SERVICE.to_owned());
-        services.insert(TIME_SERVICE.to_owned());
-        let services = extract_services(Some(services));
-        assert_eq!(services.len(), 2);
-        assert!(services.contains(BTC_ANCHORING_SERVICE));
-        assert!(services.contains(TIME_SERVICE));
+    #[should_panic(expected = "At least one user service should be defined")]
+    fn missing_user_services() {
+        let cfg = create_config(
+            "no_user_services.toml",
+            r#"
+                system_services = ["configuration", "btc_anchoring", "exonum_time"]
+                [user_services]
+             "#,
+        );
+        prepare_service_factories(cfg);
     }
 
     #[test]
-    fn load_services_definitions() {
+    #[should_panic(expected = "Unknown system service name")]
+    fn unknown_system_service() {
+        let cfg = create_config(
+            "no_user_services.toml",
+            r#"
+                system_services = ["configuration", "exonum_time", "unknown"]
+                [user_services]
+                service_name = "/path/to/artifact"
+             "#,
+        );
+        prepare_service_factories(cfg);
+    }
+
+    #[test]
+    fn missing_system_services() {
+        let cfg = create_config(
+            "no_user_services.toml",
+            r#"
+                [user_services]
+                service_name = "/path/to/artifact"
+             "#,
+        );
+
+        let factories = prepare_service_factories(cfg);
+        assert_eq!(factories.len(), 2);
+        assert!(contains_service(CONFIGURATION_SERVICE, &factories));
+        assert!(contains_service("service_name", &factories));
+    }
+
+    #[test]
+    fn all_system_plus_user_services() {
         let cfg = create_config(
             "all.toml",
             r#"
-                system_services = ["configuration", "btc-anchoring", "time"]
+                system_services = ["configuration", "btc_anchoring", "exonum_time"]
                 [user_services]
                 service_name1 = "/path/to/artifact1"
                 service_name2 = "/path/to/artifact2"
              "#,
         );
-        let EjbAppServices {
-            system_services,
-            user_services,
-        } = load_services_definition(cfg).unwrap();
-        let system_services = system_services.unwrap();
-        assert_eq!(system_services.len(), 3);
-        assert!(system_services.contains(CONFIGURATION_SERVICE));
-        assert!(system_services.contains(BTC_ANCHORING_SERVICE));
-        assert!(system_services.contains(TIME_SERVICE));
 
-        assert_eq!(user_services.len(), 2);
-        assert_eq!(&user_services["service_name1"], "/path/to/artifact1");
-        assert_eq!(&user_services["service_name2"], "/path/to/artifact2");
+        let factories = prepare_service_factories(cfg);
+        assert_eq!(factories.len(), 5);
+        let f = factories
+            .iter()
+            .map(|factory| factory.service_name().to_string())
+            .collect::<Vec<String>>();
+        dbg!(f);
+        assert!(contains_service(CONFIGURATION_SERVICE, &factories));
+        assert!(contains_service(BTC_ANCHORING_SERVICE, &factories));
+        assert!(contains_service(TIME_SERVICE, &factories));
+        assert!(contains_service("service_name1", &factories));
+        assert!(contains_service("service_name2", &factories));
     }
 
-    // Creates temporary config file
+    // Creates temporary config file.
     fn create_config(filename: &str, cfg: &str) -> TempPath {
         let mut cfg_file = Builder::new().prefix(filename).tempfile().unwrap();
         writeln!(cfg_file, "{}", cfg).unwrap();
         cfg_file.into_temp_path()
+    }
+
+    // Checks whether particular service is presented in the given collection.
+    fn contains_service(service_name: &str, factories: &[Box<ServiceFactory>]) -> bool {
+        factories
+            .iter()
+            .any(|factory| factory.service_name() == service_name)
     }
 }
