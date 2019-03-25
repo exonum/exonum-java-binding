@@ -40,7 +40,7 @@ import java.util.function.Supplier;
  * <p>This class is thread-safe and does not support client-side locking.
  */
 @Singleton
-final class ServiceRuntime {
+public final class ServiceRuntime {
 
   private final Injector frameworkInjector;
   private final ServiceLoader serviceLoader;
@@ -56,7 +56,7 @@ final class ServiceRuntime {
    * @param serverPort a port for the web server providing transport to Java services
    */
   @Inject
-  ServiceRuntime(Injector frameworkInjector, ServiceLoader serviceLoader, Server server,
+  public ServiceRuntime(Injector frameworkInjector, ServiceLoader serviceLoader, Server server,
       @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
     this.frameworkInjector = checkNotNull(frameworkInjector);
     this.serviceLoader = checkNotNull(serviceLoader);
@@ -83,7 +83,7 @@ final class ServiceRuntime {
    * @throws ServiceLoadingException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
-  String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
+  public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
     Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
     LoadedServiceDefinition loadedServiceDefinition = serviceLoader
         .loadService(serviceArtifactLocation);
@@ -99,7 +99,7 @@ final class ServiceRuntime {
    * @throws IllegalArgumentException if the artifactId is unknown
    * @throws RuntimeException if it failed to instantiate the service
    */
-  UserServiceAdapter createService(String artifactId) {
+  public UserServiceAdapter createService(String artifactId) {
     ServiceId serviceId = ServiceId.parseFrom(artifactId);
     LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));

@@ -25,7 +25,7 @@ import com.google.inject.Stage;
 /**
  * A bootstrap loader of the service runtime.
  */
-final class ServiceRuntimeBootstrap {
+public final class ServiceRuntimeBootstrap {
 
   // TODO: Shall it be configurable (Stage.DEV in tests, Stage.PRODUCTION in prod)?
   private static final Stage APP_STAGE = Stage.PRODUCTION;
@@ -36,7 +36,7 @@ final class ServiceRuntimeBootstrap {
    * @param serverPort a port for the web server providing transport to Java services
    * @return a new service runtime
    */
-  static ServiceRuntime createServiceRuntime(int serverPort) {
+  public static ServiceRuntime createServiceRuntime(int serverPort) {
     // Load the native libraries
     LibraryLoader.load();
 

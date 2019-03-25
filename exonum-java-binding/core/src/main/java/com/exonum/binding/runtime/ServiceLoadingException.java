@@ -16,13 +16,16 @@
 
 package com.exonum.binding.runtime;
 
-class ServiceLoadingException extends Exception {
+/**
+ * Indicates that a service runtime failed to load the service artifact.
+ */
+public class ServiceLoadingException extends Exception {
 
-  ServiceLoadingException(String message) {
+  public ServiceLoadingException(String message) {
     super(message);
   }
 
-  ServiceLoadingException(String message, Throwable cause) {
+  public ServiceLoadingException(String message, Throwable cause) {
     super(message, cause);
   }
 }
