@@ -42,12 +42,9 @@ impl JavaServiceFactoryAdapter {
 
     // Creates new runtime from provided config or returns the one created earlier. There can be
     // only one `JavaServiceRuntime` instance at a time.
-    fn get_or_create_java_service_runtime(context: &Context) -> JavaServiceRuntime {
+    fn get_or_create_java_service_runtime(config: Config) -> JavaServiceRuntime {
         // Initialize runtime if it wasn't created before.
         JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-            // Prepare config for service runtime configuration
-            let config = Self::extract_config(context);
-
             let runtime = JavaServiceRuntime::new(config);
             unsafe {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
@@ -56,20 +53,6 @@ impl JavaServiceFactoryAdapter {
 
         unsafe { JAVA_SERVICE_RUNTIME.clone() }
             .expect("Trying to return runtime, but it's uninitialized")
-    }
-
-    // Extracts EJB and JVM configuration from Context
-    fn extract_config(context: &Context) -> Config {
-        use exonum::helpers::fabric::keys;
-        context
-            .get(keys::NODE_CONFIG)
-            .expect("Unable to read node configuration.")
-            .services_configs
-            .get(super::cmd::EJB_CONFIG_SECTION_NAME)
-            .expect("Unable to read EJB configuration.")
-            .clone()
-            .try_into()
-            .expect("Invalid EJB configuration format.")
     }
 }
 
@@ -92,7 +75,7 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
     }
 
     fn make_service(&mut self, context: &Context) -> Box<Service> {
-        let runtime = Self::get_or_create_java_service_runtime(context);
+        let runtime = Self::get_or_create_java_service_runtime(extract_config(context));
 
         // load service from artifact and create corresponding proxy
         let artifact_id = runtime.load_artifact(&self.artifact_path);
@@ -106,4 +89,18 @@ fn extend_command_once() -> Option<Box<CommandExtension>> {
     let mut command_ext: Option<Box<CommandExtension>> = None;
     SERVICE_FACTORY_EXTEND_COMMAND.call_once(|| command_ext = Some(Box::new(Run)));
     command_ext
+}
+
+// Extracts EJB and JVM configuration from Context
+fn extract_config(context: &Context) -> Config {
+    use exonum::helpers::fabric::keys;
+    context
+        .get(keys::NODE_CONFIG)
+        .expect("Unable to read node configuration.")
+        .services_configs
+        .get(super::cmd::EJB_CONFIG_SECTION_NAME)
+        .expect("Unable to read EJB configuration.")
+        .clone()
+        .try_into()
+        .expect("Invalid EJB configuration format.")
 }
