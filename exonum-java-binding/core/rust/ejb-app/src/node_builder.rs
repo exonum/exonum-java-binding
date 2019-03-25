@@ -177,11 +177,6 @@ mod tests {
 
         let factories = prepare_service_factories(cfg);
         assert_eq!(factories.len(), 5);
-        let f = factories
-            .iter()
-            .map(|factory| factory.service_name().to_string())
-            .collect::<Vec<String>>();
-        dbg!(f);
         assert!(contains_service(CONFIGURATION_SERVICE, &factories));
         assert!(contains_service(BTC_ANCHORING_SERVICE, &factories));
         assert!(contains_service(TIME_SERVICE, &factories));
