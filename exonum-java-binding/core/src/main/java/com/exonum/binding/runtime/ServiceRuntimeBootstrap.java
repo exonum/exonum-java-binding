@@ -27,7 +27,9 @@ import com.google.inject.Stage;
  */
 public final class ServiceRuntimeBootstrap {
 
-  // TODO: Shall it be configurable (Stage.DEV in tests, Stage.PRODUCTION in prod)?
+  /**
+   * The application stage, configuring Guice behaviour. Can be made configurable if needed.
+   */
   private static final Stage APP_STAGE = Stage.PRODUCTION;
 
   /**
