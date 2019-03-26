@@ -362,16 +362,6 @@
         </executions>
       </plugin>
 
-      <!-- Generates a runtime classpath file of ejb-core.
-           Bound to the default phase (generate-sources). -->
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <configuration>
-          <outputFile>${project.build.directory}/ejb-core-classpath.txt</outputFile>
-          <includeScope>runtime</includeScope>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
