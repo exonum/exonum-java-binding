@@ -38,12 +38,18 @@ import java.util.function.Supplier;
  * services), create and stop services defined in the loaded artifacts.
  *
  * <p>This class is thread-safe and does not support client-side locking.
+ * The thread-safety is provided because the class is a singleton and may be provided to
+ * other objects. Currently, however, there is a single injection point where ServiceRuntime
+ * is instantiated (during bootstrap) and it is used by the native runtime only in a single-threaded
+ * context, hence thread-safety isn't <em>strictly</em> required, but rather provided to avoid
+ * possible errors if it is ever accessed by other objects.
  */
 @Singleton
 public final class ServiceRuntime {
 
   private final Injector frameworkInjector;
   private final ServiceLoader serviceLoader;
+  private final Object lock = new Object();
 
   /**
    * Creates a new runtime with the given framework injector. Starts the server on instantiation;
@@ -85,10 +91,12 @@ public final class ServiceRuntime {
    */
   public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
     Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
-    LoadedServiceDefinition loadedServiceDefinition = serviceLoader
-        .loadService(serviceArtifactLocation);
-    ServiceId serviceId = loadedServiceDefinition.getId();
-    return serviceId.toString();
+    synchronized (lock) {
+      LoadedServiceDefinition loadedServiceDefinition = serviceLoader
+          .loadService(serviceArtifactLocation);
+      ServiceId serviceId = loadedServiceDefinition.getId();
+      return serviceId.toString();
+    }
   }
 
   /**
@@ -101,12 +109,14 @@ public final class ServiceRuntime {
    */
   public UserServiceAdapter createService(String artifactId) {
     ServiceId serviceId = ServiceId.parseFrom(artifactId);
-    LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
-        .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
-    Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
-    Module serviceModule = serviceModuleSupplier.get();
-    Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
-    return serviceInjector.getInstance(UserServiceAdapter.class);
+    synchronized (lock) {
+      LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
+          .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
+      Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
+      Module serviceModule = serviceModuleSupplier.get();
+      Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
+      return serviceInjector.getInstance(UserServiceAdapter.class);
+    }
   }
 
   // TODO: unloadArtifact and stopService, once they can be used/ECR-2275
