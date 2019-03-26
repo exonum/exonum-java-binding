@@ -60,6 +60,14 @@
         <version>${vertx.version}</version>
       </dependency>
 
+      <!-- Guava does not appear in our APIs (unlike Gson, Guice or Vertx), but
+           it is a great candidate for a 'provided' dependency because of its considerable size.
+           Specifying it as such, however, makes it impossible to release a compatible version
+           of Exonum with incompatible Guava version (the Guava team, however, guarantees to keep
+           compatibility since 21.0 for non-@Beta APIs: https://groups.google.com/forum/#!topic/guava-discuss/rX-QXo-67ZU )
+
+           If users need to package their own (which seems to be rarely needed), it must work.
+            -->
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -71,6 +79,24 @@
         <artifactId>guice</artifactId>
         <version>${guice.version}</version>
         <classifier>no_aop</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.pf4j</groupId>
+        <artifactId>pf4j</artifactId>
+        <version>${pf4j.version}</version>
       </dependency>
 
       <dependency>

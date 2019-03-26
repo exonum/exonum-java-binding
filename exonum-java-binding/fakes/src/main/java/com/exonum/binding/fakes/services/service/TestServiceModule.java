@@ -1,11 +1,11 @@
-/* 
- * Copyright 2018 The Exonum Team
+/*
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
-import com.exonum.binding.service.TransactionConverter;
 import com.google.inject.Singleton;
-import org.pf4j.Extension;
 
-/**
- * A service module defines bindings required to create an instance of {@link MyService}.
- */
-@Extension
-public final class ServiceModule extends AbstractServiceModule {
+public class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class).to(MyService.class).in(Singleton.class);
-    bind(TransactionConverter.class).to(MyTransactionConverter.class);
+    bind(Service.class).to(TestService.class)
+        .in(Singleton.class);
   }
 }
