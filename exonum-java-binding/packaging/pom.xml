@@ -116,7 +116,7 @@
 
   <profiles>
     <profile>
-      <id>app-packaging</id>
+      <id>package-app</id>
       <build>
         <plugins>
           <!--Package EJB App with necessary libraries and documentation-->

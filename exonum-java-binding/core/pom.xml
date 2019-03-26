@@ -420,7 +420,7 @@
     </profile>
 
     <profile>
-      <id>app-packaging</id>
+      <id>package-app</id>
       <build>
         <plugins>
           <plugin>

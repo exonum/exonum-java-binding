@@ -20,7 +20,7 @@ set -eu -o pipefail
 function build-ejb-app-macos() {
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-packaging -am \
+    mvn package --activate-profiles package-app -pl :exonum-java-binding-packaging -am \
       -DskipTests \
       -DskipJavaITs \
       -DdoNotBuildRustLib \
@@ -30,7 +30,7 @@ function build-ejb-app-macos() {
 function build-ejb-app-linux() {
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles app-packaging -pl :exonum-java-binding-packaging -am \
+    mvn package --activate-profiles package-app -pl :exonum-java-binding-packaging -am \
       -DskipTests \
       -DskipJavaITs \
       -DdoNotBuildRustLib \
