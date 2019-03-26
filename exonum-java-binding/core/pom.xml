@@ -428,7 +428,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <configuration>
               <executable>cargo</executable>
-              <workingDirectory>${project.basedir}/rust/</workingDirectory>
+              <workingDirectory>${project.basedir}/rust</workingDirectory>
             </configuration>
             <executions>
               <execution>
