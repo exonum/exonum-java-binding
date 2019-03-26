@@ -132,7 +132,6 @@ mod tests {
     #[test]
     fn config_file_ok() {
         let cfg = create_config(
-            "services_list_ok.toml",
             r#"
                 system_services = []
                 [user_services]
@@ -145,7 +144,6 @@ mod tests {
     #[test]
     fn check_service_enabled() {
         let cfg = create_config(
-            "service_enabled_test.toml",
             r#"
                 system_services = ["exonum_time"]
                 [user_services]
@@ -164,9 +162,9 @@ mod tests {
         assert!(is_service_enabled_in_config_file(TIME_SERVICE, &cfg));
     }
 
-    // Creates temporary config file
-    fn create_config(filename: &str, cfg: &str) -> TempPath {
-        let mut cfg_file = Builder::new().prefix(filename).tempfile().unwrap();
+    // Creates temporary config file.
+    fn create_config(cfg: &str) -> TempPath {
+        let mut cfg_file = Builder::new().tempfile().unwrap();
         writeln!(cfg_file, "{}", cfg).unwrap();
         cfg_file.into_temp_path()
     }

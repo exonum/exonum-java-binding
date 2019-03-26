@@ -124,7 +124,6 @@ mod tests {
     #[should_panic(expected = "At least one user service should be defined")]
     fn missing_user_services() {
         let cfg = create_config(
-            "no_user_services.toml",
             r#"
                 system_services = ["configuration", "btc_anchoring", "exonum_time"]
                 [user_services]
@@ -137,7 +136,6 @@ mod tests {
     #[should_panic(expected = "Unknown system service name")]
     fn unknown_system_service() {
         let cfg = create_config(
-            "no_user_services.toml",
             r#"
                 system_services = ["configuration", "exonum_time", "unknown"]
                 [user_services]
@@ -150,7 +148,6 @@ mod tests {
     #[test]
     fn missing_system_services() {
         let cfg = create_config(
-            "no_user_services.toml",
             r#"
                 [user_services]
                 service_name = "/path/to/artifact"
@@ -166,7 +163,6 @@ mod tests {
     #[test]
     fn all_system_plus_user_services() {
         let cfg = create_config(
-            "all.toml",
             r#"
                 system_services = ["configuration", "btc_anchoring", "exonum_time"]
                 [user_services]
@@ -185,8 +181,8 @@ mod tests {
     }
 
     // Creates temporary config file.
-    fn create_config(filename: &str, cfg: &str) -> TempPath {
-        let mut cfg_file = Builder::new().prefix(filename).tempfile().unwrap();
+    fn create_config(cfg: &str) -> TempPath {
+        let mut cfg_file = Builder::new().tempfile().unwrap();
         writeln!(cfg_file, "{}", cfg).unwrap();
         cfg_file.into_temp_path()
     }
