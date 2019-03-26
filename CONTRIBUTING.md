@@ -24,7 +24,7 @@ You need to install the following dependencies:
   * The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
   * For automatic packaging of the EJB App you need [CMake](https://cmake.org/) installed in your system. Also on 
-  Mac you need a `coreutils` package installed.
+  Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
 
 ### Building
 Set required environment variables, once in a shell you use to build the project:
