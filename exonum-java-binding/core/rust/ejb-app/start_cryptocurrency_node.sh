@@ -44,7 +44,7 @@ echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
 
 export LD_LIBRARY_PATH="$JVM_LIB_PATH"
-echo "Final LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
 rm -rf testnet
