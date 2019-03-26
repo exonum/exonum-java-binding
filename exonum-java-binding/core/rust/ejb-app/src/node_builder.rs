@@ -116,53 +116,53 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Unable to load services definition")]
-    fn nonexistent_file() {
+    fn prepare_service_factories_nonexistent_file() {
         prepare_service_factories("nonexistent");
     }
 
     #[test]
     #[should_panic(expected = "At least one user service should be defined")]
-    fn missing_user_services() {
-        let cfg = create_config(
+    fn prepare_service_factories_missing_user_services() {
+        let cfg_path = create_config(
             r#"
                 system_services = ["configuration", "btc_anchoring", "exonum_time"]
                 [user_services]
              "#,
         );
-        prepare_service_factories(cfg);
+        prepare_service_factories(cfg_path);
     }
 
     #[test]
     #[should_panic(expected = "Unknown system service name")]
-    fn unknown_system_service() {
-        let cfg = create_config(
+    fn prepare_service_factories_unknown_system_service() {
+        let cfg_path = create_config(
             r#"
                 system_services = ["configuration", "exonum_time", "unknown"]
                 [user_services]
                 service_name = "/path/to/artifact"
              "#,
         );
-        prepare_service_factories(cfg);
+        prepare_service_factories(cfg_path);
     }
 
     #[test]
-    fn missing_system_services() {
-        let cfg = create_config(
+    fn prepare_service_factories_missing_system_services() {
+        let cfg_path = create_config(
             r#"
                 [user_services]
                 service_name = "/path/to/artifact"
              "#,
         );
 
-        let factories = prepare_service_factories(cfg);
+        let factories = prepare_service_factories(cfg_path);
         assert_eq!(factories.len(), 2);
         assert!(contains_service(CONFIGURATION_SERVICE, &factories));
         assert!(contains_service("service_name", &factories));
     }
 
     #[test]
-    fn all_system_plus_user_services() {
-        let cfg = create_config(
+    fn prepare_service_factories_all_system_plus_user_services() {
+        let cfg_path = create_config(
             r#"
                 system_services = ["configuration", "btc_anchoring", "exonum_time"]
                 [user_services]
@@ -171,7 +171,7 @@ mod tests {
              "#,
         );
 
-        let factories = prepare_service_factories(cfg);
+        let factories = prepare_service_factories(cfg_path);
         assert_eq!(factories.len(), 5);
         assert!(contains_service(CONFIGURATION_SERVICE, &factories));
         assert!(contains_service(BTC_ANCHORING_SERVICE, &factories));

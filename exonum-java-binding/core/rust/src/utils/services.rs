@@ -63,7 +63,7 @@ mod tests {
     use tempfile::{Builder, TempPath};
 
     #[test]
-    fn missed_system_services_section() {
+    fn parse_services_missed_system_services_section() {
         let cfg = r#"
             [user_services]
             service_name1 = "/path/to/artifact1"
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
-    fn missed_user_services_section() {
+    fn parse_services_missed_user_services_section() {
         let cfg = r#"
             system_services = ["configuration", "btc_anchoring", "exonum_time"]
         "#
@@ -85,7 +85,7 @@ mod tests {
     }
 
     #[test]
-    fn empty_list() {
+    fn parse_services_empty_list() {
         let cfg = r#"
             system_services = []
             [user_services]
@@ -99,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    fn duplicated() {
+    fn parse_services_duplicated_system_service() {
         let cfg = r#"
             system_services = ["btc_anchoring", "btc_anchoring"]
             [user_services]
@@ -117,6 +117,21 @@ mod tests {
     }
 
     #[test]
+    fn parse_services_duplicated_user_service() {
+        let cfg = r#"
+            [user_services]
+            service_name = "/path/to/artifact"
+            service_name = "/path/to/artifact"
+        "#
+        .to_owned();
+        let res = parse_services(cfg);
+        assert!(res.is_ok());
+        let EjbAppServices { user_services, .. } = res.unwrap();
+        assert_eq!(user_services.len(), 1);
+        assert_eq!(user_services["service_name"], "/path/to/artifact");
+    }
+
+    #[test]
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn broken_config() {
         let cfg = "wrong_format = 1".to_owned();
@@ -131,19 +146,19 @@ mod tests {
 
     #[test]
     fn config_file_ok() {
-        let cfg = create_config(
+        let cfg_path = create_config(
             r#"
                 system_services = []
                 [user_services]
             "#,
         );
-        let res = load_services_definition(cfg);
+        let res = load_services_definition(cfg_path);
         assert!(res.is_ok());
     }
 
     #[test]
     fn check_service_enabled() {
-        let cfg = create_config(
+        let cfg_path = create_config(
             r#"
                 system_services = ["exonum_time"]
                 [user_services]
@@ -153,13 +168,13 @@ mod tests {
 
         assert!(!is_service_enabled_in_config_file(
             CONFIGURATION_SERVICE,
-            &cfg
+            &cfg_path
         ));
         assert!(!is_service_enabled_in_config_file(
             BTC_ANCHORING_SERVICE,
-            &cfg
+            &cfg_path
         ));
-        assert!(is_service_enabled_in_config_file(TIME_SERVICE, &cfg));
+        assert!(is_service_enabled_in_config_file(TIME_SERVICE, &cfg_path));
     }
 
     // Creates temporary config file.
