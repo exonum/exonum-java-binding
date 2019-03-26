@@ -38,23 +38,13 @@ env:
 
 matrix:
   include:
-    - name: "Linux JDK 8 CHECK_RUST=true"
+    - name: "Linux OpenJDK 12 CHECK_RUST=false"
       os: linux
-      jdk: openjdk8
-      env: CHECK_RUST=true
-    - name: "Linux JDK 8 CHECK_RUST=false"
-      os: linux
-      jdk: openjdk8
+      jdk: openjdk12
       env: CHECK_RUST=false
-    - name: "OSX JDK 8 CHECK_RUST=false"
-      os: osx
-      # Specify the image containing JDK 8
-      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
-      osx_image: xcode9.3
-      env: CHECK_RUST=false
-    - name: "Linux JDK 11 CHECK_RUST=false"
+    - name: "Linux OpenJDK-EA CHECK_RUST=false"
       os: linux
-      jdk: openjdk11
+      jdk: openjdk-ea
       env: CHECK_RUST=false
 
 cache:
@@ -65,7 +55,6 @@ cache:
 before_cache:
   # Remove the project artifacts — no need to cache them.
   - rm -rf ${HOME}/.m2/repository/com/exonum/binding/
-
 
 before_install:
   # Skip the build if only md files were updated.
