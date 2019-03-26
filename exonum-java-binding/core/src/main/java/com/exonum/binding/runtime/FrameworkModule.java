@@ -23,7 +23,6 @@ import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 
 /**
@@ -41,7 +40,7 @@ final class FrameworkModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(PluginManager.class).to(DefaultPluginManager.class)
+    bind(PluginManager.class).to(JarPluginManager.class)
         .in(Singleton.class);
     bind(ServiceLoader.class).to(Pf4jServiceLoader.class)
         .in(Singleton.class);
