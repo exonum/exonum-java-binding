@@ -17,10 +17,18 @@ use std::{collections::HashSet, fs::File, io::Read, path::Path};
 use std::collections::HashMap;
 use toml;
 
+/// Names of system services to refer in the services configuration file.
+pub mod system_service_names {
+    /// Exonum configuration service
+    pub const CONFIGURATION_SERVICE: &str = "configuration";
+    /// Exonum BTC anchoring service
+    pub const BTC_ANCHORING_SERVICE: &str = "btc-anchoring";
+    /// Exonum time oracle service
+    pub const TIME_SERVICE: &str = "time";
+}
+
+/// Path to the services definition file.
 pub const PATH_TO_SERVICES_DEFINITION: &str = "ejb_app_services.toml";
-pub const CONFIGURATION_SERVICE: &str = "configuration";
-pub const BTC_ANCHORING_SERVICE: &str = "btc_anchoring";
-pub const TIME_SERVICE: &str = "exonum_time";
 
 #[derive(Serialize, Deserialize)]
 pub struct EjbAppServices {
@@ -58,6 +66,7 @@ pub fn is_service_enabled_in_config_file<P: AsRef<Path>>(service_name: &str, pat
 
 #[cfg(test)]
 mod tests {
+    use self::system_service_names::*;
     use super::*;
     use std::io::Write;
     use tempfile::{Builder, TempPath};
@@ -78,7 +87,7 @@ mod tests {
     #[should_panic(expected = "Invalid format of the file with EJB services definition")]
     fn parse_services_missed_user_services_section() {
         let cfg = r#"
-            system_services = ["configuration", "btc_anchoring", "exonum_time"]
+            system_services = ["configuration", "btc-anchoring", "time"]
         "#
         .to_owned();
         let _result = parse_services(cfg);
@@ -101,7 +110,7 @@ mod tests {
     #[test]
     fn parse_services_duplicated_system_service() {
         let cfg = r#"
-            system_services = ["btc_anchoring", "btc_anchoring"]
+            system_services = ["btc-anchoring", "btc-anchoring"]
             [user_services]
         "#
         .to_owned();
@@ -160,7 +169,7 @@ mod tests {
     fn check_service_enabled() {
         let cfg_path = create_config(
             r#"
-                system_services = ["exonum_time"]
+                system_services = ["time"]
                 [user_services]
                 service_name1 = "/path/to/artifact1.jar"
             "#,

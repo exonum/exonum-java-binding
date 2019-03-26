@@ -17,7 +17,8 @@ use jni::sys::jboolean;
 use jni::JNIEnv;
 
 use utils::services::{
-    is_service_enabled_in_config_file, PATH_TO_SERVICES_DEFINITION, TIME_SERVICE,
+    is_service_enabled_in_config_file, system_service_names::TIME_SERVICE,
+    PATH_TO_SERVICES_DEFINITION,
 };
 
 lazy_static! {

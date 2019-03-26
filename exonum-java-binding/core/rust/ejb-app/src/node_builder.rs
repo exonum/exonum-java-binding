@@ -20,8 +20,8 @@ use exonum_time::TimeServiceFactory;
 use java_bindings::{
     exonum::helpers::fabric::{self, ServiceFactory},
     utils::services::{
-        load_services_definition, EjbAppServices, BTC_ANCHORING_SERVICE, CONFIGURATION_SERVICE,
-        PATH_TO_SERVICES_DEFINITION, TIME_SERVICE,
+        load_services_definition, system_service_names::*, EjbAppServices,
+        PATH_TO_SERVICES_DEFINITION,
     },
     JavaServiceFactoryAdapter,
 };
@@ -35,7 +35,7 @@ use std::{
 pub fn create() -> fabric::NodeBuilder {
     let service_factories = prepare_service_factories(PATH_TO_SERVICES_DEFINITION);
     let mut builder = fabric::NodeBuilder::new();
-    for service_factory in service_factories {
+    for (_, service_factory) in service_factories {
         builder = builder.with_service(service_factory);
     }
     builder
@@ -43,7 +43,7 @@ pub fn create() -> fabric::NodeBuilder {
 
 // Prepares vector of `ServiceFactory` from services configuration file located at given path.
 // Panics in case of problems with reading/validating of service configuration file.
-fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFactory>> {
+fn prepare_service_factories<P: AsRef<Path>>(path: P) -> HashMap<String, Box<dyn ServiceFactory>> {
     // Read services definition from file.
     let EjbAppServices {
         system_services,
@@ -63,14 +63,15 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
     });
 
     // Prepare list of service factories from system and user services
-    let mut resulting_factories = Vec::new();
+    let mut resulting_factories = HashMap::new();
 
     // Process system services first
     let mut all_system_service_factories = service_factories();
     for service_name in system_services {
+        // Move factory to the resulting map
         match all_system_service_factories.remove(&service_name) {
             Some(factory) => {
-                resulting_factories.push(factory);
+                resulting_factories.insert(service_name, factory);
             }
             None => panic!(
                 "Unknown system service name {} has been found",
@@ -81,10 +82,10 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 
     // Process user services
     for (name, artifact_path) in user_services {
-        resulting_factories.push(Box::new(JavaServiceFactoryAdapter::new(
-            name,
-            artifact_path,
-        )));
+        resulting_factories.insert(
+            name.clone(),
+            Box::new(JavaServiceFactoryAdapter::new(name, artifact_path)),
+        );
     }
 
     resulting_factories
@@ -125,7 +126,7 @@ mod tests {
     fn prepare_service_factories_missing_user_services() {
         let cfg_path = create_config(
             r#"
-                system_services = ["configuration", "btc_anchoring", "exonum_time"]
+                system_services = ["configuration", "btc-anchoring", "time"]
                 [user_services]
              "#,
         );
@@ -137,7 +138,7 @@ mod tests {
     fn prepare_service_factories_unknown_system_service() {
         let cfg_path = create_config(
             r#"
-                system_services = ["configuration", "exonum_time", "unknown"]
+                system_services = ["configuration", "time", "unknown"]
                 [user_services]
                 service_name = "/path/to/artifact"
              "#,
@@ -156,15 +157,15 @@ mod tests {
 
         let factories = prepare_service_factories(cfg_path);
         assert_eq!(factories.len(), 2);
-        assert!(contains_service(CONFIGURATION_SERVICE, &factories));
-        assert!(contains_service("service_name", &factories));
+        assert!(factories.contains_key(CONFIGURATION_SERVICE));
+        assert!(factories.contains_key("service_name"));
     }
 
     #[test]
     fn prepare_service_factories_all_system_plus_user_services() {
         let cfg_path = create_config(
             r#"
-                system_services = ["configuration", "btc_anchoring", "exonum_time"]
+                system_services = ["configuration", "btc-anchoring", "time"]
                 [user_services]
                 service_name1 = "/path/to/artifact1"
                 service_name2 = "/path/to/artifact2"
@@ -173,11 +174,11 @@ mod tests {
 
         let factories = prepare_service_factories(cfg_path);
         assert_eq!(factories.len(), 5);
-        assert!(contains_service(CONFIGURATION_SERVICE, &factories));
-        assert!(contains_service(BTC_ANCHORING_SERVICE, &factories));
-        assert!(contains_service(TIME_SERVICE, &factories));
-        assert!(contains_service("service_name1", &factories));
-        assert!(contains_service("service_name2", &factories));
+        assert!(factories.contains_key(CONFIGURATION_SERVICE));
+        assert!(factories.contains_key(BTC_ANCHORING_SERVICE));
+        assert!(factories.contains_key(TIME_SERVICE));
+        assert!(factories.contains_key("service_name1"));
+        assert!(factories.contains_key("service_name2"));
     }
 
     // Creates temporary config file.
@@ -185,12 +186,5 @@ mod tests {
         let mut cfg_file = Builder::new().tempfile().unwrap();
         writeln!(cfg_file, "{}", cfg).unwrap();
         cfg_file.into_temp_path()
-    }
-
-    // Checks whether particular service is presented in the given collection.
-    fn contains_service(service_name: &str, factories: &[Box<ServiceFactory>]) -> bool {
-        factories
-            .iter()
-            .any(|factory| factory.service_name() == service_name)
     }
 }
