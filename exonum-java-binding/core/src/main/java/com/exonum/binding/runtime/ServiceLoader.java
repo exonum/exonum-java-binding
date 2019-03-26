@@ -23,7 +23,7 @@ import java.util.Optional;
  * A dynamic loader of Exonum service artifacts. It allows to load and unload service artifacts and
  * keeps track of already loaded services.
  */
-public interface ServiceLoader {
+interface ServiceLoader {
 
   /**
    * Loads the service artifact. The loading also involves verification of the artifact, e.g.,
@@ -54,7 +54,6 @@ public interface ServiceLoader {
    *
    * @param serviceId the identifier of the loaded service
    * @throws IllegalStateException if the service identified by the given id is not currently loaded
-   *     TODO: Shall we throw or make a no-op? /ECR-3008
    */
   void unloadService(ServiceId serviceId);
 }
