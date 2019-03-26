@@ -21,6 +21,7 @@ mod handle;
 mod jni;
 pub mod jni_cache;
 mod pair_iter;
+mod path;
 mod resource_manager;
 mod services;
 mod time_service;
@@ -34,6 +35,7 @@ pub use self::exception::{any_to_string, unwrap_exc_or, unwrap_exc_or_default};
 pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
 pub use self::jni::{get_class_name, get_exception_message};
 pub use self::pair_iter::PairIter;
+pub use self::path::{executable_directory, join_paths, PATH_SEPARATOR};
 pub use self::resource_manager::known_handles;
 pub use self::services::{
     is_service_enabled_in_config_file, load_enabled_services, BTC_ANCHORING_SERVICE,

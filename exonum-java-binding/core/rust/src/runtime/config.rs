@@ -16,34 +16,39 @@
 
 use std::fmt;
 
-/// JavaServiceRuntime configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Full configuration of the EJB runtime, JVM and Java service.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// JVM configuration.
-    pub jvm_config: JvmConfig,
-    /// EJB configuration
-    pub ejb_config: EjbConfig,
-    /// Java service configuration.
+    /// Service-specific configuration parameters.
     pub service_config: ServiceConfig,
+    /// JVM-specific configuration parameters.
+    pub jvm_config: JvmConfig,
+    /// EJB runtime-specific configuration parameters.
+    pub runtime_config: RuntimeConfig,
 }
 
-/// EJB-specific configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EjbConfig {
-    /// Java service classpath. Must include all its dependencies.
+/// Service-specific configuration parameters.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ServiceConfig {
+    /// Java service classpath.
     ///
-    /// Includes java_bindings internal dependencies as well as user service dependencies.
-    pub class_path: String,
-    /// Path to java-bindings shared library.
+    /// Provided by the user on `finalize` configuration step.
+    /// Private configuration parameter, can be unique for every node.
+    pub service_class_path: String,
+    /// Fully qualified service module name.
     ///
-    /// Should be path to core/rust/target/{debug, release}
-    pub lib_path: String,
-    /// Path to `log4j` configuration file.
-    pub log_config_path: String,
+    /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
+    ///
+    /// Provided by the user on `generate-template` configuration step.
+    /// Public configuration parameter, shared between all nodes in the network.
+    pub module_name: String,
 }
 
-/// JVM configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// JVM-specific configuration parameters.
+///
+/// These parameters are provided by the user on `run` configuration step.
+/// These parameters are private and can be unique for every node.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JvmConfig {
     /// Additional parameters for JVM.
     ///
@@ -54,19 +59,39 @@ pub struct JvmConfig {
     pub args_prepend: Vec<String>,
     /// Parameters that get appended to the rest.
     pub args_append: Vec<String>,
-    /// Socket address for JVM debugging
+    /// Socket address for JVM debugging.
     pub jvm_debug_socket: Option<String>,
 }
 
-/// Java service configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServiceConfig {
-    /// Fully qualified service module name.
-    ///
-    /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
-    pub module_name: String,
-    /// A port of the HTTP server for Java services. Must be distinct from the ports used by Exonum.
+/// Runtime-specific configuration parameters.
+///
+/// These parameters are provided by the user on `run` configuration step.
+/// These parameters are private and can be unique for every node.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RuntimeConfig {
+    /// Path to `log4j` configuration file.
+    pub log_config_path: String,
+    /// A port of the HTTP server for Java services.
+    /// Must be distinct from the ports used by Exonum.
     pub port: i32,
+}
+
+/// This is DTO for `module_name` parameter, used for storing `module_name`
+/// between `generate-template` and `finalize` configuration steps.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub(crate) struct PublicConfig {
+    pub module_name: String,
+}
+
+/// Internal EJB configuration.
+///
+/// Not visible by user, used internally while initializing runtime.
+#[doc(hidden)] // For testing purposes only.
+pub struct InternalConfig {
+    /// EJB system classpath.
+    pub system_class_path: String,
+    /// EJB library path.
+    pub system_lib_path: Option<String>,
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.

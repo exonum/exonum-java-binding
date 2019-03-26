@@ -49,8 +49,7 @@ export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dir
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to build tests.
-## Stable works well unless you want benchmarks.
-# TODO: stable does not work well until ECR-1839 is resolved
+# Using 1.32.0 until ECR-2982 is fixed.
 export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-1.32.0}"
 echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 

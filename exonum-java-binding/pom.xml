@@ -66,6 +66,7 @@
     <module>cryptocurrency-demo</module>
     <module>service-archetype</module>
     <module>time-oracle</module>
+    <module>packaging</module>
   </modules>
 
   <scm>
@@ -451,6 +452,12 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.8.2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.1.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
