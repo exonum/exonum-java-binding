@@ -66,18 +66,9 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> HashMap<String, Box<dyn
     let mut resulting_factories = HashMap::new();
 
     // Process system services first
-    let mut all_system_service_factories = service_factories();
     for service_name in system_services {
-        // Move factory to the resulting map
-        match all_system_service_factories.remove(&service_name) {
-            Some(factory) => {
-                resulting_factories.insert(service_name, factory);
-            }
-            None => panic!(
-                "Unknown system service name {} has been found",
-                service_name
-            ),
-        }
+        let factory = system_service_factory_for_name(&service_name);
+        resulting_factories.insert(service_name, factory);
     }
 
     // Process user services
@@ -91,22 +82,13 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> HashMap<String, Box<dyn
     resulting_factories
 }
 
-// Returns map of all system service factories
-fn service_factories() -> HashMap<String, Box<ServiceFactory>> {
-    let mut service_factories = HashMap::new();
-    service_factories.insert(
-        CONFIGURATION_SERVICE.to_owned(),
-        Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
-    );
-    service_factories.insert(
-        BTC_ANCHORING_SERVICE.to_owned(),
-        Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
-    );
-    service_factories.insert(
-        TIME_SERVICE.to_owned(),
-        Box::new(TimeServiceFactory) as Box<ServiceFactory>,
-    );
-    service_factories
+fn system_service_factory_for_name(name: &str) -> Box<ServiceFactory> {
+    match name {
+        CONFIGURATION_SERVICE => Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
+        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
+        TIME_SERVICE => Box::new(TimeServiceFactory) as Box<ServiceFactory>,
+        _ => panic!("Unknown system service name \"{}\" has been found", name),
+    }
 }
 
 #[cfg(test)]
@@ -179,6 +161,28 @@ mod tests {
         assert!(factories.contains_key(TIME_SERVICE));
         assert!(factories.contains_key("service_name1"));
         assert!(factories.contains_key("service_name2"));
+    }
+
+    #[test]
+    fn system_service_factory_for_name_ok() {
+        assert_eq!(
+            "configuration",
+            system_service_factory_for_name(CONFIGURATION_SERVICE).service_name()
+        );
+        assert_eq!(
+            "btc_anchoring",
+            system_service_factory_for_name(BTC_ANCHORING_SERVICE).service_name()
+        );
+        assert_eq!(
+            "exonum_time",
+            system_service_factory_for_name(TIME_SERVICE).service_name()
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Unknown system service name \"service_unknown\" has been found")]
+    fn system_service_factory_for_name_unknown() {
+        system_service_factory_for_name("service_unknown");
     }
 
     // Creates temporary config file.
