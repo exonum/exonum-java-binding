@@ -365,6 +365,11 @@
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.22.1</version>
+          <configuration>
+            <excludedGroups>
+              ${excludeTags}
+            </excludedGroups>
+          </configuration>
         </plugin>
 
         <plugin>
