@@ -21,6 +21,8 @@ use java_bindings::JavaServiceFactoryAdapter;
 
 #[test]
 fn test_callbacks() {
+    const CMD_RUN: &str = "run";
+
     let mut factory_adapter =
         JavaServiceFactoryAdapter::new("service_name".to_owned(), "artifact_path".to_owned());
     assert_eq!(factory_adapter.service_name(), "service_name");
@@ -33,13 +35,19 @@ fn test_callbacks() {
     assert!(factory_adapter.command("run-dev").is_none());
     assert!(factory_adapter.command("generate-template").is_none());
 
-    // Make sure it returns Some for the `Run` command for the first time and `None` for any other call.
+    // Make sure it always returns Some for the `Run` command.
     let run_command_ext = factory_adapter.command("run");
     assert!(run_command_ext.is_some());
-    assert!(factory_adapter.command("run").is_none());
-    assert!(factory_adapter.command("run").is_none());
+    assert!(factory_adapter.command(CMD_RUN).is_some());
+    assert!(factory_adapter.command(CMD_RUN).is_some());
 
     let run_command_ext = run_command_ext.unwrap();
     let arguments = run_command_ext.args();
     assert_eq!(arguments.len(), 7);
+
+    // Make sure another instance of JavaServiceFactoryAdapter does not extend the `Run` command.
+    let mut one_more_adapter =
+        JavaServiceFactoryAdapter::new("service_name2".to_owned(), "artifact_path2".to_owned());
+    assert!(one_more_adapter.command(CMD_RUN).is_none());
+    assert!(one_more_adapter.command(CMD_RUN).is_none());
 }

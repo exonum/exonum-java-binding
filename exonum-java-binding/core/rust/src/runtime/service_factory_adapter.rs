@@ -21,7 +21,7 @@ use std::sync::{Once, ONCE_INIT};
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
-static SERVICE_FACTORY_EXTEND_COMMAND: Once = ONCE_INIT;
+static FIRST_INSTANCE_CREATED: Once = ONCE_INIT;
 
 /// Adapts current single-service interface of Exonum to multiple EJB services until dynamic
 /// services are implemented. Tracks the `JavaServiceRuntime` instantiation and command extension
@@ -29,6 +29,7 @@ static SERVICE_FACTORY_EXTEND_COMMAND: Once = ONCE_INIT;
 pub struct JavaServiceFactoryAdapter {
     name: String,
     artifact_path: String,
+    should_extend_run_command: bool,
 }
 
 impl JavaServiceFactoryAdapter {
@@ -37,6 +38,8 @@ impl JavaServiceFactoryAdapter {
         JavaServiceFactoryAdapter {
             name,
             artifact_path,
+            // Only the first created instance should always extend the `Run` command.
+            should_extend_run_command: is_first_instance_created(),
         }
     }
 
@@ -54,6 +57,15 @@ impl JavaServiceFactoryAdapter {
         unsafe { JAVA_SERVICE_RUNTIME.clone() }
             .expect("Trying to return runtime, but it's uninitialized")
     }
+
+    // Extend command only when required.
+    fn provide_run_command_extension(&self) -> Option<Box<dyn CommandExtension>> {
+        if self.should_extend_run_command {
+            Some(Box::new(Run))
+        } else {
+            None
+        }
+    }
 }
 
 impl ServiceFactory for JavaServiceFactoryAdapter {
@@ -61,20 +73,17 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
         &self.name
     }
 
-    fn command(&mut self, command_name: &str) -> Option<Box<CommandExtension>> {
+    fn command(&mut self, command_name: &str) -> Option<Box<dyn CommandExtension>> {
         use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
         // We extend the `Run` command only, any other commands are ignored.
         if command_name == fabric::Run.name() {
-            // This callback gets called for every instance of ServiceFactory, but we have to do
-            // this extension only once otherwise the underlying `clap` backend will complain about
-            // non-unique argument names
-            return extend_command_once();
+            return self.provide_run_command_extension();
         }
         None
     }
 
-    fn make_service(&mut self, context: &Context) -> Box<Service> {
+    fn make_service(&mut self, context: &Context) -> Box<dyn Service> {
         let runtime = Self::get_or_create_java_service_runtime(extract_config(context));
 
         // load service from artifact and create corresponding proxy
@@ -85,10 +94,10 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
 }
 
 // Returns the real command extension for the first call and `None` for any other call.
-fn extend_command_once() -> Option<Box<CommandExtension>> {
-    let mut command_ext: Option<Box<CommandExtension>> = None;
-    SERVICE_FACTORY_EXTEND_COMMAND.call_once(|| command_ext = Some(Box::new(Run)));
-    command_ext
+fn is_first_instance_created() -> bool {
+    let mut is_first = false;
+    FIRST_INSTANCE_CREATED.call_once(|| is_first = true);
+    is_first
 }
 
 // Extracts EJB and JVM configuration from Context
