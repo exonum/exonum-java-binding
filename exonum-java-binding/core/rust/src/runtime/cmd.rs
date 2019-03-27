@@ -23,6 +23,8 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
+use std::path::PathBuf;
+
 /// This code encapsulates the logic of processing of our extensions to the node's binary command
 /// line arguments. The general idea: we have extensions to three regular commands of the node -
 /// `generate-template`, `finalize` and `run`. We process them on every step and store intermediate
@@ -240,7 +242,7 @@ fn write_ejb_config(context: &mut Context, value: Value) {
 }
 
 /// Extracts the `NodeConfig` from `Context` for further processing
-fn get_node_config(context: &Context) -> NodeConfig {
+fn get_node_config(context: &Context) -> NodeConfig<PathBuf> {
     context
         .get(keys::NODE_CONFIG)
         .expect("Unable to read node configuration.")
