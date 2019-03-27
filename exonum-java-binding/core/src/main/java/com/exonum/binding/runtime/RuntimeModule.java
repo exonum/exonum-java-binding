@@ -18,7 +18,6 @@ package com.exonum.binding.runtime;
 
 import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
-import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 
 /**
