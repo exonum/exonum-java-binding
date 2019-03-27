@@ -23,7 +23,6 @@ import com.exonum.binding.service.adapters.ViewProxyFactory;
 import com.exonum.binding.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import org.pf4j.PluginManager;
 
 /**
  * A framework module which configures the system-wide bindings.
@@ -40,11 +39,10 @@ final class FrameworkModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(PluginManager.class).to(JarPluginManager.class)
-        .in(Singleton.class);
-    bind(ServiceLoader.class).to(Pf4jServiceLoader.class)
-        .in(Singleton.class);
+    // Install the runtime module
+    install(new RuntimeModule());
 
+    // Specify framework-wide bindings
     bind(Server.class).toProvider(Server::create)
         .in(Singleton.class);
     bind(Integer.class).annotatedWith(named(SERVICE_WEB_SERVER_PORT))
