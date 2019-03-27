@@ -16,22 +16,20 @@
 
 package com.exonum.binding.runtime;
 
-import com.google.inject.PrivateModule;
-import com.google.inject.Singleton;
+import com.exonum.binding.test.CiOnly;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 
 /**
- * A module for the runtime package. Exposes {@link ServiceRuntime} only.
+ * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link DefaultPluginManager}
+ * so that we are able to understand if our {@linkplain JarPluginManager custom plugin manager}
+ * has any impact in case of any problems.
  */
-final class RuntimeModule extends PrivateModule {
+@CiOnly // We don't use DefaultPluginManager in prod, hence run this on CI-server only
+class Pf4jServiceLoaderWithDefaultIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {
 
   @Override
-  protected void configure() {
-    bind(ServiceRuntime.class).in(Singleton.class);
-    expose(ServiceRuntime.class);
-
-    bind(ServiceLoader.class).to(Pf4jServiceLoader.class);
-    bind(PluginManager.class).to(JarPluginManager.class);
+  PluginManager createPluginManager() {
+    return new DefaultPluginManager();
   }
 }

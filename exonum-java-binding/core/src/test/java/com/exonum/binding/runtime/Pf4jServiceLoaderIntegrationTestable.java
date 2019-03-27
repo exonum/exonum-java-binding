@@ -43,11 +43,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pf4j.DefaultPluginManager;
 import org.pf4j.Plugin;
 import org.pf4j.PluginManager;
 
-class Pf4jServiceLoaderIntegrationTest {
+abstract class Pf4jServiceLoaderIntegrationTestable {
 
   private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
 
@@ -57,10 +56,12 @@ class Pf4jServiceLoaderIntegrationTest {
 
   @BeforeEach
   void setUp(@TempDir Path tmp) {
-    pluginManager = spy(new DefaultPluginManager());
+    pluginManager = spy(createPluginManager());
     serviceLoader = new Pf4jServiceLoader(pluginManager);
     artifactLocation = tmp.resolve("service.jar");
   }
+
+  abstract PluginManager createPluginManager();
 
   @Test
   void canLoadService() throws ServiceLoadingException, IOException {
