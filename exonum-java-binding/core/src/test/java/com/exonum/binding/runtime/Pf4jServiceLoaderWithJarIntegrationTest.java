@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.runtime;
 
-import com.google.inject.AbstractModule;
+import org.pf4j.PluginManager;
 
 /**
- * A base class for {@link ServiceModule} implementations provided for convenience.
- *
- * <p>The implementation must be specified as an extension:
- * <pre>
- *   &#64;Extension
- *   class MyServiceModule extends AbstractServiceModule {
- *
- *   }
- * </pre>
+ * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link JarPluginManager},
+ * our default implementation.
  */
-public abstract class AbstractServiceModule extends AbstractModule implements ServiceModule {
+class Pf4jServiceLoaderWithJarIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {
 
+  @Override
+  PluginManager createPluginManager() {
+    return new JarPluginManager();
+  }
 }

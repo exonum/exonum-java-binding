@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.runtime;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.PrivateModule;
+import com.google.inject.Singleton;
+import org.pf4j.PluginManager;
 
 /**
- * A base class for {@link ServiceModule} implementations provided for convenience.
- *
- * <p>The implementation must be specified as an extension:
- * <pre>
- *   &#64;Extension
- *   class MyServiceModule extends AbstractServiceModule {
- *
- *   }
- * </pre>
+ * A module for the runtime package. Exposes {@link ServiceRuntime} only.
  */
-public abstract class AbstractServiceModule extends AbstractModule implements ServiceModule {
+final class RuntimeModule extends PrivateModule {
 
+  @Override
+  protected void configure() {
+    bind(ServiceRuntime.class).in(Singleton.class);
+    expose(ServiceRuntime.class);
+
+    bind(ServiceLoader.class).to(Pf4jServiceLoader.class);
+    bind(PluginManager.class).to(JarPluginManager.class);
+  }
 }

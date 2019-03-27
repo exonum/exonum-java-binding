@@ -9,12 +9,6 @@ import java.util.function.Supplier;
  * A complete definition of a loaded service that allows the framework to identify and instantiate
  * service instances.
  */
-// TODO: What if we define an alternative name for "service artifact" so that the "service" term
-//    is not overloaded? Currently "service"-as artifact might be confused with
-//    "service"-as instance of Service (or "service instance")?
-//    - Bundle (as in OSGi — short and not currently used)?
-//    - Plugin (I don't think it works in our case)?
-//    [ECR-3008]
 @AutoValue
 abstract class LoadedServiceDefinition {
 

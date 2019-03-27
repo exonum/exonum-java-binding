@@ -43,9 +43,9 @@ public final class Snapshot extends View {
    * @param nativeHandle a handle of the native Snapshot object
    */
   // todo: consider making package-private so that clients aren't able to reference an invalid
-  // memory region (currently the registry of native allocations is required to be enabled
-  // to safely discard such attempts): https://jira.bf.local/browse/ECR-471,
-  // https://jira.bf.local/browse/ECR-1525
+  //   memory region (currently the registry of native allocations is required to be enabled
+  //   to safely discard such attempts): https://jira.bf.local/browse/ECR-471,
+  //   https://jira.bf.local/browse/ECR-1525
   public static Snapshot newInstance(long nativeHandle, Cleaner cleaner) {
     return newInstance(nativeHandle, true, cleaner);
   }
