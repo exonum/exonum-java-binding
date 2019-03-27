@@ -29,7 +29,8 @@ static FIRST_INSTANCE_CREATED: Once = ONCE_INIT;
 pub struct JavaServiceFactoryAdapter {
     name: String,
     artifact_path: String,
-    should_extend_run_command: bool,
+    // Indicates whether this instance was created before others.
+    is_first_instance_created: bool,
 }
 
 impl JavaServiceFactoryAdapter {
@@ -38,8 +39,7 @@ impl JavaServiceFactoryAdapter {
         JavaServiceFactoryAdapter {
             name,
             artifact_path,
-            // Only the first created instance should always extend the `Run` command.
-            should_extend_run_command: is_first_instance_created(),
+            is_first_instance_created: is_first_instance_created(),
         }
     }
 
@@ -57,15 +57,6 @@ impl JavaServiceFactoryAdapter {
         unsafe { JAVA_SERVICE_RUNTIME.clone() }
             .expect("Trying to return runtime, but it's uninitialized")
     }
-
-    // Extend command only when required.
-    fn provide_run_command_extension(&self) -> Option<Box<dyn CommandExtension>> {
-        if self.should_extend_run_command {
-            Some(Box::new(Run))
-        } else {
-            None
-        }
-    }
 }
 
 impl ServiceFactory for JavaServiceFactoryAdapter {
@@ -76,9 +67,10 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
     fn command(&mut self, command_name: &str) -> Option<Box<dyn CommandExtension>> {
         use exonum::helpers::fabric;
         // Execute EJB configuration steps along with standard Exonum Core steps.
-        // We extend the `Run` command only, any other commands are ignored.
-        if command_name == fabric::Run.name() {
-            return self.provide_run_command_extension();
+        // We extend the `Run` command only AND only the first created instance of
+        // JavaServiceFactoryAdapter is allowed to extend the command.
+        if command_name == fabric::Run.name() && self.is_first_instance_created {
+            return Some(Box::new(Run));
         }
         None
     }
