@@ -195,7 +195,9 @@ mod tests {
             || service_name == BTC_ANCHORING_SERVICE
             || service_name == TIME_SERVICE
         {
-            system_service_factory_for_name(service_name).service_name().to_owned()
+            system_service_factory_for_name(service_name)
+                .service_name()
+                .to_owned()
         } else {
             service_name.to_owned()
         };
