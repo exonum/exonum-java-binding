@@ -36,7 +36,7 @@ fn test_callbacks() {
     assert!(factory_adapter.command("generate-template").is_none());
 
     // Make sure it always returns Some for the `Run` command.
-    let run_command_ext = factory_adapter.command("run");
+    let run_command_ext = factory_adapter.command(CMD_RUN);
     assert!(run_command_ext.is_some());
     assert!(factory_adapter.command(CMD_RUN).is_some());
     assert!(factory_adapter.command(CMD_RUN).is_some());

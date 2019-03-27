@@ -84,7 +84,7 @@ fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
         CONFIGURATION_SERVICE => Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
         BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
         TIME_SERVICE => Box::new(TimeServiceFactory) as Box<ServiceFactory>,
-        _ => unreachable!("Unknown system service name \"{}\" has been found", name),
+        _ => panic!("Unknown system service name \"{}\" has been found", name),
     }
 }
 
