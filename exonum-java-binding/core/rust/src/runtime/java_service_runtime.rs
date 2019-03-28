@@ -269,30 +269,6 @@ mod tests {
             "Invalid arguments",
             JavaServiceRuntime::transform_jni_error(error).description()
         );
-
-        let error = Error::from(ErrorKind::Other(jni::sys::JNI_EEXIST));
-        assert_eq!(
-            "VM already created",
-            JavaServiceRuntime::transform_jni_error(error).description()
-        );
-
-        let error = Error::from(ErrorKind::Other(jni::sys::JNI_ENOMEM));
-        assert_eq!(
-            "Not enough memory",
-            JavaServiceRuntime::transform_jni_error(error).description()
-        );
-
-        let error = Error::from(ErrorKind::Other(jni::sys::JNI_EVERSION));
-        assert_eq!(
-            "JNI version error",
-            JavaServiceRuntime::transform_jni_error(error).description()
-        );
-
-        let error = Error::from(ErrorKind::Other(jni::sys::JNI_ERR));
-        assert_eq!(
-            "Unknown JNI error",
-            JavaServiceRuntime::transform_jni_error(error).description()
-        );
     }
 
     #[test]
