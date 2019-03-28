@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+extern crate env_logger;
 extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
 extern crate exonum_time;
 extern crate java_bindings;
-extern crate env_logger;
 
 #[cfg(test)]
 extern crate tempfile;
