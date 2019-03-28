@@ -72,6 +72,9 @@ do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
     cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
+     --no-password \
+     --consensus-path testnet/consensus${i}.toml \
+     --service-path testnet/service${i}.toml \
      --peer-address 127.0.0.1:$peer_port
 done
 
@@ -95,6 +98,8 @@ do
 	 -d testnet/db/$i \
 	 --ejb-port ${ejb_port} \
 	 --ejb-log-config-path $log_config_path \
+	 --consensus-key-pass pass \
+     --service-key-pass pass \
 	 --public-api-address 0.0.0.0:${port} \
 	 --private-api-address 0.0.0.0:${private_port} &
 
