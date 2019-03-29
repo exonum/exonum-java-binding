@@ -90,20 +90,20 @@ header "START TESTNET"
 
 for i in $(seq 0 $((node_count - 1)))
 do
-	port=$((3000 + i))
-	private_port=$((port + 100))
-	ejb_port=$((6000 + i))
-	cargo run -- run \
-	 -c testnet/node_$i.toml \
-	 -d testnet/db/$i \
-	 --ejb-port ${ejb_port} \
-	 --ejb-log-config-path $log_config_path \
+    port=$((3000 + i))
+    private_port=$((port + 100))
+    ejb_port=$((6000 + i))
+    cargo run -- run \
+     -c testnet/node_$i.toml \
+     -d testnet/db/$i \
+     --ejb-port ${ejb_port} \
+     --ejb-log-config-path $log_config_path \
      --consensus-key-pass pass \
      --service-key-pass pass \
-	 --public-api-address 0.0.0.0:${port} \
-	 --private-api-address 0.0.0.0:${private_port} &
+     --public-api-address 0.0.0.0:${port} \
+     --private-api-address 0.0.0.0:${private_port} &
 
-	echo "new node with ports: $port (public) and $private_port (private)"
+    echo "new node with ports: $port (public) and $private_port (private)"
 done
 
 echo "$node_count nodes configured and launched"
