@@ -18,9 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 **If you are upgrading an existing Java service, consult 
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/doc/Migration_guide_0.6.md).**
 
-## [0.5.0] - 2019-03-13
+### Added
 
 - Support multiple simultaneously active Java services on the network.
+
+## [0.5.0] - 2019-03-13
 
 ### Overview
 
