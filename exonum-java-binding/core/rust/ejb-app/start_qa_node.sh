@@ -98,7 +98,7 @@ do
 	 -d testnet/db/$i \
 	 --ejb-port ${ejb_port} \
 	 --ejb-log-config-path $log_config_path \
-	 --consensus-key-pass pass \
+     --consensus-key-pass pass \
      --service-key-pass pass \
 	 --public-api-address 0.0.0.0:${port} \
 	 --private-api-address 0.0.0.0:${private_port} &
