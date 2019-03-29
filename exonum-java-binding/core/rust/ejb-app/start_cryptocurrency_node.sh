@@ -56,6 +56,9 @@ cargo run -- generate-template --validators-count=1 testnet/common.toml \
 
 header "GENERATE CONFIG"
 cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+ --no-password \
+ --consensus-path testnet/consensus.toml \
+ --service-path testnet/service.toml \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
@@ -65,6 +68,8 @@ cargo run -- finalize testnet/sec.toml testnet/node.toml \
 
 header "START TESTNET"
 cargo run -- run -d testnet/db -c testnet/node.toml \
+ --consensus-key-pass pass \
+ --service-key-pass pass \
  --public-api-address 127.0.0.1:3000 \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
  --ejb-port 6000

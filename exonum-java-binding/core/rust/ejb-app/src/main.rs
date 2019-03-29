@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+extern crate env_logger;
 extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
 extern crate exonum_time;
@@ -25,6 +26,7 @@ extern crate tempfile;
 mod node_builder;
 
 fn main() {
+    env_logger::init();
     // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
 

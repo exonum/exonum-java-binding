@@ -12,6 +12,7 @@ java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.11"
 exonum-btc-anchoring = "0.11"
 exonum-time = "0.11"
+env_logger = "0.6.1"
 toml = "0.4.6"
 serde = "1.0"
 serde_derive = "1.0"

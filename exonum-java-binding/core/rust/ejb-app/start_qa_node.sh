@@ -72,6 +72,9 @@ do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
     cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
+     --no-password \
+     --consensus-path testnet/consensus${i}.toml \
+     --service-path testnet/service${i}.toml \
      --peer-address 127.0.0.1:$peer_port
 done
 
@@ -87,18 +90,20 @@ header "START TESTNET"
 
 for i in $(seq 0 $((node_count - 1)))
 do
-	port=$((3000 + i))
-	private_port=$((port + 100))
-	ejb_port=$((6000 + i))
-	cargo run -- run \
-	 -c testnet/node_$i.toml \
-	 -d testnet/db/$i \
-	 --ejb-port ${ejb_port} \
-	 --ejb-log-config-path $log_config_path \
-	 --public-api-address 0.0.0.0:${port} \
-	 --private-api-address 0.0.0.0:${private_port} &
+    port=$((3000 + i))
+    private_port=$((port + 100))
+    ejb_port=$((6000 + i))
+    cargo run -- run \
+     -c testnet/node_$i.toml \
+     -d testnet/db/$i \
+     --ejb-port ${ejb_port} \
+     --ejb-log-config-path $log_config_path \
+     --consensus-key-pass pass \
+     --service-key-pass pass \
+     --public-api-address 0.0.0.0:${port} \
+     --private-api-address 0.0.0.0:${private_port} &
 
-	echo "new node with ports: $port (public) and $private_port (private)"
+    echo "new node with ports: $port (public) and $private_port (private)"
 done
 
 echo "$node_count nodes configured and launched"
