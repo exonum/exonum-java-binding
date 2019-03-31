@@ -5,4 +5,6 @@ option java_outer_classname = "WalletProtos";
 
 message Wallet {
     int64 balance = 1;
+    int64 pendingBalance = 2;
+    bytes signer = 3;
 }

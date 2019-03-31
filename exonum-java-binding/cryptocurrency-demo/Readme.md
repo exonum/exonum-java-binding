@@ -10,6 +10,118 @@ It implements most basic operations:
 
 - Create a new user
 - Transfer funds between users
+- Transfer funds between users with multisig wallet in two ops: multisignTransfer and signMultisignTransfer
+
+### API Description
+```javascript
+const TRANSACTION_URL = '/api/explorer/v1/transactions'
+```
+#### Create wallet
+Create wallet with base balance, pending balance equals 0, if wallet is not multisig, you can place in signer any address
+and send ordinary transfer. If transfer is multisig, then (signer != walletTo || signer != walletFrom). Also, 
+when initiating wallet, signer should not be empty.
+```javascript
+function CreateTransaction(publicKey) {
+  return Exonum.newTransaction({
+    author: publicKey,
+    service_id: SERVICE_ID,
+    message_id: 1,
+    schema: proto.CreateWalletTx
+  })
+}
+
+createWallet (keyPair, balance, signer) {
+    // Describe transaction
+    const transaction = new CreateTransaction(keyPair.publicKey)
+
+    // Transaction data
+    const data = {
+        initialBalance: balance,
+        signer: signer
+    }
+
+    // Send transaction into blockchain
+    return transaction.send(TRANSACTION_URL, data, keyPair.secretKey)
+}
+
+```
+```proto
+message Wallet {
+    int64 balance = 1;
+    int64 pendingBalance = 2;
+    bytes signer = 3;
+}
+```
+#### Multisig transfer transaction
+Send multisig transfer. Will decrease pending balance on wallet
+```javascript
+function MultisignTransferTransaction(publicKey) {
+  return Exonum.newTransaction({
+    author: publicKey,
+    service_id: SERVICE_ID,
+    message_id: 3,
+    schema: proto.TransferTx
+  })
+}
+multisigTransfer (keyPair, receiver, amountToTransfer, seed) {
+  // Describe transaction
+  const transaction = new MultisignTransferTransaction(keyPair.publicKey)
+
+  // Transaction data
+  const data = {
+    seed: seed,
+    toWallet: Exonum.hexadecimalToUint8Array(receiver),
+    sum: amountToTransfer
+  }
+
+  // Send transaction into blockchain
+  return transaction.send(TRANSACTION_URL, data, keyPair.secretKey)
+}
+```
+```proto
+message TransferTx {
+  int64 seed = 1;
+  bytes toWallet = 2;
+  int64 sum = 3;
+}
+```
+
+#### Sign multisig transfer transaction
+Will sign multisig tranfer and calculate balances based on multisig transfer
+```javascript
+function SignMultisignTransferTransaction(publicKey) {
+  return Exonum.newTransaction({
+    author: publicKey,
+    service_id: SERVICE_ID,
+    message_id: 4,
+    schema: proto.SignMultisignTransferTx
+  })
+}
+transfer (keyPair, txHashToSign, seed) {
+  // Describe transaction
+  const transaction = new SignMultisignTransferTransaction(keyPair.publicKey)
+
+  // Transaction data
+  const data = {
+    seed: seed,
+    txHash: txHashToSign
+  }
+
+  // Send transaction into blockchain
+  return transaction.send(TRANSACTION_URL, data, keyPair.secretKey)
+},
+```
+```proto
+message SignMultisignTransferTx {
+  int64 seed = 1;
+  bytes txHash = 2; //transaction to sign
+}
+```
+#### Get pending transactions
+Get pending transactions, if transaction signed, then it will be deleted from list
+```
+GET    /api/cryptocurrency-demo-service/transactions/pending
+```
 
 ## Install and run
 

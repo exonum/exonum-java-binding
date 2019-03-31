@@ -47,6 +47,7 @@ final class ApiController {
   private static final String WALLET_ID_PARAM = "walletId";
   private static final String GET_WALLET_PATH = "/wallet/:" + WALLET_ID_PARAM;
   private static final String GET_WALLET_HISTORY_PATH = "/wallet/:" + WALLET_ID_PARAM + "/history";
+  private static final String GET_PENDING_TRANSACTIONS_HISTORY_PATH = "/transactions/pending";
 
   private final CryptocurrencyService service;
 
@@ -63,6 +64,7 @@ final class ApiController {
         ImmutableMap.<String, Handler<RoutingContext>>builder()
             .put(GET_WALLET_PATH, this::getWallet)
             .put(GET_WALLET_HISTORY_PATH, this::getWalletHistory)
+            .put(GET_PENDING_TRANSACTIONS_HISTORY_PATH, this::getPendingTransactions)
             .build();
 
     handlers.forEach((path, handler) ->
@@ -95,6 +97,14 @@ final class ApiController {
     rc.response()
         .putHeader("Content-Type", "application/json")
         .end(json().toJson(walletHistory));
+  }
+
+  private void getPendingTransactions(RoutingContext rc) {
+    List<HistoryEntity> pendingTransactions = service.getPendingTransactions();
+
+    rc.response()
+        .putHeader("Content-Type", "application/json")
+        .end(json().toJson(pendingTransactions));
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,

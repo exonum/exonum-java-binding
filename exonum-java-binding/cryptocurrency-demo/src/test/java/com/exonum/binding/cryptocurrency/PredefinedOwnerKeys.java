@@ -21,13 +21,19 @@ import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KE
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.test.Bytes;
 
-public class PredefinedOwnerKeys {
+public final class PredefinedOwnerKeys {
 
   public static final PublicKey FIRST_OWNER_KEY =
       PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(0), PUBLIC_KEY_BYTES));
 
   public static final PublicKey SECOND_OWNER_KEY =
       PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(1), PUBLIC_KEY_BYTES));
+
+  public static final PublicKey SIGNER_OWNER_KEY =
+      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(2), PUBLIC_KEY_BYTES));
+
+  public static final PublicKey THIRD_OWNER_KEY =
+      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(3), PUBLIC_KEY_BYTES));
 
   private PredefinedOwnerKeys() {
     throw new AssertionError("Non-instantiable");

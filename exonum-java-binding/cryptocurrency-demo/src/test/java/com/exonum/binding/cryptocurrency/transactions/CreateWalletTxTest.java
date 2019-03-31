@@ -19,6 +19,8 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_INITIAL_BALANCE;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_INITIAL_PENDING_BALANCE;
+import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_INITIAL_SIGNER;
 import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -55,11 +57,11 @@ class CreateWalletTxTest {
   @Test
   void fromRawTransaction() {
     long initialBalance = 100L;
-    RawTransaction raw = createRawTransaction(initialBalance);
+    RawTransaction raw = createRawTransaction(initialBalance, DEFAULT_INITIAL_SIGNER);
 
     CreateWalletTx tx = CreateWalletTx.fromRawTransaction(raw);
 
-    assertThat(tx, equalTo(new CreateWalletTx(initialBalance)));
+    assertThat(tx, equalTo(new CreateWalletTx(initialBalance, DEFAULT_INITIAL_SIGNER)));
   }
 
   @Test
@@ -67,7 +69,7 @@ class CreateWalletTxTest {
     long initialBalance = -1L;
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> new CreateWalletTx(initialBalance));
+        () -> new CreateWalletTx(initialBalance, DEFAULT_INITIAL_SIGNER));
 
     assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
   }
@@ -75,7 +77,7 @@ class CreateWalletTxTest {
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx() throws Exception {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE, DEFAULT_INITIAL_SIGNER);
 
     try (Database db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -104,18 +106,20 @@ class CreateWalletTxTest {
       Fork view = db.createFork(cleaner);
 
       Long initialBalance = DEFAULT_INITIAL_BALANCE;
+      Long pendingInitialBalance = DEFAULT_INITIAL_PENDING_BALANCE;
+      PublicKey signer = DEFAULT_INITIAL_SIGNER;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       {
         MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(OWNER_KEY, new Wallet(initialBalance));
+        wallets.put(OWNER_KEY, new Wallet(initialBalance, pendingInitialBalance, signer));
       }
 
       // Execute the transaction, that has the same owner key.
       // Use twice the initial balance to detect invalid updates.
       long newBalance = 2 * initialBalance;
-      CreateWalletTx tx = new CreateWalletTx(newBalance);
+      CreateWalletTx tx = new CreateWalletTx(newBalance, signer);
       TransactionContext context = newContextBuilder(view)
           .authorPk(OWNER_KEY)
           .build();
@@ -128,7 +132,7 @@ class CreateWalletTxTest {
 
   @Test
   void info() {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE, DEFAULT_INITIAL_SIGNER);
 
     String info = tx.info();
 

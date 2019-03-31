@@ -21,7 +21,6 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -41,6 +40,7 @@ import io.vertx.junit5.VertxTestContext;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -98,7 +98,10 @@ class ApiControllerTest {
   @Test
   void getWallet(VertxTestContext context) {
     long balance = 200L;
-    Wallet wallet = new Wallet(balance);
+    long pendingBalance = 0L;
+    PublicKey signer = PublicKey.fromHexString("abcd");
+
+    Wallet wallet = new Wallet(balance, pendingBalance, signer);
     when(service.getWallet(eq(FROM_KEY)))
         .thenReturn(Optional.of(wallet));
 
@@ -148,13 +151,17 @@ class ApiControllerTest {
 
   @Test
   void getWalletHistory(VertxTestContext context) {
-    List<HistoryEntity> history = singletonList(
+    List<HistoryEntity> history = Arrays.asList(
         HistoryEntity.newBuilder()
             .setSeed(1L)
             .setWalletFrom(FROM_KEY)
             .setWalletTo(TO_KEY)
             .setAmount(10L)
             .setTxMessageHash(HashCode.fromString("a0a0a0"))
+            .build(),
+        HistoryEntity.newBuilder()
+            .setSeed(2L)
+            .setTxMessageHash(HashCode.fromString("0a0a0a"))
             .build()
     );
     when(service.getWalletHistory(FROM_KEY)).thenReturn(history);
@@ -168,6 +175,40 @@ class ApiControllerTest {
           List<HistoryEntity> actualHistory = parseWalletHistory(response);
 
           assertThat(actualHistory).isEqualTo(history);
+
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  void getPendingTransactions(VertxTestContext context) {
+    List<HistoryEntity> pendingTransactions = Arrays.asList(
+        HistoryEntity.newBuilder()
+            .setSeed(1L)
+            .setWalletFrom(FROM_KEY)
+            .setWalletTo(TO_KEY)
+            .setAmount(10L)
+            .setTxMessageHash(HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"))
+            .build(),
+        HistoryEntity.newBuilder()
+            .setSeed(2L)
+            .setWalletFrom(FROM_KEY)
+            .setWalletTo(TO_KEY)
+            .setAmount(10L)
+            .setTxMessageHash(HashCode.fromString("b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"))
+            .build()
+    );
+    when(service.getPendingTransactions()).thenReturn(pendingTransactions);
+
+    String uri = "/transactions/pending";
+
+    get(uri)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+
+          List<HistoryEntity> actualPendingTxs = parseWalletHistory(response);
+
+          assertThat(actualPendingTxs).isEqualTo(pendingTransactions);
 
           context.completeNow();
         })));

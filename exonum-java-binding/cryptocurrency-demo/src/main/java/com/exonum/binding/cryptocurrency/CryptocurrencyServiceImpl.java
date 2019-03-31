@@ -32,9 +32,12 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -97,6 +100,17 @@ public final class CryptocurrencyServiceImpl extends AbstractService
           .map(txMessages::get)
           .map(this::createTransferHistoryEntry)
           .collect(toList());
+    });
+  }
+
+  @Override
+  public List<HistoryEntity> getPendingTransactions() {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot(view -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      MapIndex<HashCode, HistoryEntity> pendingTransactions = schema.pendingTxs();
+      return Lists.newArrayList(pendingTransactions.values());
     });
   }
 

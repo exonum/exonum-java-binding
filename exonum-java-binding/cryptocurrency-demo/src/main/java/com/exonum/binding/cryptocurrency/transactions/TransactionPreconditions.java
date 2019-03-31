@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.transaction.TransactionExecutionException;
 
 final class TransactionPreconditions {
 
@@ -32,6 +33,13 @@ final class TransactionPreconditions {
   static void checkTransaction(RawTransaction transaction, short expectedTxId) {
     checkServiceId(transaction);
     checkTransactionId(transaction, expectedTxId);
+  }
+
+  static void checkExecution(boolean precondition, byte errorCode)
+      throws TransactionExecutionException {
+    if (!precondition) {
+      throw new TransactionExecutionException(errorCode);
+    }
   }
 
   private static void checkServiceId(RawTransaction transaction) {

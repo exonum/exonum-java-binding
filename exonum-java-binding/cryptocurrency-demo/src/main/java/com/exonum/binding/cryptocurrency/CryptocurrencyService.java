@@ -28,4 +28,6 @@ public interface CryptocurrencyService extends Service {
   Optional<Wallet> getWallet(PublicKey ownerKey);
 
   List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
+
+  List<HistoryEntity> getPendingTransactions();
 }

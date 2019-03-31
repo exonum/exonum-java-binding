@@ -18,6 +18,7 @@ package com.exonum.binding.cryptocurrency;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import org.junit.jupiter.api.Test;
 
 class WalletSerializerTest {
@@ -35,7 +36,7 @@ class WalletSerializerTest {
   }
 
   private static Wallet testWallet() {
-    return new Wallet(100L);
+    return new Wallet(100L, 0L, PublicKey.fromHexString("abcd"));
   }
 
 }

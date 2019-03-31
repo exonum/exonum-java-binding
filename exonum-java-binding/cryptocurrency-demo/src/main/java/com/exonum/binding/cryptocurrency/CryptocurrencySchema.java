@@ -72,6 +72,16 @@ public final class CryptocurrencySchema implements Schema {
         StandardSerializers.hash());
   }
 
+  /**
+   * Returns a proof map of pending transactions.
+   */
+  public ProofMapIndexProxy<HashCode, HistoryEntity> pendingTxs() {
+    String name = fullIndexName("pending_transactions");
+
+    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+        HistoryEntitySerializer.INSTANCE);
+  }
+
   private static String fullIndexName(String name) {
     return NAMESPACE + "__" + name;
   }

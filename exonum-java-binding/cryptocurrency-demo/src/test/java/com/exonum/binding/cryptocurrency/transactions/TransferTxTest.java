@@ -104,8 +104,11 @@ class TransferTxTest {
 
       // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
-      createWallet(view, FROM_KEY, initialBalance);
-      createWallet(view, TO_KEY, initialBalance);
+      long pendingInitialBalance = 0L;
+      PublicKey signer = PublicKey.fromHexString("abcd");
+
+      createWallet(view, FROM_KEY, initialBalance, pendingInitialBalance, signer);
+      createWallet(view, TO_KEY, initialBalance, pendingInitialBalance, signer);
 
       // Create and execute the transaction
       long seed = 1L;
@@ -141,7 +144,10 @@ class TransferTxTest {
 
       // Create a receiver’s wallet with the given initial balance
       long initialBalance = 50L;
-      createWallet(view, TO_KEY, initialBalance);
+      long pendingInitialBalance = 0L;
+      PublicKey signer = PublicKey.fromHexString("abcd");
+
+      createWallet(view, TO_KEY, initialBalance, pendingInitialBalance, signer);
 
       long seed = 1L;
       long transferValue = 50L;
@@ -166,7 +172,10 @@ class TransferTxTest {
 
       // Create a sender’s wallet
       long initialBalance = 100L;
-      createWallet(view, FROM_KEY, initialBalance);
+      long pendingInitialBalance = 0L;
+      PublicKey signer = PublicKey.fromHexString("abcd");
+
+      createWallet(view, FROM_KEY, initialBalance, pendingInitialBalance, signer);
 
       // Create and execute the transaction that attempts to transfer to unknown wallet
       long transferValue = 50L;
@@ -209,8 +218,11 @@ class TransferTxTest {
 
       // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
-      createWallet(view, FROM_KEY, initialBalance);
-      createWallet(view, TO_KEY, initialBalance);
+      long pendingInitialBalance = 0L;
+      PublicKey signer = PublicKey.fromHexString("abcd");
+
+      createWallet(view, FROM_KEY, initialBalance, pendingInitialBalance, signer);
+      createWallet(view, TO_KEY, initialBalance, pendingInitialBalance, signer);
 
       // Create and execute the transaction that attempts to transfer an amount
       // exceeding the balance
@@ -249,7 +261,7 @@ class TransferTxTest {
         .verify();
   }
 
-  private static Matcher<TransactionExecutionException> hasErrorCode(TransactionError expected) {
+  static Matcher<TransactionExecutionException> hasErrorCode(TransactionError expected) {
     return new FeatureMatcher<TransactionExecutionException, Byte>(equalTo(expected.errorCode),
         "ExecutionException#errorCode", "errorCode") {
 

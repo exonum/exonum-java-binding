@@ -16,15 +16,29 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.protobuf.ByteString;
 
 public final class Wallet {
 
   private final long balance;
+  private final long pendingBalance;
+  private final PublicKey signer;
 
-  public Wallet(long balance) {
+  public Wallet(long balance, long pendingBalance, PublicKey signer) {
     this.balance = balance;
+    this.pendingBalance = pendingBalance;
+    this.signer = signer;
+  }
+
+  public long getPendingBalance() {
+    return pendingBalance;
+  }
+
+  public PublicKey getSigner() {
+    return signer;
   }
 
   public long getBalance() {
@@ -35,24 +49,28 @@ public final class Wallet {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("balance", balance)
+        .add("pendingBalance", pendingBalance)
+        .add("signer", signer)
         .toString();
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (!(o instanceof Wallet)) return false;
     Wallet wallet = (Wallet) o;
-    return balance == wallet.balance;
+    return getBalance() == wallet.getBalance() &&
+            getPendingBalance() == wallet.getPendingBalance() &&
+            Objects.equal(getSigner(), wallet.getSigner());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(balance);
+    return Objects.hashCode(getBalance(), getPendingBalance(), getSigner());
+  }
+
+  public static PublicKey toPublicKey(ByteString s) {
+    return PublicKey.fromBytes(s.toByteArray());
   }
 
 }

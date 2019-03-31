@@ -5,7 +5,7 @@ set -eu -o pipefail
 # Fixes tha lack of the `realpath` tool in OS X.
 if [ ! $(which realpath) ]; then
     function realpath() {
-        python -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
+        python2 -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
     }
 fi
 

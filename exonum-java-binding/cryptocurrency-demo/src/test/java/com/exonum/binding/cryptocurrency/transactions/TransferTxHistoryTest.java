@@ -58,8 +58,10 @@ class TransferTxHistoryTest {
 
       // Create wallets with the given initial balances
       long initialBalance = 100L;
-      createWallet(view, ACCOUNT_1, initialBalance);
-      createWallet(view, ACCOUNT_2, initialBalance);
+      long pendingInitialBalance = 0L;
+      PublicKey signer = PublicKey.fromHexString("abcd");
+      createWallet(view, ACCOUNT_1, initialBalance, pendingInitialBalance, signer);
+      createWallet(view, ACCOUNT_2, initialBalance, pendingInitialBalance, signer);
 
       // Create and execute 1st transaction
       long seed1 = 1L;

@@ -19,6 +19,7 @@ package com.exonum.binding.cryptocurrency;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
 import com.exonum.binding.common.serialization.Serializer;
+import com.google.protobuf.ByteString;
 
 public enum WalletSerializer implements Serializer<Wallet> {
   INSTANCE;
@@ -30,6 +31,8 @@ public enum WalletSerializer implements Serializer<Wallet> {
   public byte[] toBytes(Wallet value) {
     WalletProtos.Wallet wallet = WalletProtos.Wallet.newBuilder()
         .setBalance(value.getBalance())
+        .setPendingBalance(value.getPendingBalance())
+        .setSigner(ByteString.copyFrom(value.getSigner().toBytes()))
         .build();
     return wallet.toByteArray();
   }
@@ -37,6 +40,6 @@ public enum WalletSerializer implements Serializer<Wallet> {
   @Override
   public Wallet fromBytes(byte[] binaryWallet) {
     WalletProtos.Wallet copiedWalletProtos = PROTO_SERIALIZER.fromBytes(binaryWallet);
-    return new Wallet(copiedWalletProtos.getBalance());
+    return new Wallet(copiedWalletProtos.getBalance(), copiedWalletProtos.getPendingBalance(), Wallet.toPublicKey(copiedWalletProtos.getSigner()));
   }
 }

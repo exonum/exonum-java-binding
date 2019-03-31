@@ -22,6 +22,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.IN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkExecution;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -92,26 +93,16 @@ public final class TransferTx implements Transaction {
 
     Wallet from = wallets.get(fromWallet);
     Wallet to = wallets.get(toWallet);
-    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
+    checkExecution(sum <= from.getBalance() + from.getPendingBalance(), INSUFFICIENT_FUNDS.errorCode);
 
     // Update the balances
-    wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
-    wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+    wallets.put(fromWallet, new Wallet(from.getBalance() - sum, from.getPendingBalance(), from.getSigner()));
+    wallets.put(toWallet, new Wallet(to.getBalance() + sum, to.getPendingBalance(), to.getSigner()));
 
     // Update the transaction history of each wallet
     HashCode messageHash = context.getTransactionMessageHash();
     schema.transactionsHistory(fromWallet).add(messageHash);
     schema.transactionsHistory(toWallet).add(messageHash);
-  }
-
-  // todo: consider extracting in a TransactionPreconditions or
-  //   TransactionExecutionException: ECR-2746.
-  /** Checks a transaction execution precondition, throwing if it is false. */
-  private static void checkExecution(boolean precondition, byte errorCode)
-      throws TransactionExecutionException {
-    if (!precondition) {
-      throw new TransactionExecutionException(errorCode);
-    }
   }
 
   @Override

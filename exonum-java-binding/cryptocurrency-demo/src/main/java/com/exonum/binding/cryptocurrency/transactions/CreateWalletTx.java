@@ -32,7 +32,7 @@ import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Objects;
+import com.google.common.base.Objects;
 
 /** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx implements Transaction {
@@ -41,13 +41,17 @@ public final class CreateWalletTx implements Transaction {
   private static final Serializer<TxMessageProtos.CreateWalletTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.CreateWalletTx.class);
   private final long initialBalance;
+  private final long initialPendingBalance;
+  private final PublicKey signer;
 
   @VisibleForTesting
-  CreateWalletTx(long initialBalance) {
+  CreateWalletTx(long initialBalance, PublicKey signer) {
     checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
         initialBalance);
 
     this.initialBalance = initialBalance;
+    this.initialPendingBalance = 0L;
+    this.signer = signer;
   }
 
   /**
@@ -61,7 +65,8 @@ public final class CreateWalletTx implements Transaction {
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
     long initialBalance = body.getInitialBalance();
-    return new CreateWalletTx(initialBalance);
+    PublicKey signer = Wallet.toPublicKey(body.getSigner());
+    return new CreateWalletTx(initialBalance, signer);
   }
 
   @Override
@@ -75,7 +80,7 @@ public final class CreateWalletTx implements Transaction {
       throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
     }
 
-    Wallet wallet = new Wallet(initialBalance);
+    Wallet wallet = new Wallet(initialBalance, initialPendingBalance, signer);
 
     wallets.put(ownerPublicKey, wallet);
   }
@@ -87,19 +92,17 @@ public final class CreateWalletTx implements Transaction {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (!(o instanceof CreateWalletTx)) return false;
     CreateWalletTx that = (CreateWalletTx) o;
-    return initialBalance == that.initialBalance;
+    return initialBalance == that.initialBalance &&
+        initialPendingBalance == that.initialPendingBalance &&
+        Objects.equal(signer, that.signer);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(initialBalance);
+    return Objects.hashCode(initialBalance, initialPendingBalance, signer);
   }
 }
 
