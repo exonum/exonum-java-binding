@@ -48,7 +48,8 @@ public class TransferMultisigHistoryTest {
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
-      HashCode txMessageHash1 = HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
+      HashCode txMessageHash1 =
+        HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
       MultisignTransferTx tx1 = new MultisignTransferTx(seed1, ACCOUNT_2, transferSum1);
       TransactionContext context1 = newContextBuilder(view)
           .txMessageHash(txMessageHash1)
@@ -59,7 +60,8 @@ public class TransferMultisigHistoryTest {
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
-      HashCode txMessageHash2 = HashCode.fromString("b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1");
+      HashCode txMessageHash2 =
+        HashCode.fromString("b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1");
       MultisignTransferTx tx2 = new MultisignTransferTx(seed2, ACCOUNT_1, transferSum2);
       TransactionContext context2 = newContextBuilder(view)
           .txMessageHash(txMessageHash2)
@@ -82,7 +84,8 @@ public class TransferMultisigHistoryTest {
 
       // Create and execute 3st transaction
       long seed3 = 3L;
-      HashCode txMessageHash3 = HashCode.fromString("c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1");
+      HashCode txMessageHash3 =
+        HashCode.fromString("c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1");
       SignMultisignTransferTx tx3 = new SignMultisignTransferTx(seed3, txMessageHash1);
       TransactionContext context3 = newContextBuilder(view)
           .txMessageHash(txMessageHash3)
@@ -92,7 +95,8 @@ public class TransferMultisigHistoryTest {
 
       // Create and execute 2nd transaction
       long seed4 = 4L;
-      HashCode txMessageHash4 = HashCode.fromString("d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1");
+      HashCode txMessageHash4 =
+        HashCode.fromString("d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1");
       SignMultisignTransferTx tx4 = new SignMultisignTransferTx(seed4, txMessageHash2);
       TransactionContext context4 = newContextBuilder(view)
           .txMessageHash(txMessageHash4)

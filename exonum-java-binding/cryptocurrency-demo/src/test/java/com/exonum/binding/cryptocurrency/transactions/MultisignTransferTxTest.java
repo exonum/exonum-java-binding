@@ -28,9 +28,14 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
 import static com.exonum.binding.cryptocurrency.transactions.CreateMultisignTransferTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.CreateMultisignTransferTransactionUtils.createWallet;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.*;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SIGNER_AND_TX_SENDER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SIGNER_NOT_EQUALS_TO_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransferTxTest.hasErrorCode;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,7 +70,8 @@ public class MultisignTransferTxTest {
   })
   void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
     long seed = 1;
-    RawTransaction tx = CreateMultisignTransferTransactionUtils.createRawTransaction(seed, TO_KEY, transferAmount);
+    RawTransaction tx =
+      CreateMultisignTransferTransactionUtils.createRawTransaction(seed, TO_KEY, transferAmount);
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> MultisignTransferTx.fromRawTransaction(tx));
@@ -91,7 +97,8 @@ public class MultisignTransferTxTest {
 
       long seed = 1L;
       long transferSum = 40L;
-      HashCode hash = HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
+      HashCode hash = HashCode
+        .fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
       MultisignTransferTx tx = new MultisignTransferTx(seed, TO_KEY, transferSum);
       TransactionContext context = newContextBuilder(view)
           .txMessageHash(hash)
@@ -115,7 +122,8 @@ public class MultisignTransferTxTest {
       assertThat(schema.transactionsHistory(TO_KEY), hasItem(hash));
 
       long seed1 = 2L;
-      HashCode hash1 = HashCode.fromString("0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a");
+      HashCode hash1 = HashCode
+        .fromString("0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a");
       SignMultisignTransferTx tx1 = new SignMultisignTransferTx(seed1, hash);
       TransactionContext context1 = newContextBuilder(view)
           .txMessageHash(hash1)
@@ -156,7 +164,8 @@ public class MultisignTransferTxTest {
 
       long seed = 1L;
       long transferSum = 40L;
-      HashCode hash = HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
+      HashCode hash =
+        HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
       MultisignTransferTx tx = new MultisignTransferTx(seed, TO_KEY, transferSum);
       TransactionContext context = newContextBuilder(view)
           .txMessageHash(hash)
@@ -180,7 +189,8 @@ public class MultisignTransferTxTest {
       assertThat(schema.transactionsHistory(TO_KEY), hasItem(hash));
 
       long seed1 = 2L;
-      HashCode hash1 = HashCode.fromString("0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a");
+      HashCode hash1 =
+        HashCode.fromString("0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a");
       SignMultisignTransferTx tx1 = new SignMultisignTransferTx(seed1, hash);
       TransactionContext context1 = newContextBuilder(view)
           .txMessageHash(hash1)
@@ -209,7 +219,8 @@ public class MultisignTransferTxTest {
 
       long seed = 1L;
       long transferSum = 40L;
-      HashCode hash = HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
+      HashCode hash =
+        HashCode.fromString("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
       MultisignTransferTx tx = new MultisignTransferTx(seed, TO_KEY, transferSum);
       TransactionContext context = newContextBuilder(view)
           .txMessageHash(hash)
@@ -233,7 +244,8 @@ public class MultisignTransferTxTest {
       assertThat(schema.transactionsHistory(TO_KEY), hasItem(hash));
 
       long seed1 = 2L;
-      HashCode hash1 = HashCode.fromString("0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a");
+      HashCode hash1 =
+        HashCode.fromString("0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a");
       SignMultisignTransferTx tx1 = new SignMultisignTransferTx(seed1, hash);
       TransactionContext context1 = newContextBuilder(view)
           .txMessageHash(hash1)
@@ -258,8 +270,10 @@ public class MultisignTransferTxTest {
       long pendingInitialBalance = -150L;
       PublicKey signer = PublicKey.fromHexString("abcd");
 
-      CreateTransferTransactionUtils.createWallet(view, FROM_KEY, initialBalance, pendingInitialBalance, signer);
-      CreateTransferTransactionUtils.createWallet(view, TO_KEY, initialBalance, pendingInitialBalance, signer);
+      CreateTransferTransactionUtils
+        .createWallet(view, FROM_KEY, initialBalance, pendingInitialBalance, signer);
+      CreateTransferTransactionUtils
+        .createWallet(view, TO_KEY, initialBalance, pendingInitialBalance, signer);
 
       // Create and execute the transaction that attempts to transfer an amount
       // exceeding the balance

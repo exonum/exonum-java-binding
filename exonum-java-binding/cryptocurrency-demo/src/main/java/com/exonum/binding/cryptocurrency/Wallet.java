@@ -48,20 +48,24 @@ public final class Wallet {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("balance", balance)
-        .add("pendingBalance", pendingBalance)
-        .add("signer", signer)
-        .toString();
+      .add("balance", balance)
+      .add("pendingBalance", pendingBalance)
+      .add("signer", signer)
+      .toString();
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Wallet)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Wallet)) {
+      return false;
+    }
     Wallet wallet = (Wallet) o;
-    return getBalance() == wallet.getBalance() &&
-            getPendingBalance() == wallet.getPendingBalance() &&
-            Objects.equal(getSigner(), wallet.getSigner());
+    return getBalance() == wallet.getBalance()
+      && getPendingBalance() == wallet.getPendingBalance()
+      && Objects.equal(getSigner(), wallet.getSigner());
   }
 
   @Override

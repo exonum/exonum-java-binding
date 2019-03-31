@@ -26,7 +26,7 @@ public final class SignMultisignTransferTx implements Transaction {
 
   static final short ID = 4;
   private static final Serializer<TxMessageProtos.SignMultisignTransferTx> PROTO_SERIALIZER =
-      protobuf(TxMessageProtos.SignMultisignTransferTx.class);
+    protobuf(TxMessageProtos.SignMultisignTransferTx.class);
 
   private final long seed;
   private final HashCode txHash;
@@ -41,11 +41,15 @@ public final class SignMultisignTransferTx implements Transaction {
     checkTransaction(rawTransaction, ID);
 
     TxMessageProtos.SignMultisignTransferTx body =
-        PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+      PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
     long seed = body.getSeed();
     HashCode txHash = toHashCode(body.getTxHash());
     return new SignMultisignTransferTx(seed, txHash);
+  }
+
+  private static HashCode toHashCode(ByteString s) {
+    return HashCode.fromBytes(s.toByteArray());
   }
 
   @Override
@@ -65,12 +69,12 @@ public final class SignMultisignTransferTx implements Transaction {
     Wallet toWallet = wallets.get(toWalletKey);
     long sum = pendingTransaction.getAmount();
     wallets.put(fromWalletKey,
-        new Wallet(
-            fromWallet.getBalance() - sum,
-            fromWallet.getPendingBalance() + sum,
-            fromWallet.getSigner()));
+      new Wallet(
+        fromWallet.getBalance() - sum,
+        fromWallet.getPendingBalance() + sum,
+        fromWallet.getSigner()));
     wallets.put(toWalletKey,
-        new Wallet(
+      new Wallet(
         toWallet.getBalance() + sum,
         toWallet.getPendingBalance(),
         toWallet.getSigner()));
@@ -90,19 +94,19 @@ public final class SignMultisignTransferTx implements Transaction {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof SignMultisignTransferTx)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof SignMultisignTransferTx)) {
+      return false;
+    }
     SignMultisignTransferTx that = (SignMultisignTransferTx) o;
     return seed == that.seed &&
-        Objects.equal(txHash, that.txHash);
+      Objects.equal(txHash, that.txHash);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(seed, txHash);
-  }
-
-  private static HashCode toHashCode(ByteString s) {
-    return HashCode.fromBytes(s.toByteArray());
   }
 }

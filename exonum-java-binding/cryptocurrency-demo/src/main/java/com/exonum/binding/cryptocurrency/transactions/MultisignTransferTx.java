@@ -17,8 +17,10 @@ import java.util.Objects;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.*;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkExecution;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -27,7 +29,7 @@ public final class MultisignTransferTx implements Transaction {
 
     static final short ID = 3;
     private static final Serializer<TxMessageProtos.TransferTx> PROTO_SERIALIZER =
-            protobuf(TxMessageProtos.TransferTx.class);
+      protobuf(TxMessageProtos.TransferTx.class);
 
     private final long seed;
     private final PublicKey toWallet;
@@ -48,7 +50,7 @@ public final class MultisignTransferTx implements Transaction {
       checkTransaction(rawTransaction, ID);
 
       TxMessageProtos.TransferTx body =
-          PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+        PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
       long seed = body.getSeed();
       PublicKey toWallet = Wallet.toPublicKey(body.getToWallet());
@@ -76,32 +78,32 @@ public final class MultisignTransferTx implements Transaction {
       schema.transactionsHistory(fromWallet).add(messageHash);
       schema.transactionsHistory(toWallet).add(messageHash);
       HistoryEntity pendingTransaction = HistoryEntity.newBuilder()
-          .setSeed(seed)
-          .setWalletFrom(fromWallet)
-          .setWalletTo(toWallet)
-          .setAmount(sum)
-          .setTxMessageHash(messageHash)
-          .build();
+        .setSeed(seed)
+        .setWalletFrom(fromWallet)
+        .setWalletTo(toWallet)
+        .setAmount(sum)
+        .setTxMessageHash(messageHash)
+        .build();
       schema.pendingTxs().put(messageHash, pendingTransaction);
     }
 
     @Override
     public String info() {
-        return json().toJson(this);
+      return json().toJson(this);
     }
 
     @Override
     public boolean equals(Object o) {
       if (this == o) {
-          return true;
+        return true;
       }
       if (o == null || getClass() != o.getClass()) {
-          return false;
+        return false;
       }
       MultisignTransferTx that = (MultisignTransferTx) o;
       return seed == that.seed
-              && sum == that.sum
-              && Objects.equals(toWallet, that.toWallet);
+        && sum == that.sum
+        && Objects.equals(toWallet, that.toWallet);
     }
 
     @Override
