@@ -19,19 +19,15 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::{get_fakes_classpath, get_libpath};
-use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig, ServiceConfig};
+use integration_tests::vm::{get_fake_service_artifact_path, get_fakes_classpath, get_libpath};
+use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
-#[ignore]
-// TODO: Reenable after ECR-2999/ECR-3011
 fn bootstrap() {
-    let artifact_uri = "".to_owned();
+    let artifact_path = get_fake_service_artifact_path();
     let system_class_path = get_fakes_classpath();
     let system_lib_path = get_libpath();
     let log_config_path = "".to_owned();
-
-    let service_config = ServiceConfig { artifact_uri };
 
     let jvm_config = JvmConfig {
         args_prepend: Vec::new(),
@@ -47,16 +43,13 @@ fn bootstrap() {
     };
 
     let config = Config {
-        service_config,
         jvm_config,
         runtime_config,
     };
 
-    let service_runtime = JavaServiceRuntime::get_or_create(config.clone());
+    let service_runtime = JavaServiceRuntime::new(config);
 
-    let artifact_id = service_runtime
-        .load_artifact(&config.service_config.artifact_uri)
-        .expect("Unable to load artifact");
+    let artifact_id = service_runtime.load_artifact(&artifact_path);
     let service = service_runtime.create_service(&artifact_id);
 
     let mut testkit = TestKitBuilder::validator().with_service(service).create();

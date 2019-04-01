@@ -17,6 +17,8 @@
 mod cmd;
 mod config;
 mod java_service_runtime;
+mod service_factory_adapter;
 
 pub use self::config::*;
 pub use self::java_service_runtime::*;
+pub use self::service_factory_adapter::JavaServiceFactoryAdapter;

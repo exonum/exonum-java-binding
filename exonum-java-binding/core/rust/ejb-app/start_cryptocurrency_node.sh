@@ -35,15 +35,20 @@ echo "CURRENT_DIR=${EJB_APP_DIR}"
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
 
+# Find the artifact
+ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
+echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
+
+# Prepare the services configuration file
+SERVICES_CONFIG_FILE="ejb_app_services.toml"
+SERVICE_NAME="cryptocurrency-demo-service"
+echo "[user_services]" > ${SERVICES_CONFIG_FILE}
+echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
+
 header "PREPARE PATHS"
 
 CORE_TXT="core/target/ejb-core-classpath.txt"
-# FIXME: Remove the CRYPTOCURRENCY_TXT as it is no longer generated/needed, see PR for ECR-3005
-CRYPTOCURRENCY_TXT="cryptocurrency-demo/target/cryptocurrency-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/core/target/classes"
-#TODO: remove when service loader implemented (ECR-2953)
-EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/cryptocurrency-demo/target/classes"
+EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):${EJB_ROOT}/core/target/classes"
 echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
 
@@ -68,7 +73,6 @@ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.to
 
 header "FINALIZE"
 cargo run -- finalize testnet/sec.toml testnet/node.toml \
- --ejb-artifact-uri 'file:///artifacts/cryptocurrency_service.jar' \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"

@@ -42,14 +42,29 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}:${RUST_LIB_PATH}:${EJB_LIBPATH}"
 ```
 
 #### CLASSPATH
-Classpath is used to locate Java classes of your service and its dependencies, including 
-the Exonum Java Binding.
+Classpath is used to locate Java classes of the Exonum Java Binding and its dependencies.
+ Note, that classpath has nothing to do with classes of user services. 
 
-You may package your service in an Uber JAR using 
-the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
-and pass a path to the service artefact during application configuration as `--ejb-classpath`
-parameter. Alternatively, you may assemble a classpath that includes the service and all of 
-its dependencies and pass it instead.
+#### Services definition
+Services must be defined in the [ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
+file in order to be available in the network. The configuration file consists of two sections:
+- The optional `system_services` section is used to enable built-in Exonum services. If 
+not specified - only Configuration service is enabled. Possible variants for the moment are: 
+`configuration`, `btc-anchoring`, `time`.
+- The `user_services` section is used to enumerate user services that are loaded from artifacts 
+in the JAR format. It takes a line per service in form of `name = artifact`, where `name` 
+is one-word description of the service and `artifact` is a full path to the service's artifact. 
+At least one service must be defined.
+
+The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
+and two user services:
+```toml
+system_services = ["configuration", "btc-anchoring", "time"]
+
+[user_services]
+service_name1 = "/path/to/service1_artifact.jar"
+service_name2 = "/path/to/service2_artifact.jar"
+```
 
 ### Step 2. Generate Node Configuration
 
@@ -74,21 +89,18 @@ $ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.
 
 #### Finalize Configuration
 
-There is one specific parameter here:
-- `--ejb-artifact-uri` for the URI of Java service artifact.
-
 ```$sh
 $ cargo run -- finalize testnet/sec.toml testnet/node.toml \
-    --ejb-artifact-uri 'path_to_your_service_artifact.jar' \
     --public-configs testnet/pub.toml
 ```
 
 ### Step 3. Run Configured Node
 
-- `--ejb-classpath` for a classpath of Java service runtime.
+There are several required parameters here:
+- `--ejb-classpath` for a classpath of Java service runtime. Shall not include paths to service artifacts.
 - `--ejb-libpath` for a path to Java bindings native libraries.
 - `--ejb-port` for port that your service will use for communication.
-  Java Binding does not use Exonum Core ports directly.
+ Java Binding does not use Exonum Core ports directly.
 
 ```$sh
 $ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
@@ -97,11 +109,12 @@ $ cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 127.0
     --ejb-port 6000
 ```
 
-There are few specific optional parameters here:
+There are few optional parameters here:
 - `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
  append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
+- `--ejb-log-config-path`: Path to log4j configuration file.
 
 #### Debugging the JVM
 
