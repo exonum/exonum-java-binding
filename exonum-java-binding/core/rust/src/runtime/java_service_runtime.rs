@@ -208,6 +208,11 @@ impl JavaServiceRuntime {
         }
         args_builder
     }
+
+    /// Returns a reference to the runtime's executor.
+    pub fn get_executor(&self) -> &MainExecutor {
+        &self.executor
+    }
 }
 
 /// Panics if `_JAVA_OPTIONS` environmental variable is set.
