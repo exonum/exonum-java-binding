@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-use exonum::blockchain::Service;
-use exonum::helpers::fabric::{Command, CommandExtension, Context, ServiceFactory};
 use jni::{
     self,
     objects::{GlobalRef, JObject},
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use std::env;
-use std::sync::{Arc, Once, ONCE_INIT};
+use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
+use std::{env, sync::Arc};
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::cmd::{Finalize, Run};
-use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
+use std::path::Path;
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
-
-static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
-static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
@@ -49,27 +43,16 @@ pub struct JavaServiceRuntime {
 }
 
 impl JavaServiceRuntime {
-    /// Creates new runtime from provided config or returns the one created earlier.
+    /// Creates new runtime from provided config.
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
-    pub fn get_or_create(config: Config) -> Self {
-        unsafe {
-            // Initialize runtime if it wasn't created before.
-            JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
-                let executor = MainExecutor::new(Arc::new(java_vm));
-                let service_runtime =
-                    Self::create_service_runtime(config.runtime_config, executor.clone());
-                let runtime = JavaServiceRuntime {
-                    executor,
-                    service_runtime,
-                };
-                JAVA_SERVICE_RUNTIME = Some(runtime);
-            });
-            // Return global runtime.
-            JAVA_SERVICE_RUNTIME
-                .clone()
-                .expect("Trying to return runtime, but it's uninitialized")
+    pub fn new(config: Config) -> Self {
+        let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
+        let executor = MainExecutor::new(Arc::new(java_vm));
+        let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
+        JavaServiceRuntime {
+            executor,
+            service_runtime,
         }
     }
 
@@ -89,18 +72,28 @@ impl JavaServiceRuntime {
     }
 
     /// Creates a new service instance using the given artifact id.
+    ///
+    /// Panics if there are errors on Java side.
     pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
         unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_id: JObject = env.new_string(artifact_id)?.into();
-            let service = env
-                .call_method(
+            let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
+            let service = check_error_on_exception(
+                env,
+                env.call_method(
                     self.service_runtime.as_obj(),
                     "createService",
                     CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id.into()],
-                )?
-                .l()?;
-            let service = env.new_global_ref(service).unwrap();
+                    &[artifact_id_obj.into()],
+                ),
+            )
+            .unwrap_or_else(|err_msg| {
+                panic!(
+                    "Unable to create service for artifact_id [{}]: {}",
+                    artifact_id, err_msg
+                )
+            })
+            .l()?;
+            let service = env.new_global_ref(service)?;
             Ok(ServiceProxy::from_global_ref(
                 self.executor.clone(),
                 service,
@@ -111,21 +104,26 @@ impl JavaServiceRuntime {
     /// Loads an artifact from the specified location involving verification of the artifact.
     /// Returns an unique service artifact identifier that must be specified in subsequent
     /// operations with it.
-    pub fn load_artifact(&self, artifact_uri: &str) -> Result<String, String> {
+    ///
+    /// Panics if there are errors on Java side.
+    pub fn load_artifact<P: AsRef<Path>>(&self, artifact_path: P) -> String {
         unwrap_jni(self.executor.with_attached(|env| {
-            let res = {
-                let artifact_uri: JObject = env.new_string(artifact_uri)?.into();
-                let artifact_id = env
-                    .call_method(
-                        self.service_runtime.as_obj(),
-                        "loadArtifact",
-                        LOAD_ARTIFACT_SIGNATURE,
-                        &[artifact_uri.into()],
-                    )?
-                    .l()?;
-                convert_to_string(env, artifact_id)
-            };
-            Ok(check_error_on_exception(env, res))
+            let artifact_path = artifact_path.as_ref().to_str().unwrap();
+            let artifact_path_obj: JObject = env.new_string(artifact_path)?.into();
+            let artifact_id = check_error_on_exception(
+                env,
+                env.call_method(
+                    self.service_runtime.as_obj(),
+                    "loadArtifact",
+                    LOAD_ARTIFACT_SIGNATURE,
+                    &[artifact_path_obj.into()],
+                ),
+            )
+            .unwrap_or_else(|err_msg| {
+                panic!("Unable to load artifact {}: {}", artifact_path, err_msg)
+            })
+            .l()?;
+            convert_to_string(env, artifact_id)
         }))
     }
 
@@ -223,45 +221,5 @@ pub fn panic_if_java_options() {
              It is recommended to use `--ejb-jvm-args` command-line \
              parameter for setting custom JVM parameters."
         );
-    }
-}
-
-/// Factory for particular Java service.
-/// Initializes EJB runtime and creates `ServiceProxy`.
-pub struct JavaServiceFactory;
-
-impl ServiceFactory for JavaServiceFactory {
-    fn service_name(&self) -> &str {
-        "JAVA_SERVICE_FACTORY"
-    }
-
-    fn command(&mut self, command: &str) -> Option<Box<CommandExtension>> {
-        use exonum::helpers::fabric;
-        // Execute EJB configuration steps along with standard Exonum Core steps.
-        match command {
-            v if v == fabric::Finalize.name() => Some(Box::new(Finalize)),
-            v if v == fabric::Run.name() => Some(Box::new(Run)),
-            _ => None,
-        }
-    }
-
-    fn make_service(&mut self, context: &Context) -> Box<Service> {
-        use exonum::helpers::fabric::keys;
-        let config: Config = context
-            .get(keys::NODE_CONFIG)
-            .expect("Unable to read node configuration.")
-            .services_configs
-            .get(super::cmd::EJB_CONFIG_SECTION_NAME)
-            .expect("Unable to read EJB configuration.")
-            .clone()
-            .try_into()
-            .expect("Invalid EJB configuration format.");
-
-        let runtime = JavaServiceRuntime::get_or_create(config.clone());
-        let artifact_id = runtime
-            .load_artifact(&config.service_config.artifact_uri)
-            .expect("Unable to load artifact");
-        let service_proxy = runtime.create_service(&artifact_id);
-        Box::new(service_proxy)
     }
 }

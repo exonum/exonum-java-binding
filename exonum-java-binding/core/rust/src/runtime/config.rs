@@ -16,24 +16,13 @@
 
 use std::fmt;
 
-/// Full configuration of the EJB runtime, JVM and Java service.
+/// Full configuration of the EJB runtime and JVM.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// Service-specific configuration parameters.
-    pub service_config: ServiceConfig,
     /// JVM-specific configuration parameters.
     pub jvm_config: JvmConfig,
     /// EJB runtime-specific configuration parameters.
     pub runtime_config: RuntimeConfig,
-}
-
-/// Service-specific configuration parameters.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct ServiceConfig {
-    /// URI to the Java service artifact.
-    ///
-    /// Provided by the user on the `finalize` configuration step.
-    pub artifact_uri: String,
 }
 
 /// JVM-specific configuration parameters.
