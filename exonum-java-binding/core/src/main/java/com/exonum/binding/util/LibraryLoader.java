@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>To have library java_bindings available by its name,
  * add a path to the folder containing it to <code>java.library.path</code> property,
- * e.g.: <code>java -Djava.library.path=rust/target/release …</code>
+ * e.g.: <code>java -Djava.library.path=${EXONUM_HOME}/lib/native …</code>
  */
 public final class LibraryLoader {
 
@@ -46,26 +46,46 @@ public final class LibraryLoader {
     try {
       System.loadLibrary(BINDING_LIB_NAME);
     } catch (UnsatisfiedLinkError e) {
-      logger.error("Failed to load '{}' library: {}…\n{}",
-          BINDING_LIB_NAME, e, extraLibLoadErrorInfo());
-      throw e;
+      String message = String.format("Failed to load '%s' library: %s.\n%s", BINDING_LIB_NAME,
+          e.getMessage(), extraLibLoadErrorInfo());
+      logger.fatal(message, e);
+
+      // Throw a new exception with a _full_ error message so that it is always available,
+      // even if the logger is not configured.
+      throw new LinkageError(message, e);
     }
   }
 
   private static String extraLibLoadErrorInfo() {
     String javaLibPath = System.getProperty(JAVA_LIBRARY_PATH_PROPERTY);
-    String dynamicLibVar = dynamicLibrariesEnvVar();
-    String dynamicLibPath = System.getenv(dynamicLibVar);
-    // todo: clarify this message when LD_LIBRARY_PATH becomes required.
-    return "java.library.path=" + javaLibPath + ", \n"
-        + dynamicLibVar + "=" + dynamicLibPath
-        + "\nMake sure that:\n"
-        + "1. The path to a directory containing '" + BINDING_LIB_NAME
-        + "' dynamic library image is included in either java.library.path system property or "
-        + dynamicLibVar + " environment variable.\n"
-        + "2. The paths to directories containing dynamic libraries required by '"
-        + BINDING_LIB_NAME + "', if any, are included in " + dynamicLibVar
-        + " environment variable";
+    if (runningUnitTests()) {
+      // 1. These error messages are tailored for an installed application. If you *develop*
+      // Exonum, the instructions might not be applicable.
+      // 2. java.library.path has a default platform-specific value if not specified (on 11),
+      // hence it might never be empty.
+      return String.format(
+          "Check that %s system property includes a path to '${EXONUM_HOME}/lib/native' directory\n"
+              + "containing %s library, where 'EXONUM_HOME' denotes the Exonum installation "
+              + "directory.\n"
+              + "The code launching tests must usually set it explicitly, see "
+              + "https://exonum.com/doc/version/0.10/get-started/java-binding/#testing",
+          JAVA_LIBRARY_PATH_PROPERTY, BINDING_LIB_NAME);
+    } else {
+      String dynamicLibVar = dynamicLibrariesEnvVar();
+      String dynamicLibValue = System.getenv(dynamicLibVar);
+      return String.format("Unknown error: please submit an issue including this error message.\n"
+              + "%s=%s\n%s=%s", JAVA_LIBRARY_PATH_PROPERTY, javaLibPath,
+          dynamicLibVar, dynamicLibValue);
+    }
+  }
+
+  private static boolean runningUnitTests() {
+    try {
+      Class.forName("org.junit.jupiter.api.Test");
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   private static String dynamicLibrariesEnvVar() {
