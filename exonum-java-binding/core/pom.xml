@@ -34,6 +34,7 @@
     <skipITs>${project.skipJavaITs}</skipITs>
     <!-- Skip building Rust library for tests -->
     <doNotBuildRustLib>false</doNotBuildRustLib>
+    <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
   </properties>
 

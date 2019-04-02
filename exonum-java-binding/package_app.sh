@@ -6,12 +6,12 @@
 # This script runs all tests, builds and packages the EJB App into a single zip archive with all
 # necessary dependencies. The workflow is the following:
 # 1. Run all tests
-# 2. Prepare special directories inside `core/rust/target/debug` directory:
+# 2. Prepare special directories inside `core/rust/target/${BUILD_MODE}` directory:
 #    - etc/ - for licenses, TUTORIAL.md and fallback logger configuration
 #    - lib/native/ - for native dynamic libraries used by the App
 #    - lib/java/ - for Java classes used by the App
 # 3. Copy available files to corresponding directories performed at step 2
-# 4. Compile the App and package it using special Maven module `packaging` with `app-packaging` profile
+# 4. Compile the App and package it using special Maven module `packaging` with `package-app` profile
 #    At this step, we copy the files from prepared at step 2 directories.
 
 # Fail immediately in case of errors and/or unset variables
@@ -44,8 +44,12 @@ function build-ejb-app-linux() {
 
 EJB_RUST_DIR="${PWD}/core/rust"
 
+# Run tests by default. To skip, use `--skip-tests` flag
 SKIP_TESTS=false
+# Debug mode by default. To switch to release, use `--release` flag
 BUILD_MODE=debug
+# This var is used by maven to run `cargo` with no extra flags in case of debug builds and with `--release` flag for
+#   release builds
 BUILD_CARGO_FLAG=""
 
 while (( "$#" )); do
