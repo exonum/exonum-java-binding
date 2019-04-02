@@ -22,12 +22,14 @@
  * associated with an index.
  *
  * <h2><a name="families">Index families</a></h2>
+ *
  * <p>An index family is a named group of indexes of the same type. Each index in the group
  * is identified by an <em>identifier</em>, an arbitrary byte string. An index in the group works
  * the same as an individual index. Indexes in a family are isolated from each other.
  * It is not possible to iterate through all elements that are stored inside an index group.
  *
- * <h3><a name="families-use-cases">Uses cases</a></h3>
+ * <h3><a name="families-use-cases">Use cases</a></h3>
+ *
  * <p>Index families provide a way to separate elements by a certain criterion. Applications include
  * indexing, where you create a separate collection group to index another collection of elements
  * by a certain criterion; referencing another collection Bar from elements of collection Foo,
@@ -35,6 +37,7 @@
  * in collection Foo.
  *
  * <h3><a name="families-limitations">Limitations</a></h3>
+ *
  * <p>Currently Exonum prepends an index identifier within a group to internal,
  * implementation-specific, keys of that index to keep their elements separate from each other.
  * The resulting database key includes the index identifier followed by the internal index key.
