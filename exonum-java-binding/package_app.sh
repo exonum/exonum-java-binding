@@ -18,9 +18,10 @@
 set -eu -o pipefail
 
 function build-ejb-app() {
-    mvn package --activate-profiles ${BUILD_PROFILE} -pl :exonum-java-binding-packaging -am \
+    mvn package --activate-profiles package-app -pl :exonum-java-binding-packaging -am \
       -DskipTests \
       -Dbuild.mode=${BUILD_MODE} \
+      -Dbuild.cargoFlag=${BUILD_CARGO_FLAG} \
       -DskipJavaITs \
       -DdoNotBuildRustLib \
       -Drust.libraryPath="${RUST_LIBRARY_PATH}"
@@ -45,8 +46,7 @@ EJB_RUST_DIR="${PWD}/core/rust"
 
 SKIP_TESTS=false
 BUILD_MODE=debug
-# Can be either `package-app` or `package-app-release`
-BUILD_PROFILE=package-app
+BUILD_CARGO_FLAG=""
 
 while (( "$#" )); do
   case "$1" in
@@ -56,7 +56,7 @@ while (( "$#" )); do
       ;;
     --release)
       BUILD_MODE=release
-      BUILD_PROFILE=package-app-release
+      BUILD_CARGO_FLAG="--release"
       shift 1
       ;;
     *) # anything else

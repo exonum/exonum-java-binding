@@ -34,6 +34,7 @@
     <skipITs>${project.skipJavaITs}</skipITs>
     <!-- Skip building Rust library for tests -->
     <doNotBuildRustLib>false</doNotBuildRustLib>
+    <build.cargoFlag></build.cargoFlag>
   </properties>
 
   <dependencies>
@@ -438,6 +439,7 @@
                   <arguments>
                     <argument>+${rust.compiler.version}</argument>
                     <argument>build</argument>
+                    <argument>${build.cargoFlag}</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>
@@ -455,57 +457,7 @@
                     <argument>build</argument>
                     <argument>--package</argument>
                     <argument>ejb-app</argument>
-                    <argument>--color</argument>
-                    <argument>always</argument>
-                  </arguments>
-                </configuration>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>package-app-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <configuration>
-              <executable>cargo</executable>
-              <workingDirectory>${project.basedir}/rust</workingDirectory>
-            </configuration>
-            <executions>
-              <execution>
-                <id>build-rust-lib-release</id>
-                <phase>prepare-package</phase>
-                <configuration>
-                  <arguments>
-                    <argument>+${rust.compiler.version}</argument>
-                    <argument>build</argument>
-                    <argument>--release</argument>
-                    <argument>--color</argument>
-                    <argument>always</argument>
-                  </arguments>
-                </configuration>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>build-ejb-app-release</id>
-                <phase>prepare-package</phase>
-                <configuration>
-                  <arguments>
-                    <argument>+${rust.compiler.version}</argument>
-                    <argument>build</argument>
-                    <argument>--package</argument>
-                    <argument>ejb-app</argument>
-                    <argument>--release</argument>
+                    <argument>${build.cargoFlag}</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>
