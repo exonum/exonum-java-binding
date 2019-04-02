@@ -71,6 +71,10 @@ public class UserServiceAdapter {
     return service.getName();
   }
 
+  public Service getService() {
+    return service;
+  }
+
   /**
    * Converts a transaction messages into an executable transaction of this service.
    *
