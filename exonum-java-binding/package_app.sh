@@ -31,7 +31,6 @@ function build-ejb-app-macos() {
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
     export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/libjava_bindings.dylib"
-    echo "RUST_LIBRARY_PATH=${RUST_LIBRARY_PATH}"
     build-ejb-app
 }
 
