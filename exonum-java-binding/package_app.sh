@@ -17,41 +17,62 @@
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
 
+function build-ejb-app() {
+    mvn package --activate-profiles ${BUILD_PROFILE} -pl :exonum-java-binding-packaging -am \
+      -DskipTests \
+      -Dbuild.mode=${BUILD_MODE} \
+      -DskipJavaITs \
+      -DdoNotBuildRustLib \
+      -Drust.libraryPath="${RUST_LIBRARY_PATH}"
+}
+
 function build-ejb-app-macos() {
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles package-app -pl :exonum-java-binding-packaging -am \
-      -DskipTests \
-      -DskipJavaITs \
-      -DdoNotBuildRustLib \
-      -Drust.libraryPath="${PACKAGING_BASE_DIR}/libjava_bindings.dylib"
+    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/libjava_bindings.dylib"
+    echo "RUST_LIBRARY_PATH=${RUST_LIBRARY_PATH}"
+    build-ejb-app
 }
 
 function build-ejb-app-linux() {
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    mvn package --activate-profiles package-app -pl :exonum-java-binding-packaging -am \
-      -DskipTests \
-      -DskipJavaITs \
-      -DdoNotBuildRustLib \
-      -Drust.libraryPath="${PACKAGING_BASE_DIR}/libjava_bindings.so"
+    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/libjava_bindings.so"
+    build-ejb-app
 }
 
 EJB_RUST_DIR="${PWD}/core/rust"
 
-# Run all tests before packaging the App. This is safer, but takes a long time.
-if [ "$#" -eq 0 ]; then
+SKIP_TESTS=false
+BUILD_MODE=debug
+# Can be either `package-app` or `package-app-release`
+BUILD_PROFILE=package-app
+
+while (( "$#" )); do
+  case "$1" in
+    --skip-tests)
+      SKIP_TESTS=true
+      shift 1
+      ;;
+    --release)
+      BUILD_MODE=release
+      BUILD_PROFILE=package-app-release
+      shift 1
+      ;;
+    *) # anything else
+      echo "Usage: package_app.sh [--skip-tests] [--release]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ $SKIP_TESTS != true ]; then
   ./run_all_tests.sh
-else
-  if [ "$1" != "--skip-tests" ]; then
-    echo "Unknown option: $1"
-    exit 1
-  fi
 fi
 source ./tests_profile
 
 # Prepare directories
-PACKAGING_BASE_DIR="${EJB_RUST_DIR}/target/debug"
+PACKAGING_BASE_DIR="${EJB_RUST_DIR}/target/${BUILD_MODE}"
 PACKAGING_NATIVE_LIB_DIR="${PACKAGING_BASE_DIR}/lib/native"
 PACKAGING_ETC_DIR="${PACKAGING_BASE_DIR}/etc"
 mkdir -p "${PACKAGING_BASE_DIR}"

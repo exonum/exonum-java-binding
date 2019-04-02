@@ -26,9 +26,9 @@
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <!--A directory containing libjava_bindings native library-->
-    <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <build.nativeLibPath>${project.basedir}/rust/target/${build.mode}</build.nativeLibPath>
     <!--A directory containing native dynamic libraries used by the App-->
-    <packaging.native>${project.basedir}/rust/target/debug/lib/native</packaging.native>
+    <packaging.native>${project.basedir}/rust/target/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
@@ -455,6 +455,57 @@
                     <argument>build</argument>
                     <argument>--package</argument>
                     <argument>ejb-app</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>package-app-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>cargo</executable>
+              <workingDirectory>${project.basedir}/rust</workingDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>build-rust-lib-release</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>--release</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>build-ejb-app-release</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>--package</argument>
+                    <argument>ejb-app</argument>
+                    <argument>--release</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>
