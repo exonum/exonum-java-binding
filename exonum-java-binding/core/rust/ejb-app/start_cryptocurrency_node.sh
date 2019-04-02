@@ -47,18 +47,10 @@ echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 
 header "PREPARE PATHS"
 
-CORE_TXT="core/target/ejb-core-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):${EJB_ROOT}/core/target/classes"
-echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
-EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j2.xml"
+EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
 
-EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
-echo "EJB_LIBPATH=${EJB_LIBPATH}"
-RUST_LIB_DIR="$(rustup run 1.32.0 rustc --print sysroot)/lib"
-echo "RUST_LIB_DIR=${RUST_LIB_DIR}"
-
-export LD_LIBRARY_PATH="$EJB_LIBPATH:$RUST_LIB_DIR:$JVM_LIB_PATH"
-echo "Final LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$JVM_LIB_PATH"
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
 rm -rf testnet
@@ -69,6 +61,9 @@ cargo run -- generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
 cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+ --no-password \
+ --consensus-path testnet/consensus.toml \
+ --service-path testnet/service.toml \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
@@ -76,8 +71,9 @@ cargo run -- finalize testnet/sec.toml testnet/node.toml \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"
-cargo run -- run -d testnet/db -c testnet/node.toml --public-api-address 0.0.0.0:3000 \
- --ejb-classpath $EJB_CLASSPATH \
- --ejb-libpath $EJB_LIBPATH \
+cargo run -- run -d testnet/db -c testnet/node.toml \
+ --consensus-key-pass pass \
+ --service-key-pass pass \
+ --public-api-address 127.0.0.1:3000 \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
  --ejb-port 6000

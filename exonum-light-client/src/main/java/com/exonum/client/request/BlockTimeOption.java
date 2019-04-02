@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-extern crate env_logger;
-extern crate exonum_btc_anchoring;
-extern crate exonum_configuration;
-extern crate exonum_time;
-extern crate java_bindings;
+package com.exonum.client.request;
 
-#[cfg(test)]
-extern crate tempfile;
+import com.exonum.client.response.Block;
 
-mod node_builder;
-
-fn main() {
-    env_logger::init();
-    // Panic if `_JAVA_OPTIONS` environmental variable is set.
-    java_bindings::panic_if_java_options();
-
-    let builder = node_builder::create();
-    builder.run()
+/**
+ * Request option for block commit time.
+ * See {@link Block#getCommitTime()}.
+ */
+public enum BlockTimeOption {
+  /**
+   * Do not include block commit times in a response.
+   */
+  NO_COMMIT_TIME,
+  /**
+   * Include block commit times in a response.
+   */
+  INCLUDE_COMMIT_TIME
 }
