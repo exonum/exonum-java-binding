@@ -16,8 +16,7 @@
   <url>https://exonum.com/doc/version/latest/advanced/time/</url>
 
   <properties>
-    <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/${build.mode}
-    </ejb-core.nativeLibPath>
+    <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
   </properties>
 
   <dependencies>
