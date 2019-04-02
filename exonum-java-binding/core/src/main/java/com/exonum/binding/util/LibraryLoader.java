@@ -46,7 +46,7 @@ public final class LibraryLoader {
     try {
       System.loadLibrary(BINDING_LIB_NAME);
     } catch (UnsatisfiedLinkError e) {
-      String message = String.format("Failed to load '%s' library: %s.\n%s", BINDING_LIB_NAME,
+      String message = String.format("Failed to load '%s' library: %s.%n%s", BINDING_LIB_NAME,
           e.getMessage(), extraLibLoadErrorInfo());
       logger.fatal(message, e);
 
@@ -64,17 +64,17 @@ public final class LibraryLoader {
       // 2. java.library.path has a default platform-specific value if not specified (on 11),
       // hence it might never be empty.
       return String.format(
-          "Check that %s system property includes a path to '${EXONUM_HOME}/lib/native' directory\n"
-              + "containing %s library, where 'EXONUM_HOME' denotes the Exonum installation "
-              + "directory.\n"
+          "Check that %s system property includes a path to '${EXONUM_HOME}/lib/native' directory%n"
+              + "containing %s library, where 'EXONUM_HOME' denotes the Exonum Java installation "
+              + "directory.%n"
               + "The code launching tests must usually set it explicitly, see "
               + "https://exonum.com/doc/version/0.10/get-started/java-binding/#testing",
           JAVA_LIBRARY_PATH_PROPERTY, BINDING_LIB_NAME);
     } else {
       String dynamicLibVar = dynamicLibrariesEnvVar();
       String dynamicLibValue = System.getenv(dynamicLibVar);
-      return String.format("Unknown error: please submit an issue including this error message.\n"
-              + "%s=%s\n%s=%s", JAVA_LIBRARY_PATH_PROPERTY, javaLibPath,
+      return String.format("Unknown error: please submit an issue including this error message.%n"
+              + "%s=%s%n" + "%s=%s", JAVA_LIBRARY_PATH_PROPERTY, javaLibPath,
           dynamicLibVar, dynamicLibValue);
     }
   }
