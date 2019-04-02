@@ -19,8 +19,10 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::{get_fakes_classpath, get_libpath};
-use java_bindings::{Config, EjbConfig, JavaServiceRuntime, JvmConfig, ServiceConfig};
+use integration_tests::vm::get_fakes_classpath;
+use java_bindings::{
+    Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig, ServiceConfig,
+};
 
 const TEST_SERVICE_MODULE_NAME: &str =
     "com.exonum.binding.fakes.services.service.TestServiceModule";
@@ -29,26 +31,31 @@ const TEST_SERVICE_MODULE_NAME: &str =
 fn bootstrap() {
     let service_config = ServiceConfig {
         module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
-        port: 6300,
+        service_class_path: "".to_string(),
+    };
+
+    let runtime_config = RuntimeConfig {
+        log_config_path: "".to_string(),
+        port: 6000,
     };
 
     let jvm_config = JvmConfig {
-        args_prepend: Vec::new(),
-        args_append: Vec::new(),
+        args_prepend: vec![],
+        args_append: vec![],
         jvm_debug_socket: None,
     };
 
-    let ejb_config = EjbConfig {
-        class_path: get_fakes_classpath(),
-        lib_path: get_libpath(),
-        log_config_path: "".to_owned(),
-    };
-
-    let service_runtime = JavaServiceRuntime::get_or_create(Config {
-        jvm_config,
-        ejb_config,
-        service_config,
-    });
+    let service_runtime = JavaServiceRuntime::get_or_create(
+        Config {
+            runtime_config,
+            jvm_config,
+            service_config,
+        },
+        InternalConfig {
+            system_class_path: get_fakes_classpath(),
+            system_lib_path: None,
+        },
+    );
 
     let service = service_runtime.create_service("", TEST_SERVICE_MODULE_NAME);
 

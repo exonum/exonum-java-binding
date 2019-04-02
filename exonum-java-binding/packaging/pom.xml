@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.exonum.binding</groupId>
+    <artifactId>exonum-java-binding-parent</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>exonum-java-binding-packaging</artifactId>
+  <version>0.6.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Exonum Java Binding: Packaging</name>
+  <description>A fake module used for packaging EJB App</description>
+
+  <properties>
+    <!--A directory used for storing temporary files while packaging the App-->
+    <packaging.basedir>${project.parent.basedir}/core/rust/target/debug</packaging.basedir>
+    <!--A directory containing licenses, TUTORIAL.md and fallback logger configuration-->
+    <!--This property is used by app_assembly.xml configuration-->
+    <packaging.etc>${packaging.basedir}/etc</packaging.etc>
+    <!--A directory containing native dynamic libraries used by the App when running from target directory-->
+    <!--This property is used by app_assembly.xml configuration-->
+    <packaging.native>${packaging.basedir}/lib/native</packaging.native>
+    <!--A directory containing Java dependencies of the App used when running from target directory-->
+    <packaging.java>${packaging.basedir}/lib/java</packaging.java>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-core</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-time-oracle</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin><!--Do not create Jar-->
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase/>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin><!--Do not install Jar-->
+        <artifactId>maven-install-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-install</id>
+            <phase/>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <!--We need to explicitly copy EJB Core and Time Oracle JARs because we use `type=pom` dependencies-->
+        <!--TODO: remove after ECR-3039-->
+        <executions>
+          <execution>
+            <id>copy-core-and-time-oracle-jars</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${packaging.java}</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>exonum-java-binding-core</artifactId>
+                  <version>${project.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>exonum-time-oracle</artifactId>
+                  <version>${project.version}</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <!--We copy all Java dependencies needed by the App to the <ejb-app-location>/lib/java directory-->
+          <execution>
+            <id>copy-java-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${packaging.java}</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>package-app</id>
+      <build>
+        <plugins>
+          <!--Package EJB App with necessary libraries and documentation-->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptors>
+                <descriptor>app_assembly.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <executions>
+              <execution>
+                <id>package-ejb-app</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
