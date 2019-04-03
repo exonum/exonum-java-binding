@@ -4,7 +4,7 @@ This document describes how to configure and run an Exonum node with a Java serv
 ## Prerequisites
 
 Build an application following the instructions in [“How to Build”][how-to-build] section
-of the Contribution Guide. Unpack the zip archive from `exonum-java-bingind/packaging/target` directory to some known 
+of the Contribution Guide. Unpack the zip archive from `exonum-java-binding/packaging/target` directory to some known 
 location.
 
 You also need a ready-to-use Exonum Java service. You can use 
