@@ -21,11 +21,9 @@ use jni::{
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
-use std::{env, sync::Arc};
-
 use proxy::{JniExecutor, ServiceProxy};
-use std::path::Path;
+use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
+use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 

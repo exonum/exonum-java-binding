@@ -20,9 +20,7 @@ extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
 use integration_tests::vm::{get_fake_service_artifact_path, get_fakes_classpath};
-use java_bindings::{
-    Config, InternalConfig, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig,
-};
+use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
 fn bootstrap() {

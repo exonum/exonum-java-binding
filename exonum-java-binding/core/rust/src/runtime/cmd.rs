@@ -90,22 +90,6 @@ impl CommandExtension for Run {
                 "jvm-args-append",
                 true,
             ),
-            Argument::new_named(
-                EJB_CLASSPATH_SYSTEM,
-                true,
-                "Java runtime classpath. Must include all its dependencies.",
-                None,
-                "ejb-classpath",
-                false,
-            ),
-            Argument::new_named(
-                EJB_LIBPATH,
-                true,
-                "Path to java-bindings shared library.",
-                None,
-                "ejb-libpath",
-                false,
-            ),
         ]
     }
 
