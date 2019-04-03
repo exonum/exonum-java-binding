@@ -48,7 +48,8 @@ impl JavaServiceRuntime {
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
     pub fn new(config: Config, internal_config: InternalConfig) -> Self {
-        let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
+        let java_vm =
+            Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
         let executor = MainExecutor::new(Arc::new(java_vm));
         let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
         JavaServiceRuntime {
@@ -138,9 +139,8 @@ impl JavaServiceRuntime {
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
     ) -> JavaVM {
-        let args =
-            Self::build_jvm_arguments(jvm_config, runtime_config, internal_config)
-                .expect("Unable to build arguments for JVM");
+        let args = Self::build_jvm_arguments(jvm_config, runtime_config, internal_config)
+            .expect("Unable to build arguments for JVM");
 
         jni::JavaVM::new(args)
             .map_err(Self::transform_jni_error)
@@ -178,11 +178,7 @@ impl JavaServiceRuntime {
         args_builder = Self::add_user_arguments(args_builder, args_prepend);
 
         // Add required arguments
-        args_builder = Self::add_required_arguments(
-            args_builder,
-            runtime_config,
-            internal_config,
-        );
+        args_builder = Self::add_required_arguments(args_builder, runtime_config, internal_config);
 
         // Add optional arguments
         args_builder = Self::add_optional_arguments(args_builder, jvm_config);
@@ -221,7 +217,10 @@ impl JavaServiceRuntime {
         }
 
         args_builder
-            .option(&format!("-Djava.class.path={}", internal_config.system_class_path))
+            .option(&format!(
+                "-Djava.class.path={}",
+                internal_config.system_class_path
+            ))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
                 runtime_config.log_config_path
