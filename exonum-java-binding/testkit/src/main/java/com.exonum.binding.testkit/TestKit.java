@@ -18,9 +18,12 @@ package com.exonum.binding.testkit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
+import static java.util.Collections.singletonList;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.proxy.NativeHandle;
+import com.exonum.binding.runtime.ReflectiveModuleSupplier;
 import com.exonum.binding.service.BlockCommittedEvent;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
@@ -28,43 +31,40 @@ import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
  * TestKit for testing blockchain services. It offers simple network configuration emulation
  * (with no real network setup). Although it is possible to add several validator nodes to this
- * network, only one node (either validator or auditor) would be truly emulated and execute its
- * {@link Service#afterCommit(BlockCommittedEvent)} method logic.
+ * network, only one node will create the service instances and will execute their operations
+ * (e.g., {@link Service#afterCommit(BlockCommittedEvent)} method logic).
  *
  * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
  */
 public final class TestKit {
 
   @VisibleForTesting
-  final static short MAX_SERVICE_NUMBER = 256;
-  private final static Injector frameworkInjector = Guice.createInjector(new TestKitFrameworkModule());
+  static final short MAX_SERVICE_NUMBER = 256;
+  private final Injector frameworkInjector = Guice.createInjector(new TestKitFrameworkModule());
 
   private final NativeHandle nativeHandle;
   private final Map<Short, Service> services = new HashMap<>();
 
   private TestKit(List<Class<? extends ServiceModule>> serviceModules, EmulatedNodeType nodeType,
                   short validatorCount, @Nullable TimeProvider timeProvider) {
-    List<UserServiceAdapter> serviceAdapters = new ArrayList<>();
+    List<UserServiceAdapter> serviceAdapters = new ArrayList<>(serviceModules.size());
     for (Class<? extends ServiceModule> moduleClass : serviceModules) {
-      UserServiceAdapter serviceAdapter = createUserModule(moduleClass);
+      UserServiceAdapter serviceAdapter = createUserServiceAdapter(moduleClass);
       serviceAdapters.add(serviceAdapter);
       services.put(serviceAdapter.getId(), serviceAdapter.getService());
     }
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
-    UserServiceAdapter[] userServiceAdapters = serviceAdapters.stream().toArray(UserServiceAdapter[]::new);
+    UserServiceAdapter[] userServiceAdapters = serviceAdapters.toArray(new UserServiceAdapter[0]);
     // TODO: fix after native implementation
     nativeHandle = null;
 //    nativeHandle = new NativeHandle(
@@ -76,37 +76,40 @@ public final class TestKit {
    * Creates a TestKit network with a single validator node for a single service.
    */
   public static TestKit forService(Class<? extends ServiceModule> serviceModule) {
-    return new TestKit(Collections.singletonList(serviceModule), EmulatedNodeType.VALIDATOR,
-        (short) 0, null);
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T extends Service> T getService(short serviceId, Class<T> serviceClass) {
-    Service service = services.get(serviceId);
-    checkArgument(service.getClass().equals(serviceClass), "Service with id %s is not of expected class %s",
-        serviceId, serviceClass.getCanonicalName());
-    return (T) services.get(serviceId);
+    return new TestKit(singletonList(serviceModule), EmulatedNodeType.VALIDATOR, (short) 0, null);
   }
 
   /**
-   * Creates a service from the service module.
+   * Returns an instance of a service with the given service id and service class.
+   *
+   * @return the service instance or null if there is no service with such id
+   * @throws NullPointerException if the service with given id was not found
+   * @throws IllegalArgumentException if the service could not be cast to given class
+   */
+  public <T extends Service> T getService(short serviceId, Class<T> serviceClass) {
+    Service service = services.get(serviceId);
+    checkNotNull(service, "Service with given id=%s was not found", serviceId);
+    checkArgument(service.getClass().equals(serviceClass),
+        "Service (id=%s, class=%s) cannot be cast to %s",
+        serviceId, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
+    return serviceClass.cast(service);
+  }
+
+  /**
+   * Creates a user service adapter from the service module.
    *
    * @param moduleClass a class of the user service module
    */
-  private static UserServiceAdapter createUserModule(Class<? extends ServiceModule> moduleClass) {
+  private UserServiceAdapter createUserServiceAdapter(Class<? extends ServiceModule> moduleClass) {
     try {
-      Constructor constructor = moduleClass.getDeclaredConstructor();
-      Object moduleObject = constructor.newInstance();
-      checkArgument(moduleObject instanceof Module, "%s is not a sub-class of %s",
-          moduleClass, Module.class.getCanonicalName());
-      Injector serviceInjector = frameworkInjector.createChildInjector((Module) moduleObject);
+      Supplier<ServiceModule> moduleSupplier = new ReflectiveModuleSupplier(moduleClass);
+      ServiceModule serviceModule = moduleSupplier.get();
+      Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
       return serviceInjector.getInstance(UserServiceAdapter.class);
     } catch (IllegalAccessException e) {
       throw new IllegalArgumentException("Cannot access the no-arg module constructor", e);
     } catch (NoSuchMethodException e) {
       throw new IllegalArgumentException("No no-arg constructor", e);
-    } catch (InstantiationException | InvocationTargetException e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -144,12 +147,17 @@ public final class TestKit {
     private TimeProvider timeProvider;
 
     private Builder(EmulatedNodeType nodeType) {
+      // TestKit network should have at least one validator node
+      if (nodeType == EmulatedNodeType.AUDITOR) {
+        validatorCount = 1;
+      }
       this.nodeType = nodeType;
     }
 
     /**
      * Sets number of additional validator nodes in the TestKit network. Note that
-     * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main TestKit node.
+     * regardless of the configured number of validators, only a single service will be
+     * instantiated.
      */
     public Builder withValidators(short validatorCount) {
       this.validatorCount = validatorCount;
@@ -165,16 +173,26 @@ public final class TestKit {
     }
 
     /**
-     * Adds a list of services with which the TestKit would be instantiated. Several services can
-     * be added.
+     * Adds a variable number of services with which the TestKit would be instantiated.
      */
-    public Builder withServices(List<Class<? extends ServiceModule>> serviceModules) {
-      services.addAll(serviceModules);
+    public Builder withServices(Class<? extends ServiceModule> serviceModule,
+                                Class<? extends ServiceModule>... serviceModules) {
+      List<Class<? extends ServiceModule>> services = asList(serviceModule, serviceModules);
+      this.services.addAll(services);
       return this;
     }
 
     /**
-     * If called, will create a TestKit with time service with given TimeProvider.
+     * Adds a list of services with which the TestKit would be instantiated.
+     */
+    public Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
+      serviceModules.forEach(services::add);
+      return this;
+    }
+
+    /**
+     * If called, will create a TestKit with time service enabled. The time service will use the
+     * given {@linkplain TimeProvider} as a time source.
      */
     public Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;
@@ -185,13 +203,14 @@ public final class TestKit {
      * Creates the TestKit instance.
      */
     public TestKit build() {
-      checkMaxServiceNumber(services);
+      checkCorrectServiceNumber(services.size());
       return new TestKit(services, nodeType, validatorCount, timeProvider);
     }
 
-    private void checkMaxServiceNumber(List<Class<? extends ServiceModule>> serviceModules) {
-      checkArgument(serviceModules.size() < MAX_SERVICE_NUMBER,
-          "There shouldn't be more than %s services in the TestKit", MAX_SERVICE_NUMBER);
+    private void checkCorrectServiceNumber(int serviceCount) {
+      checkArgument(0 < serviceCount && serviceCount <= MAX_SERVICE_NUMBER,
+          "Number of services must be in range [1; %s], but was %s",
+          MAX_SERVICE_NUMBER, serviceCount);
     }
   }
 }

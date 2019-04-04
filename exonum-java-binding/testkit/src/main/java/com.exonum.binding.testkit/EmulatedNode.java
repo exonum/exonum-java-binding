@@ -17,6 +17,8 @@
 package com.exonum.binding.testkit;
 
 import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.service.Node;
+import com.exonum.binding.transaction.RawTransaction;
 import java.util.OptionalInt;
 
 /**
@@ -37,28 +39,32 @@ public class EmulatedNode {
   }
 
   /**
-   * Returns a node type - either {@link EmulatedNodeType.VALIDATOR} or {@link EmulatedNodeType.AUDITOR}.
+   * Returns a node type - either {@link EmulatedNodeType.VALIDATOR} or
+   * {@link EmulatedNodeType.AUDITOR}.
    */
   public EmulatedNodeType getNodeType() {
     return validatorId.isPresent() ? EmulatedNodeType.VALIDATOR : EmulatedNodeType.AUDITOR;
   }
 
   /**
-   * Returns a validator id if this node is a validator or {@link OptionalInt.EMPTY} is this is a validator node.
+   * Returns a validator id if this node is a validator or {@link OptionalInt.EMPTY} is this is an
+   * auditor node.
    */
   public OptionalInt getValidatorId() {
     return validatorId;
   }
 
   /**
-   * Returns a service key pair of this node.
+   * Returns a service key pair of this node. This key pair is used to sign transactions
+   * {@linkplain Node#submitTransaction(RawTransaction)} produced} by the service itself.
    */
   public KeyPair getServiceKeyPair() {
     return serviceKeyPair;
   }
 
   /**
-   * Returns a consensus key pair of this node.
+   * Returns a consensus key pair of this node. This key pair is used to sign consensus message of
+   * this node.
    */
   public KeyPair getConsensusKeyPair() {
     return consensusKeyPair;

@@ -26,6 +26,7 @@ import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import io.vertx.ext.web.Router;
 import org.junit.jupiter.api.Test;
@@ -54,9 +55,8 @@ class TestKitTest {
 
   @Test
   void createTestKitWithBuilderForMultipleSameServices() {
-    List<Class<? extends ServiceModule>> serviceModules = new ArrayList<>();
-    serviceModules.add(TestServiceModule.class);
-    serviceModules.add(TestServiceModule.class);
+    List<Class<? extends ServiceModule>> serviceModules = ImmutableList.of(TestServiceModule.class,
+        TestServiceModule.class);
     TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withServices(serviceModules)
         .build();
@@ -89,6 +89,15 @@ class TestKitTest {
   }
 
   @Test
+  void requestWrongServiceId() {
+    Class<NullPointerException> exceptionType = NullPointerException.class;
+    TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(TestServiceModule.class)
+        .build();
+    assertThrows(exceptionType, () -> testKit.getService((short) -1, TestService2.class));
+  }
+
+  @Test
   void createTestKitMoreThanMaxServiceNumber() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     List<Class<? extends ServiceModule>> serviceModules = new ArrayList<>();
@@ -100,7 +109,15 @@ class TestKitTest {
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
-  static final class TestServiceModule extends AbstractServiceModule {
+  @Test
+  void createTestKitWithoutServices() {
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR);
+    assertThrows(exceptionType, testKitBuilder::build);
+  }
+
+  public static final class TestServiceModule extends AbstractServiceModule {
+
     private static final TransactionConverter THROWING_TX_CONVERTER = (tx) -> {
       throw new IllegalStateException("No transactions in this service: " + tx);
     };
@@ -112,7 +129,8 @@ class TestKitTest {
     }
   }
 
-  static final class TestServiceModule2 extends AbstractServiceModule {
+  public static final class TestServiceModule2 extends AbstractServiceModule {
+
     private static final TransactionConverter THROWING_TX_CONVERTER = (tx) -> {
       throw new IllegalStateException("No transactions in this service: " + tx);
     };

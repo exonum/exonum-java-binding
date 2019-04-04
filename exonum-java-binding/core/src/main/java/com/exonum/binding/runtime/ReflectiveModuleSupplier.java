@@ -30,12 +30,12 @@ import java.util.function.Supplier;
 /**
  * A reflective supplier of service modules that instantiates them with a no-arg constructor.
  */
-final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
+public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
 
   private final Class<? extends ServiceModule> moduleClass;
   private final MethodHandle moduleConstructor;
 
-  ReflectiveModuleSupplier(Class<? extends ServiceModule> moduleClass)
+  public ReflectiveModuleSupplier(Class<? extends ServiceModule> moduleClass)
       throws NoSuchMethodException, IllegalAccessException {
     this.moduleClass = moduleClass;
     MethodHandles.Lookup lookup = MethodHandles.lookup();
