@@ -32,7 +32,7 @@
     </fileSet>
   </fileSets>
   <files>
-    <!--Main EJB App executable-->
+    <!--Main Exonum Java app executable-->
     <file>
       <source>${packaging.basedir}/exonum-java</source>
     </file>

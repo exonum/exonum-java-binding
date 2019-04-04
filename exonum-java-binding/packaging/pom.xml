@@ -13,7 +13,7 @@
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Packaging</name>
-  <description>A fake module used for packaging EJB App</description>
+  <description>A fake module used for packaging Exonum Java app</description>
 
   <properties>
     <!--A directory used for storing temporary files while packaging the App-->
@@ -119,7 +119,7 @@
       <id>package-app</id>
       <build>
         <plugins>
-          <!--Package EJB App with necessary libraries and documentation-->
+          <!--Package Exonum Java app with necessary libraries and documentation-->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>

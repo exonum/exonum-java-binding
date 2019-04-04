@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Package EJB App after preparing necessary environment variables and file structure.
+# Package Exonum Java app after preparing necessary environment variables and file structure.
 #
 # ¡Keep it MacOS/Ubuntu compatible!
 
-# This script runs all tests, builds and packages the EJB App into a single zip archive with all
+# This script runs all tests, builds and packages the Exonum Java app into a single zip archive with all
 # necessary dependencies. The workflow is the following:
 # 1. Run all tests
 # 2. Prepare special directories inside `core/rust/target/${BUILD_MODE}` directory:

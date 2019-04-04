@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs EJB App tests (ejb-core/rust/exonum-java).
+# Runs Exonum Java app tests (ejb-core/rust/exonum-java).
 #
 # ¡Keep it MacOS/Ubuntu compatible!
 

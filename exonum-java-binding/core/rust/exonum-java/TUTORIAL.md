@@ -56,7 +56,7 @@ service_name2 = "/path/to/service2_artifact.jar"
 
 ### Step 2. Generate Node Configuration
 
-EJB App configuration is pretty similar to configuration of any other Exonum service,
+Exonum Java app configuration is pretty similar to configuration of any other Exonum service,
 with a few additional parameters.
 
 #### Generate Template Config
@@ -83,7 +83,7 @@ $ exonum-java finalize testnet/sec.toml testnet/node.toml \
 ### Step 3. Run Configured Node
 There are two required parameters here:
 - `--ejb-log-config-path` for path to `log4j` configuration file.
-  Default config `log4j-fallback.xml` provided with EJB App prints to STDOUT.
+  Default config `log4j-fallback.xml` provided with Exonum Java app prints to STDOUT.
 - `--ejb-port` for port that your service will use for communication.
   Java Binding does not use Exonum Core API port directly.
 

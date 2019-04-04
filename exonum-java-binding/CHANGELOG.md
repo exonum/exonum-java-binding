@@ -152,7 +152,7 @@ The release is based on Exonum 0.8.
 - Standard services may be enabled using specific `ejb_app_services.toml` file.
   It supports only `configuration` and `btc-anchoring` services at the moment.
 
-  To enable services put `ejb_app_services.toml` file into EJB App's directory
+  To enable services put `ejb_app_services.toml` file into Exonum Java app's directory
   with the following content:
   ```toml
   services = ["configuration", "btc-anchoring"]
