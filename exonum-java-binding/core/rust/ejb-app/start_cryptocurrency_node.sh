@@ -35,12 +35,18 @@ echo "CURRENT_DIR=${EJB_APP_DIR}"
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
 
+# Find the artifact
+ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
+echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
+
+# Prepare the services configuration file
+SERVICES_CONFIG_FILE="ejb_app_services.toml"
+SERVICE_NAME="cryptocurrency-demo-service"
+echo "[user_services]" > ${SERVICES_CONFIG_FILE}
+echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
+
 header "PREPARE PATHS"
 
-CRYPTOCURRENCY_TXT="cryptocurrency-demo/target/cryptocurrency-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CRYPTOCURRENCY_TXT})"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/cryptocurrency-demo/target/classes"
-echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
 
 export LD_LIBRARY_PATH="$JVM_LIB_PATH"
@@ -51,8 +57,7 @@ rm -rf testnet
 mkdir testnet
 
 header "GENERATE COMMON CONFIG"
-cargo run -- generate-template --validators-count=1 testnet/common.toml \
- --ejb-module-name 'com.exonum.binding.cryptocurrency.ServiceModule'
+cargo run -- generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
 cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
@@ -63,7 +68,6 @@ cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.to
 
 header "FINALIZE"
 cargo run -- finalize testnet/sec.toml testnet/node.toml \
- --ejb-service-classpath $EJB_CLASSPATH \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"

@@ -4,7 +4,7 @@ This document describes how to configure and run an Exonum node with a Java serv
 ## Prerequisites
 
 Build an application following the instructions in [“How to Build”][how-to-build] section
-of the Contribution Guide. Unpack the zip archive from `exonum-java-binding/core/target` directory to some known 
+of the Contribution Guide. Unpack the zip archive from `exonum-java-binding/packaging/target` directory to some known 
 location.
 
 You also need a ready-to-use Exonum Java service. You can use 
@@ -33,16 +33,26 @@ LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 ```
 
-#### CLASSPATH
-Classpath is used to locate Java classes of your service and its dependencies.
+#### Services definition
+Services must be defined in the [ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
+file in order to be available in the network. The configuration file consists of two sections:
+- The optional `system_services` section is used to enable built-in Exonum services. If 
+not specified - only Configuration service is enabled. Possible variants for the moment are: 
+`configuration`, `btc-anchoring`, `time`.
+- The `user_services` section is used to enumerate user services that are loaded from artifacts 
+in the JAR format. It takes a line per service in form of `name = artifact`, where `name` 
+is one-word description of the service and `artifact` is a full path to the service's artifact. 
+At least one service must be defined.
 
-You may package your service in an Uber JAR using 
-the [Maven Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
-and pass a path to the service artefact during application configuration as `--ejb-service-classpath`
-parameter. Alternatively, you may assemble a classpath that includes the path to service and all of 
-its dependencies and pass it instead.
+The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
+and two user services:
+```toml
+system_services = ["configuration", "btc-anchoring", "time"]
 
-The service must use `provided` scope for all Exonum dependencies because they are included in the application.
+[user_services]
+service_name1 = "/path/to/service1_artifact.jar"
+service_name2 = "/path/to/service2_artifact.jar"
+```
 
 ### Step 2. Generate Node Configuration
 
@@ -50,12 +60,10 @@ EJB App configuration is pretty similar to configuration of any other Exonum ser
 with a few additional parameters.
 
 #### Generate Template Config
-Use `--ejb-module-name` for fully qualified name of your service module.
 
 ```$sh
 $ ejb-app generate-template testnet/common.toml \
     --validators-count=1
-    --ejb-module-name 'com.company.project.ServiceModule'
 ```
 
 #### Generate Node Private and Public Configs
@@ -67,11 +75,8 @@ $ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml 
 
 #### Finalize Configuration
 
-Use `--ejb-service-classpath` for a [classpath](#CLASSPATH) of your service.
-
 ```$sh
 $ ejb-app finalize testnet/sec.toml testnet/node.toml \
-    --ejb-service-classpath $CLASSPATH \
     --public-configs testnet/pub.toml
 ```
 

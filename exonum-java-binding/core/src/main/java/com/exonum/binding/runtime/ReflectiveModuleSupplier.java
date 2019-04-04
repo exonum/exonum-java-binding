@@ -24,8 +24,8 @@ import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 
 // todo: such implementation is nicer in terms of error handling (it happens upfront), but
-//   does not allow package-private module until Java 9 with MethodHandles#privateLookupIn
-//   [ECR-3008]
+//   does not allow package-private modules until Java 9 with MethodHandles#privateLookupIn
+//   [ECR-3008, ECR-521]
 
 /**
  * A reflective supplier of service modules that instantiates them with a no-arg constructor.

@@ -16,11 +16,11 @@
 
 package com.exonum.binding.runtime;
 
+import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.TransactionConverter;
-import com.google.inject.AbstractModule;
 
-class TestServiceModule extends AbstractModule {
+class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {

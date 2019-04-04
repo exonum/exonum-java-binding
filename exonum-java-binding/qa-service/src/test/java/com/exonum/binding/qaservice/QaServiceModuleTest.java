@@ -23,7 +23,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;
 
-class ServiceModuleTest {
+class QaServiceModuleTest {
 
   @Test
   void testServiceBindingsSufficient() {
@@ -48,6 +48,6 @@ class ServiceModuleTest {
   }
 
   private Injector createInjector() {
-    return Guice.createInjector(new ServiceModule());
+    return Guice.createInjector(new QaServiceModule());
   }
 }
