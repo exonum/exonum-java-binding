@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.request.BlockFilteringOption;
+import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
@@ -109,11 +111,11 @@ public interface ExonumClient {
    * in reverse order, starting from the {@code heightMax}.
    * @param count Number of blocks to return.
    *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
-   * @param skipEmpty if {@code true}, then only non-empty blocks will be returned
+   * @param blockFilter controls whether to skip blocks with no transactions
    * @param heightMax maximum height of the returned blocks.
    *        If the {@code heightMax} is greater than actual blockchain height then
    *        the actual height will be used
-   * @param withTime if {@code true}, then includes block commit times in the response.
+   * @param timeOption controls whether to include the block commit time.
    *        See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
@@ -123,14 +125,15 @@ public interface ExonumClient {
    * @throws IllegalArgumentException if count is out of range
    *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    */
-  BlocksResponse getBlocks(int count, boolean skipEmpty, long heightMax, boolean withTime);
+  BlocksResponse getBlocks(int count, BlockFilteringOption blockFilter, long heightMax,
+      BlockTimeOption timeOption);
 
   /**
    * Returns blockchain blocks information starting from the last block in the blockchain.
    * @param count Number of blocks to return.
    *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
-   * @param skipEmpty if {@code true}, then only non-empty blocks are returned
-   * @param withTime if {@code true}, then includes block commit times in the response.
+   * @param blockFilter controls whether to skip blocks with no transactions
+   * @param timeOption controls whether to include the block commit time.
    *        See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
@@ -140,30 +143,23 @@ public interface ExonumClient {
    * @throws IllegalArgumentException if count is out of range
    *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
    */
-  BlocksResponse getLastBlocks(int count, boolean skipEmpty, boolean withTime);
+  BlocksResponse getLastBlocks(int count, BlockFilteringOption blockFilter,
+      BlockTimeOption timeOption);
 
   /**
    * Returns the last block in the blockchain.
-   * @param withTime if {@code true}, then includes block commit times in the response.
-   *        See {@linkplain Block#getCommitTime()}.
-   *        The time value corresponds to the average time of submission of precommits by the
-   *        validators for every returned block
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  Block getLastBlock(boolean withTime);
+  Block getLastBlock();
 
   /**
    * Returns the last block in the blockchain which contains transactions;
    * or {@code Optional.empty()} if there are no blocks with transactions in the blockchain.
-   * @param withTime if {@code true}, then includes block commit times in the response.
-   *        See {@linkplain Block#getCommitTime()}.
-   *        The time value corresponds to the average time of submission of precommits by the
-   *        validators for every returned block
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
-  Optional<Block> getLastNonEmptyBlock(boolean withTime);
+  Optional<Block> getLastNonEmptyBlock();
 
   /**
    * Returns Exonum client builder.

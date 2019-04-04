@@ -20,6 +20,7 @@ import static com.exonum.binding.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.storage.indices.TestStorageItems.V2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,6 +29,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.View;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -99,6 +101,25 @@ class EntryIndexProxyIntegrationTest
   void removeFailsWithSnapshot() {
     runTestWithView(database::createSnapshot,
         (e) -> assertThrows(UnsupportedOperationException.class, e::remove));
+  }
+
+  @Test
+  void toOptional() {
+    runTestWithView(database::createFork, (e) -> {
+      e.set(V1);
+      Optional<String> optional = e.toOptional();
+      assertTrue(optional.isPresent());
+      assertThat(optional.get(), is(V1));
+    });
+  }
+
+  @Test
+  void optionalEmptyIfNoValue() {
+    runTestWithView(database::createFork, (e) -> {
+      assertFalse(e.isPresent());
+      Optional<String> optional = e.toOptional();
+      assertFalse(optional.isPresent());
+    });
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
