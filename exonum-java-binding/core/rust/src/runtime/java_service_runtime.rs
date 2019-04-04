@@ -21,21 +21,17 @@ use jni::{
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use std::sync::{Arc, Once, ONCE_INIT};
-
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig, ServiceConfig};
-use utils::{check_error_on_exception, convert_to_string, join_paths, unwrap_jni};
+use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
+use std::{path::Path, sync::Arc};
+use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
-
-static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
-static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
 
 const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
 const LOAD_ARTIFACT_SIGNATURE: &str = "(Ljava/lang/String;)Ljava/lang/String;";
 const CREATE_SERVICE_SIGNATURE: &str =
-    "(Ljava/lang/String;Ljava/lang/String;)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
+    "(Ljava/lang/String;)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
 #[allow(dead_code)]
@@ -46,50 +42,58 @@ pub struct JavaServiceRuntime {
 }
 
 impl JavaServiceRuntime {
-    /// Creates new runtime from provided config or returns the one created earlier.
+    /// Creates new runtime from provided config.
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
-    pub fn get_or_create(config: Config, internal_config: InternalConfig) -> Self {
-        unsafe {
-            // Initialize runtime if it wasn't created before.
-            JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-                let java_vm = Self::create_java_vm(
-                    &config.jvm_config,
-                    &config.runtime_config,
-                    &config.service_config,
-                    internal_config,
-                );
-                let executor = MainExecutor::new(Arc::new(java_vm));
-
-                let service_runtime =
-                    Self::create_service_runtime(&config.runtime_config, executor.clone());
-                let runtime = JavaServiceRuntime {
-                    executor,
-                    service_runtime,
-                };
-                JAVA_SERVICE_RUNTIME = Some(runtime);
-            });
-            // Return global runtime.
-            JAVA_SERVICE_RUNTIME
-                .clone()
-                .expect("Trying to return runtime, but it's uninitialized")
+    pub fn new(config: Config, internal_config: InternalConfig) -> Self {
+        let java_vm =
+            Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
+        let executor = MainExecutor::new(Arc::new(java_vm));
+        let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
+        JavaServiceRuntime {
+            executor,
+            service_runtime,
         }
     }
 
+    /// Creates service runtime that is responsible for services management.
+    fn create_service_runtime(config: RuntimeConfig, executor: MainExecutor) -> GlobalRef {
+        unwrap_jni(executor.with_attached(|env| {
+            let serviceRuntime = env
+                .call_static_method(
+                    SERVICE_BOOTSTRAP_PATH,
+                    "createServiceRuntime",
+                    CREATE_RUNTIME_SIGNATURE,
+                    &[config.port.into()],
+                )?
+                .l()?;
+            env.new_global_ref(serviceRuntime)
+        }))
+    }
+
     /// Creates a new service instance using the given artifact id.
-    pub fn create_service(&self, artifact_id: &str, module: &str) -> ServiceProxy {
+    ///
+    /// Panics if there are errors on Java side.
+    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
         unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_id: JObject = env.new_string(artifact_id)?.into();
-            let module_name: JObject = env.new_string(module)?.into();
-            let service = env
-                .call_method(
+            let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
+            let service = check_error_on_exception(
+                env,
+                env.call_method(
                     self.service_runtime.as_obj(),
                     "createService",
                     CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id.into(), module_name.into()],
-                )?
-                .l()?;
-            let service = env.new_global_ref(service).unwrap();
+                    &[artifact_id_obj.into()],
+                ),
+            )
+            .unwrap_or_else(|err_msg| {
+                panic!(
+                    "Unable to create service for artifact_id [{}]: {}",
+                    artifact_id, err_msg
+                )
+            })
+            .l()?;
+            let service = env.new_global_ref(service)?;
             Ok(ServiceProxy::from_global_ref(
                 self.executor.clone(),
                 service,
@@ -100,21 +104,26 @@ impl JavaServiceRuntime {
     /// Loads an artifact from the specified location involving verification of the artifact.
     /// Returns an unique service artifact identifier that must be specified in subsequent
     /// operations with it.
-    pub fn load_artifact(&self, artifact_uri: &str) -> Result<String, String> {
+    ///
+    /// Panics if there are errors on Java side.
+    pub fn load_artifact<P: AsRef<Path>>(&self, artifact_path: P) -> String {
         unwrap_jni(self.executor.with_attached(|env| {
-            let res = {
-                let artifact_uri: JObject = env.new_string(artifact_uri)?.into();
-                let artifact_id = env
-                    .call_method(
-                        self.service_runtime.as_obj(),
-                        "loadArtifact",
-                        LOAD_ARTIFACT_SIGNATURE,
-                        &[artifact_uri.into()],
-                    )?
-                    .l()?;
-                convert_to_string(env, artifact_id)
-            };
-            Ok(check_error_on_exception(env, res))
+            let artifact_path = artifact_path.as_ref().to_str().unwrap();
+            let artifact_path_obj: JObject = env.new_string(artifact_path)?.into();
+            let artifact_id = check_error_on_exception(
+                env,
+                env.call_method(
+                    self.service_runtime.as_obj(),
+                    "loadArtifact",
+                    LOAD_ARTIFACT_SIGNATURE,
+                    &[artifact_path_obj.into()],
+                ),
+            )
+            .unwrap_or_else(|err_msg| {
+                panic!("Unable to load artifact {}: {}", artifact_path, err_msg)
+            })
+            .l()?;
+            convert_to_string(env, artifact_id)
         }))
     }
 
@@ -126,12 +135,10 @@ impl JavaServiceRuntime {
     fn create_java_vm(
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
-        service_config: &ServiceConfig,
         internal_config: InternalConfig,
     ) -> JavaVM {
-        let args =
-            Self::build_jvm_arguments(jvm_config, runtime_config, service_config, internal_config)
-                .expect("Unable to build arguments for JVM");
+        let args = Self::build_jvm_arguments(jvm_config, runtime_config, internal_config)
+            .expect("Unable to build arguments for JVM");
 
         jni::JavaVM::new(args)
             .map_err(Self::transform_jni_error)
@@ -158,7 +165,6 @@ impl JavaServiceRuntime {
     fn build_jvm_arguments(
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
-        service_config: &ServiceConfig,
         internal_config: InternalConfig,
     ) -> JniResult<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
@@ -170,12 +176,7 @@ impl JavaServiceRuntime {
         args_builder = Self::add_user_arguments(args_builder, args_prepend);
 
         // Add required arguments
-        args_builder = Self::add_required_arguments(
-            args_builder,
-            runtime_config,
-            service_config,
-            internal_config,
-        );
+        args_builder = Self::add_required_arguments(args_builder, runtime_config, internal_config);
 
         // Add optional arguments
         args_builder = Self::add_optional_arguments(args_builder, jvm_config);
@@ -202,7 +203,6 @@ impl JavaServiceRuntime {
     fn add_required_arguments(
         mut args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
-        service_config: &ServiceConfig,
         internal_config: InternalConfig,
     ) -> InitArgsBuilder {
         // We do not use system library path in tests, because an absolute path to the native
@@ -214,14 +214,11 @@ impl JavaServiceRuntime {
             ));
         }
 
-        // We combine system and service class paths.
-        let class_path = join_paths(&[
-            &internal_config.system_class_path,
-            &service_config.service_class_path,
-        ]);
-
         args_builder
-            .option(&format!("-Djava.class.path={}", class_path))
+            .option(&format!(
+                "-Djava.class.path={}",
+                internal_config.system_class_path
+            ))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
                 runtime_config.log_config_path
@@ -240,21 +237,6 @@ impl JavaServiceRuntime {
             ));
         }
         args_builder
-    }
-
-    /// Creates service runtime that is responsible for services management.
-    fn create_service_runtime(config: &RuntimeConfig, executor: MainExecutor) -> GlobalRef {
-        unwrap_jni(executor.with_attached(|env| {
-            let serviceRuntime = env
-                .call_static_method(
-                    SERVICE_BOOTSTRAP_PATH,
-                    "createServiceRuntime",
-                    CREATE_RUNTIME_SIGNATURE,
-                    &[config.port.into()],
-                )?
-                .l()?;
-            env.new_global_ref(serviceRuntime)
-        }))
     }
 }
 

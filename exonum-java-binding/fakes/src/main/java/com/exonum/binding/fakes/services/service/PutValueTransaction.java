@@ -33,9 +33,8 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
-final class PutValueTransaction implements Transaction {
+public final class PutValueTransaction implements Transaction {
 
-  @SuppressWarnings("WeakerAccess")  // Might be used in native tests.
   static final short ID = 0x1234;
   static final Charset BODY_CHARSET = StandardCharsets.UTF_8;
 

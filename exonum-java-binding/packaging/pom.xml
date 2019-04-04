@@ -17,7 +17,7 @@
 
   <properties>
     <!--A directory used for storing temporary files while packaging the App-->
-    <packaging.basedir>${project.parent.basedir}/core/rust/target/debug</packaging.basedir>
+    <packaging.basedir>${project.parent.basedir}/core/rust/target/${build.mode}</packaging.basedir>
     <!--A directory containing licenses, TUTORIAL.md and fallback logger configuration-->
     <!--This property is used by app_assembly.xml configuration-->
     <packaging.etc>${packaging.basedir}/etc</packaging.etc>
@@ -127,6 +127,8 @@
               <descriptors>
                 <descriptor>app_assembly.xml</descriptor>
               </descriptors>
+              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>exonum-java-${project.version}-${build.mode}</finalName>
             </configuration>
             <executions>
               <execution>

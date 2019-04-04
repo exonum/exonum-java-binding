@@ -84,7 +84,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   }
 
   private String loadPlugin(Path artifactLocation) throws ServiceLoadingException {
-    // fixme: prevent loading of duplicates at this point. The plugin manager might load duplicate
+    // todo: prevent loading of duplicates at this point. The plugin manager might load duplicate
     //  plugins if they have different paths. This problem is resolved
     //  in https://github.com/pf4j/pf4j/pull/287 , update PF4J when the fix is released.
     String pluginId = pluginManager.loadPlugin(artifactLocation);
@@ -172,9 +172,9 @@ final class Pf4jServiceLoader implements ServiceLoader {
     checkArgument(loadedServices.containsKey(serviceId), "No such serviceId: %s", serviceId);
 
     String pluginId = serviceId.toString();
-    // Fixme: the docs don't say why it may fail to stop the plugin.
-    //   Follow: https://github.com/pf4j/pf4j/issues/291
     boolean stopped = pluginManager.unloadPlugin(pluginId);
+    // The docs don't say why it may fail to stop the plugin.
+    // Follow: https://github.com/pf4j/pf4j/issues/291
     checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
 
     loadedServices.remove(serviceId);

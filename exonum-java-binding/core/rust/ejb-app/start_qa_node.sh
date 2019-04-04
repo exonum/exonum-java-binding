@@ -34,12 +34,17 @@ echo "CURRENT_DIR=${EJB_APP_DIR}"
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
 
-header "PREPARE PATHS"
+# Find the artifact
+ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-qa-service-*-artifact.jar)"
+echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
 
-QA_SERVICE_TXT="qa-service/target/qa-service-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${QA_SERVICE_TXT})"
-EJB_CLASSPATH="${EJB_CLASSPATH}:${EJB_ROOT}/qa-service/target/classes"
-echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
+# Prepare the services configuration file
+SERVICES_CONFIG_FILE="ejb_app_services.toml"
+SERVICE_NAME="ejb-qa-service"
+echo "[user_services]" > ${SERVICES_CONFIG_FILE}
+echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
+
+header "PREPARE PATHS"
 
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
@@ -63,8 +68,7 @@ do
 done
 
 header "GENERATE COMMON CONFIG"
-cargo run -- generate-template --validators-count $node_count testnet/common.toml \
-  --ejb-module-name 'com.exonum.binding.qaservice.ServiceModule'
+cargo run -- generate-template --validators-count $node_count testnet/common.toml
 
 header "GENERATE CONFIG"
 for i in $(seq 0 $((node_count - 1)))
@@ -82,7 +86,6 @@ header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
     cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
-     --ejb-service-classpath $EJB_CLASSPATH \
      --public-configs testnet/pub_*.toml
 done
 
