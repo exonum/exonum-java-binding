@@ -276,7 +276,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
-          <!--We need to copy libjava_bindings dynamic library to the <ejb-app-location>/lib/native directory-->
+          <!--We need to copy libjava_bindings dynamic library to the <exonum-java-location>/lib/native directory-->
           <execution>
             <id>copy-native-lib</id>
             <phase>package</phase>
@@ -450,14 +450,14 @@
                 </goals>
               </execution>
               <execution>
-                <id>build-ejb-app</id>
+                <id>build-exonum-java</id>
                 <phase>prepare-package</phase>
                 <configuration>
                   <arguments>
                     <argument>+${rust.compiler.version}</argument>
                     <argument>build</argument>
                     <argument>--package</argument>
-                    <argument>ejb-app</argument>
+                    <argument>exonum-java</argument>
                     <argument>${build.cargoFlag}</argument>
                     <argument>--color</argument>
                     <argument>always</argument>

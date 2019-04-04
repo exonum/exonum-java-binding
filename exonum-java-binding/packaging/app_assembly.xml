@@ -34,7 +34,7 @@
   <files>
     <!--Main EJB App executable-->
     <file>
-      <source>${packaging.basedir}/ejb-app</source>
+      <source>${packaging.basedir}/exonum-java</source>
     </file>
     <!--libjava_bindings.[so|dylib]-->
     <file>

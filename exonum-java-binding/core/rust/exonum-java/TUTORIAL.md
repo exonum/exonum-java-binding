@@ -62,21 +62,21 @@ with a few additional parameters.
 #### Generate Template Config
 
 ```$sh
-$ ejb-app generate-template testnet/common.toml \
+$ exonum-java generate-template testnet/common.toml \
     --validators-count=1
 ```
 
 #### Generate Node Private and Public Configs
 
 ```$sh
-$ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+$ exonum-java generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
     --peer-address 127.0.0.1:5400
 ```
 
 #### Finalize Configuration
 
 ```$sh
-$ ejb-app finalize testnet/sec.toml testnet/node.toml \
+$ exonum-java finalize testnet/sec.toml testnet/node.toml \
     --public-configs testnet/pub.toml
 ```
 
@@ -94,7 +94,7 @@ There are also optional parameters useful for debugging purposes and JVM fine tu
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
  
 ```$sh
-$ ejb-app run -d testnet/db -c testnet/node.toml \
+$ exonum-java run -d testnet/db -c testnet/node.toml \
     --ejb-log-config-path "log4j.xml" \
     --ejb-port 6000 \
     --public-api-address 127.0.0.1:3000
@@ -107,7 +107,7 @@ pass `--jvm-debug` option with a socket address to connect to
 from a debugger:
 
 ```sh
-$ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
+$ exonum-java run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
     --ejb-log-config-path "log4j-fallback.xml" \
     --ejb-port 6000 \
     --jvm-debug localhost:8000

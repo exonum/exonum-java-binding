@@ -52,7 +52,7 @@ echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 rm -rf testnet
 mkdir testnet
 
-trap "killall ejb-app" SIGINT SIGTERM EXIT
+trap "killall exonum-java" SIGINT SIGTERM EXIT
 
 # Configure and run nodes
 node_count=$1

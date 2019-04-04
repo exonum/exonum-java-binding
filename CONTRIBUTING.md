@@ -63,7 +63,7 @@ Here are the main ones:
   * [`core`](exonum-java-binding/core) contains the APIs to define and implement an 
   [Exonum service](https://exonum.com/doc/version/0.10/get-started/design-overview/#modularity-and-services).
   * [`core-native`](exonum-java-binding/core/rust) contains the glue code between Java and Rust.
-  * [`app`](exonum-java-binding/core/rust/ejb-app) is an application that runs a node with Java 
+  * [`app`](exonum-java-binding/core/rust/exonum-java) is an application that runs a node with Java 
   and Rust services.
   * [`common`](exonum-java-binding/common) provides common functionality to Exonum core
   and light clients: [Exonum proofs](https://exonum.com/doc/version/0.10/get-started/design-overview/#proofs),

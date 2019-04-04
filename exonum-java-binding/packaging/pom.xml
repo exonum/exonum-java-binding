@@ -96,7 +96,7 @@
               </artifactItems>
             </configuration>
           </execution>
-          <!--We copy all Java dependencies needed by the App to the <ejb-app-location>/lib/java directory-->
+          <!--We copy all Java dependencies needed by the App to the <exonum-java-location>/lib/java directory-->
           <execution>
             <id>copy-java-dependencies</id>
             <phase>prepare-package</phase>
@@ -132,7 +132,7 @@
             </configuration>
             <executions>
               <execution>
-                <id>package-ejb-app</id>
+                <id>package-exonum-java</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>

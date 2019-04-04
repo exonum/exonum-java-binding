@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs EJB App tests (ejb-core/rust/ejb-app).
+# Runs EJB App tests (ejb-core/rust/exonum-java).
 #
 # ¡Keep it MacOS/Ubuntu compatible!
 
@@ -12,4 +12,4 @@ source tests_profile
 cd core/rust
 
 cargo "+${RUST_COMPILER_VERSION}" test \
-  --manifest-path ejb-app/Cargo.toml
+  --manifest-path exonum-java/Cargo.toml
