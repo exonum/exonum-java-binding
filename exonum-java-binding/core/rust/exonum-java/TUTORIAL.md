@@ -68,8 +68,8 @@ $ exonum-java generate-template testnet/common.toml \
 
 #### Generate Node Private and Public Configs
 
-**Note:** in this tutorial we are not providing any passwords for consensus and service private keys.
-Please consult Exonum documentation for the correct way of the node configuration.
+**Note:** in this tutorial we do not provide any passwords for consensus and service private keys.
+Please consult Exonum documentation for the secure way of the node configuration.
 
 ```$sh
 $ exonum-java generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
