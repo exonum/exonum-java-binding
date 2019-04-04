@@ -94,7 +94,7 @@ The following scripts can be run separately
 from the [EJB](exonum-java-binding) directory:
 * `./run_maven_tests.sh` - all tests in Java and unit tests in Rust.
 * `./run_native_integration_tests.sh` - integration tests in Rust.
-* `./run_ejb_app_tests.sh` - application tests in Rust.
+* `./run_app_tests.sh` - application tests in Rust.
 
 ### Writing Tests
 #### Java

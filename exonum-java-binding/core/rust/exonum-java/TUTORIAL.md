@@ -34,7 +34,7 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 ```
 
 #### Services definition
-Services must be defined in the [ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
+Services must be defined in the [services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
 file in order to be available in the network. The configuration file consists of two sections:
 - The optional `system_services` section is used to enable built-in Exonum services. If 
 not specified - only Configuration service is enabled. Possible variants for the moment are: 
@@ -44,7 +44,7 @@ in the JAR format. It takes a line per service in form of `name = artifact`, whe
 is one-word description of the service and `artifact` is a full path to the service's artifact. 
 At least one service must be defined.
 
-The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
+The sample of `services.toml` file that enables all possible built-in Exonum services 
 and two user services:
 ```toml
 system_services = ["configuration", "btc-anchoring", "time"]

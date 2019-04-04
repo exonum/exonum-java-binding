@@ -17,7 +17,7 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
 ```
 
 To use the time oracle, we should enable it. To do that, include its name `time` in
-`ejb_app_services.toml` configuration file in the Exonum Java app's directory with the following content:
+`services.toml` configuration file in the Exonum Java app's directory with the following content:
 
 ```toml
 services = ["time"]

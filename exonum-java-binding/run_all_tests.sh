@@ -14,4 +14,4 @@ set -eu -o pipefail
 
 # Run native integration tests that require prepared classpaths for fake classes.
 ./run_native_integration_tests.sh --skip-compile
-./run_ejb_app_tests.sh
+run_app_tests.sh
