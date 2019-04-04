@@ -25,10 +25,17 @@
     <rust.compiler.version>1.32.0</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
-    <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <!--A directory containing libjava_bindings native library-->
+    <build.nativeLibPath>${project.basedir}/rust/target/${build.mode}</build.nativeLibPath>
+    <!--A directory containing native dynamic libraries used by the App-->
+    <packaging.native>${project.basedir}/rust/target/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
+    <!-- Skip building Rust library for tests -->
+    <doNotBuildRustLib>false</doNotBuildRustLib>
+    <!-- This flag is empty for debug builds and equals to `release` otherwise -->
+    <build.cargoFlag></build.cargoFlag>
   </properties>
 
   <dependencies>
@@ -198,7 +205,7 @@
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
                  depend on the library -->
-            <id>build-rust-lib</id>
+            <id>build-rust-lib-for-tests</id>
             <phase>compile</phase>
             <configuration>
               <arguments>
@@ -209,6 +216,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${doNotBuildRustLib}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -233,6 +241,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
@@ -254,10 +263,38 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
+              <skip>${skipTests}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <!--We need to copy libjava_bindings dynamic library to the <ejb-app-location>/lib/native directory-->
+          <execution>
+            <id>copy-native-lib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${packaging.native}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${build.nativeLibPath}</directory>
+                  <includes>
+                    <include>libjava_bindings.so</include>
+                    <include>libjava_bindings.dylib</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -327,24 +364,6 @@
         </executions>
       </plugin>
 
-      <!-- Generates a runtime classpath file of ejb-core.
-           Bound to the default phase (generate-sources). -->
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <configuration>
-          <outputFile>${project.build.directory}/ejb-core-classpath.txt</outputFile>
-          <includeScope>runtime</includeScope>
-        </configuration>
-        <executions>
-          <execution>
-            <id>generate-classpath-file</id>
-            <goals>
-              <goal>build-classpath</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
@@ -394,6 +413,58 @@
                 <phase>verify</phase>
                 <goals>
                   <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>package-app</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>cargo</executable>
+              <workingDirectory>${project.basedir}/rust</workingDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>build-rust-lib</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>${build.cargoFlag}</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>build-ejb-app</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>build</argument>
+                    <argument>--package</argument>
+                    <argument>ejb-app</argument>
+                    <argument>${build.cargoFlag}</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
                 </goals>
               </execution>
             </executions>

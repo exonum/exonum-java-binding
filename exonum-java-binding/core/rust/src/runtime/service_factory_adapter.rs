@@ -16,7 +16,12 @@ use exonum::{
     blockchain::Service,
     helpers::fabric::{Command, CommandExtension, Context, ServiceFactory},
 };
-use runtime::{cmd::Run, config::Config, java_service_runtime::JavaServiceRuntime};
+use runtime::{
+    cmd::Run,
+    config::{Config, InternalConfig},
+    java_service_runtime::JavaServiceRuntime,
+    utils::{absolute_library_path, system_classpath},
+};
 use std::sync::{Once, ONCE_INIT};
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
@@ -48,7 +53,12 @@ impl JavaServiceFactoryAdapter {
     fn get_or_create_java_service_runtime(config: Config) -> JavaServiceRuntime {
         // Initialize runtime if it wasn't created before.
         JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-            let runtime = JavaServiceRuntime::new(config);
+            let internal_config = InternalConfig {
+                system_class_path: system_classpath(),
+                system_lib_path: Some(absolute_library_path()),
+            };
+
+            let runtime = JavaServiceRuntime::new(config, internal_config);
             unsafe {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             }

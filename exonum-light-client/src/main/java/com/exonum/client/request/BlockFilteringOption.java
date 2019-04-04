@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-mod cmd;
-mod config;
-mod java_service_runtime;
-mod service_factory_adapter;
-mod utils;
+package com.exonum.client.request;
 
-pub use self::config::*;
-pub use self::java_service_runtime::JavaServiceRuntime;
-pub use self::service_factory_adapter::JavaServiceFactoryAdapter;
-pub use self::utils::panic_if_java_options;
+/**
+ * Request option for filtering blocks.
+ */
+public enum BlockFilteringOption {
+  /**
+   * Skip empty blocks (containing no transactions).
+   * Only non-empty blocks will be returned in a response.
+   */
+  SKIP_EMPTY,
+  /**
+   * Include all blocks in a response (both empty and non-empty).
+   */
+  INCLUDE_EMPTY
+}

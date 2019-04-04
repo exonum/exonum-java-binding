@@ -46,14 +46,6 @@ echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 
 header "PREPARE PATHS"
 
-CORE_TXT="core/target/ejb-core-classpath.txt"
-EJB_CLASSPATH="$(cat ${EJB_ROOT}/${CORE_TXT}):${EJB_ROOT}/core/target/classes"
-echo "EJB_CLASSPATH=${EJB_CLASSPATH}"
-
-EJB_LIBPATH="${EJB_ROOT}/core/rust/target/debug"
-echo "EJB_LIBPATH=${EJB_LIBPATH}"
-export RUST_LIB_DIR="$(rustup run 1.32.0 rustc --print sysroot)/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EJB_LIBPATH":"$RUST_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
@@ -84,13 +76,15 @@ do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
     cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
+     --no-password \
+     --consensus-path testnet/consensus${i}.toml \
+     --service-path testnet/service${i}.toml \
      --peer-address 127.0.0.1:$peer_port
 done
 
 header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
-    ejb_port=$((6000 + i))
     cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
      --public-configs testnet/pub_*.toml
 done
@@ -99,19 +93,20 @@ header "START TESTNET"
 
 for i in $(seq 0 $((node_count - 1)))
 do
-	port=$((3000 + i))
-	private_port=$((port + 100))
-	cargo run -- run \
-	 -c testnet/node_$i.toml \
-	 -d testnet/db/$i \
-     --ejb-classpath $EJB_CLASSPATH \
-     --ejb-libpath $EJB_LIBPATH \
-     --ejb-port $ejb_port \
+    port=$((3000 + i))
+    private_port=$((port + 100))
+    ejb_port=$((6000 + i))
+    cargo run -- run \
+     -c testnet/node_$i.toml \
+     -d testnet/db/$i \
+     --ejb-port ${ejb_port} \
      --ejb-log-config-path $log_config_path \
-	 --public-api-address 0.0.0.0:${port} \
-	 --private-api-address 0.0.0.0:${private_port} &
+     --consensus-key-pass pass \
+     --service-key-pass pass \
+     --public-api-address 0.0.0.0:${port} \
+     --private-api-address 0.0.0.0:${private_port} &
 
-	echo "new node with ports: $port (public) and $private_port (private)"
+    echo "new node with ports: $port (public) and $private_port (private)"
 done
 
 echo "$node_count nodes configured and launched"

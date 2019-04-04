@@ -21,8 +21,6 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.Value;
 
@@ -32,19 +30,13 @@ import lombok.Value;
 final class SystemApiHelper {
 
   static HealthCheckInfo parseHealthCheckJson(String json) {
-    // TODO: ECR-2925 (core dependency) change after the response format update
     HealthCheckResponse response = json().fromJson(json, HealthCheckResponse.class);
     String consensusStatus = response.getConsensusStatus().toUpperCase();
-    JsonElement connectivity = response.getConnectivity();
-    if (connectivity.isJsonObject()) {
-      JsonObject connectivityObject = connectivity.getAsJsonObject();
-      int connectionsNumber = connectivityObject
-          .get("Connected").getAsJsonObject()
-          .get("amount").getAsInt();
-      return new HealthCheckInfo(ConsensusStatus.valueOf(consensusStatus), connectionsNumber);
-    } else {
-      return new HealthCheckInfo(ConsensusStatus.valueOf(consensusStatus), 0);
-    }
+
+    return new HealthCheckInfo(
+        ConsensusStatus.valueOf(consensusStatus),
+        response.getConnectedPeers()
+    );
   }
 
   static int parseMemoryPoolJson(String json) {
@@ -67,7 +59,8 @@ final class SystemApiHelper {
   private class HealthCheckResponse {
     @SerializedName("consensus_status")
     String consensusStatus;
-    JsonElement connectivity;
+    @SerializedName("connected_peers")
+    int connectedPeers;
   }
 
   private SystemApiHelper() {
