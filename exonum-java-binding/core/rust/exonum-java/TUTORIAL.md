@@ -68,8 +68,14 @@ $ exonum-java generate-template testnet/common.toml \
 
 #### Generate Node Private and Public Configs
 
+**Note:** in this tutorial we are not providing any passwords for consensus and service private keys.
+Please consult Exonum documentation for the correct way of the node configuration.
+
 ```$sh
 $ exonum-java generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+    --consensus-key-path testnet/consensus1.toml \
+    --service-key-path testnet/service1.toml \
+    --no-password \
     --peer-address 127.0.0.1:5400
 ```
 
@@ -97,6 +103,8 @@ There are also optional parameters useful for debugging purposes and JVM fine tu
 $ exonum-java run -d testnet/db -c testnet/node.toml \
     --ejb-log-config-path "log4j.xml" \
     --ejb-port 6000 \
+    --consensus-key-pass pass \
+    --service-key-pass pass \
     --public-api-address 127.0.0.1:3000
 ```
 
