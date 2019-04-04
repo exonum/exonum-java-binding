@@ -65,9 +65,9 @@ public final class LibraryLoader {
       // hence it might never be empty.
       return String.format(
           "Check that %s system property includes a path to '${EXONUM_HOME}/lib/native' directory%n"
-              + "containing %s library, where 'EXONUM_HOME' denotes the Exonum Java installation "
-              + "directory.%n"
-              + "The code launching tests must usually set it explicitly, see "
+              + "containing %s library, where 'EXONUM_HOME' denotes the Exonum Java app "
+              + "installation directory.%n"
+              + "The code launching tests must usually set this property explicitly, see "
               + "https://exonum.com/doc/version/0.10/get-started/java-binding/#testing",
           JAVA_LIBRARY_PATH_PROPERTY, BINDING_LIB_NAME);
     } else {
