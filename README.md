@@ -10,12 +10,9 @@ This is a primary repository for Exonum projects in Java.
 ## Projects
 The following projects are available:
  - [Exonum Java Binding](exonum-java-binding). It is a framework for building blockchain 
- applications in Java which provides Exonum services runtime environment.
+   applications in Java which provides Exonum services runtime environment.
  - [Light Client](exonum-light-client). It is a library for interaction with Exonum 
-  blockchain from external Java applications.
-
-## Java version
-Java 8 or newer is required for building and using Exonum Java projects.
+   blockchain from external Java applications.
  
 ## Links
 For more information see the relevant documentation on the tool:
