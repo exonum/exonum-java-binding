@@ -71,7 +71,7 @@ class TimeSchemaProxy implements TimeSchema {
     }
   }
 
-  private native boolean isTimeServiceEnabled();
+  private static native boolean isTimeServiceEnabled();
 
   /**
    * Mapping for Exonum time indexes by name.
