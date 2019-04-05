@@ -1,5 +1,5 @@
 [package]
-name = "ejb-app"
+name = "exonum-java"
 version = "0.6.0-SNAPSHOT"
 authors = ["Exonum team <exonum@bitfury.com>"]
 

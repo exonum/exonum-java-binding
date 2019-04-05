@@ -56,7 +56,7 @@ class TimeSchemaProxy implements TimeSchema {
     // in integration tests. To be removed in ECR-2970 (Java Testkit)
     if (!runningUnitTests()) {
       checkState(isTimeServiceEnabled(), "Time service is not enabled. To enable it, put 'time' "
-          + "into 'ejb_app_services.toml' file.\n"
+          + "into 'services.toml' file.\n"
           + "See https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services "
           + "for details.");
     }
