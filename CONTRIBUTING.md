@@ -17,7 +17,7 @@ This guide shows how to build the whole project only.
 ### System Dependencies
 You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
-  * [JDK 1.8+](http://jdk.java.net/10/).
+  * [JDK 1.8+](https://jdk.java.net/12/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Rust 1.32.0](https://www.rust-lang.org/).
   To install a specific Rust version, use `rustup install 1.32.0` command.
@@ -36,7 +36,7 @@ Then run:
 $ mvn install
 ```
 
-#### Building Exonum Java App
+#### Building Java Binding App
 Run:
 
 ```$sh
@@ -54,8 +54,9 @@ is valid. It may take a long time, so you can pass `--skip-tests` flag to skip t
 $ ./package_app.sh --skip-tests
 ```
 
-By default, the Exonum Java app is build in debug mode, which affects performance and not desired for production usage. 
-To enable release mode, you need to simply pass `--release` flag to the `package_app.sh` script.
+By default, the Exonum Java app is built in debug mode, which affects performance
+and is not desired for production usage. To enable release mode, you need
+to pass `--release` flag to the `package_app.sh` script.
 
 ## EJB Modules
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
