@@ -26,14 +26,16 @@
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <!--A directory containing libjava_bindings native library-->
-    <build.nativeLibPath>${project.basedir}/rust/target/debug</build.nativeLibPath>
+    <build.nativeLibPath>${project.basedir}/rust/target/${build.mode}</build.nativeLibPath>
     <!--A directory containing native dynamic libraries used by the App-->
-    <packaging.native>${project.basedir}/rust/target/debug/lib/native</packaging.native>
+    <packaging.native>${project.basedir}/rust/target/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
     <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
     <skipITs>${project.skipJavaITs}</skipITs>
     <!-- Skip building Rust library for tests -->
     <doNotBuildRustLib>false</doNotBuildRustLib>
+    <!-- This flag is empty for debug builds and equals to `release` otherwise -->
+    <build.cargoFlag></build.cargoFlag>
   </properties>
 
   <dependencies>
@@ -274,7 +276,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
-          <!--We need to copy libjava_bindings dynamic library to the <ejb-app-location>/lib/native directory-->
+          <!--We need to copy libjava_bindings dynamic library to the <exonum-java-location>/lib/native directory-->
           <execution>
             <id>copy-native-lib</id>
             <phase>package</phase>
@@ -438,6 +440,7 @@
                   <arguments>
                     <argument>+${rust.compiler.version}</argument>
                     <argument>build</argument>
+                    <argument>${build.cargoFlag}</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>
@@ -447,14 +450,15 @@
                 </goals>
               </execution>
               <execution>
-                <id>build-ejb-app</id>
+                <id>build-exonum-java</id>
                 <phase>prepare-package</phase>
                 <configuration>
                   <arguments>
                     <argument>+${rust.compiler.version}</argument>
                     <argument>build</argument>
                     <argument>--package</argument>
-                    <argument>ejb-app</argument>
+                    <argument>exonum-java</argument>
+                    <argument>${build.cargoFlag}</argument>
                     <argument>--color</argument>
                     <argument>always</argument>
                   </arguments>

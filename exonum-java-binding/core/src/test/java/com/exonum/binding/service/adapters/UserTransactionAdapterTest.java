@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,7 +72,7 @@ class UserTransactionAdapterTest {
   void execute_rethrowsExecutionException() throws TransactionExecutionException {
     when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
 
-    TransactionExecutionException txError = mock(TransactionExecutionException.class);
+    TransactionExecutionException txError = new TransactionExecutionException((byte) 0);
 
     doThrow(txError).when(transaction).execute(any(TransactionContext.class));
 
@@ -86,7 +85,7 @@ class UserTransactionAdapterTest {
   void execute_rethrowsRuntimeExceptions() throws TransactionExecutionException {
     when(viewFactory.createFork(eq(FORK_HANDLE), any(Cleaner.class))).thenReturn(fork);
 
-    RuntimeException unexpectedTxError = mock(RuntimeException.class);
+    RuntimeException unexpectedTxError = new RuntimeException("Unexpected execution exception");
 
     doThrow(unexpectedTxError).when(transaction).execute(any(TransactionContext.class));
 

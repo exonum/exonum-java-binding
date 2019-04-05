@@ -4,7 +4,7 @@ version = "0.6.0-SNAPSHOT"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 
 [workspace]
-members = ["integration_tests", "ejb-app"]
+members = ["integration_tests", "exonum-java"]
 
 [lib]
 crate-type = ["dylib"]
@@ -15,8 +15,8 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = "0.10"
-exonum-time = "0.10"
+exonum = "0.11"
+exonum-time = "0.11"
 failure = "0.1.1"
 toml = "0.4.6"
 jni = { version = "0.11.0", features = ["invocation"] }

@@ -66,11 +66,19 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.pf4j</groupId>
+      <artifactId>pf4j</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -169,19 +177,31 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <configuration>
-          <outputFile>${project.build.directory}/qa-service-classpath.txt</outputFile>
-          <includeScope>runtime</includeScope>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>generate-classpath-file</id>
+            <id>package-service-artifact</id>
+            <phase>package</phase>
             <goals>
-              <goal>build-classpath</goal>
+              <goal>single</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <archive>
+            <manifestEntries>
+              <Plugin-Id>${project.groupId}:${project.artifactId}:${project.version}</Plugin-Id>
+              <Plugin-Version>${project.version}</Plugin-Version>
+              <Plugin-Provider>${project.groupId}</Plugin-Provider>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
 
       <!-- Skip the deployment of internal module as it is inherited from parent pom -->

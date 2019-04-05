@@ -16,11 +16,14 @@ use jni::objects::JClass;
 use jni::sys::jboolean;
 use jni::JNIEnv;
 
-use utils::{is_service_enabled_in_config_file, PATH_TO_SERVICES_TO_ENABLE, TIME_SERVICE};
+use utils::services::{
+    is_service_enabled_in_config_file, system_service_names::TIME_SERVICE,
+    PATH_TO_SERVICES_DEFINITION,
+};
 
 lazy_static! {
     static ref IS_TIME_SERVICE_ENABLED: jboolean =
-        is_service_enabled_in_config_file(TIME_SERVICE, PATH_TO_SERVICES_TO_ENABLE).into();
+        is_service_enabled_in_config_file(TIME_SERVICE, PATH_TO_SERVICES_DEFINITION).into();
 }
 
 #[no_mangle]

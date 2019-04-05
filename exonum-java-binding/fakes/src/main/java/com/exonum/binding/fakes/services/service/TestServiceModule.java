@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,15 @@
 
 package com.exonum.binding.fakes.services.service;
 
+import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
-import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
+import com.google.inject.Singleton;
 
-/**
- * A module configuring {@link TestService}.
- */
-public final class TestServiceModule extends AbstractModule {
+public class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class).to(TestService.class);
-    bind(new TypeLiteral<SchemaFactory<TestSchema>>(){})
-        .toInstance(TestSchema::new);
+    bind(Service.class).to(TestService.class)
+        .in(Singleton.class);
   }
 }

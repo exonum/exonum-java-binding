@@ -32,9 +32,9 @@
     </fileSet>
   </fileSets>
   <files>
-    <!--Main EJB App executable-->
+    <!--Main Exonum Java app executable-->
     <file>
-      <source>${packaging.basedir}/ejb-app</source>
+      <source>${packaging.basedir}/exonum-java</source>
     </file>
     <!--libjava_bindings.[so|dylib]-->
     <file>

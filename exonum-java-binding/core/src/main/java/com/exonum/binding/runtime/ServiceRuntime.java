@@ -16,15 +16,23 @@
 
 package com.exonum.binding.runtime;
 
+import static com.exonum.binding.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.transport.Server;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.function.Supplier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A service runtime. It manages the services required for operation of Exonum services (e.g., a
@@ -32,29 +40,43 @@ import java.lang.reflect.InvocationTargetException;
  * services), create and stop services defined in the loaded artifacts.
  *
  * <p>This class is thread-safe and does not support client-side locking.
+ * The thread-safety is provided because the class is a singleton and may be provided to
+ * other objects. Currently, however, there is a single injection point where ServiceRuntime
+ * is instantiated (during bootstrap) and it is used by the native runtime only in a single-threaded
+ * context, hence thread-safety isn't <em>strictly</em> required, but rather provided to avoid
+ * possible errors if it is ever accessed by other objects.
  */
-final class ServiceRuntime {
+@Singleton
+public final class ServiceRuntime {
+
+  private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
 
   private final Injector frameworkInjector;
+  private final ServiceLoader serviceLoader;
+  private final Object lock = new Object();
 
   /**
-   * Creates a new runtime with the given framework injector. Starts the server on instantiation.
+   * Creates a new runtime with the given framework injector. Starts the server on instantiation;
+   * never stops it.
    *
    * @param frameworkInjector the injector that has been configured with the Exonum framework
    *     bindings. It serves as a parent for service injectors
+   * @param serviceLoader a loader of service artifacts
+   * @param server a web server providing transport to Java services
    * @param serverPort a port for the web server providing transport to Java services
    */
-  ServiceRuntime(Injector frameworkInjector, int serverPort) {
+  @Inject
+  public ServiceRuntime(Injector frameworkInjector, ServiceLoader serviceLoader, Server server,
+      @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
     this.frameworkInjector = checkNotNull(frameworkInjector);
+    this.serviceLoader = checkNotNull(serviceLoader);
 
     // Start the server
-    checkServerIsSingleton(frameworkInjector);
-    Server server = frameworkInjector.getInstance(Server.class);
+    checkServerIsSingleton(server, frameworkInjector);
     server.start(serverPort);
   }
 
-  private void checkServerIsSingleton(Injector frameworkInjector) {
-    Server s1 = frameworkInjector.getInstance(Server.class);
+  private void checkServerIsSingleton(Server s1, Injector frameworkInjector) {
     Server s2 = frameworkInjector.getInstance(Server.class);
     checkArgument(s1.equals(s2), "%s is not configured as singleton: s1=%s, s2=%s", Server.class,
         s1, s2);
@@ -68,52 +90,46 @@ final class ServiceRuntime {
    *     to load the service artifact
    * @return a unique service artifact identifier that must be specified in subsequent operations
    *     with it
-   * @throws RuntimeException if it failed to load an artifact; or if the given artifact is
+   * @throws ServiceLoadingException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
-  @SuppressWarnings("unused")
-  String loadArtifact(String serviceArtifactPath) {
-    return "com.acme:any-service:1.0.0";
+  public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
+    Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
+    try {
+      synchronized (lock) {
+        LoadedServiceDefinition loadedServiceDefinition = serviceLoader
+            .loadService(serviceArtifactLocation);
+        ServiceId serviceId = loadedServiceDefinition.getId();
+        return serviceId.toString();
+      }
+    } catch (Throwable e) {
+      logger.error("Failed to load an artifact from {}", serviceArtifactPath, e);
+      throw e;
+    }
   }
 
   /**
    * Creates a new service instance of the given type.
    *
    * @param artifactId a unique identifier of the loaded artifact
-   * @param moduleName *temp parameter* a fully-qualified class name of the service module to
-   *     instantiate
    * @return a new service
    * @throws IllegalArgumentException if the artifactId is unknown
    * @throws RuntimeException if it failed to instantiate the service
    */
-  UserServiceAdapter createService(@SuppressWarnings("unused") String artifactId,
-      /* Temporary arg: remove */ String moduleName) {
-    Module serviceModule = createUserModule(moduleName);
-    Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
-    return serviceInjector.getInstance(UserServiceAdapter.class);
-  }
-
-  /**
-   * Creates a user module that configures the bindings of that module.
-   *
-   * @param moduleName a fully-qualified class name of the user service module
-   */
-  private static Module createUserModule(String moduleName) {
+  public UserServiceAdapter createService(String artifactId) {
     try {
-      Class<?> moduleClass = Class.forName(moduleName);
-      Constructor constructor = moduleClass.getDeclaredConstructor();
-      Object moduleObject = constructor.newInstance();
-      checkArgument(moduleObject instanceof Module, "%s is not a sub-class of %s",
-          moduleClass, Module.class.getCanonicalName());
-      return (Module) moduleObject;
-    } catch (ClassNotFoundException e) {
-      throw new IllegalArgumentException("Module class cannot be found", e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalArgumentException("Cannot access the no-arg module constructor", e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalArgumentException("No no-arg constructor", e);
-    } catch (InstantiationException | InvocationTargetException e) {
-      throw new RuntimeException(e);
+      ServiceId serviceId = ServiceId.parseFrom(artifactId);
+      synchronized (lock) {
+        LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
+        Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
+        Module serviceModule = serviceModuleSupplier.get();
+        Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
+        return serviceInjector.getInstance(UserServiceAdapter.class);
+      }
+    } catch (Throwable e) {
+      logger.error("Failed to create a service {} instance", artifactId, e);
+      throw e;
     }
   }
 
