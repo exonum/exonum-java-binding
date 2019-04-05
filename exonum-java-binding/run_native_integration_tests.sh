@@ -26,5 +26,5 @@ fi
 
 cd core/rust
 
-cargo "+${RUST_COMPILER_VERSION}" test --release \
+cargo "+${RUST_COMPILER_VERSION}" test \
   --manifest-path integration_tests/Cargo.toml
