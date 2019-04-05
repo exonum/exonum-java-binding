@@ -21,7 +21,7 @@ To use the time oracle, we should enable it. To do that, include its name `time`
 `services.toml` configuration file in the Exonum Java app's directory with the following content:
 
 ```toml
-services = ["time"]
+system_services = ["time"]
 ```
 
 See more information on built-in services [here][built-in-services].
