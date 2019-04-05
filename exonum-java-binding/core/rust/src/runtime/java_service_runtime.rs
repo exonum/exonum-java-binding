@@ -16,15 +16,14 @@
 
 use jni::{
     self,
+    errors::{Error, ErrorKind},
     objects::{GlobalRef, JObject},
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use runtime::config::{self, Config, JvmConfig, RuntimeConfig};
-use std::{env, sync::Arc};
-
 use proxy::{JniExecutor, ServiceProxy};
-use std::path::Path;
+use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
+use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 
@@ -46,8 +45,9 @@ impl JavaServiceRuntime {
     /// Creates new runtime from provided config.
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
-    pub fn new(config: Config) -> Self {
-        let java_vm = Self::create_java_vm(&config.jvm_config, &config.runtime_config);
+    pub fn new(config: Config, internal_config: InternalConfig) -> Self {
+        let java_vm =
+            Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
         let executor = MainExecutor::new(Arc::new(java_vm));
         let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
         JavaServiceRuntime {
@@ -132,16 +132,40 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(jvm_config: &JvmConfig, runtime_config: &RuntimeConfig) -> JavaVM {
-        let args = Self::build_jvm_arguments(jvm_config, runtime_config)
+    fn create_java_vm(
+        jvm_config: &JvmConfig,
+        runtime_config: &RuntimeConfig,
+        internal_config: InternalConfig,
+    ) -> JavaVM {
+        let args = Self::build_jvm_arguments(jvm_config, runtime_config, internal_config)
             .expect("Unable to build arguments for JVM");
-        jni::JavaVM::new(args).unwrap()
+
+        jni::JavaVM::new(args)
+            .map_err(Self::transform_jni_error)
+            .expect("Unable to create JVM")
+    }
+
+    /// Transforms JNI errors by converting JNI error codes of error of type `Other` to its string
+    /// representation.
+    fn transform_jni_error(error: Error) -> Error {
+        match error.0 {
+            ErrorKind::Other(code) => match code {
+                jni::sys::JNI_EINVAL => "Invalid arguments".into(),
+                jni::sys::JNI_EEXIST => "VM already created".into(),
+                jni::sys::JNI_ENOMEM => "Not enough memory".into(),
+                jni::sys::JNI_EVERSION => "JNI version error".into(),
+                jni::sys::JNI_ERR => "Unknown JNI error".into(),
+                _ => error,
+            },
+            _ => error,
+        }
     }
 
     /// Builds arguments for JVM initialization.
     fn build_jvm_arguments(
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
+        internal_config: InternalConfig,
     ) -> JniResult<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
@@ -152,7 +176,7 @@ impl JavaServiceRuntime {
         args_builder = Self::add_user_arguments(args_builder, args_prepend);
 
         // Add required arguments
-        args_builder = Self::add_required_arguments(args_builder, runtime_config);
+        args_builder = Self::add_required_arguments(args_builder, runtime_config, internal_config);
 
         // Add optional arguments
         args_builder = Self::add_optional_arguments(args_builder, jvm_config);
@@ -177,17 +201,23 @@ impl JavaServiceRuntime {
 
     /// Adds required EJB-related arguments to JVM configuration
     fn add_required_arguments(
-        args_builder: InitArgsBuilder,
+        mut args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
+        internal_config: InternalConfig,
     ) -> InitArgsBuilder {
+        // We do not use system library path in tests, because an absolute path to the native
+        // library will be provided at compile time using RPATH.
+        if internal_config.system_lib_path.is_some() {
+            args_builder = args_builder.option(&format!(
+                "-Djava.library.path={}",
+                internal_config.system_lib_path.unwrap()
+            ));
+        }
+
         args_builder
             .option(&format!(
-                "-Djava.library.path={}",
-                runtime_config.system_lib_path
-            ))
-            .option(&format!(
                 "-Djava.class.path={}",
-                runtime_config.system_class_path
+                internal_config.system_class_path
             ))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
@@ -215,16 +245,34 @@ impl JavaServiceRuntime {
     }
 }
 
-/// Panics if `_JAVA_OPTIONS` environmental variable is set.
-pub fn panic_if_java_options() {
-    if env::var("_JAVA_OPTIONS").is_ok() {
-        panic!(
-            "_JAVA_OPTIONS environment variable is set. \
-             Due to the fact that it will overwrite any JVM settings, \
-             including ones set by EJB internally, this variable is \
-             forbidden for EJB applications.\n\
-             It is recommended to use `--ejb-jvm-args` command-line \
-             parameter for setting custom JVM parameters."
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn transform_jni_error_error_type_other() {
+        let error = Error::from(ErrorKind::Other(jni::sys::JNI_EINVAL));
+        assert_eq!(
+            "Invalid arguments",
+            JavaServiceRuntime::transform_jni_error(error).description()
+        );
+    }
+
+    #[test]
+    fn transform_jni_error_not_type_other() {
+        let error_detached = Error::from(ErrorKind::ThreadDetached);
+        assert_eq!(
+            "Current thread is not attached to the java VM",
+            JavaServiceRuntime::transform_jni_error(error_detached).description()
+        );
+    }
+
+    #[test]
+    fn transform_jni_error_type_other_code_not_in_range() {
+        let error = Error::from(ErrorKind::Other(-42));
+        assert_eq!(
+            "JNI error",
+            JavaServiceRuntime::transform_jni_error(error).description()
         );
     }
 }

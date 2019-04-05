@@ -54,13 +54,11 @@ class SystemApiHelperTest {
 
   private static List<Arguments> healthCheckSource() {
     return ImmutableList.of(
-        Arguments.of("{\"consensus_status\": \"Enabled\", \"connectivity\": \"NotConnected\"}",
+        Arguments.of("{\"consensus_status\": \"Enabled\", \"connected_peers\": 0}",
             new HealthCheckInfo(ConsensusStatus.ENABLED, 0)),
-        Arguments.of("{\"consensus_status\": \"Disabled\", \"connectivity\": \"NotConnected\"}",
+        Arguments.of("{\"consensus_status\": \"Disabled\", \"connected_peers\": 0}",
             new HealthCheckInfo(ConsensusStatus.DISABLED, 0)),
-        Arguments.of("{\"consensus_status\": \"Active\","
-                + "\"connectivity\": {\"Connected\": {\"amount\": 1 } }"
-                + "}",
+        Arguments.of("{\"consensus_status\": \"Active\", \"connected_peers\": 1 }",
             new HealthCheckInfo(ConsensusStatus.ACTIVE, 1))
     );
   }

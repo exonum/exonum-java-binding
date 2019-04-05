@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+The release is based on Exonum 0.11
+
+### Added
+- `toOptional()` method to `EntryIndexProxy`. (#790) 
+
 ## [0.5.0] - 2019-03-13
 
 ### Overview

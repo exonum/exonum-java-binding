@@ -344,16 +344,8 @@ final class QaServiceImpl extends AbstractService implements QaService {
     return node.withSnapshot(s -> {
       TimeSchema timeOracle = TimeSchema.newInstance(s);
       EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
-      return toOptional(currentTime);
+      return currentTime.toOptional();
     });
-  }
-
-  private <T> Optional<T> toOptional(EntryIndexProxy<T> entry) {
-    if (entry.isPresent()) {
-      return Optional.of(entry.get());
-    } else {
-      return Optional.empty();
-    }
   }
 
   @Override

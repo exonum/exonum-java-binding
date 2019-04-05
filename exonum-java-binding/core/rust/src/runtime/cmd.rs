@@ -23,14 +23,14 @@ use exonum::node::NodeConfig;
 use failure;
 use toml::Value;
 
+use std::path::PathBuf;
+
 /// This code encapsulates our extension to the node's binary command line arguments. We extend the
 /// regular `run` command of the node with processing of custom EJB arguments and compose the
 /// `Config` structure that contains all required data for initialization of service runtime.
 
 // Parameters for `run` command
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
-const EJB_CLASSPATH_SYSTEM: &str = "EJB_CLASSPATH_SYSTEM";
-const EJB_LIBPATH: &str = "EJB_LIBPATH";
 const EJB_PORT: &str = "EJB_PORT";
 const JVM_DEBUG_SOCKET: &str = "JVM_DEBUG_SOCKET";
 const JVM_ARGS_PREPEND: &str = "JVM_ARGS_PREPEND";
@@ -90,22 +90,6 @@ impl CommandExtension for Run {
                 "jvm-args-append",
                 true,
             ),
-            Argument::new_named(
-                EJB_CLASSPATH_SYSTEM,
-                true,
-                "Java runtime classpath. Must include all its dependencies.",
-                None,
-                "ejb-classpath",
-                false,
-            ),
-            Argument::new_named(
-                EJB_LIBPATH,
-                true,
-                "Path to java-bindings shared library.",
-                None,
-                "ejb-libpath",
-                false,
-            ),
         ]
     }
 
@@ -115,8 +99,6 @@ impl CommandExtension for Run {
         let args_prepend: Vec<String> = context.arg_multiple(JVM_ARGS_PREPEND).unwrap_or_default();
         let args_append: Vec<String> = context.arg_multiple(JVM_ARGS_APPEND).unwrap_or_default();
         let jvm_debug_socket = context.arg(JVM_DEBUG_SOCKET).ok();
-        let system_class_path = context.arg(EJB_CLASSPATH_SYSTEM)?;
-        let system_lib_path = context.arg(EJB_LIBPATH)?;
 
         let jvm_config = JvmConfig {
             args_prepend,
@@ -127,8 +109,6 @@ impl CommandExtension for Run {
         let runtime_config = RuntimeConfig {
             log_config_path,
             port,
-            system_class_path,
-            system_lib_path,
         };
 
         let config = Config {
@@ -153,7 +133,7 @@ fn write_ejb_config(context: &mut Context, value: Value) {
 }
 
 /// Extracts the `NodeConfig` from `Context` for further processing
-fn get_node_config(context: &Context) -> NodeConfig {
+fn get_node_config(context: &Context) -> NodeConfig<PathBuf> {
     context
         .get(keys::NODE_CONFIG)
         .expect("Unable to read node configuration.")

@@ -24,9 +24,9 @@ extern crate parking_lot;
 use exonum_testkit::TestKitBuilder;
 use integration_tests::{
     fake_service::*,
-    vm::{get_fake_service_artifact_path, get_fakes_classpath, get_libpath},
+    vm::{get_fake_service_artifact_path, get_fakes_classpath},
 };
-use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
+use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 use parking_lot::{Mutex, MutexGuard};
 
 lazy_static! {
@@ -111,21 +111,15 @@ fn create_service_for_unknown_artifact() {
 }
 
 fn create_runtime() -> JavaServiceRuntime {
-    let system_class_path = get_fakes_classpath();
-    let system_lib_path = get_libpath();
-    let log_config_path = "".to_owned();
-
     let jvm_config = JvmConfig {
-        args_prepend: Vec::new(),
-        args_append: Vec::new(),
+        args_prepend: vec![],
+        args_append: vec![],
         jvm_debug_socket: None,
     };
 
     let runtime_config = RuntimeConfig {
-        log_config_path,
+        log_config_path: "".to_owned(),
         port: 6300,
-        system_class_path,
-        system_lib_path,
     };
 
     let config = Config {
@@ -133,7 +127,12 @@ fn create_runtime() -> JavaServiceRuntime {
         runtime_config,
     };
 
-    JavaServiceRuntime::new(config)
+    let internal_config = InternalConfig {
+        system_class_path: get_fakes_classpath(),
+        system_lib_path: None,
+    };
+
+    JavaServiceRuntime::new(config, internal_config)
 }
 
 // Returns a guard to the service runtime that helps executing tests in turn.
