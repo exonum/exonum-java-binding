@@ -39,7 +39,7 @@ ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-qa-service-*
 echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
 
 # Prepare the services configuration file
-SERVICES_CONFIG_FILE="ejb_app_services.toml"
+SERVICES_CONFIG_FILE="services.toml"
 SERVICE_NAME="ejb-qa-service"
 echo "[user_services]" > ${SERVICES_CONFIG_FILE}
 echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
@@ -52,7 +52,7 @@ echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 rm -rf testnet
 mkdir testnet
 
-trap "killall ejb-app" SIGINT SIGTERM EXIT
+trap "killall exonum-java" SIGINT SIGTERM EXIT
 
 # Configure and run nodes
 node_count=$1

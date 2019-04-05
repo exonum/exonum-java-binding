@@ -34,7 +34,7 @@ public interface TimeSchema {
    * Constructs a time schema for a given dbView.
    *
    * <p>Won't be constructed unless time service is enabled. To enable time service, put 'time'
-   * into 'ejb_app_services.toml' file.
+   * into 'services.toml' file.
    *
    * @throws IllegalStateException if time service is not enabled
    */
