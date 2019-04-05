@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- A simple configuration to be used along with EJB App.
+<!-- A simple configuration to be used along with Exonum Java app.
      Error log entries go to file. -->
 <Configuration status="WARN">
     <Appenders>

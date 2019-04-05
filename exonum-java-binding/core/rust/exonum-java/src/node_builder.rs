@@ -28,7 +28,7 @@ use java_bindings::{
 
 use std::{collections::HashSet, path::Path};
 
-/// Creates `NodeBuilder` using services configuration from `ejb_app_services.toml` located in the working directory.
+/// Creates `NodeBuilder` using services configuration from `services.toml` located in the working directory.
 pub fn create() -> fabric::NodeBuilder {
     let service_factories = prepare_service_factories(PATH_TO_SERVICES_DEFINITION);
     let mut builder = fabric::NodeBuilder::new();
@@ -49,7 +49,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 
     // Make sure there is at least one user service defined.
     if user_services.is_empty() {
-        panic!("At least one user service should be defined in the \"ejb_app_services.toml\" file");
+        panic!("At least one user service should be defined in the \"services.toml\" file");
     }
 
     // Check whether we have system services defined or insert the configuration service otherwise.

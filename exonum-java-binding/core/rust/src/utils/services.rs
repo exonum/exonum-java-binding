@@ -28,7 +28,7 @@ pub mod system_service_names {
 }
 
 /// Path to the services definition file.
-pub const PATH_TO_SERVICES_DEFINITION: &str = "ejb_app_services.toml";
+pub const PATH_TO_SERVICES_DEFINITION: &str = "services.toml";
 
 #[derive(Serialize, Deserialize)]
 pub struct EjbAppServices {
