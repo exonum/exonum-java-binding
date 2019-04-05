@@ -36,7 +36,7 @@ Then run:
 $ mvn install
 ```
 
-#### Building Java Binding App
+#### Building Exonum Java App
 Run:
 
 ```$sh
