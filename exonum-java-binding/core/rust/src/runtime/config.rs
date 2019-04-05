@@ -16,32 +16,13 @@
 
 use std::fmt;
 
-/// Full configuration of the EJB runtime, JVM and Java service.
+/// Full configuration of the EJB runtime and JVM.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// Service-specific configuration parameters.
-    pub service_config: ServiceConfig,
     /// JVM-specific configuration parameters.
     pub jvm_config: JvmConfig,
     /// EJB runtime-specific configuration parameters.
     pub runtime_config: RuntimeConfig,
-}
-
-/// Service-specific configuration parameters.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct ServiceConfig {
-    /// Java service classpath.
-    ///
-    /// Provided by the user on `finalize` configuration step.
-    /// Private configuration parameter, can be unique for every node.
-    pub service_class_path: String,
-    /// Fully qualified service module name.
-    ///
-    /// Must be subclass of `AbstractModule` and contain no-arguments constructor.
-    ///
-    /// Provided by the user on `generate-template` configuration step.
-    /// Public configuration parameter, shared between all nodes in the network.
-    pub module_name: String,
 }
 
 /// JVM-specific configuration parameters.
@@ -74,13 +55,6 @@ pub struct RuntimeConfig {
     /// A port of the HTTP server for Java services.
     /// Must be distinct from the ports used by Exonum.
     pub port: i32,
-}
-
-/// This is DTO for `module_name` parameter, used for storing `module_name`
-/// between `generate-template` and `finalize` configuration steps.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub(crate) struct PublicConfig {
-    pub module_name: String,
 }
 
 /// Internal EJB configuration.

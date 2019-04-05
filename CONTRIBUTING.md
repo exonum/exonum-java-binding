@@ -54,6 +54,9 @@ is valid. It may take a long time, so you can pass `--skip-tests` flag to skip t
 $ ./package_app.sh --skip-tests
 ```
 
+By default, the EJB App is build in debug mode, which affects performance and not desired for production usage. 
+To enable release mode, you need to simply pass `--release` flag to the `package_app.sh` script.
+
 ## EJB Modules
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:

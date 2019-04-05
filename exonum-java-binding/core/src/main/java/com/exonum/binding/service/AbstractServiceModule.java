@@ -23,8 +23,7 @@ import com.google.inject.AbstractModule;
  *
  * <p>The implementation must be specified as an extension:
  * <pre>
- *   // fixme: do I really need to put explicit points if using abstract class?
- *   &#64;Extension(points = ServiceModule.class)
+ *   &#64;Extension
  *   class MyServiceModule extends AbstractServiceModule {
  *
  *   }

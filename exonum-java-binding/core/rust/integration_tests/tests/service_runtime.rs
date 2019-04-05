@@ -19,25 +19,12 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use exonum_testkit::TestKitBuilder;
-use integration_tests::vm::get_fakes_classpath;
-use java_bindings::{
-    Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig, ServiceConfig,
-};
-
-const TEST_SERVICE_MODULE_NAME: &str =
-    "com.exonum.binding.fakes.services.service.TestServiceModule";
+use integration_tests::vm::{get_fake_service_artifact_path, get_fakes_classpath};
+use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
 fn bootstrap() {
-    let service_config = ServiceConfig {
-        module_name: TEST_SERVICE_MODULE_NAME.to_owned(),
-        service_class_path: "".to_string(),
-    };
-
-    let runtime_config = RuntimeConfig {
-        log_config_path: "".to_string(),
-        port: 6000,
-    };
+    let artifact_path = get_fake_service_artifact_path();
 
     let jvm_config = JvmConfig {
         args_prepend: vec![],
@@ -45,19 +32,25 @@ fn bootstrap() {
         jvm_debug_socket: None,
     };
 
-    let service_runtime = JavaServiceRuntime::get_or_create(
-        Config {
-            runtime_config,
-            jvm_config,
-            service_config,
-        },
-        InternalConfig {
-            system_class_path: get_fakes_classpath(),
-            system_lib_path: None,
-        },
-    );
+    let runtime_config = RuntimeConfig {
+        log_config_path: "".to_owned(),
+        port: 6300,
+    };
 
-    let service = service_runtime.create_service("", TEST_SERVICE_MODULE_NAME);
+    let config = Config {
+        jvm_config,
+        runtime_config,
+    };
+
+    let internal_config = InternalConfig {
+        system_class_path: get_fakes_classpath(),
+        system_lib_path: None,
+    };
+
+    let service_runtime = JavaServiceRuntime::new(config, internal_config);
+
+    let artifact_id = service_runtime.load_artifact(&artifact_path);
+    let service = service_runtime.create_service(&artifact_id);
 
     let mut testkit = TestKitBuilder::validator().with_service(service).create();
 

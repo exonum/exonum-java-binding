@@ -41,16 +41,24 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
+     <!-- Exonum *must* have 'provided' scope so that it and its dependencies are not included
+         in the service artifact. Some of transitive dependencies of Exonum are safe
+         and recommended to use in a service in 'provided' scope as well, because they will not
+         be changed in an incompatible way in a compatible release of Exonum. Such dependencies
+         are listed in exonum-java-binding-bom (e.g., guava, guice, gson, vertx, pf4j,
+         protobuf-java). You can either use them implicitly as transitive dependencies
+         (no extra POM modifications needed) or define explicitly below with 'provided' scope
+         and NO version — it will be inherited from exonum-java-binding-bom.
+
+         See also https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies
+         -->
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-binding-core</artifactId>
+      <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web</artifactId>
-    </dependency>
-
+    <!-- Test dependencies -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -113,6 +121,34 @@
                  integration tests that require a native library. -->
             -Djava.library.path=${project.basedir}/core/rust/target/debug
           </argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>package-service-artifact</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <!-- This configuration produces a JAR file with this service definition in Exonum format -->
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <archive>
+            <manifestEntries>
+              <Plugin-Id>${project.groupId}:${project.artifactId}:${project.version}</Plugin-Id>
+              <Plugin-Version>${project.version}</Plugin-Version>
+              <Plugin-Provider>${project.groupId}</Plugin-Provider>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>
     </plugins>

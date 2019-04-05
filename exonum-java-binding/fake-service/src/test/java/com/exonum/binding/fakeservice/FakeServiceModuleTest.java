@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.fakes.services.service;
+package com.exonum.binding.fakeservice;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,15 +26,16 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;
 
-class TestServiceModuleTest {
+class FakeServiceModuleTest {
 
   @Test
   void configure() {
-    Injector injector = Guice.createInjector(new TestServiceModule());
+    Injector injector = Guice.createInjector(new FakeServiceModule());
 
     Service instance = injector.getInstance(Service.class);
 
     assertNotNull(instance);
-    assertThat(instance, instanceOf(TestService.class));
+    assertThat(instance, instanceOf(FakeService.class));
+    assertThat(instance.getId(), equalTo(FakeService.ID));
   }
 }
