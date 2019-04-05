@@ -13,6 +13,7 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
       <version>0.6.0-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
 ```
 
