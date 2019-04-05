@@ -63,7 +63,7 @@ public class EmulatedNode {
   }
 
   /**
-   * Returns a consensus key pair of this node. This key pair is used to sign consensus message of
+   * Returns a consensus key pair of this node. This key pair is used to sign consensus messages of
    * this node.
    */
   public KeyPair getConsensusKeyPair() {

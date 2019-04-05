@@ -44,6 +44,11 @@ import javax.annotation.Nullable;
  * network, only one node will create the service instances and will execute their operations
  * (e.g., {@link Service#afterCommit(BlockCommittedEvent)} method logic).
  *
+ * <p>When TestKit is created, Exonum blockchain instance with given services is initialized and
+ * genesis block is committed. The service instances are created and their
+ * {@linkplain UserServiceAdapter#initialize(long)}  initialization} methods are called and
+ * {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are created.
+ *
  * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
  */
 public final class TestKit {
@@ -57,12 +62,8 @@ public final class TestKit {
 
   private TestKit(List<Class<? extends ServiceModule>> serviceModules, EmulatedNodeType nodeType,
                   short validatorCount, @Nullable TimeProvider timeProvider) {
-    List<UserServiceAdapter> serviceAdapters = new ArrayList<>(serviceModules.size());
-    for (Class<? extends ServiceModule> moduleClass : serviceModules) {
-      UserServiceAdapter serviceAdapter = createUserServiceAdapter(moduleClass);
-      serviceAdapters.add(serviceAdapter);
-      services.put(serviceAdapter.getId(), serviceAdapter.getService());
-    }
+    List<UserServiceAdapter> serviceAdapters = toUserServiceAdapters(serviceModules);
+    populateServiceMap(serviceAdapters);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     UserServiceAdapter[] userServiceAdapters = serviceAdapters.toArray(new UserServiceAdapter[0]);
     // TODO: fix after native implementation
@@ -134,6 +135,34 @@ public final class TestKit {
   public static Builder builder(EmulatedNodeType nodeType) {
     checkNotNull(nodeType);
     return new Builder(nodeType);
+  }
+
+  /**
+   * Returns a list of user service adapters created from given service modules.
+   */
+  private List<UserServiceAdapter> toUserServiceAdapters(List<Class<? extends ServiceModule>> serviceModules) {
+    List<UserServiceAdapter> serviceAdapters = new ArrayList<>(serviceModules.size());
+    for (Class<? extends ServiceModule> moduleClass : serviceModules) {
+      UserServiceAdapter serviceAdapter = createUserServiceAdapter(moduleClass);
+      serviceAdapters.add(serviceAdapter);
+    }
+    return serviceAdapters;
+  }
+
+  /**
+   * Populate the map of services given the list of service adapters.
+   */
+  private void populateServiceMap(List<UserServiceAdapter> serviceAdapters) {
+    for (UserServiceAdapter serviceAdapter: serviceAdapters) {
+      short serviceId = serviceAdapter.getId();
+      checkForDuplicateService(serviceId);
+      services.put(serviceId, serviceAdapter.getService());
+    }
+  }
+
+  private void checkForDuplicateService(short serviceId) {
+    checkArgument(!services.containsKey(serviceId),
+        "Service with id %s was added to the TestKit twice");
   }
 
   /**

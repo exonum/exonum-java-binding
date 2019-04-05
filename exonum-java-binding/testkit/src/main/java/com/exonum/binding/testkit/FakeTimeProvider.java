@@ -18,6 +18,7 @@ package com.exonum.binding.testkit;
 
 import java.time.ZonedDateTime;
 
+// TODO: update Javadocs in P2 [ECR-3050]
 public class FakeTimeProvider implements TimeProvider {
 
   public FakeTimeProvider create(ZonedDateTime time) {

@@ -35,6 +35,12 @@ public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
   private final Class<? extends ServiceModule> moduleClass;
   private final MethodHandle moduleConstructor;
 
+  /**
+   * Creates a module supplier for a given service module class.
+   *
+   * @throws NoSuchMethodException if the constructor of given service module class does not exist
+   * @throws IllegalAccessException if accessing the no-arg module constructor failed
+   */
   public ReflectiveModuleSupplier(Class<? extends ServiceModule> moduleClass)
       throws NoSuchMethodException, IllegalAccessException {
     this.moduleClass = moduleClass;
