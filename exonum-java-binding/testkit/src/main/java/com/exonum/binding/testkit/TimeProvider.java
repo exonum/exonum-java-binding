@@ -18,7 +18,7 @@ package com.exonum.binding.testkit;
 
 import java.time.ZonedDateTime;
 
-// TODO: update Javadocs in P2 [ECR-3050]
+// TODO: update Javadocs in P2 [ECR-3051]
 public interface TimeProvider {
   ZonedDateTime getTime();
 }
