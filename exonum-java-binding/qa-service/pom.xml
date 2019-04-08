@@ -38,10 +38,10 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Time oracle is a compile-scoped dependency till Packaging is delivered. -->
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

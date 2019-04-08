@@ -17,14 +17,14 @@ This guide shows how to build the whole project only.
 ### System Dependencies
 You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
-  * [JDK 1.8+](http://jdk.java.net/10/).
+  * [JDK 1.8+](https://jdk.java.net/12/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Rust 1.32.0](https://www.rust-lang.org/).
   To install a specific Rust version, use `rustup install 1.32.0` command.
   * The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
-  * For automatic packaging of the EJB App you need [CMake](https://cmake.org/) installed in your system. Also on 
-  Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
+  * For automatic packaging of the Exonum Java app you need [CMake](https://cmake.org/) installed in your system. 
+  Also on Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
 
 ### Building
 Set required environment variables, once in a shell you use to build the project:
@@ -36,7 +36,7 @@ Then run:
 $ mvn install
 ```
 
-#### Building Java Binding App
+#### Building Exonum Java App
 Run:
 
 ```$sh
@@ -44,7 +44,7 @@ $ cd exonum-java-binding
 $ ./package_app.sh
 ```
 
-This command will build and package EJB App with all the necessary runtime dependencies
+This command will build and package Exonum Java app with all the necessary runtime dependencies
 in a single `zip` archive in `exonum-java-binding/packaging/target` directory.
 
 Before packaging, the script will also run all the tests to guarantee that the generated application
@@ -54,8 +54,9 @@ is valid. It may take a long time, so you can pass `--skip-tests` flag to skip t
 $ ./package_app.sh --skip-tests
 ```
 
-By default, the EJB App is build in debug mode, which affects performance and not desired for production usage. 
-To enable release mode, you need to simply pass `--release` flag to the `package_app.sh` script.
+By default, the Exonum Java app is built in debug mode, which affects performance
+and is not desired for production usage. To enable release mode, you need
+to pass `--release` flag to the `package_app.sh` script.
 
 ## EJB Modules
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
@@ -63,7 +64,7 @@ Here are the main ones:
   * [`core`](exonum-java-binding/core) contains the APIs to define and implement an 
   [Exonum service](https://exonum.com/doc/version/0.10/get-started/design-overview/#modularity-and-services).
   * [`core-native`](exonum-java-binding/core/rust) contains the glue code between Java and Rust.
-  * [`app`](exonum-java-binding/core/rust/ejb-app) is an application that runs a node with Java 
+  * [`app`](exonum-java-binding/core/rust/exonum-java) is an application that runs a node with Java 
   and Rust services.
   * [`common`](exonum-java-binding/common) provides common functionality to Exonum core
   and light clients: [Exonum proofs](https://exonum.com/doc/version/0.10/get-started/design-overview/#proofs),
@@ -94,7 +95,7 @@ The following scripts can be run separately
 from the [EJB](exonum-java-binding) directory:
 * `./run_maven_tests.sh` - all tests in Java and unit tests in Rust.
 * `./run_native_integration_tests.sh` - integration tests in Rust.
-* `./run_ejb_app_tests.sh` - application tests in Rust.
+* `./run_app_tests.sh` - application tests in Rust.
 
 ### Writing Tests
 #### Java

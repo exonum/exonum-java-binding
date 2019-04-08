@@ -589,21 +589,6 @@ version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "ejb-app"
-version = "0.6.0-SNAPSHOT"
-dependencies = [
- "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-btc-anchoring 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-configuration 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-time 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "java_bindings 0.6.0-SNAPSHOT",
- "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
- "tempfile 3.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "toml 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "encoding"
 version = "0.2.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -844,6 +829,21 @@ dependencies = [
  "proc-macro2 0.4.27 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "syn 0.15.27 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "exonum-java"
+version = "0.6.0-SNAPSHOT"
+dependencies = [
+ "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-btc-anchoring 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-configuration 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-time 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "java_bindings 0.6.0-SNAPSHOT",
+ "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tempfile 3.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "toml 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
