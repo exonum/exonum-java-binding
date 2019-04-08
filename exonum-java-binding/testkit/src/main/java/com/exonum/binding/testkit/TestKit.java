@@ -204,9 +204,7 @@ public final class TestKit {
     @SafeVarargs
     public final Builder withServices(Class<? extends ServiceModule> serviceModule,
                                       Class<? extends ServiceModule>... serviceModules) {
-      List<Class<? extends ServiceModule>> services = asList(serviceModule, serviceModules);
-      this.services.addAll(services);
-      return this;
+      return withServices(asList(serviceModule, serviceModules));
     }
 
     /**
