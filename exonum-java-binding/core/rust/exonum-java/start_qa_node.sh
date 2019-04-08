@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# Runs exonum-java executable from target directory and starts N Exonum nodes with
+# QA service, where N corresponds to the first argument of the script.
+#
+# This script is intended to be used by Exonum developers to speed up working workflow.
+# Running the executable from target doesn't need packaging and therefore can be performed
+# immediately after running tests, without additional recompilation.
 
 set -eu -o pipefail
 
@@ -18,21 +24,16 @@ function header() {
     echo
 }
 
-# Use an already set JAVA_HOME, or infer it from java.home system property.
-#
-# Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
-# hence this a bit complex thing.
-JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
-echo "JAVA_HOME=${JAVA_HOME}"
-
-# Find the directory containing libjvm (the relative path has changed in Java 9)
-export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-
 EJB_APP_DIR=$(pwd)
 echo "CURRENT_DIR=${EJB_APP_DIR}"
 
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
+
+source "${EJB_ROOT}/tests_profile"
+
+export LD_LIBRARY_PATH="${JAVA_LIB_DIR}"
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Find the artifact
 ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-qa-service-*-artifact.jar)"
@@ -46,7 +47,6 @@ echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 
 header "PREPARE PATHS"
 
-echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
 rm -rf testnet
@@ -68,14 +68,14 @@ do
 done
 
 header "GENERATE COMMON CONFIG"
-cargo run -- generate-template --validators-count $node_count testnet/common.toml
+cargo +$RUST_COMPILER_VERSION run -- generate-template --validators-count $node_count testnet/common.toml
 
 header "GENERATE CONFIG"
 for i in $(seq 0 $((node_count - 1)))
 do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
-    cargo run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
+    cargo +$RUST_COMPILER_VERSION run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
      --no-password \
      --consensus-path testnet/consensus${i}.toml \
      --service-path testnet/service${i}.toml \
@@ -85,7 +85,7 @@ done
 header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
-    cargo run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
+    cargo +$RUST_COMPILER_VERSION run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
      --public-configs testnet/pub_*.toml
 done
 
@@ -96,7 +96,7 @@ do
     port=$((3000 + i))
     private_port=$((port + 100))
     ejb_port=$((6000 + i))
-    cargo run -- run \
+    cargo +$RUST_COMPILER_VERSION run -- run \
      -c testnet/node_$i.toml \
      -d testnet/db/$i \
      --ejb-port ${ejb_port} \

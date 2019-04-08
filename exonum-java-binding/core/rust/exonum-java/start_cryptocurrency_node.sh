@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# Runs exonum-java executable from target directory and starts one Exonum node with
+# cryptocurrency service.
+#
+# This script is intended to be used by Exonum developers to speed up working workflow.
+# Running the executable from target doesn't need packaging and therefore can be performed
+# immediately after running tests, without additional recompilation.
 
 set -eu -o pipefail
 
@@ -18,22 +24,13 @@ function header() {
     echo
 }
 
-# Use an already set JAVA_HOME, or infer it from java.home system property.
-#
-# Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
-# hence this a bit complex thing.
-JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}/"
-echo "JAVA_HOME=${JAVA_HOME}"
-
-# Find the directory containing libjvm (the relative path has changed in Java 9)
-JVM_LIB_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-echo "JVM_LIB_PATH=${JVM_LIB_PATH}"
-
 EJB_APP_DIR=$(pwd)
 echo "CURRENT_DIR=${EJB_APP_DIR}"
 
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
+
+source "${EJB_ROOT}/tests_profile"
 
 # Find the artifact
 ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
@@ -49,7 +46,7 @@ header "PREPARE PATHS"
 
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
 
-export LD_LIBRARY_PATH="$JVM_LIB_PATH"
+export LD_LIBRARY_PATH="$JAVA_LIB_DIR"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Clear test dir
@@ -57,21 +54,21 @@ rm -rf testnet
 mkdir testnet
 
 header "GENERATE COMMON CONFIG"
-cargo run -- generate-template --validators-count=1 testnet/common.toml
+cargo +$RUST_COMPILER_VERSION run -- generate-template --validators-count=1 testnet/common.toml
 
 header "GENERATE CONFIG"
-cargo run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+cargo +$RUST_COMPILER_VERSION run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
  --no-password \
  --consensus-path testnet/consensus.toml \
  --service-path testnet/service.toml \
  --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-cargo run -- finalize testnet/sec.toml testnet/node.toml \
+cargo +$RUST_COMPILER_VERSION run -- finalize testnet/sec.toml testnet/node.toml \
  --public-configs testnet/pub.toml
 
 header "START TESTNET"
-cargo run -- run -d testnet/db -c testnet/node.toml \
+cargo +$RUST_COMPILER_VERSION run -- run -d testnet/db -c testnet/node.toml \
  --consensus-key-pass pass \
  --service-key-pass pass \
  --public-api-address 127.0.0.1:3000 \
