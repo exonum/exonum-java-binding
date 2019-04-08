@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-mod cmd;
-mod config;
-mod java_service_runtime;
-mod service_factory_adapter;
-mod utils;
+package com.exonum.client.request;
 
-pub use self::config::*;
-pub use self::java_service_runtime::JavaServiceRuntime;
-pub use self::service_factory_adapter::JavaServiceFactoryAdapter;
-pub use self::utils::panic_if_java_options;
+import com.exonum.client.response.Block;
+
+/**
+ * Request option for block commit time.
+ * See {@link Block#getCommitTime()}.
+ */
+public enum BlockTimeOption {
+  /**
+   * Do not include block commit times in a response.
+   */
+  NO_COMMIT_TIME,
+  /**
+   * Include block commit times in a response.
+   */
+  INCLUDE_COMMIT_TIME
+}

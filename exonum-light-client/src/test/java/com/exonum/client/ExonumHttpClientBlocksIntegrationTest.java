@@ -31,6 +31,10 @@ import static com.exonum.client.Blocks.BLOCK_3_WITHOUT_TIME;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
+import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
+import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
+import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
+import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -41,6 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.client.request.BlockFilteringOption;
+import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
@@ -122,10 +128,10 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Call
     int blocksCount = MAX_BLOCKS_PER_REQUEST;
-    boolean skipEmpty = true;
+    BlockFilteringOption blockFilter = SKIP_EMPTY;
     long height = Long.MAX_VALUE;
-    boolean showTimes = true;
-    BlocksResponse response = exonumClient.getBlocks(blocksCount, skipEmpty, height, showTimes);
+    BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
+    BlocksResponse response = exonumClient.getBlocks(blocksCount, blockFilter, height, timeOption);
 
     // Assert response
     assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
@@ -136,7 +142,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, blocksCount, skipEmpty, height, showTimes);
+    assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, height, timeOption);
   }
 
   @Test
@@ -153,10 +159,10 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Call
     int blocksCount = MAX_BLOCKS_PER_REQUEST;
-    boolean skipEmpty = true;
+    BlockFilteringOption blockFilter = SKIP_EMPTY;
     long height = Long.MAX_VALUE;
-    boolean showTimes = false;
-    BlocksResponse response = exonumClient.getBlocks(blocksCount, skipEmpty, height, showTimes);
+    BlockTimeOption timeOption = NO_COMMIT_TIME;
+    BlocksResponse response = exonumClient.getBlocks(blocksCount, blockFilter, height, timeOption);
 
     // Assert response
     assertThat(response.getBlocks(),
@@ -168,28 +174,28 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, blocksCount, skipEmpty, height, showTimes);
+    assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, height, timeOption);
   }
 
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, MAX_BLOCKS_PER_REQUEST + 1, Integer.MAX_VALUE})
   void getBlocksWrongBlocksCount(int blocksCount) {
     assertThrows(IllegalArgumentException.class,
-        () -> exonumClient.getBlocks(blocksCount, false, 1L, false));
+        () -> exonumClient.getBlocks(blocksCount, INCLUDE_EMPTY, 1L, NO_COMMIT_TIME));
   }
 
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, MAX_BLOCKS_PER_REQUEST + 1, Integer.MAX_VALUE})
   void getLastBlocksWrongBlocksCount(int blocksCount) {
     assertThrows(IllegalArgumentException.class,
-        () -> exonumClient.getLastBlocks(blocksCount, false, false));
+        () -> exonumClient.getLastBlocks(blocksCount, INCLUDE_EMPTY, NO_COMMIT_TIME));
   }
 
   @ParameterizedTest
   @ValueSource(longs = {Long.MIN_VALUE, -1L})
   void getBlocksWrongHeight(long heightMax) {
     assertThrows(IllegalArgumentException.class,
-        () -> exonumClient.getBlocks(1, false, heightMax, false));
+        () -> exonumClient.getBlocks(1, INCLUDE_EMPTY, heightMax, NO_COMMIT_TIME));
   }
 
   @Test
@@ -206,9 +212,9 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Call
     int blocksCount = MAX_BLOCKS_PER_REQUEST;
-    boolean skipEmpty = true;
-    boolean showTimes = true;
-    BlocksResponse response = exonumClient.getLastBlocks(blocksCount, skipEmpty, showTimes);
+    BlockFilteringOption blockFilter = SKIP_EMPTY;
+    BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
+    BlocksResponse response = exonumClient.getLastBlocks(blocksCount, blockFilter, timeOption);
 
     // Assert response
     assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
@@ -219,7 +225,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, blocksCount, skipEmpty, null, showTimes);
+    assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, null, timeOption);
   }
 
   @Test
@@ -235,8 +241,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    boolean withTime = false;
-    Block block = exonumClient.getLastBlock(withTime);
+    Block block = exonumClient.getLastBlock();
 
     // Assert response
     assertThat(block, is(BLOCK_1_WITHOUT_TIME));
@@ -245,7 +250,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 1, false, null, withTime);
+    assertBlockRequestParams(recordedRequest, 1, INCLUDE_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
   @Test
@@ -261,8 +266,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    boolean withTime = false;
-    Optional<Block> block = exonumClient.getLastNonEmptyBlock(withTime);
+    Optional<Block> block = exonumClient.getLastNonEmptyBlock();
 
     // Assert response
     assertTrue(block.isPresent());
@@ -272,7 +276,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 1, true, null, withTime);
+    assertBlockRequestParams(recordedRequest, 1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
   @Test
@@ -288,8 +292,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    boolean withTime = false;
-    Optional<Block> block = exonumClient.getLastNonEmptyBlock(withTime);
+    Optional<Block> block = exonumClient.getLastNonEmptyBlock();
 
     // Assert response
     assertFalse(block.isPresent());
@@ -298,7 +301,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 1, true, null, withTime);
+    assertBlockRequestParams(recordedRequest, 1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
   @Test
@@ -325,11 +328,14 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, 0, false, null, false);
+    assertBlockRequestParams(recordedRequest, 0, INCLUDE_EMPTY, null, NO_COMMIT_TIME);
   }
 
   private static void assertBlockRequestParams(RecordedRequest request, int count,
-      boolean skipEmpty, Long heightMax, boolean withBlocksTime) {
+      BlockFilteringOption blockFilter, Long heightMax, BlockTimeOption timeOption) {
+    boolean skipEmpty = blockFilter == SKIP_EMPTY;
+    boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
+
     assertThat(request.getRequestUrl().queryParameter("count"),
         is(String.valueOf(count)));
     assertThat(request.getRequestUrl().queryParameter("skip_empty_blocks"),
@@ -341,7 +347,7 @@ class ExonumHttpClientBlocksIntegrationTest {
           is(String.valueOf(heightMax)));
     }
     assertThat(request.getRequestUrl().queryParameter("add_blocks_time"),
-        is(String.valueOf(withBlocksTime)));
+        is(String.valueOf(withTime)));
   }
 
 }

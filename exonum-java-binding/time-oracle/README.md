@@ -13,14 +13,15 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
       <version>0.6.0-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
 ```
 
 To use the time oracle, we should enable it. To do that, include its name `time` in
-`ejb_app_services.toml` configuration file in the EJB App's directory with the following content:
+`services.toml` configuration file in the Exonum Java app's directory with the following content:
 
 ```toml
-services = ["time"]
+system_services = ["time"]
 ```
 
 See more information on built-in services [here][built-in-services].
@@ -39,11 +40,7 @@ public Optional<ZonedDateTime> getTime() {
   return node.withSnapshot(s -> {
     TimeSchema timeOracle = TimeSchema.newInstance(s);
     EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
-    if (currentTime.isPresent()) {
-      return Optional.of(currentTime.get());
-    } else {
-      return Optional.empty();
-    }
+    return currentTime.toOptional();
   });
 }
 ```

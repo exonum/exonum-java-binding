@@ -18,9 +18,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 **If you are upgrading an existing Java service, consult 
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/doc/Migration_guide_0.6.md).**
 
+The release is based on Exonum 0.11
+
 ### Added
 
 - Support multiple simultaneously active Java services on the network.
+- `toOptional()` method to `EntryIndexProxy`. (#790) 
 
 ## [0.5.0] - 2019-03-13
 
@@ -151,10 +154,10 @@ The release is based on Exonum 0.8.
 ## [0.2] - 2018-07-23
 
 ### Added
-- Standard services may be enabled using specific `ejb_app_services.toml` file.
+- Standard services may be enabled using specific `services.toml` file.
   It supports only `configuration` and `btc-anchoring` services at the moment.
 
-  To enable services put `ejb_app_services.toml` file into EJB App's directory
+  To enable services put `services.toml` file into Exonum Java app's directory
   with the following content:
   ```toml
   services = ["configuration", "btc-anchoring"]
