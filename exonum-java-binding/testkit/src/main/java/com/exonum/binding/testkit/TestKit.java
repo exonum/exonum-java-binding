@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.proxy.NativeHandle;
@@ -29,6 +30,7 @@ import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterables;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.ArrayList;
@@ -74,32 +76,16 @@ public final class TestKit {
   }
 
   /**
-   * Creates a TestKit network with a single validator node for a single service.
+   * Returns a list of user service adapters created from given service modules.
    */
-  public static TestKit forService(Class<? extends ServiceModule> serviceModule) {
-    return new TestKit(singletonList(serviceModule), EmulatedNodeType.VALIDATOR, (short) 0, null);
+  private List<UserServiceAdapter> toUserServiceAdapters(List<Class<? extends ServiceModule>> serviceModules) {
+    return serviceModules.stream()
+        .map(this::createUserServiceAdapter)
+        .collect(toList());
   }
 
   /**
-   * Returns an instance of a service with the given service id and service class.
-   *
-   * @return the service instance or null if there is no service with such id
-   * @throws NullPointerException if the service with given id was not found
-   * @throws IllegalArgumentException if the service could not be cast to given class
-   */
-  public <T extends Service> T getService(short serviceId, Class<T> serviceClass) {
-    Service service = services.get(serviceId);
-    checkNotNull(service, "Service with given id=%s was not found", serviceId);
-    checkArgument(service.getClass().equals(serviceClass),
-        "Service (id=%s, class=%s) cannot be cast to %s",
-        serviceId, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
-    return serviceClass.cast(service);
-  }
-
-  /**
-   * Creates a user service adapter from the service module.
-   *
-   * @param moduleClass a class of the user service module
+   * Instantiates a service given its module and wraps in a UserServiceAdapter for the native code.
    */
   private UserServiceAdapter createUserServiceAdapter(Class<? extends ServiceModule> moduleClass) {
     try {
@@ -112,6 +98,38 @@ public final class TestKit {
     } catch (NoSuchMethodException e) {
       throw new IllegalArgumentException("No no-arg constructor", e);
     }
+  }
+
+  private void populateServiceMap(List<UserServiceAdapter> serviceAdapters) {
+    for (UserServiceAdapter serviceAdapter: serviceAdapters) {
+      checkForDuplicateService(serviceAdapter);
+      services.put(serviceAdapter.getId(), serviceAdapter.getService());
+    }
+  }
+
+  /**
+   * Creates a TestKit network with a single validator node for a single service.
+   */
+  public static TestKit forService(Class<? extends ServiceModule> serviceModule) {
+    return new TestKit(singletonList(serviceModule), EmulatedNodeType.VALIDATOR, (short) 0, null);
+  }
+
+  /**
+   * Returns an instance of a service with the given service id and service class. Only
+   * user-defined services can be requested, i.e., it is not possible to get an instance of a
+   * built-in service such as the time oracle.
+   *
+   * @return the service instance or null if there is no service with such id
+   * @throws IllegalArgumentException if the service with given id was not found or could not be
+   *     cast to given class
+   */
+  public <T extends Service> T getService(short serviceId, Class<T> serviceClass) {
+    Service service = services.get(serviceId);
+    checkArgument(service != null, "Service with given id=%s was not found", serviceId);
+    checkArgument(service.getClass().equals(serviceClass),
+        "Service (id=%s, class=%s) cannot be cast to %s",
+        serviceId, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
+    return serviceClass.cast(service);
   }
 
   private native long nativeCreateTestKit(UserServiceAdapter[] services, boolean auditor,
@@ -137,32 +155,11 @@ public final class TestKit {
     return new Builder(nodeType);
   }
 
-  /**
-   * Returns a list of user service adapters created from given service modules.
-   */
-  private List<UserServiceAdapter> toUserServiceAdapters(List<Class<? extends ServiceModule>> serviceModules) {
-    List<UserServiceAdapter> serviceAdapters = new ArrayList<>(serviceModules.size());
-    for (Class<? extends ServiceModule> moduleClass : serviceModules) {
-      UserServiceAdapter serviceAdapter = createUserServiceAdapter(moduleClass);
-      serviceAdapters.add(serviceAdapter);
-    }
-    return serviceAdapters;
-  }
-
-  /**
-   * Populate the map of services given the list of service adapters.
-   */
-  private void populateServiceMap(List<UserServiceAdapter> serviceAdapters) {
-    for (UserServiceAdapter serviceAdapter: serviceAdapters) {
-      short serviceId = serviceAdapter.getId();
-      checkForDuplicateService(serviceId);
-      services.put(serviceId, serviceAdapter.getService());
-    }
-  }
-
-  private void checkForDuplicateService(short serviceId) {
+  private void checkForDuplicateService(UserServiceAdapter newService) {
+    short serviceId = newService.getId();
     checkArgument(!services.containsKey(serviceId),
-        "Service with id %s was added to the TestKit twice");
+        "Service with id %s was added to the TestKit twice: %s and %s",
+        serviceId, services.get(serviceId), newService.getService());
   }
 
   /**
@@ -188,7 +185,7 @@ public final class TestKit {
      * regardless of the configured number of validators, only a single service will be
      * instantiated.
      */
-    public Builder withValidators(short validatorCount) {
+    public final Builder withValidators(short validatorCount) {
       this.validatorCount = validatorCount;
       return this;
     }
@@ -196,26 +193,27 @@ public final class TestKit {
     /**
      * Adds a service with which the TestKit would be instantiated. Several services can be added.
      */
-    public Builder withService(Class<? extends ServiceModule> serviceModule) {
+    public final Builder withService(Class<? extends ServiceModule> serviceModule) {
       services.add(serviceModule);
       return this;
     }
 
     /**
-     * Adds a variable number of services with which the TestKit would be instantiated.
+     * Adds services with which the TestKit would be instantiated.
      */
-    public Builder withServices(Class<? extends ServiceModule> serviceModule,
-                                Class<? extends ServiceModule>... serviceModules) {
+    @SafeVarargs
+    public final Builder withServices(Class<? extends ServiceModule> serviceModule,
+                                      Class<? extends ServiceModule>... serviceModules) {
       List<Class<? extends ServiceModule>> services = asList(serviceModule, serviceModules);
       this.services.addAll(services);
       return this;
     }
 
     /**
-     * Adds a list of services with which the TestKit would be instantiated.
+     * Adds services with which the TestKit would be instantiated.
      */
-    public Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
-      serviceModules.forEach(services::add);
+    public final Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
+      Iterables.addAll(services, serviceModules);
       return this;
     }
 
@@ -223,7 +221,7 @@ public final class TestKit {
      * If called, will create a TestKit with time service enabled. The time service will use the
      * given {@linkplain TimeProvider} as a time source.
      */
-    public Builder withTimeService(TimeProvider timeProvider) {
+    public final Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;
       return this;
     }
@@ -231,7 +229,7 @@ public final class TestKit {
     /**
      * Creates the TestKit instance.
      */
-    public TestKit build() {
+    public final TestKit build() {
       checkCorrectServiceNumber(services.size());
       return new TestKit(services, nodeType, validatorCount, timeProvider);
     }

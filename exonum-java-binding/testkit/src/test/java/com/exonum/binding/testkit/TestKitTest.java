@@ -19,14 +19,11 @@ package com.exonum.binding.testkit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.google.common.collect.ImmutableList;
@@ -35,7 +32,6 @@ import io.vertx.ext.web.Router;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 class TestKitTest {
 
@@ -105,7 +101,7 @@ class TestKitTest {
 
   @Test
   void requestWrongServiceId() {
-    Class<NullPointerException> exceptionType = NullPointerException.class;
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
         .build();
