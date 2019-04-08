@@ -171,6 +171,11 @@ See details in the [network configuration tutorial][config-tutorial].
 <!-- todo: link app tutorial or the (non-existent at the moment) section on the website -->
 [config-tutorial]: http://todo
 
+## Update the Clients
+
+Update your client applications to use the new services API prefix `/api/services/` 
+(it used to be `/api`). For example, `/api/my-timestamping` becomes `/api/services/my-timestamping`.
+
 ## Use the Application
 
 Exonum 0.6.0 comes with pre-built application packages, available
