@@ -102,13 +102,13 @@ public interface Service {
    * equal to the service name.
    *
    * <p>Please note that the path prefix is stripped from the request path when it is forwarded to
-   * the given router. For example, if your service name is «cryptocurrency»,
-   * and you have two endpoints «/send-money» and «/balance», use these names when
-   * defining handlers, and they will be available by paths «/cryptocurrency/send-money»
-   * and «/cryptocurrency/balance»:
+   * the given router. For example, if your service name is «timestamping»,
+   * and you have an endpoint «/timestamp», use this name when defining the handler and it will be
+   * available by path «/api/services/timestamping/timestamp»:
+   *
    * <pre><code>
    * router.get("/balance").handler((rc) -> {
-   *   rc.response().end("$1’000’000");
+   *   rc.response().end("2019-04-01T10:15:30+02:00[Europe/Kiev]");
    * });
    * </code></pre>
    *

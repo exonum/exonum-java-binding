@@ -41,7 +41,7 @@ echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
 
 # Prepare the services configuration file
 SERVICES_CONFIG_FILE="services.toml"
-SERVICE_NAME="ejb-qa-service"
+SERVICE_NAME="qa"
 echo "[user_services]" > ${SERVICES_CONFIG_FILE}
 echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 

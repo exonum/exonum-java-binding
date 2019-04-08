@@ -47,7 +47,7 @@ public class UserServiceAdapter {
 
   private static final Logger logger = LogManager.getLogger(UserServiceAdapter.class);
 
-  private static final String API_ROOT_PATH = "/api";
+  private static final String API_ROOT_PATH = "/api/services";
 
   private final Service service;
   private final Server server;
@@ -164,7 +164,8 @@ public class UserServiceAdapter {
 
   public void mountPublicApiHandler(long nodeNativeHandle) {
     try {
-      checkState(node == null, "There is a node already: are you calling this method twice?");
+      checkState(node == null, "There is a node already (%s): are you calling this method twice?",
+          node);
       node = new NodeProxy(nodeNativeHandle);
       Router router = server.createRouter();
       service.createPublicApiHandlers(node, router);
