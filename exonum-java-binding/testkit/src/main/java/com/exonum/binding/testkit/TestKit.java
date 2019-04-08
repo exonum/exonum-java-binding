@@ -46,9 +46,10 @@ import javax.annotation.Nullable;
  * network, only one node will create the service instances and will execute their operations
  * (e.g., {@link Service#afterCommit(BlockCommittedEvent)} method logic).
  *
- * <p>When TestKit is created, Exonum blockchain instance with given services is initialized and
- * genesis block is committed. The service instances are created and their
+ * <p>When TestKit is created, Exonum blockchain instance is initialized, given service instances
+ * are created and their
  * {@linkplain UserServiceAdapter#initialize(long)}  initialization} methods are called and
+ * genesis block is committed. The
  * {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are created.
  *
  * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
@@ -107,6 +108,13 @@ public final class TestKit {
     }
   }
 
+  private void checkForDuplicateService(UserServiceAdapter newService) {
+    short serviceId = newService.getId();
+    checkArgument(!services.containsKey(serviceId),
+        "Service with id %s was added to the TestKit twice: %s and %s",
+        serviceId, services.get(serviceId), newService.getService());
+  }
+
   /**
    * Creates a TestKit network with a single validator node for a single service.
    */
@@ -153,13 +161,6 @@ public final class TestKit {
   public static Builder builder(EmulatedNodeType nodeType) {
     checkNotNull(nodeType);
     return new Builder(nodeType);
-  }
-
-  private void checkForDuplicateService(UserServiceAdapter newService) {
-    short serviceId = newService.getId();
-    checkArgument(!services.containsKey(serviceId),
-        "Service with id %s was added to the TestKit twice: %s and %s",
-        serviceId, services.get(serviceId), newService.getService());
   }
 
   /**
