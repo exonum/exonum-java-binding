@@ -19,21 +19,51 @@ extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
-extern crate parking_lot;
 
 use exonum_testkit::TestKitBuilder;
 use integration_tests::{
     fake_service::*,
     vm::{get_fake_service_artifact_path, get_fakes_classpath},
 };
-use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
-use parking_lot::{Mutex, MutexGuard};
+use java_bindings::{
+    jni::JavaVM, Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig,
+};
+use std::sync::{
+    atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT},
+    Arc,
+};
 
 lazy_static! {
-    // Reference to the JavaServiceRuntime is wrapped with Mutex in order to execute tests (more
-    // precise - Java code for artifacts loading and services creation) sequentially.
-    // We use Mutex from the `parking_lot` crate because it doesn't get poisoned in case of panic.
-    static ref SERVICE_RUNTIME: Mutex<JavaServiceRuntime> = Mutex::new(create_runtime());
+    static ref VM: Arc<JavaVM> = {
+        let jvm_config = JvmConfig {
+            args_prepend: vec![],
+            args_append: vec![],
+            jvm_debug_socket: None,
+        };
+
+        let runtime_config = RuntimeConfig {
+            log_config_path: "".to_owned(),
+            port: 6300,
+        };
+
+        let config = Config {
+            jvm_config,
+            runtime_config,
+        };
+
+        let internal_config = InternalConfig {
+            system_class_path: get_fakes_classpath(),
+            system_lib_path: None,
+        };
+
+        let java_vm = JavaServiceRuntime::create_java_vm(
+            &config.jvm_config,
+            &config.runtime_config,
+            internal_config,
+        );
+
+        Arc::new(java_vm)
+    };
 }
 
 #[test]
@@ -110,32 +140,13 @@ fn create_service_for_unknown_artifact() {
     runtime.create_service("unknown:artifact:id");
 }
 
-fn create_runtime() -> JavaServiceRuntime {
-    let jvm_config = JvmConfig {
-        args_prepend: vec![],
-        args_append: vec![],
-        jvm_debug_socket: None,
-    };
-
-    let runtime_config = RuntimeConfig {
-        log_config_path: "".to_owned(),
-        port: 6300,
-    };
-
-    let config = Config {
-        jvm_config,
-        runtime_config,
-    };
-
-    let internal_config = InternalConfig {
-        system_class_path: get_fakes_classpath(),
-        system_lib_path: None,
-    };
-
-    JavaServiceRuntime::new(config, internal_config)
+// Creates a new instance of JavaServiceRuntime for same JVM.
+fn get_runtime() -> JavaServiceRuntime {
+    JavaServiceRuntime::new(VM.clone(), get_port())
 }
 
-// Returns a guard to the service runtime that helps executing tests in turn.
-fn get_runtime() -> MutexGuard<'static, JavaServiceRuntime> {
-    SERVICE_RUNTIME.lock()
+// Provides port number that is unique within the scope of tests module.
+fn get_port() -> i32 {
+    static PORT: AtomicUsize = ATOMIC_USIZE_INIT;
+    PORT.fetch_add(1, Ordering::SeqCst) as i32 + 6300
 }

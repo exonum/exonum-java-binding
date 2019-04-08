@@ -22,7 +22,7 @@ use jni::{
 };
 
 use proxy::{JniExecutor, ServiceProxy};
-use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
+use runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
@@ -42,14 +42,12 @@ pub struct JavaServiceRuntime {
 }
 
 impl JavaServiceRuntime {
-    /// Creates new runtime from provided config.
+    /// Creates new runtime for given JVM and port.
     ///
-    /// There can be only one `JavaServiceRuntime` instance at a time.
-    pub fn new(config: Config, internal_config: InternalConfig) -> Self {
-        let java_vm =
-            Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
-        let executor = MainExecutor::new(Arc::new(java_vm));
-        let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
+    /// There can be only one JVM per process.
+    pub fn new(java_vm: Arc<JavaVM>, port: i32) -> Self {
+        let executor = MainExecutor::new(java_vm.clone());
+        let service_runtime = Self::create_service_runtime(port, executor.clone());
         JavaServiceRuntime {
             executor,
             service_runtime,
@@ -57,14 +55,14 @@ impl JavaServiceRuntime {
     }
 
     /// Creates service runtime that is responsible for services management.
-    fn create_service_runtime(config: RuntimeConfig, executor: MainExecutor) -> GlobalRef {
+    fn create_service_runtime(port: i32, executor: MainExecutor) -> GlobalRef {
         unwrap_jni(executor.with_attached(|env| {
             let serviceRuntime = env
                 .call_static_method(
                     SERVICE_BOOTSTRAP_PATH,
                     "createServiceRuntime",
                     CREATE_RUNTIME_SIGNATURE,
-                    &[config.port.into()],
+                    &[port.into()],
                 )?
                 .l()?;
             env.new_global_ref(serviceRuntime)
@@ -132,7 +130,7 @@ impl JavaServiceRuntime {
     /// # Panics
     ///
     /// - If user specified invalid additional JVM parameters.
-    fn create_java_vm(
+    pub fn create_java_vm(
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
