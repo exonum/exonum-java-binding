@@ -30,6 +30,14 @@ public class EmulatedNode {
   private final KeyPair serviceKeyPair;
   private final KeyPair consensusKeyPair;
 
+  /**
+   * Creates a context of an emulated node.
+   *
+   * @param validatorId validator id of the validator node, less or equal to 0 in case of an
+   *     auditor node
+   * @param serviceKeyPair service key pair of the node
+   * @param consensusKeyPair consensus key pair of the node
+   */
   public EmulatedNode(int validatorId, KeyPair serviceKeyPair, KeyPair consensusKeyPair) {
     this.validatorId = validatorId >= 0
         ? OptionalInt.of(validatorId)

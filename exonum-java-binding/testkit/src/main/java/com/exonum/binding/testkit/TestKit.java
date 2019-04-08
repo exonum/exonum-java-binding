@@ -70,15 +70,15 @@ public final class TestKit {
     UserServiceAdapter[] userServiceAdapters = serviceAdapters.toArray(new UserServiceAdapter[0]);
     // TODO: fix after native implementation
     nativeHandle = null;
-//    nativeHandle = new NativeHandle(
-//        nativeCreateTestKit(userServiceAdapters, isAuditorNode,
-//            validatorCount, timeProvider));
+    //  nativeHandle = new NativeHandle(
+    //      nativeCreateTestKit(userServiceAdapters, isAuditorNode, validatorCount, timeProvider));
   }
 
   /**
    * Returns a list of user service adapters created from given service modules.
    */
-  private List<UserServiceAdapter> toUserServiceAdapters(List<Class<? extends ServiceModule>> serviceModules) {
+  private List<UserServiceAdapter> toUserServiceAdapters(
+      List<Class<? extends ServiceModule>> serviceModules) {
     return serviceModules.stream()
         .map(this::createUserServiceAdapter)
         .collect(toList());
@@ -147,8 +147,8 @@ public final class TestKit {
    * Creates a new builder for the TestKit.
    *
    * @param nodeType type of the main TestKit node - either validator or auditor. Note that
-   * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main TestKit node of this
-   * type
+   * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main TestKit
+   *     node of this type
    */
   public static Builder builder(EmulatedNodeType nodeType) {
     checkNotNull(nodeType);

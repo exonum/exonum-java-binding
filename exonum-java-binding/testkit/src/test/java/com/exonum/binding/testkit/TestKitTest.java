@@ -29,9 +29,9 @@ import com.exonum.binding.transaction.Transaction;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import io.vertx.ext.web.Router;
-import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class TestKitTest {
 
@@ -96,7 +96,8 @@ class TestKitTest {
     TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
         .build();
-    assertThrows(exceptionType, () -> testKit.getService(TestService.SERVICE_ID, TestService2.class));
+    assertThrows(exceptionType,
+        () -> testKit.getService(TestService.SERVICE_ID, TestService2.class));
   }
 
   @Test
