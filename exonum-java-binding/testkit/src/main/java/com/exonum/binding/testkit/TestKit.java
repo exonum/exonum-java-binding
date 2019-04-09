@@ -144,9 +144,9 @@ public final class TestKit {
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
-  private native Block nativeCreateBlock(long nativeHandle);
+  private native byte[] nativeCreateBlock(long nativeHandle);
 
-  private native Block nativeCreateBlockWithTransactions(long nativeHandle, byte[][] transactions);
+  private native byte[] nativeCreateBlockWithTransactions(long nativeHandle, byte[][] transactions);
 
   private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
 
