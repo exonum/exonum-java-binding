@@ -1,37 +1,37 @@
-//private native long nativeCreateTestKit(UserServiceAdapter[] services, boolean auditor,
-//short withValidatorCount, TimeProvider timeProvider);
-//
-//private native long nativeCreateSnapshot(long nativeHandle);
-//
-//private native Block nativeCreateBlock(long nativeHandle);
-//
-//private native Block nativeCreateBlockWithTransactions(long nativeHandle, byte[][] transactions);
-//
-//private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
-#![allow(missing_docs)]
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-//com.exonum.binding.blockchain.AutoValue_Block
-
-use exonum::helpers::ValidatorId;
-use exonum::messages::{BinaryForm, RawTransaction, Signed};
-use exonum::storage::StorageValue;
-use exonum_testkit::TestKit;
-use exonum_testkit::TestKitBuilder;
-use jni::objects::JList;
-use jni::objects::JObject;
-use jni::sys::{jboolean, jbyteArray, jshort};
-use jni::JNIEnv;
-use proxy::MainExecutor;
-use proxy::ServiceProxy;
-use std::panic;
-use std::sync::Arc;
+use exonum::{
+    helpers::ValidatorId,
+    messages::{BinaryForm, RawTransaction, Signed},
+    storage::StorageValue,
+};
+use exonum_testkit::{TestKit, TestKitBuilder};
+use jni::{
+    objects::{JList, JObject},
+    sys::{jboolean, jbyteArray, jshort},
+    JNIEnv,
+};
+use proxy::{MainExecutor, ServiceProxy};
+use std::{panic, sync::Arc};
 use storage::View;
-use utils::cast_handle;
-use utils::unwrap_exc_or_default;
-use utils::unwrap_jni;
-use utils::Handle;
-use utils::{to_handle, unwrap_exc_or};
+use utils::{cast_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, Handle};
 
+/// Creates TestKit instance with specified services and wires public API handlers.
+/// Created instance is considered static and lives till the end of the program.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
     env: JNIEnv,
@@ -64,6 +64,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     to_handle(static_ref)
 }
 
+/// Creates Snapshot using provided TestKit instance.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnapshot(
     env: JNIEnv,
@@ -79,6 +80,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
     unwrap_exc_or_default(&env, res)
 }
 
+/// Creates new block and returns its header.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock(
     env: JNIEnv,
@@ -95,6 +97,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
 
+/// Creates Block with specified list of transactions and returns its header.
 #[no_mangle]
 #[rustfmt::skip]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlockWithTransactions<'e>(
@@ -120,16 +123,13 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
 
+/// Returns the EmulatedNode of the provided TestKit instance.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulatedNode<'e>(
     env: JNIEnv<'e>,
     _: JObject,
     handle: Handle,
 ) -> JObject<'e> {
-    //    com/exonum/binding/common/crypto/PublicKey
-    //    com/exonum/binding/common/crypto/PrivateKey
-    //    com/exonum/binding/common/crypto/KeyPair
-    //    com/exonum/binding/testkit/EmulatedNode
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<Box<TestKit>>(handle);
         let emulated_node = testkit.us();
