@@ -96,7 +96,7 @@ impl CommandExtension for Run {
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
         let log_config_path = context
             .arg(EJB_LOG_CONFIG_PATH)
-            .unwrap_or("log4j-fallback.xml".to_owned());
+            .unwrap_or_else(|_| "log4j-fallback.xml".to_owned());
         let port = context.arg(EJB_PORT)?;
         let args_prepend: Vec<String> = context.arg_multiple(JVM_ARGS_PREPEND).unwrap_or_default();
         let args_append: Vec<String> = context.arg_multiple(JVM_ARGS_APPEND).unwrap_or_default();
