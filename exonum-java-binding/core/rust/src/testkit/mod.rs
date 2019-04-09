@@ -21,6 +21,11 @@ use std::sync::Arc;
 use utils::to_handle;
 use utils::unwrap_jni;
 use utils::Handle;
+use std::panic;
+use utils::cast_handle;
+use exonum_testkit::TestKit;
+use storage::View;
+use utils::unwrap_exc_or_default;
 
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
@@ -60,7 +65,13 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
     _: JObject,
     handle: Handle,
 ) -> Handle {
-    Handle::default()
+    let res = panic::catch_unwind(|| {
+        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let snapshot = testkit.snapshot();
+        let view = View::from_owned_snapshot(snapshot);
+        Ok(to_handle(view))
+    });
+    unwrap_exc_or_default(&env, res)
 }
 
 #[no_mangle]
