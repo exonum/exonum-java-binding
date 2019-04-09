@@ -30,6 +30,12 @@ use std::{panic, sync::Arc};
 use storage::View;
 use utils::{cast_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, Handle};
 
+const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
+const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
+const EMULATED_NODE_CLASS: &str = "com/exonum/binding/testkit/EmulatedNode";
+const EMULATED_NODE_CTOR_SIGNATURE: &str =
+    "(ILcom/exonum/binding/common/crypto/KeyPair;)Lcom/exonum/binding/testkit/EmulatedNode;";
+
 /// Creates TestKit instance with specified services and wires public API handlers.
 /// Created instance is considered static and lives till the end of the program.
 #[no_mangle]
@@ -140,14 +146,16 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulated
         let secret_key_byte_array: JObject =
             env.byte_array_from_slice(&service_keypair.1[..])?.into();
         let java_key_pair = env.call_static_method(
-            "com/exonum/binding/common/crypto/KeyPair",
-            "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;",
+            KEYPAIR_CLASS,
+            KEYPAIR_CTOR_SIGNATURE,
             "createKeyPair",
             &[public_key_byte_array.into(), secret_key_byte_array.into()],
         )?;
-        let java_emulated_node = env.new_object("com/exonum/binding/testkit/EmulatedNode",
-                                                "(ILcom/exonum/binding/common/crypto/KeyPair;)Lcom/exonum/binding/testkit/EmulatedNode;",
-        &[validator_id.into(), java_key_pair])?;
+        let java_emulated_node = env.new_object(
+            EMULATED_NODE_CLASS,
+            EMULATED_NODE_CTOR_SIGNATURE,
+            &[validator_id.into(), java_key_pair],
+        )?;
         Ok(java_emulated_node)
     });
     unwrap_exc_or(&env, res, JObject::null())
