@@ -28,7 +28,6 @@ public class EmulatedNode {
 
   private final OptionalInt validatorId;
   private final KeyPair serviceKeyPair;
-  private final KeyPair consensusKeyPair;
 
   /**
    * Creates a context of an emulated node.
@@ -36,14 +35,12 @@ public class EmulatedNode {
    * @param validatorId validator id of the validator node, less or equal to 0 in case of an
    *     auditor node
    * @param serviceKeyPair service key pair of the node
-   * @param consensusKeyPair consensus key pair of the node
    */
-  public EmulatedNode(int validatorId, KeyPair serviceKeyPair, KeyPair consensusKeyPair) {
+  public EmulatedNode(int validatorId, KeyPair serviceKeyPair) {
     this.validatorId = validatorId >= 0
         ? OptionalInt.of(validatorId)
         : OptionalInt.empty();
     this.serviceKeyPair = serviceKeyPair;
-    this.consensusKeyPair = consensusKeyPair;
   }
 
   /**
@@ -68,13 +65,5 @@ public class EmulatedNode {
    */
   public KeyPair getServiceKeyPair() {
     return serviceKeyPair;
-  }
-
-  /**
-   * Returns a consensus key pair of this node. This key pair is used to sign consensus messages of
-   * this node.
-   */
-  public KeyPair getConsensusKeyPair() {
-    return consensusKeyPair;
   }
 }
