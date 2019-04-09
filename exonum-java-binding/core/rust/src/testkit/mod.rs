@@ -12,15 +12,17 @@
 
 //com.exonum.binding.blockchain.AutoValue_Block
 
-use exonum::messages::BinaryForm;
+use exonum::blockchain::Transaction;
+use exonum::messages::{BinaryForm, RawTransaction, Signed};
+use exonum::storage::StorageValue;
 use exonum_testkit::TestKit;
 use exonum_testkit::TestKitBuilder;
-use jni::objects::JObject;
 use jni::objects::JList;
+use jni::objects::JObject;
 use jni::sys::{jboolean, jbyteArray, jshort};
 use jni::JNIEnv;
-use proxy::MainExecutor;
 use proxy::ServiceProxy;
+use proxy::{MainExecutor, TransactionProxy};
 use std::panic;
 use std::sync::Arc;
 use storage::View;
@@ -100,8 +102,23 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     _: JObject,
     handle: Handle,
     transactions: JList,
-) -> JObject<'e> {
-    JObject::null()
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
+        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let mut raw_transactions = Vec::new();
+        for object in transactions.iter()? {
+            let java_byte_array: jbyteArray = object.into_inner().into();
+            let byte_array = env.convert_byte_array(java_byte_array)?;
+            let transaction: Signed<RawTransaction> = StorageValue::from_bytes(byte_array.into());
+            raw_transactions.push(transaction);
+        }
+        let block = testkit.create_block_with_transactions(raw_transactions.into_iter()).header;
+        let serialized_block = block.encode().unwrap();
+        let byte_array = env.byte_array_from_slice(&serialized_block)?;
+        Ok(byte_array)
+    });
+    unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
 
 #[no_mangle]
