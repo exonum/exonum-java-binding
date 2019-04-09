@@ -45,6 +45,7 @@ mod init;
 mod proxy;
 mod runtime;
 mod storage;
+mod testkit;
 #[doc(hidden)]
 pub mod utils;
 
@@ -53,3 +54,4 @@ pub use init::*;
 pub use proxy::*;
 pub use runtime::*;
 pub use storage::*;
+pub use testkit::*;
