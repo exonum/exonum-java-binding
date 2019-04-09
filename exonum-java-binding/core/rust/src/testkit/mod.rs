@@ -10,22 +10,25 @@
 //private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
 #![allow(missing_docs)]
 
+//com.exonum.binding.blockchain.AutoValue_Block
+
+use exonum::messages::BinaryForm;
+use exonum_testkit::TestKit;
 use exonum_testkit::TestKitBuilder;
-use jni::objects::JList;
 use jni::objects::JObject;
-use jni::sys::{jboolean, jshort};
+use jni::objects::JList;
+use jni::sys::{jboolean, jbyteArray, jshort};
 use jni::JNIEnv;
 use proxy::MainExecutor;
 use proxy::ServiceProxy;
+use std::panic;
 use std::sync::Arc;
-use utils::to_handle;
+use storage::View;
+use utils::cast_handle;
+use utils::unwrap_exc_or_default;
 use utils::unwrap_jni;
 use utils::Handle;
-use std::panic;
-use utils::cast_handle;
-use exonum_testkit::TestKit;
-use storage::View;
-use utils::unwrap_exc_or_default;
+use utils::{to_handle, unwrap_exc_or};
 
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
@@ -75,12 +78,19 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock<'e>(
-    env: JNIEnv<'e>,
+pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock(
+    env: JNIEnv,
     _: JObject,
     handle: Handle,
-) -> JObject<'e> {
-    JObject::null()
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let block = testkit.create_block().header;
+        let serialized_block = block.encode().unwrap();
+        let byte_array = env.byte_array_from_slice(&serialized_block)?;
+        Ok(byte_array)
+    });
+    unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
 
 #[no_mangle]
