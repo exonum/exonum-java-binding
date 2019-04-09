@@ -46,11 +46,10 @@ import javax.annotation.Nullable;
  * network, only one node will create the service instances and will execute their operations
  * (e.g., {@link Service#afterCommit(BlockCommittedEvent)} method logic).
  *
- * <p>When TestKit is created, Exonum blockchain instance is initialized, given service instances
- * are created and their
- * {@linkplain UserServiceAdapter#initialize(long)}  initialization} methods are called and
- * genesis block is committed. The
- * {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are created.
+ * <p>When TestKit is created, Exonum blockchain instance is initialized - service instances are
+ * {@linkplain UserServiceAdapter#initialize(long)} initialized} and genesis block is committed.
+ * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are
+ * created.
  *
  * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
  */
