@@ -8,6 +8,7 @@
 //private native Block nativeCreateBlockWithTransactions(long nativeHandle, byte[][] transactions);
 //
 //private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
+#![allow(missing_docs)]
 
 use jni::objects::JList;
 use jni::objects::JObject;
