@@ -2,7 +2,7 @@
 # Runs exonum-java executable from target directory and starts N Exonum nodes with
 # QA service, where N corresponds to the first argument of the script.
 #
-# This script is intended to be used by Exonum developers to speed up working workflow.
+# This script is intended to be used by Exonum developers to speed up workflow.
 # Running the executable from target doesn't need packaging and therefore can be performed
 # immediately after running tests, without additional recompilation.
 

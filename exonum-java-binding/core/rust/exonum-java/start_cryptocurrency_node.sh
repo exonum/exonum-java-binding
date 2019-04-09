@@ -2,7 +2,7 @@
 # Runs exonum-java executable from target directory and starts one Exonum node with
 # cryptocurrency service.
 #
-# This script is intended to be used by Exonum developers to speed up working workflow.
+# This script is intended to be used by Exonum developers to speed up workflow.
 # Running the executable from target doesn't need packaging and therefore can be performed
 # immediately after running tests, without additional recompilation.
 
