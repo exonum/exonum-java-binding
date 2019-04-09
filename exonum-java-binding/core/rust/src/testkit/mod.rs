@@ -12,7 +12,7 @@
 
 //com.exonum.binding.blockchain.AutoValue_Block
 
-use exonum::blockchain::Transaction;
+use exonum::helpers::ValidatorId;
 use exonum::messages::{BinaryForm, RawTransaction, Signed};
 use exonum::storage::StorageValue;
 use exonum_testkit::TestKit;
@@ -21,8 +21,8 @@ use jni::objects::JList;
 use jni::objects::JObject;
 use jni::sys::{jboolean, jbyteArray, jshort};
 use jni::JNIEnv;
+use proxy::MainExecutor;
 use proxy::ServiceProxy;
-use proxy::{MainExecutor, TransactionProxy};
 use std::panic;
 use std::sync::Arc;
 use storage::View;
@@ -104,7 +104,6 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     transactions: JList,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
         let testkit = cast_handle::<Box<TestKit>>(handle);
         let mut raw_transactions = Vec::new();
         for object in transactions.iter()? {
@@ -123,9 +122,33 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
 
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulatedNode<'e>(
-    env: JNIEnv,
+    env: JNIEnv<'e>,
     _: JObject,
     handle: Handle,
 ) -> JObject<'e> {
-    JObject::null()
+    //    com/exonum/binding/common/crypto/PublicKey
+    //    com/exonum/binding/common/crypto/PrivateKey
+    //    com/exonum/binding/common/crypto/KeyPair
+    //    com/exonum/binding/testkit/EmulatedNode
+    let res = panic::catch_unwind(|| {
+        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let emulated_node = testkit.us();
+        let validator_id = emulated_node.validator_id().unwrap_or(ValidatorId(0)).0;
+        let service_keypair = emulated_node.service_keypair();
+        let public_key_byte_array: JObject =
+            env.byte_array_from_slice(&service_keypair.0[..])?.into();
+        let secret_key_byte_array: JObject =
+            env.byte_array_from_slice(&service_keypair.1[..])?.into();
+        let java_key_pair = env.call_static_method(
+            "com/exonum/binding/common/crypto/KeyPair",
+            "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;",
+            "createKeyPair",
+            &[public_key_byte_array.into(), secret_key_byte_array.into()],
+        )?;
+        let java_emulated_node = env.new_object("com/exonum/binding/testkit/EmulatedNode",
+                                                "(ILcom/exonum/binding/common/crypto/KeyPair;)Lcom/exonum/binding/testkit/EmulatedNode;",
+        &[validator_id.into(), java_key_pair])?;
+        Ok(java_emulated_node)
+    });
+    unwrap_exc_or(&env, res, JObject::null())
 }
