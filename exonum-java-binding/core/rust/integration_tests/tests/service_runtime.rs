@@ -28,10 +28,7 @@ use integration_tests::{
 use java_bindings::{
     jni::JavaVM, Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig,
 };
-use std::sync::{
-    atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT},
-    Arc,
-};
+use std::sync::Arc;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = {
@@ -142,11 +139,5 @@ fn create_service_for_unknown_artifact() {
 
 // Creates a new instance of JavaServiceRuntime for same JVM.
 fn get_runtime() -> JavaServiceRuntime {
-    JavaServiceRuntime::new(VM.clone(), get_port())
-}
-
-// Provides port number that is unique within the scope of tests module.
-fn get_port() -> i32 {
-    static PORT: AtomicUsize = ATOMIC_USIZE_INIT;
-    PORT.fetch_add(1, Ordering::SeqCst) as i32 + 6300
+    JavaServiceRuntime::new(VM.clone(), 0)
 }
