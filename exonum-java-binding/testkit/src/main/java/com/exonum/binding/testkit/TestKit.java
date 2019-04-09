@@ -22,7 +22,6 @@ import static com.google.common.collect.Lists.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
-import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.runtime.ReflectiveModuleSupplier;
 import com.exonum.binding.service.BlockCommittedEvent;
