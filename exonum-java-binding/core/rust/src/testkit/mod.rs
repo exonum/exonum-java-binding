@@ -28,9 +28,7 @@ use jni::{
 use proxy::{MainExecutor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
-use utils::{
-    cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, Handle,
-};
+use utils::{cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, Handle};
 
 const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
@@ -117,6 +115,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
 }
 
 /// Creates Block with specified list of transactions and returns its header.
+/// The transactions are the byte[][] array which contains the set of serialized transaction
+/// messages in Protobuf format.
 #[no_mangle]
 #[rustfmt::skip]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlockWithTransactions<'e>(
@@ -129,9 +129,10 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
         let testkit = cast_handle::<TestKit>(handle);
         let mut raw_transactions = Vec::new();
         for object in transactions.iter()? {
-            let java_byte_array: jbyteArray = object.into_inner().into();
-            let byte_array = env.convert_byte_array(java_byte_array)?;
-            let transaction: Signed<RawTransaction> = StorageValue::from_bytes(byte_array.into());
+            let serialized_tx: jbyteArray = object.into_inner().into();
+            let serialized_tx = env.convert_byte_array(serialized_tx)?;
+            let transaction: Signed<RawTransaction> =
+                StorageValue::from_bytes(serialized_tx.into());
             raw_transactions.push(transaction);
         }
         let block = testkit
