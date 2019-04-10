@@ -39,7 +39,7 @@ const EMULATED_NODE_CTOR_SIGNATURE: &str =
 
 /// Creates TestKit instance with specified services and wires public API handlers.
 /// The caller is responsible for properly destroying TestKit instance and freeing
-/// the memory by calling `n ativeFreeTestKit` function.
+/// the memory by calling `nativeFreeTestKit` function.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
     env: JNIEnv,
