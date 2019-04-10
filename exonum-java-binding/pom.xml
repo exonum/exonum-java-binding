@@ -424,7 +424,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.1.0</version>
           <configuration>
-            <source>8</source>
+            <source>${java.compiler.source}</source>
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
             <additionalJOption>${maven.javadoc.joption}</additionalJOption>
