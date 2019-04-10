@@ -29,7 +29,7 @@ use proxy::{MainExecutor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
 use utils::{
-    cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, Handle,
+    cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, Handle,
 };
 
 const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
@@ -40,7 +40,7 @@ const EMULATED_NODE_CTOR_SIGNATURE: &str =
 
 /// Creates TestKit instance with specified services and wires public API handlers.
 /// The caller is responsible for properly destroying TestKit instance and freeing
-/// the memory by calling `nativeFreeTestKit` function.
+/// the memory by calling `n ativeFreeTestKit` function.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
     env: JNIEnv,
@@ -50,25 +50,28 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     validator_count: jshort,
     _time_provider: JObject,
 ) -> Handle {
-    let mut builder = if auditor == jni::sys::JNI_TRUE {
-        TestKitBuilder::auditor()
-    } else {
-        TestKitBuilder::validator()
-    };
-    builder = builder.with_validators(validator_count as _);
-    let builder = unwrap_jni((move || {
-        let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
-        for service in services.iter()? {
-            let global_ref = env.new_global_ref(service)?;
-            let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
-            builder = builder.with_service(service);
-        }
-        Ok(builder)
-    })());
-    let testkit = builder.create();
-    // Mount API handlers
-    testkit.api();
-    to_handle(testkit)
+    let res = panic::catch_unwind(|| {
+        let mut builder = if auditor == jni::sys::JNI_TRUE {
+            TestKitBuilder::auditor()
+        } else {
+            TestKitBuilder::validator()
+        };
+        builder = builder.with_validators(validator_count as _);
+        let builder = {
+            let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
+            for service in services.iter()? {
+                let global_ref = env.new_global_ref(service)?;
+                let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
+                builder = builder.with_service(service);
+            }
+            builder
+        };
+        let testkit = builder.create();
+        // Mount API handlers
+        testkit.api();
+        Ok(to_handle(testkit))
+    });
+    unwrap_exc_or_default(&env, res)
 }
 
 #[no_mangle]
