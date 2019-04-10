@@ -23,44 +23,13 @@ extern crate lazy_static;
 use exonum_testkit::TestKitBuilder;
 use integration_tests::{
     fake_service::*,
-    vm::{get_fake_service_artifact_path, get_fakes_classpath},
+    vm::{create_vm_for_tests_with_fake_classes, get_fake_service_artifact_path},
 };
-use java_bindings::{
-    jni::JavaVM, Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig,
-};
-use std::sync::Arc;
+use java_bindings::{jni::JavaVM, JavaServiceRuntime};
+use std::{panic::catch_unwind, sync::Arc};
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = {
-        let jvm_config = JvmConfig {
-            args_prepend: vec![],
-            args_append: vec![],
-            jvm_debug_socket: None,
-        };
-
-        let runtime_config = RuntimeConfig {
-            log_config_path: "".to_owned(),
-            port: 6300,
-        };
-
-        let config = Config {
-            jvm_config,
-            runtime_config,
-        };
-
-        let internal_config = InternalConfig {
-            system_class_path: get_fakes_classpath(),
-            system_lib_path: None,
-        };
-
-        let java_vm = JavaServiceRuntime::create_java_vm(
-            &config.jvm_config,
-            &config.runtime_config,
-            internal_config,
-        );
-
-        Arc::new(java_vm)
-    };
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
 }
 
 #[test]
@@ -106,10 +75,16 @@ fn load_nonexistent_artifact() {
 #[test]
 #[should_panic(expected = "Unable to load artifact")]
 fn load_artifact_twice() {
-    let runtime = get_runtime();
-    let artifact_path = create_service_artifact_valid(runtime.get_executor());
+    let res = catch_unwind(|| {
+        let runtime = get_runtime();
+        let artifact_path = create_service_artifact_valid(runtime.get_executor());
+        runtime.load_artifact(&artifact_path);
+        (runtime, artifact_path)
+    });
+    assert!(res.is_ok());
 
-    runtime.load_artifact(&artifact_path);
+    let (runtime, artifact_path) = res.unwrap();
+    // The second loading attempt should fail.
     runtime.load_artifact(&artifact_path);
 }
 
@@ -139,5 +114,5 @@ fn create_service_for_unknown_artifact() {
 
 // Creates a new instance of JavaServiceRuntime for same JVM.
 fn get_runtime() -> JavaServiceRuntime {
-    JavaServiceRuntime::new(VM.clone(), 0)
+    JavaServiceRuntime::create_with_jvm(VM.clone(), 0)
 }

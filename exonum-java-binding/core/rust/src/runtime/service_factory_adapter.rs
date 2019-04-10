@@ -22,7 +22,7 @@ use runtime::{
     java_service_runtime::JavaServiceRuntime,
     utils::{absolute_library_path, system_classpath},
 };
-use std::sync::{Arc, Once, ONCE_INIT};
+use std::sync::{Once, ONCE_INIT};
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
@@ -58,12 +58,7 @@ impl JavaServiceFactoryAdapter {
                 system_lib_path: Some(absolute_library_path()),
             };
 
-            let vm = JavaServiceRuntime::create_java_vm(
-                &config.jvm_config,
-                &config.runtime_config,
-                internal_config,
-            );
-            let runtime = JavaServiceRuntime::new(Arc::new(vm), config.runtime_config.port);
+            let runtime = JavaServiceRuntime::new(config, internal_config);
             unsafe {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             }
