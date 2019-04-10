@@ -73,6 +73,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     unwrap_exc_or_default(&env, res)
 }
 
+/// Destroys TestKit instance behind the provided handler and frees occupied memory.
+/// Must be called by Java side.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeFreeTestKit(
     env: JNIEnv,
@@ -108,8 +110,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
         let block = testkit.create_block().header;
-        let serialized_block = serialize_block(&env, block);
-        serialized_block
+        serialize_block(&env, block)
     });
     unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
@@ -138,8 +139,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
         let block = testkit
             .create_block_with_transactions(raw_transactions.into_iter())
             .header;
-        let serialized_block = serialize_block(&env, block);
-        serialized_block
+        serialize_block(&env, block)
     });
     unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
