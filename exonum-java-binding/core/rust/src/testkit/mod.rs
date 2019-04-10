@@ -15,6 +15,7 @@
  */
 
 use exonum::{
+    blockchain::Block,
     crypto::{PublicKey, SecretKey},
     messages::{BinaryForm, RawTransaction, Signed},
     storage::StorageValue,
@@ -107,9 +108,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
         let block = testkit.create_block().header;
-        let serialized_block = block.encode().unwrap();
-        let byte_array = env.byte_array_from_slice(&serialized_block)?;
-        Ok(byte_array)
+        let serialized_block = serialize_block(&env, block);
+        serialized_block
     });
     unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
@@ -138,9 +138,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
         let block = testkit
             .create_block_with_transactions(raw_transactions.into_iter())
             .header;
-        let serialized_block = block.encode().unwrap();
-        let byte_array = env.byte_array_from_slice(&serialized_block)?;
-        Ok(byte_array)
+        let serialized_block = serialize_block(&env, block);
+        serialized_block
     });
     unwrap_exc_or(&env, res, std::ptr::null_mut())
 }
@@ -167,6 +166,11 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulated
         Ok(java_emulated_node)
     });
     unwrap_exc_or(&env, res, JObject::null())
+}
+
+fn serialize_block(env: &JNIEnv, block: Block) -> jni::errors::Result<jbyteArray> {
+    let serialized_block = block.encode().unwrap();
+    env.byte_array_from_slice(&serialized_block)
 }
 
 fn create_java_keypair<'a>(
