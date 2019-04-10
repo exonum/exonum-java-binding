@@ -38,6 +38,7 @@ pub extern crate serde_json;
 extern crate lazy_static;
 
 extern crate exonum_testkit;
+extern crate exonum_time;
 #[cfg(test)]
 extern crate tempfile;
 
