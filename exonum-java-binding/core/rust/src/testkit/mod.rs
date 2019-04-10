@@ -23,7 +23,7 @@ use exonum::{
 use exonum_testkit::{TestKit, TestKitBuilder};
 use jni::{
     objects::{JList, JObject, JValue},
-    sys::{jboolean, jbyteArray, jshort},
+    sys::{jboolean, jbyteArray, jobjectArray, jshort},
     JNIEnv,
 };
 use proxy::{MainExecutor, ServiceProxy};
@@ -119,18 +119,20 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
 /// The transactions are the byte[][] array which contains the set of serialized transaction
 /// messages in Protobuf format.
 #[no_mangle]
-#[rustfmt::skip]
-pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlockWithTransactions<'e>(
-    env: JNIEnv<'e>,
+pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlockWithTransactions(
+    env: JNIEnv,
     _: JObject,
     handle: Handle,
-    transactions: JList,
+    transactions: jobjectArray,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
         let mut raw_transactions = Vec::new();
-        for object in transactions.iter()? {
-            let serialized_tx: jbyteArray = object.into_inner().into();
+        let transactions_count = env.get_array_length(transactions)?;
+        for i in 0..transactions_count {
+            let serialized_tx_object =
+                env.auto_local(env.get_object_array_element(transactions, i as _)?);
+            let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner().into();
             let serialized_tx = env.convert_byte_array(serialized_tx)?;
             let transaction: Signed<RawTransaction> =
                 StorageValue::from_bytes(serialized_tx.into());
