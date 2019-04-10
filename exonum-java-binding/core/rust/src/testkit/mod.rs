@@ -28,7 +28,9 @@ use jni::{
 use proxy::{MainExecutor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
-use utils::{cast_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, Handle};
+use utils::{
+    cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, Handle,
+};
 
 const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
@@ -37,7 +39,8 @@ const EMULATED_NODE_CTOR_SIGNATURE: &str =
     "(ILcom/exonum/binding/common/crypto/KeyPair;)Lcom/exonum/binding/testkit/EmulatedNode;";
 
 /// Creates TestKit instance with specified services and wires public API handlers.
-/// Created instance is considered static and lives till the end of the program.
+/// The caller is responsible for properly destroying TestKit instance and freeing
+/// the memory by calling `nativeFreeTestKit` function.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
     env: JNIEnv,
@@ -62,12 +65,19 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         }
         Ok(builder)
     })());
-    let testkit = Box::new(builder.create());
+    let testkit = builder.create();
     // Mount API handlers
     testkit.api();
-    // Make TestKit instance static
-    let static_ref = Box::leak(testkit);
-    to_handle(static_ref)
+    to_handle(testkit)
+}
+
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeFreeTestKit(
+    env: JNIEnv,
+    _: JObject,
+    handle: Handle,
+) {
+    drop_handle::<TestKit>(&env, handle)
 }
 
 /// Creates Snapshot using provided TestKit instance.
@@ -78,7 +88,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
     handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let testkit = cast_handle::<TestKit>(handle);
         let snapshot = testkit.snapshot();
         let view = View::from_owned_snapshot(snapshot);
         Ok(to_handle(view))
@@ -94,7 +104,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let testkit = cast_handle::<TestKit>(handle);
         let block = testkit.create_block().header;
         let serialized_block = block.encode().unwrap();
         let byte_array = env.byte_array_from_slice(&serialized_block)?;
@@ -113,7 +123,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
     transactions: JList,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let testkit = cast_handle::<TestKit>(handle);
         let mut raw_transactions = Vec::new();
         for object in transactions.iter()? {
             let java_byte_array: jbyteArray = object.into_inner().into();
@@ -139,7 +149,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulated
     handle: Handle,
 ) -> JObject<'e> {
     let res = panic::catch_unwind(|| {
-        let testkit = cast_handle::<Box<TestKit>>(handle);
+        let testkit = cast_handle::<TestKit>(handle);
         let emulated_node = testkit.us();
         // Validator id == 0 in case of auditor node.
         let validator_id = emulated_node.validator_id().map(|id| id.0).unwrap_or(0);
