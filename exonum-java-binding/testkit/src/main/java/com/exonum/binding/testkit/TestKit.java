@@ -22,7 +22,6 @@ import static com.google.common.collect.Lists.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
-import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.runtime.ReflectiveModuleSupplier;
 import com.exonum.binding.service.BlockCommittedEvent;
@@ -144,9 +143,9 @@ public final class TestKit {
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
-  private native Block nativeCreateBlock(long nativeHandle);
+  private native byte[] nativeCreateBlock(long nativeHandle);
 
-  private native Block nativeCreateBlockWithTransactions(long nativeHandle, byte[][] transactions);
+  private native byte[] nativeCreateBlockWithTransactions(long nativeHandle, byte[][] transactions);
 
   private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
 
@@ -185,7 +184,7 @@ public final class TestKit {
      * regardless of the configured number of validators, only a single service will be
      * instantiated.
      */
-    public final Builder withValidators(short validatorCount) {
+    public Builder withValidators(short validatorCount) {
       this.validatorCount = validatorCount;
       return this;
     }
@@ -193,7 +192,7 @@ public final class TestKit {
     /**
      * Adds a service with which the TestKit would be instantiated. Several services can be added.
      */
-    public final Builder withService(Class<? extends ServiceModule> serviceModule) {
+    public Builder withService(Class<? extends ServiceModule> serviceModule) {
       services.add(serviceModule);
       return this;
     }
@@ -210,7 +209,7 @@ public final class TestKit {
     /**
      * Adds services with which the TestKit would be instantiated.
      */
-    public final Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
+    public Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
       Iterables.addAll(services, serviceModules);
       return this;
     }
@@ -219,7 +218,7 @@ public final class TestKit {
      * If called, will create a TestKit with time service enabled. The time service will use the
      * given {@linkplain TimeProvider} as a time source.
      */
-    public final Builder withTimeService(TimeProvider timeProvider) {
+    public Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;
       return this;
     }
@@ -227,7 +226,7 @@ public final class TestKit {
     /**
      * Creates the TestKit instance.
      */
-    public final TestKit build() {
+    public TestKit build() {
       checkCorrectServiceNumber(services.size());
       return new TestKit(services, nodeType, validatorCount, timeProvider);
     }
