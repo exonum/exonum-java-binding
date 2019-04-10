@@ -68,6 +68,7 @@
     <module>service-archetype</module>
     <module>time-oracle</module>
     <module>packaging</module>
+    <module>testkit</module>
   </modules>
 
   <scm>
