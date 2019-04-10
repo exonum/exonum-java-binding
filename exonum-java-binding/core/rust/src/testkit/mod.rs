@@ -132,7 +132,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
         for i in 0..transactions_count {
             let serialized_tx_object =
                 env.auto_local(env.get_object_array_element(transactions, i as _)?);
-            let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner().into();
+            let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner();
             let serialized_tx = env.convert_byte_array(serialized_tx)?;
             let transaction: Signed<RawTransaction> =
                 StorageValue::from_bytes(serialized_tx.into());
