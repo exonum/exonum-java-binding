@@ -26,6 +26,7 @@ import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import io.vertx.ext.web.Router;
@@ -34,6 +35,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class TestKitTest {
+
+  static {
+    LibraryLoader.load();
+  }
 
   @Test
   void createTestKitForSingleService() {
