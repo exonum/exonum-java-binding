@@ -163,7 +163,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Creates a block with the given transaction. Transactions that are in the pool will be ignored.
+   * Creates a block with the given transaction. In-pool transactions will be ignored.
    *
    * @return created block
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
@@ -174,7 +174,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Creates a block with the given transactions. Transactions that are in the pool will be ignored.
+   * Creates a block with the given transactions. In-pool transactions will be ignored.
    *
    * @return created block
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
@@ -189,7 +189,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Creates a block with the given transaction. Transactions that are in the pool will be ignored.
+   * Creates a block with the given transaction. In-pool transactions will be ignored.
    *
    * @return created block
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
