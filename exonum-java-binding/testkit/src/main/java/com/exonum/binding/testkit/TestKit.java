@@ -41,9 +41,8 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.ArrayList;
@@ -78,6 +77,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private final Map<Short, Service> services = new HashMap<>();
 
+  private TestKit(long nativeHandle, List<UserServiceAdapter> serviceAdapters) {
+    super(nativeHandle, true);
+    populateServiceMap(serviceAdapters);
+  }
+
   private static TestKit newInstance(List<Class<? extends ServiceModule>> serviceModules,
                                      EmulatedNodeType nodeType, short validatorCount,
                                      @Nullable TimeProvider timeProvider) {
@@ -85,15 +89,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     UserServiceAdapter[] userServiceAdapters = serviceAdapters.toArray(new UserServiceAdapter[0]);
     // TODO: fix after native implementation
-    long nativeHandle = 0L;
+    long nativeHandle = 1L;
     //    long nativeHandle = nativeCreateTestKit(userServiceAdapters, isAuditorNode,
     //    validatorCount, timeProvider);
     return new TestKit(nativeHandle, serviceAdapters);
-  }
-
-  private TestKit(long nativeHandle, List<UserServiceAdapter> serviceAdapters) {
-    super(nativeHandle, true);
-    populateServiceMap(serviceAdapters);
   }
 
   /**
@@ -168,6 +167,16 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @return created block
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
+  public Block createBlockWithTransaction(TransactionMessage transaction) {
+    return createBlockWithTransactions(transaction);
+  }
+
+  /**
+   * Creates a block with the given transaction(s). In-pool transactions will be ignored.
+   *
+   * @return created block
+   * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   */
   public Block createBlockWithTransactions(TransactionMessage transaction,
                                            TransactionMessage... transactions) {
     return createBlockWithTransactions(asList(transaction, transactions));
@@ -180,23 +189,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
-    List<TransactionMessage> messageList = Lists.newArrayList(transactions);
-    byte[][] transactionMessagesArr = messageList.stream()
+    byte[][] transactionMessagesArr = Streams.stream(transactions)
         .map(TransactionMessage::toBytes)
         .toArray(byte[][]::new);
     byte[] block = nativeCreateBlockWithTransactions(nativeHandle.get(), transactionMessagesArr);
-    return BLOCK_SERIALIZER.fromBytes(block);
-  }
-
-  /**
-   * Creates a block with the given transaction. In-pool transactions will be ignored.
-   *
-   * @return created block
-   * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
-   */
-  public Block createBlockWithTransaction(TransactionMessage transaction) {
-    byte[][] transactionMessageArray = { transaction.toBytes() };
-    byte[] block = nativeCreateBlockWithTransactions(nativeHandle.get(), transactionMessageArray);
     return BLOCK_SERIALIZER.fromBytes(block);
   }
 
@@ -220,11 +216,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
-      List<TransactionMessage> messageList = ImmutableList.copyOf(txMessages.values());
       // As only executed transactions are stored in TxResults, it wouldn't contain in-pool
       // transactions
       ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
-      return messageList.stream()
+      return Streams.stream(txMessages.values())
           .filter(predicate)
           .filter(tx -> !txResults.containsKey(tx.hash()))
           .collect(toList());
