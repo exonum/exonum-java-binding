@@ -21,6 +21,7 @@ import static com.google.inject.name.Names.named;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Service;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
@@ -50,6 +51,7 @@ final class RuntimeModule extends PrivateModule {
             .put("exonum-java-binding-common", HashCode.class)
             .put("vertx", Vertx.class)
             .put("gson", Gson.class)
+            .put("guava", Preconditions.class)
             .put("guice", Guice.class)
             .put("pf4j", PluginManager.class)
             .put("log4j", LogManager.class)
