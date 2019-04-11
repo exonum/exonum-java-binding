@@ -19,7 +19,7 @@ It implements most basic operations:
 
 Be sure you installed necessary packages:
 - Linux or macOS. Windows support is coming soon.
-- [JDK 1.8+](http://jdk.java.net/10/).
+- [JDK 1.8+](http://jdk.java.net/12/).
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)

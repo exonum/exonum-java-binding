@@ -82,7 +82,7 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <!-- Empty for all JDKs but 11 -->
+    <!-- Empty for all JDKs but 11+ -->
     <maven.javadoc.joption></maven.javadoc.joption>
   </properties>
 
@@ -351,11 +351,11 @@
       </build>
     </profile>
 
-    <!-- Fill in needed property when generating Javadocs on JDK 11 -->
+    <!-- Fill in needed property when generating Javadocs on JDK 11+ -->
     <profile>
-      <id>generate-javadocs-jdk11</id>
+      <id>generate-javadocs-jdk11-plus</id>
       <activation>
-        <jdk>11</jdk>
+        <jdk>[11,)</jdk>
       </activation>
       <properties>
         <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
