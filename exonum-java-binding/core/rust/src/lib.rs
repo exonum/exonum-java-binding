@@ -37,6 +37,8 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate exonum_testkit;
+extern crate exonum_time;
 #[cfg(test)]
 extern crate tempfile;
 
@@ -45,6 +47,7 @@ mod init;
 mod proxy;
 mod runtime;
 mod storage;
+mod testkit;
 #[doc(hidden)]
 pub mod utils;
 
@@ -53,3 +56,4 @@ pub use init::*;
 pub use proxy::*;
 pub use runtime::*;
 pub use storage::*;
+pub use testkit::*;
