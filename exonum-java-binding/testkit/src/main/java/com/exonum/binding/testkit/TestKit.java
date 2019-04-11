@@ -201,7 +201,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Creates a block with all transactions in the pool.
+   * Creates a block with all in-pool transactions.
    *
    * @return created block
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
@@ -226,7 +226,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
       return messageList.stream()
           .filter(predicate)
-          // TODO: is tx.hash() correct?
           .filter(tx -> !txResults.containsKey(tx.hash()))
           .collect(toList());
     });
