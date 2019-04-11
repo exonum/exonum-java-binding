@@ -53,38 +53,16 @@ class ClassLoadingScopeChecker {
     this.dependencyReferenceClasses = dependencyReferenceClasses;
   }
 
-  // todo: withOptionalDependencies (recommended)?
-
-  // todo: Shall we use "plugin classloader" (PF4J specific term) or "module classloader"?
   /**
    * Checks if there are copies of application classes on the classpath of the given classloader.
    * @param pluginClassloader a plugin parent-last classloader
    * @throws IllegalArgumentException if a copy of an application class is available on the
    *     classpath of the given classloader
    * @throws IllegalStateException if the given classloader fails to delegate
-   *     to the application classloader
+   *     to the application classloader (i.e., a reference class is inaccessible
+   *     through it)
    */
   void checkNoCopiesOfAppClasses(ClassLoader pluginClassloader) {
-    /*
-    todo: Would you prefer the iterative version?
-    List<String> libraryCopies = new ArrayList<>(0);
-    for (Entry<String, Class<?>> entry : dependencyReferenceClasses.entrySet()) {
-      String libraryName = entry.getKey();
-      Class<?> referenceClass = entry.getValue();
-      String referenceClassName = referenceClass.getName();
-      try {
-        Class<?> loadedThruPlugin = pluginClassloader.loadClass(referenceClassName);
-        if (referenceClass != loadedThruPlugin) {
-          libraryCopies.add(libraryName);
-        }
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException(
-            String.format("Classloader (%s) failed to load the reference "
-                + "application class from %s library", pluginClassloader, libraryName), e);
-      }
-    }
-    */
-
     List<String> libraryCopies = dependencyReferenceClasses.entrySet().stream()
         .filter(e -> loadsCopyOf(pluginClassloader, e))
         .map(Entry::getKey)

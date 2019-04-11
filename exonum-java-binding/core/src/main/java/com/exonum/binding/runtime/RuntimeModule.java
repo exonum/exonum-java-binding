@@ -56,7 +56,7 @@ final class RuntimeModule extends PrivateModule {
             // todo: exonum-time is not a dependency of core (where this code is),
             //   but of an application. We can either move the runtime in a separate module
             //   so that it has direct dependency on exonum-time, or reach for all classes
-            //   reflectively.
+            //   reflectively: ECR-3115
             .build());
     bind(ServiceLoader.class).to(Pf4jServiceLoader.class);
     bind(PluginManager.class).to(JarPluginManager.class);
