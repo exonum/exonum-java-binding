@@ -156,7 +156,7 @@ class TestKitTest {
 
   static final class TestService implements Service {
 
-    static short SERVICE_ID = 42;
+    static short SERVICE_ID = 46;
     static String SERVICE_NAME = "Test service";
 
     @Override

@@ -61,11 +61,10 @@ import javax.annotation.Nullable;
  * network, only one node will create the service instances and will execute their operations
  * (e.g., {@link Service#afterCommit(BlockCommittedEvent)} method logic).
  *
- * <p>When TestKit is created, Exonum blockchain instance is initialized, given service instances
- * are created and their
- * {@linkplain UserServiceAdapter#initialize(long)}  initialization} methods are called and
- * genesis block is committed. The
- * {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are created.
+ * <p>When TestKit is created, Exonum blockchain instance is initialized - service instances are
+ * {@linkplain UserServiceAdapter#initialize(long)} initialized} and genesis block is committed.
+ * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are
+ * created.
  *
  * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
  */
@@ -310,7 +309,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * regardless of the configured number of validators, only a single service will be
      * instantiated.
      */
-    public final Builder withValidators(short validatorCount) {
+    public Builder withValidators(short validatorCount) {
       this.validatorCount = validatorCount;
       return this;
     }
@@ -318,7 +317,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     /**
      * Adds a service with which the TestKit would be instantiated. Several services can be added.
      */
-    public final Builder withService(Class<? extends ServiceModule> serviceModule) {
+    public Builder withService(Class<? extends ServiceModule> serviceModule) {
       services.add(serviceModule);
       return this;
     }
@@ -335,7 +334,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     /**
      * Adds services with which the TestKit would be instantiated.
      */
-    public final Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
+    public Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
       Iterables.addAll(services, serviceModules);
       return this;
     }
@@ -344,7 +343,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * If called, will create a TestKit with time service enabled. The time service will use the
      * given {@linkplain TimeProvider} as a time source.
      */
-    public final Builder withTimeService(TimeProvider timeProvider) {
+    public Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;
       return this;
     }
@@ -352,7 +351,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     /**
      * Creates the TestKit instance.
      */
-    public final TestKit build() {
+    public TestKit build() {
       checkCorrectServiceNumber(services.size());
       return newInstance(services, nodeType, validatorCount, timeProvider);
     }
