@@ -35,7 +35,7 @@ const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
 const EMULATED_NODE_CLASS: &str = "com/exonum/binding/testkit/EmulatedNode";
 const EMULATED_NODE_CTOR_SIGNATURE: &str =
-    "(ILcom/exonum/binding/common/crypto/KeyPair;)Lcom/exonum/binding/testkit/EmulatedNode;";
+    "(ILcom/exonum/binding/common/crypto/KeyPair;)V";
 
 /// Creates TestKit instance with specified services and wires public API handlers.
 /// The caller is responsible for properly destroying TestKit instance and freeing
