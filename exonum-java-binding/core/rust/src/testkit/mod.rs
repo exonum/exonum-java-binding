@@ -185,8 +185,8 @@ fn create_java_keypair<'a>(
     let secret_key_byte_array: JObject = env.byte_array_from_slice(&keypair.1[..])?.into();
     env.call_static_method(
         KEYPAIR_CLASS,
-        KEYPAIR_CTOR_SIGNATURE,
         "createKeyPair",
+        KEYPAIR_CTOR_SIGNATURE,
         &[public_key_byte_array.into(), secret_key_byte_array.into()],
     )
 }
