@@ -22,7 +22,7 @@ use exonum::{
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use jni::{
-    objects::{JList, JObject, JValue},
+    objects::{JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
     JNIEnv,
 };
@@ -44,7 +44,7 @@ const EMULATED_NODE_CTOR_SIGNATURE: &str =
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
     env: JNIEnv,
     _: JObject,
-    services: JList,
+    services: jobjectArray,
     auditor: jboolean,
     validator_count: jshort,
     _time_provider: JObject,
@@ -58,7 +58,9 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         builder = builder.with_validators(validator_count as _);
         let builder = {
             let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
-            for service in services.iter()? {
+            let services_amount = env.get_array_length(services)?;
+            for i in 0..services_amount {
+                let service = env.get_object_array_element(services, i)?;
                 let global_ref = env.new_global_ref(service)?;
                 let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
                 builder = builder.with_service(service);
