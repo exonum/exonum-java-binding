@@ -42,6 +42,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -194,7 +195,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
-    byte[][] transactionMessagesArr = Streams.stream(transactions)
+    List<TransactionMessage> messageList = Lists.newArrayList(transactions);
+    byte[][] transactionMessagesArr = messageList.stream()
         .map(TransactionMessage::toBytes)
         .toArray(byte[][]::new);
     byte[] block = nativeCreateBlockWithTransactions(nativeHandle.get(), transactionMessagesArr);
