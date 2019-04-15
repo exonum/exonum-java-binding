@@ -232,6 +232,11 @@
           <doclint>none</doclint>
           <detectOfflineLinks>false</detectOfflineLinks>
           <additionalJOption>${maven.javadoc.joption}</additionalJOption>
+          <!-- Allow fetching external resources to generate links -->
+          <isOffline>false</isOffline>
+          <links>
+            <link>https://exonum.com/doc/api/java-binding-common/${ejb.version}</link>
+          </links>
         </configuration>
         <executions>
           <execution>
