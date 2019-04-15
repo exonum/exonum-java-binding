@@ -32,8 +32,7 @@ public class EmulatedNode {
   /**
    * Creates a context of an emulated node.
    *
-   * @param validatorId validator id of the validator node, less or equal to 0 in case of an
-   *     auditor node
+   * @param validatorId validator id of the validator node, less than 0 in case of an auditor node
    * @param serviceKeyPair service key pair of the node
    */
   public EmulatedNode(int validatorId, KeyPair serviceKeyPair) {

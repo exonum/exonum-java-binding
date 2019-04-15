@@ -47,8 +47,10 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -98,9 +100,22 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    */
   private static List<UserServiceAdapter> toUserServiceAdapters(
       List<Class<? extends ServiceModule>> serviceModules) {
+    Set<Short> serviceIds = new HashSet<>();
     return serviceModules.stream()
         .map(TestKit::createUserServiceAdapter)
+        .peek(s -> checkForDuplicateService(s, serviceIds))
         .collect(toList());
+  }
+
+  private static void checkForDuplicateService(UserServiceAdapter service, Set<Short> serviceIds) {
+    short serviceId = service.getId();
+    if (serviceIds.contains(serviceId)) {
+      String message =
+          String.format("Service with id %s was added to the TestKit twice: %s",
+              serviceId, service.getService());
+      throw new IllegalArgumentException(message);
+    }
+    serviceIds.add(serviceId);
   }
 
   /**
@@ -122,23 +137,15 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private void populateServiceMap(List<UserServiceAdapter> serviceAdapters) {
     for (UserServiceAdapter serviceAdapter: serviceAdapters) {
-      checkForDuplicateService(serviceAdapter);
       services.put(serviceAdapter.getId(), serviceAdapter.getService());
     }
-  }
-
-  private void checkForDuplicateService(UserServiceAdapter newService) {
-    short serviceId = newService.getId();
-    checkArgument(!services.containsKey(serviceId),
-        "Service with id %s was added to the TestKit twice: %s and %s",
-        serviceId, services.get(serviceId), newService.getService());
   }
 
   /**
    * Creates a TestKit network with a single validator node for a single service.
    */
   public static TestKit forService(Class<? extends ServiceModule> serviceModule) {
-    return newInstance(singletonList(serviceModule), EmulatedNodeType.VALIDATOR, (short) 0, null);
+    return newInstance(singletonList(serviceModule), EmulatedNodeType.VALIDATOR, (short) 1, null);
   }
 
   /**
@@ -345,6 +352,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      */
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
+      if (nodeType == EmulatedNodeType.VALIDATOR) {
+        validatorCount += 1;
+      }
       return newInstance(services, nodeType, validatorCount, timeProvider);
     }
 
