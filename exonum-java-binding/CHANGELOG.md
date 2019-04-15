@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 The release is based on Exonum 0.11
 
 ### Added
+- Support of packaging the Exonum Java application into a single archive with all the necessary
+  dependencies. For the instructions, consult [CONTRIBUTING.md](../CONTRIBUTING.md#Building-Exonum-Java-App).
+  This allows you to develop and run Java services without installing Rust compiler and Exonum dependencies.
+  <!-- TODO: add link to the prepared binaries for the Linux and Mac OS -->
+  (#818, #776)
+- Support of multiple Java services on one blockchain node. To enable a list of specific services, you need to 
+  provide a paths to each service artifact in a `services.toml` configuration file. See the 
+  [documentation](core/rust/exonum-java/TUTORIAL.md#Services-definition) for more details. (#820)
 - `toOptional()` method to `EntryIndexProxy`. (#790)
 
 ### Changed
