@@ -22,7 +22,7 @@ use exonum::{
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use jni::{
-    objects::{JList, JObject, JValue},
+    objects::{JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
     JNIEnv,
 };
@@ -34,8 +34,7 @@ use utils::{cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_de
 const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
 const EMULATED_NODE_CLASS: &str = "com/exonum/binding/testkit/EmulatedNode";
-const EMULATED_NODE_CTOR_SIGNATURE: &str =
-    "(ILcom/exonum/binding/common/crypto/KeyPair;)Lcom/exonum/binding/testkit/EmulatedNode;";
+const EMULATED_NODE_CTOR_SIGNATURE: &str = "(ILcom/exonum/binding/common/crypto/KeyPair;)V";
 
 /// Creates TestKit instance with specified services and wires public API handlers.
 /// The caller is responsible for properly destroying TestKit instance and freeing
@@ -44,7 +43,7 @@ const EMULATED_NODE_CTOR_SIGNATURE: &str =
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestKit(
     env: JNIEnv,
     _: JObject,
-    services: JList,
+    services: jobjectArray,
     auditor: jboolean,
     validator_count: jshort,
     _time_provider: JObject,
@@ -58,7 +57,9 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         builder = builder.with_validators(validator_count as _);
         let builder = {
             let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
-            for service in services.iter()? {
+            let num_services = env.get_array_length(services)?;
+            for i in 0..num_services {
+                let service = env.get_object_array_element(services, i)?;
                 let global_ref = env.new_global_ref(service)?;
                 let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
                 builder = builder.with_service(service);
@@ -183,8 +184,8 @@ fn create_java_keypair<'a>(
     let secret_key_byte_array: JObject = env.byte_array_from_slice(&keypair.1[..])?.into();
     env.call_static_method(
         KEYPAIR_CLASS,
-        KEYPAIR_CTOR_SIGNATURE,
         "createKeyPair",
+        KEYPAIR_CTOR_SIGNATURE,
         &[public_key_byte_array.into(), secret_key_byte_array.into()],
     )
 }
