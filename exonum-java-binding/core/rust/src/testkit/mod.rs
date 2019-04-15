@@ -58,8 +58,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         builder = builder.with_validators(validator_count as _);
         let builder = {
             let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
-            let services_amount = env.get_array_length(services)?;
-            for i in 0..services_amount {
+            let num_services = env.get_array_length(services)?;
+            for i in 0..num_services {
                 let service = env.get_object_array_element(services, i)?;
                 let global_ref = env.new_global_ref(service)?;
                 let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
