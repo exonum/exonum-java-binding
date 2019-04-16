@@ -42,7 +42,6 @@ extern crate exonum_time;
 #[cfg(test)]
 extern crate tempfile;
 
-mod error;
 mod proxy;
 mod runtime;
 mod storage;
@@ -50,9 +49,10 @@ mod testkit;
 pub mod utils;
 mod resource_manager;
 
-pub use error::*;
 pub use proxy::*;
 pub use runtime::*;
 pub use storage::*;
 pub use testkit::*;
 pub use resource_manager::*;
+
+pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
