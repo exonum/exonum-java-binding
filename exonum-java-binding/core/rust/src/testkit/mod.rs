@@ -17,6 +17,7 @@
 use exonum::{
     blockchain::Block,
     crypto::{PublicKey, SecretKey},
+    helpers::ValidatorId,
     messages::{BinaryForm, RawTransaction, Signed},
     storage::StorageValue,
 };
@@ -157,8 +158,11 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulated
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
         let emulated_node = testkit.us();
-        // Validator id == 0 in case of auditor node.
-        let validator_id = emulated_node.validator_id().map(|id| id.0).unwrap_or(0);
+        // Validator id == -1 in case of auditor node.
+        let validator_id = match emulated_node.validator_id() {
+            Some(ValidatorId(id)) => i32::from(id),
+            None => -1,
+        };
         let service_keypair = emulated_node.service_keypair();
         let java_key_pair = create_java_keypair(&env, service_keypair)?;
         let java_emulated_node = env.new_object(
