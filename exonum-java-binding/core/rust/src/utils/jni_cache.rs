@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Caching some of the often used methods and classes helps to improve
+//! performance. Caching is done immediately after loading of the native
+//! library by JVM. To do so, we use JNI_OnLoad method. JNI_OnUnload is not
+//! currently used because we don't need to reload native library multiple times
+//! during execution.
+
 use jni::{
     objects::{GlobalRef, JMethodID},
     sys::{jint, JNI_VERSION_1_8},
@@ -35,6 +41,8 @@ static mut SERVICE_ADAPTER_CONVERT_TRANSACTION: Option<JMethodID> = None;
 static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
 static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
 
+/// This function is executed on loading native library by JVM.
+/// It initializes the cache of method and class references.
 #[allow(non_snake_case)]
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {

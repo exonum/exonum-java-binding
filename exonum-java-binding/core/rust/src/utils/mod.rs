@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Contains util methods which are used by other top-level modules.
+
 #![deny(non_snake_case)]
 
 mod conversion;
