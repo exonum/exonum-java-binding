@@ -62,6 +62,7 @@ import com.google.common.io.BaseEncoding;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -199,7 +200,7 @@ final class ApiController {
       HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
       getBlockById(rc, blockId);
     } else {
-      respondBadRequest(rc, "Get block request was invalid. Expected format is "
+      throw new IllegalArgumentException("Get block request was invalid. Expected format is "
           + BLOCKCHAIN_BLOCK_PATH + "?blockId={blockId} or "
           + BLOCKCHAIN_BLOCK_PATH + "?blockHeight={blockHeight}");
     }
@@ -229,9 +230,10 @@ final class ApiController {
       HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
       getBlockTransactionsByBlockId(rc, blockId);
     } else {
-      respondBadRequest(rc, "Get block transactions request was invalid. Expected format is "
-          + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockId={blockId} or "
-          + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockHeight={blockHeight}");
+      throw new IllegalArgumentException(
+          "Get block transactions request was invalid. Expected format is "
+              + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockId={blockId} or "
+              + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockHeight={blockHeight}");
     }
   }
 
@@ -333,21 +335,34 @@ final class ApiController {
 
     Throwable requestFailure = rc.failure();
     if (requestFailure != null) {
-      Optional<String> badRequest = badRequestDescription(requestFailure);
-      if (badRequest.isPresent()) {
-        respondBadRequest(rc, badRequest.get());
+      HttpServerResponse response = rc.response();
+      if (isBadRequest(requestFailure)) {
+        logger.info("Request error:", requestFailure);
+        response.setStatusCode(HTTP_BAD_REQUEST);
       } else {
-        logger.error("Request error:", requestFailure);
-        rc.response()
-            .setStatusCode(HTTP_INTERNAL_ERROR)
-            .end();
+        logger.error("Internal error", requestFailure);
+        response.setStatusCode(HTTP_INTERNAL_ERROR);
       }
+      String description = Strings.nullToEmpty(requestFailure.getMessage());
+      response.putHeader("Content-Type", "text/plain")
+          .end(description);
     } else {
       int failureStatusCode = rc.statusCode();
       rc.response()
           .setStatusCode(failureStatusCode)
           .end();
     }
+  }
+
+  /**
+   * Returns true if the passed throwable corresponds to a bad request; false — otherwise.
+   */
+  private boolean isBadRequest(Throwable requestFailure) {
+    // All IllegalArgumentExceptions (including NumberFormatException) and IndexOutOfBoundsException
+    // are considered to be caused by a bad request. Other Throwables are considered internal
+    // errors.
+    return (requestFailure instanceof IllegalArgumentException
+        || requestFailure instanceof IndexOutOfBoundsException);
   }
 
   private <T> void respondWithJson(RoutingContext rc, Optional<T> responseBody) {
@@ -368,30 +383,6 @@ final class ApiController {
     rc.response()
         .setStatusCode(HTTP_NOT_FOUND)
         .end();
-  }
-
-  private void respondBadRequest(RoutingContext rc, String description) {
-    rc.response()
-        .setStatusCode(HTTP_BAD_REQUEST)
-        .putHeader("Content-Type", "text/plain")
-        .end(description);
-  }
-
-  /**
-   * If the passed throwable corresponds to a bad request — returns an error message,
-   * or {@code Optional.empty()} otherwise.
-   */
-  private Optional<String> badRequestDescription(Throwable requestFailure) {
-    // All IllegalArgumentExceptions (including NumberFormatException) and IndexOutOfBoundsException
-    // are considered to be caused by a bad request.
-    if (requestFailure instanceof IllegalArgumentException
-        || requestFailure instanceof IndexOutOfBoundsException) {
-      String message = Strings.nullToEmpty(requestFailure.getLocalizedMessage());
-      return Optional.of(message);
-    }
-
-    // This throwable must correspond to an internal server error.
-    return Optional.empty();
   }
 
   @VisibleForTesting

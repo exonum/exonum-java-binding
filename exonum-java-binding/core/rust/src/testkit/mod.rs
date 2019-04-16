@@ -160,7 +160,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulated
         let emulated_node = testkit.us();
         // Validator id == -1 in case of auditor node.
         let validator_id = match emulated_node.validator_id() {
-            Some(ValidatorId(id)) => id as i32,
+            Some(ValidatorId(id)) => i32::from(id),
             None => -1,
         };
         let service_keypair = emulated_node.service_keypair();

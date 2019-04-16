@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.qaservice.transactions;
 
-/**
- * Indicates that an internal error occurred during transaction processing.
- */
-public final class InternalServerError extends Exception {
+import com.google.common.primitives.UnsignedBytes;
 
-  public InternalServerError(String message) {
-    super(message);
+enum TransactionError {
+  // Create counter errors
+  COUNTER_ALREADY_EXISTS(0),
+  // Increment counter errors
+  UNKNOWN_COUNTER(1);
+
+  byte code;
+
+  TransactionError(int code) {
+    this.code = UnsignedBytes.checkedCast(code);
   }
 }

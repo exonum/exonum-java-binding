@@ -234,7 +234,7 @@ class QaServiceImplIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void getValue() throws CloseFailuresException {
+  void getValue() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance()) {
       node = new NodeFake(db);
       setServiceNode(node);

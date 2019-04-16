@@ -15,13 +15,13 @@
  */
 
 use super::{Config, JvmConfig, RuntimeConfig};
-use exonum::helpers::fabric::keys;
-use exonum::helpers::fabric::Argument;
-use exonum::helpers::fabric::CommandExtension;
-use exonum::helpers::fabric::Context;
-use exonum::node::NodeConfig;
+use exonum::{
+    helpers::fabric::{keys, Argument, CommandExtension, Context},
+    node::NodeConfig,
+};
 use failure;
 use toml::Value;
+use utils::executable_directory;
 
 use std::path::PathBuf;
 
@@ -94,7 +94,9 @@ impl CommandExtension for Run {
     }
 
     fn execute(&self, mut context: Context) -> Result<Context, failure::Error> {
-        let log_config_path = context.arg(EJB_LOG_CONFIG_PATH).unwrap_or_default();
+        let log_config_path = context
+            .arg(EJB_LOG_CONFIG_PATH)
+            .unwrap_or_else(|_| get_path_to_default_log_config());
         let port = context.arg(EJB_PORT)?;
         let args_prepend: Vec<String> = context.arg_multiple(JVM_ARGS_PREPEND).unwrap_or_default();
         let args_append: Vec<String> = context.arg_multiple(JVM_ARGS_APPEND).unwrap_or_default();
@@ -123,7 +125,7 @@ impl CommandExtension for Run {
 }
 
 /// Updates the `ejb` section of service configs of `NodeConfig` with `value` and puts updated
-/// `NodeConfig` back to `Context`
+/// `NodeConfig` back to `Context`.
 fn write_ejb_config(context: &mut Context, value: Value) {
     let mut node_config = get_node_config(context);
     node_config
@@ -132,9 +134,20 @@ fn write_ejb_config(context: &mut Context, value: Value) {
     context.set(keys::NODE_CONFIG, node_config);
 }
 
-/// Extracts the `NodeConfig` from `Context` for further processing
+/// Extracts the `NodeConfig` from `Context` for further processing.
 fn get_node_config(context: &Context) -> NodeConfig<PathBuf> {
     context
         .get(keys::NODE_CONFIG)
         .expect("Unable to read node configuration.")
+}
+
+/// Returns full path to the default log configuration file assuming the `exonum-java` app is
+/// packaged/installed.
+fn get_path_to_default_log_config() -> String {
+    let log_fallback_path = {
+        let mut path = executable_directory();
+        path.push("log4j-fallback.xml");
+        path
+    };
+    log_fallback_path.to_string_lossy().into_owned()
 }
