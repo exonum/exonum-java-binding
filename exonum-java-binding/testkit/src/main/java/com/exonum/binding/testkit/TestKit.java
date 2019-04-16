@@ -41,9 +41,8 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.ArrayList;
@@ -195,7 +194,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
-    List<TransactionMessage> messageList = Lists.newArrayList(transactions);
+    List<TransactionMessage> messageList = ImmutableList.copyOf(transactions);
     byte[][] transactionMessagesArr = messageList.stream()
         .map(TransactionMessage::toBytes)
         .toArray(byte[][]::new);
@@ -226,7 +225,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       // As only executed transactions are stored in TxResults, it wouldn't contain in-pool
       // transactions
       ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
-      return Streams.stream(txMessages.values())
+      List<TransactionMessage> messages = ImmutableList.copyOf(txMessages.values());
+      return messages.stream()
           .filter(predicate)
           .filter(tx -> !txResults.containsKey(tx.hash()))
           .collect(toList());
