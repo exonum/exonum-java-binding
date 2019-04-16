@@ -70,7 +70,7 @@
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
-      <!-- Skip the deployment of internal module as it is inherited from parent pom -->
+      <!-- Skip the deployment of TestKit module as it is not yet ready, fix in ECR-3120 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
