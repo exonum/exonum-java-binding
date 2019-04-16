@@ -17,6 +17,7 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.exonum.binding.qaservice.transactions.TransactionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -31,6 +32,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import java.util.Objects;
 
 /**
@@ -49,7 +51,7 @@ public final class CreateCounterTx implements Transaction {
   }
 
   @Override
-  public void execute(TransactionContext context) {
+  public void execute(TransactionContext context) throws TransactionExecutionException {
     QaSchema schema = new QaSchema(context.getFork());
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
@@ -57,7 +59,7 @@ public final class CreateCounterTx implements Transaction {
     HashCode counterId = Hashing.defaultHashFunction()
         .hashString(name, UTF_8);
     if (counters.containsKey(counterId)) {
-      return;
+      throw new TransactionExecutionException(COUNTER_ALREADY_EXISTS.code);
     }
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + name;
 
