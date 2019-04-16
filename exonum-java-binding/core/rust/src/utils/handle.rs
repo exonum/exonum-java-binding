@@ -24,7 +24,7 @@ use std::marker::PhantomData;
 use std::panic;
 
 use resource_manager;
-use utils::exception;
+use utils::errors;
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
@@ -101,7 +101,7 @@ pub fn drop_handle<T: 'static>(env: &JNIEnv, handle: Handle) {
         Box::from_raw(handle as *mut T);
         Ok(())
     });
-    exception::unwrap_exc_or_default(env, res);
+    errors::unwrap_exc_or_default(env, res);
 }
 
 #[cfg(test)]

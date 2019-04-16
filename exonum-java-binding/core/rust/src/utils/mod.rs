@@ -18,7 +18,6 @@
 
 mod conversion;
 mod errors;
-mod exception;
 mod handle;
 mod jni;
 pub mod jni_cache;
@@ -29,9 +28,8 @@ mod time_service;
 pub use self::conversion::{convert_hash, convert_to_hash, convert_to_string};
 pub use self::errors::{
     check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
-    panic_on_exception, unwrap_jni, unwrap_jni_verbose,
+    panic_on_exception, unwrap_jni, unwrap_jni_verbose,any_to_string, unwrap_exc_or, unwrap_exc_or_default
 };
-pub use self::exception::{any_to_string, unwrap_exc_or, unwrap_exc_or_default};
 pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
 pub use self::jni::{get_class_name, get_exception_message};
 pub use self::path::executable_directory;
