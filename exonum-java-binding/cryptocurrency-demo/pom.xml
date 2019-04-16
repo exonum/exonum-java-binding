@@ -206,4 +206,13 @@
       </extension>
     </extensions>
   </build>
+
+  <profiles>
+    <profile>
+      <id>with-installed-app</id>
+      <properties>
+        <ejb-core.nativeLibPath>${env.EXONUM_HOME}/lib/native</ejb-core.nativeLibPath>
+      </properties>
+    </profile>
+  </profiles>
 </project>
