@@ -43,17 +43,16 @@ extern crate exonum_time;
 extern crate tempfile;
 
 mod error;
-mod init;
 mod proxy;
 mod runtime;
 mod storage;
 mod testkit;
-#[doc(hidden)]
 pub mod utils;
+mod resource_manager;
 
 pub use error::*;
-pub use init::*;
 pub use proxy::*;
 pub use runtime::*;
 pub use storage::*;
 pub use testkit::*;
+pub use resource_manager::*;

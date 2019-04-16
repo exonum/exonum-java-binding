@@ -23,7 +23,8 @@ use jni::JNIEnv;
 use std::marker::PhantomData;
 use std::panic;
 
-use utils::{exception, resource_manager};
+use resource_manager;
+use utils::exception;
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
