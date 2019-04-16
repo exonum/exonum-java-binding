@@ -26,8 +26,9 @@ use exonum::storage::proof_map_index::{
 };
 use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 
+use storage::PairIter;
 use storage::db::{Value, View, ViewRef};
-use utils::{self, Handle, PairIter};
+use utils::{self, Handle};
 use JniResult;
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];

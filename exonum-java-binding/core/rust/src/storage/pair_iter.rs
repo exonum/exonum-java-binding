@@ -19,13 +19,20 @@ use std::mem;
 
 use JniResult;
 
+/// A wrapper around Iterator used for constructing Java objects from their
+/// serialized representation. It allows to store the type information about
+/// elements together with the Iterator.
 pub struct PairIter<InnerIter: Iterator> {
+    /// The base `Iterator` instance.
     pub iter: InnerIter,
+    /// Class of the Java representation of the iterator elements.
     pub element_class: GlobalRef,
+    /// Cached method Id of the `element_class` constructor.
     pub constructor_id: JMethodID<'static>,
 }
 
 impl<InnerIter: Iterator> PairIter<InnerIter> {
+    /// Returns new `PairIter` for a given `iter` and `class_name`.
     pub fn new(env: &JNIEnv, iter: InnerIter, class_name: &str) -> JniResult<Self> {
         let class = env.find_class(class_name)?;
         let element_class = env.new_global_ref(class.into())?;

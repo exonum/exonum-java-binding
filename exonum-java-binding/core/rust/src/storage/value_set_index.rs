@@ -21,8 +21,9 @@ use jni::JNIEnv;
 use std::panic;
 use std::ptr;
 
+use storage::PairIter;
 use storage::db::{Value, View, ViewRef};
-use utils::{self, Handle, PairIter};
+use utils::{self, Handle};
 
 type Index<T> = ValueSetIndex<T, Value>;
 
