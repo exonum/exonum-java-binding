@@ -17,6 +17,7 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
+import static com.exonum.binding.qaservice.transactions.TransactionError.UNKNOWN_COUNTER;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -30,6 +31,7 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.protobuf.ByteString;
 import java.util.Objects;
 
@@ -62,14 +64,16 @@ public final class IncrementCounterTx implements Transaction {
   }
 
   @Override
-  public void execute(TransactionContext context) {
+  public void execute(TransactionContext context) throws TransactionExecutionException {
     QaSchema schema = new QaSchema(context.getFork());
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
+
     // Increment the counter if there is such.
-    if (counters.containsKey(counterId)) {
-      long newValue = counters.get(counterId) + 1;
-      counters.put(counterId, newValue);
+    if (!counters.containsKey(counterId)) {
+      throw new TransactionExecutionException(UNKNOWN_COUNTER.code);
     }
+    long newValue = counters.get(counterId) + 1;
+    counters.put(counterId, newValue);
   }
 
   @Override
