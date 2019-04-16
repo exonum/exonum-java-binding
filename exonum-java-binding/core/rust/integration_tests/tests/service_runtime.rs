@@ -128,8 +128,8 @@ fn get_runtime() -> JavaServiceRuntime {
     JavaServiceRuntime::create_with_jvm(VM.clone(), 0)
 }
 
-// Asserts that given closure panics while executed.
-fn assert_panics<F, R>(err_pattern: &str, f: F)
+// Asserts that given closure panics while executed and error message contains given substring.
+fn assert_panics<F, R>(err_substring: &str, f: F)
 where
     F: FnOnce() -> R,
 {
@@ -138,7 +138,7 @@ where
         Ok(_) => panic!("Panic expected"),
         Err(err) => {
             let err_msg = any_to_string(&err);
-            assert!(err_msg.contains(err_pattern));
+            assert!(err_msg.contains(err_substring));
         }
     }
 }
