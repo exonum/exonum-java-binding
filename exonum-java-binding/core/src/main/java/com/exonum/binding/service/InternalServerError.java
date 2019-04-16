@@ -21,7 +21,7 @@ package com.exonum.binding.service;
  */
 public final class InternalServerError extends Exception {
 
-  InternalServerError(String message) {
+  public InternalServerError(String message) {
     super(message);
   }
 }

@@ -19,7 +19,7 @@ It implements most basic operations:
 
 Be sure you installed necessary packages:
 - Linux or macOS. Windows support is coming soon.
-- [JDK 1.8+](http://jdk.java.net/10/).
+- [JDK 1.8+](http://jdk.java.net/12/).
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
@@ -38,7 +38,7 @@ $ source exonum-java-binding/tests_profile
 
 $ mvn install
 
-$ cd exonum-java-binding/core/rust/ejb-app/
+$ cd exonum-java-binding/core/rust/exonum-java/
 
 $ cargo build
 
@@ -79,4 +79,4 @@ Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 - [Reference Documentation](https://exonum.com/doc/version/0.10/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
-[app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/ejb-app/TUTORIAL.md
+[app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/exonum-java/TUTORIAL.md

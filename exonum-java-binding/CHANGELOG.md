@@ -18,7 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 The release is based on Exonum 0.11
 
 ### Added
-- `toOptional()` method to `EntryIndexProxy`. (#790) 
+- `toOptional()` method to `EntryIndexProxy`. (#790)
+
+### Changed
+- Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted
+  on `/api/services` instead of `/api` for consistency with Exonum Core.
 
 ## [0.5.0] - 2019-03-13
 
@@ -149,10 +153,10 @@ The release is based on Exonum 0.8.
 ## [0.2] - 2018-07-23
 
 ### Added
-- Standard services may be enabled using specific `ejb_app_services.toml` file.
+- Standard services may be enabled using specific `services.toml` file.
   It supports only `configuration` and `btc-anchoring` services at the moment.
 
-  To enable services put `ejb_app_services.toml` file into EJB App's directory
+  To enable services put `services.toml` file into Exonum Java app's directory
   with the following content:
   ```toml
   services = ["configuration", "btc-anchoring"]

@@ -31,6 +31,8 @@ import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A service runtime. It manages the services required for operation of Exonum services (e.g., a
@@ -46,6 +48,8 @@ import java.util.function.Supplier;
  */
 @Singleton
 public final class ServiceRuntime {
+
+  private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
 
   private final Injector frameworkInjector;
   private final ServiceLoader serviceLoader;
@@ -91,11 +95,16 @@ public final class ServiceRuntime {
    */
   public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
     Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
-    synchronized (lock) {
-      LoadedServiceDefinition loadedServiceDefinition = serviceLoader
-          .loadService(serviceArtifactLocation);
-      ServiceId serviceId = loadedServiceDefinition.getId();
-      return serviceId.toString();
+    try {
+      synchronized (lock) {
+        LoadedServiceDefinition loadedServiceDefinition = serviceLoader
+            .loadService(serviceArtifactLocation);
+        ServiceId serviceId = loadedServiceDefinition.getId();
+        return serviceId.toString();
+      }
+    } catch (Throwable e) {
+      logger.error("Failed to load an artifact from {}", serviceArtifactPath, e);
+      throw e;
     }
   }
 
@@ -108,14 +117,19 @@ public final class ServiceRuntime {
    * @throws RuntimeException if it failed to instantiate the service
    */
   public UserServiceAdapter createService(String artifactId) {
-    ServiceId serviceId = ServiceId.parseFrom(artifactId);
-    synchronized (lock) {
-      LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
-          .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
-      Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
-      Module serviceModule = serviceModuleSupplier.get();
-      Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
-      return serviceInjector.getInstance(UserServiceAdapter.class);
+    try {
+      ServiceId serviceId = ServiceId.parseFrom(artifactId);
+      synchronized (lock) {
+        LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
+        Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
+        Module serviceModule = serviceModuleSupplier.get();
+        Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
+        return serviceInjector.getInstance(UserServiceAdapter.class);
+      }
+    } catch (Throwable e) {
+      logger.error("Failed to create a service {} instance", artifactId, e);
+      throw e;
     }
   }
 

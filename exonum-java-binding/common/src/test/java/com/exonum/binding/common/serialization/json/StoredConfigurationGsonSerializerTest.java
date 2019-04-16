@@ -58,7 +58,7 @@ class StoredConfigurationGsonSerializerTest {
       + "\"majority_count\": null,\n"
       + "\"services\": {\n"
       + "    \"configuration\": null,\n"
-      + "    \"cryptocurrency-demo-service\": null\n"
+      + "    \"cryptocurrency-demo\": null\n"
       + "}\n"
       + "}";
 

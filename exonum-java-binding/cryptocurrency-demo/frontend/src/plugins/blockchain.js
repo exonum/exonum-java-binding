@@ -27,7 +27,7 @@ const PER_PAGE = 10
 const MAX_VALUE = 2147483647
 
 function getWallet (publicKey) {
-  return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}`)
+  return axios.get(`/api/services/cryptocurrency-demo/wallet/${publicKey}`)
     .then(response => response.data)
     .then(data => {
       return {
@@ -112,7 +112,7 @@ module.exports = {
       },
 
       getHistory (publicKey) {
-        return axios.get(`/api/cryptocurrency-demo-service/wallet/${publicKey}/history`).then(r => r.data)
+        return axios.get(`/api/services/cryptocurrency-demo/wallet/${publicKey}/history`).then(r => r.data)
       }
     }
   }

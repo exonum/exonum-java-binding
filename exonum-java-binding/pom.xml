@@ -68,6 +68,7 @@
     <module>service-archetype</module>
     <module>time-oracle</module>
     <module>packaging</module>
+    <module>testkit</module>
   </modules>
 
   <scm>
@@ -104,7 +105,7 @@
     <maven.javadoc.joption></maven.javadoc.joption>
 
     <assertj.version>3.12.2</assertj.version>
-    <checkstyle.configLocation>${project.basedir}/checkstyle.xml</checkstyle.configLocation>
+    <checkstyle.configLocation>${project.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
     <log4j.version>2.11.2</log4j.version>
@@ -154,7 +155,6 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
-        <scope>compile</scope>
       </dependency>
 
       <dependency>
@@ -421,10 +421,33 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.1.0</version>
           <configuration>
+            <source>${java.compiler.source}</source>
             <doclint>none</doclint>
+            <!-- Allow fetching links below -->
+            <isOffline>false</isOffline>
             <detectOfflineLinks>false</detectOfflineLinks>
+            <links>
+              <!-- Published Exonum API docs. Only the modules that are dependencies of
+                   other modules are listed here.
+
+                   To generate release Javadocs, a two-step process is required:
+                     0. Bump version.
+                     1. Generate Javadocs for the given version. They won't have cross-references,
+                        because no Javadocs have been published on the website.
+                     2. Upload them to the website.
+                     3. Re-generate Javadocs. This time the Javadocs will be available
+                        on the website, and cross-references will be added.
+                     4. Upload the new ones.
+
+                   Our web-site seems to be the only one compatible with javadoc tool —
+                   the Javadocs published on javadoc.io, github.io (guava and vertx)
+                   do not work.
+              -->
+              <link>https://exonum.com/doc/api/java-binding-common/${project.version}</link>
+              <link>https://exonum.com/doc/api/java-binding-core/${project.version}</link>
+            </links>
             <additionalJOption>${maven.javadoc.joption}</additionalJOption>
           </configuration>
           <executions>
@@ -675,7 +698,7 @@
     <profile>
       <id>generate-javadocs-jdk11</id>
       <activation>
-        <jdk>11</jdk>
+        <jdk>[11,)</jdk>
       </activation>
       <properties>
         <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>

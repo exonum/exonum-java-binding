@@ -34,7 +34,7 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 ```
 
 #### Services definition
-Services must be defined in the [ejb_app_services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
+Services must be defined in the [services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
 file in order to be available in the network. The configuration file consists of two sections:
 - The optional `system_services` section is used to enable built-in Exonum services. If 
 not specified - only Configuration service is enabled. Possible variants for the moment are: 
@@ -44,7 +44,7 @@ in the JAR format. It takes a line per service in form of `name = artifact`, whe
 is one-word description of the service and `artifact` is a full path to the service's artifact. 
 At least one service must be defined.
 
-The sample of `ejb_app_services.toml` file that enables all possible built-in Exonum services 
+The sample of `services.toml` file that enables all possible built-in Exonum services 
 and two user services:
 ```toml
 system_services = ["configuration", "btc-anchoring", "time"]
@@ -56,47 +56,54 @@ service_name2 = "/path/to/service2_artifact.jar"
 
 ### Step 2. Generate Node Configuration
 
-EJB App configuration is pretty similar to configuration of any other Exonum service,
+Exonum Java app configuration is pretty similar to configuration of any other Exonum service,
 with a few additional parameters.
 
 #### Generate Template Config
 
 ```$sh
-$ ejb-app generate-template testnet/common.toml \
+$ exonum-java generate-template testnet/common.toml \
     --validators-count=1
 ```
 
 #### Generate Node Private and Public Configs
 
+**Note:** in this tutorial we do not provide any passwords for consensus and service private keys.
+Please consult Exonum documentation for the secure way of the node configuration.
+
 ```$sh
-$ ejb-app generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+$ exonum-java generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
+    --consensus-key-path testnet/consensus1.toml \
+    --service-key-path testnet/service1.toml \
+    --no-password \
     --peer-address 127.0.0.1:5400
 ```
 
 #### Finalize Configuration
 
 ```$sh
-$ ejb-app finalize testnet/sec.toml testnet/node.toml \
+$ exonum-java finalize testnet/sec.toml testnet/node.toml \
     --public-configs testnet/pub.toml
 ```
 
 ### Step 3. Run Configured Node
-There are two required parameters here:
-- `--ejb-log-config-path` for path to `log4j` configuration file.
-  Default config `log4j-fallback.xml` provided with EJB App prints to STDOUT.
+There is one required parameter here:
 - `--ejb-port` for port that your service will use for communication.
   Java Binding does not use Exonum Core API port directly.
 
-There are also optional parameters useful for debugging purposes and JVM fine tuning:
+There are also optional parameters useful for debugging purposes, logging configuration and JVM fine tuning:
 - `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
  append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
+- `--ejb-log-config-path` for path to `log4j` configuration file. Default config `log4j-fallback.xml` provided with Exonum Java app prints to STDOUT.
  
 ```$sh
-$ ejb-app run -d testnet/db -c testnet/node.toml \
-    --ejb-log-config-path "log4j.xml" \
+$ exonum-java run -d testnet/db -c testnet/node.toml \
     --ejb-port 6000 \
+    --ejb-log-config-path "log4j.xml" \
+    --consensus-key-pass pass \
+    --service-key-pass pass \
     --public-api-address 127.0.0.1:3000
 ```
 
@@ -107,7 +114,7 @@ pass `--jvm-debug` option with a socket address to connect to
 from a debugger:
 
 ```sh
-$ ejb-app run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
+$ exonum-java run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
     --ejb-log-config-path "log4j-fallback.xml" \
     --ejb-port 6000 \
     --jvm-debug localhost:8000
