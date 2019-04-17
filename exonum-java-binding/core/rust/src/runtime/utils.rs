@@ -1,6 +1,13 @@
 use std::{env, fs};
+use std::path::PathBuf;
 
-use utils::executable_directory;
+/// Returns current directory (where executable is placed).
+pub fn executable_directory() -> PathBuf {
+    let mut executable_path =
+        env::current_exe().expect("Unable to get current executable location");
+    executable_path.pop(); // Drop file name.
+    executable_path
+}
 
 /// Returns a path to the `<exonum-java location>/lib/native` directory in an absolute form.
 /// This directory contains `libjava_bindings.so` so JVM is able to load native functions
