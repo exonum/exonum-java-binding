@@ -41,8 +41,6 @@ $ mvn install
 
 $ cd exonum-java-binding/cryptocurrency-demo
 
-$ export LIB_JVM_PATH=/path/to/libjvm
-
 $ ./start_cryptocurrency_node.sh
 ```
 
