@@ -17,14 +17,14 @@ header "DETECTING ENVIRONMENT"
 EXONUM_JAVA_APP="exonum-java"
 command -v ${EXONUM_JAVA_APP} >/dev/null 2>&1 || { echo >&2 "Please install the Exonum Java App and make sure that 'exonum-java' binary is available via PATH. Aborting."; exit 1; }
 
-# Check that path to the JVM library is set. We cannot just set the LD_LIBRARY_PATH outside the script because of OSX SIP limitation.
-if [ -z "${LIB_JVM_PATH+x}" ];
+# Check that path to the JVM library is set.
+if [ -z "${JAVA_LIB_DIR+x}" ];
 then
-    echo "ERROR: LIB_JVM_PATH variable is not set. Please make sure it points to the directory where the JVM dynamic library (libjvm.[so|dylib]) resides."
+    echo "ERROR: JAVA_LIB_DIR variable is not set. Please make sure you executed 'source ../tests_profile'"
     exit 1
 fi
 
-export LD_LIBRARY_PATH=${LIB_JVM_PATH}
+export LD_LIBRARY_PATH="${JAVA_LIB_DIR}"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Find the latest version of artifact and build if not found.
