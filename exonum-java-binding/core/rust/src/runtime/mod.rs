@@ -19,6 +19,8 @@ mod config;
 mod java_service_runtime;
 mod service_factory_adapter;
 mod paths;
+pub mod services;
+mod time_service;
 
 pub use self::config::*;
 pub use self::java_service_runtime::JavaServiceRuntime;

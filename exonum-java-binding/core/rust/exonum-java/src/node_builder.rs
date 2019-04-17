@@ -19,7 +19,7 @@ use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
     exonum::helpers::fabric::{self, ServiceFactory},
-    utils::services::{
+    services::{
         load_services_definition, system_service_names::*, EjbAppServices,
         PATH_TO_SERVICES_DEFINITION,
     },

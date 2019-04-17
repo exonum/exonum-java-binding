@@ -21,8 +21,6 @@ mod errors;
 mod handle;
 mod jni;
 pub mod jni_cache;
-pub mod services;
-mod time_service;
 
 pub use self::conversion::{convert_hash, convert_to_hash, convert_to_string};
 pub use self::errors::{

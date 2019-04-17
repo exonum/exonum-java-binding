@@ -54,5 +54,6 @@ pub use runtime::*;
 pub use storage::*;
 pub use testkit::*;
 pub use resource_manager::*;
+pub use runtime::services;
 
 pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
