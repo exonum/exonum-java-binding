@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::paths::executable_directory;
 use super::{Config, JvmConfig, RuntimeConfig};
 use exonum::{
     helpers::fabric::{keys, Argument, CommandExtension, Context},
@@ -21,7 +22,6 @@ use exonum::{
 };
 use failure;
 use toml::Value;
-use utils::executable_directory;
 
 use std::path::PathBuf;
 
