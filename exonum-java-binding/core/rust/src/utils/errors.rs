@@ -17,14 +17,14 @@
 use jni::objects::JObject;
 use jni::JNIEnv;
 
-use std::cell::Cell;
 use std::any::Any;
+use std::cell::Cell;
 use std::error::Error;
 use std::result;
 use std::thread;
 
 use utils::{get_class_name, get_exception_message, jni_cache::classes_refs};
-use {JniErrorKind, JniResult, JniError};
+use {JniError, JniErrorKind, JniResult};
 
 /// Unwraps the result, returning its content.
 ///
@@ -235,4 +235,3 @@ mod tests {
         panic::catch_unwind(panic::AssertUnwindSafe(|| panic!(val))).unwrap_err()
     }
 }
-

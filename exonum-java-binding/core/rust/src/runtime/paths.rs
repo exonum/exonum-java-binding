@@ -1,5 +1,5 @@
-use std::{env, fs};
 use std::path::PathBuf;
+use std::{env, fs};
 
 /// Returns current directory (where executable is placed).
 pub fn executable_directory() -> PathBuf {

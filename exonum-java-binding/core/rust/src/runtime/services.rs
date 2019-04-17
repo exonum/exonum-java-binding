@@ -23,7 +23,7 @@ use std::collections::HashMap;
 use toml;
 
 /// Names of system services to refer in the services configuration file.
-pub mod  system_service_names {
+pub mod system_service_names {
     /// Exonum configuration service
     pub const CONFIGURATION_SERVICE: &str = "configuration";
     /// Exonum BTC anchoring service
