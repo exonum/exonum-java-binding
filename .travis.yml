@@ -54,10 +54,6 @@ matrix:
       # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
       osx_image: xcode9.3
       env: CHECK_RUST=false
-    - name: "Linux JDK 12 CHECK_RUST=false"
-      os: linux
-      jdk: openjdk12
-      env: CHECK_RUST=false
 
 cache:
   directories:
