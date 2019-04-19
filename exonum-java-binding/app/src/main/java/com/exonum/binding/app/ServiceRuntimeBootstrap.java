@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.runtime;
+package com.exonum.binding.app;
 
+import com.exonum.binding.runtime.FrameworkModule;
+import com.exonum.binding.runtime.ServiceRuntime;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
