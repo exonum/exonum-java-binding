@@ -36,6 +36,7 @@ pub extern crate serde_json;
 
 #[macro_use]
 extern crate lazy_static;
+extern crate num_cpus;
 
 extern crate exonum_testkit;
 extern crate exonum_time;

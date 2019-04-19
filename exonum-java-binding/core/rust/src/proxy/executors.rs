@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use jni::objects::JObject;
-use jni::sys::jint;
-use jni::{JNIEnv, JavaVM};
+use jni::{
+    JNIEnv, JavaVM,
+    {objects::JObject, sys::jint},
+};
 
-use std::mem;
-use std::sync::{Arc, Mutex};
+use std::{
+    cmp, mem,
+    sync::{Arc, Mutex},
+    thread,
+};
 
 use JniErrorKind::{Other, ThreadDetached};
 use {JniError, JniResult};
@@ -142,6 +146,17 @@ impl HackyExecutor {
             .num_attached_threads
             .lock()
             .expect("Failed to acquire the mutex on the attached threads number");
+
+        // Dump info about thread to attach and num of threads attached.
+        let curr_thread = thread::current();
+        let curr_thread_name = curr_thread.name().unwrap_or("n/a");
+        info!(
+            "Attaching thread with id: {:?} and name: {}. Number of threads already attached: {}.",
+            curr_thread.id(),
+            curr_thread_name,
+            *num_attached_threads
+        );
+
         if *num_attached_threads == self.attach_limit {
             Err(Other(Self::LIMIT_EXHAUSTED))?;
         }
@@ -192,15 +207,16 @@ impl JniExecutor for HackyExecutor {
 
 /// An interface for JNI thread attachment manager.
 /// It attaches the current thread to JVM and then detaches.
-/// This struct incapsulates an actual implementation of `JniExecutor`
-/// (currently - `DumbExecutor`)
+/// This struct encapsulates an actual implementation of `JniExecutor`
+/// (currently - `HackyExecutor`)
 #[derive(Clone)]
-pub struct MainExecutor(DumbExecutor);
+pub struct MainExecutor(HackyExecutor);
 
 impl MainExecutor {
     /// Creates a `MainExecutor`
     pub fn new(vm: Arc<JavaVM>) -> Self {
-        MainExecutor(DumbExecutor::new(vm))
+        let threads_limit = cmp::max(16, num_cpus::get() * 2);
+        MainExecutor(HackyExecutor::new(vm, threads_limit))
     }
 }
 
