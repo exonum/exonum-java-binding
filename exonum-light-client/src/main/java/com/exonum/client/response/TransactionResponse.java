@@ -79,7 +79,7 @@ public class TransactionResponse {
     return "TransactionResponse(status=" + this.getStatus()
         + ", message=" + this.getMessage()
         + (isCommitted() ? ", executionResult=" + this.getExecutionResult() : "")
-        + ", location=" + this.getLocation() + ")";
+        + (isCommitted() ? ", location=" + this.getLocation() : "") + ")";
   }
 
   @Override
@@ -92,12 +92,13 @@ public class TransactionResponse {
     }
     TransactionResponse that = (TransactionResponse) o;
     return status == that.status
-        && Objects.equal(message, that.message);
+        && Objects.equal(message, that.message)
+        && Objects.equal(executionResult, that.executionResult)
+        && Objects.equal(location, that.location);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(status, message);
+    return Objects.hashCode(status, message, executionResult, location);
   }
-
 }
