@@ -25,6 +25,7 @@ import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
@@ -238,5 +239,12 @@ public final class Blockchain {
    */
   public StoredConfiguration getActualConfiguration() {
     return schema.getActualConfiguration();
+  }
+
+  /**
+   * Returns a set of uncommitted (in-pool) transaction hashes.
+   */
+  KeySetIndexProxy<HashCode> getPoolTransactionHashes() {
+    return schema.getPoolTransactionHashes();
   }
 }
