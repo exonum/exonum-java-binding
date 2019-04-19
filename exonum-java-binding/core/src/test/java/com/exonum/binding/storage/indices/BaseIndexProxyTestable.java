@@ -27,6 +27,7 @@ import com.exonum.binding.storage.database.Database;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 // TODO: Move all tests applicable to any index in here when ECR-642 (JUnit 5) is resolved.
 // Currently it's not possible due to JUnit 4 limitations (e.g., @Rules do not work).
+@RequiresNativeLibrary
 abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
 
   static {

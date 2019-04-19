@@ -52,7 +52,7 @@ class TimeSchemaProxyIntegrationTest {
       Snapshot view = db.createSnapshot(cleaner);
       assertion.accept(new TimeSchemaProxy(view));
     } catch (CloseFailuresException e) {
-      fail(e.getLocalizedMessage());
+      fail(e);
     }
   }
 }
