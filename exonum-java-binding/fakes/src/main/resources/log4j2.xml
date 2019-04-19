@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A simple configuration to be used in native integration tests, that use ejb-fakes.
-     Error log entries go to stdout, which cargo prints only in case of failures. -->
+     Log entries go to stdout, which cargo prints only in case of failures.
+     That does not clutter the build output when tests pass but gives extra information
+     when they fail. -->
 <Configuration status="WARN">
-    <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </Console>
-    </Appenders>
-    <Loggers>
-        <!-- Use DEBUG level by default, since Cargo prints the stdout output only
-             in case of failures, when you might enjoy extra logs. -->
-        <Root level="debug">
-            <AppenderRef ref="Console"/>
-        </Root>
-    </Loggers>
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <!-- Use DEBUG level for our code and WARN for any other logger
+         (i.e., from external libraries). -->
+    <Root level="WARN">
+      <AppenderRef ref="Console"/>
+    </Root>
+
+    <Logger name="com.exonum.binding" level="DEBUG" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+  </Loggers>
 </Configuration>
