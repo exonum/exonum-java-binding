@@ -16,13 +16,13 @@
 
 package com.exonum.client.response;
 
+import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.client.response.TransactionStatus.COMMITTED;
 import static com.exonum.client.response.TransactionStatus.IN_POOL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -34,11 +34,12 @@ class TransactionResponseTest {
 
   @Test
   void toStringInPoolTxTest() {
-    TransactionResponse response = new TransactionResponse(IN_POOL,
-        mock(TransactionMessage.class),
-        mock(TransactionResult.class),
-        null
-    );
+    TransactionResponse response =
+        new TransactionResponse(IN_POOL,
+        withTxMessage(),
+        null,
+        null);
+
     assertThat(response.toString(), allOf(
         not(containsString("executionResult")),
         not(containsString("location"))
@@ -46,12 +47,13 @@ class TransactionResponseTest {
   }
 
   @Test
-  void toStringCommitedTxTest() {
-    TransactionResponse response = new TransactionResponse(COMMITTED,
-        mock(TransactionMessage.class),
-        mock(TransactionResult.class),
-        mock(TransactionLocation.class)
-    );
+  void toStringCommittedTxTest() {
+    TransactionResponse response =
+        new TransactionResponse(COMMITTED,
+            withTxMessage(),
+            TransactionResult.successful(),
+            withTxLocation());
+
     assertThat(response.toString(), allOf(
         containsString("executionResult"),
         containsString("location")
@@ -62,6 +64,18 @@ class TransactionResponseTest {
   void equalsTest() {
     EqualsVerifier.forClass(TransactionResponse.class)
         .verify();
+  }
+
+  private static TransactionMessage withTxMessage() {
+    return TransactionMessage.builder()
+        .serviceId((short) 1)
+        .transactionId((short) 1)
+        .payload(new byte[]{})
+        .sign(ed25519().generateKeyPair(), ed25519());
+  }
+
+  private static TransactionLocation withTxLocation() {
+    return TransactionLocation.valueOf(1L, 0L);
   }
 
 }
