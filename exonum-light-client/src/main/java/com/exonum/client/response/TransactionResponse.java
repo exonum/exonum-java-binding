@@ -91,8 +91,8 @@ public class TransactionResponse {
       return false;
     }
     TransactionResponse that = (TransactionResponse) o;
-    return status == that.status &&
-        Objects.equal(message, that.message);
+    return status == that.status
+        && Objects.equal(message, that.message);
   }
 
   @Override
