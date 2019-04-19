@@ -27,13 +27,19 @@ import com.google.inject.Singleton;
 /**
  * A framework module which configures the system-wide bindings.
  */
-final class FrameworkModule extends AbstractModule {
+public final class FrameworkModule extends AbstractModule {
 
   static final String SERVICE_WEB_SERVER_PORT = "Service web server port";
 
   private final int serviceWebServerPort;
 
-  FrameworkModule(int serviceWebServerPort) {
+  /**
+   * Creates a framework module with the given configuration.
+   *
+   * @param serviceWebServerPort the port for the web server on which endpoints of Exonum services
+   *     will be mounted
+   */
+  public FrameworkModule(int serviceWebServerPort) {
     this.serviceWebServerPort = serviceWebServerPort;
   }
 

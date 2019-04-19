@@ -31,13 +31,7 @@
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-time-oracle</artifactId>
+      <artifactId>exonum-java-app</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
