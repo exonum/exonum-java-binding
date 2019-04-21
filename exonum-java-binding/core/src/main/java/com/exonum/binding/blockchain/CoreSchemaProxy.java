@@ -159,7 +159,7 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a set of uncommitted (in-pool) transaction hashes.
+   * Returns a set of uncommitted (in-pool) transaction hashes; empty in case of no transactions.
    */
   KeySetIndexProxy<HashCode> getPoolTransactionHashes() {
     return KeySetIndexProxy.newInstance(CoreIndex.TRANSACTIONS_POOL, dbView,

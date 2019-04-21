@@ -242,7 +242,7 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a set of uncommitted (in-pool) transaction hashes.
+   * Returns a set of uncommitted (in-pool) transaction hashes; empty in case of no transactions.
    */
   KeySetIndexProxy<HashCode> getPoolTransactionHashes() {
     return schema.getPoolTransactionHashes();
