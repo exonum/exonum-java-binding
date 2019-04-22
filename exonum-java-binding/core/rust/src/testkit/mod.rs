@@ -190,6 +190,6 @@ fn create_java_keypair<'a>(
         KEYPAIR_CLASS,
         "createKeyPair",
         KEYPAIR_CTOR_SIGNATURE,
-        &[public_key_byte_array.into(), secret_key_byte_array.into()],
+        &[secret_key_byte_array.into(), public_key_byte_array.into()],
     )
 }

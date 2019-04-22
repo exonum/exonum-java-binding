@@ -22,7 +22,7 @@ import com.exonum.binding.transaction.RawTransaction;
 import java.util.OptionalInt;
 
 /**
- * Context of the TestKit emulated node.
+ * Context of the TestKit emulated node, i.e., on which it instantiates and executes services.
  */
 public class EmulatedNode {
 
@@ -32,7 +32,8 @@ public class EmulatedNode {
   /**
    * Creates a context of an emulated node.
    *
-   * @param validatorId validator id of the validator node, less than 0 in case of an auditor node
+   * @param validatorId identifier of the validator node; or any negative value if the node is an
+   *     auditor
    * @param serviceKeyPair service key pair of the node
    */
   public EmulatedNode(int validatorId, KeyPair serviceKeyPair) {

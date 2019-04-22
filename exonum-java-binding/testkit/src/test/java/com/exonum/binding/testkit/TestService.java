@@ -58,6 +58,10 @@ final class TestService extends AbstractService {
     return SERVICE_NAME;
   }
 
+  Node getNode() {
+    return node;
+  }
+
   @Override
   protected TestSchema createDataSchema(View view) {
     return new TestSchema(view);
