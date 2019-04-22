@@ -17,20 +17,23 @@
 use chrono::{DateTime, Utc};
 use exonum::storage::StorageValue;
 use exonum_time::time_provider::TimeProvider;
-use jni::objects::{GlobalRef, JObject};
-use jni::JNIEnv;
+use jni::{
+    objects::{GlobalRef, JObject},
+    JNIEnv,
+};
 use proxy::{JniExecutor, MainExecutor};
-use std::fmt::Debug;
 use utils::unwrap_jni;
 
-//com.exonum.binding.testkit.TimeProvider
+const DATE_TIME_SERIALIZER_CLASS: &str = "com/exonum/binding/time/UtcZonedDateTimeSerializer";
+const DATE_TIME_SERIALIZER_SIG: &str = "Lcom/exonum/binding/time/UtcZonedDateTimeSerializer;";
 
+/// Wrapper around Java interface TimeProvider.
 pub struct JavaTimeProvider {
     provider: GlobalRef,
     exec: MainExecutor,
 }
 
-impl Debug for JavaTimeProvider {
+impl std::fmt::Debug for JavaTimeProvider {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "JavaTimeProvider")
     }
@@ -55,9 +58,9 @@ impl TimeProvider for JavaTimeProvider {
             )?;
             let serializer = env
                 .get_static_field(
-                    "com/exonum/binding/time/UtcZonedDateTimeSerializer",
+                    DATE_TIME_SERIALIZER_CLASS,
                     "INSTANCE",
-                    "Lcom/exonum/binding/time/UtcZonedDateTimeSerializer;",
+                    DATE_TIME_SERIALIZER_SIG,
                 )?
                 .l()?;
             let serialized_date_time = env
