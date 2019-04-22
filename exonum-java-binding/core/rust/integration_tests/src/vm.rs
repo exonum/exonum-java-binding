@@ -66,6 +66,8 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
 
     if with_fakes {
         jvm_args_builder = jvm_args_builder.option(&get_fakes_classpath_option());
+        // Enable log4j
+        jvm_args_builder = jvm_args_builder.option(&get_log4j_path_option());
     }
     if debug {
         jvm_args_builder = jvm_args_builder.option("-Xcheck:jni");
@@ -103,7 +105,7 @@ fn get_fakes_classpath_option() -> String {
 }
 
 pub fn get_fakes_classpath() -> String {
-    let classpath_txt_path = project_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
+    let classpath_txt_path = java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
 
     let mut class_path = String::new();
     File::open(classpath_txt_path)
@@ -111,18 +113,36 @@ pub fn get_fakes_classpath() -> String {
         .read_to_string(&mut class_path)
         .expect("Failed to read classpath.txt");
 
-    let fakes_path = project_root_dir().join("fakes/target/classes/");
+    let fakes_path = java_binding_parent_root_dir().join("fakes/target/classes/");
     let fakes_classes = fakes_path.to_str().expect(CONVERSION_FAILED_MESSAGE);
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
     format!("{}:{}", class_path, fakes_classes)
 }
 
+/// Returns a Log4j system property pointing to the configuration file. The file is in
+/// the base directory of the `integration_tests` project and must be edited if more detailed
+/// Java logs are needed for debugging purposes.
+///
+/// It requires the log4j-core library to be present on the classpath, which is the case with fakes.
+fn get_log4j_path_option() -> String {
+    format!("-Dlog4j.configurationFile={}", get_log4j_path())
+}
+
+/// Returns a path to Log4j configuration file to be used in the integration tests.
+pub fn get_log4j_path() -> String {
+    project_root_dir()
+        .join("log4j2.xml")
+        .to_str()
+        .expect(CONVERSION_FAILED_MESSAGE)
+        .to_owned()
+}
+
 fn get_libpath_option() -> String {
     format!("-Djava.library.path={}", get_libpath())
 }
 
-pub fn get_libpath() -> String {
+fn get_libpath() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
@@ -137,25 +157,31 @@ pub fn get_libpath() -> String {
 }
 
 pub fn get_fake_service_artifact_path() -> String {
-    project_root_dir()
+    java_binding_parent_root_dir()
         .join("fake-service/target/fake-service-artifact.jar")
         .to_str()
         .expect(CONVERSION_FAILED_MESSAGE)
         .to_owned()
 }
 
+fn java_binding_parent_root_dir() -> PathBuf {
+    rust_project_root_dir()
+        .join("../..")
+        .canonicalize()
+        .unwrap()
+}
+
+/// The path to the root directory of the Rust parent module.
 fn rust_project_root_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
+    project_root_dir()
         .join("..")
         .canonicalize()
         .unwrap()
 }
 
-fn project_root_dir() -> PathBuf {
-    rust_project_root_dir()
-        .join("../..")
-        .canonicalize()
-        .unwrap()
+/// The path to `integration_tests` root directory.
+fn project_root_dir() -> &'static Path {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
 }
 
 #[cfg(debug_assertions)]
