@@ -20,12 +20,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.app.ServiceRuntimeBootstrap;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.runtime.ServiceLoadingException;
 import com.exonum.binding.runtime.ServiceRuntime;
-import com.exonum.binding.runtime.ServiceRuntimeBootstrap;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.test.CiOnly;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 @CiOnly
+@RequiresNativeLibrary
 class ServiceArtifactsIntegrationTest {
 
   private Path artifactLocation;
