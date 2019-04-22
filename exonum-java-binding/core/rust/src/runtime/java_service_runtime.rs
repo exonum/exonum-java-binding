@@ -27,7 +27,7 @@ use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 
-const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeBootstrap";
+const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
 const LOAD_ARTIFACT_SIGNATURE: &str = "(Ljava/lang/String;)Ljava/lang/String;";
 const CREATE_SERVICE_SIGNATURE: &str =
@@ -68,7 +68,7 @@ impl JavaServiceRuntime {
         unwrap_jni(executor.with_attached(|env| {
             let serviceRuntime = env
                 .call_static_method(
-                    SERVICE_BOOTSTRAP_PATH,
+                    SERVICE_RUNTIME_BOOTSTRAP_PATH,
                     "createServiceRuntime",
                     CREATE_RUNTIME_SIGNATURE,
                     &[port.into()],

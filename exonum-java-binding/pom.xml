@@ -69,6 +69,7 @@
     <module>time-oracle</module>
     <module>packaging</module>
     <module>testkit</module>
+    <module>app</module>
   </modules>
 
   <scm>
