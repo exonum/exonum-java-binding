@@ -24,8 +24,7 @@ use exonum::{
     storage::StorageValue,
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
-use exonum_time::time_provider::TimeProvider;
-use exonum_time::TimeService;
+use exonum_time::{time_provider::TimeProvider, TimeService};
 use jni::{
     objects::{JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
