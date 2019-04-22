@@ -24,9 +24,6 @@ use jni::{
 use proxy::{JniExecutor, MainExecutor};
 use utils::unwrap_jni;
 
-const DATE_TIME_SERIALIZER_CLASS: &str = "com/exonum/binding/time/UtcZonedDateTimeSerializer";
-const DATE_TIME_SERIALIZER_SIG: &str = "Lcom/exonum/binding/time/UtcZonedDateTimeSerializer;";
-
 /// Wrapper around Java interface TimeProvider.
 pub struct JavaTimeProvider {
     provider: GlobalRef,
@@ -50,26 +47,8 @@ impl JavaTimeProvider {
 impl TimeProvider for JavaTimeProvider {
     fn current_time(&self) -> DateTime<Utc> {
         unwrap_jni(self.exec.with_attached(|env: &JNIEnv| {
-            let java_date_time = env.call_method(
-                self.provider.as_obj(),
-                "getTime",
-                "()Ljava/time/ZonedDateTime;",
-                &[],
-            )?;
-            let serializer = env
-                .get_static_field(
-                    DATE_TIME_SERIALIZER_CLASS,
-                    "INSTANCE",
-                    DATE_TIME_SERIALIZER_SIG,
-                )?
-                .l()?;
             let serialized_date_time = env
-                .call_method(
-                    serializer,
-                    "toBytes",
-                    "(Ljava/time/ZonedDateTime;)[B",
-                    &[java_date_time],
-                )?
+                .call_method(self.provider.as_obj(), "getTime", "()[B", &[])?
                 .l()?
                 .into_inner();
             let serialized_date_time = env.convert_byte_array(serialized_date_time)?;
