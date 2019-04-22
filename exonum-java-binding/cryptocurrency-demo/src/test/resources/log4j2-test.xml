@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A simple configuration to be used in unit and integration tests.
-     Any warnings go to stdout; debug entries from our code — to stdout and the list appender
-     to allow to check for specific entries. -->
+     Warnings from any libraries and debug entries from our code are enabled.
+-->
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
