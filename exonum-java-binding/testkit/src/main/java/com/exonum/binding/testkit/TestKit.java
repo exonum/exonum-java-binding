@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.blockchain.Block;
@@ -216,7 +215,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       List<TransactionMessage> messages = ImmutableList.copyOf(txMessages.values());
       return messages.stream()
           .filter(predicate)
-           .filter(not(tx -> txResults.containsKey(tx.hash())))
+          .filter(tx -> !txResults.containsKey(tx.hash()))
           .collect(toList());
     });
   }
