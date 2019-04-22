@@ -19,6 +19,7 @@ The release is based on Exonum 0.11
 
 ### Added
 - `toOptional()` method to `EntryIndexProxy`. (#790)
+- `getPoolTransactionHashes()` method to `Blockchain`. (#850)
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted

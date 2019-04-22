@@ -243,6 +243,8 @@ public final class Blockchain {
 
   /**
    * Returns a set of uncommitted (in-pool) transaction hashes; empty in case of no transactions.
+   *
+   * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   KeySetIndexProxy<HashCode> getPoolTransactionHashes() {
     return schema.getPoolTransactionHashes();
