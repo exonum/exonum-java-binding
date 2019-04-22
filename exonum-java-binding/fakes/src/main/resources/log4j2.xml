@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A simple configuration to be used in native integration tests, that use ejb-fakes.
-     Log entries go to stdout, which cargo prints only in case of failures.
-     That does not clutter the build output when tests pass but gives extra information
-     when they fail. -->
+     Log entries go to stdout. The output levels of Java Binding and 3rd-party library code
+     can be configured separately below. By default, it is FATAL to reduce the number of
+     messages in the build log, but can be easily changed with no need for recompilation. -->
 <Configuration status="WARN">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
@@ -10,13 +10,13 @@
     </Console>
   </Appenders>
   <Loggers>
-    <!-- Use DEBUG level for our code and WARN for any other logger
-         (i.e., from external libraries). -->
-    <Root level="WARN">
+    <!-- Root configuration, applies to the 3rd-party library code. -->
+    <Root level="FATAL">
       <AppenderRef ref="Console"/>
     </Root>
 
-    <Logger name="com.exonum.binding" level="DEBUG" additivity="false">
+    <!-- Configuration for Java binding. -->
+    <Logger name="com.exonum.binding" level="FATAL" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
   </Loggers>
