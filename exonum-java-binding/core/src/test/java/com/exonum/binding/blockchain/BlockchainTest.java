@@ -216,8 +216,8 @@ class BlockchainTest {
   @Test
   void getTransactionPool() {
     KeySetIndexProxy transactions = mock(KeySetIndexProxy.class);
-    when(mockSchema.getPoolTransactionHashes()).thenReturn(transactions);
+    when(mockSchema.getTransactionPool()).thenReturn(transactions);
 
-    assertThat(blockchain.getPoolTransactionHashes()).isEqualTo(transactions);
+    assertThat(blockchain.getTransactionPool()).isEqualTo(transactions);
   }
 }

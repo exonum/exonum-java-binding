@@ -93,9 +93,9 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
-  void getPoolTransactionHashes() {
+  void getTransactionPool() {
     assertSchema((schema) -> {
-      Set<HashCode> set = ImmutableSet.copyOf(schema.getPoolTransactionHashes());
+      Set<HashCode> set = ImmutableSet.copyOf(schema.getTransactionPool());
       assertTrue(set.isEmpty());
     });
   }

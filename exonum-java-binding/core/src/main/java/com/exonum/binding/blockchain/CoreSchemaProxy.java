@@ -160,10 +160,12 @@ final class CoreSchemaProxy {
 
   /**
    * Returns a set of uncommitted (in-pool) transaction hashes; empty in case of no transactions.
+   * Note that this pool represents the state as of the current snapshot, and its state is volatile
+   * even between block commits.
    *
    * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
-  KeySetIndexProxy<HashCode> getPoolTransactionHashes() {
+  KeySetIndexProxy<HashCode> getTransactionPool() {
     return KeySetIndexProxy.newInstance(CoreIndex.TRANSACTIONS_POOL, dbView,
         StandardSerializers.hash());
   }
