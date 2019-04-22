@@ -72,7 +72,7 @@ impl TimeProvider for JavaTimeProvider {
                 )?
                 .l()?
                 .into_inner();
-            let serialized_date_time = env.convert_byte_array(serialized_date_time.into())?;
+            let serialized_date_time = env.convert_byte_array(serialized_date_time)?;
             let date_time = DateTime::from_bytes(serialized_date_time.into());
 
             Ok(date_time)
