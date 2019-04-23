@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.runtime;
+package com.exonum.binding.app;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.exonum.binding.runtime.ServiceRuntime;
 import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.Test;
 
+@RequiresNativeLibrary
 class ServiceRuntimeBootstrapIntegrationTest {
 
   private static final int PORT = 25000;

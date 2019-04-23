@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//! Provides native methods for Java TestKit support.
+
 use exonum::{
     blockchain::Block,
     crypto::{PublicKey, SecretKey},
@@ -22,6 +24,7 @@ use exonum::{
     storage::StorageValue,
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
+use exonum_time::{time_provider::TimeProvider, TimeService};
 use jni::{
     objects::{JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
@@ -30,7 +33,10 @@ use jni::{
 use proxy::{MainExecutor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
+use testkit::time_provider::JavaTimeProvider;
 use utils::{cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, Handle};
+
+mod time_provider;
 
 const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
@@ -47,7 +53,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     services: jobjectArray,
     auditor: jboolean,
     validator_count: jshort,
-    _time_provider: JObject,
+    time_provider: JObject,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let mut builder = if auditor == jni::sys::JNI_TRUE {
@@ -65,6 +71,15 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
                 let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
                 builder = builder.with_service(service);
             }
+
+            // Handle Time Service
+            if !time_provider.is_null() {
+                let provider = JavaTimeProvider::new(executor.clone(), time_provider);
+                builder = builder.with_service(TimeService::with_provider(
+                    Box::new(provider) as Box<TimeProvider>
+                ));
+            }
+
             builder
         };
         let testkit = builder.create();
