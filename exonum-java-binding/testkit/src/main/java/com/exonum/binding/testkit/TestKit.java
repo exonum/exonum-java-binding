@@ -77,7 +77,7 @@ import javax.annotation.Nullable;
  * created.
  *
  * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
- *      <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>
+ *      <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
