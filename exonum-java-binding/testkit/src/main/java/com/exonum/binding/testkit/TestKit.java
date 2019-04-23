@@ -18,6 +18,7 @@ package com.exonum.binding.testkit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.not;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -34,12 +35,14 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.runtime.ReflectiveModuleSupplier;
 import com.exonum.binding.service.BlockCommittedEvent;
+import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -59,10 +62,14 @@ import javax.annotation.Nullable;
 /**
  * TestKit for testing blockchain services. It offers simple network configuration emulation
  * (with no real network setup). Although it is possible to add several validator nodes to this
- * network, only one node will create the service instances, provide access to its
- * <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">pool of unconfirmed transactions</a>
- * and will execute their operations (e.g., {@link Service#afterCommit(BlockCommittedEvent)} method
- * logic).
+ * network, only one node will create the service instances, execute their operations (e.g.,
+ * {@linkplain Service#afterCommit(BlockCommittedEvent)} method logic), and provide access to its
+ * state.
+ *
+ * <p>Only the emulated node has a pool of unconfirmed transactions where a service can submit new
+ * transaction messages through {@linkplain Node#submitTransaction(RawTransaction)}. All
+ * transactions from the pool are committed when a new block is created with
+ * {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized - service instances are
  * {@linkplain UserServiceAdapter#initialize(long)} initialized} and genesis block is committed.
@@ -215,7 +222,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       List<TransactionMessage> messages = ImmutableList.copyOf(txMessages.values());
       return messages.stream()
           .filter(predicate)
-          .filter(tx -> !txResults.containsKey(tx.hash()))
+          .filter(not(tx -> txResults.containsKey(tx.hash())))
           .collect(toList());
     });
   }
@@ -283,24 +290,23 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   public static final class Builder {
 
     private EmulatedNodeType nodeType;
-    private short validatorCount;
+    private short validatorCount = 1;
     private List<Class<? extends ServiceModule>> services = new ArrayList<>();
     private TimeProvider timeProvider;
 
     private Builder(EmulatedNodeType nodeType) {
-      // TestKit network should have at least one validator node
-      if (nodeType == EmulatedNodeType.AUDITOR) {
-        validatorCount = 1;
-      }
       this.nodeType = nodeType;
     }
 
     /**
-     * Sets number of additional validator nodes in the TestKit network. Note that
+     * Sets number of validator nodes in the TestKit network, should be positive. Note that
      * regardless of the configured number of validators, only a single service will be
-     * instantiated.
+     * instantiated. Equal to one by default.
+     *
+     * @throws IllegalArgumentException if validatorCount is less than one
      */
     public Builder withValidators(short validatorCount) {
+      checkArgument(validatorCount > 0, "TestKit network should have at least one validator node");
       this.validatorCount = validatorCount;
       return this;
     }
@@ -344,10 +350,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      */
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
-      if (nodeType == EmulatedNodeType.VALIDATOR) {
-        // If the main node is a validator, increment the number of validator nodes in the network
-        validatorCount += 1;
-      }
       return newInstance(services, nodeType, validatorCount, timeProvider);
     }
 

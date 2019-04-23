@@ -70,11 +70,10 @@ class TestKitTest {
 
   @Test
   void createTestKitWithBuilderForSingleService() {
-    TestService service;
     try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
         .build()) {
-      service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
       checkTestServiceInitialization(testKit, service);
     }
   }
@@ -127,11 +126,11 @@ class TestKitTest {
     testKit.withSnapshot((view) -> {
       // Check that initialization changed database state
       TestSchema testSchema = service.createDataSchema(view);
-      ProofMapIndexProxy<HashCode, String> proofMapIndexProxy = testSchema.testMap();
-      Map<HashCode, String> map = toMap(proofMapIndexProxy);
+      ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
+      Map<HashCode, String> testMap = toMap(testProofMap);
       Map<HashCode, String> expected = ImmutableMap.of(
           TestService.INITIAL_ENTRY_KEY, TestService.INITIAL_ENTRY_VALUE);
-      assertThat(map).isEqualTo(expected);
+      assertThat(testMap).isEqualTo(expected);
 
       // Check that genesis block was committed
       Blockchain blockchain = Blockchain.newInstance(view);
@@ -159,18 +158,16 @@ class TestKitTest {
   }
 
   @Test
-  void createTestKitWithValidatorAndAdditionalValidators() {
-    short additionalValidatorsCount = 2;
+  void createTestKitWithSeveralValidators() {
+    short validatorCount = 2;
     try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
-        .withValidators(additionalValidatorsCount)
+        .withValidators(validatorCount)
         .build()) {
       testKit.withSnapshot((view) -> {
         Blockchain blockchain = Blockchain.newInstance(view);
-        // Number of validator keys is equal to number of validator nodes - in this case one
-        // emulated validator node plus additional nodes
         assertThat(blockchain.getActualConfiguration().validatorKeys().size())
-            .isEqualTo(additionalValidatorsCount + 1);
+            .isEqualTo(validatorCount);
         return null;
       });
     }
@@ -178,20 +175,27 @@ class TestKitTest {
 
   @Test
   void createTestKitWithAuditorAndAdditionalValidators() {
-    short additionalValidatorsCount = 2;
+    short validatorCount = 2;
     try (TestKit testKit = TestKit.builder(EmulatedNodeType.AUDITOR)
         .withService(TestServiceModule.class)
-        .withValidators(additionalValidatorsCount)
+        .withValidators(validatorCount)
         .build()) {
       testKit.withSnapshot((view) -> {
         Blockchain blockchain = Blockchain.newInstance(view);
-        // Number of validator keys is equal to number of validators - in this case only additional
-        // nodes, as main emulated node is an auditor
         assertThat(blockchain.getActualConfiguration().validatorKeys().size())
-            .isEqualTo(additionalValidatorsCount);
+            .isEqualTo(validatorCount);
         return null;
       });
     }
+  }
+
+  @Test
+  void setInvalidValidatorCount() {
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    short invalidValidatorCount = 0;
+    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(TestServiceModule.class);
+    assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
   }
 
   @Test
@@ -249,7 +253,6 @@ class TestKitTest {
 
   @Test
   void afterCommitSubmitsTransaction() {
-    Block nextBlock;
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       // Create a block so that afterCommit transaction is submitted
       Block block = testKit.createBlock();
@@ -265,15 +268,14 @@ class TestKitTest {
           .isEqualTo(afterCommitTransaction.getTransactionId());
       assertThat(inPoolTransaction.getPayload()).isEqualTo(afterCommitTransaction.getPayload());
 
-      nextBlock = testKit.createBlock();
+      Block nextBlock = testKit.createBlock();
+      assertThat(nextBlock.getNumTransactions()).isEqualTo(1);
+      assertThat(nextBlock.getHeight()).isEqualTo(2);
     }
-    assertThat(nextBlock.getNumTransactions()).isEqualTo(1);
-    assertThat(nextBlock.getHeight()).isEqualTo(2);
   }
 
   @Test
   void createBlockWithTransactionIgnoresInPoolTransactions() {
-    List<TransactionMessage> inPoolTransactions;
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       // Create a block so that afterCommit transaction is submitted
       testKit.createBlock();
@@ -282,10 +284,10 @@ class TestKitTest {
       assertThat(block.getNumTransactions()).isEqualTo(0);
 
       // Two blocks were created, so two afterCommit transactions should be submitted into pool
-      inPoolTransactions = testKit
+      List<TransactionMessage> inPoolTransactions = testKit
           .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+      assertThat(inPoolTransactions).hasSize(2);
     }
-    assertThat(inPoolTransactions).hasSize(2);
   }
 
   @Test
@@ -392,26 +394,24 @@ class TestKitTest {
 
   @Test
   void getValidatorEmulatedNode() {
-    EmulatedNode node;
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      node = testKit.getEmulatedNode();
+      EmulatedNode node = testKit.getEmulatedNode();
+      assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
+      assertThat(node.getValidatorId()).isNotEmpty();
+      assertThat(node.getServiceKeyPair()).isNotNull();
     }
-    assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
-    assertThat(node.getValidatorId()).isNotEmpty();
-    assertThat(node.getServiceKeyPair()).isNotNull();
   }
 
   @Test
   void getAuditorEmulatedNode() {
-    EmulatedNode node;
     try (TestKit testKit = TestKit.builder(EmulatedNodeType.AUDITOR)
         .withService(TestServiceModule.class)
         .build()) {
-      node = testKit.getEmulatedNode();
+      EmulatedNode node = testKit.getEmulatedNode();
+      assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.AUDITOR);
+      assertThat(node.getValidatorId()).isEmpty();
+      assertThat(node.getServiceKeyPair()).isNotNull();
     }
-    assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.AUDITOR);
-    assertThat(node.getValidatorId()).isEmpty();
-    assertThat(node.getServiceKeyPair()).isNotNull();
   }
 
   private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
