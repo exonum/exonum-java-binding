@@ -17,14 +17,15 @@ header "DETECTING ENVIRONMENT"
 EXONUM_JAVA_APP="exonum-java"
 command -v ${EXONUM_JAVA_APP} >/dev/null 2>&1 || { echo >&2 "Please install the Exonum Java App and make sure that 'exonum-java' binary is available via PATH. Aborting."; exit 1; }
 
-# Check that path to the JVM library is set.
-if [ -z "${JAVA_LIB_DIR+x}" ];
+# Check whether JAVA_HOME is set or detect it from the currently available java binary otherwise.
+if [ -z "${JAVA_HOME+x}" ];
 then
-    echo "ERROR: JAVA_LIB_DIR variable is not set. Please make sure you executed 'source ../tests_profile'"
-    exit 1
+    export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')"
 fi
+echo "JAVA_HOME=${JAVA_HOME}"
 
-export LD_LIBRARY_PATH="${JAVA_LIB_DIR}"
+# Find the directory containing libjvm (the relative path has changed in Java 9).
+export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Find the latest version of artifact and build if not found.
