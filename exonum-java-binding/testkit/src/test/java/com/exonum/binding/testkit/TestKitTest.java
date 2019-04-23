@@ -27,6 +27,7 @@ import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.AbstractServiceModule;
@@ -37,6 +38,7 @@ import com.exonum.binding.service.TransactionConverter;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
@@ -45,15 +47,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
 import io.vertx.ext.web.Router;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class TestKitTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
+  private static final ZonedDateTime TIME = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
   static {
     LibraryLoader.load();
@@ -110,6 +116,18 @@ class TestKitTest {
       checkTestServiceInitialization(testKit, service);
       TestService2 service2 = testKit.getService(TestService2.SERVICE_ID, TestService2.class);
       checkTestService2Initialization(testKit, service2);
+    }
+  }
+
+  @Test
+  void createTestKitWithTimeService() {
+    TimeProvider timeProvider = FakeTimeProvider.create(TIME);
+    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(TestServiceModule.class)
+        .withTimeService(timeProvider)
+        .build()) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+      checkTestServiceInitialization(testKit, service);
     }
   }
 
@@ -412,6 +430,61 @@ class TestKitTest {
       assertThat(node.getValidatorId()).isEmpty();
       assertThat(node.getServiceKeyPair()).isNotNull();
     }
+  }
+
+  @Test
+  void timeServiceWorksInTestKit() {
+    TimeProvider timeProvider = FakeTimeProvider.create(TIME);
+    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(TestServiceModule.class)
+        .withTimeService(timeProvider)
+        .build()) {
+      // Commit two blocks for time oracle to prepare consolidated time
+      testKit.createBlock();
+      testKit.createBlock();
+      testKit.withSnapshot((view) -> {
+        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+        assertThat(consolidatedTime).contains(TIME);
+
+        // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
+        // public key and time provider's time
+        checkValidatorsTimes(timeSchema, testKit);
+        return null;
+      });
+    }
+  }
+
+  @Test
+  void timeServiceWithManyValidatorsDoesNotReturnConsolidatedTime() {
+    TimeProvider timeProvider = FakeTimeProvider.create(TIME);
+    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(TestServiceModule.class)
+        .withValidators((short) 4)
+        .withTimeService(timeProvider)
+        .build()) {
+      // Commit two blocks for time oracle to prepare consolidated time
+      testKit.createBlock();
+      testKit.createBlock();
+      testKit.withSnapshot((view) -> {
+        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+        assertThat(consolidatedTime).isEmpty();
+
+        // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
+        // public key and time provider's time
+        checkValidatorsTimes(timeSchema, testKit);
+        return null;
+      });
+    }
+  }
+
+  private void checkValidatorsTimes(TimeSchema timeSchema, TestKit testKit) {
+    Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
+    EmulatedNode emulatedNode = testKit.getEmulatedNode();
+    PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
+    Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, TIME);
+    assertThat(validatorsTimes).isEqualTo(expected);
   }
 
   private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {

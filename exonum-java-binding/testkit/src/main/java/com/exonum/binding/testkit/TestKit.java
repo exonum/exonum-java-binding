@@ -108,8 +108,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     UserServiceAdapter[] userServiceAdapters = serviceAdapters.values()
         .toArray(new UserServiceAdapter[0]);
+    TimeProviderAdapter timeProviderAdapter =  timeProvider == null
+        ? null
+        : new TimeProviderAdapter(timeProvider);
     long nativeHandle = nativeCreateTestKit(userServiceAdapters, isAuditorNode, validatorCount,
-        timeProvider);
+        timeProviderAdapter);
     return new TestKit(nativeHandle, serviceAdapters);
   }
 
@@ -261,7 +264,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   private static native long nativeCreateTestKit(UserServiceAdapter[] services, boolean auditor,
-      short withValidatorCount, TimeProvider timeProvider);
+      short withValidatorCount, TimeProviderAdapter timeProvider);
 
   private native long nativeCreateSnapshot(long nativeHandle);
 

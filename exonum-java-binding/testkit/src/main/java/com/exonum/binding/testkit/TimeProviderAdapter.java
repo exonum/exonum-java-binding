@@ -16,15 +16,25 @@
 
 package com.exonum.binding.testkit;
 
+import com.exonum.binding.common.serialization.Serializer;
+
 import java.time.ZonedDateTime;
 
-/**
- * Time provider for service testing. Used as a time source by TestKit time service.
- */
-public interface TimeProvider {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-  /**
-   * Returns time that is stored in this time provider.
-   */
-  ZonedDateTime getTime();
+/**
+ * An adapter of a {@link TimeProvider} for a native code.
+ */
+final class TimeProviderAdapter {
+  private final Serializer<ZonedDateTime> ZDT_SERIALIZER = UtcZonedDateTimeSerializer.INSTANCE;
+
+  private final TimeProvider timeProvider;
+
+  TimeProviderAdapter(TimeProvider timeProvider) {
+    this.timeProvider = checkNotNull(timeProvider, "TimeProvider must not be null");
+  }
+
+  byte[] getTime() {
+    return ZDT_SERIALIZER.toBytes(timeProvider.getTime());
+  }
 }

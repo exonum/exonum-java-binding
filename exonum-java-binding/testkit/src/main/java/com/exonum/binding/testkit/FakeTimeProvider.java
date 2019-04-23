@@ -16,25 +16,59 @@
 
 package com.exonum.binding.testkit;
 
-import java.time.ZonedDateTime;
+import static com.google.common.base.Preconditions.checkArgument;
 
-// TODO: update Javadocs in P2 [ECR-3051]
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
+
+/**
+ * Fake time provider for service testing. Allows to manually manipulate time that is returned
+ * by TestKit time service.
+ */
 public class FakeTimeProvider implements TimeProvider {
 
-  public FakeTimeProvider create(ZonedDateTime time) {
-    throw new UnsupportedOperationException();
+  private ZonedDateTime time;
+
+  private FakeTimeProvider(ZonedDateTime time) {
+    this.time = time;
   }
 
+  /**
+   * Creates a fake time provider with given time. Note that time should be in UTC time zone.
+   *
+   * @throws IllegalArgumentException if value has time zone other than UTC
+   */
+  public static FakeTimeProvider create(ZonedDateTime time) {
+    checkTimeZone(time);
+    return new FakeTimeProvider(time);
+  }
+
+  /**
+   * Sets new time for this time provider. Note that time should be in UTC time zone.
+   *
+   * @throws IllegalArgumentException if value has time zone other than UTC
+   */
   public void setTime(ZonedDateTime time) {
-    throw new UnsupportedOperationException();
+    checkTimeZone(time);
+    this.time = time;
   }
 
-  public void addTime(ZonedDateTime time) {
-    throw new UnsupportedOperationException();
+  private static void checkTimeZone(ZonedDateTime value) {
+    checkArgument(value.getZone() == ZoneOffset.UTC,
+        "ZonedDateTime value should be in UTC, but was %s",
+        value.getZone());
+  }
+
+  /**
+   * Increases stored time by given amount.
+   */
+  public void addTime(TemporalAmount toAdd) {
+    time = time.plus(toAdd);
   }
 
   @Override
   public ZonedDateTime getTime() {
-    throw new UnsupportedOperationException();
+    return time;
   }
 }
