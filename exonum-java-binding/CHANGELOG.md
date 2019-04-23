@@ -21,7 +21,7 @@ The release is based on Exonum 0.11
 - `toOptional()` method to `EntryIndexProxy`. (#790)
 - `getTransactionPool()` method to `Blockchain`. (#850)
 - SLF4J to Log4j binding to enable libraries coded to the SLF4J API to use Log4j 2, 
-  used by Exonum Java, as the implementation.
+  used by Exonum Java, as the implementation. (#854)
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted
