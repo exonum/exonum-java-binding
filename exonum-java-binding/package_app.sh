@@ -27,18 +27,29 @@ function build-exonum-java() {
       -Drust.libraryPath="${RUST_LIBRARY_PATH}"
 }
 
-function build-exonum-java-macos() {
-    export RUSTFLAGS="-C link-arg=-Wl,-rpath,@executable_path/lib/native"
+# Prepares native environment for building with build-exonum-java function. The first argument of function is platform
+# dependent rpath value for linker that points to the directory where code is executed/loaded. For currently supported
+# architectures they are "@loader_path" for OSX and "$ORIGIN" for Linux. The second argument is full name os the
+# java_binding library for current platform.
+function build-exonum-java-for-platform() {
+    # This will point to the directory with native libraries in case code was executed by "exonum-java"
+    local path_lib_from_exe="$1/lib/native"
+    # This will point to the directory with native libraries in case code was loaded by java
+    local path_lib_from_lib=$1
+    local full_lib_name=$2
+
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,${path_lib_from_exe} -C link-arg=-Wl,-rpath,${path_lib_from_lib}"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/libjava_bindings.dylib"
+    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/${full_lib_name}"
     build-exonum-java
 }
 
+function build-exonum-java-macos() {
+    build-exonum-java-for-platform "@loader_path" "libjava_bindings.dylib"
+}
+
 function build-exonum-java-linux() {
-    export RUSTFLAGS="-C link-arg=-Wl,-rpath,\$ORIGIN/lib/native/"
-    echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/libjava_bindings.so"
-    build-exonum-java
+    build-exonum-java-for-platform "\$ORIGIN" "libjava_bindings.so"
 }
 
 EJB_RUST_DIR="${PWD}/core/rust"
