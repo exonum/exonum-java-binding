@@ -105,7 +105,8 @@ fn get_fakes_classpath_option() -> String {
 }
 
 pub fn get_fakes_classpath() -> String {
-    let classpath_txt_path = java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
+    let classpath_txt_path =
+        java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
 
     let mut class_path = String::new();
     File::open(classpath_txt_path)
@@ -173,10 +174,7 @@ fn java_binding_parent_root_dir() -> PathBuf {
 
 /// The path to the root directory of the Rust parent module.
 fn rust_project_root_dir() -> PathBuf {
-    project_root_dir()
-        .join("..")
-        .canonicalize()
-        .unwrap()
+    project_root_dir().join("..").canonicalize().unwrap()
 }
 
 /// The path to `integration_tests` root directory.
