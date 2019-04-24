@@ -22,6 +22,7 @@ use exonum::{
     storage::StorageValue,
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
+use handle::{cast_handle, drop_handle, to_handle, Handle};
 use jni::{
     objects::{JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
@@ -30,7 +31,7 @@ use jni::{
 use proxy::{MainExecutor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
-use utils::{cast_handle, drop_handle, to_handle, unwrap_exc_or, unwrap_exc_or_default, Handle};
+use utils::{unwrap_exc_or, unwrap_exc_or_default};
 
 const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";

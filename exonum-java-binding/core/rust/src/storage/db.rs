@@ -16,7 +16,7 @@ use exonum::storage::{Fork, Snapshot};
 use jni::objects::JClass;
 use jni::JNIEnv;
 
-use utils::{self, Handle};
+use handle::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
@@ -113,7 +113,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_Views_nativeFree
     _: JClass,
     view_handle: Handle,
 ) {
-    utils::drop_handle::<View>(&env, view_handle);
+    handle::drop_handle::<View>(&env, view_handle);
 }
 
 #[cfg(test)]
