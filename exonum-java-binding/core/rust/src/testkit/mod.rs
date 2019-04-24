@@ -16,6 +16,7 @@
 
 //! Provides native methods for Java TestKit support.
 
+use self::time_provider::JavaTimeProvider;
 use exonum::{
     blockchain::Block,
     crypto::{PublicKey, SecretKey},
@@ -24,7 +25,7 @@ use exonum::{
     storage::StorageValue,
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
-use exonum_time::{TimeService, time_provider::TimeProvider};
+use exonum_time::{time_provider::TimeProvider, TimeService};
 use handle::{cast_handle, drop_handle, to_handle, Handle};
 use jni::{
     objects::{JObject, JValue},
@@ -34,7 +35,6 @@ use jni::{
 use proxy::{MainExecutor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
-use self::time_provider::JavaTimeProvider;
 use utils::{unwrap_exc_or, unwrap_exc_or_default};
 
 mod time_provider;
