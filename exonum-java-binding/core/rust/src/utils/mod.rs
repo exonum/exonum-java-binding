@@ -12,28 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Contains util methods which are used by other top-level modules.
+
 #![deny(non_snake_case)]
 
 mod conversion;
 mod errors;
-mod exception;
-mod handle;
 mod jni;
 pub mod jni_cache;
-mod pair_iter;
-mod path;
-mod resource_manager;
-pub mod services;
-mod time_service;
 
 pub use self::conversion::{convert_hash, convert_to_hash, convert_to_string};
 pub use self::errors::{
-    check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
-    panic_on_exception, unwrap_jni, unwrap_jni_verbose,
+    any_to_string, check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
+    panic_on_exception, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, unwrap_jni_verbose,
 };
-pub use self::exception::{any_to_string, unwrap_exc_or, unwrap_exc_or_default};
-pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
 pub use self::jni::{get_class_name, get_exception_message};
-pub use self::pair_iter::PairIter;
-pub use self::path::executable_directory;
-pub use self::resource_manager::known_handles;

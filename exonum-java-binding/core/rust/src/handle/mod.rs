@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+//! Wrappers and helper functions around Java pointers. Used for memory management
+//! between native and Java.
+
 // TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
 #![allow(dead_code)]
 
@@ -23,12 +26,13 @@ use jni::JNIEnv;
 use std::marker::PhantomData;
 use std::panic;
 
-use utils::{exception, resource_manager};
+pub mod resource_manager;
+use super::utils::unwrap_exc_or_default;
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
-/// Wrapper for a non-owned handle. Calls `resource_manager::unregister_handle` in the `Drop`
+/// Wrapper for a non-owned handle. Calls `handle.resource_manager::unregister_handle` in the `Drop`
 /// implementation.
 pub struct NonOwnedHandle<T: 'static> {
     handle: Handle,
@@ -100,7 +104,7 @@ pub fn drop_handle<T: 'static>(env: &JNIEnv, handle: Handle) {
         Box::from_raw(handle as *mut T);
         Ok(())
     });
-    exception::unwrap_exc_or_default(env, res);
+    unwrap_exc_or_default(env, res);
 }
 
 #[cfg(test)]

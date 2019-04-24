@@ -22,6 +22,7 @@ use serde::{self, ser};
 
 use std::fmt;
 
+use handle::to_handle;
 use storage::View;
 use utils::{
     check_error_on_exception, convert_to_string, describe_java_exception,
@@ -30,7 +31,7 @@ use utils::{
         classes_refs::transaction_execution_exception,
         transaction_adapter::{execute_id, info_id},
     },
-    to_handle, unwrap_jni,
+    unwrap_jni,
 };
 use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
 
