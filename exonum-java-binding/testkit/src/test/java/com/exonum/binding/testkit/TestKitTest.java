@@ -376,8 +376,9 @@ class TestKitTest {
           .sign(KEY_PAIR, CRYPTO_FUNCTION);
       IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
           () -> testKit.createBlockWithTransactions(message));
-      String expectedMessage = String.format("Unknown service id (%s) in transaction message (%s)",
-          wrongServiceId, message);
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      String expectedMessage = String.format("Unknown service id (%s) in transaction (%s)",
+          wrongServiceId, rawTransaction);
       assertTrue(thrownException.getMessage().contains(expectedMessage));
     }
   }
@@ -393,7 +394,11 @@ class TestKitTest {
           .sign(KEY_PAIR, CRYPTO_FUNCTION);
       IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
           () -> testKit.createBlockWithTransactions(message));
-      String expectedMessage = String.format("Transaction message (%s) is invalid", message);
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      String expectedMessage = String.format("Service (%s) with id=%s failed to convert" +
+          " transaction (%s). Make sure that the submitted transaction is correctly serialized," +
+          " and the service's TransactionConverter implementation is correct and handles this" +
+          " transaction as expected.", TestService.SERVICE_NAME, TestService.SERVICE_ID, rawTransaction);
       assertTrue(thrownException.getMessage().contains(expectedMessage));
     }
   }
