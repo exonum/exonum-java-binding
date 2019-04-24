@@ -17,7 +17,7 @@
 extern crate integration_tests;
 extern crate java_bindings;
 
-use integration_tests::vm::{get_fakes_classpath, get_log4j_path};
+use integration_tests::vm::{fakes_classpath, log4j_path};
 use java_bindings::{
     Config, InternalConfig, JavaServiceRuntime, JniExecutor, JvmConfig, RuntimeConfig,
 };
@@ -32,7 +32,7 @@ fn bootstrap() {
 
     let runtime_config = RuntimeConfig {
         // Pass log4j path to avoid error messages of mis-configuration
-        log_config_path: get_log4j_path(),
+        log_config_path: log4j_path(),
         port: 6300,
     };
 
@@ -42,7 +42,7 @@ fn bootstrap() {
     };
 
     let internal_config = InternalConfig {
-        system_class_path: get_fakes_classpath(),
+        system_class_path: fakes_classpath(),
         system_lib_path: None,
     };
 

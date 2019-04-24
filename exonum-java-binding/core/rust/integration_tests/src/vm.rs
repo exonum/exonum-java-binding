@@ -62,12 +62,12 @@ pub fn create_vm_for_tests_with_fake_classes() -> Arc<JavaVM> {
 fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     let mut jvm_args_builder = InitArgsBuilder::new()
         .version(JNIVersion::V8)
-        .option(&get_libpath_option());
+        .option(&libpath_option());
 
     if with_fakes {
-        jvm_args_builder = jvm_args_builder.option(&get_fakes_classpath_option());
+        jvm_args_builder = jvm_args_builder.option(&fakes_classpath_option());
         // Enable log4j
-        jvm_args_builder = jvm_args_builder.option(&get_log4j_path_option());
+        jvm_args_builder = jvm_args_builder.option(&log4j_path_option());
     }
     if debug {
         jvm_args_builder = jvm_args_builder.option("-Xcheck:jni");
@@ -92,7 +92,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
 pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     let jvm_args = InitArgsBuilder::new()
         .version(JNIVersion::V8)
-        .option(&get_libpath_option())
+        .option(&libpath_option())
         .option(&format!("-Xmx{}m", memory_limit_mib))
         .build()
         .unwrap_or_else(|e| panic!("{:#?}", e));
@@ -100,11 +100,11 @@ pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-fn get_fakes_classpath_option() -> String {
-    format!("-Djava.class.path={}", get_fakes_classpath())
+fn fakes_classpath_option() -> String {
+    format!("-Djava.class.path={}", fakes_classpath())
 }
 
-pub fn get_fakes_classpath() -> String {
+pub fn fakes_classpath() -> String {
     let classpath_txt_path =
         java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
 
@@ -126,12 +126,12 @@ pub fn get_fakes_classpath() -> String {
 /// Java logs are needed for debugging purposes.
 ///
 /// It requires the log4j-core library to be present on the classpath, which is the case with fakes.
-fn get_log4j_path_option() -> String {
-    format!("-Dlog4j.configurationFile={}", get_log4j_path())
+fn log4j_path_option() -> String {
+    format!("-Dlog4j.configurationFile={}", log4j_path())
 }
 
 /// Returns a path to Log4j configuration file to be used in the integration tests.
-pub fn get_log4j_path() -> String {
+pub fn log4j_path() -> String {
     project_root_dir()
         .join("log4j2.xml")
         .to_str()
@@ -139,11 +139,11 @@ pub fn get_log4j_path() -> String {
         .to_owned()
 }
 
-fn get_libpath_option() -> String {
-    format!("-Djava.library.path={}", get_libpath())
+fn libpath_option() -> String {
+    format!("-Djava.library.path={}", libpath())
 }
 
-fn get_libpath() -> String {
+fn libpath() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
@@ -157,7 +157,7 @@ fn get_libpath() -> String {
         .to_owned()
 }
 
-pub fn get_fake_service_artifact_path() -> String {
+pub fn fake_service_artifact_path() -> String {
     java_binding_parent_root_dir()
         .join("fake-service/target/fake-service-artifact.jar")
         .to_str()
