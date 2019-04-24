@@ -34,3 +34,6 @@ tempfile = "3"
 
 [profile.dev]
 rpath = true
+
+[profile.release]
+rpath = true

@@ -20,7 +20,7 @@ use runtime::{
     cmd::Run,
     config::{Config, InternalConfig},
     java_service_runtime::JavaServiceRuntime,
-    utils::{absolute_library_path, system_classpath},
+    paths::{absolute_library_path, system_classpath},
 };
 use std::sync::{Once, ONCE_INIT};
 
