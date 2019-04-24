@@ -33,6 +33,9 @@ pub struct PairIter<InnerIter: Iterator> {
 
 impl<InnerIter: Iterator> PairIter<InnerIter> {
     /// Returns new `PairIter` for a given `iter` and `class_name`.
+    ///
+    /// Provided class must have a constructor accepting two byte arrays,
+    /// i.e. `ClassName(byte[], byte[])`.
     pub fn new(env: &JNIEnv, iter: InnerIter, class_name: &str) -> JniResult<Self> {
         let class = env.find_class(class_name)?;
         let element_class = env.new_global_ref(class.into())?;
