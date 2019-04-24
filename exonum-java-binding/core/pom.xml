@@ -30,8 +30,6 @@
     <!--A directory containing native dynamic libraries used by the App-->
     <packaging.native>${project.basedir}/rust/target/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
-    <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
-    <skipITs>${project.skipJavaITs}</skipITs>
     <!-- Skip building Rust library for tests -->
     <doNotBuildRustLib>false</doNotBuildRustLib>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->

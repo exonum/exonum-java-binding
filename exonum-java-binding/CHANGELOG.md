@@ -19,10 +19,15 @@ The release is based on Exonum 0.11
 
 ### Added
 - `toOptional()` method to `EntryIndexProxy`. (#790)
+- `getPoolTransactionHashes()` method to `Blockchain`. (#850)
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted
   on `/api/services` instead of `/api` for consistency with Exonum Core.
+  
+### Fixed
+- The bug when Java integration tests using native library (e.g., via `MemoryDb`)
+  crashed on Linux.
 
 ## [0.5.0] - 2019-03-13
 

@@ -15,9 +15,11 @@
 extern crate java_bindings;
 #[macro_use]
 extern crate lazy_static;
+extern crate tempfile;
 
 pub mod example_proxy;
 pub mod executor;
+pub mod fake_service;
 pub mod mock;
 pub mod test_service;
 pub mod vm;
