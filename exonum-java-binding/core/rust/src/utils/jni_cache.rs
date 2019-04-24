@@ -17,6 +17,8 @@
 //! library by JVM. To do so, we use JNI_OnLoad method. JNI_OnUnload is not
 //! currently used because we don't need to reload native library multiple times
 //! during execution.
+//!
+//! See: https://docs.oracle.com/en/java/javase/12/docs/specs/jni/invocation.html#jni_onload
 
 use jni::{
     objects::{GlobalRef, JMethodID},
