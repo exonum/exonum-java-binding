@@ -71,6 +71,7 @@
     <module>testkit</module>
     <module>app</module>
     <module>auto-service</module>
+    <module>auto-service-it</module>
   </modules>
 
   <scm>

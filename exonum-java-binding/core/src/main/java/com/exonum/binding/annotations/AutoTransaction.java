@@ -16,7 +16,6 @@
 
 package com.exonum.binding.annotations;
 
-
 import com.exonum.binding.common.message.TransactionMessage;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
