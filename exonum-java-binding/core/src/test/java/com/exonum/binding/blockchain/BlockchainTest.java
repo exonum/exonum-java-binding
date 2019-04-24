@@ -25,6 +25,7 @@ import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
@@ -210,5 +211,13 @@ class BlockchainTest {
     when(mockSchema.getActualConfiguration()).thenReturn(configuration);
 
     assertThat(blockchain.getActualConfiguration()).isEqualTo(configuration);
+  }
+
+  @Test
+  void getTransactionPool() {
+    KeySetIndexProxy transactions = mock(KeySetIndexProxy.class);
+    when(mockSchema.getTransactionPool()).thenReturn(transactions);
+
+    assertThat(blockchain.getTransactionPool()).isEqualTo(transactions);
   }
 }
