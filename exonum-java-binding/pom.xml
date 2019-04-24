@@ -70,6 +70,7 @@
     <module>packaging</module>
     <module>testkit</module>
     <module>app</module>
+    <module>auto-service</module>
   </modules>
 
   <scm>
