@@ -27,11 +27,12 @@ use serde_json::value::Value;
 use std::fmt;
 use std::str::FromStr;
 
+use handle::to_handle;
 use proxy::node::NodeContext;
 use storage::View;
 use utils::{
     check_error_on_exception, convert_to_hash, convert_to_string, jni_cache::service_adapter,
-    panic_on_exception, to_handle, unwrap_jni,
+    panic_on_exception, unwrap_jni,
 };
 use {JniExecutor, MainExecutor, TransactionProxy};
 

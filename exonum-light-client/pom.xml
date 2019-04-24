@@ -73,6 +73,7 @@
     <junit.jupiter.version>5.4.1</junit.jupiter.version>
     <mockito.version>2.25.1</mockito.version>
     <hamcrest.version>2.1</hamcrest.version>
+    <equalsverifier.version>3.1.7</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
@@ -141,6 +142,13 @@
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
       <version>${okhttp.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>nl.jqno.equalsverifier</groupId>
+      <artifactId>equalsverifier</artifactId>
+      <version>${equalsverifier.version}</version>
       <scope>test</scope>
     </dependency>
 

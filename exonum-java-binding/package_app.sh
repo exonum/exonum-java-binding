@@ -22,7 +22,6 @@ function build-exonum-java() {
       -DskipTests \
       -Dbuild.mode=${BUILD_MODE} \
       -Dbuild.cargoFlag=${BUILD_CARGO_FLAG} \
-      -DskipJavaITs \
       -DdoNotBuildRustLib \
       -Drust.libraryPath="${RUST_LIBRARY_PATH}"
 }

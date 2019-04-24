@@ -23,7 +23,7 @@
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-core</artifactId>
+      <artifactId>exonum-java-app</artifactId>
       <version>${project.version}</version>
     </dependency>
 
