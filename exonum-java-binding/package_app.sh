@@ -29,7 +29,7 @@ function build-exonum-java() {
 
 # Prepares native environment for building with build-exonum-java function. The first argument of function is platform
 # dependent rpath value for linker that points to the directory where code is executed/loaded. For currently supported
-# architectures they are "@loader_path" for OSX and "$ORIGIN" for Linux. The second argument is full name os the
+# architectures they are "@loader_path" for OSX and "$ORIGIN" for Linux. The second argument is full name of the
 # java_binding library for current platform.
 function build-exonum-java-for-platform() {
     # This will point to the directory with native libraries in case code was executed by "exonum-java"
