@@ -48,6 +48,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +56,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
 
 /**
  * TestKit for testing blockchain services. It offers simple network configuration emulation
@@ -198,6 +198,19 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return BLOCK_SERIALIZER.fromBytes(block);
   }
 
+  /**
+   * Creates a block with all in-pool transactions. Transactions are applied in the lexicographical
+   * order of their hashes.
+   *
+   * @return created block
+   */
+  public Block createBlock() {
+    List<TransactionMessage> inPoolTransactions = findTransactionsInPool(transactionMessage -> true);
+    checkTransactions(inPoolTransactions);
+    byte[] block = nativeCreateBlock(nativeHandle.get());
+    return BLOCK_SERIALIZER.fromBytes(block);
+  }
+
   private void checkTransactions(List<TransactionMessage> transactionMessages) {
     for (TransactionMessage transactionMessage: transactionMessages) {
       checkTransaction(transactionMessage);
@@ -227,17 +240,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
         .transactionId(transactionMessage.getTransactionId())
         .payload(transactionMessage.getPayload())
         .build();
-  }
-
-  /**
-   * Creates a block with all in-pool transactions. Transactions are applied in the lexicographical
-   * order of their hashes.
-   *
-   * @return created block
-   */
-  public Block createBlock() {
-    byte[] block = nativeCreateBlock(nativeHandle.get());
-    return BLOCK_SERIALIZER.fromBytes(block);
   }
 
   /**
