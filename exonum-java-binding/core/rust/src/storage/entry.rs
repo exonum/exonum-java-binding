@@ -20,8 +20,9 @@ use jni::JNIEnv;
 use std::panic;
 use std::ptr;
 
+use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
-use utils::{self, Handle};
+use utils;
 
 type Index<T> = Entry<T, Value>;
 
@@ -40,8 +41,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<View>(view_handle).get() {
+        Ok(handle::to_handle(
+            match *handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
@@ -59,7 +60,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
     _: JClass,
     entry_handle: Handle,
 ) {
-    utils::drop_handle::<IndexType>(&env, entry_handle);
+    handle::drop_handle::<IndexType>(&env, entry_handle);
 }
 
 /// Returns the value or null pointer if it is absent.
@@ -70,7 +71,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
     entry_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *utils::cast_handle::<IndexType>(entry_handle) {
+        let val = match *handle::cast_handle::<IndexType>(entry_handle) {
             IndexType::SnapshotIndex(ref entry) => entry.get(),
             IndexType::ForkIndex(ref entry) => entry.get(),
         };
@@ -90,7 +91,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_native
     entry_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        Ok(match *utils::cast_handle::<IndexType>(entry_handle) {
+        Ok(match *handle::cast_handle::<IndexType>(entry_handle) {
             IndexType::SnapshotIndex(ref entry) => entry.exists(),
             IndexType::ForkIndex(ref entry) => entry.exists(),
         } as jboolean)
@@ -108,7 +109,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
     let res = panic::catch_unwind(|| {
         utils::convert_hash(
             &env,
-            &match *utils::cast_handle::<IndexType>(entry_handle) {
+            &match *handle::cast_handle::<IndexType>(entry_handle) {
                 IndexType::SnapshotIndex(ref entry) => entry.hash(),
                 IndexType::ForkIndex(ref entry) => entry.hash(),
             },
@@ -125,7 +126,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
     entry_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(entry_handle) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(entry_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -145,7 +146,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_native
     _: JObject,
     entry_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(entry_handle) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(entry_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
