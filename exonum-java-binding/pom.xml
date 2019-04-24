@@ -519,6 +519,14 @@
                   <message>Java Binding cannot be built on Windows at the moment.
                     You are welcome to hack on ECR-446 and ECR-587!</message>
                 </requireOS>
+                <requireEnvironmentVariable>
+                  <variableName>RUSTFLAGS</variableName>
+                  <message>
+                    RUSTFLAGS with proper runtime paths are required to run most integration tests.
+                    Use 'source tests_profile' in your terminal to set the required
+                    environment variables. See also CONTRIBUTING.md.
+                  </message>
+                </requireEnvironmentVariable>
               </rules>
             </configuration>
           </execution>
