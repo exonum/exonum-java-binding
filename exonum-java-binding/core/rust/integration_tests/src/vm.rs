@@ -178,8 +178,8 @@ fn rust_project_root_dir() -> PathBuf {
 }
 
 /// The path to `integration_tests` root directory.
-fn project_root_dir() -> &'static Path {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
+fn project_root_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
 #[cfg(debug_assertions)]
