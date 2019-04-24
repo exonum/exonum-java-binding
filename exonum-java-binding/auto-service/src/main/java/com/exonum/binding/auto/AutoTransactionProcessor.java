@@ -176,7 +176,7 @@ public final class AutoTransactionProcessor extends AbstractProcessor {
   private static short extractTxId(Element annotatedElement) {
     AutoTransaction annotation = annotatedElement.getAnnotation(AutoTransaction.class);
     checkNotNull(annotation, "%s does not have %s present", annotatedElement, annotation);
-    return annotation.id();
+    return annotation.value();
   }
 
   private TypeMirror typeMirrorOf(Class<?> type) {

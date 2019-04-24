@@ -25,7 +25,7 @@ public class TestTransaction implements Transaction {
 
   private static final short ID = 0;
 
-  @AutoTransaction(id = ID)
+  @AutoTransaction(ID)
   public static TestTransaction fromRaw(RawTransaction rawTx) {
     return new TestTransaction();
   }
