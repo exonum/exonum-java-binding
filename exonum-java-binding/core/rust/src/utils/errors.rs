@@ -164,7 +164,7 @@ pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) 
 
 /// Calls a corresponding `JNIEnv` method, so exception will be thrown when execution returns to
 /// the Java side.
-fn throw(env: &JNIEnv, description: &str) {
+fn throw(env: &JNIEnv, error_message: &str) {
     // We cannot throw exception from this function, so errors should be written in log instead.
     let exception = match env.find_class("java/lang/RuntimeException") {
         Ok(val) => val,
@@ -176,9 +176,10 @@ fn throw(env: &JNIEnv, description: &str) {
             return;
         }
     };
-    if let Err(e) = env.throw_new(exception, description) {
+    if let Err(e) = env.throw_new(exception, error_message) {
         error!(
-            "Unable to find 'RuntimeException' class: {}",
+            "Failed to throw RuntimeException({}): {}",
+            error_message,
             e.description()
         );
     }
