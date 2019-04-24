@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use super::paths::executable_directory;
-use super::{Config, JvmConfig, RuntimeConfig};
+use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
 use exonum::{
     helpers::fabric::{keys, Argument, CommandExtension, Context},
     node::NodeConfig,
