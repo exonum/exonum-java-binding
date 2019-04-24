@@ -398,7 +398,8 @@ class TestKitTest {
       String expectedMessage = String.format("Service (%s) with id=%s failed to convert"
           + " transaction (%s). Make sure that the submitted transaction is correctly serialized,"
           + " and the service's TransactionConverter implementation is correct and handles this"
-          + " transaction as expected.", TestService.SERVICE_NAME, TestService.SERVICE_ID, rawTransaction);
+          + " transaction as expected.",
+          TestService.SERVICE_NAME, TestService.SERVICE_ID, rawTransaction);
       assertTrue(thrownException.getMessage().contains(expectedMessage));
     }
   }
