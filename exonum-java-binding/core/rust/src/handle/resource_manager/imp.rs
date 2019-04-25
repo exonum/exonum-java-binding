@@ -16,7 +16,7 @@ use std::any::TypeId;
 use std::collections::HashMap;
 use std::sync::RwLock;
 
-use utils::Handle;
+use super::super::Handle;
 
 lazy_static! {
     static ref HANDLES_MAP: RwLock<HashMap<Handle, HandleInfo>> = RwLock::new(HashMap::new());

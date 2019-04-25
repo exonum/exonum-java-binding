@@ -25,13 +25,12 @@
     <rust.compiler.version>1.32.0</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
+    <rust.appSubCrate>exonum-java</rust.appSubCrate>
     <!--A directory containing libjava_bindings native library-->
     <build.nativeLibPath>${project.basedir}/rust/target/${build.mode}</build.nativeLibPath>
     <!--A directory containing native dynamic libraries used by the App-->
     <packaging.native>${project.basedir}/rust/target/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.3</auto-value.version>
-    <!-- Disable ITs that run during 'verify' phase as most of them require the native library. -->
-    <skipITs>${project.skipJavaITs}</skipITs>
     <!-- Skip building Rust library for tests -->
     <doNotBuildRustLib>false</doNotBuildRustLib>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
@@ -238,6 +237,9 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
+                <!-- Exonum Java app depends on `resource-manager`, so we do not test it here -->
+                <argument>--exclude</argument>
+                <argument>${rust.appSubCrate}</argument>
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>

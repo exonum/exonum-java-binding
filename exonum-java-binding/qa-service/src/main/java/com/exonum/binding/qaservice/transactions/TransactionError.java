@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
+package com.exonum.binding.qaservice.transactions;
+
+import com.google.common.primitives.UnsignedBytes;
+
+enum TransactionError {
+  // Create counter errors
+  COUNTER_ALREADY_EXISTS(0),
+  // Increment counter errors
+  UNKNOWN_COUNTER(1);
+
+  byte code;
+
+  TransactionError(int code) {
+    this.code = UnsignedBytes.checkedCast(code);
+  }
+}

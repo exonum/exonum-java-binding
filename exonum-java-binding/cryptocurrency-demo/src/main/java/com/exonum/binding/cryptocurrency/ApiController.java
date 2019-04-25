@@ -30,7 +30,6 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -55,15 +54,11 @@ final class ApiController {
   }
 
   void mountApi(Router router) {
-    router.route()
-        .handler(BodyHandler.create())
-        .failureHandler(this::failureHandler);
+    router.route().failureHandler(this::failureHandler);
 
-    ImmutableMap<String, Handler<RoutingContext>> handlers =
-        ImmutableMap.<String, Handler<RoutingContext>>builder()
-            .put(GET_WALLET_PATH, this::getWallet)
-            .put(GET_WALLET_HISTORY_PATH, this::getWalletHistory)
-            .build();
+    ImmutableMap<String, Handler<RoutingContext>> handlers = ImmutableMap.of(
+        GET_WALLET_PATH, this::getWallet,
+        GET_WALLET_HISTORY_PATH, this::getWalletHistory);
 
     handlers.forEach((path, handler) ->
         router.route(path).handler(handler)

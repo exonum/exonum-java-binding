@@ -27,7 +27,7 @@ use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use MainExecutor;
 
-const SERVICE_BOOTSTRAP_PATH: &str = "com/exonum/binding/runtime/ServiceRuntimeBootstrap";
+const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
 const LOAD_ARTIFACT_SIGNATURE: &str = "(Ljava/lang/String;)Ljava/lang/String;";
 const CREATE_SERVICE_SIGNATURE: &str =
@@ -48,8 +48,15 @@ impl JavaServiceRuntime {
     pub fn new(config: Config, internal_config: InternalConfig) -> Self {
         let java_vm =
             Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
-        let executor = MainExecutor::new(Arc::new(java_vm));
-        let service_runtime = Self::create_service_runtime(config.runtime_config, executor.clone());
+        Self::create_with_jvm(Arc::new(java_vm), config.runtime_config.port)
+    }
+
+    /// Creates new runtime for given JVM and port.
+    ///
+    /// Also, this function is public for being used from integration tests.
+    pub fn create_with_jvm(java_vm: Arc<JavaVM>, port: i32) -> Self {
+        let executor = MainExecutor::new(java_vm.clone());
+        let service_runtime = Self::create_service_runtime_java(port, executor.clone());
         JavaServiceRuntime {
             executor,
             service_runtime,
@@ -57,14 +64,14 @@ impl JavaServiceRuntime {
     }
 
     /// Creates service runtime that is responsible for services management.
-    fn create_service_runtime(config: RuntimeConfig, executor: MainExecutor) -> GlobalRef {
+    fn create_service_runtime_java(port: i32, executor: MainExecutor) -> GlobalRef {
         unwrap_jni(executor.with_attached(|env| {
             let serviceRuntime = env
                 .call_static_method(
-                    SERVICE_BOOTSTRAP_PATH,
+                    SERVICE_RUNTIME_BOOTSTRAP_PATH,
                     "createServiceRuntime",
                     CREATE_RUNTIME_SIGNATURE,
-                    &[config.port.into()],
+                    &[port.into()],
                 )?
                 .l()?;
             env.new_global_ref(serviceRuntime)
@@ -237,6 +244,11 @@ impl JavaServiceRuntime {
             ));
         }
         args_builder
+    }
+
+    /// Returns a reference to the runtime's executor.
+    pub fn get_executor(&self) -> &MainExecutor {
+        &self.executor
     }
 }
 

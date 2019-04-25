@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// The main goal of resource manager is early detection of possible problems with resources
-/// management and accessing objects with pointers. Not required in production.
+//! See actual implementation (`imp.rs`) for the documentation.
 
-#[cfg(not(feature = "resource-manager"))]
-#[path = "stub.rs"]
-mod imp;
+#![allow(missing_docs)]
 
-#[cfg(feature = "resource-manager")]
-#[path = "imp.rs"]
-mod imp;
+use super::super::Handle;
 
-pub use self::imp::*;
+pub fn add_handle<T: 'static>(_: Handle) {}
+pub fn remove_handle<T: 'static>(_: Handle) {}
+pub fn register_handle<T: 'static>(_: Handle) {}
+pub fn unregister_handle<T: 'static>(_: Handle) {}
+pub fn check_handle<T: 'static>(_: Handle) {}
+pub fn known_handles() -> usize {
+    0
+}

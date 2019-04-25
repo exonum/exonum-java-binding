@@ -87,22 +87,21 @@ $ exonum-java finalize testnet/sec.toml testnet/node.toml \
 ```
 
 ### Step 3. Run Configured Node
-There are two required parameters here:
-- `--ejb-log-config-path` for path to `log4j` configuration file.
-  Default config `log4j-fallback.xml` provided with Exonum Java app prints to STDOUT.
+There is one required parameter here:
 - `--ejb-port` for port that your service will use for communication.
   Java Binding does not use Exonum Core API port directly.
 
-There are also optional parameters useful for debugging purposes and JVM fine tuning:
+There are also optional parameters useful for debugging purposes, logging configuration and JVM fine tuning:
 - `--jvm-args-prepend` and `--jvm-args-append`: Additional parameters for JVM that prepend and
  append the rest of arguments. Must not have a leading dash. For example, `Xmx2G`.
 - `--jvm-debug`: Allows JVM being remotely debugged over the `JDWP` protocol. Takes a socket address as a parameter in form
  of `HOSTNAME:PORT`. For example, `localhost:8000`.
+- `--ejb-log-config-path` for path to `log4j` configuration file. Default config `log4j-fallback.xml` provided with Exonum Java app prints to STDOUT.
  
 ```$sh
 $ exonum-java run -d testnet/db -c testnet/node.toml \
-    --ejb-log-config-path "log4j.xml" \
     --ejb-port 6000 \
+    --ejb-log-config-path "log4j.xml" \
     --consensus-key-pass pass \
     --service-key-pass pass \
     --public-api-address 127.0.0.1:3000
