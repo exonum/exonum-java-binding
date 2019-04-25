@@ -23,6 +23,9 @@ use java_bindings::{
 };
 
 #[test]
+// Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
+// the execution of system tests.
+#[ignore]
 fn bootstrap() {
     let jvm_config = JvmConfig {
         args_prepend: vec![],
