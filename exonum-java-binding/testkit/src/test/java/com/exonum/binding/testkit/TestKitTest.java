@@ -20,7 +20,6 @@ import static com.exonum.binding.testkit.TestService.constructAfterCommitTransac
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
@@ -379,7 +378,7 @@ class TestKitTest {
       RawTransaction rawTransaction = TestKit.toRawTransaction(message);
       String expectedMessage = String.format("Unknown service id (%s) in transaction (%s)",
           wrongServiceId, rawTransaction);
-      assertTrue(thrownException.getMessage().contains(expectedMessage));
+      assertThat(thrownException).hasMessageContaining(expectedMessage);
     }
   }
 
@@ -400,7 +399,7 @@ class TestKitTest {
           + " and the service's TransactionConverter implementation is correct and handles this"
           + " transaction as expected.",
           TestService.SERVICE_NAME, TestService.SERVICE_ID, rawTransaction);
-      assertTrue(thrownException.getMessage().contains(expectedMessage));
+      assertThat(thrownException).hasMessageContaining(expectedMessage);
     }
   }
 
