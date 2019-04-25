@@ -19,7 +19,7 @@ The release is based on Exonum 0.11
 
 ### Added
 - Support of packaging the Exonum Java application into a single archive with all the necessary
-  dependencies. For the instructions, consult [Installation guide][installation].
+  dependencies. For the instructions, consult the [Installation guide][installation].
   This allows you to develop and run Java services without installing Rust compiler and Exonum dependencies.
   <!-- TODO: add link to the prepared binaries for the Linux and Mac OS -->
   It is still possible to build the application manually, using the instructions in the
