@@ -25,6 +25,7 @@
     <rust.compiler.version>1.32.0</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
+    <rust.appSubCrate>exonum-java</rust.appSubCrate>
     <!--A directory containing libjava_bindings native library-->
     <build.nativeLibPath>${project.basedir}/rust/target/${build.mode}</build.nativeLibPath>
     <!--A directory containing native dynamic libraries used by the App-->
@@ -237,6 +238,9 @@
                 <argument>--all</argument>
                 <argument>--exclude</argument>
                 <argument>${rust.itSubCrate}</argument>
+                <!-- Exonum Java app depends on `resource-manager`, so we do not test it here -->
+                <argument>--exclude</argument>
+                <argument>${rust.appSubCrate}</argument>
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
