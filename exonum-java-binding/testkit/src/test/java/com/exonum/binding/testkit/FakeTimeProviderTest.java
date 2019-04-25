@@ -26,7 +26,8 @@ import org.junit.jupiter.api.Test;
 
 class FakeTimeProviderTest {
 
-  private static final ZonedDateTime TIME = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+  private static final ZonedDateTime TIME =
+      ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
   @Test
   void createFakeTimeProvider() {

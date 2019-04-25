@@ -16,17 +16,16 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.common.serialization.Serializer;
-
-import java.time.ZonedDateTime;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.common.serialization.Serializer;
+import java.time.ZonedDateTime;
+
 /**
- * An adapter of a {@link TimeProvider} for a native code.
+ * An adapter of a {@link TimeProvider} for native code.
  */
 final class TimeProviderAdapter {
-  private final Serializer<ZonedDateTime> ZDT_SERIALIZER = UtcZonedDateTimeSerializer.INSTANCE;
+  private static final Serializer<ZonedDateTime> ZDT_SERIALIZER = UtcZonedDateTimeSerializer.INSTANCE;
 
   private final TimeProvider timeProvider;
 

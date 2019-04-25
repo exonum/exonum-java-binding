@@ -84,6 +84,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
+  private static final short TIME_SERVICE_ID = 4;
 
   private final Map<Short, Service> services = new HashMap<>();
 
@@ -225,6 +226,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private void checkTransaction(TransactionMessage transactionMessage) {
     short serviceId = transactionMessage.getServiceId();
+    if (serviceId == TIME_SERVICE_ID) {
+      return;
+    }
     RawTransaction rawTransaction = toRawTransaction(transactionMessage);
     if (!services.containsKey(serviceId)) {
       String message = String.format("Unknown service id (%s) in transaction (%s)",

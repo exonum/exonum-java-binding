@@ -60,7 +60,8 @@ class TestKitTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
-  private static final ZonedDateTime TIME = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+  private static final ZonedDateTime TIME =
+      ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
   static {
     LibraryLoader.load();
@@ -446,7 +447,7 @@ class TestKitTest {
 
   @Test
   void timeServiceWorksInTestKit() {
-    TimeProvider timeProvider = FakeTimeProvider.create(TIME);
+    FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
@@ -462,6 +463,18 @@ class TestKitTest {
         // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
         // public key and time provider's time
         checkValidatorsTimes(timeSchema, testKit);
+        return null;
+      });
+
+      // Update time in time provider
+      ZonedDateTime newTime = TIME.plusDays(1);
+      timeProvider.setTime(newTime);
+      testKit.createBlock();
+      testKit.createBlock();
+      testKit.withSnapshot((view) -> {
+        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+        assertThat(consolidatedTime).contains(newTime);
         return null;
       });
     }
