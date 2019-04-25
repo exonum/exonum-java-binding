@@ -40,7 +40,8 @@ public @interface AutoTransaction {
 
   // todo: enable
   //  /**
-  //   * Specifies the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}.
+  //   * Specifies the {@linkplain TransactionMessage#getTransactionId() transaction type
+  //   * identifier}.
   //   * Must be unique within a service.
   //   */
   //  short id();
