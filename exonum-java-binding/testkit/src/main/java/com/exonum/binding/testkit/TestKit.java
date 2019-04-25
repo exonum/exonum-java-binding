@@ -46,17 +46,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
@@ -257,15 +257,14 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
       KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
-      Set<HashCode> poolTxsHashesSet = toSet(poolTxsHashes);
-      return poolTxsHashesSet.stream()
+      return stream(poolTxsHashes)
           .map(txMessages::get)
           .collect(toList());
     });
   }
 
-  private <T> Set<T> toSet(KeySetIndexProxy<T> setIndex) {
-    return Sets.newHashSet(setIndex.iterator());
+  private static <T> Stream<T> stream(KeySetIndexProxy<T> setIndex) {
+    return Streams.stream(setIndex);
   }
 
   /**
