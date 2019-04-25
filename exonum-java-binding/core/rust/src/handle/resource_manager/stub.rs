@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// See actual implementation (`imp.rs`) for the documentation.
-use utils::Handle;
+//! See actual implementation (`imp.rs`) for the documentation.
+
+#![allow(missing_docs)]
+
+use super::super::Handle;
 
 pub fn add_handle<T: 'static>(_: Handle) {}
 pub fn remove_handle<T: 'static>(_: Handle) {}

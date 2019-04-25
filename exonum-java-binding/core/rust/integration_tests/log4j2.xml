@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A configuration to be used in native integration tests that use ejb-fakes.
+
+     Log entries go to stdout. The output levels of Java Binding and 3rd-party library code
+     can be configured separately below. By default, it is FATAL to reduce the number of
+     messages in the build log. Edit as needed — the changes will be picked up with no need
+     for recompilation. -->
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <!-- Root configuration, applies to the 3rd-party library code. -->
+    <Root level="FATAL">
+      <AppenderRef ref="Console"/>
+    </Root>
+
+    <!-- Configuration for Java binding. -->
+    <Logger name="com.exonum.binding" level="FATAL" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+  </Loggers>
+</Configuration>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A simple configuration to be used in unit and integration tests.
-     Error log entries go to stdout. -->
+     Warnings from any libraries and debug entries from our code are enabled.
+-->
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
@@ -8,8 +9,12 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Root level="fatal">
-            <AppenderRef ref="Console"/>
+        <Root level="WARN">
+            <AppenderRef ref="Console" />
         </Root>
+
+        <Logger name="com.exonum.binding" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
     </Loggers>
 </Configuration>
