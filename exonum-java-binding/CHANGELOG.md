@@ -19,15 +19,19 @@ The release is based on Exonum 0.11
 
 ### Added
 - Support of packaging the Exonum Java application into a single archive with all the necessary
-  dependencies. For the instructions, consult [CONTRIBUTING.md](../CONTRIBUTING.md#Building-Exonum-Java-App).
+  dependencies. For the instructions, consult [Installation guide][installation].
   This allows you to develop and run Java services without installing Rust compiler and Exonum dependencies.
   <!-- TODO: add link to the prepared binaries for the Linux and Mac OS -->
+  It is still possible to build the application manually, using the instructions in the
+  [Contribution Guide](../CONTRIBUTING.md#Building-Exonum-Java-App).
   (#818, #776)
 - Support of multiple Java services on one blockchain node. To enable a list of specific services, you need to 
   provide a paths to each service artifact in a `services.toml` configuration file. See the 
   [documentation](core/rust/exonum-java/TUTORIAL.md#Services-definition) for more details. (#820)
 - `toOptional()` method to `EntryIndexProxy`. (#790)
 - `getPoolTransactionHashes()` method to `Blockchain`. (#850)
+
+[installation]: https://exonum.com/doc/version/latest/get-started/java-binding/#installation
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted
