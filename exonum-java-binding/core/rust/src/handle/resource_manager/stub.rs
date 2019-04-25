@@ -14,6 +14,8 @@
 
 //! See actual implementation (`imp.rs`) for the documentation.
 
+#![allow(missing_docs)]
+
 use super::super::Handle;
 
 pub fn add_handle<T: 'static>(_: Handle) {}
