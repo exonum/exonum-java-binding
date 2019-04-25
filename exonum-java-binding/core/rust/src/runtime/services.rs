@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Temporary solution for multiple Java services support.
+//!
+//! User needs to define a full list of included Java and internal services
+//! in a special `PATH_TO_SERVICES_DEFINITION` file.
+
 use std::{collections::HashSet, fs::File, io::Read, path::Path};
 
 use std::collections::HashMap;
@@ -30,6 +35,7 @@ pub mod system_service_names {
 /// Path to the services definition file.
 pub const PATH_TO_SERVICES_DEFINITION: &str = "services.toml";
 
+#[allow(missing_docs)]
 #[derive(Serialize, Deserialize)]
 pub struct EjbAppServices {
     pub system_services: Option<HashSet<String>>,

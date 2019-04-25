@@ -19,13 +19,13 @@ use jni::JNIEnv;
 
 use JniResult;
 
-// Converts Java byte array to `Hash`. Panics if array has the wrong length.
+/// Converts Java byte array to `Hash`. Panics if array has the wrong length.
 pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> JniResult<Hash> {
     let bytes = env.convert_byte_array(array)?;
     Ok(Hash::from_slice(&bytes).expect("Unable to create `Hash` from the slice"))
 }
 
-// Converts `Hash` to Java byte array.
+/// Converts `Hash` to Java byte array.
 pub fn convert_hash(env: &JNIEnv, hash: &Hash) -> JniResult<jbyteArray> {
     env.byte_array_from_slice(hash.as_ref())
 }

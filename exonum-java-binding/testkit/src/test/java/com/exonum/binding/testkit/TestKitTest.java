@@ -20,6 +20,7 @@ import static com.exonum.binding.testkit.TestService.constructAfterCommitTransac
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
@@ -384,7 +385,6 @@ class TestKitTest {
 
   @Test
   void createBlockWithTransactionWithWrongServiceId() {
-    Class<RuntimeException> exceptionType = RuntimeException.class;
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       short wrongServiceId = (short) (TestService.SERVICE_ID + 1);
       TransactionMessage message = TransactionMessage.builder()
@@ -392,13 +392,17 @@ class TestKitTest {
           .transactionId(TestTransaction.ID)
           .payload("Test message".getBytes(BODY_CHARSET))
           .sign(KEY_PAIR, CRYPTO_FUNCTION);
-      assertThrows(exceptionType, () -> testKit.createBlockWithTransactions(message));
+      IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+          () -> testKit.createBlockWithTransactions(message));
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      String expectedMessage = String.format("Unknown service id (%s) in transaction (%s)",
+          wrongServiceId, rawTransaction);
+      assertTrue(thrownException.getMessage().contains(expectedMessage));
     }
   }
 
   @Test
   void createBlockWithTransactionWithWrongTransactionId() {
-    Class<RuntimeException> exceptionType = RuntimeException.class;
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       short wrongTransactionId = (short) (TestTransaction.ID + 1);
       TransactionMessage message = TransactionMessage.builder()
@@ -406,7 +410,15 @@ class TestKitTest {
           .transactionId(wrongTransactionId)
           .payload("Test message".getBytes(BODY_CHARSET))
           .sign(KEY_PAIR, CRYPTO_FUNCTION);
-      assertThrows(exceptionType, () -> testKit.createBlockWithTransactions(message));
+      IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+          () -> testKit.createBlockWithTransactions(message));
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      String expectedMessage = String.format("Service (%s) with id=%s failed to convert"
+          + " transaction (%s). Make sure that the submitted transaction is correctly serialized,"
+          + " and the service's TransactionConverter implementation is correct and handles this"
+          + " transaction as expected.",
+          TestService.SERVICE_NAME, TestService.SERVICE_ID, rawTransaction);
+      assertTrue(thrownException.getMessage().contains(expectedMessage));
     }
   }
 

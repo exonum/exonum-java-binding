@@ -18,7 +18,6 @@ package com.exonum.binding.testkit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.not;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -26,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.blockchain.serialization.BlockSerializer;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
@@ -40,20 +38,22 @@ import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -67,9 +67,9 @@ import javax.annotation.Nullable;
  * state.
  *
  * <p>Only the emulated node has a pool of unconfirmed transactions where a service can submit new
- * transaction messages through {@linkplain Node#submitTransaction(RawTransaction)}. All
- * transactions from the pool are committed when a new block is created with
- * {@link #createBlock()}.
+ * transaction messages through {@linkplain Node#submitTransaction(RawTransaction)}; or the test
+ * code through {@link #createBlockWithTransactions(TransactionMessage...)}. All transactions
+ * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized - service instances are
  * {@linkplain UserServiceAdapter#initialize(long)} initialized} and genesis block is committed.
@@ -178,7 +178,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws RuntimeException if transactions are malformed or don't belong to this
+   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
    *     service
    */
   public Block createBlockWithTransactions(TransactionMessage... transactions) {
@@ -190,11 +190,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws RuntimeException if transactions are malformed or don't belong to this
+   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
    *     service
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
     List<TransactionMessage> messageList = ImmutableList.copyOf(transactions);
+    checkTransactions(messageList);
     byte[][] transactionMessagesArr = messageList.stream()
         .map(TransactionMessage::toBytes)
         .toArray(byte[][]::new);
@@ -209,8 +210,46 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @return created block
    */
   public Block createBlock() {
+    List<TransactionMessage> inPoolTransactions =
+        findTransactionsInPool(transactionMessage -> true);
+    checkTransactions(inPoolTransactions);
     byte[] block = nativeCreateBlock(nativeHandle.get());
     return BLOCK_SERIALIZER.fromBytes(block);
+  }
+
+  private void checkTransactions(List<TransactionMessage> transactionMessages) {
+    for (TransactionMessage transactionMessage: transactionMessages) {
+      checkTransaction(transactionMessage);
+    }
+  }
+
+  private void checkTransaction(TransactionMessage transactionMessage) {
+    short serviceId = transactionMessage.getServiceId();
+    RawTransaction rawTransaction = toRawTransaction(transactionMessage);
+    if (!services.containsKey(serviceId)) {
+      String message = String.format("Unknown service id (%s) in transaction (%s)",
+          serviceId, rawTransaction);
+      throw new IllegalArgumentException(message);
+    }
+    Service service = services.get(serviceId);
+    try {
+      service.convertToTransaction(rawTransaction);
+    } catch (Throwable conversionError) {
+      String message = String.format("Service (%s) with id=%s failed to convert transaction (%s)."
+          + " Make sure that the submitted transaction is correctly serialized, and the service's"
+          + " TransactionConverter implementation is correct and handles this transaction as"
+          + " expected.", service.getName(), serviceId, rawTransaction);
+      throw new IllegalArgumentException(message, conversionError);
+    }
+  }
+
+  @VisibleForTesting
+  static RawTransaction toRawTransaction(TransactionMessage transactionMessage) {
+    return RawTransaction.newBuilder()
+        .serviceId(transactionMessage.getServiceId())
+        .transactionId(transactionMessage.getTransactionId())
+        .payload(transactionMessage.getPayload())
+        .build();
   }
 
   /**
@@ -220,15 +259,16 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
-      // As only executed transactions are stored in TxResults, it wouldn't contain in-pool
-      // transactions
-      ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
-      List<TransactionMessage> messages = ImmutableList.copyOf(txMessages.values());
-      return messages.stream()
-          .filter(predicate)
-          .filter(not(tx -> txResults.containsKey(tx.hash())))
+      KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
+      Set<HashCode> poolTxsHashesSet = toSet(poolTxsHashes);
+      return poolTxsHashesSet.stream()
+          .map(txMessages::get)
           .collect(toList());
     });
+  }
+
+  private <T> Set<T> toSet(KeySetIndexProxy<T> setIndex) {
+    return Sets.newHashSet(setIndex.iterator());
   }
 
   /**

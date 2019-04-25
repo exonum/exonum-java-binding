@@ -23,8 +23,9 @@ use jni::JNIEnv;
 use std::panic;
 use std::ptr;
 
+use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
-use utils::{self, Handle};
+use utils;
 
 type Index<T> = ProofListIndex<T, Value>;
 
@@ -43,8 +44,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<View>(view_handle).get() {
+        Ok(handle::to_handle(
+            match *handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
@@ -67,8 +68,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
-        let view_ref = utils::cast_handle::<View>(view_handle).get();
-        Ok(utils::to_handle(match *view_ref {
+        let view_ref = handle::cast_handle::<View>(view_handle).get();
+        Ok(handle::to_handle(match *view_ref {
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
             }
@@ -87,7 +88,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     _: JClass,
     list_handle: Handle,
 ) {
-    utils::drop_handle::<IndexType>(&env, list_handle);
+    handle::drop_handle::<IndexType>(&env, list_handle);
 }
 
 /// Returns the value by index. Null pointer is returned if value is not found.
@@ -99,7 +100,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     index: jlong,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *utils::cast_handle::<IndexType>(list_handle) {
+        let val = match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get(index as u64),
             IndexType::ForkIndex(ref list) => list.get(index as u64),
         };
@@ -119,7 +120,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *utils::cast_handle::<IndexType>(list_handle) {
+        let val = match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.last(),
             IndexType::ForkIndex(ref list) => list.last(),
         };
@@ -139,7 +140,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        Ok(match *utils::cast_handle::<IndexType>(list_handle) {
+        Ok(match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.is_empty(),
             IndexType::ForkIndex(ref list) => list.is_empty(),
         } as jboolean)
@@ -155,7 +156,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        Ok(match *utils::cast_handle::<IndexType>(list_handle) {
+        Ok(match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.len(),
             IndexType::ForkIndex(ref list) => list.len(),
         } as jlong)
@@ -172,7 +173,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 ) -> jint {
     let res = panic::catch_unwind(|| {
         Ok(i32::from(
-            match *utils::cast_handle::<IndexType>(list_handle) {
+            match *handle::cast_handle::<IndexType>(list_handle) {
                 IndexType::SnapshotIndex(ref list) => list.height(),
                 IndexType::ForkIndex(ref list) => list.height(),
             },
@@ -189,7 +190,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let hash = match *utils::cast_handle::<IndexType>(list_handle) {
+        let hash = match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.merkle_root(),
             IndexType::ForkIndex(ref list) => list.merkle_root(),
         };
@@ -207,7 +208,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     index: jlong,
 ) -> jobject {
     let res = panic::catch_unwind(|| {
-        let proof = match *utils::cast_handle::<IndexType>(list_handle) {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
             IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
         };
@@ -226,7 +227,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     to: jlong,
 ) -> jobject {
     let res = panic::catch_unwind(|| {
-        let proof = match *utils::cast_handle::<IndexType>(list_handle) {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
             IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64, to as u64),
             IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64, to as u64),
         };
@@ -243,8 +244,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(list_handle) {
+        Ok(handle::to_handle(
+            match *handle::cast_handle::<IndexType>(list_handle) {
                 IndexType::SnapshotIndex(ref list) => list.iter(),
                 IndexType::ForkIndex(ref list) => list.iter(),
             },
@@ -262,8 +263,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     index_from: jlong,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(utils::to_handle(
-            match *utils::cast_handle::<IndexType>(list_handle) {
+        Ok(handle::to_handle(
+            match *handle::cast_handle::<IndexType>(list_handle) {
                 IndexType::SnapshotIndex(ref list) => list.iter_from(index_from as u64),
                 IndexType::ForkIndex(ref list) => list.iter_from(index_from as u64),
             },
@@ -280,7 +281,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     list_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -302,7 +303,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     index: jlong,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -322,7 +323,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     _: JObject,
     list_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *utils::cast_handle::<IndexType>(list_handle) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
@@ -342,7 +343,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = utils::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
+        let iter = handle::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -358,7 +359,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
     _: JObject,
     iter_handle: Handle,
 ) {
-    utils::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
+    handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
 }
 
 fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JObject<'a>> {
