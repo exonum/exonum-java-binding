@@ -23,6 +23,7 @@ use java_bindings::{
 };
 
 #[test]
+#[ignore]
 fn bootstrap() {
     let jvm_config = JvmConfig {
         args_prepend: vec![],
