@@ -29,7 +29,9 @@ The release is based on Exonum 0.11
   provide a paths to each service artifact in a `services.toml` configuration file. See the 
   [documentation](core/rust/exonum-java/TUTORIAL.md#Services-definition) for more details. (#820)
 - `toOptional()` method to `EntryIndexProxy`. (#790)
-- `getPoolTransactionHashes()` method to `Blockchain`. (#850)
+- `getTransactionPool()` method to `Blockchain`. (#850)
+- SLF4J to Log4j binding to enable libraries coded to the SLF4J API to use Log4j 2, 
+  used by Exonum Java, as the implementation. (#854)
 
 [installation]: https://exonum.com/doc/version/latest/get-started/java-binding/#installation
 

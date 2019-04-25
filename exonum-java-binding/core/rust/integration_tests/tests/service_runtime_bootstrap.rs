@@ -17,12 +17,15 @@
 extern crate integration_tests;
 extern crate java_bindings;
 
-use integration_tests::vm::get_fakes_classpath;
+use integration_tests::vm::{fakes_classpath, log4j_path};
 use java_bindings::{
     Config, InternalConfig, JavaServiceRuntime, JniExecutor, JvmConfig, RuntimeConfig,
 };
 
 #[test]
+// Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
+// the execution of system tests.
+#[ignore]
 fn bootstrap() {
     let jvm_config = JvmConfig {
         args_prepend: vec![],
@@ -31,7 +34,8 @@ fn bootstrap() {
     };
 
     let runtime_config = RuntimeConfig {
-        log_config_path: "".to_owned(),
+        // Pass log4j path to avoid error messages of mis-configuration
+        log_config_path: log4j_path(),
         port: 6300,
     };
 
@@ -41,7 +45,7 @@ fn bootstrap() {
     };
 
     let internal_config = InternalConfig {
-        system_class_path: get_fakes_classpath(),
+        system_class_path: fakes_classpath(),
         system_lib_path: None,
     };
 
