@@ -15,23 +15,34 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-The release is based on Exonum 0.11
+## [0.6.0]
+
+**If you are upgrading an existing Java service, consult 
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/doc/Migration_guide_0.6.md).**
+
+The release is based on Exonum 0.11.
 
 ### Added
 - Support of packaging the Exonum Java application into a single archive with all the necessary
-  dependencies. For the instructions, consult the [Installation guide][installation].
-  This allows you to develop and run Java services without installing Rust compiler and Exonum dependencies.
-  <!-- TODO: add link to the prepared binaries for the Linux and Mac OS -->
+  dependencies.
+  This allows you to develop and run Java services without installing Rust compiler
+  and building Exonum Java.
+  For the instructions, consult the [Installation guide][installation].
+  
   It is still possible to build the application manually, using the instructions in the
   [Contribution Guide](../CONTRIBUTING.md#Building-Exonum-Java-App).
   (#818, #776)
-- Support of multiple Java services on one blockchain node. To enable a list of specific services, you need to 
-  provide a paths to each service artifact in a `services.toml` configuration file. See the 
+- Support of multiple simultaneously active Java services on the network. To enable a list
+  of specific services, you need to provide paths to each service artifact in a `services.toml` 
+  configuration file. See the 
   [documentation](core/rust/exonum-java/TUTORIAL.md#Services-definition) for more details. (#820)
-- `toOptional()` method to `EntryIndexProxy`. (#790)
-- `getTransactionPool()` method to `Blockchain`. (#850)
+- Internal load tests verifying the application reliability
+  under various kinds of load. Builds for each release of Exonum Java, starting with 0.6.0,
+  process millions of transactions and read requests to ensure stability and reliability.
 - SLF4J to Log4j binding to enable libraries coded to the SLF4J API to use Log4j 2, 
   used by Exonum Java, as the implementation. (#854)
+- `toOptional()` method to `EntryIndexProxy`. (#790)
+- `getTransactionPool()` method to `Blockchain`. (#850)
 
 [installation]: https://exonum.com/doc/version/latest/get-started/java-binding/#installation
 
@@ -205,7 +216,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...HEAD
+[0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0
 [0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0
 [0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
 [0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
