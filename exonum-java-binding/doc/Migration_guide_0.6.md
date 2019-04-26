@@ -16,8 +16,6 @@ See the [dependencies management section][dep-management-docs] for details.
 An example of the ServiceModule in the cryptocurrency demo
 </summary>
 
-<!-- TODO: Or just link the file? -->
-
 ```java
 package com.exonum.binding.cryptocurrency;
 
@@ -42,9 +40,8 @@ public final class CryptocurrencyServiceModule extends AbstractServiceModule {
 
 </details>
 
-[abstract-service-module-javadoc]: https://todo.com
-<!-- todo: Dependencies Management -->
-[dep-management-docs]: https://todo.com
+[abstract-service-module-javadoc]: https://exonum.com/doc/api/java-binding-core/0.6.0/com/exonum/binding/service/AbstractServiceModule.html
+[dep-management-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding/#dependencies-management
 
 ### Service Packaging Requirements
  
@@ -140,10 +137,8 @@ Highlights of the project build definition from the cryptocurrency demo
 
 </details>
 
-<!-- TODO: Using Libraries in the docs -->
-[using-libraries-docs]: https://todo.com
-<!-- TODO: How to Build a Service Artifact in the docs -->
-[how-to-build-docs]: https://todo.com
+[using-libraries-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding/#using-libraries
+[how-to-build-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding/#how-to-build-a-service-artifact
 
 ### Use Example
 
@@ -168,8 +163,7 @@ Below are the highlights of the changes in the node configuration:
 
 See details in the [network configuration tutorial][config-tutorial].
 
-<!-- todo: link app tutorial or the (non-existent at the moment) section on the website -->
-[config-tutorial]: http://todo
+[config-tutorial]: https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/core/rust/exonum-java/TUTORIAL.md
 
 ## Update the Clients
 
