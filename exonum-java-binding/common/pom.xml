@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
   </parent>
 
   <artifactId>exonum-java-binding-common</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Common</name>
