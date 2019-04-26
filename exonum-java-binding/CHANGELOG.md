@@ -18,13 +18,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 **If you are upgrading an existing Java service, consult 
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/doc/Migration_guide_0.6.md).**
 
-The release is based on Exonum 0.11
+The release is based on Exonum 0.11.
 
 ### Added
 - Support of packaging the Exonum Java application into a single archive with all the necessary
-  dependencies. For the instructions, consult the [Installation guide][installation].
-  This allows you to develop and run Java services without installing Rust compiler and Exonum dependencies.
-  <!-- TODO: add link to the prepared binaries for the Linux and Mac OS -->
+  dependencies.
+  This allows you to develop and run Java services without installing Rust compiler
+  and building Exonum Java.
+  For the instructions, consult the [Installation guide][installation].
+  
   It is still possible to build the application manually, using the instructions in the
   [Contribution Guide](../CONTRIBUTING.md#Building-Exonum-Java-App).
   (#818, #776)
