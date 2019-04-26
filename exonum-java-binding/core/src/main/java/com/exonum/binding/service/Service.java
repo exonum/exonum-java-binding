@@ -51,7 +51,7 @@ public interface Service {
    * and is supposed to
    * <ul>
    *   <li>(a) initialize the database schema of this service, and</li>
-   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/0.10/architecture/services/#global-configuration">global configuration</a>
+   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/0.11/architecture/services/#global-configuration">global configuration</a>
    * of the service.</li>
    * </ul>
    *
@@ -62,7 +62,7 @@ public interface Service {
    * @param fork a database fork to apply changes to. Not valid after this method returns
    * @return a global configuration of the service, or {@code Optional.empty()} if the service
    *         does not have any configuration parameters.
-   * @see <a href="https://exonum.com/doc/version/0.10/architecture/services/#genesis-block-handler">Genesis block handler</a>
+   * @see <a href="https://exonum.com/doc/version/0.11/architecture/services/#genesis-block-handler">Genesis block handler</a>
    */
   default Optional<String> initialize(Fork fork) {
     return Optional.empty();

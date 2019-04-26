@@ -44,7 +44,7 @@ The release is based on Exonum 0.11.
 - `toOptional()` method to `EntryIndexProxy`. (#790)
 - `getTransactionPool()` method to `Blockchain`. (#850)
 
-[installation]: https://exonum.com/doc/version/latest/get-started/java-binding/#installation
+[installation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#installation
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted

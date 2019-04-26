@@ -73,7 +73,7 @@ v0.4 provides access to some data stored by the framework in the database: trans
 execution results; blocks; node configuration, etc — take a look at [`Blockchain`][blockchain-jd] 
 to see if it will simplify your service implementation.
 
-[core-schema-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#core-schema-api
+[core-schema-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding#core-schema-api
 [blockchain-jd]: https://exonum.com/doc/api/java-binding-core/0.4/com/exonum/binding/blockchain/Blockchain.html
 
 ### [Handle blockchain events][core-events-docs]
@@ -81,14 +81,14 @@ v0.4 also brings `Service#afterCommit` handler which is invoked by the blockchai
 block commit. For example, a service can create one or more transactions if a specific condition
 has occurred.
 
-[core-events-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#blockchain-events
+[core-events-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding#blockchain-events
 
 ### [Sign and submit transactions][node-submit-docs]
 The framework now provides a method to create a transaction message and sign it with the
 _service key_. This allows service implementations to create new transactions and securely sign
 them, e.g., in their event handlers. But use with care — each node has its own service keypair.
 
-[node-submit-docs]: https://exonum.com/doc/version/0.10/get-started/java-binding#messages
+[node-submit-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding#messages
 
 ## Use example
 See how the cryptocurrency service has changed since the last release to understand what

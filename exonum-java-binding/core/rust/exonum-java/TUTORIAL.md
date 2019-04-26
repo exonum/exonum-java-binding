@@ -10,7 +10,7 @@ location.
 You also need a ready-to-use Exonum Java service. You can use 
 [cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
 implementing your own Exonum service 
-in the [user guide](https://exonum.com/doc/version/0.10/get-started/java-binding/).
+in the [user guide](https://exonum.com/doc/version/0.11/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
 [cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding/cryptocurrency-demo
@@ -34,7 +34,7 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 ```
 
 #### Services definition
-Services must be defined in the [services.toml](https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services) 
+Services must be defined in the [services.toml](https://exonum.com/doc/version/0.11/get-started/java-binding/#built-in-services) 
 file in order to be available in the network. The configuration file consists of two sections:
 - The optional `system_services` section is used to enable built-in Exonum services. If 
 not specified - only Configuration service is enabled. Possible variants for the moment are: 
