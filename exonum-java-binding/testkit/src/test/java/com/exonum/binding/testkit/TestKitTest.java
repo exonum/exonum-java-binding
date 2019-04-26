@@ -444,8 +444,8 @@ class TestKitTest {
 
   static final class TestService2 implements Service {
 
-    static short SERVICE_ID = 48;
-    static String SERVICE_NAME = "Test service 2";
+    static final short SERVICE_ID = 48;
+    static final String SERVICE_NAME = "Test service 2";
 
     private Node node;
 

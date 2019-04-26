@@ -331,7 +331,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType;
     private short validatorCount = 1;
-    private List<Class<? extends ServiceModule>> services = new ArrayList<>();
+    private final List<Class<? extends ServiceModule>> services = new ArrayList<>();
     private TimeProvider timeProvider;
 
     private Builder(EmulatedNodeType nodeType) {

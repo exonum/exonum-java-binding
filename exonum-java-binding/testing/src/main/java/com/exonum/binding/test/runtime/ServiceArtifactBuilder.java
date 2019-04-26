@@ -220,7 +220,6 @@ public final class ServiceArtifactBuilder {
     });
   }
 
-  @SuppressWarnings("UnstableApiUsage") // That's internal code, so `Beta` APIs are OK.
   private void writeClasses(JarOutputStream out) throws IOException {
     for (Class<?> serviceClass : artifactClasses) {
       String path = getPath(serviceClass);
