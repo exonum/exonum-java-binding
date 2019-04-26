@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0]
+
 **If you are upgrading an existing Java service, consult 
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/doc/Migration_guide_0.6.md).**
 
@@ -34,10 +36,13 @@ The release is based on Exonum 0.11.
   of specific services, you need to provide paths to each service artifact in a `services.toml` 
   configuration file. See the 
   [documentation](core/rust/exonum-java/TUTORIAL.md#Services-definition) for more details. (#820)
-- `toOptional()` method to `EntryIndexProxy`. (#790)
-- `getTransactionPool()` method to `Blockchain`. (#850)
+- Internal load tests verifying the application reliability
+  under various kinds of load. Builds for each release of Exonum Java, starting with 0.6.0,
+  process millions of transactions and read requests to ensure stability and reliability.
 - SLF4J to Log4j binding to enable libraries coded to the SLF4J API to use Log4j 2, 
   used by Exonum Java, as the implementation. (#854)
+- `toOptional()` method to `EntryIndexProxy`. (#790)
+- `getTransactionPool()` method to `Blockchain`. (#850)
 
 [installation]: https://exonum.com/doc/version/latest/get-started/java-binding/#installation
 
@@ -211,7 +216,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...HEAD
+[0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0
 [0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0
 [0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
 [0.3]: https://github.com/exonum/exonum-java-binding/compare/v0.2...v0.3
