@@ -205,7 +205,7 @@ class UserServiceAdapterTest {
         .thenReturn(serviceName);
 
     serviceAdapter.mountPublicApiHandler(0x0A);
-    verify(server).mountSubRouter(eq("/api/service1"), eq(router));
+    verify(server).mountSubRouter(eq("/api/services/service1"), eq(router));
   }
 
   @Test

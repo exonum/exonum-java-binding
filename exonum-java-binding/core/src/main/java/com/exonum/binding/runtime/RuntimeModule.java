@@ -16,8 +16,14 @@
 
 package com.exonum.binding.runtime;
 
+import static com.exonum.binding.runtime.ClassLoadingScopeChecker.DEPENDENCY_REFERENCE_CLASSES_KEY;
+import static com.google.inject.name.Names.named;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import java.util.Map;
 import org.pf4j.PluginManager;
 
 /**
@@ -25,11 +31,21 @@ import org.pf4j.PluginManager;
  */
 final class RuntimeModule extends PrivateModule {
 
+  private final Map<String, Class<?>> dependencyReferenceClasses;
+
+  RuntimeModule(Map<String, Class<?>> dependencyReferenceClasses) {
+    this.dependencyReferenceClasses = ImmutableMap.copyOf(dependencyReferenceClasses);
+  }
+
   @Override
   protected void configure() {
     bind(ServiceRuntime.class).in(Singleton.class);
     expose(ServiceRuntime.class);
 
+    bind(ClassLoadingScopeChecker.class);
+    bind(new TypeLiteral<Map<String, Class<?>>>() {})
+        .annotatedWith(named(DEPENDENCY_REFERENCE_CLASSES_KEY))
+        .toInstance(dependencyReferenceClasses);
     bind(ServiceLoader.class).to(Pf4jServiceLoader.class);
     bind(PluginManager.class).to(JarPluginManager.class);
   }

@@ -206,4 +206,26 @@
       </extension>
     </extensions>
   </build>
+
+  <profiles>
+    <profile>
+      <id>with-installed-app</id>
+      <properties>
+        <!-- Override the path to the 'java_bindings' library location to point to the
+             libraries of the installed application. -->
+        <ejb-core.nativeLibPath>${env.EXONUM_HOME}/lib/native</ejb-core.nativeLibPath>
+      </properties>
+      <build>
+        <plugins>
+          <!-- Do not enforce the usual rules for standalone cryptocurrency builds. -->
+          <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

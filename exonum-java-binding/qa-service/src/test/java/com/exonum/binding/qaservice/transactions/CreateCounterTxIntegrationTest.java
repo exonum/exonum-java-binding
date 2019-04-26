@@ -21,6 +21,7 @@ import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
+import static com.exonum.binding.qaservice.transactions.TransactionError.COUNTER_ALREADY_EXISTS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -40,6 +41,7 @@ import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -91,7 +93,7 @@ class CreateCounterTxIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeNewCounter() throws CloseFailuresException {
+  void executeNewCounter() throws Exception {
     String name = "counter";
 
     CreateCounterTx tx = new CreateCounterTx(name);
@@ -125,7 +127,6 @@ class CreateCounterTxIntegrationTest {
 
       String name = "counter";
       Long value = 100500L;
-      HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
 
       // Add a counter with the given name and initial value to both indices manually.
       createCounter(view, name, value);
@@ -133,15 +134,9 @@ class CreateCounterTxIntegrationTest {
       // Execute the transaction, that has the same name.
       CreateCounterTx tx = new CreateCounterTx(name);
       TransactionContext context = newContext(view);
-      tx.execute(context);
-
-      // Check it has not changed the entries in the maps.
-      QaSchema schema = new QaSchema(view);
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-      assertThat(counterNames.get(nameHash), equalTo(name));
-
-      MapIndex<HashCode, Long> counters = schema.counters();
-      assertThat(counters.get(nameHash), equalTo(value));
+      TransactionExecutionException e = assertThrows(TransactionExecutionException.class,
+          () -> tx.execute(context));
+      assertThat(e.getErrorCode(), equalTo(COUNTER_ALREADY_EXISTS.code));
     }
   }
 

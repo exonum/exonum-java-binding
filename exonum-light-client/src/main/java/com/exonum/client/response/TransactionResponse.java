@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.google.common.base.Objects;
 import lombok.Value;
 
 @Value
@@ -73,4 +74,31 @@ public class TransactionResponse {
     return status == COMMITTED;
   }
 
+  @Override
+  public String toString() {
+    return "TransactionResponse(status=" + this.getStatus()
+        + ", message=" + this.getMessage()
+        + (isCommitted() ? ", executionResult=" + this.getExecutionResult() : "")
+        + (isCommitted() ? ", location=" + this.getLocation() : "") + ")";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TransactionResponse that = (TransactionResponse) o;
+    return status == that.status
+        && Objects.equal(message, that.message)
+        && Objects.equal(executionResult, that.executionResult)
+        && Objects.equal(location, that.location);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(status, message, executionResult, location);
+  }
 }

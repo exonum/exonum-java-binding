@@ -21,6 +21,7 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
+extern crate chrono;
 pub extern crate exonum;
 #[macro_use]
 extern crate failure;
@@ -37,19 +38,24 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate exonum_testkit;
+extern crate exonum_time;
 #[cfg(test)]
 extern crate tempfile;
 
-mod error;
-mod init;
+pub mod handle;
 mod proxy;
 mod runtime;
 mod storage;
-#[doc(hidden)]
+mod testkit;
 pub mod utils;
 
-pub use error::*;
-pub use init::*;
+pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
+pub use handle::resource_manager::*;
 pub use proxy::*;
+pub use runtime::services;
 pub use runtime::*;
 pub use storage::*;
+pub use testkit::*;
+
+pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};

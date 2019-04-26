@@ -54,10 +54,16 @@ matrix:
       # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
       osx_image: xcode9.3
       env: CHECK_RUST=false
-    - name: "Linux JDK 11 CHECK_RUST=false"
+    - name: "Linux JDK 12 CHECK_RUST=false"
       os: linux
-      jdk: openjdk11
+      jdk: openjdk12
       env: CHECK_RUST=false
+  allow_failures:
+    # Flaky service runtime IT: ECR-3133
+    - os: linux
+      jdk: openjdk12
+  # Report the result of the build as it is ready
+  fast_finish: true
 
 cache:
   directories:

@@ -49,11 +49,13 @@ final class Pf4jServiceLoader implements ServiceLoader {
           .thenComparing(ServiceId::getVersion);
 
   private final PluginManager pluginManager;
+  private final ClassLoadingScopeChecker classLoadingChecker;
   private final SortedMap<ServiceId, LoadedServiceDefinition> loadedServices;
 
   @Inject
-  Pf4jServiceLoader(PluginManager pluginManager) {
+  Pf4jServiceLoader(PluginManager pluginManager, ClassLoadingScopeChecker classLoadingChecker) {
     this.pluginManager = checkNotNull(pluginManager);
+    this.classLoadingChecker = classLoadingChecker;
     loadedServices = new TreeMap<>(SERVICE_ID_COMPARATOR);
   }
 
@@ -69,6 +71,9 @@ final class Pf4jServiceLoader implements ServiceLoader {
     // Load a plugin
     String pluginId = loadPlugin(artifactPath);
     try {
+      // Verify the plugin
+      verifyPostLoad(pluginId);
+
       // Start the plugin
       startPlugin(pluginId);
 
@@ -93,6 +98,12 @@ final class Pf4jServiceLoader implements ServiceLoader {
           + artifactLocation);
     }
     return pluginId;
+  }
+
+  private void verifyPostLoad(String pluginId) {
+    // Check no copies of application classes are included in the artifact
+    ClassLoader pluginClassLoader = pluginManager.getPluginClassLoader(pluginId);
+    classLoadingChecker.checkNoCopiesOfAppClasses(pluginClassLoader);
   }
 
   private void startPlugin(String pluginId) throws ServiceLoadingException {

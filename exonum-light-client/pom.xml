@@ -73,6 +73,7 @@
     <junit.jupiter.version>5.4.1</junit.jupiter.version>
     <mockito.version>2.25.1</mockito.version>
     <hamcrest.version>2.1</hamcrest.version>
+    <equalsverifier.version>3.1.7</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
@@ -82,7 +83,7 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <!-- Empty for all JDKs but 11 -->
+    <!-- Empty for all JDKs but 11+ -->
     <maven.javadoc.joption></maven.javadoc.joption>
   </properties>
 
@@ -141,6 +142,13 @@
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
       <version>${okhttp.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>nl.jqno.equalsverifier</groupId>
+      <artifactId>equalsverifier</artifactId>
+      <version>${equalsverifier.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -226,11 +234,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0</version>
         <configuration>
+          <source>${java.compiler.source}</source>
           <doclint>none</doclint>
           <detectOfflineLinks>false</detectOfflineLinks>
           <additionalJOption>${maven.javadoc.joption}</additionalJOption>
+          <!-- Allow fetching external resources to generate links -->
+          <isOffline>false</isOffline>
+          <links>
+            <link>https://exonum.com/doc/api/java-binding-common/${ejb.version}</link>
+          </links>
         </configuration>
         <executions>
           <execution>
@@ -351,11 +365,11 @@
       </build>
     </profile>
 
-    <!-- Fill in needed property when generating Javadocs on JDK 11 -->
+    <!-- Fill in needed property when generating Javadocs on JDK 11+ -->
     <profile>
-      <id>generate-javadocs-jdk11</id>
+      <id>generate-javadocs-jdk11-plus</id>
       <activation>
-        <jdk>11</jdk>
+        <jdk>[11,)</jdk>
       </activation>
       <properties>
         <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>

@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 public interface QaService extends Service {
 
   short ID = 127;
-  String NAME = "ejb-qa-service";
+  String NAME = "qa";
 
   HashCode submitCreateCounter(String counterName);
 

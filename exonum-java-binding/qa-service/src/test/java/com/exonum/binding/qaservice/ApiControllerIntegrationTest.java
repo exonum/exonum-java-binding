@@ -53,7 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -212,7 +211,8 @@ class ApiControllerIntegrationTest {
     String counterName = "counter 1";
     MultiMap params = multiMap("name", counterName);
 
-    Throwable error = wrappingChecked(InternalServerError.class);
+    String errorMessage = "internal error";
+    Throwable error = wrapInUnchecked(new InternalServerError(errorMessage));
     when(qaService.submitCreateCounter(counterName))
         .thenThrow(error);
 
@@ -220,6 +220,7 @@ class ApiControllerIntegrationTest {
         .sendForm(params, context.succeeding(response -> {
           context.verify(() -> {
             assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
+            assertThat(response.bodyAsString()).contains(errorMessage);
             context.completeNow();
           });
         }));
@@ -879,17 +880,8 @@ class ApiControllerIntegrationTest {
     }
   }
 
-  private Throwable wrappingChecked(Class<? extends Throwable> checkedException) {
-    Throwable wrappingException = logSafeExceptionMock(RuntimeException.class);
-    Throwable cause = logSafeExceptionMock(checkedException);
-    when(wrappingException.getCause()).thenReturn(cause);
-    return wrappingException;
-  }
-
-  private Throwable logSafeExceptionMock(Class<? extends Throwable> exceptionType) {
-    Throwable t = mock(exceptionType);
-    lenient().when(t.getStackTrace()).thenReturn(new StackTraceElement[0]);
-    return t;
+  private Throwable wrapInUnchecked(Throwable checkedException) {
+    return new RuntimeException(checkedException);
   }
 
   private Handler<AsyncResult<HttpResponse<Buffer>>> checkCreatedTransaction(

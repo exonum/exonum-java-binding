@@ -19,7 +19,7 @@ use java_bindings::utils::jni_cache;
 
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 /// Kibibyte
@@ -62,10 +62,12 @@ pub fn create_vm_for_tests_with_fake_classes() -> Arc<JavaVM> {
 fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
     let mut jvm_args_builder = InitArgsBuilder::new()
         .version(JNIVersion::V8)
-        .option(&get_libpath_option());
+        .option(&libpath_option());
 
     if with_fakes {
-        jvm_args_builder = jvm_args_builder.option(&get_fakes_classpath_option());
+        jvm_args_builder = jvm_args_builder.option(&fakes_classpath_option());
+        // Enable log4j
+        jvm_args_builder = jvm_args_builder.option(&log4j_path_option());
     }
     if debug {
         jvm_args_builder = jvm_args_builder.option("-Xcheck:jni");
@@ -90,7 +92,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
 pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     let jvm_args = InitArgsBuilder::new()
         .version(JNIVersion::V8)
-        .option(&get_libpath_option())
+        .option(&libpath_option())
         .option(&format!("-Xmx{}m", memory_limit_mib))
         .build()
         .unwrap_or_else(|e| panic!("{:#?}", e));
@@ -98,12 +100,13 @@ pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-fn get_fakes_classpath_option() -> String {
-    format!("-Djava.class.path={}", get_fakes_classpath())
+fn fakes_classpath_option() -> String {
+    format!("-Djava.class.path={}", fakes_classpath())
 }
 
-pub fn get_fakes_classpath() -> String {
-    let classpath_txt_path = project_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
+pub fn fakes_classpath() -> String {
+    let classpath_txt_path =
+        java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
 
     let mut class_path = String::new();
     File::open(classpath_txt_path)
@@ -111,18 +114,36 @@ pub fn get_fakes_classpath() -> String {
         .read_to_string(&mut class_path)
         .expect("Failed to read classpath.txt");
 
-    let fakes_path = project_root_dir().join("fakes/target/classes/");
+    let fakes_path = java_binding_parent_root_dir().join("fakes/target/classes/");
     let fakes_classes = fakes_path.to_str().expect(CONVERSION_FAILED_MESSAGE);
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
     format!("{}:{}", class_path, fakes_classes)
 }
 
-fn get_libpath_option() -> String {
-    format!("-Djava.library.path={}", get_libpath())
+/// Returns a Log4j system property pointing to the configuration file. The file is in
+/// the base directory of the `integration_tests` project and must be edited if more detailed
+/// Java logs are needed for debugging purposes.
+///
+/// It requires the log4j-core library to be present on the classpath, which is the case with fakes.
+fn log4j_path_option() -> String {
+    format!("-Dlog4j.configurationFile={}", log4j_path())
 }
 
-pub fn get_libpath() -> String {
+/// Returns a path to Log4j configuration file to be used in the integration tests.
+pub fn log4j_path() -> String {
+    project_root_dir()
+        .join("log4j2.xml")
+        .to_str()
+        .expect(CONVERSION_FAILED_MESSAGE)
+        .to_owned()
+}
+
+fn libpath_option() -> String {
+    format!("-Djava.library.path={}", libpath())
+}
+
+fn libpath() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
@@ -136,26 +157,29 @@ pub fn get_libpath() -> String {
         .to_owned()
 }
 
-pub fn get_fake_service_artifact_path() -> String {
-    project_root_dir()
+pub fn fake_service_artifact_path() -> String {
+    java_binding_parent_root_dir()
         .join("fake-service/target/fake-service-artifact.jar")
         .to_str()
         .expect(CONVERSION_FAILED_MESSAGE)
         .to_owned()
 }
 
-fn rust_project_root_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
-        .canonicalize()
-        .unwrap()
-}
-
-fn project_root_dir() -> PathBuf {
+fn java_binding_parent_root_dir() -> PathBuf {
     rust_project_root_dir()
         .join("../..")
         .canonicalize()
         .unwrap()
+}
+
+/// The path to the root directory of the Rust parent module.
+fn rust_project_root_dir() -> PathBuf {
+    project_root_dir().join("..").canonicalize().unwrap()
+}
+
+/// The path to `integration_tests` root directory.
+fn project_root_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
 #[cfg(debug_assertions)]

@@ -26,13 +26,19 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.inject.Guice;
+import io.vertx.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +55,13 @@ import org.pf4j.PluginManager;
 abstract class Pf4jServiceLoaderIntegrationTestable {
 
   private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
+  private static final Map<String, Class<?>> TEST_DEPENDENCY_REFERENCE_CLASSES = ImmutableMap.of(
+      "exonum-java-binding", Service.class,
+      "vertx", Vertx.class,
+      "guice", Guice.class,
+      "pf4j", PluginManager.class,
+      "gson", Gson.class
+  );
 
   private PluginManager pluginManager;
   private Pf4jServiceLoader serviceLoader;
@@ -57,7 +70,8 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @BeforeEach
   void setUp(@TempDir Path tmp) {
     pluginManager = spy(createPluginManager());
-    serviceLoader = new Pf4jServiceLoader(pluginManager);
+    serviceLoader = new Pf4jServiceLoader(pluginManager,
+        new ClassLoadingScopeChecker(TEST_DEPENDENCY_REFERENCE_CLASSES));
     artifactLocation = tmp.resolve("service.jar");
   }
 
@@ -193,6 +207,26 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         arguments(singletonList(TestServiceModuleInaccessibleCtor.class),
             "Cannot load a plugin.+module.+not valid")
     );
+  }
+
+  @Test
+  void cannotLoadIfArtifactIncludesCopiesOfAppClasses() throws IOException {
+    String pluginId = PLUGIN_ID;
+
+    anArtifact()
+        .setPluginId(pluginId)
+        .addClasses(TEST_DEPENDENCY_REFERENCE_CLASSES.values())
+        .writeTo(artifactLocation);
+
+    Exception e = assertThrows(ServiceLoadingException.class,
+        () -> serviceLoader.loadService(artifactLocation));
+    Throwable cause = e.getCause();
+    for (String dependencyName : TEST_DEPENDENCY_REFERENCE_CLASSES.keySet()) {
+      assertThat(cause).hasMessageContaining(dependencyName);
+    }
+
+    // Check it is unloaded if failed to start
+    verifyUnloaded(pluginId);
   }
 
   @Test
