@@ -17,7 +17,7 @@
     <java.compiler.target>8</java.compiler.target>
     <junit.jupiter.version>5.4.1</junit.jupiter.version>
     <hamcrest.version>2.1</hamcrest.version>
-    <mockito.version>2.25.1</mockito.version>
+    <mockito.version>2.27.0</mockito.version>
     <exonum.version>0.7.0-SNAPSHOT</exonum.version>
   </properties>
 
