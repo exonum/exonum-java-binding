@@ -22,7 +22,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>3.6.0</lazysodium-java.version>
+    <lazysodium-java.version>3.6.1</lazysodium-java.version>
     <auto-value.version>1.6.5</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
   </properties>
@@ -37,6 +37,13 @@
       <groupId>com.goterl.lazycode</groupId>
       <artifactId>lazysodium-java</artifactId>
       <version>${lazysodium-java.version}</version>
+    </dependency>
+
+    <!-- Required for lazysodium, but is not transitively accessible. -->
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>5.3.1</version>
     </dependency>
 
     <dependency>
