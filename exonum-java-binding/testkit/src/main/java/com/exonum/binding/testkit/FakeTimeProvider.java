@@ -24,7 +24,8 @@ import java.time.temporal.TemporalAmount;
 
 /**
  * Fake time provider for service testing. Allows to manually manipulate time that is returned
- * by TestKit time service.
+ * by TestKit time service. If you need to set results of different consecutive calls on
+ * {@link #getTime()}, consider using a mock of TimeProvider instead.
  */
 public class FakeTimeProvider implements TimeProvider {
 

@@ -19,9 +19,7 @@ package com.exonum.binding.testkit;
 import java.time.ZonedDateTime;
 
 /**
- * Time provider for service testing. Used as a time source by TestKit time service. If you need
- * to set results of different consecutive calls on {@link #getTime()}, consider using a mock of
- * TimeProvider instead.
+ * Time provider for service testing. Used as a time source by TestKit time service.
  */
 public interface TimeProvider {
 
