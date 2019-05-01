@@ -17,8 +17,10 @@
 package com.exonum.binding.testkit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
@@ -28,6 +30,8 @@ class FakeTimeProviderTest {
 
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+  private static final ZonedDateTime NOT_UTC_TIME =
+      ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneId.of("Europe/Amsterdam"));
 
   @Test
   void createFakeTimeProvider() {
@@ -36,11 +40,24 @@ class FakeTimeProviderTest {
   }
 
   @Test
+  void createFakeTimeProviderRejectsInvalidTimeZone() {
+    assertThrows(IllegalArgumentException.class,
+        () -> FakeTimeProvider.create(NOT_UTC_TIME));
+  }
+
+  @Test
   void setTime() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     ZonedDateTime newTime = ZonedDateTime.of(2010, 10, 10, 10, 10, 10, 10, ZoneOffset.UTC);
     timeProvider.setTime(newTime);
     assertThat(timeProvider.getTime()).isEqualTo(newTime);
+  }
+
+  @Test
+  void setTimeRejectsInvalidTimeZone() {
+    FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
+    assertThrows(IllegalArgumentException.class,
+        () -> timeProvider.setTime(NOT_UTC_TIME));
   }
 
   @Test

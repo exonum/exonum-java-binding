@@ -28,7 +28,9 @@ import java.time.temporal.TemporalAmount;
  */
 public class FakeTimeProvider implements TimeProvider {
 
-  private ZonedDateTime time;
+  // As native code can access this field at any time, it is made volatile so that any changes to
+  // it are visible immediately
+  private volatile ZonedDateTime time;
 
   private FakeTimeProvider(ZonedDateTime time) {
     this.time = time;
@@ -39,9 +41,9 @@ public class FakeTimeProvider implements TimeProvider {
    *
    * @throws IllegalArgumentException if value has time zone other than UTC
    */
-  public static FakeTimeProvider create(ZonedDateTime time) {
-    checkTimeZone(time);
-    return new FakeTimeProvider(time);
+  public static FakeTimeProvider create(ZonedDateTime initialTime) {
+    checkTimeZone(initialTime);
+    return new FakeTimeProvider(initialTime);
   }
 
   /**

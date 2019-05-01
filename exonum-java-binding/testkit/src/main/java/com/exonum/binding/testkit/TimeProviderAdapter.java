@@ -19,6 +19,7 @@ package com.exonum.binding.testkit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.time.UtcZonedDateTimeSerializer;
 import java.time.ZonedDateTime;
 
 /**

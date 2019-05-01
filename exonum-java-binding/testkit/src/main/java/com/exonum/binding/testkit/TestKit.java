@@ -226,6 +226,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private void checkTransaction(TransactionMessage transactionMessage) {
     short serviceId = transactionMessage.getServiceId();
+    // As transactions of time service might be submitted in TestKit that has that service
+    // activated, those transactions should be considered valid, even though time service is not
+    // contained in 'services'
     if (serviceId == TIME_SERVICE_ID) {
       return;
     }
@@ -386,6 +389,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     /**
      * If called, will create a TestKit with time service enabled. The time service will use the
      * given {@linkplain TimeProvider} as a time source.
+     *
+     * <p>Note that if network consists of 4 or more validator nodes the time will not be
+     * consolidated.
      */
     public Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;

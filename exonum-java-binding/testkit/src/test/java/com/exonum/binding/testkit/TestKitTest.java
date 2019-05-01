@@ -461,7 +461,7 @@ class TestKitTest {
 
         // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
         // public key and time provider's time
-        checkValidatorsTimes(timeSchema, testKit);
+        checkValidatorsTimes(timeSchema, testKit, TIME);
         return null;
       });
 
@@ -497,17 +497,17 @@ class TestKitTest {
 
         // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
         // public key and time provider's time
-        checkValidatorsTimes(timeSchema, testKit);
+        checkValidatorsTimes(timeSchema, testKit, TIME);
         return null;
       });
     }
   }
 
-  private void checkValidatorsTimes(TimeSchema timeSchema, TestKit testKit) {
+  private void checkValidatorsTimes(TimeSchema timeSchema, TestKit testKit, ZonedDateTime expectedTime) {
     Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
     EmulatedNode emulatedNode = testKit.getEmulatedNode();
     PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
-    Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, TIME);
+    Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, expectedTime);
     assertThat(validatorsTimes).isEqualTo(expected);
   }
 
