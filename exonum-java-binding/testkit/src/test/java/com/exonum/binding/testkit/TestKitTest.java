@@ -503,7 +503,8 @@ class TestKitTest {
     }
   }
 
-  private void checkValidatorsTimes(TimeSchema timeSchema, TestKit testKit, ZonedDateTime expectedTime) {
+  private void checkValidatorsTimes(
+      TimeSchema timeSchema, TestKit testKit, ZonedDateTime expectedTime) {
     Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
     EmulatedNode emulatedNode = testKit.getEmulatedNode();
     PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
