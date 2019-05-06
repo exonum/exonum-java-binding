@@ -451,7 +451,9 @@ class TestKitTest {
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build()) {
-      // Commit two blocks for time oracle to prepare consolidated time
+      // Commit two blocks for time oracle to prepare consolidated time. Two blocks are needed as
+      // after the first block time transactions are generated and after the second one they are
+      // processed
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
@@ -468,6 +470,9 @@ class TestKitTest {
       // Update time in time provider
       ZonedDateTime newTime = TIME.plusDays(1);
       timeProvider.setTime(newTime);
+      // Commit two blocks for time oracle to prepare consolidated time. Two blocks are needed as
+      // after the first block time transactions are generated and after the second one they are
+      // processed
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
@@ -480,27 +485,15 @@ class TestKitTest {
   }
 
   @Test
-  void timeServiceWithManyValidatorsDoesNotReturnConsolidatedTime() {
+  void createTestKitWithTimeServiceAndTooManyValidators() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    short invalidValidatorCount = TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE + 1;
+    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
-        .withValidators((short) 4)
         .withTimeService(timeProvider)
-        .build()) {
-      // Commit two blocks for time oracle to prepare consolidated time
-      testKit.createBlock();
-      testKit.createBlock();
-      testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).isEmpty();
-
-        // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
-        // public key and time provider's time
-        checkValidatorsTimes(timeSchema, testKit, TIME);
-        return null;
-      });
-    }
+        .withValidators(invalidValidatorCount);
+    assertThrows(exceptionType, testKitBuilder::build);
   }
 
   private void checkValidatorsTimes(

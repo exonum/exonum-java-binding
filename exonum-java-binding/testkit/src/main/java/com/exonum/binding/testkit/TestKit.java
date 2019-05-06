@@ -83,6 +83,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
+  @VisibleForTesting
+  static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final short TIME_SERVICE_ID = 4;
 
@@ -353,6 +355,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * regardless of the configured number of validators, only a single service will be
      * instantiated. Equal to one by default.
      *
+     * <p>Note that validator count should be
+     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
+     *
      * @throws IllegalArgumentException if validatorCount is less than one
      */
     public Builder withValidators(short validatorCount) {
@@ -390,8 +395,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * If called, will create a TestKit with time service enabled. The time service will use the
      * given {@linkplain TimeProvider} as a time source.
      *
-     * <p>Note that if network consists of 4 or more validator nodes the time will not be
-     * consolidated.
+     * <p>Note that validator count should be
+     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
      */
     public Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;
@@ -400,10 +405,22 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     /**
      * Creates the TestKit instance.
+     *
+     * @throws IllegalArgumentException if validatorCount is invalid
+     * @throws IllegalArgumentException if service number is invalid
      */
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
+      checkCorrectValidatorNumber();
       return newInstance(services, nodeType, validatorCount, timeProvider);
+    }
+
+    private void checkCorrectValidatorNumber() {
+      if (timeProvider != null) {
+        checkArgument(validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
+            "Validator count with enabled TimeService should be less or equal to %s",
+            MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
+      }
     }
 
     private void checkCorrectServiceNumber(int serviceCount) {
