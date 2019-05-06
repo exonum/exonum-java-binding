@@ -30,12 +30,12 @@ The release is based on Exonum 0.11.
   For the instructions, consult the [Installation guide][installation].
   
   It is still possible to build the application manually, using the instructions in the
-  [Contribution Guide](../CONTRIBUTING.md#Building-Exonum-Java-App).
+  [Contribution Guide](../CONTRIBUTING.md#building-exonum-java-app).
   (#818, #776)
 - Support of multiple simultaneously active Java services on the network. To enable a list
   of specific services, you need to provide paths to each service artifact in a `services.toml` 
   configuration file. See the 
-  [documentation](core/rust/exonum-java/TUTORIAL.md#Services-definition) for more details. (#820)
+  [documentation](core/rust/exonum-java/TUTORIAL.md#services-definition) for more details. (#820)
 - Internal load tests verifying the application reliability
   under various kinds of load. Builds for each release of Exonum Java, starting with 0.6.0,
   process millions of transactions and read requests to ensure stability and reliability.
