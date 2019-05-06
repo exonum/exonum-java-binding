@@ -62,7 +62,7 @@ public interface Service {
    * @param fork a database fork to apply changes to. Not valid after this method returns
    * @return a global configuration of the service, or {@code Optional.empty()} if the service
    *         does not have any configuration parameters.
-   * @see <a href="https://exonum.com/doc/version/0.11/architecture/services/#genesis-block-handler">Genesis block handler</a>
+   * @see <a href="https://exonum.com/doc/version/0.11/architecture/services/#initialization-handler">Initialization handler</a>
    */
   default Optional<String> initialize(Fork fork) {
     return Optional.empty();
