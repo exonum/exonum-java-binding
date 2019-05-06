@@ -67,13 +67,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
-    <okhttp.version>3.14.0</okhttp.version>
+    <okhttp.version>3.14.1</okhttp.version>
     <lombok.version>1.18.6</lombok.version>
     <!--Test dependencies-->
-    <junit.jupiter.version>5.4.1</junit.jupiter.version>
-    <mockito.version>2.25.1</mockito.version>
+    <junit.jupiter.version>5.4.2</junit.jupiter.version>
+    <mockito.version>2.27.0</mockito.version>
     <hamcrest.version>2.1</hamcrest.version>
-    <equalsverifier.version>3.1.7</equalsverifier.version>
+    <equalsverifier.version>3.1.8</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
