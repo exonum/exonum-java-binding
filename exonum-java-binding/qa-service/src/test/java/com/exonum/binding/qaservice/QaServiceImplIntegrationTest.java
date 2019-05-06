@@ -456,13 +456,13 @@ class QaServiceImplIntegrationTest {
   @Test
   void getTime() {
     // TODO: merge Time Service support in TestKit first
-//    withNodeFake(() -> assertThat(service.getTime()).isEmpty());
+    // withNodeFake(() -> assertThat(service.getTime()).isEmpty());
   }
 
   @Test
   void getValidatorsTime() {
     // TODO: merge Time Service support in TestKit first
-//    withNodeFake(() -> assertThat(service.getValidatorsTimes()).isEmpty());
+    // withNodeFake(() -> assertThat(service.getValidatorsTimes()).isEmpty());
   }
 
   private TransactionMessage createCreateCounterTransaction(String counterName) {
