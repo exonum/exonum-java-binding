@@ -81,10 +81,13 @@ import javax.annotation.Nullable;
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
+  // The maximum number of validators supported by TestKit when a time oracle is enabled. The time
+  // oracle does not work in a TestKit with a higher number of validators because the time oracle
+  // requires the majority of those validators to submit transactions with time updates, but only a
+  // single emulated node submits them.
+  public static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
-  @VisibleForTesting
-  static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final short TIME_SERVICE_ID = 4;
 
@@ -418,8 +421,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     private void checkCorrectValidatorNumber() {
       if (timeProvider != null) {
         checkArgument(validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
-            "Validator count with enabled TimeService should be less or equal to %s",
-            MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
+            "Number of validators (%s) should be less than or equal to %s when TimeService is"
+                + " enabled.",
+            validatorCount, MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
       }
     }
 

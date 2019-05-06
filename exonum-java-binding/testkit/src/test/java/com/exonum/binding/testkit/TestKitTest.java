@@ -470,7 +470,7 @@ class TestKitTest {
       // Update time in time provider
       ZonedDateTime newTime = TIME.plusDays(1);
       timeProvider.setTime(newTime);
-      // Commit two blocks for time oracle to prepare consolidated time. Two blocks are needed as
+      // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
       // after the first block time transactions are generated and after the second one they are
       // processed
       testKit.createBlock();
@@ -493,7 +493,11 @@ class TestKitTest {
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .withValidators(invalidValidatorCount);
-    assertThrows(exceptionType, testKitBuilder::build);
+    IllegalArgumentException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    String expectedMessage = String.format("Number of validators (%s) should be less than or equal"
+        + " to %s when TimeService is enabled.",
+        invalidValidatorCount, TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
+    assertThat(thrownException).hasMessageContaining(expectedMessage);
   }
 
   private void checkValidatorsTimes(
