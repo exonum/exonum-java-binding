@@ -406,7 +406,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     /**
      * Creates the TestKit instance.
      *
-     * @throws IllegalArgumentException if validatorCount is invalid
+     * @throws IllegalArgumentException if validator count is invalid
      * @throws IllegalArgumentException if service number is invalid
      */
     public TestKit build() {
