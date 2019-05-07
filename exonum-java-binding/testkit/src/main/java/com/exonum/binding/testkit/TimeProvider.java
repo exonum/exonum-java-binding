@@ -18,7 +18,13 @@ package com.exonum.binding.testkit;
 
 import java.time.ZonedDateTime;
 
-// TODO: update Javadocs in P2 [ECR-3051]
+/**
+ * Time provider for service testing. Used as a time source by TestKit time service.
+ */
 public interface TimeProvider {
+
+  /**
+   * Returns the current time of this time provider in UTC time zone.
+   */
   ZonedDateTime getTime();
 }
