@@ -81,10 +81,12 @@ import javax.annotation.Nullable;
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
-  // The maximum number of validators supported by TestKit when a time oracle is enabled. The time
-  // oracle does not work in a TestKit with a higher number of validators because the time oracle
-  // requires the majority of those validators to submit transactions with time updates, but only a
-  // single emulated node submits them.
+  /**
+   * The maximum number of validators supported by TestKit when a time oracle is enabled. The time
+   * oracle does not work in a TestKit with a higher number of validators because the time oracle
+   * requires the majority of those validators to submit transactions with time updates, but only a
+   * single emulated node submits them.
+   */
   public static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
