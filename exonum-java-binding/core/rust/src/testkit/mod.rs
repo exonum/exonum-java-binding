@@ -102,6 +102,24 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeFreeTestKit
     drop_handle::<TestKit>(&env, handle)
 }
 
+/// Polls events out of event queue. This forces messages handling, e.g. adding transactions
+/// to the pool.
+///
+/// This method is called internally by `createBlock` and `createBlockWithTransactions` methods.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativePollEvents(
+    env: JNIEnv,
+    _: JObject,
+    handle: Handle,
+) {
+    let res = panic::catch_unwind(|| {
+        let testkit = cast_handle::<TestKit>(handle);
+        testkit.poll_events();
+        Ok(())
+    });
+    unwrap_exc_or_default(&env, res)
+}
+
 /// Creates Snapshot using provided TestKit instance.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnapshot(
