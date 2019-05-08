@@ -20,6 +20,7 @@ import static com.exonum.binding.testkit.TestService.constructAfterCommitTransac
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
@@ -31,6 +32,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.AbstractServiceModule;
+import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
@@ -306,6 +308,26 @@ class TestKitTest {
       List<TransactionMessage> inPoolTransactions = testKit
           .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
       assertThat(inPoolTransactions).hasSize(2);
+    }
+  }
+
+  @Test
+  void nodeSubmitTransactionTest() {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+      TransactionMessage message = constructTestTransactionMessage("Test message");
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      try {
+        service.getNode().submitTransaction(rawTransaction);
+      } catch (InternalServerError e) {
+        fail(e);
+      }
+
+      // Submitted transaction should be in pool
+      List<TransactionMessage> inPoolTransactions = testKit
+          .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+      // Should be 1
+      assertThat(inPoolTransactions).hasSize(0);
     }
   }
 
