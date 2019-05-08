@@ -276,6 +276,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
       return stream(poolTxsHashes)
           .map(txMessages::get)
+          .filter(predicate)
           .collect(toList());
     });
   }
