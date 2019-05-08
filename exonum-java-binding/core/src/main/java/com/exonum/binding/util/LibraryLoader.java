@@ -120,7 +120,7 @@ public final class LibraryLoader {
               + "containing %s library, where 'EXONUM_HOME' denotes the Exonum Java app "
               + "installation directory.%n"
               + "The code launching tests must usually set this property explicitly, see "
-              + "https://exonum.com/doc/version/0.10/get-started/java-binding/#testing",
+              + "https://exonum.com/doc/version/0.11/get-started/java-binding/#testing",
           JAVA_LIBRARY_PATH_PROPERTY, BINDING_LIB_NAME);
     } else {
       String dynamicLibVar = dynamicLibrariesEnvVar();

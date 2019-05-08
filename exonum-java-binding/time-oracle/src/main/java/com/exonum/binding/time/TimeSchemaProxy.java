@@ -57,7 +57,7 @@ class TimeSchemaProxy implements TimeSchema {
     if (!runningUnitTests()) {
       checkState(isTimeServiceEnabled(), "Time service is not enabled. To enable it, put 'time' "
           + "into 'services.toml' file.\n"
-          + "See https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services "
+          + "See https://exonum.com/doc/version/0.11/get-started/java-binding/#built-in-services "
           + "for details.");
     }
   }
