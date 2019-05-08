@@ -20,6 +20,7 @@ import static com.exonum.binding.testkit.TestService.constructAfterCommitTransac
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
@@ -31,6 +32,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.AbstractServiceModule;
+import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
@@ -50,6 +52,7 @@ import io.vertx.ext.web.Router;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -342,6 +345,31 @@ class TestKitTest {
         checkTransactionsCommittedSuccessfully(view, block, message, message2);
         return null;
       });
+    }
+  }
+
+  @Test
+  void findTransactionsInPool() {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+
+      String messagePayload = "Test message";
+      TransactionMessage message = constructTestTransactionMessage(messagePayload);
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
+      RawTransaction rawTransaction2 = TestKit.toRawTransaction(message2);
+
+      try {
+        service.getNode().submitTransaction(rawTransaction);
+        service.getNode().submitTransaction(rawTransaction2);
+      } catch (InternalServerError e) {
+        fail(e);
+      }
+
+      List<TransactionMessage> transactionsInPool =
+          testKit.findTransactionsInPool(
+              tx -> Arrays.equals(tx.getPayload(), messagePayload.getBytes(BODY_CHARSET)));
+      assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
     }
   }
 
