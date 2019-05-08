@@ -81,9 +81,17 @@ import javax.annotation.Nullable;
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
+  /**
+   * The maximum number of validators supported by TestKit when a time oracle is enabled. The time
+   * oracle does not work in a TestKit with a higher number of validators because the time oracle
+   * requires the majority of those validators to submit transactions with time updates, but only a
+   * single emulated node submits them.
+   */
+  public static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
+  private static final short TIME_SERVICE_ID = 4;
 
   private final Map<Short, Service> services = new HashMap<>();
 
@@ -108,8 +116,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     UserServiceAdapter[] userServiceAdapters = serviceAdapters.values()
         .toArray(new UserServiceAdapter[0]);
+    TimeProviderAdapter timeProviderAdapter =  timeProvider == null
+        ? null
+        : new TimeProviderAdapter(timeProvider);
     long nativeHandle = nativeCreateTestKit(userServiceAdapters, isAuditorNode, validatorCount,
-        timeProvider);
+        timeProviderAdapter);
     return new TestKit(nativeHandle, serviceAdapters);
   }
 
@@ -222,6 +233,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private void checkTransaction(TransactionMessage transactionMessage) {
     short serviceId = transactionMessage.getServiceId();
+    // As transactions of time service might be submitted in TestKit that has that service
+    // activated, those transactions should be considered valid, even though time service is not
+    // contained in 'services'
+    if (serviceId == TIME_SERVICE_ID) {
+      return;
+    }
     RawTransaction rawTransaction = toRawTransaction(transactionMessage);
     if (!services.containsKey(serviceId)) {
       String message = String.format("Unknown service id (%s) in transaction (%s)",
@@ -300,7 +317,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   private static native long nativeCreateTestKit(UserServiceAdapter[] services, boolean auditor,
-      short withValidatorCount, TimeProvider timeProvider);
+      short withValidatorCount, TimeProviderAdapter timeProvider);
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
@@ -343,6 +360,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * regardless of the configured number of validators, only a single service will be
      * instantiated. Equal to one by default.
      *
+     * <p>Note that validator count should be
+     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
+     *
      * @throws IllegalArgumentException if validatorCount is less than one
      */
     public Builder withValidators(short validatorCount) {
@@ -379,6 +399,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     /**
      * If called, will create a TestKit with time service enabled. The time service will use the
      * given {@linkplain TimeProvider} as a time source.
+     *
+     * <p>Note that validator count should be
+     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
      */
     public Builder withTimeService(TimeProvider timeProvider) {
       this.timeProvider = timeProvider;
@@ -387,10 +410,23 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     /**
      * Creates the TestKit instance.
+     *
+     * @throws IllegalArgumentException if validator count is invalid
+     * @throws IllegalArgumentException if service number is invalid
      */
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
+      checkCorrectValidatorNumber();
       return newInstance(services, nodeType, validatorCount, timeProvider);
+    }
+
+    private void checkCorrectValidatorNumber() {
+      if (timeProvider != null) {
+        checkArgument(validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
+            "Number of validators (%s) should be less than or equal to %s when TimeService is"
+                + " enabled.",
+            validatorCount, MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
+      }
     }
 
     private void checkCorrectServiceNumber(int serviceCount) {

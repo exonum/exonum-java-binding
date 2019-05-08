@@ -28,8 +28,9 @@ import java.time.ZonedDateTime;
 
 /**
  * ZonedDateTime serializer. Only serializes values with UTC zones, throws an exception otherwise.
+ * Mostly for internal use (integration with exonum-core).
  */
-enum UtcZonedDateTimeSerializer implements Serializer<ZonedDateTime> {
+public enum UtcZonedDateTimeSerializer implements Serializer<ZonedDateTime> {
   INSTANCE;
 
   private static final int SERIALIZED_DATE_TIME_SIZE = Long.BYTES + Integer.BYTES;

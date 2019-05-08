@@ -16,25 +16,62 @@
 
 package com.exonum.binding.testkit;
 
-import java.time.ZonedDateTime;
+import static com.google.common.base.Preconditions.checkArgument;
 
-// TODO: update Javadocs in P2 [ECR-3051]
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
+
+/**
+ * Fake time provider for service testing. Allows to manually manipulate time that is returned
+ * by TestKit time service. If you need to set results of different consecutive calls on
+ * {@link #getTime()}, consider using a mock of TimeProvider instead.
+ */
 public class FakeTimeProvider implements TimeProvider {
 
-  public FakeTimeProvider create(ZonedDateTime time) {
-    throw new UnsupportedOperationException();
+  // As native code can access this field at any time, it is made volatile so that any changes to
+  // it are visible immediately
+  private volatile ZonedDateTime time;
+
+  private FakeTimeProvider(ZonedDateTime time) {
+    this.time = time;
   }
 
+  /**
+   * Creates a fake time provider with given time. Note that time should be in UTC time zone.
+   *
+   * @throws IllegalArgumentException if value has time zone other than UTC
+   */
+  public static FakeTimeProvider create(ZonedDateTime initialTime) {
+    checkTimeZone(initialTime);
+    return new FakeTimeProvider(initialTime);
+  }
+
+  /**
+   * Sets new time for this time provider. Note that time should be in UTC time zone.
+   *
+   * @throws IllegalArgumentException if value has time zone other than UTC
+   */
   public void setTime(ZonedDateTime time) {
-    throw new UnsupportedOperationException();
+    checkTimeZone(time);
+    this.time = time;
   }
 
-  public void addTime(ZonedDateTime time) {
-    throw new UnsupportedOperationException();
+  private static void checkTimeZone(ZonedDateTime value) {
+    checkArgument(value.getZone() == ZoneOffset.UTC,
+        "ZonedDateTime value should be in UTC, but was %s",
+        value.getZone());
+  }
+
+  /**
+   * Increases stored time by given amount.
+   */
+  public void addTime(TemporalAmount toAdd) {
+    time = time.plus(toAdd);
   }
 
   @Override
   public ZonedDateTime getTime() {
-    throw new UnsupportedOperationException();
+    return time;
   }
 }
