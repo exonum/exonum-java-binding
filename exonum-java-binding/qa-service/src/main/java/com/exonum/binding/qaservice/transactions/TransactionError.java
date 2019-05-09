@@ -24,7 +24,7 @@ enum TransactionError {
   // Increment counter errors
   UNKNOWN_COUNTER(1);
 
-  byte code;
+  final byte code;
 
   TransactionError(int code) {
     this.code = UnsignedBytes.checkedCast(code);

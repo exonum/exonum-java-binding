@@ -246,7 +246,7 @@ public final class Blockchain {
    * Note that this pool represents the state as of the current snapshot, and its state is volatile
    * even between block commits.
    *
-   * @see <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   * @see <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();

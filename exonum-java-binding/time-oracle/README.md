@@ -51,6 +51,6 @@ public Optional<ZonedDateTime> getTime() {
 Apache License (Version 2.0).
 See [LICENSE](../../LICENSE) for details.
 
-[exonum-time]: https://exonum.com/doc/version/0.10/advanced/time/
-[built-in-services]: https://exonum.com/doc/version/0.10/get-started/java-binding/#built-in-services
+[exonum-time]: https://exonum.com/doc/version/0.11/advanced/time/
+[built-in-services]: https://exonum.com/doc/version/0.11/get-started/java-binding/#built-in-services
 [time-schema-javadoc]: https://exonum.com/doc/api/java-time-oracle/0.5.0/com/exonum/binding/time/TimeSchema.html
