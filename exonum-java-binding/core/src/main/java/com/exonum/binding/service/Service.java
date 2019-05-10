@@ -97,17 +97,17 @@ public interface Service {
   }
 
   /**
-   * Creates handlers that makes up the public API of this service.
-   * The handlers are added to the given router, which is then mounted at a path,
-   * equal to the service name.
+   * Creates handlers that make up the public HTTP API of this service.
+   * The handlers are added to the given router, which is then mounted at the following path:
+   * {@code /api/services/<service-name>}.
    *
-   * <p>Please note that the path prefix is stripped from the request path when it is forwarded to
-   * the given router. For example, if your service name is «timestamping»,
+   * <p>Please note that the path prefix shown above is stripped from the request path
+   * when it is forwarded to the given router. For example, if your service name is «timestamping»,
    * and you have an endpoint «/timestamp», use this name when defining the handler and it will be
    * available by path «/api/services/timestamping/timestamp»:
    *
    * <pre><code>
-   * router.get("/balance").handler((rc) -> {
+   * router.get("/timestamp").handler((rc) -> {
    *   rc.response().end("2019-04-01T10:15:30+02:00[Europe/Kiev]");
    * });
    * </code></pre>
@@ -115,6 +115,8 @@ public interface Service {
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
    * @param router a router responsible for handling requests to this service
+   * @see <a href="https://exonum.com/doc/version/0.11/get-started/java-binding/#external-service-api">
+   *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);
 
