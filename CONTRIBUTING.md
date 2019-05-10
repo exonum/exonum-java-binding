@@ -21,7 +21,7 @@ You need to install the following dependencies:
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Rust 1.32.0](https://www.rust-lang.org/).
   To install a specific Rust version, use `rustup install 1.32.0` command.
-  * The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. 
+  * The [system dependencies](https://exonum.com/doc/version/0.11/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
   * For automatic packaging of the Exonum Java app you need [CMake](https://cmake.org/) installed in your system. 
   Also on Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
@@ -62,12 +62,12 @@ to pass `--release` flag to the `package_app.sh` script.
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:
   * [`core`](exonum-java-binding/core) contains the APIs to define and implement an 
-  [Exonum service](https://exonum.com/doc/version/0.10/get-started/design-overview/#modularity-and-services).
+  [Exonum service](https://exonum.com/doc/version/0.11/get-started/design-overview/#modularity-and-services).
   * [`core-native`](exonum-java-binding/core/rust) contains the glue code between Java and Rust.
   * [`app`](exonum-java-binding/core/rust/exonum-java) is an application that runs a node with Java 
   and Rust services.
   * [`common`](exonum-java-binding/common) provides common functionality to Exonum core
-  and light clients: [Exonum proofs](https://exonum.com/doc/version/0.10/get-started/design-overview/#proofs),
+  and light clients: [Exonum proofs](https://exonum.com/doc/version/0.11/get-started/design-overview/#proofs),
   hashing and cryptographic operations, serialization support.
   * [`exonum-service-archetype`](exonum-java-binding/service-archetype) implements an archetype
   generating a template project of Exonum Java service. 

@@ -30,10 +30,12 @@ import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.TestStorageItems;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+@RequiresNativeLibrary
 class MemoryDbIntegrationTest {
 
   static {

@@ -34,6 +34,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
@@ -158,6 +159,18 @@ final class CoreSchemaProxy {
   }
 
   /**
+   * Returns a set of uncommitted (in-pool) transaction hashes; empty in case of no transactions.
+   * Note that this pool represents the state as of the current snapshot, and its state is volatile
+   * even between block commits.
+   *
+   * @see <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   */
+  KeySetIndexProxy<HashCode> getTransactionPool() {
+    return KeySetIndexProxy.newInstance(CoreIndex.TRANSACTIONS_POOL, dbView,
+        StandardSerializers.hash());
+  }
+
+  /**
    * Returns the configuration for the latest height of the blockchain.
    *
    * @throws RuntimeException if the "genesis block" was not created
@@ -201,6 +214,7 @@ final class CoreSchemaProxy {
     private static final String BLOCKS = PREFIX + "blocks";
     private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
     private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
+    private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
   }
 
 }

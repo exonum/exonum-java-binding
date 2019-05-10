@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndexProxy;
+import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test;
  * A couple of tests that verify that using an invalid handle from Java does not crash the VM,
  * but results in a descriptive RuntimeException.
  */
+@RequiresNativeLibrary
 class NativeResourceManagerIntegrationTest {
 
   static {

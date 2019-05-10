@@ -23,24 +23,16 @@ Be sure you installed necessary packages:
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
-- The [system dependencies](https://exonum.com/doc/version/0.10/get-started/install/) of Exonum. You do _not_ need to manually fetch and compile Exonum.
-- [Rust 1.32.0](https://rustup.rs/). To install a specific Rust version, you can use the following command:
-  ```bash
-  rustup install 1.32.0
-  ```
+- You should have `Exonum Java App` installed and configured. The `exonum-java` binary should be available via the `PATH` environment variable.
 
 #### Install and run
 
 Build the project:
 
 ```sh
-$ source exonum-java-binding/tests_profile
+$ cd exonum-java-binding/cryptocurrency-demo
 
-$ mvn install
-
-$ cd exonum-java-binding/core/rust/exonum-java/
-
-$ cargo build
+$ mvn -P with-installed-app install 
 
 $ ./start_cryptocurrency_node.sh
 ```
@@ -76,7 +68,7 @@ $ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http
 Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
-- [Reference Documentation](https://exonum.com/doc/version/0.10/get-started/java-binding).
+- [Reference Documentation](https://exonum.com/doc/version/0.11/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/exonum-java/TUTORIAL.md

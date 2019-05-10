@@ -23,7 +23,7 @@ extern crate lazy_static;
 use exonum_testkit::TestKitBuilder;
 use integration_tests::{
     fake_service::*,
-    vm::{create_vm_for_tests_with_fake_classes, get_fake_service_artifact_path},
+    vm::{create_vm_for_tests_with_fake_classes, fake_service_artifact_path},
 };
 use java_bindings::{jni::JavaVM, utils::any_to_string, JavaServiceRuntime};
 use std::{panic, sync::Arc};
@@ -48,7 +48,7 @@ fn load_one_service() {
 fn load_two_services() {
     let runtime = get_runtime();
 
-    let fake_artifact_path = get_fake_service_artifact_path();
+    let fake_artifact_path = fake_service_artifact_path();
     let fake_artifact_id = runtime.load_artifact(&fake_artifact_path);
     let fake_service = runtime.create_service(&fake_artifact_id);
 

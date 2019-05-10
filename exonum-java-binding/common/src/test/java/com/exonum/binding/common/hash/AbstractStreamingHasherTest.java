@@ -152,7 +152,7 @@ class AbstractStreamingHasherTest {
    * process()/processRemaining() invocations, due to alignment.
    */
   @Test
-  void testExhaustive() throws Exception {
+  void testExhaustive() {
     Random random = new Random(0); // will iteratively make more debuggable, each time it breaks
     for (int totalInsertions = 0; totalInsertions < 200; totalInsertions++) {
 

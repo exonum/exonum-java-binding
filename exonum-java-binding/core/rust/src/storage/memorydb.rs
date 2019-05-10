@@ -18,8 +18,9 @@ use jni::JNIEnv;
 
 use std::panic;
 
+use handle::{self, Handle};
 use storage::db::{View, ViewRef};
-use utils::{self, Handle};
+use utils;
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
@@ -27,7 +28,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
     env: JNIEnv,
     _: JClass,
 ) -> Handle {
-    let res = panic::catch_unwind(|| Ok(utils::to_handle(MemoryDB::new())));
+    let res = panic::catch_unwind(|| Ok(handle::to_handle(MemoryDB::new())));
     utils::unwrap_exc_or_default(&env, res)
 }
 
@@ -38,7 +39,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeF
     _: JClass,
     db_handle: Handle,
 ) {
-    utils::drop_handle::<MemoryDB>(&env, db_handle);
+    handle::drop_handle::<MemoryDB>(&env, db_handle);
 }
 
 /// Returns pointer to created `Snapshot` object.
@@ -49,8 +50,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_handle::<MemoryDB>(db_handle);
-        Ok(utils::to_handle(View::from_owned_snapshot(db.snapshot())))
+        let db = handle::cast_handle::<MemoryDB>(db_handle);
+        Ok(handle::to_handle(View::from_owned_snapshot(db.snapshot())))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -63,8 +64,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
     db_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_handle::<MemoryDB>(db_handle);
-        Ok(utils::to_handle(View::from_owned_fork(db.fork())))
+        let db = handle::cast_handle::<MemoryDB>(db_handle);
+        Ok(handle::to_handle(View::from_owned_fork(db.fork())))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -78,8 +79,8 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeM
     view_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let db = utils::cast_handle::<MemoryDB>(db_handle);
-        let fork = match *utils::cast_handle::<View>(view_handle).get() {
+        let db = handle::cast_handle::<MemoryDB>(db_handle);
+        let fork = match *handle::cast_handle::<View>(view_handle).get() {
             ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
             ViewRef::Fork(ref fork) => fork,
         };

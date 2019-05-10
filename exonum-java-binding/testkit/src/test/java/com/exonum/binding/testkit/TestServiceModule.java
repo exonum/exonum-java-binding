@@ -14,4 +14,16 @@
  * limitations under the License.
  */
 
-pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
+package com.exonum.binding.testkit;
+
+import com.exonum.binding.service.AbstractServiceModule;
+import com.exonum.binding.service.Service;
+import com.google.inject.Singleton;
+
+public final class TestServiceModule extends AbstractServiceModule {
+
+  @Override
+  protected void configure() {
+    bind(Service.class).to(TestService.class).in(Singleton.class);
+  }
+}

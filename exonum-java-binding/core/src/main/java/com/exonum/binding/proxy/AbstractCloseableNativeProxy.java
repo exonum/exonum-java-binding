@@ -66,7 +66,6 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
     this(nativeHandle, dispose, Collections.emptySet());
   }
 
-
   /**
    * Creates a native proxy.
    *

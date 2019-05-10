@@ -22,8 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
 /**
  * Indicates that a test requires the native Java Binding library to work.
@@ -32,6 +30,5 @@ import org.junit.jupiter.api.condition.OS;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Tag("requires-native-library")
-@DisabledOnOs(OS.LINUX)
 public @interface RequiresNativeLibrary {
 }

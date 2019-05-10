@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-use super::{Config, JvmConfig, RuntimeConfig};
+use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
 use exonum::{
     helpers::fabric::{keys, Argument, CommandExtension, Context},
     node::NodeConfig,
 };
 use failure;
 use toml::Value;
-use utils::executable_directory;
 
 use std::path::PathBuf;
 
