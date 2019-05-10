@@ -1,6 +1,6 @@
 [package]
 name = "java_bindings"
-version = "0.6.0"
+version = "0.6.0-hacky"
 authors = ["Exonum Team <exonum@bitfury.com>"]
 
 [workspace]

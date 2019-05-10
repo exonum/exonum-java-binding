@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.6.0</version>
+    <version>0.6.0-hacky</version>
   </parent>
 
   <artifactId>exonum-testkit</artifactId>
-  <version>0.6.0</version>
+  <version>0.6.0-hacky</version>
   <packaging>jar</packaging>
 
   <name>Exonum TestKit</name>
