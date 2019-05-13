@@ -20,7 +20,6 @@ import static com.exonum.binding.testkit.TestService.constructAfterCommitTransac
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.blockchain.Block;
 import com.exonum.binding.blockchain.Blockchain;
@@ -32,7 +31,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.service.AbstractServiceModule;
-import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.ServiceModule;
@@ -61,6 +59,7 @@ import org.junit.jupiter.api.Test;
 class TestKitTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
+  private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
@@ -314,7 +313,7 @@ class TestKitTest {
   @Test
   void createBlockWithSingleTransaction() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+      TransactionMessage message = constructTestTransactionMessage("Test message");
       Block block = testKit.createBlockWithTransactions(message);
       assertThat(block.getNumTransactions()).isEqualTo(1);
 
@@ -334,8 +333,8 @@ class TestKitTest {
   @Test
   void createBlockWithTransactions() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+      TransactionMessage message = constructTestTransactionMessage("Test message");
+      TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
       Block block = testKit.createBlockWithTransactions(ImmutableList.of(message, message2));
       assertThat(block.getNumTransactions()).isEqualTo(2);
@@ -348,18 +347,13 @@ class TestKitTest {
   }
 
   @Test
-  void nodeSubmittedTransactionsArePlacedInPool() {
+  void nodeSubmittedTransactionsArePlacedInPool() throws Exception {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
       TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
       RawTransaction rawTransaction = TestKit.toRawTransaction(message);
-
-      try {
-        service.getNode().submitTransaction(rawTransaction);
-      } catch (InternalServerError e) {
-        fail(e);
-      }
+      service.getNode().submitTransaction(rawTransaction);
 
       List<TransactionMessage> transactionsInPool =
           testKit.findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
@@ -368,7 +362,7 @@ class TestKitTest {
   }
 
   @Test
-  void findTransactionsInPool() {
+  void findTransactionsInPool() throws Exception {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
@@ -376,13 +370,8 @@ class TestKitTest {
       RawTransaction rawTransaction = TestKit.toRawTransaction(message);
       TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
       RawTransaction rawTransaction2 = TestKit.toRawTransaction(message2);
-
-      try {
-        service.getNode().submitTransaction(rawTransaction);
-        service.getNode().submitTransaction(rawTransaction2);
-      } catch (InternalServerError e) {
-        fail(e);
-      }
+      service.getNode().submitTransaction(rawTransaction);
+      service.getNode().submitTransaction(rawTransaction2);
 
       List<TransactionMessage> transactionsInPool =
           testKit.findTransactionsInPool(
@@ -394,8 +383,8 @@ class TestKitTest {
   @Test
   void createBlockWithTransactionsVarargs() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+      TransactionMessage message = constructTestTransactionMessage("Test message");
+      TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
       Block block = testKit.createBlockWithTransactions(message, message2);
       assertThat(block.getNumTransactions()).isEqualTo(2);
@@ -407,14 +396,22 @@ class TestKitTest {
     }
   }
 
+  private TransactionMessage constructTestTransactionMessage(String payload) {
+    return constructTestTransactionMessage(payload, KEY_PAIR);
+  }
+
   private TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
     EmulatedNode emulatedNode = testKit.getEmulatedNode();
     KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
+    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
+  }
+
+  private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(TestService.SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
-        .sign(emulatedNodeKeyPair, CRYPTO_FUNCTION);
+        .sign(keyPair, CRYPTO_FUNCTION);
   }
 
   private void checkTransactionsCommittedSuccessfully(
@@ -435,13 +432,11 @@ class TestKitTest {
   void createBlockWithTransactionWithWrongServiceId() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       short wrongServiceId = (short) (TestService.SERVICE_ID + 1);
-      EmulatedNode emulatedNode = testKit.getEmulatedNode();
-      KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
       TransactionMessage message = TransactionMessage.builder()
           .serviceId(wrongServiceId)
           .transactionId(TestTransaction.ID)
           .payload("Test message".getBytes(BODY_CHARSET))
-          .sign(emulatedNodeKeyPair, CRYPTO_FUNCTION);
+          .sign(KEY_PAIR, CRYPTO_FUNCTION);
       IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
           () -> testKit.createBlockWithTransactions(message));
       RawTransaction rawTransaction = TestKit.toRawTransaction(message);
@@ -455,13 +450,11 @@ class TestKitTest {
   void createBlockWithTransactionWithWrongTransactionId() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       short wrongTransactionId = (short) (TestTransaction.ID + 1);
-      EmulatedNode emulatedNode = testKit.getEmulatedNode();
-      KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
       TransactionMessage message = TransactionMessage.builder()
           .serviceId(TestService.SERVICE_ID)
           .transactionId(wrongTransactionId)
           .payload("Test message".getBytes(BODY_CHARSET))
-          .sign(emulatedNodeKeyPair, CRYPTO_FUNCTION);
+          .sign(KEY_PAIR, CRYPTO_FUNCTION);
       IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
           () -> testKit.createBlockWithTransactions(message));
       RawTransaction rawTransaction = TestKit.toRawTransaction(message);
