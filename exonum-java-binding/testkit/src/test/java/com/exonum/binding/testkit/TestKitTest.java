@@ -349,12 +349,31 @@ class TestKitTest {
   }
 
   @Test
+  void nodeSubmittedTransactionsArePlacedInPool() {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+
+      TransactionMessage message = constructTestTransactionMessage("Test message");
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+
+      try {
+        service.getNode().submitTransaction(rawTransaction);
+      } catch (InternalServerError e) {
+        fail(e);
+      }
+
+      List<TransactionMessage> transactionsInPool =
+          testKit.findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+      assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
+    }
+  }
+
+  @Test
   void findTransactionsInPool() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
-      String messagePayload = "Test message";
-      TransactionMessage message = constructTestTransactionMessage(messagePayload);
+      TransactionMessage message = constructTestTransactionMessage("Test message");
       RawTransaction rawTransaction = TestKit.toRawTransaction(message);
       TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
       RawTransaction rawTransaction2 = TestKit.toRawTransaction(message2);
@@ -368,7 +387,7 @@ class TestKitTest {
 
       List<TransactionMessage> transactionsInPool =
           testKit.findTransactionsInPool(
-              tx -> Arrays.equals(tx.getPayload(), messagePayload.getBytes(BODY_CHARSET)));
+              tx -> Arrays.equals(tx.getPayload(), message.getPayload()));
       assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
     }
   }
