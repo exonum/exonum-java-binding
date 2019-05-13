@@ -19,8 +19,8 @@ package com.exonum.binding.testkit;
 /**
  * Type of the TestKit emulated node.
  *
- * @see <a href="https://exonum.com/doc/version/0.10/glossary/#auditor">Auditor Node</a>
- *      <a href="https://exonum.com/doc/version/0.10/glossary/#validator">Validator Node</a>
+ * @see <a href="https://exonum.com/doc/version/0.11/glossary/#auditor">Auditor Node</a>
+ *      <a href="https://exonum.com/doc/version/0.11/glossary/#validator">Validator Node</a>
  */
 public enum EmulatedNodeType {
   VALIDATOR,

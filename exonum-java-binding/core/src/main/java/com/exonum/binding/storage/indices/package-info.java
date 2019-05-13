@@ -48,6 +48,6 @@
  * <p>Until this limitation is fixed, care must be taken when using this feature, because
  * the identifiers are not checked.
  *
- * @see <a href="https://exonum.com/doc/version/0.10/architecture/storage/#table-types">Exonum indexes reference documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.11/architecture/storage/#table-types">Exonum indexes reference documentation</a>
  */
 package com.exonum.binding.storage.indices;

@@ -9,7 +9,7 @@ With Exonum Java Binding you can define stateful Exonum Services in Java,
 configure a network of nodes and run your services in it.
 
 For more information see the relevant documentation on the tool:
-  - [User Guide](https://exonum.com/doc/version/0.10/get-started/java-binding/)
+  - [User Guide](https://exonum.com/doc/version/0.11/get-started/java-binding/)
   - [Cryptocurrency Example Service](cryptocurrency-demo)
 
 ## License

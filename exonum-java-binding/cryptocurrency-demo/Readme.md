@@ -1,6 +1,6 @@
-# Cryptocurrency demo
+# Cryptocurrency Demo
 
-This project demonstrates how to bootstrap own cryptocurrency
+This project demonstrates how to bootstrap your own cryptocurrency
 with [Java binding Exonum blockchain](https://github.com/exonum/exonum).
 
 Exonum blockchain keeps balances of users and handles secure
@@ -11,11 +11,11 @@ It implements most basic operations:
 - Create a new user
 - Transfer funds between users
 
-## Install and run
+## Install and Run
 
 ### Manually
 
-#### Getting started
+#### Getting Started
 
 Be sure you installed necessary packages:
 - Linux or macOS. Windows support is coming soon.
@@ -23,21 +23,24 @@ Be sure you installed necessary packages:
 - [Maven 3.5+](https://maven.apache.org/download.cgi).
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
-- You should have `Exonum Java App` installed and configured. The `exonum-java` binary should be available via the `PATH` environment variable.
+- [Exonum Java][ejb-installation] application.
 
-#### Install and run
+[ejb-installation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#installation
 
-Build the project:
+#### Build and Run
+
+Build the service project:
 
 ```sh
 $ cd exonum-java-binding/cryptocurrency-demo
 
 $ mvn -P with-installed-app install 
-
-$ ./start_cryptocurrency_node.sh
 ```
 
-<!-- markdownlint-enable MD013 -->
+Run the service:
+```sh
+$ ./start-cryptocurrency-demo.sh
+```
 
 Install frontend dependencies:
 
@@ -53,7 +56,7 @@ Build sources:
 $ npm run build
 ```
 
-Run the application:
+Run the frontend application:
 
 ```sh
 $ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http://127.0.0.1:3000
@@ -68,7 +71,7 @@ $ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http
 Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
-- [Reference Documentation](https://exonum.com/doc/version/0.10/get-started/java-binding).
+- [Reference Documentation](https://exonum.com/doc/version/0.11/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/exonum-java/TUTORIAL.md

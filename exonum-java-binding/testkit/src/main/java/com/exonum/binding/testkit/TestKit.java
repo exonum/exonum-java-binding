@@ -76,8 +76,8 @@ import javax.annotation.Nullable;
  * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are
  * created.
  *
- * @see <a href="https://exonum.com/doc/version/0.10/get-started/test-service/">TestKit documentation</a>
- *      <a href="https://exonum.com/doc/version/0.10/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.11/get-started/test-service/">TestKit documentation</a>
+ *      <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
@@ -349,7 +349,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType;
     private short validatorCount = 1;
-    private List<Class<? extends ServiceModule>> services = new ArrayList<>();
+    private final List<Class<? extends ServiceModule>> services = new ArrayList<>();
     private TimeProvider timeProvider;
 
     private Builder(EmulatedNodeType nodeType) {

@@ -39,8 +39,8 @@ final class TestService extends AbstractService {
   static final String INITIAL_ENTRY_VALUE = "initial value";
   static final String INITIAL_CONFIGURATION = "{ \"version\": \"0.2.0\" }";
 
-  static short SERVICE_ID = 46;
-  static String SERVICE_NAME = "Test service";
+  static final short SERVICE_ID = 46;
+  static final String SERVICE_NAME = "Test service";
 
   private Node node;
 
