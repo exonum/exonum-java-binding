@@ -16,7 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionConverter;
+import com.example.auto.AutoTransactionConverter;
 import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
 import com.exonum.binding.service.TransactionConverter;
@@ -30,6 +30,6 @@ public final class CryptocurrencyServiceModule extends AbstractServiceModule {
   protected void configure() {
     bind(Service.class).to(CryptocurrencyServiceImpl.class);
     bind(CryptocurrencyService.class).to(CryptocurrencyServiceImpl.class).in(Singleton.class);
-    bind(TransactionConverter.class).to(CryptocurrencyTransactionConverter.class);
+    bind(TransactionConverter.class).to(AutoTransactionConverter.class);
   }
 }

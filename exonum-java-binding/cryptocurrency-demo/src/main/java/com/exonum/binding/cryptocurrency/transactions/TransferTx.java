@@ -25,6 +25,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.annotations.AutoTransaction;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
@@ -63,6 +64,7 @@ public final class TransferTx implements Transaction {
   /**
    * Creates a new transfer transaction from the serialized transaction data.
    */
+  @AutoTransaction(ID)
   public static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 

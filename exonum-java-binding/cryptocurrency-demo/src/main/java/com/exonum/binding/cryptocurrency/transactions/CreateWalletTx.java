@@ -22,6 +22,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WA
 import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.annotations.AutoTransaction;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
@@ -54,6 +55,7 @@ public final class CreateWalletTx implements Transaction {
    * Creates a create wallet transaction from the serialized transaction data.
    * @param rawTransaction a raw transaction
    */
+  @AutoTransaction(ID)
   public static CreateWalletTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
