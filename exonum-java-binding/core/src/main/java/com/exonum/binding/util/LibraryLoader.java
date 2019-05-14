@@ -53,7 +53,7 @@ public final class LibraryLoader {
   private static final String JAVA_BINDING_VERSION = "0.7.0-SNAPSHOT";
 
   // TODO: Remove in ECR-3172
-  private static final boolean LIBRARY_VERSION_VERIFICATION_ENABLED = false;
+  private static final boolean LIBRARY_VERSION_VERIFICATION_ENABLED = true;
 
   private static final Logger logger = LogManager.getLogger(LibraryLoader.class);
 
