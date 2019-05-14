@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Verification of native library compatibility when it is first loaded, to detect
+  possible mismatch between an installed exonum-java application and the version
+  used in a service project. (#882) 
+
 ## [0.6.0]- 2019-05-08
 
 **If you are upgrading an existing Java service, consult 
