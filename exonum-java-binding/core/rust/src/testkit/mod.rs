@@ -103,6 +103,9 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeFreeTestKit
 }
 
 /// Creates Snapshot using provided TestKit instance.
+///
+/// Calls `TestKit::poll_events`, so all transactions received prior to the call of this method
+/// are handled and added to the pool.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnapshot(
     env: JNIEnv,
@@ -111,6 +114,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
+        testkit.poll_events();
         let snapshot = testkit.snapshot();
         let view = View::from_owned_snapshot(snapshot);
         Ok(to_handle(view))

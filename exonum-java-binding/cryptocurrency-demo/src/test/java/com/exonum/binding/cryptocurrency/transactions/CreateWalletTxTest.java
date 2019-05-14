@@ -103,7 +103,7 @@ class CreateWalletTxTest {
         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
-      Long initialBalance = DEFAULT_INITIAL_BALANCE;
+      long initialBalance = DEFAULT_INITIAL_BALANCE;
 
       // Create a wallet manually.
       CryptocurrencySchema schema = new CryptocurrencySchema(view);

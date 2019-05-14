@@ -184,7 +184,6 @@ class ServiceArtifactBuilderTest {
     assertThat(mainAttributes.getValue("Exonum-Version")).isEqualTo("3.1.0");
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   private static Map<String, byte[]> readJarEntries(Path jarPath) throws IOException {
     Map<String, byte[]> allJarEntries = new TreeMap<>();
     try (JarInputStream in = new JarInputStream(new FileInputStream(jarPath.toFile()))) {
@@ -210,7 +209,7 @@ class ServiceArtifactBuilderTest {
     return out.toByteArray();
   }
 
-  @SuppressWarnings({"UnstableApiUsage", "ConstantConditions"})
+  @SuppressWarnings("ConstantConditions")
   private static byte[] readClass(Class<?> c) throws IOException {
     // Instead of duplicating the code reading a class we could alternatively add some
     // `ClassWriter` or `ClassReader` interface, and inject a mock of it in ServiceArtifactBuilder
