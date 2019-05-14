@@ -44,8 +44,14 @@ public final class LibraryLoader {
   private static final String JAVA_LIBRARY_PATH_PROPERTY = "java.library.path";
   private static final String DYNAMIC_LIBRARIES_ENV_VAR_WINDOWS = "PATH";
   private static final String DYNAMIC_LIBRARIES_ENV_VAR_UNIX = "LD_LIBRARY_PATH";
-  // TODO: Shall this class read the properties instead?
+
+  /**
+   * The current version of the project. Must be updated on
+   * <a href="https://wiki.bf.local/display/EJB/Java+Binding+Release+Checklist+Template">
+   * each release</a>.
+   */
   private static final String JAVA_BINDING_VERSION = "0.7.0-SNAPSHOT";
+
   // TODO: Remove in ECR-3172
   private static final boolean LIBRARY_VERSION_VERIFICATION_ENABLED = false;
 
@@ -60,9 +66,9 @@ public final class LibraryLoader {
    * Creates a new library loader.
    *
    * @param libraryVersion the version of this library to verify that the native library
-   *     is compatible with it. The compatibility is d
+   *     is compatible with it
    */
-  LibraryLoader(String libraryVersion) {
+  private LibraryLoader(String libraryVersion) {
     this.expectedLibVersion = libraryVersion;
     this.loaded = false;
   }
@@ -77,7 +83,7 @@ public final class LibraryLoader {
     INSTANCE.loadOnce();
   }
 
-  synchronized void loadOnce() {
+  private synchronized void loadOnce() {
     if (loaded) {
       // It has already been attempted to load the library (successfully or not)
       return;
@@ -153,7 +159,7 @@ public final class LibraryLoader {
       return;
     }
     String nativeLibVersion = nativeGetLibraryVersion();
-    if (!nativeLibVersion.equals(expectedLibVersion)) {
+    if (!expectedLibVersion.equals(nativeLibVersion)) {
       String message = String.format(
           "Mismatch between versions of Java library and native '%s' library:%n"
               + "  Java library version:   %s%n"
@@ -167,7 +173,5 @@ public final class LibraryLoader {
     }
   }
 
-  // todo: Shall we extract it as a Supplier<String>, and System.load() as Consumer<String>
-  //    to be able to test?
   private static native String nativeGetLibraryVersion();
 }
