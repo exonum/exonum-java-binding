@@ -20,6 +20,7 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -47,21 +48,20 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.test.appender.ListAppender;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -304,13 +304,17 @@ class QaServiceImplIntegrationTest {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       StoredConfiguration configuration = service.getActualConfiguration();
       EmulatedNode emulatedNode = testKit.getEmulatedNode();
-      PublicKey emulatedNodeServicePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
       List<ValidatorKey> validatorKeys = configuration.validatorKeys();
 
       assertThat(validatorKeys).hasSize(validatorCount);
-      boolean emulatedNodeValidatorKeyIsInConfig = validatorKeys.stream()
-          .anyMatch(vk -> vk.serviceKey().equals(emulatedNodeServicePublicKey));
-      assertThat(emulatedNodeValidatorKeyIsInConfig).isTrue();
+
+      PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
+      List<PublicKey> serviceKeys = configuration.validatorKeys().stream()
+          .map(ValidatorKey::serviceKey)
+          .collect(toList());
+
+      assertThat(serviceKeys).hasSize(validatorCount);
+      assertThat(serviceKeys).contains(emulatedNodeServiceKey);
     }
   }
 
@@ -348,7 +352,8 @@ class QaServiceImplIntegrationTest {
       testKit.createBlockWithTransactions(createCounterTransaction);
       Map<HashCode, TransactionResult> txResults = service.getTxResults();
       assertThat(txResults)
-          .isEqualTo(ImmutableMap.of(createCounterTransaction.hash(), TransactionResult.successful()));
+          .isEqualTo(ImmutableMap.of(createCounterTransaction.hash(),
+              TransactionResult.successful()));
     }
   }
 
@@ -431,45 +436,47 @@ class QaServiceImplIntegrationTest {
     }
   }
 
-  @Test
-  void getTime() {
-    ZonedDateTime time = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
-    TimeProvider timeProvider = FakeTimeProvider.create(time);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
-        .withService(QaServiceModule.class)
-        .withTimeService(timeProvider)
-        .build()) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+  @Nested
+  class WithTime {
+
+    private final ZonedDateTime expectedTime = ZonedDateTime
+        .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+    private TestKit testKit;
+
+    @BeforeEach
+    void setUpConsolidatedTime() {
+      TimeProvider timeProvider = FakeTimeProvider.create(expectedTime);
+      testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+          .withService(QaServiceModule.class)
+          .withTimeService(timeProvider)
+          .build();
 
       // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
       // after the first block time transactions are generated and after the second one they are
       // processed
       testKit.createBlock();
       testKit.createBlock();
-      Optional<ZonedDateTime> consolidatedTime = service.getTime();
-      assertThat(consolidatedTime).hasValue(time);
     }
-  }
 
-  @Test
-  void getValidatorsTime() {
-    ZonedDateTime time = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
-    TimeProvider timeProvider = FakeTimeProvider.create(time);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
-        .withService(QaServiceModule.class)
-        .withTimeService(timeProvider)
-        .build()) {
+    @AfterEach
+    void destroyTestKit() {
+      testKit.close();
+    }
+
+    @Test
+    void getTime() {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+      Optional<ZonedDateTime> consolidatedTime = service.getTime();
+      assertThat(consolidatedTime).hasValue(expectedTime);
+    }
 
-      // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
-      // after the first block time transactions are generated and after the second one they are
-      // processed
-      testKit.createBlock();
-      testKit.createBlock();
+    @Test
+    void getValidatorsTime() {
+      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
       EmulatedNode emulatedNode = testKit.getEmulatedNode();
       PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
-      Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, time);
+      Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, expectedTime);
       assertThat(validatorsTimes).isEqualTo(expected);
     }
   }

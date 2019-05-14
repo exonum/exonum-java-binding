@@ -21,11 +21,17 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
+import static com.exonum.binding.qaservice.transactions.TransactionError.UNKNOWN_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceImpl;
@@ -37,42 +43,16 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
+import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 class IncrementCounterTxIntegrationTest {
 
+  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
+
   static {
     LibraryLoader.load();
-  }
-
-  private ListAppender logAppender;
-
-  @BeforeEach
-  void setUp() {
-    logAppender = getCapturingLogAppender();
-  }
-
-  private static ListAppender getCapturingLogAppender() {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    Configuration config = ctx.getConfiguration();
-    ListAppender appender = (ListAppender) config.getAppenders().get("ListAppender");
-    // Clear the appender so that it doesn't contain entries from the previous tests.
-    appender.clear();
-    return appender;
-  }
-
-  @AfterEach
-  void tearDown() {
-    logAppender.clear();
   }
 
   @Test
@@ -131,7 +111,6 @@ class IncrementCounterTxIntegrationTest {
         MapIndex<HashCode, Long> counters = schema.counters();
         long expectedValue = initialValue + 1;
 
-        // TODO: remove Assertions
         assertThat(counters.get(counterId)).isEqualTo(expectedValue);
         return null;
       });
@@ -142,21 +121,19 @@ class IncrementCounterTxIntegrationTest {
   @RequiresNativeLibrary
   void executeNoSuchCounter() {
     try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       String counterName = "unknown-counter";
-      HashCode nameHash = defaultHashFunction().hashString(counterName, UTF_8);
-      service.submitIncrementCounter(1L, nameHash);
-      testKit.createBlock();
+      HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
+      TransactionMessage incrementCounterTx = createIncrementCounterTransaction(0L, counterId);
+      testKit.createBlockWithTransactions(incrementCounterTx);
 
-      List<String> logMessages = logAppender.getMessages();
-      // Logger contains two #getStateHashes messages and an exception message
-      int expectedNumMessages = 3;
-      assertThat(logMessages).hasSize(expectedNumMessages);
-
-      String exceptionMessage = "com.exonum.binding.transaction.TransactionExecutionException";
-      assertThat(logMessages.get(1))
-          .contains("INFO")
-          .contains(exceptionMessage);
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        Optional<TransactionResult> txResult = blockchain.getTxResult(incrementCounterTx.hash());
+        TransactionResult expectedTransactionResult =
+            TransactionResult.error(UNKNOWN_COUNTER.code, null);
+        assertThat(txResult).hasValue(expectedTransactionResult);
+        return null;
+      });
     }
   }
 
@@ -189,5 +166,19 @@ class IncrementCounterTxIntegrationTest {
         .transactionId(INCREMENT_COUNTER.id())
         .serviceId(QaService.ID)
         .payload(Bytes.bytes());
+  }
+
+  private TransactionMessage createIncrementCounterTransaction(long seed, HashCode counterId) {
+    IncrementCounterTx incrementCounterTx = new IncrementCounterTx(seed, counterId);
+    RawTransaction rawTransaction = incrementCounterTx.toRawTransaction();
+    return toTransactionMessage(rawTransaction);
+  }
+
+  private TransactionMessage toTransactionMessage(RawTransaction rawTransaction) {
+    return TransactionMessage.builder()
+        .serviceId(rawTransaction.getServiceId())
+        .transactionId(rawTransaction.getTransactionId())
+        .payload(rawTransaction.getPayload())
+        .sign(CRYPTO_FUNCTION.generateKeyPair(), CRYPTO_FUNCTION);
   }
 }

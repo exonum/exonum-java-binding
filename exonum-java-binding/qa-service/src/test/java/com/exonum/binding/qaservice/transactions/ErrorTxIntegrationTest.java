@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -33,19 +35,12 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 class ErrorTxIntegrationTest {
 
@@ -53,27 +48,6 @@ class ErrorTxIntegrationTest {
 
   static {
     LibraryLoader.load();
-  }
-
-  private ListAppender logAppender;
-
-  @BeforeEach
-  void setUp() {
-    logAppender = getCapturingLogAppender();
-  }
-
-  private static ListAppender getCapturingLogAppender() {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    Configuration config = ctx.getConfiguration();
-    ListAppender appender = (ListAppender) config.getAppenders().get("ListAppender");
-    // Clear the appender so that it doesn't contain entries from the previous tests.
-    appender.clear();
-    return appender;
-  }
-
-  @AfterEach
-  void tearDown() {
-    logAppender.clear();
   }
 
   @Test
@@ -127,15 +101,14 @@ class ErrorTxIntegrationTest {
       byte errorCode = 1;
       TransactionMessage errorTx = createErrorTransaction(0L, errorCode, null);
       testKit.createBlockWithTransactions(errorTx);
-      List<String> logMessages = logAppender.getMessages();
-      // Logger contains two #getStateHashes messages and an exception message
-      int expectedNumMessages = 3;
-      assertThat(logMessages).hasSize(expectedNumMessages);
 
-      String exceptionMessage = "com.exonum.binding.transaction.TransactionExecutionException: null";
-      assertThat(logMessages.get(1))
-          .contains("INFO")
-          .contains(exceptionMessage);
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+        TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
+        assertThat(txResult).hasValue(expectedTransactionResult);
+        return null;
+      });
     }
   }
 
@@ -147,16 +120,15 @@ class ErrorTxIntegrationTest {
       String errorDescription = "Test";
       TransactionMessage errorTx = createErrorTransaction(0L, errorCode, errorDescription);
       testKit.createBlockWithTransactions(errorTx);
-      List<String> logMessages = logAppender.getMessages();
-      // Logger contains two #getStateHashes messages and an exception message
-      int expectedNumMessages = 3;
-      assertThat(logMessages).hasSize(expectedNumMessages);
 
-      String exceptionMessage =
-          "com.exonum.binding.transaction.TransactionExecutionException: " + errorDescription;
-      assertThat(logMessages.get(1))
-          .contains("INFO")
-          .contains(exceptionMessage);
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+        TransactionResult expectedTransactionResult =
+            TransactionResult.error(errorCode, errorDescription);
+        assertThat(txResult).hasValue(expectedTransactionResult);
+        return null;
+      });
     }
   }
 
