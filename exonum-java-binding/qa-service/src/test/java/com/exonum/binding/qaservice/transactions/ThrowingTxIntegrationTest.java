@@ -17,34 +17,52 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
-import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.qaservice.QaServiceImpl;
+import com.exonum.binding.qaservice.QaServiceModule;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.test.appender.ListAppender;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 class ThrowingTxIntegrationTest {
 
-  @BeforeAll
-  static void loadLibrary() {
+  static {
     LibraryLoader.load();
+  }
+
+  private ListAppender logAppender;
+
+  @BeforeEach
+  void setUp() {
+    logAppender = getCapturingLogAppender();
+  }
+
+  private static ListAppender getCapturingLogAppender() {
+    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    Configuration config = ctx.getConfiguration();
+    ListAppender appender = (ListAppender) config.getAppenders().get("ListAppender");
+    // Clear the appender so that it doesn't contain entries from the previous tests.
+    appender.clear();
+    return appender;
+  }
+
+  @AfterEach
+  void tearDown() {
+    logAppender.clear();
   }
 
   @Test
@@ -56,7 +74,7 @@ class ThrowingTxIntegrationTest {
 
     ThrowingTx txFromRaw = ThrowingTx.converter().fromRawTransaction(message);
 
-    assertThat(txFromRaw, equalTo(tx));
+    assertThat(txFromRaw).isEqualTo(tx);
   }
 
   @Test
@@ -68,39 +86,27 @@ class ThrowingTxIntegrationTest {
     AnyTransaction<ThrowingTx> txParams = json().fromJson(info,
         new TypeToken<AnyTransaction<ThrowingTx>>(){}.getType());
 
-    assertThat(txParams.service_id, equalTo(QaService.ID));
-    assertThat(txParams.message_id, equalTo(QaTransaction.VALID_THROWING.id()));
-    assertThat(txParams.body, equalTo(tx));
+    assertThat(txParams.service_id).isEqualTo(QaService.ID);
+    assertThat(txParams.message_id).isEqualTo(QaTransaction.VALID_THROWING.id());
+    assertThat(txParams.body).isEqualTo(tx);
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeClearsQaServiceData() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+  void executeThrows() {
+    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
+      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+      service.submitValidThrowingTx(1L);
+      testKit.createBlock();
+      List<String> logMessages = logAppender.getMessages();
+      // Logger contains two #getStateHashes messages and an exception message
+      int expectedNumMessages = 3;
+      assertThat(logMessages).hasSize(expectedNumMessages);
 
-      // Initialize storage with a counter equal to 10
-      String name = "counter";
-      long value = 10L;
-      createCounter(view, name, value);
-
-      // Create the transaction
-      ThrowingTx tx = new ThrowingTx(0L);
-
-      // Execute the transaction
-      TransactionContext context = newContext(view);
-      IllegalStateException expected = assertThrows(IllegalStateException.class,
-          () -> tx.execute(context));
-
-      // Check that execute cleared the maps
-      QaSchema schema = new QaSchema(view);
-      assertTrue(schema.counters().isEmpty());
-      assertTrue(schema.counterNames().isEmpty());
-
-      // Check the exception message
-      String message = expected.getMessage();
-      assertThat(message, startsWith("#execute of this transaction always throws"));
+      String exceptionMessage = "#execute of this transaction always throws";
+      assertThat(logMessages.get(1))
+          .contains("ERROR")
+          .contains(exceptionMessage);
     }
   }
 

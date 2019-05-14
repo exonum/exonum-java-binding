@@ -35,14 +35,21 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
+import com.exonum.binding.qaservice.transactions.QaTransaction;
+import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.EmulatedNodeType;
+import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
+
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -152,18 +159,10 @@ class QaServiceImplIntegrationTest {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       String counterName = "bids";
       service.submitCreateCounter(counterName);
-      testKit.createBlock();
-
-      testKit.withSnapshot((view) -> {
-        QaSchema schema = new QaSchema(view);
-        MapIndex<HashCode, Long> counters = schema.counters();
-        MapIndex<HashCode, String> counterNames = schema.counterNames();
-        HashCode counterId = sha256().hashString(counterName, UTF_8);
-
-        assertThat(counters.get(counterId)).isEqualTo(0L);
-        assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-        return null;
-      });
+      List<TransactionMessage> inPoolTransactions =
+          testKit.findTransactionsInPool(tx -> tx.getServiceId() == QaService.ID
+              && tx.getTransactionId() == QaTransaction.CREATE_COUNTER.id());
+      assertThat(inPoolTransactions).hasSize(1);
     }
   }
 
@@ -177,16 +176,12 @@ class QaServiceImplIntegrationTest {
 
       HashCode counterId = sha256().hashString(counterName, UTF_8);
       service.submitIncrementCounter(1L, counterId);
-      testKit.createBlock();
-      testKit.withSnapshot((view) -> {
-        QaSchema schema = new QaSchema(view);
-        MapIndex<HashCode, Long> counters = schema.counters();
-        MapIndex<HashCode, String> counterNames = schema.counterNames();
-
-        assertThat(counters.get(counterId)).isEqualTo(1L);
-        assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-        return null;
-      });
+      List<TransactionMessage> inPoolTransactions =
+          testKit.findTransactionsInPool(tx -> tx.getServiceId() == QaService.ID
+              && tx.getTransactionId() == QaTransaction.INCREMENT_COUNTER.id());
+      // Pool should contain two transactions - one was manually submitted above and another one
+      // was submitted in afterCommit
+      assertThat(inPoolTransactions).hasSize(2);
     }
   }
 
@@ -195,41 +190,28 @@ class QaServiceImplIntegrationTest {
     try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       service.submitValidThrowingTx(1L);
-      testKit.createBlock();
-
-      List<String> logMessages = logAppender.getMessages();
-
-      // Logger contains three messages as #getStateHashes is called during service instantiation
-      // and block creation
-      int expectedNumMessages = 3;
-      assertThat(logMessages).hasSize(expectedNumMessages);
-
-      String expectedExceptionMessage =
-          "java.lang.IllegalStateException: #execute of this transaction always throws";
-      assertThat(logMessages.get(1))
-          .contains("ERROR")
-          .contains(expectedExceptionMessage);
+      List<TransactionMessage> inPoolTransactions =
+          testKit.findTransactionsInPool(tx -> tx.getServiceId() == QaService.ID
+              && tx.getTransactionId() == QaTransaction.VALID_THROWING.id());
+      assertThat(inPoolTransactions).hasSize(1);
     }
   }
 
   @Test
   void submitUnknownTx() {
-    Class<RuntimeException> exceptionType = RuntimeException.class;
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       service.submitUnknownTx();
-      assertThrows(exceptionType, testKit::createBlock);
-      List<String> logMessages = logAppender.getMessages();
 
-      // Logger contains two messages as #getStateHashes is called during service instantiation
-      int expectedNumMessages = 2;
-      assertThat(logMessages).hasSize(expectedNumMessages);
-
-      String expectedExceptionMessage =
-          "java.lang.IllegalArgumentException: Unknown transaction id: 9999";
-      assertThat(logMessages.get(1))
-          .contains("WARN")
-          .contains(expectedExceptionMessage);
+      IllegalArgumentException e = assertThrows(exceptionType, testKit::createBlock);
+      String expectedMessage =
+          String.format("Service (%s) with id=%s failed to convert transaction"
+              + " (RawTransaction{serviceId=%s, transactionId=%s, payload=[]}). Make sure that"
+              + " the submitted transaction is correctly serialized, and the service's"
+              + " TransactionConverter implementation is correct and handles this transaction as"
+              + " expected.", QaService.NAME, QaService.ID, QaService.ID, UnknownTx.ID);
+      assertThat(e).hasMessageContaining(expectedMessage);
     }
   }
 
@@ -326,8 +308,9 @@ class QaServiceImplIntegrationTest {
       List<ValidatorKey> validatorKeys = configuration.validatorKeys();
 
       assertThat(validatorKeys).hasSize(validatorCount);
-      assertThat(emulatedNodeServicePublicKey).matches(pk -> validatorKeys.stream()
-          .anyMatch(v -> v.serviceKey().equals(pk)));
+      boolean emulatedNodeValidatorKeyIsInConfig = validatorKeys.stream()
+          .anyMatch(vk -> vk.serviceKey().equals(emulatedNodeServicePublicKey));
+      assertThat(emulatedNodeValidatorKeyIsInConfig).isTrue();
     }
   }
 
@@ -350,6 +333,7 @@ class QaServiceImplIntegrationTest {
       TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
       testKit.createBlockWithTransactions(createCounterTransaction);
       Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
+      // Contains two transactions - one submitted above and the second committed in afterCommit
       assertThat(txMessages).hasSize(2);
       assertThat(txMessages.get(createCounterTransaction.hash()))
           .isEqualTo(createCounterTransaction);
@@ -410,7 +394,6 @@ class QaServiceImplIntegrationTest {
   void getBlocks() {
     try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      createCreateCounterTransaction("counterName");
       Block block = testKit.createBlock();
       Map<HashCode, Block> blocks = service.getBlocks();
       assertThat(blocks).hasSize(2);
@@ -450,14 +433,45 @@ class QaServiceImplIntegrationTest {
 
   @Test
   void getTime() {
-    // TODO: merge Time Service support in TestKit first
-    // withNodeFake(() -> assertThat(service.getTime()).isEmpty());
+    ZonedDateTime time = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+    TimeProvider timeProvider = FakeTimeProvider.create(time);
+    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(QaServiceModule.class)
+        .withTimeService(timeProvider)
+        .build()) {
+      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+
+      // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
+      // after the first block time transactions are generated and after the second one they are
+      // processed
+      testKit.createBlock();
+      testKit.createBlock();
+      Optional<ZonedDateTime> consolidatedTime = service.getTime();
+      assertThat(consolidatedTime).hasValue(time);
+    }
   }
 
   @Test
   void getValidatorsTime() {
-    // TODO: merge Time Service support in TestKit first
-    // withNodeFake(() -> assertThat(service.getValidatorsTimes()).isEmpty());
+    ZonedDateTime time = ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+    TimeProvider timeProvider = FakeTimeProvider.create(time);
+    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+        .withService(QaServiceModule.class)
+        .withTimeService(timeProvider)
+        .build()) {
+      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+
+      // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
+      // after the first block time transactions are generated and after the second one they are
+      // processed
+      testKit.createBlock();
+      testKit.createBlock();
+      Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
+      EmulatedNode emulatedNode = testKit.getEmulatedNode();
+      PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
+      Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, time);
+      assertThat(validatorsTimes).isEqualTo(expected);
+    }
   }
 
   private TransactionMessage createCreateCounterTransaction(String counterName) {
