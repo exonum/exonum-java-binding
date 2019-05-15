@@ -59,6 +59,14 @@ public abstract class Block {
   public abstract long getHeight();
 
   /**
+   * Returns true if this block is empty:
+   * contains no {@linkplain #getNumTransactions() transactions}.
+   */
+  public final boolean isEmpty() {
+    return getNumTransactions() == 0;
+  }
+
+  /**
    * Number of transactions in this block.
    */
   public abstract int getNumTransactions();

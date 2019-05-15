@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Verification of native library compatibility when it is first loaded, to detect
   possible mismatch between an installed exonum-java application and the version
-  used in a service project. (#882) 
+  used in a service project. (#882)
+- `Block#isEmpty()`
 
 ## [0.6.0]- 2019-05-08
 

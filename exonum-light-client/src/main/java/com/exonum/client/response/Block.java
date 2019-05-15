@@ -81,10 +81,18 @@ public class Block {
 
   /**
    * Returns time when the block was committed to the blockchain.
-   * Can be empty if show time parameter is not specified in the request.
+   * Can be empty if include time parameter is not specified in the request.
    */
   public Optional<ZonedDateTime> getCommitTime() {
     return Optional.ofNullable(commitTime);
   }
 
+
+  /**
+   * Returns true if this block is empty:
+   * contains no {@linkplain #getNumTransactions() transactions}.
+   */
+  public final boolean isEmpty() {
+    return getNumTransactions() == 0;
+  }
 }

@@ -67,4 +67,4 @@ ${EXONUM_JAVA_APP} run -d testnet/db -c testnet/node.toml \
  --consensus-key-pass pass \
  --service-key-pass pass \
  --public-api-address 127.0.0.1:3000 \
- --ejb-port 6000
+ --ejb-port 7000
