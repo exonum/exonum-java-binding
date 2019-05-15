@@ -28,12 +28,12 @@ public class BlocksResponse {
   List<Block> blocks;
 
   /**
-   * The smallest height of the returned blocks that match the search criteria.
+   * The smallest inclusive height of the returned blocks that match the search criteria.
    */
   long blocksRangeStart;
 
   /**
-   * The largest height of the returned blocks that match the search criteria.
+   * The largest exclusive height of the returned blocks that match the search criteria.
    * If some blocks in the range do not match the search criteria then:
    * {@code blocksRangeEnd - blocksRangeStart != blocks.size}.
    */
