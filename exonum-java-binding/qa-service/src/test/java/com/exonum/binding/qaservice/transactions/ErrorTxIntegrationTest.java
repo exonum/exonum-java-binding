@@ -77,7 +77,7 @@ class ErrorTxIntegrationTest {
     RawTransaction raw = ErrorTx.converter().toRawTransaction(tx);
     ErrorTx txFromRaw = ErrorTx.converter().fromRawTransaction(raw);
 
-    assertThat(txFromRaw).isEqualTo(equalTo(tx));
+    assertThat(txFromRaw).isEqualTo(tx);
   }
 
   @Test
