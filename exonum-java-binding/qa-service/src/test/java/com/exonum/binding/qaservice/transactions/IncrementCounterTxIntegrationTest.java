@@ -95,7 +95,6 @@ class IncrementCounterTxIntegrationTest {
 
       // Add a new counter with the given name and initial value
       String counterName = "counter";
-      long initialValue = 0L;
       service.submitCreateCounter(counterName);
       testKit.createBlock();
 
@@ -109,7 +108,7 @@ class IncrementCounterTxIntegrationTest {
         // Check the counter has an incremented value
         QaSchema schema = new QaSchema(view);
         MapIndex<HashCode, Long> counters = schema.counters();
-        long expectedValue = initialValue + 1;
+        long expectedValue = 1;
 
         assertThat(counters.get(counterId)).isEqualTo(expectedValue);
         return null;
