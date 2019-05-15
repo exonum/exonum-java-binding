@@ -20,7 +20,6 @@ mod conversion;
 mod errors;
 mod jni;
 pub mod jni_cache;
-mod library_loader;
 
 pub use self::conversion::{convert_hash, convert_to_hash, convert_to_string};
 pub use self::errors::{

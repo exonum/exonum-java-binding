@@ -17,6 +17,7 @@
 mod cmd;
 mod config;
 mod java_service_runtime;
+mod library_loader;
 mod paths;
 mod service_factory_adapter;
 pub mod services;
