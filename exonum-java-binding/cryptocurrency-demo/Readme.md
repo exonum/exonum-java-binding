@@ -59,7 +59,7 @@ $ npm run build
 Run the frontend application:
 
 ```sh
-$ npm start -- --port=6040 --api-root=http://127.0.0.1:6000 --explorer-root=http://127.0.0.1:3000
+$ npm start -- --port=6040 --api-root=http://127.0.0.1:7000 --explorer-root=http://127.0.0.1:3000
 ```
 
 `--port` is a port for Node.JS app.
