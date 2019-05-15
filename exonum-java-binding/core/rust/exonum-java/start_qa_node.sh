@@ -95,7 +95,7 @@ for i in $(seq 0 $((node_count - 1)))
 do
     port=$((3000 + i))
     private_port=$((port + 100))
-    ejb_port=$((6000 + i))
+    ejb_port=$((7000 + i))
     cargo +$RUST_COMPILER_VERSION run -- run \
      -c testnet/node_$i.toml \
      -d testnet/db/$i \

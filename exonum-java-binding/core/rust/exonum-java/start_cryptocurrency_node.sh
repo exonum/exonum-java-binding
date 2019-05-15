@@ -73,4 +73,4 @@ cargo +$RUST_COMPILER_VERSION run -- run -d testnet/db -c testnet/node.toml \
  --service-key-pass pass \
  --public-api-address 127.0.0.1:3000 \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
- --ejb-port 6000
+ --ejb-port 7000
