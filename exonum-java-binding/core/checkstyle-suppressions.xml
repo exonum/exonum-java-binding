@@ -17,4 +17,5 @@
 
     <!-- Allow `aBlock` name -->
     <suppress files="BlockchainIntegrationTest\.java" checks="MethodName"/>
+    <suppress files="BlockTest\.java" checks="MethodName"/>
 </suppressions>
