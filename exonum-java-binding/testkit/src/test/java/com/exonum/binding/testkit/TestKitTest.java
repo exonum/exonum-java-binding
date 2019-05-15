@@ -50,6 +50,7 @@ import io.vertx.ext.web.Router;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -346,6 +347,40 @@ class TestKitTest {
   }
 
   @Test
+  void nodeSubmittedTransactionsArePlacedInPool() throws Exception {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+
+      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      service.getNode().submitTransaction(rawTransaction);
+
+      List<TransactionMessage> transactionsInPool =
+          testKit.findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+      assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
+    }
+  }
+
+  @Test
+  void findTransactionsInPool() throws Exception {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+
+      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+      RawTransaction rawTransaction2 = TestKit.toRawTransaction(message2);
+      service.getNode().submitTransaction(rawTransaction);
+      service.getNode().submitTransaction(rawTransaction2);
+
+      List<TransactionMessage> transactionsInPool =
+          testKit.findTransactionsInPool(
+              tx -> Arrays.equals(tx.getPayload(), message.getPayload()));
+      assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
+    }
+  }
+
+  @Test
   void createBlockWithTransactionsVarargs() {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       TransactionMessage message = constructTestTransactionMessage("Test message");
@@ -362,11 +397,21 @@ class TestKitTest {
   }
 
   private TransactionMessage constructTestTransactionMessage(String payload) {
+    return constructTestTransactionMessage(payload, KEY_PAIR);
+  }
+
+  private TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
+    EmulatedNode emulatedNode = testKit.getEmulatedNode();
+    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
+    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
+  }
+
+  private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(TestService.SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(keyPair, CRYPTO_FUNCTION);
   }
 
   private void checkTransactionsCommittedSuccessfully(
