@@ -35,6 +35,8 @@ public class BlocksResponse {
   /**
    * The largest height of the returned blocks that match the search criteria.
    * The value is equal to {@code heightMax + 1} if heightMax request parameter is passed.
+   * If the heightMax request parameter is greater then last committed block height at the moment
+   * then blocksRangeEnd value will be equal to {@code last_committed_block.height + 1}.
    * The value is always equal to {@code blocks[0].height + 1} for responses with blocks.
    * If some blocks in the range do not match the search criteria then:
    * {@code blocksRangeEnd - blocksRangeStart != blocks.size}.
