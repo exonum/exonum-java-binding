@@ -218,8 +218,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @return created block
    */
   public Block createBlock() {
-    List<TransactionMessage> inPoolTransactions =
-        findTransactionsInPool(transactionMessage -> true);
+    List<TransactionMessage> inPoolTransactions = getTransactionPool();
     checkTransactions(inPoolTransactions);
     byte[] block = nativeCreateBlock(nativeHandle.get());
     return BLOCK_SERIALIZER.fromBytes(block);
@@ -255,6 +254,14 @@ public final class TestKit extends AbstractCloseableNativeProxy {
           + " expected.", service.getName(), serviceId, transactionMessage);
       throw new IllegalArgumentException(message, conversionError);
     }
+  }
+
+  /**
+   * Returns a list of in-pool transactions. Please note that the order of transactions in pool
+   * does not necessarily match the order in which the clients submitted the messages.
+   */
+  public List<TransactionMessage> getTransactionPool() {
+    return findTransactionsInPool(transactionMessage -> true);
   }
 
   /**
