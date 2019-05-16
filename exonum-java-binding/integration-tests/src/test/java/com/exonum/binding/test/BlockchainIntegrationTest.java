@@ -44,10 +44,10 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
@@ -369,18 +369,6 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTransactionPool() {
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
-      ImmutableSet<HashCode> transactionPoolSet = ImmutableSet.copyOf(transactionPool);
-      // Contains a single transaction - submitted in afterCommit method
-      assertThat(transactionPoolSet).hasSize(1);
-      return null;
-    });
-  }
-
-  @Test
   void getActualConfiguration() {
     testKit.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
@@ -403,16 +391,50 @@ class BlockchainIntegrationTest {
     });
   }
 
+  @Test
+  void getTransactionPool() throws Exception {
+    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+    RawTransaction rawTransaction = toRawTransaction(message);
+    service.getNode().submitTransaction(rawTransaction);
+
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+
+      KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
+      assertThat(transactionPool.contains(message.hash())).isTrue();
+      return null;
+    });
+  }
+
   private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
-  private TransactionMessage constructTestTransactionMessage(String payload) {
+  private static TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
+    EmulatedNode emulatedNode = testKit.getEmulatedNode();
+    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
+    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
+  }
+
+  private static TransactionMessage constructTestTransactionMessage(String payload) {
+    return constructTestTransactionMessage(payload, KEY_PAIR);
+  }
+
+  private static TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(TestService.SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(keyPair, CRYPTO_FUNCTION);
+  }
+
+  private static RawTransaction toRawTransaction(TransactionMessage transactionMessage) {
+    return RawTransaction.newBuilder()
+        .serviceId(transactionMessage.getServiceId())
+        .transactionId(transactionMessage.getTransactionId())
+        .payload(transactionMessage.getPayload())
+        .build();
   }
 
   /**
