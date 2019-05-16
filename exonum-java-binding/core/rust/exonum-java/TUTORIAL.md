@@ -100,7 +100,7 @@ There are also optional parameters useful for debugging purposes, logging config
  
 ```$sh
 $ exonum-java run -d testnet/db -c testnet/node.toml \
-    --ejb-port 6000 \
+    --ejb-port 7000 \
     --ejb-log-config-path "log4j.xml" \
     --consensus-key-pass pass \
     --service-key-pass pass \
@@ -116,7 +116,7 @@ from a debugger:
 ```sh
 $ exonum-java run -d testnet/db -c testnet/node.toml --public-api-address 127.0.0.1:3000 \
     --ejb-log-config-path "log4j-fallback.xml" \
-    --ejb-port 6000 \
+    --ejb-port 7000 \
     --jvm-debug localhost:8000
 ```
 
