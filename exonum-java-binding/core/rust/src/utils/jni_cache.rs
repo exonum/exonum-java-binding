@@ -130,7 +130,7 @@ fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMe
 
 fn check_cache_initalized() {
     if !INIT.state().done() {
-        panic!("Cache is not initialized")
+        panic!("JNI cache is not initialized")
     }
 }
 
