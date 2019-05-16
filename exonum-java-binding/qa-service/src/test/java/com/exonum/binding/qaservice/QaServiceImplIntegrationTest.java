@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
@@ -305,6 +306,10 @@ class QaServiceImplIntegrationTest {
         .build()) {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       StoredConfiguration configuration = service.getActualConfiguration();
+
+      HashCode expectedPreviousCfgHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+      assertThat(configuration.previousCfgHash()).isEqualTo(expectedPreviousCfgHash);
+
       EmulatedNode emulatedNode = testKit.getEmulatedNode();
       List<ValidatorKey> validatorKeys = configuration.validatorKeys();
 
