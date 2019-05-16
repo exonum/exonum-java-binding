@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   used in a service project. (#882)
 - `Block#isEmpty()`
 
+### Changed
+- Re-implemented `BinaryTransactionMessage#toString` to include some fields in human-readable
+  format instead of the whole message in binary form.
+
 ## [0.6.0]- 2019-05-08
 
 **If you are upgrading an existing Java service, consult 
