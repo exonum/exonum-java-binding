@@ -31,6 +31,9 @@ then
     cargo clippy --all --tests --all-features -- -D warnings
 
     # Run audit of vulnerable dependencies.
+    #
+    # Don’t fail the build, as the vulnerable crate might not even have a fix yet,
+    # and, as it has, it will updated promptly by Dependabot.
     cargo audit | true
 
     # Check silently for updates of Maven dependencies.
