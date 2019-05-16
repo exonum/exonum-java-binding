@@ -22,7 +22,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- TODO: stable does not work well until ECR-1839 is resolved. -->
-    <rust.compiler.version>1.34.1</rust.compiler.version>
+    <rust.compiler.version>stable</rust.compiler.version>
     <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <rust.appSubCrate>exonum-java</rust.appSubCrate>
