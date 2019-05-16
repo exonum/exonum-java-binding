@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.TransactionUtils.toTransactionMessage;
 import static com.exonum.binding.qaservice.transactions.CreateCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
 import static com.exonum.binding.qaservice.transactions.TransactionError.COUNTER_ALREADY_EXISTS;
@@ -27,8 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.crypto.CryptoFunction;
-import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.QaSchema;
@@ -47,8 +46,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 class CreateCounterTxIntegrationTest {
-
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   static {
     LibraryLoader.load();
@@ -160,14 +157,6 @@ class CreateCounterTxIntegrationTest {
     CreateCounterTx createCounterTx = new CreateCounterTx(counterName);
     RawTransaction rawTransaction = createCounterTx.toRawTransaction();
     return toTransactionMessage(rawTransaction);
-  }
-
-  private TransactionMessage toTransactionMessage(RawTransaction rawTransaction) {
-    return TransactionMessage.builder()
-        .serviceId(rawTransaction.getServiceId())
-        .transactionId(rawTransaction.getTransactionId())
-        .payload(rawTransaction.getPayload())
-        .sign(CRYPTO_FUNCTION.generateKeyPair(), CRYPTO_FUNCTION);
   }
 
   private static RawTransaction.Builder txTemplate() {

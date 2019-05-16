@@ -19,6 +19,9 @@ package com.exonum.binding.qaservice;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
+import static com.exonum.binding.qaservice.TransactionUtils.createCreateCounterTransaction;
+import static com.exonum.binding.qaservice.TransactionUtils.createIncrementCounterTransaction;
+import static com.exonum.binding.qaservice.TransactionUtils.createThrowingTransaction;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,13 +32,9 @@ import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
-import com.exonum.binding.common.crypto.CryptoFunction;
-import com.exonum.binding.common.crypto.CryptoFunctions;
-import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.QaTransaction;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.service.Schema;
@@ -46,7 +45,6 @@ import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TimeProvider;
-import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -66,9 +64,6 @@ import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class QaServiceImplIntegrationTest {
-
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
-  private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
 
   static {
     LibraryLoader.load();
@@ -159,9 +154,11 @@ class QaServiceImplIntegrationTest {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       String counterName = "bids";
       service.submitCreateCounter(counterName);
+      TransactionMessage expectedTransaction = createCreateCounterTransaction(counterName, testKit);
       List<TransactionMessage> inPoolTransactions =
           testKit.findTransactionsInPool(tx -> tx.getServiceId() == QaService.ID
-              && tx.getTransactionId() == QaTransaction.CREATE_COUNTER.id());
+              && tx.getTransactionId() == QaTransaction.CREATE_COUNTER.id()
+              && tx.equals(expectedTransaction));
       assertThat(inPoolTransactions).hasSize(1);
     }
   }
@@ -175,13 +172,15 @@ class QaServiceImplIntegrationTest {
       testKit.createBlock();
 
       HashCode counterId = sha256().hashString(counterName, UTF_8);
-      service.submitIncrementCounter(1L, counterId);
+      long seed = 1L;
+      service.submitIncrementCounter(seed, counterId);
+      TransactionMessage expectedTransaction =
+          createIncrementCounterTransaction(seed, counterId, testKit);
       List<TransactionMessage> inPoolTransactions =
           testKit.findTransactionsInPool(tx -> tx.getServiceId() == QaService.ID
-              && tx.getTransactionId() == QaTransaction.INCREMENT_COUNTER.id());
-      // Pool should contain two transactions - one was manually submitted above and another one
-      // was submitted in afterCommit
-      assertThat(inPoolTransactions).hasSize(2);
+              && tx.getTransactionId() == QaTransaction.INCREMENT_COUNTER.id()
+              && tx.equals(expectedTransaction));
+      assertThat(inPoolTransactions).hasSize(1);
     }
   }
 
@@ -189,10 +188,13 @@ class QaServiceImplIntegrationTest {
   void submitValidThrowingTx() {
     try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      service.submitValidThrowingTx(1L);
+      long seed = 1L;
+      service.submitValidThrowingTx(seed);
+      TransactionMessage expectedTransaction = createThrowingTransaction(seed, testKit);
       List<TransactionMessage> inPoolTransactions =
           testKit.findTransactionsInPool(tx -> tx.getServiceId() == QaService.ID
-              && tx.getTransactionId() == QaTransaction.VALID_THROWING.id());
+              && tx.getTransactionId() == QaTransaction.VALID_THROWING.id()
+              && tx.equals(expectedTransaction));
       assertThat(inPoolTransactions).hasSize(1);
     }
   }
@@ -479,19 +481,5 @@ class QaServiceImplIntegrationTest {
       Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, expectedTime);
       assertThat(validatorsTimes).isEqualTo(expected);
     }
-  }
-
-  private TransactionMessage createCreateCounterTransaction(String counterName) {
-    CreateCounterTx createCounterTx = new CreateCounterTx(counterName);
-    RawTransaction rawTransaction = createCounterTx.toRawTransaction();
-    return toTransactionMessage(rawTransaction);
-  }
-
-  private TransactionMessage toTransactionMessage(RawTransaction rawTransaction) {
-    return TransactionMessage.builder()
-        .serviceId(rawTransaction.getServiceId())
-        .transactionId(rawTransaction.getTransactionId())
-        .payload(rawTransaction.getPayload())
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
   }
 }

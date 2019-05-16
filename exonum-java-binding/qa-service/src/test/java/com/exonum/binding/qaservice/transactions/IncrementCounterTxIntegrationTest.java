@@ -19,6 +19,7 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.TransactionUtils.createIncrementCounterTransaction;
 import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.TransactionError.UNKNOWN_COUNTER;
@@ -28,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.crypto.CryptoFunction;
-import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.QaSchema;
@@ -48,8 +47,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 class IncrementCounterTxIntegrationTest {
-
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   static {
     LibraryLoader.load();
@@ -165,19 +162,5 @@ class IncrementCounterTxIntegrationTest {
         .transactionId(INCREMENT_COUNTER.id())
         .serviceId(QaService.ID)
         .payload(Bytes.bytes());
-  }
-
-  private TransactionMessage createIncrementCounterTransaction(long seed, HashCode counterId) {
-    IncrementCounterTx incrementCounterTx = new IncrementCounterTx(seed, counterId);
-    RawTransaction rawTransaction = incrementCounterTx.toRawTransaction();
-    return toTransactionMessage(rawTransaction);
-  }
-
-  private TransactionMessage toTransactionMessage(RawTransaction rawTransaction) {
-    return TransactionMessage.builder()
-        .serviceId(rawTransaction.getServiceId())
-        .transactionId(rawTransaction.getTransactionId())
-        .payload(rawTransaction.getPayload())
-        .sign(CRYPTO_FUNCTION.generateKeyPair(), CRYPTO_FUNCTION);
   }
 }

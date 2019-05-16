@@ -17,22 +17,29 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.TransactionUtils.createCounter;
+import static com.exonum.binding.qaservice.TransactionUtils.newContext;
+import static com.exonum.binding.qaservice.TransactionUtils.toTransactionMessage;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.crypto.CryptoFunction;
-import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceModule;
+import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
@@ -43,8 +50,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class ErrorTxIntegrationTest {
-
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   static {
     LibraryLoader.load();
@@ -132,6 +137,34 @@ class ErrorTxIntegrationTest {
     }
   }
 
+  @Test
+  @RequiresNativeLibrary
+  void executeClearsQaServiceData() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
+      Fork view = db.createFork(cleaner);
+
+      // Initialize storage with a counter equal to 10
+      String name = "counter";
+      long value = 10L;
+      createCounter(view, name, value);
+
+      // Create the transaction
+      byte errorCode = 1;
+      ErrorTx tx = new ErrorTx(0L, errorCode, "Foo");
+
+      // Execute the transaction
+      TransactionContext context = newContext(view);
+      assertThrows(TransactionExecutionException.class, () -> tx.execute(context));
+
+      // Check that execute cleared the maps
+      QaSchema schema = new QaSchema(view);
+
+      assertThat(schema.counters().isEmpty()).isTrue();
+      assertThat(schema.counterNames().isEmpty()).isTrue();
+    }
+  }
+
   @CsvSource({
       "1, 0, Boom", // min error code value
       "-1, 1, 'Longer error message'",
@@ -161,14 +194,6 @@ class ErrorTxIntegrationTest {
     ErrorTx errorTx = new ErrorTx(seed, errorCode, errorDescription);
     RawTransaction rawTransaction = errorTx.toRawTransaction();
     return toTransactionMessage(rawTransaction);
-  }
-
-  private TransactionMessage toTransactionMessage(RawTransaction rawTransaction) {
-    return TransactionMessage.builder()
-        .serviceId(rawTransaction.getServiceId())
-        .transactionId(rawTransaction.getTransactionId())
-        .payload(rawTransaction.getPayload())
-        .sign(CRYPTO_FUNCTION.generateKeyPair(), CRYPTO_FUNCTION);
   }
 
   private static RawTransaction.Builder txTemplate() {
