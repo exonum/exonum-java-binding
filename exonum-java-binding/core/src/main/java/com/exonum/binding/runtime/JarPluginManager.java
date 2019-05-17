@@ -23,7 +23,6 @@ import java.util.List;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.JarPluginLoader;
 import org.pf4j.ManifestPluginDescriptorFinder;
-import org.pf4j.PluginClasspath;
 import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginLoader;
 import org.pf4j.PluginRepository;
@@ -66,11 +65,5 @@ class JarPluginManager extends DefaultPluginManager {
   protected PluginLoader createPluginLoader() {
     // Returns a JarPluginLoader as it is the only format we support
     return new JarPluginLoader(this);
-  }
-
-  @Override
-  protected PluginClasspath createPluginClasspath() {
-    // Return an *empty* classpath: we shall not add arbitrary directories to the classpath
-    return new PluginClasspath();
   }
 }

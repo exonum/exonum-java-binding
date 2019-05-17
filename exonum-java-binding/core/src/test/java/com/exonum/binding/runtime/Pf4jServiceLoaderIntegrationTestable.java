@@ -50,6 +50,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pf4j.Plugin;
+import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
 
 abstract class Pf4jServiceLoaderIntegrationTestable {
@@ -117,7 +118,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("Failed to load the plugin from");
+    assertThat(e).hasMessageContaining("Failed to load the service from");
 
     // Check the definition is inaccessible
     ServiceId serviceId = ServiceId.parseFrom(PLUGIN_ID);
@@ -135,7 +136,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
 
   @Test
-  void cannotLoadIfPluginFailedToStart() throws IOException {
+  void cannotLoadIfPluginFailedToStart() throws Exception {
     String pluginId = PLUGIN_ID;
     Class<? extends Plugin> evilPlugin = EvilPluginFailingToStart.class;
     anArtifact()
@@ -162,7 +163,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
       "foo-service",
       "com.acme:foo-service:1.0:extra-coordinate",
   })
-  void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) throws IOException {
+  void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) throws Exception {
     anArtifact()
         .setPluginId(invalidPluginId)
         .writeTo(artifactLocation);
@@ -181,7 +182,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @MethodSource("invalidServiceModuleExtensions")
   void cannotLoadIfInvalidServiceModuleExtensions(
       List<Class<? extends ServiceModule>> extensionClasses, String expectedErrorPattern)
-      throws IOException {
+      throws Exception {
     String pluginId = PLUGIN_ID;
 
     anArtifact()
@@ -210,7 +211,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   }
 
   @Test
-  void cannotLoadIfArtifactIncludesCopiesOfAppClasses() throws IOException {
+  void cannotLoadIfArtifactIncludesCopiesOfAppClasses() throws Exception {
     String pluginId = PLUGIN_ID;
 
     anArtifact()
@@ -230,7 +231,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   }
 
   @Test
-  void canLoadUnloadService() throws ServiceLoadingException, IOException {
+  void canLoadUnloadService() throws Exception {
     String pluginId = PLUGIN_ID;
 
     anArtifact()
@@ -273,7 +274,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         .addExtensionClass(serviceModule);
   }
 
-  private void verifyUnloaded(String pluginId) {
+  private void verifyUnloaded(String pluginId) throws PluginException {
     verify(pluginManager).unloadPlugin(pluginId);
 
     ServiceId serviceId = ServiceId.parseFrom(pluginId);

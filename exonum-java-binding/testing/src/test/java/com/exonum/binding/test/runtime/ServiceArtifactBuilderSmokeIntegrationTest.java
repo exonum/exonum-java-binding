@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.test.runtime.testplugin.TestPlugin;
 import com.exonum.binding.test.runtime.testplugin.TestServiceExtension;
 import com.exonum.binding.test.runtime.testplugin.TestServiceExtensionImpl;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +38,7 @@ class ServiceArtifactBuilderSmokeIntegrationTest {
   @DisplayName("Created plugin must be successfully loaded and unloaded by the PluginManager. "
       + "If this test does not work, subsequent use of ServiceArtifactBuilder in other ITs makes "
       + "no sense.")
-  void createdArtifactCanBeLoaded(@TempDir Path tmp) throws IOException {
+  void createdArtifactCanBeLoaded(@TempDir Path tmp) throws Exception {
     Path pluginPath = tmp.resolve("test-plugin.jar");
 
     String pluginId = "test-plugin";
@@ -69,7 +68,7 @@ class ServiceArtifactBuilderSmokeIntegrationTest {
     assertThat(pluginState).isEqualTo(PluginState.STARTED);
 
     // Check the extensions
-    List<Class<TestServiceExtension>> extensionClasses = pluginManager
+    List<Class<? extends TestServiceExtension>> extensionClasses = pluginManager
         .getExtensionClasses(TestServiceExtension.class, pluginId);
     assertThat(extensionClasses).hasSize(1);
     Class<?> extensionType = extensionClasses.get(0);

@@ -128,7 +128,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
-    <pf4j.version>2.6.0</pf4j.version>
+    <pf4j.version>3.0.0-SNAPSHOT</pf4j.version>
     <!-- Default build mode is `debug`, can also be `release`. Usually controlled
          by the packaging script (package_app.sh), but can also be set from the CLI -->
     <build.mode>debug</build.mode>
