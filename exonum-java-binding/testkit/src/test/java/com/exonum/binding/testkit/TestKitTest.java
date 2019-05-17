@@ -362,6 +362,24 @@ class TestKitTest {
   }
 
   @Test
+  void getTransactionPool() throws Exception {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+
+      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
+      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+      RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
+
+      service.getNode().submitTransaction(rawTransaction);
+      service.getNode().submitTransaction(rawTransaction2);
+
+      List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
+      assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
+    }
+  }
+
+  @Test
   void findTransactionsInPool() throws Exception {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
