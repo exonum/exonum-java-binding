@@ -207,14 +207,11 @@ class QaServiceImplIntegrationTest {
       QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
       service.submitUnknownTx();
 
-      IllegalArgumentException e = assertThrows(exceptionType, testKit::createBlock);
-      String expectedMessage =
-          String.format("Service (%s) with id=%s failed to convert transaction"
-              + " (RawTransaction{serviceId=%s, transactionId=%s, payload=[]}). Make sure that"
-              + " the submitted transaction is correctly serialized, and the service's"
-              + " TransactionConverter implementation is correct and handles this transaction as"
-              + " expected.", QaService.NAME, QaService.ID, QaService.ID, UnknownTx.ID);
-      assertThat(e).hasMessageContaining(expectedMessage);
+      Exception e = assertThrows(exceptionType, testKit::createBlock);
+
+      String expectedTxId = Integer.toString(UnknownTx.ID);
+      assertThat(e.getMessage())
+          .contains("failed to convert transaction", expectedTxId);
     }
   }
 
