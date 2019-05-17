@@ -24,9 +24,9 @@ import static java.util.Arrays.copyOf;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * Binary implementation of the {@link TransactionMessage} class. Immutable by design.
@@ -50,6 +50,14 @@ final class BinaryTransactionMessage implements TransactionMessage {
     this.rawTransaction = ByteBuffer.allocate(messageSize).order(LITTLE_ENDIAN);
     this.rawTransaction.put(slice);
     this.rawTransaction.flip();
+
+    // Check class and tag of the message
+    byte messageClass = rawTransaction.get(CLS_OFFSET);
+    checkArgument(messageClass == MessageType.TRANSACTION.cls(),
+        "Invalid message class: %s", messageClass);
+    byte messageTag = rawTransaction.get(TAG_OFFSET);
+    checkArgument(messageTag == MessageType.TRANSACTION.tag(),
+        "Invalid message tag: %s", messageTag);
   }
 
   @Override
@@ -115,7 +123,15 @@ final class BinaryTransactionMessage implements TransactionMessage {
 
   @Override
   public String toString() {
-    return Arrays.toString(rawTransaction.array());
+    // Include only the fields that identify this message and allow to re-create it.
+    // It is assumed that if someone needs it in its exact, binary, form, they can use #toBytes
+    // instead.
+    return MoreObjects.toStringHelper(this)
+        .add("author", getAuthor())
+        .add("serviceId", getServiceId())
+        .add("transactionId", getTransactionId())
+        .add("payload", getPayload())
+        .toString();
   }
 
   /**
