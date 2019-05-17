@@ -33,7 +33,7 @@ public class BlocksResponse {
   long blocksRangeStart;
 
   /**
-   * The largest height of the returned blocks that match the search criteria.
+   * The largest height of the returned blocks that match the search criteria, <em>plus one</em>.
    *
    * <p><b>WARNING: do not rely on the value, because it's unpredictable in some queries.</b>
    * It'll be fixed in future releases. Read below if would still like to use it.
