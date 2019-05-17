@@ -33,6 +33,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,27 +41,22 @@ import org.junit.jupiter.api.Test;
 @RequiresNativeLibrary
 class TimeSchemaProxyIntegrationTest {
 
+  private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
+      .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+
   static {
     LibraryLoader.load();
   }
 
-  private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
-      .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
   private TestKit testKit;
 
   @BeforeEach
-  void setUpConsolidatedTime() {
+  void createTestKit() {
     TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
     testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build();
-
-    // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
-    // after the first block time transactions are generated and after the second one they are
-    // processed
-    testKit.createBlock();
-    testKit.createBlock();
   }
 
   @AfterEach
@@ -70,23 +66,46 @@ class TimeSchemaProxyIntegrationTest {
 
   @Test
   void getTime() {
-    testKit.withSnapshot((view) -> {
-      TimeSchema timeSchema = TimeSchema.newInstance(view);
+    setUpConsolidatedTime();
+    testKitTest((timeSchema) -> {
       Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
       assertThat(consolidatedTime).hasValue(EXPECTED_TIME);
-      return null;
+    });
+  }
+
+  @Test
+  void getTimeBeforeConsolidated() {
+    testKitTest((timeSchema) -> {
+      Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+      assertThat(consolidatedTime).isEmpty();
     });
   }
 
   @Test
   void getValidatorsTime() {
-    testKit.withSnapshot((view) -> {
-      TimeSchema timeSchema = TimeSchema.newInstance(view);
+    setUpConsolidatedTime();
+    testKitTest((timeSchema) -> {
       Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
       EmulatedNode emulatedNode = testKit.getEmulatedNode();
       PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
       Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, EXPECTED_TIME);
       assertThat(validatorsTimes).isEqualTo(expected);
+    });
+  }
+
+  private void setUpConsolidatedTime() {
+    // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
+    // after the first block time transactions are generated and after the second one they are
+    // processed
+    testKit.createBlock();
+    testKit.createBlock();
+  }
+
+  private void testKitTest(Consumer<TimeSchema> test) {
+    testKit.withSnapshot((view) -> {
+      TimeSchema timeSchema = TimeSchema.newInstance(view);
+      test.accept(timeSchema);
+
       return null;
     });
   }
