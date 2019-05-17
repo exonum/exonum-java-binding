@@ -218,8 +218,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @return created block
    */
   public Block createBlock() {
-    List<TransactionMessage> inPoolTransactions =
-        findTransactionsInPool(transactionMessage -> true);
+    List<TransactionMessage> inPoolTransactions = getTransactionPool();
     checkTransactions(inPoolTransactions);
     byte[] block = nativeCreateBlock(nativeHandle.get());
     return BLOCK_SERIALIZER.fromBytes(block);
@@ -239,31 +238,30 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     if (serviceId == TIME_SERVICE_ID) {
       return;
     }
-    RawTransaction rawTransaction = toRawTransaction(transactionMessage);
     if (!services.containsKey(serviceId)) {
       String message = String.format("Unknown service id (%s) in transaction (%s)",
-          serviceId, rawTransaction);
+          serviceId, transactionMessage);
       throw new IllegalArgumentException(message);
     }
     Service service = services.get(serviceId);
+    RawTransaction rawTransaction = RawTransaction.fromMessage(transactionMessage);
     try {
       service.convertToTransaction(rawTransaction);
     } catch (Throwable conversionError) {
       String message = String.format("Service (%s) with id=%s failed to convert transaction (%s)."
           + " Make sure that the submitted transaction is correctly serialized, and the service's"
           + " TransactionConverter implementation is correct and handles this transaction as"
-          + " expected.", service.getName(), serviceId, rawTransaction);
+          + " expected.", service.getName(), serviceId, transactionMessage);
       throw new IllegalArgumentException(message, conversionError);
     }
   }
 
-  @VisibleForTesting
-  static RawTransaction toRawTransaction(TransactionMessage transactionMessage) {
-    return RawTransaction.newBuilder()
-        .serviceId(transactionMessage.getServiceId())
-        .transactionId(transactionMessage.getTransactionId())
-        .payload(transactionMessage.getPayload())
-        .build();
+  /**
+   * Returns a list of in-pool transactions. Please note that the order of transactions in pool
+   * does not necessarily match the order in which the clients submitted the messages.
+   */
+  public List<TransactionMessage> getTransactionPool() {
+    return findTransactionsInPool(transactionMessage -> true);
   }
 
   /**

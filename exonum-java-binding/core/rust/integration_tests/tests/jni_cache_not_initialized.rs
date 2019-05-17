@@ -17,7 +17,7 @@ extern crate java_bindings;
 use java_bindings::utils::jni_cache;
 
 #[test]
-#[should_panic(expected = "Cache is not initialized")]
+#[should_panic(expected = "JNI cache is not initialized")]
 fn cache_not_initialized() {
     jni_cache::transaction_adapter::execute_id();
 }

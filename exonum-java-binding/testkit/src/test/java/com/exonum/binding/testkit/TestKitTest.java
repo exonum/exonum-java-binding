@@ -352,7 +352,7 @@ class TestKitTest {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
       TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
       service.getNode().submitTransaction(rawTransaction);
 
       List<TransactionMessage> transactionsInPool =
@@ -362,14 +362,32 @@ class TestKitTest {
   }
 
   @Test
+  void getTransactionPool() throws Exception {
+    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
+      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+
+      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
+      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+      RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
+
+      service.getNode().submitTransaction(rawTransaction);
+      service.getNode().submitTransaction(rawTransaction2);
+
+      List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
+      assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
+    }
+  }
+
+  @Test
   void findTransactionsInPool() throws Exception {
     try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
       TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
       TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-      RawTransaction rawTransaction2 = TestKit.toRawTransaction(message2);
+      RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
       service.getNode().submitTransaction(rawTransaction);
       service.getNode().submitTransaction(rawTransaction2);
 
@@ -439,10 +457,8 @@ class TestKitTest {
           .sign(KEY_PAIR, CRYPTO_FUNCTION);
       IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
           () -> testKit.createBlockWithTransactions(message));
-      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
-      String expectedMessage = String.format("Unknown service id (%s) in transaction (%s)",
-          wrongServiceId, rawTransaction);
-      assertThat(thrownException).hasMessageContaining(expectedMessage);
+      assertThat(thrownException.getMessage())
+          .contains("Unknown service id", Integer.toString(wrongServiceId), message.toString());
     }
   }
 
@@ -457,13 +473,9 @@ class TestKitTest {
           .sign(KEY_PAIR, CRYPTO_FUNCTION);
       IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
           () -> testKit.createBlockWithTransactions(message));
-      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
-      String expectedMessage = String.format("Service (%s) with id=%s failed to convert"
-          + " transaction (%s). Make sure that the submitted transaction is correctly serialized,"
-          + " and the service's TransactionConverter implementation is correct and handles this"
-          + " transaction as expected.",
-          TestService.SERVICE_NAME, TestService.SERVICE_ID, rawTransaction);
-      assertThat(thrownException).hasMessageContaining(expectedMessage);
+      assertThat(thrownException.getMessage())
+          .contains("failed to convert transaction", TestService.SERVICE_NAME,
+              Integer.toString(TestService.SERVICE_ID), message.toString());
     }
   }
 

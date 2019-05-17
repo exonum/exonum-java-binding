@@ -17,33 +17,35 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
-import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.exonum.binding.qaservice.TransactionUtils.createCounter;
+import static com.exonum.binding.qaservice.TransactionUtils.createThrowingTransaction;
+import static com.exonum.binding.qaservice.TransactionUtils.newContext;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
+import com.exonum.binding.qaservice.QaServiceModule;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
+import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class ThrowingTxIntegrationTest {
 
-  @BeforeAll
-  static void loadLibrary() {
+  static {
     LibraryLoader.load();
   }
 
@@ -56,7 +58,7 @@ class ThrowingTxIntegrationTest {
 
     ThrowingTx txFromRaw = ThrowingTx.converter().fromRawTransaction(message);
 
-    assertThat(txFromRaw, equalTo(tx));
+    assertThat(txFromRaw).isEqualTo(tx);
   }
 
   @Test
@@ -68,16 +70,37 @@ class ThrowingTxIntegrationTest {
     AnyTransaction<ThrowingTx> txParams = json().fromJson(info,
         new TypeToken<AnyTransaction<ThrowingTx>>(){}.getType());
 
-    assertThat(txParams.service_id, equalTo(QaService.ID));
-    assertThat(txParams.message_id, equalTo(QaTransaction.VALID_THROWING.id()));
-    assertThat(txParams.body, equalTo(tx));
+    assertThat(txParams.service_id).isEqualTo(QaService.ID);
+    assertThat(txParams.message_id).isEqualTo(QaTransaction.VALID_THROWING.id());
+    assertThat(txParams.body).isEqualTo(tx);
+  }
+
+  @Test
+  @RequiresNativeLibrary
+  void executeThrows() {
+    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
+      TransactionMessage throwingTx = createThrowingTransaction(0L);
+      testKit.createBlockWithTransactions(throwingTx);
+
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        Optional<TransactionResult> txResult = blockchain.getTxResult(throwingTx.hash());
+        assertThat(txResult).isNotEmpty();
+        TransactionResult transactionResult = txResult.get();
+        assertThat(transactionResult.getType()).isEqualTo(TransactionResult.Type.UNEXPECTED_ERROR);
+        assertThat(transactionResult.getErrorCode()).isEmpty();
+        assertThat(transactionResult.getErrorDescription())
+            .contains("#execute of this transaction always throws");
+        return null;
+      });
+    }
   }
 
   @Test
   @RequiresNativeLibrary
   void executeClearsQaServiceData() throws CloseFailuresException {
     try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
+         Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 
       // Initialize storage with a counter equal to 10
@@ -95,12 +118,12 @@ class ThrowingTxIntegrationTest {
 
       // Check that execute cleared the maps
       QaSchema schema = new QaSchema(view);
-      assertTrue(schema.counters().isEmpty());
-      assertTrue(schema.counterNames().isEmpty());
+      assertThat(schema.counters().isEmpty()).isTrue();
+      assertThat(schema.counterNames().isEmpty()).isTrue();
 
       // Check the exception message
       String message = expected.getMessage();
-      assertThat(message, startsWith("#execute of this transaction always throws"));
+      assertThat(message).contains("#execute of this transaction always throws");
     }
   }
 
