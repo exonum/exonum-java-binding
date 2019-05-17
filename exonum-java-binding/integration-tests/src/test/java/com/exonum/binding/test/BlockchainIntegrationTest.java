@@ -61,6 +61,7 @@ class BlockchainIntegrationTest {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
+  private static final short VALIDATOR_COUNT = 1;
 
   static {
     LibraryLoader.load();
@@ -74,6 +75,7 @@ class BlockchainIntegrationTest {
   void setUp() {
     testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
         .withService(TestServiceModule.class)
+        .withValidators(VALIDATOR_COUNT)
         .build();
     String payload = "Test";
     TransactionMessage transactionMessage = constructTestTransactionMessage(payload);
@@ -326,18 +328,20 @@ class BlockchainIntegrationTest {
   void getActualConfiguration() {
     testKitTest((blockchain) -> {
       StoredConfiguration configuration = blockchain.getActualConfiguration();
-      EmulatedNode emulatedNode = testKit.getEmulatedNode();
       List<ValidatorKey> validatorKeys = configuration.validatorKeys();
-      short validatorCount = 1;
-      assertThat(validatorKeys).hasSize(validatorCount);
+      // Check the number of validator keys
+      assertThat(validatorKeys).hasSize(VALIDATOR_COUNT);
 
-      PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
-      List<PublicKey> serviceKeys = configuration.validatorKeys().stream()
+      // Check the public key of the emulated node is included
+      List<PublicKey> serviceKeys = validatorKeys.stream()
           .map(ValidatorKey::serviceKey)
           .collect(toList());
+      EmulatedNode emulatedNode = testKit.getEmulatedNode();
+      PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
+      List<PublicKey> expectedKeys = ImmutableList.of(emulatedNodeServiceKey);
+      assertThat(serviceKeys).isEqualTo(expectedKeys);
 
-      assertThat(serviceKeys).hasSize(validatorCount);
-      assertThat(serviceKeys).contains(emulatedNodeServiceKey);
+      // Check the previous config is empty
       HashCode zeroHashCode = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
       assertThat(configuration.previousCfgHash()).isEqualTo(zeroHashCode);
     });
@@ -347,12 +351,14 @@ class BlockchainIntegrationTest {
   void getTransactionPool() throws Exception {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = toRawTransaction(message);
+    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
     service.getNode().submitTransaction(rawTransaction);
 
     testKitTest((blockchain) -> {
       KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
-      assertThat(transactionPool.contains(message.hash())).isTrue();
+      assertThat(transactionPool.contains(message.hash()))
+          .describedAs("pool=%s", transactionPool)
+          .isTrue();
     });
   }
 
@@ -369,7 +375,8 @@ class BlockchainIntegrationTest {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
-  private static TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
+  private static TransactionMessage constructTestTransactionMessage(
+      String payload, TestKit testKit) {
     EmulatedNode emulatedNode = testKit.getEmulatedNode();
     KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
     return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
@@ -379,20 +386,13 @@ class BlockchainIntegrationTest {
     return constructTestTransactionMessage(payload, KEY_PAIR);
   }
 
-  private static TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
+  private static TransactionMessage constructTestTransactionMessage(
+      String payload, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(TestService.SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
         .sign(keyPair, CRYPTO_FUNCTION);
-  }
-
-  private static RawTransaction toRawTransaction(TransactionMessage transactionMessage) {
-    return RawTransaction.newBuilder()
-        .serviceId(transactionMessage.getServiceId())
-        .transactionId(transactionMessage.getTransactionId())
-        .payload(transactionMessage.getPayload())
-        .build();
   }
 
   /**
