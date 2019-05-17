@@ -57,6 +57,19 @@ public abstract class RawTransaction {
     return new AutoValue_RawTransaction.Builder();
   }
 
+  /**
+   * Creates a raw transaction from the given transaction message.
+   * The returned transaction will have the same service id, transaction id, and payload
+   * as the given message.
+   */
+  public static RawTransaction fromMessage(TransactionMessage txMessage) {
+    return newBuilder()
+        .serviceId(txMessage.getServiceId())
+        .transactionId(txMessage.getTransactionId())
+        .payload(txMessage.getPayload())
+        .build();
+  }
+
   @AutoValue.Builder
   public abstract static class Builder {
 
