@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   used in a service project. (#882)
 - `Block#isEmpty()`
 - `RawTransaction#fromMessage(TransactionMessage)`, which is mostly useful in tests,
-  where you might have a message but need is as a `RawTransaction` in some assertions.
+  where you might have a message but need it as a `RawTransaction` in some assertions.
 
 ### Changed
 - `BinaryTransactionMessage#toString` to include some fields in human-readable
