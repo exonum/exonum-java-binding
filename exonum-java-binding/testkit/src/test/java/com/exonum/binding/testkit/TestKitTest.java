@@ -367,9 +367,9 @@ class TestKitTest {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
       TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = TestKit.toRawTransaction(message);
+      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
       TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-      RawTransaction rawTransaction2 = TestKit.toRawTransaction(message2);
+      RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
 
       service.getNode().submitTransaction(rawTransaction);
       service.getNode().submitTransaction(rawTransaction2);
