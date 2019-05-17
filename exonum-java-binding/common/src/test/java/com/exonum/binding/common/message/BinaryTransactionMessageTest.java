@@ -18,8 +18,11 @@
 package com.exonum.binding.common.message;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
+import static com.exonum.binding.common.message.TransactionMessage.CLS_OFFSET;
 import static com.exonum.binding.common.message.TransactionMessage.MIN_MESSAGE_SIZE;
+import static com.exonum.binding.common.message.TransactionMessage.TAG_OFFSET;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -113,10 +116,49 @@ class BinaryTransactionMessageTest {
   }
 
   @Test
-  void invalidBytesArrayTest() {
-    byte[] messageBytes = Bytes.randomBytes(MIN_MESSAGE_SIZE - 1);
+  void invalidMessageSizeTest() {
+    int invalidSize = MIN_MESSAGE_SIZE - 1;
+    byte[] messageBytes = Bytes.randomBytes(invalidSize);
 
-    assertThrows(IllegalArgumentException.class, () -> new BinaryTransactionMessage(messageBytes));
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> new BinaryTransactionMessage(messageBytes));
+    assertThat(e.getMessage(), containsString(Integer.toString(invalidSize)));
+  }
+
+  @Test
+  void invalidClassTest() {
+    byte[] messageBytes = TransactionMessage.builder()
+        .serviceId((short) 1)
+        .transactionId((short) 2)
+        .payload(Bytes.bytes(0x00, 0x01, 0x02))
+        .sign(KEYS, CRYPTO)
+        .toBytes();
+
+    // Modify the 'class' byte
+    byte invalidClass = (byte) (MessageType.TRANSACTION.cls() + 1);
+    messageBytes[CLS_OFFSET] = invalidClass;
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> new BinaryTransactionMessage(messageBytes));
+    assertThat(e.getMessage(), containsString("Invalid message class: " + invalidClass));
+  }
+
+  @Test
+  void invalidTagTest() {
+    byte[] messageBytes = TransactionMessage.builder()
+        .serviceId((short) 1)
+        .transactionId((short) 2)
+        .payload(Bytes.bytes(0x00, 0x01, 0x02))
+        .sign(KEYS, CRYPTO)
+        .toBytes();
+
+    // Modify the 'class' byte
+    byte invalidTag = (byte) (MessageType.TRANSACTION.tag() + 1);
+    messageBytes[TAG_OFFSET] = invalidTag;
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> new BinaryTransactionMessage(messageBytes));
+    assertThat(e.getMessage(), containsString("Invalid message tag: " + invalidTag));
   }
 
   @ParameterizedTest

@@ -19,32 +19,30 @@ package com.exonum.binding.qaservice.transactions;
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.transactions.ContextUtils.newContext;
-import static com.exonum.binding.qaservice.transactions.CreateCounterTxIntegrationTest.createCounter;
+import static com.exonum.binding.qaservice.TransactionUtils.createIncrementCounterTransaction;
 import static com.exonum.binding.qaservice.transactions.IncrementCounterTx.converter;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.TransactionError.UNKNOWN_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.qaservice.QaServiceImpl;
+import com.exonum.binding.qaservice.QaServiceModule;
+import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
+import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -83,56 +81,55 @@ class IncrementCounterTxIntegrationTest {
     RawTransaction raw = converter().toRawTransaction(tx);
     IncrementCounterTx txFromRaw = converter().fromRawTransaction(raw);
 
-    assertThat(txFromRaw, equalTo(tx));
+    assertThat(txFromRaw).isEqualTo(tx);
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeIncrementsCounter() throws Exception {
-    try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+  void executeIncrementsCounter() {
+    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
+      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
 
       // Add a new counter with the given name and initial value
-      String name = "counter";
-      long initialValue = 0;
-      createCounter(view, name, initialValue);
+      String counterName = "counter";
+      service.submitCreateCounter(counterName);
+      testKit.createBlock();
 
-      // Create and execute the transaction
+      // Submit and execute the transaction
       long seed = 0L;
-      HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
-      IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
+      HashCode counterId = sha256().hashString(counterName, UTF_8);
+      service.submitIncrementCounter(seed, counterId);
+      testKit.createBlock();
 
-      // Execute the transaction
-      TransactionContext context = newContext(view);
-      tx.execute(context);
+      testKit.withSnapshot((view) -> {
+        // Check the counter has an incremented value
+        QaSchema schema = new QaSchema(view);
+        MapIndex<HashCode, Long> counters = schema.counters();
+        long expectedValue = 1;
 
-      // Check the counter has an incremented value
-      QaSchema schema = new QaSchema(view);
-      ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
-      long expectedValue = initialValue + 1;
-      assertThat(counters.get(nameHash), equalTo(expectedValue));
+        assertThat(counters.get(counterId)).isEqualTo(expectedValue);
+        return null;
+      });
     }
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeNoSuchCounter() throws CloseFailuresException {
-    try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+  void executeNoSuchCounter() {
+    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
+      String counterName = "unknown-counter";
+      HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
+      TransactionMessage incrementCounterTx = createIncrementCounterTransaction(0L, counterId);
+      testKit.createBlockWithTransactions(incrementCounterTx);
 
-      // Create and execute the transaction that attempts to update an unknown counter
-      long seed = 0L;
-      String name = "unknown-counter";
-      HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
-
-      // Execute the transaction
-      IncrementCounterTx tx = new IncrementCounterTx(seed, nameHash);
-      TransactionContext context = newContext(view);
-      TransactionExecutionException e = assertThrows(TransactionExecutionException.class,
-          () -> tx.execute(context));
-      assertThat(e.getErrorCode(), equalTo(UNKNOWN_COUNTER.code));
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        Optional<TransactionResult> txResult = blockchain.getTxResult(incrementCounterTx.hash());
+        TransactionResult expectedTransactionResult =
+            TransactionResult.error(UNKNOWN_COUNTER.code, null);
+        assertThat(txResult).hasValue(expectedTransactionResult);
+        return null;
+      });
     }
   }
 
@@ -150,7 +147,7 @@ class IncrementCounterTxIntegrationTest {
     AnyTransaction<IncrementCounterTx> txParameters = json().fromJson(info,
         new TypeToken<AnyTransaction<IncrementCounterTx>>(){}.getType());
 
-    assertThat(txParameters.body, equalTo(tx));
+    assertThat(txParameters.body).isEqualTo(tx);
   }
 
   @Test

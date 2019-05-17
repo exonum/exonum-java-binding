@@ -20,6 +20,7 @@ import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A transaction that has QA service identifier, but an unknown transaction id.
@@ -34,7 +35,8 @@ import com.exonum.binding.transaction.TransactionContext;
  */
 public final class UnknownTx implements Transaction {
 
-  private static final short ID = 9999;
+  @VisibleForTesting
+  public static final short ID = 9999;
 
   @Override
   public void execute(TransactionContext context) {

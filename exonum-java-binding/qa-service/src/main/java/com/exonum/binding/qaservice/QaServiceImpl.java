@@ -74,7 +74,7 @@ import org.apache.logging.log4j.Logger;
  *     on implementing Exonum Services, therefore, it shall NOT be used as an example
  *     of a user service.
  */
-final class QaServiceImpl extends AbstractService implements QaService {
+public final class QaServiceImpl extends AbstractService implements QaService {
 
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
