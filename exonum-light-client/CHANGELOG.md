@@ -15,16 +15,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.2.0 <!-- Release date placeholder -->
+
+Second release of Exonum Java Light Client which brings
+system API and blockhain explorer API endpoints support.
+
 ### Versions Support
-- Exonum version, 0.11
-  <!-- TODO: clarify during JLC release (in readme#compatibility) -->
-- Exonum Java Binding version, 0.5-SNAPSHOT
+- Exonum version, 0.11.0
+- Exonum Java Binding version, 0.6.0
 
 ### Added
 - Support of [System API public][system-api-public] endpoints. (#716) 
 - Support of [Explorer API][explorer-api] endpoints. (#725, #734) 
 
-## 0.1 - 2019-02-18
+## 0.1.0 - 2019-02-18
 
 The first release of Exonum Java Light Client.
 
@@ -38,6 +42,6 @@ This release brings:
 - Support of sending transactions to Exonum blockchain nodes.
 - Support of Exonum Java Binding Commons library.
 
-[system-api-public]: https://exonum.com/doc/version/latest/advanced/node-management/#public-endpoints
-[explorer-api]: https://exonum.com/doc/version/latest/advanced/node-management/#explorer-api-endpoints
+[system-api-public]: https://exonum.com/doc/version/0.11/advanced/node-management/#public-endpoints
+[explorer-api]: https://exonum.com/doc/version/0.11/advanced/node-management/#explorer-api-endpoints
 
