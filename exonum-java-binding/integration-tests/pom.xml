@@ -13,7 +13,11 @@
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Integration Tests</name>
-  <description>A module providing integration tests for Core and Time Oracle modules.</description>
+  <description>
+    A module providing integration tests for Core and Time Oracle modules that require
+    a node running a service. Such tests cannot be written using plain MemoryDb, hence use
+    a testkit.
+  </description>
 
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
