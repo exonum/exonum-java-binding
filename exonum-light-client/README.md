@@ -25,8 +25,8 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
-| 0.1.0        | 0.10.* | 0.4         |
 | 0.2.0        | 0.11.0 | 0.6.0       |
+| 0.1.0        | 0.10.* | 0.4         |
 
 ## System Dependencies
 - Java 8 or above is required for using this client
@@ -48,7 +48,7 @@ compile 'com.exonum.client:exonum-light-client:0.2.0'
 
 ## Examples
 This section contains most frequently used operations with the blockchain.
-Please navigate to [Exonum client][exonum-client] methods 
+Please navigate to [Exonum client][exonum-client] API documentation 
 to see all supported operations.
 
 ### Exonum Client Initialization
