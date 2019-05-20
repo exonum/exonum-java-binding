@@ -18,7 +18,7 @@ use jni::{
     self,
     errors::{Error, ErrorKind},
     objects::{GlobalRef, JObject},
-    InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
+    InitArgs, InitArgsBuilder, JavaVM,
 };
 
 use proxy::{JniExecutor, ServiceProxy};
@@ -144,8 +144,7 @@ impl JavaServiceRuntime {
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
     ) -> JavaVM {
-        let args = Self::build_jvm_arguments(jvm_config, runtime_config, internal_config)
-            .expect("Unable to build arguments for JVM");
+        let args = Self::build_jvm_arguments(jvm_config, runtime_config, internal_config);
 
         jni::JavaVM::new(args)
             .map_err(Self::transform_jni_error)
@@ -173,8 +172,8 @@ impl JavaServiceRuntime {
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
-    ) -> JniResult<InitArgs> {
-        let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
+    ) -> InitArgs {
+        let mut args_builder = JvmArgsBuilder::new();
 
         let args_prepend = jvm_config.args_prepend.clone();
         let args_append = jvm_config.args_append.clone();
@@ -195,7 +194,7 @@ impl JavaServiceRuntime {
     }
 
     /// Adds extra user arguments (optional) to JVM configuration
-    fn add_user_arguments<I>(mut args_builder: InitArgsBuilder, user_args: I) -> InitArgsBuilder
+    fn add_user_arguments<I>(mut args_builder: JvmArgsBuilder, user_args: I) -> JvmArgsBuilder
     where
         I: IntoIterator<Item = String>,
     {
@@ -208,10 +207,10 @@ impl JavaServiceRuntime {
 
     /// Adds required EJB-related arguments to JVM configuration
     fn add_required_arguments(
-        mut args_builder: InitArgsBuilder,
+        mut args_builder: JvmArgsBuilder,
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
-    ) -> InitArgsBuilder {
+    ) -> JvmArgsBuilder {
         // We do not use system library path in tests, because an absolute path to the native
         // library will be provided at compile time using RPATH.
         if internal_config.system_lib_path.is_some() {
@@ -234,9 +233,9 @@ impl JavaServiceRuntime {
 
     /// Adds optional user arguments to JVM configuration
     fn add_optional_arguments(
-        mut args_builder: InitArgsBuilder,
+        mut args_builder: JvmArgsBuilder,
         jvm_config: &JvmConfig,
-    ) -> InitArgsBuilder {
+    ) -> JvmArgsBuilder {
         if let Some(ref socket) = jvm_config.jvm_debug_socket {
             args_builder = args_builder.option(&format!(
                 "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={}",
@@ -249,6 +248,44 @@ impl JavaServiceRuntime {
     /// Returns a reference to the runtime's executor.
     pub fn get_executor(&self) -> &MainExecutor {
         &self.executor
+    }
+}
+
+/// Wrapper for InitArgsBuilder.
+struct JvmArgsBuilder {
+    internal: InitArgsBuilder,
+    jvm_args_line: String,
+}
+
+impl JvmArgsBuilder {
+    /// Create a new JvmArgsBuilder
+    pub(self) fn new() -> Self {
+        JvmArgsBuilder {
+            internal: InitArgsBuilder::new().version(jni::JNIVersion::V8),
+            jvm_args_line: String::new(),
+        }
+    }
+
+    /// Add an option to the init args
+    pub(self) fn option(mut self, option: &str) -> Self {
+        self.internal = self.internal.option(&option);
+
+        if !self.jvm_args_line.is_empty() {
+            self.jvm_args_line.push(' ');
+        }
+        self.jvm_args_line.push_str(option);
+
+        self
+    }
+
+    /// Build the `InitArgs`
+    pub(self) fn build(self) -> InitArgs {
+        let args = self
+            .internal
+            .build()
+            .expect("Unable to build arguments for JVM");
+        info!("Arguments for JVM: {}", self.jvm_args_line);
+        args
     }
 }
 
