@@ -31,6 +31,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
+import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -42,6 +43,8 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 class CreateWalletTxTest {
+
+  private static final KeyPair OWNER_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
 
   static {
     LibraryLoader.load();
@@ -94,11 +97,10 @@ class CreateWalletTxTest {
   @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx() {
     try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      KeyPair emulatedNodeKeyPair = testKit.getEmulatedNode().getServiceKeyPair();
       TransactionMessage transactionMessage =
-          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE, emulatedNodeKeyPair);
+          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE, OWNER_KEY_PAIR);
       TransactionMessage transactionMessage2 =
-          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE * 2, emulatedNodeKeyPair);
+          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE * 2, OWNER_KEY_PAIR);
       testKit.createBlockWithTransactions(transactionMessage);
       testKit.createBlockWithTransactions(transactionMessage2);
 
