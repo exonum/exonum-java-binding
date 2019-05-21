@@ -44,7 +44,7 @@ import java.util.Objects;
  */
 public final class TransferTx implements Transaction {
 
-  public static final short ID = 2;
+  static final short ID = 2;
   private static final Serializer<TxMessageProtos.TransferTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.TransferTx.class);
 
@@ -63,7 +63,7 @@ public final class TransferTx implements Transaction {
   /**
    * Creates a new transfer transaction from the serialized transaction data.
    */
-  public static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
+  static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
     TxMessageProtos.TransferTx body =
