@@ -307,7 +307,8 @@
             <version>0.8.3</version>
             <configuration>
               <excludes>
-                <exclude>**/*TransactionResponse*</exclude>
+                <!--Exclude auto generated lombok classes-->
+                <exclude>com/exonum/client/response/*</exclude>
               </excludes>
             </configuration>
             <executions>
