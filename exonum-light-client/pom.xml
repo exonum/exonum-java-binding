@@ -307,7 +307,7 @@
             <version>0.8.3</version>
             <configuration>
               <excludes>
-                <exclude>**/TransactionResponse.*</exclude>
+                <exclude>**/com/exonum/client/response/TransactionResponseTest.class</exclude>
               </excludes>
             </configuration>
             <executions>
