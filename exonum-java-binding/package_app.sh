@@ -92,6 +92,9 @@ mkdir -p "${PACKAGING_BASE_DIR}"
 mkdir -p "${PACKAGING_NATIVE_LIB_DIR}"
 mkdir -p "${PACKAGING_ETC_DIR}"
 
+# Enable static linkage for RocksDB
+export ROCKSDB_STATIC=1
+
 # Copy libstd to some known place.
 cp ${RUST_LIB_DIR}/libstd* "${PACKAGING_NATIVE_LIB_DIR}"
 
