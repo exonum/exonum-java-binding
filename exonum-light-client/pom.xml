@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.0</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
