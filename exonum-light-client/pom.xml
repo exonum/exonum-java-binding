@@ -305,6 +305,11 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.3</version>
+            <configuration>
+              <excludes>
+                <exclude>**/TransactionResponse.*</exclude>
+              </excludes>
+            </configuration>
             <executions>
               <execution>
                 <id>prepare-jacoco-agent</id>
