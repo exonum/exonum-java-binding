@@ -17,30 +17,27 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.DEFAULT_INITIAL_BALANCE;
-import static com.exonum.binding.cryptocurrency.transactions.CreateWalletTransactionUtils.createRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createCreateWalletRawTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createCreateWalletTransaction;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.blockchain.TransactionResult;
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
+import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.transaction.TransactionExecutionException;
 import com.exonum.binding.util.LibraryLoader;
+import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -50,16 +47,14 @@ class CreateWalletTxTest {
     LibraryLoader.load();
   }
 
-  private static final PublicKey OWNER_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
-
   @Test
   void fromRawTransaction() {
     long initialBalance = 100L;
-    RawTransaction raw = createRawTransaction(initialBalance);
+    RawTransaction raw = createCreateWalletRawTransaction(initialBalance);
 
     CreateWalletTx tx = CreateWalletTx.fromRawTransaction(raw);
 
-    assertThat(tx, equalTo(new CreateWalletTx(initialBalance)));
+    assertThat(tx).isEqualTo(new CreateWalletTx(initialBalance));
   }
 
   @Test
@@ -69,60 +64,52 @@ class CreateWalletTxTest {
     Throwable t = assertThrows(IllegalArgumentException.class,
         () -> new CreateWalletTx(initialBalance));
 
-    assertThat(t.getMessage(), equalTo("The initial balance (-1) must not be negative."));
+    assertThat(t.getMessage()).isEqualTo("The initial balance (-1) must not be negative.");
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeCreateWalletTx() throws Exception {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
+  void executeCreateWalletTx() {
+    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
+      KeyPair emulatedNodeKeyPair = testKit.getEmulatedNode().getServiceKeyPair();
+      TransactionMessage transactionMessage =
+          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE, emulatedNodeKeyPair);
+      testKit.createBlockWithTransactions(transactionMessage);
 
-    try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+      testKit.withSnapshot((view) -> {
+        // Check that entries have been added
+        CryptocurrencySchema schema = new CryptocurrencySchema(view);
+        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-      // Execute the transaction
-      TransactionContext context = newContextBuilder(view)
-          .authorPk(OWNER_KEY)
-          .build();
-      tx.execute(context);
-
-      // Check that entries have been added.
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-
-      assertTrue(wallets.containsKey(OWNER_KEY));
-      assertThat(wallets.get(OWNER_KEY).getBalance(), equalTo(DEFAULT_INITIAL_BALANCE));
+        PublicKey emulatedNodePublicKey = emulatedNodeKeyPair.getPublicKey();
+        assertThat(wallets.containsKey(emulatedNodePublicKey)).isTrue();
+        assertThat(wallets.get(emulatedNodePublicKey).getBalance())
+            .isEqualTo(DEFAULT_INITIAL_BALANCE);
+        return null;
+      });
     }
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeAlreadyExistingWalletTx() throws CloseFailuresException {
-    try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+  void executeAlreadyExistingWalletTx() {
+    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
+      KeyPair emulatedNodeKeyPair = testKit.getEmulatedNode().getServiceKeyPair();
+      TransactionMessage transactionMessage =
+          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE, emulatedNodeKeyPair);
+      TransactionMessage transactionMessage2 =
+          createCreateWalletTransaction(DEFAULT_INITIAL_BALANCE * 2, emulatedNodeKeyPair);
+      testKit.createBlockWithTransactions(transactionMessage);
+      testKit.createBlockWithTransactions(transactionMessage2);
 
-      long initialBalance = DEFAULT_INITIAL_BALANCE;
-
-      // Create a wallet manually.
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      {
-        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
-        wallets.put(OWNER_KEY, new Wallet(initialBalance));
-      }
-
-      // Execute the transaction, that has the same owner key.
-      // Use twice the initial balance to detect invalid updates.
-      long newBalance = 2 * initialBalance;
-      CreateWalletTx tx = new CreateWalletTx(newBalance);
-      TransactionContext context = newContextBuilder(view)
-          .authorPk(OWNER_KEY)
-          .build();
-      TransactionExecutionException e = assertThrows(
-          TransactionExecutionException.class, () -> tx.execute(context));
-
-      assertThat(e.getErrorCode(), equalTo(WALLET_ALREADY_EXISTS.errorCode));
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
+        TransactionResult expectedTransactionResult =
+            TransactionResult.error(WALLET_ALREADY_EXISTS.errorCode, null);
+        assertThat(txResult).hasValue(expectedTransactionResult);
+        return null;
+      });
     }
   }
 
@@ -135,7 +122,7 @@ class CreateWalletTxTest {
     CreateWalletTx txParams = json()
         .fromJson(info, CreateWalletTx.class);
 
-    assertThat(txParams, equalTo(tx));
+    assertThat(txParams).isEqualTo(tx);
   }
 
   @Test

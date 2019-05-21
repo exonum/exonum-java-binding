@@ -50,6 +50,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     super(ID, NAME, transactionConverter);
   }
 
+  public Node getNode() {
+    return node;
+  }
+
   @Override
   protected Schema createDataSchema(View view) {
     return new CryptocurrencySchema(view);

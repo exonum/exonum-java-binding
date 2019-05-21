@@ -44,7 +44,7 @@ import java.util.Objects;
  */
 public final class TransferTx implements Transaction {
 
-  static final short ID = 2;
+  public static final short ID = 2;
   private static final Serializer<TxMessageProtos.TransferTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.TransferTx.class);
 

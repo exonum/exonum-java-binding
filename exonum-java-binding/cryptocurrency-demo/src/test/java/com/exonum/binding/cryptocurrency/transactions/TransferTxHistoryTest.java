@@ -17,84 +17,80 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createTransferTransaction;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.util.LibraryLoader;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class TransferTxHistoryTest {
 
+  private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
+  private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
+
   static {
     LibraryLoader.load();
   }
 
-  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
-  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
-
   @Test
   @RequiresNativeLibrary
-  void transfersHistoryBetweenTwoAccountsTest() throws Exception {
-    try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
-
-      // Create wallets with the given initial balances
+  void transfersHistoryBetweenTwoAccountsTest() {
+    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
+      // Create source and target wallets with the given initial balances
       long initialBalance = 100L;
-      createWallet(view, ACCOUNT_1, initialBalance);
-      createWallet(view, ACCOUNT_2, initialBalance);
+      TransactionMessage createFromWalletTx1 =
+          createCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+      TransactionMessage createFromWalletTx2 =
+          createCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+      testKit.createBlockWithTransactions(createFromWalletTx1, createFromWalletTx2);
 
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
-      HashCode txMessageHash1 = HashCode.fromString("a0a0a0a0");
-      TransferTx tx1 = new TransferTx(seed1, ACCOUNT_2, transferSum1);
-      TransactionContext context1 = newContextBuilder(view)
-          .txMessageHash(txMessageHash1)
-          .authorPk(ACCOUNT_1)
-          .build();
-      tx1.execute(context1);
+      TransactionMessage transferTx1 = createTransferTransaction(
+          seed1, FROM_KEY_PAIR.getPublicKey(), transferSum1, TO_KEY_PAIR);
+      testKit.createBlockWithTransactions(transferTx1);
 
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
-      HashCode txMessageHash2 = HashCode.fromString("b1b1b1b1");
-      TransferTx tx2 = new TransferTx(seed2, ACCOUNT_1, transferSum2);
-      TransactionContext context2 = newContextBuilder(view)
-          .txMessageHash(txMessageHash2)
-          .authorPk(ACCOUNT_2)
-          .build();
-      tx2.execute(context2);
+      TransactionMessage transferTx2 = createTransferTransaction(
+          seed2, TO_KEY_PAIR.getPublicKey(), transferSum2, FROM_KEY_PAIR);
+      testKit.createBlockWithTransactions(transferTx2);
 
-      // Check that wallets have correct balances
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-      long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
-      assertThat(wallets.get(ACCOUNT_1).getBalance(), equalTo(expectedBalance1));
-      long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
-      assertThat(wallets.get(ACCOUNT_2).getBalance(), equalTo(expectedBalance2));
+      testKit.withSnapshot((view) -> {
+        // Check that wallets have correct balances
+        CryptocurrencySchema schema = new CryptocurrencySchema(view);
+        ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+        long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
+        assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
+            .isEqualTo(expectedBalance1);
+        long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
+        assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
+            .isEqualTo(expectedBalance2);
 
-      // Check history
-      Matcher<Iterable<?>> containsExpectedEntries = contains(txMessageHash1, txMessageHash2);
-      assertThat(schema.transactionsHistory(ACCOUNT_1), containsExpectedEntries);
-      assertThat(schema.transactionsHistory(ACCOUNT_2), containsExpectedEntries);
+        // Check history
+        HashCode messageHash1 = transferTx1.hash();
+        HashCode messageHash2 = transferTx2.hash();
+        assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
+            .contains(messageHash1, messageHash2);
+        assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
+            .contains(messageHash1, messageHash2);
+        return null;
+      });
     }
   }
 }

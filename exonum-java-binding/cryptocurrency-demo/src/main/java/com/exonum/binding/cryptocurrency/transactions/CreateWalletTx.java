@@ -37,7 +37,7 @@ import java.util.Objects;
 /** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx implements Transaction {
 
-  static final short ID = 1;
+  public static final short ID = 1;
   private static final Serializer<TxMessageProtos.CreateWalletTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.CreateWalletTx.class);
   private final long initialBalance;
