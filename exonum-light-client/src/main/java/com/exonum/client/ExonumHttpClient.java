@@ -181,7 +181,7 @@ class ExonumHttpClient implements ExonumClient {
         "Requested number of blocks was %s but maximum allowed is %s",
         count, MAX_BLOCKS_PER_REQUEST);
     checkArgument(heightMax == null || 0 <= heightMax,
-        "Blockhain height can't be negative but was %s", heightMax);
+        "Blockchain height can't be negative but was %s", heightMax);
 
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
