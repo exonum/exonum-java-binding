@@ -22,7 +22,8 @@ import lombok.Value;
 @Value
 public class HealthCheckInfo {
   /**
-   * Shows information about whether it is possible to achieve the consensus between
+   * Consensus status which shows an information about
+   * whether it is possible to achieve the consensus between
    * validators in the current state.
    */
   ConsensusStatus consensusStatus;
