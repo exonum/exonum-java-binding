@@ -17,8 +17,8 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createCreateWalletTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createTransferTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.KeyPair;
@@ -38,8 +38,8 @@ import org.junit.jupiter.api.Test;
 @RequiresNativeLibrary
 class TransferTxHistoryTest {
 
-  private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
-  private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
+  private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
+  private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
   static {
     LibraryLoader.load();
@@ -49,26 +49,26 @@ class TransferTxHistoryTest {
   @RequiresNativeLibrary
   void transfersHistoryBetweenTwoAccountsTest() {
     try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create source and target wallets with the given initial balances
+      // Create source and target wallets with the same initial balance
       long initialBalance = 100L;
       TransactionMessage createFromWalletTx1 =
-          createCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+          newCreateWalletTransaction(initialBalance, ACCOUNT_1);
       TransactionMessage createFromWalletTx2 =
-          createCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+          newCreateWalletTransaction(initialBalance, ACCOUNT_2);
       testKit.createBlockWithTransactions(createFromWalletTx1, createFromWalletTx2);
 
       // Create and execute 1st transaction
       long seed1 = 1L;
       long transferSum1 = 40L;
-      TransactionMessage transferTx1 = createTransferTransaction(
-          seed1, FROM_KEY_PAIR.getPublicKey(), transferSum1, TO_KEY_PAIR);
+      TransactionMessage transferTx1 = newTransferTransaction(
+          seed1, transferSum1, ACCOUNT_1, ACCOUNT_2.getPublicKey());
       testKit.createBlockWithTransactions(transferTx1);
 
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
-      TransactionMessage transferTx2 = createTransferTransaction(
-          seed2, TO_KEY_PAIR.getPublicKey(), transferSum2, FROM_KEY_PAIR);
+      TransactionMessage transferTx2 = newTransferTransaction(
+          seed2, transferSum2, ACCOUNT_2, ACCOUNT_1.getPublicKey());
       testKit.createBlockWithTransactions(transferTx2);
 
       testKit.withSnapshot((view) -> {
@@ -76,19 +76,19 @@ class TransferTxHistoryTest {
         CryptocurrencySchema schema = new CryptocurrencySchema(view);
         ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
         long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
-        assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
+        assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())
             .isEqualTo(expectedBalance1);
         long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
-        assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
+        assertThat(wallets.get(ACCOUNT_2.getPublicKey()).getBalance())
             .isEqualTo(expectedBalance2);
 
         // Check history
         HashCode messageHash1 = transferTx1.hash();
         HashCode messageHash2 = transferTx2.hash();
-        assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
-            .contains(messageHash1, messageHash2);
-        assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
-            .contains(messageHash1, messageHash2);
+        assertThat(schema.transactionsHistory(ACCOUNT_1.getPublicKey()))
+            .containsExactly(messageHash1, messageHash2);
+        assertThat(schema.transactionsHistory(ACCOUNT_2.getPublicKey()))
+            .containsExactly(messageHash1, messageHash2);
         return null;
       });
     }

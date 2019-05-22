@@ -21,9 +21,9 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.IN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createCreateWalletTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createTransferRawTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createTransferTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferRawTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -63,11 +63,11 @@ class TransferTxTest {
   void fromRawTransaction() {
     long seed = 1;
     long amount = 50L;
-    RawTransaction raw = createTransferRawTransaction(seed, FROM_KEY_PAIR.getPublicKey(), amount);
+    RawTransaction raw = newTransferRawTransaction(seed, amount, TO_KEY_PAIR.getPublicKey());
 
     TransferTx tx = TransferTx.fromRawTransaction(raw);
 
-    assertThat(tx).isEqualTo(new TransferTx(seed, FROM_KEY_PAIR.getPublicKey(), amount));
+    assertThat(tx).isEqualTo(new TransferTx(seed, TO_KEY_PAIR.getPublicKey(), amount));
   }
 
   @ParameterizedTest
@@ -80,7 +80,7 @@ class TransferTxTest {
   void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
     long seed = 1;
     RawTransaction tx =
-        createTransferRawTransaction(seed, FROM_KEY_PAIR.getPublicKey(), transferAmount);
+        newTransferRawTransaction(seed, transferAmount, TO_KEY_PAIR.getPublicKey());
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransferTx.fromRawTransaction(tx));
@@ -93,20 +93,21 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransfer() {
     try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create source and target wallets with the given initial balances
+      // Create source and target wallets with the same initial balance
       long initialBalance = 100L;
-      TransactionMessage createFromWalletTx1 =
-          createCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
-      TransactionMessage createFromWalletTx2 =
-          createCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
-      testKit.createBlockWithTransactions(createFromWalletTx1, createFromWalletTx2);
+      TransactionMessage createFromWalletTx =
+          newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+      TransactionMessage createToWalletTx =
+          newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+      testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
 
       // Create and execute the transaction
       long seed = 1L;
       long transferSum = 40L;
-      TransactionMessage transferTx = createTransferTransaction(
-          seed, TO_KEY_PAIR.getPublicKey(), transferSum, FROM_KEY_PAIR);
+      TransactionMessage transferTx = newTransferTransaction(
+          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
       testKit.createBlockWithTransactions(transferTx);
+
       testKit.withSnapshot((view) -> {
         // Check that wallets have correct balances
         CryptocurrencySchema schema = new CryptocurrencySchema(view);
@@ -121,9 +122,9 @@ class TransferTxTest {
         // Check history
         HashCode messageHash = transferTx.hash();
         assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
-            .contains(messageHash);
+            .containsExactly(messageHash);
         assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
-            .contains(messageHash);
+            .containsExactly(messageHash);
         return null;
       });
     }
@@ -136,13 +137,13 @@ class TransferTxTest {
       // Create a receiver’s wallet with the given initial balance
       long initialBalance = 50L;
       TransactionMessage createFromWalletTx =
-          createCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+          newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
       testKit.createBlockWithTransactions(createFromWalletTx);
 
       long seed = 1L;
       long transferSum = 50L;
-      TransactionMessage transferTx = createTransferTransaction(
-          seed, FROM_KEY_PAIR.getPublicKey(), transferSum, TO_KEY_PAIR);
+      TransactionMessage transferTx = newTransferTransaction(
+          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -163,13 +164,13 @@ class TransferTxTest {
       // Create a receiver’s wallet with the given initial balance
       long initialBalance = 50L;
       TransactionMessage createFromWalletTx =
-          createCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+          newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
       testKit.createBlockWithTransactions(createFromWalletTx);
 
       long seed = 1L;
       long transferSum = 50L;
-      TransactionMessage transferTx = createTransferTransaction(
-          seed, TO_KEY_PAIR.getPublicKey(), transferSum, FROM_KEY_PAIR);
+      TransactionMessage transferTx = newTransferTransaction(
+          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -189,8 +190,8 @@ class TransferTxTest {
     try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
       long seed = 1L;
       long transferSum = 50L;
-      TransactionMessage transferTx = createTransferTransaction(
-          seed, FROM_KEY_PAIR.getPublicKey(), transferSum, FROM_KEY_PAIR);
+      TransactionMessage transferTx = newTransferTransaction(
+          seed, transferSum, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey());
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -208,18 +209,20 @@ class TransferTxTest {
   @RequiresNativeLibrary
   void executeTransfer_InsufficientFunds() {
     try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create a receiver’s wallet with the given initial balance
+      // Create source and target wallets with the same initial balance
       long initialBalance = 50L;
-      TransactionMessage createFromWalletTx1 =
-          createCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
-      TransactionMessage createFromWalletTx2 =
-          createCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
-      testKit.createBlockWithTransactions(createFromWalletTx1, createFromWalletTx2);
+      TransactionMessage createFromWalletTx =
+          newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+      TransactionMessage createToWalletTx =
+          newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+      testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
 
+      // Create and execute the transaction that attempts to transfer an amount exceeding the
+      // balance
       long seed = 1L;
       long transferSum = initialBalance + 50L;
-      TransactionMessage transferTx = createTransferTransaction(
-          seed, TO_KEY_PAIR.getPublicKey(), transferSum, FROM_KEY_PAIR);
+      TransactionMessage transferTx = newTransferTransaction(
+          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -236,7 +239,7 @@ class TransferTxTest {
   @Test
   void info() {
     long seed = Long.MAX_VALUE - 1L;
-    TransferTx tx =  new TransferTx(seed, FROM_KEY_PAIR.getPublicKey(), 50L);
+    TransferTx tx =  new TransferTx(seed, TO_KEY_PAIR.getPublicKey(), 50L);
 
     String info = tx.info();
 

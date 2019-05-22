@@ -36,18 +36,18 @@ public class TransactionUtils {
 
   /**
    * Returns a CreateWalletTx transaction message with given default initial balance and signed
-   * with given service key pair.
+   * with given owner key pair.
    */
-  static TransactionMessage createCreateWalletTransaction(
-      long initialBalance, KeyPair emulatedNodeKeyPair) {
-    RawTransaction rawTransaction = createCreateWalletRawTransaction(initialBalance);
-    return toTransactionMessage(rawTransaction, emulatedNodeKeyPair);
+  static TransactionMessage newCreateWalletTransaction(
+      long initialBalance, KeyPair ownerKeyPair) {
+    RawTransaction rawTransaction = newCreateWalletRawTransaction(initialBalance);
+    return toTransactionMessage(rawTransaction, ownerKeyPair);
   }
 
   /**
    * Creates new raw create wallet transaction with a given initial balance.
    */
-  static RawTransaction createCreateWalletRawTransaction(long initialBalance) {
+  static RawTransaction newCreateWalletRawTransaction(long initialBalance) {
     return RawTransaction.newBuilder()
         .serviceId(CryptocurrencyService.ID)
         .transactionId(CreateWalletTx.ID)
@@ -59,20 +59,20 @@ public class TransactionUtils {
   }
 
   /**
-   * Returns a TransferTx transaction message with given default initial balance and signed
-   * with given service key pair.
+   * Returns a TransferTx transaction message with given seed, receiver key and transfer amount and
+   * signed with given owner key pair.
    */
-  static TransactionMessage createTransferTransaction(
-      long seed, PublicKey toWallet, long sum, KeyPair emulatedNodeKeyPair) {
-    RawTransaction rawTransaction = createTransferRawTransaction(seed, toWallet, sum);
-    return toTransactionMessage(rawTransaction, emulatedNodeKeyPair);
+  static TransactionMessage newTransferTransaction(
+      long seed, long sum, KeyPair ownerKeyPair, PublicKey toWallet) {
+    RawTransaction rawTransaction = newTransferRawTransaction(seed, sum, toWallet);
+    return toTransactionMessage(rawTransaction, ownerKeyPair);
   }
 
   /**
    * Creates a new raw transfer transaction message using the provided receiver key and amount.
    */
-  static RawTransaction createTransferRawTransaction(
-      long seed, PublicKey recipientId, long amount) {
+  static RawTransaction newTransferRawTransaction(
+      long seed, long amount, PublicKey recipientId) {
     return RawTransaction.newBuilder()
         .serviceId(CryptocurrencyService.ID)
         .transactionId(TransferTx.ID)
