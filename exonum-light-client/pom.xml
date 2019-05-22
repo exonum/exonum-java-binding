@@ -307,7 +307,12 @@
             <version>0.8.3</version>
             <configuration>
               <excludes>
-                <!--Exclude auto generated lombok classes-->
+                <!--
+                Exclude auto-generated lombok classes because sources for lombok-generated
+                files are located at `src/main/lombok` directory and the plugin can't be
+                configured to look there.
+                Also, reason to check coverage for auto-generated code.
+                -->
                 <exclude>com/exonum/client/response/*</exclude>
               </excludes>
             </configuration>
