@@ -712,7 +712,7 @@ dependencies = [
  "exonum-build 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-crypto 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-derive 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum_rocksdb 0.7.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum_rocksdb 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum_sodiumoxide 0.0.21 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -916,7 +916,7 @@ dependencies = [
 
 [[package]]
 name = "exonum_librocksdb-sys"
-version = "0.5.4"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc 1.0.36 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -942,10 +942,10 @@ dependencies = [
 
 [[package]]
 name = "exonum_rocksdb"
-version = "0.7.4"
+version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "exonum_librocksdb-sys 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum_librocksdb-sys 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.54 (registry+https://github.com/rust-lang/crates.io-index)",
  "tempdir 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -3160,9 +3160,9 @@ dependencies = [
 "checksum exonum-time 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "395608df660871f13bcbc5f3d831fd6e071e25c34157a54bc68a3c4ee29e8a0b"
 "checksum exonum_bitcoinrpc 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6179a9142f323499451d891fb1d53feecee1e56f01a46a167be5bd4444a23d22"
 "checksum exonum_jsonrpc 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f83cff59c50a592f63e19b3ba6b0c50bd0dcfe139ef2d0e121f2349f45350990"
-"checksum exonum_librocksdb-sys 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b666a95d4440df63ac27157864c75f6f9ac199ac644cf52d8c15b930f64b8d1f"
+"checksum exonum_librocksdb-sys 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)" = "d562638351f11f1bcb069624d9e80ada9ce5f685f02a7c355179b729cca6fd22"
 "checksum exonum_libsodium-sys 0.0.21 (registry+https://github.com/rust-lang/crates.io-index)" = "61f47a9389cb9c0c338de1a3596f21a9d8c1f27cde75e2cf5d0fb08c9d72e7f8"
-"checksum exonum_rocksdb 0.7.4 (registry+https://github.com/rust-lang/crates.io-index)" = "1232885974f13381ad6ad0f56d1253f32ce26f54526bbd54bb65137dc3111fad"
+"checksum exonum_rocksdb 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)" = "4ee3c9ba43b417f366d2c788456a2ad716fbacff1a44e7b9506705facf3c12d7"
 "checksum exonum_sodiumoxide 0.0.21 (registry+https://github.com/rust-lang/crates.io-index)" = "245705ee8dc6de09809de05e756e35f3e24a65bc18b287c731601801c3d63cc9"
 "checksum failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "795bd83d3abeb9220f257e597aa0080a508b27533824adf336529648f6abf7e2"
 "checksum failure_derive 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "ea1063915fd7ef4309e222a5a07cf9c319fb9c7836b1f89b85458672dbb127e1"
