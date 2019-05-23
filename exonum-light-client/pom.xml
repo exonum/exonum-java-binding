@@ -312,6 +312,7 @@
                 because the plugin can't be configured to look for sources there.
                 -->
                 <exclude>com/exonum/client/response/Block.class</exclude>
+                <exclude>com/exonum/client/response/Block*BlockBuilder.class</exclude>
                 <exclude>com/exonum/client/response/BlockResponse.class</exclude>
                 <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
                 <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
