@@ -270,6 +270,20 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <version>1.18.6.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>delombok</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -291,6 +305,20 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.3</version>
+            <configuration>
+              <excludes>
+                <!--
+                Exclude lombok annotated classes which are located at `src/main/lombok`,
+                because the plugin can't be configured to look for sources there.
+                -->
+                <exclude>com/exonum/client/response/Block.class</exclude>
+                <exclude>com/exonum/client/response/Block*BlockBuilder.class</exclude>
+                <exclude>com/exonum/client/response/BlockResponse.class</exclude>
+                <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
+                <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
+              </excludes>
+            </configuration>
             <executions>
               <execution>
                 <id>prepare-jacoco-agent</id>
