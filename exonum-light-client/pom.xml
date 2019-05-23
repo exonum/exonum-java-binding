@@ -308,12 +308,13 @@
             <configuration>
               <excludes>
                 <!--
-                Exclude auto-generated lombok classes because sources for lombok-generated
-                files are located at `src/main/lombok` directory and the plugin can't be
-                configured to look there.
-                Also, reason to check coverage for auto-generated code.
+                Exclude lombok annotated classes which are located at `src/main/lombok`,
+                because the plugin can't be configured to look for sources there.
                 -->
-                <exclude>com/exonum/client/response/*</exclude>
+                <exclude>com/exonum/client/response/Block.class</exclude>
+                <exclude>com/exonum/client/response/BlockResponse.class</exclude>
+                <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
               </excludes>
             </configuration>
             <executions>
