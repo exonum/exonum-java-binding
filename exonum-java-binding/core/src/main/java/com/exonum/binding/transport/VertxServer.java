@@ -23,6 +23,7 @@ import static com.exonum.binding.transport.VertxServer.State.STOPPED;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
+import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -97,7 +98,18 @@ final class VertxServer implements Server {
       }
       state = STARTED;
       server.listen(port);
-      logger.info("Listening at {}", server.actualPort());
+      logger.info("Java server is listening at {}", server.actualPort());
+    }
+  }
+
+  @Override
+  public OptionalInt getActualPort() {
+    synchronized (lock) {
+      if (state == STARTED) {
+        return OptionalInt.of(server.actualPort());
+      } else {
+        return OptionalInt.empty();
+      }
     }
   }
 
