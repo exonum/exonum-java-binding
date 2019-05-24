@@ -8,10 +8,13 @@
         </Console>
     </Appenders>
     <Loggers>
-        <!-- Use DEBUG level by default, since Cargo prints the stdout output only
-             in case of failures, when you might enjoy extra logs. -->
-        <Root level="debug">
-            <AppenderRef ref="Console"/>
+        <!-- Use INFO level for Exonum Java libraries. -->
+        <Logger name="com.exonum.binding" level="INFO" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <Root level="WARN">
+            <AppenderRef ref="Console" />
         </Root>
     </Loggers>
 </Configuration>
