@@ -48,6 +48,10 @@ echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 rm -rf testnet
 mkdir testnet
 
+# Enable predefined native logging configuration,
+# unless it is already set to any value (incl. null)
+export RUST_LOG="${RUST_LOG-error,exonum=info,exonum-java=info,java_bindings=info}"
+
 header "GENERATE COMMON CONFIG"
 ${EXONUM_JAVA_APP} generate-template --validators-count=1 testnet/common.toml
 
