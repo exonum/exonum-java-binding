@@ -19,9 +19,13 @@ extern crate exonum_btc_anchoring;
 extern crate exonum_configuration;
 extern crate exonum_time;
 extern crate java_bindings;
+#[macro_use]
+extern crate log;
 
 #[cfg(test)]
 extern crate tempfile;
+
+use java_bindings::get_lib_version;
 
 mod node_builder;
 
@@ -30,6 +34,21 @@ fn main() {
     // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
 
+    // Log app's metadata
+    print_info();
+
     let builder = node_builder::create();
     builder.run()
+}
+
+// Prints info about version and build mode of started app to the STDOUT.
+fn print_info() {
+    let version = get_lib_version();
+    let build_type= if cfg!(debug_assertions) {
+            "DEBUG"
+        } else {
+            "RELEASE"
+        };
+
+    info!("Started Exonum Java {} (built in {} mode)", version, build_type);
 }
