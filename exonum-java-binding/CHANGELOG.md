@@ -28,8 +28,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   format instead of the whole message in binary form.
 - RocksDB library is no longer required to be installed on Mac or Linux to run
   the Exonum Java application. (#902)
+  
+### Fixed
+- The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
+request. It is modified to return an empty object (no info) by default. (#904) 
 
-## [0.6.0]- 2019-05-08
+[tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/transaction/Transaction.html#info()
+
+## [0.6.0] - 2019-05-08
 
 **If you are upgrading an existing Java service, consult 
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.6.0/exonum-java-binding/doc/Migration_guide_0.6.md).**
