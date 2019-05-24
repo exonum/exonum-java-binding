@@ -191,6 +191,14 @@ impl JavaServiceRuntime {
         // Append extra user arguments
         args_builder = Self::add_user_arguments(args_builder, args_append);
 
+        // Log JVM arguments
+        let mut jvm_args_line = String::new();
+        for option in args_builder.get_options().iter() {
+            jvm_args_line.push(' ');
+            jvm_args_line.push_str(option);
+        }
+        info!("JVM arguments:{}", jvm_args_line);
+
         args_builder.build()
     }
 

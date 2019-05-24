@@ -37,3 +37,7 @@ rpath = true
 
 [profile.release]
 rpath = true
+
+# TODO: Remove after merging of https://github.com/jni-rs/jni-rs/pull/177.
+[patch.crates-io]
+jni = { git = "https://github.com/skletsun/jni-rs.git", branch = "improve-args-builder" }
