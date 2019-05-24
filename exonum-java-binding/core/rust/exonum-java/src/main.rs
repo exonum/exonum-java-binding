@@ -35,20 +35,23 @@ fn main() {
     java_bindings::panic_if_java_options();
 
     // Log app's metadata
-    print_info();
+    log_app_metadata();
 
     let builder = node_builder::create();
     builder.run()
 }
 
 // Prints info about version and build mode of started app to the STDOUT.
-fn print_info() {
+fn log_app_metadata() {
     let version = get_lib_version();
-    let build_type= if cfg!(debug_assertions) {
-            "DEBUG"
-        } else {
-            "RELEASE"
-        };
+    let build_type = if cfg!(debug_assertions) {
+        "DEBUG"
+    } else {
+        "RELEASE"
+    };
 
-    info!("Started Exonum Java {} (built in {} mode)", version, build_type);
+    info!(
+        "Started Exonum Java {} (built in {} mode)",
+        version, build_type
+    );
 }
