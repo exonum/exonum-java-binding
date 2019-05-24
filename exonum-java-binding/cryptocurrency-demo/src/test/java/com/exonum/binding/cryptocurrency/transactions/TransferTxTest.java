@@ -63,11 +63,12 @@ class TransferTxTest {
   void fromRawTransaction() {
     long seed = 1;
     long amount = 50L;
-    RawTransaction raw = newTransferRawTransaction(seed, amount, TO_KEY_PAIR.getPublicKey());
+    PublicKey recipientKey = TO_KEY_PAIR.getPublicKey();
+    RawTransaction raw = newTransferRawTransaction(seed, amount, recipientKey);
 
     TransferTx tx = TransferTx.fromRawTransaction(raw);
 
-    assertThat(tx).isEqualTo(new TransferTx(seed, TO_KEY_PAIR.getPublicKey(), amount));
+    assertThat(tx).isEqualTo(new TransferTx(seed, recipientKey, amount));
   }
 
   @ParameterizedTest
@@ -105,7 +106,7 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 40L;
       TransactionMessage transferTx = newTransferTransaction(
-          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
+          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -136,14 +137,14 @@ class TransferTxTest {
     try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
       // Create a receiver’s wallet with the given initial balance
       long initialBalance = 50L;
-      TransactionMessage createFromWalletTx =
+      TransactionMessage createToWalletTx =
           newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
-      testKit.createBlockWithTransactions(createFromWalletTx);
+      testKit.createBlockWithTransactions(createToWalletTx);
 
       long seed = 1L;
       long transferSum = 50L;
       TransactionMessage transferTx = newTransferTransaction(
-          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
+          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -170,7 +171,7 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 50L;
       TransactionMessage transferTx = newTransferTransaction(
-          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
+          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -191,7 +192,7 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = 50L;
       TransactionMessage transferTx = newTransferTransaction(
-          seed, transferSum, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey());
+          seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum);
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
@@ -222,7 +223,7 @@ class TransferTxTest {
       long seed = 1L;
       long transferSum = initialBalance + 50L;
       TransactionMessage transferTx = newTransferTransaction(
-          seed, transferSum, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey());
+          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {

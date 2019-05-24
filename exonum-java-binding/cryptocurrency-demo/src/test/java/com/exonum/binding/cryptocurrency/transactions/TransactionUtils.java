@@ -63,8 +63,8 @@ public class TransactionUtils {
    * signed with given owner key pair.
    */
   static TransactionMessage newTransferTransaction(
-      long seed, long sum, KeyPair ownerKeyPair, PublicKey toWallet) {
-    RawTransaction rawTransaction = newTransferRawTransaction(seed, sum, toWallet);
+      long seed, KeyPair ownerKeyPair, PublicKey receiverKey, long sum) {
+    RawTransaction rawTransaction = newTransferRawTransaction(seed, sum, receiverKey);
     return toTransactionMessage(rawTransaction, ownerKeyPair);
   }
 

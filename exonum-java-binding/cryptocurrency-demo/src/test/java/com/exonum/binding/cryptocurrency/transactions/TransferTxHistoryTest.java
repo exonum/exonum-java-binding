@@ -61,14 +61,14 @@ class TransferTxHistoryTest {
       long seed1 = 1L;
       long transferSum1 = 40L;
       TransactionMessage transferTx1 = newTransferTransaction(
-          seed1, transferSum1, ACCOUNT_1, ACCOUNT_2.getPublicKey());
+          seed1, ACCOUNT_1, ACCOUNT_2.getPublicKey(), transferSum1);
       testKit.createBlockWithTransactions(transferTx1);
 
       // Create and execute 2nd transaction
       long seed2 = 2L;
       long transferSum2 = 10L;
       TransactionMessage transferTx2 = newTransferTransaction(
-          seed2, transferSum2, ACCOUNT_2, ACCOUNT_1.getPublicKey());
+          seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2);
       testKit.createBlockWithTransactions(transferTx2);
 
       testKit.withSnapshot((view) -> {
