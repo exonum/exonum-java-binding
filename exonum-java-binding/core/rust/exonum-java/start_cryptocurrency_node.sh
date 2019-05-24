@@ -53,6 +53,11 @@ echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 rm -rf testnet
 mkdir testnet
 
+# Enable predefined native logging configuration,
+# unless it is already set to any value (incl. null)
+# Use jni=error as we currently have some warnings (see ECR-2482).
+export RUST_LOG="${RUST_LOG-warn,exonum=info,exonum-java=info,java_bindings=info,jni=error}"
+
 header "GENERATE COMMON CONFIG"
 cargo +$RUST_COMPILER_VERSION run -- generate-template --validators-count=1 testnet/common.toml
 
