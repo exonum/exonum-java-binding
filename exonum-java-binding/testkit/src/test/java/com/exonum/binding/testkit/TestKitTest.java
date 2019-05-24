@@ -55,8 +55,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 class TestKitTest {
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder(EmulatedNodeType.VALIDATOR)
+          .withService(TestServiceModule.class));
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
@@ -68,12 +74,9 @@ class TestKitTest {
   }
 
   @Test
-  void createTestKitForSingleService() {
-    TestService service;
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      checkTestServiceInitialization(testKit, service);
-    }
+  void createTestKitForSingleService(TestKit testKit) {
+    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+    checkTestServiceInitialization(testKit, service);
   }
 
   @Test
