@@ -26,8 +26,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - `BinaryTransactionMessage#toString` to include some fields in human-readable
   format instead of the whole message in binary form.
-- RocksDB library is no longer required to be installed on Mac or Linux to run
-  the Exonum Java application. (#902)
   
 ### Fixed
 - The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
