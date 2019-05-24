@@ -45,9 +45,9 @@ fn main() {
 fn log_app_metadata() {
     let version = get_lib_version();
     let build_type = if cfg!(debug_assertions) {
-        "DEBUG"
+        "debug"
     } else {
-        "RELEASE"
+        "release"
     };
 
     info!(
