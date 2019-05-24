@@ -30,6 +30,7 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.pf4j.PluginManager;
 
 /**
@@ -55,6 +56,8 @@ public final class ServiceRuntimeBootstrap {
           .put("log4j", LogManager.class)
           .build();
 
+  private static final Logger logger = LogManager.getLogger(ServiceRuntimeBootstrap.class);
+
   /**
    * Bootstraps a Java service runtime.
    *
@@ -62,14 +65,40 @@ public final class ServiceRuntimeBootstrap {
    * @return a new service runtime
    */
   public static ServiceRuntime createServiceRuntime(int serverPort) {
-    // Load the native libraries
-    LibraryLoader.load();
+    try {
+      // Log the information about the runtime and environment
+      logRuntimeInfo();
 
-    // Create the framework injector
-    Module frameworkModule = new FrameworkModule(serverPort, DEPENDENCY_REFERENCE_CLASSES);
-    Injector frameworkInjector = Guice.createInjector(APP_STAGE, frameworkModule);
+      // Load the native libraries
+      LibraryLoader.load();
 
-    return frameworkInjector.getInstance(ServiceRuntime.class);
+      // Create the framework injector
+      Module frameworkModule = new FrameworkModule(serverPort, DEPENDENCY_REFERENCE_CLASSES);
+      Injector frameworkInjector = Guice.createInjector(APP_STAGE, frameworkModule);
+
+      return frameworkInjector.getInstance(ServiceRuntime.class);
+    } catch (Throwable t) {
+      logger.fatal("Failed to create the Java Service Runtime", t);
+      throw t;
+    }
+  }
+
+  private static void logRuntimeInfo() {
+    logger.info("Starting Java Service Runtime");
+    // Log VM info, e.g., OpenJDK 64-Bit Server VM (build 12.0.1+12)
+    String vmName = getSysProperty("java.vm.name");
+    String vmVersion = getSysProperty("java.vm.version");
+    logger.info("    VM: {} (build {})", vmName, vmVersion);
+
+    // Log OS info, e.g. Linux 4.15.0-50-generic amd64
+    String osName = getSysProperty("os.name");
+    String osVersion = getSysProperty("os.version");
+    String osArch = getSysProperty("os.arch");
+    logger.info("    OS: {} {} {}", osName, osVersion, osArch);
+  }
+
+  private static String getSysProperty(String key) {
+    return System.getProperty(key);
   }
 
   private ServiceRuntimeBootstrap() {}
