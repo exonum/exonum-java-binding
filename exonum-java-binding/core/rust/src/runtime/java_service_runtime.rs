@@ -193,7 +193,7 @@ impl JavaServiceRuntime {
 
         // Log JVM arguments
         let mut jvm_args_line = String::new();
-        for option in args_builder.get_options().iter() {
+        for option in args_builder.options().iter() {
             jvm_args_line.push(' ');
             jvm_args_line.push_str(option);
         }
