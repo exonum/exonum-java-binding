@@ -192,7 +192,7 @@ impl JavaServiceRuntime {
         args_builder = Self::add_user_arguments(args_builder, args_append);
 
         // Log JVM arguments
-        Self::log_jvm_arguments(args_builder);
+        Self::log_jvm_arguments(&args_builder);
 
         args_builder.build()
     }
@@ -250,7 +250,7 @@ impl JavaServiceRuntime {
     }
 
     /// Logs JVM arguments collected by a particular builder.
-    fn log_jvm_arguments(&args_builder: InitArgsBuilder) {
+    fn log_jvm_arguments(args_builder: &InitArgsBuilder) {
         let mut jvm_args_line = String::new();
         for option in args_builder.options().iter() {
             jvm_args_line.push(' ');
