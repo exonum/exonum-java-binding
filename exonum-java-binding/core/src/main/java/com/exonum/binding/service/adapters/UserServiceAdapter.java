@@ -198,16 +198,18 @@ public class UserServiceAdapter {
     String serviceName = getName();
     int port = server.getActualPort().orElse(0);
     String mountPoint = serviceApiPath();
+    // Currently the API is mounted on *all* interfaces, see VertxServer#start
+    logger.info("{} API is mounted at :{}{}", serviceName, port, mountPoint);
+
     // TODO: is it worth it — it is not even necessarily *GET* (and you can't filter by that)?
     //   It can also have things like request parameters ('/foo/:bar')
-    String someRoute = serviceRoutes.stream()
+    serviceRoutes.stream()
         .map(Route::getPath)
         .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
         .findAny()
-        .orElse("");
-    // Currently the API is mounted on *all* interfaces, see VertxServer#start
-    logger.info("{} API is mounted at :{}{}", serviceName, port, mountPoint);
-    logger.info("    E.g.: http://127.1:{}{}", port, mountPoint + someRoute);
+        .ifPresent(someRoute ->
+            logger.info("    E.g.: http://127.1:{}{}", port, mountPoint + someRoute)
+        );
   }
 
   /**
