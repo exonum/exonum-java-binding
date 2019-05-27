@@ -63,7 +63,7 @@ public final class TransferTx implements Transaction {
   /**
    * Creates a new transfer transaction from the serialized transaction data.
    */
-  public static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
+  static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
     TxMessageProtos.TransferTx body =

@@ -191,10 +191,13 @@ impl JavaServiceRuntime {
         // Append extra user arguments
         args_builder = Self::add_user_arguments(args_builder, args_append);
 
+        // Log JVM arguments
+        Self::log_jvm_arguments(&args_builder);
+
         args_builder.build()
     }
 
-    /// Adds extra user arguments (optional) to JVM configuration
+    /// Adds extra user arguments (optional) to JVM configuration.
     fn add_user_arguments<I>(mut args_builder: InitArgsBuilder, user_args: I) -> InitArgsBuilder
     where
         I: IntoIterator<Item = String>,
@@ -206,7 +209,7 @@ impl JavaServiceRuntime {
         args_builder
     }
 
-    /// Adds required EJB-related arguments to JVM configuration
+    /// Adds required EJB-related arguments to JVM configuration.
     fn add_required_arguments(
         mut args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
@@ -232,7 +235,7 @@ impl JavaServiceRuntime {
             ))
     }
 
-    /// Adds optional user arguments to JVM configuration
+    /// Adds optional user arguments to JVM configuration.
     fn add_optional_arguments(
         mut args_builder: InitArgsBuilder,
         jvm_config: &JvmConfig,
@@ -244,6 +247,16 @@ impl JavaServiceRuntime {
             ));
         }
         args_builder
+    }
+
+    /// Logs JVM arguments collected by a particular builder.
+    fn log_jvm_arguments(args_builder: &InitArgsBuilder) {
+        let mut jvm_args_line = String::new();
+        for option in args_builder.options().iter() {
+            jvm_args_line.push(' ');
+            jvm_args_line.push_str(option);
+        }
+        info!("JVM arguments:{}", jvm_args_line);
     }
 
     /// Returns a reference to the runtime's executor.

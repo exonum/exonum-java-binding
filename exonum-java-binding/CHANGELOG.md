@@ -29,7 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   
 ### Fixed
 - The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
-request. It is modified to return an empty object (no info) by default. (#904) 
+request. It is modified to return an empty object by default (no info in `content.debug` field
+of the response to `transaction`). (#904)
 
 [tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/transaction/Transaction.html#info()
 

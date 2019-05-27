@@ -25,5 +25,6 @@ mod time_service;
 
 pub use self::config::*;
 pub use self::java_service_runtime::JavaServiceRuntime;
+pub use self::library_loader::get_lib_version;
 pub use self::paths::panic_if_java_options;
 pub use self::service_factory_adapter::JavaServiceFactoryAdapter;
