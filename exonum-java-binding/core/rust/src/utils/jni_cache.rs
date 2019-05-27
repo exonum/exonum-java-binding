@@ -20,13 +20,18 @@
 //!
 //! See: https://docs.oracle.com/en/java/javase/12/docs/specs/jni/invocation.html#jni_onload
 
+use std::os::raw::c_void;
+use std::panic::catch_unwind;
+
 use jni::{
     objects::{GlobalRef, JMethodID},
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
 use parking_lot::{Once, ONCE_INIT};
-use std::os::raw::c_void;
+
+/// Invalid JNI version constant, signifying JNI_OnLoad failure.
+const INVALID_JNI_VERSION: jint = 0;
 
 static INIT: Once = ONCE_INIT;
 
@@ -41,6 +46,7 @@ static mut SERVICE_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
 static mut SERVICE_ADAPTER_CONVERT_TRANSACTION: Option<JMethodID> = None;
 
 static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
+static mut JAVA_LANG_RUNTIME_EXCEPTION: Option<GlobalRef> = None;
 static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
 
 /// This function is executed on loading native library by JVM.
@@ -49,9 +55,12 @@ static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {
     let env = vm.get_env().expect("Cannot get reference to the JNIEnv");
-    init_cache(&env);
 
-    JNI_VERSION_1_8
+    catch_unwind(|| {
+        init_cache(&env);
+        JNI_VERSION_1_8
+    })
+    .unwrap_or(INVALID_JNI_VERSION)
 }
 
 /// Initializes JNI cache considering synchronization
@@ -96,6 +105,9 @@ unsafe fn cache_methods(env: &JNIEnv) {
     JAVA_LANG_ERROR = env
         .new_global_ref(env.find_class("java/lang/Error").unwrap().into())
         .ok();
+    JAVA_LANG_RUNTIME_EXCEPTION = env
+        .new_global_ref(env.find_class("java/lang/RuntimeException").unwrap().into())
+        .ok();
     TRANSACTION_EXECUTION_EXCEPTION = env
         .new_global_ref(
             env.find_class("com/exonum/binding/transaction/TransactionExecutionException")
@@ -113,11 +125,12 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && SERVICE_ADAPTER_STATE_HASHES.is_some()
             && SERVICE_ADAPTER_CONVERT_TRANSACTION.is_some()
             && JAVA_LANG_ERROR.is_some()
+            && JAVA_LANG_RUNTIME_EXCEPTION.is_some()
             && TRANSACTION_EXECUTION_EXCEPTION.is_some(),
         "Error caching Java entities"
     );
 
-    info!("Done caching references to Java classes and methods.");
+    debug!("Done caching references to Java classes and methods.");
 }
 
 /// Produces `JMethodID` for a particular class dealing with its lifetime.
@@ -209,6 +222,12 @@ pub mod classes_refs {
     pub fn java_lang_error() -> GlobalRef {
         check_cache_initalized();
         unsafe { JAVA_LANG_ERROR.clone().unwrap() }
+    }
+
+    /// Returns cached `JClass` for `java/lang/RuntimeException` as a `GlobalRef`.
+    pub fn java_lang_runtime_exception() -> GlobalRef {
+        check_cache_initalized();
+        unsafe { JAVA_LANG_RUNTIME_EXCEPTION.clone().unwrap() }
     }
 
     /// Returns cached `JClass` for `TransactionExecutionException` as a `GlobalRef`.

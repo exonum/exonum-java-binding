@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-use jni::objects::JObject;
-use jni::JNIEnv;
-
 use std::any::Any;
 use std::cell::Cell;
 use std::error::Error;
 use std::result;
 use std::thread;
+
+use jni::objects::JObject;
+use jni::JNIEnv;
 
 use utils::{get_class_name, get_exception_message, jni_cache::classes_refs};
 use {JniError, JniErrorKind, JniResult};
@@ -166,17 +166,7 @@ pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) 
 /// the Java side.
 fn throw(env: &JNIEnv, error_message: &str) {
     // We cannot throw exception from this function, so errors should be written in log instead.
-    let exception = match env.find_class("java/lang/RuntimeException") {
-        Ok(val) => val,
-        Err(e) => {
-            error!(
-                "Unable to find 'RuntimeException' class: {}",
-                e.description()
-            );
-            return;
-        }
-    };
-    if let Err(e) = env.throw_new(exception, error_message) {
+    if let Err(e) = env.throw_new(&classes_refs::java_lang_runtime_exception(), error_message) {
         error!(
             "Failed to throw RuntimeException({}): {}",
             error_message,
@@ -200,9 +190,10 @@ pub fn any_to_string(any: &Box<Any + Send>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::error::Error;
     use std::panic;
+
+    use super::*;
 
     #[test]
     fn str_any() {
