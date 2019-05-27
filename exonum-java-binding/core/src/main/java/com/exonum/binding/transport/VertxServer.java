@@ -98,7 +98,7 @@ final class VertxServer implements Server {
       }
       state = STARTED;
       server.listen(port);
-      logger.info("Java server is listening at {}", server.actualPort());
+      logger.info("Java server is listening at port {}", server.actualPort());
     }
   }
 
