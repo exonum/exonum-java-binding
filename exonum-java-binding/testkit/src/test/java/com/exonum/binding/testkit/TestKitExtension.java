@@ -16,15 +16,15 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.util.LibraryLoader;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-public class TestKitExtension implements ParameterResolver, BeforeEachCallback {
+public class TestKitExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback {
 
   private static final String KEY = "ResourceKey";
 
@@ -45,8 +45,15 @@ public class TestKitExtension implements ParameterResolver, BeforeEachCallback {
   }
 
   @Override
+  public void afterEach(ExtensionContext extensionContext) {
+    TestKit testKit = getStore(extensionContext).get(KEY, TestKit.class);
+    testKit.disposeInternal();
+  }
+
+  @Override
   public boolean supportsParameter(ParameterContext parameterContext,
-                                   ExtensionContext extensionContext) throws ParameterResolutionException {
+                                   ExtensionContext extensionContext)
+      throws ParameterResolutionException {
     return parameterContext.getParameter().getType() == TestKit.class;
   }
 
@@ -58,6 +65,7 @@ public class TestKitExtension implements ParameterResolver, BeforeEachCallback {
   }
 
   private ExtensionContext.Store getStore(ExtensionContext context) {
-    return context.getStore(ExtensionContext.Namespace.create(getClass(), context.getRequiredTestMethod()));
+    return context.getStore(ExtensionContext.Namespace.create(getClass(),
+        context.getRequiredTestMethod()));
   }
 }
