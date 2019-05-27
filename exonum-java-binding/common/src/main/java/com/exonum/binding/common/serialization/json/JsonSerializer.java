@@ -28,7 +28,9 @@ import java.time.ZonedDateTime;
 /**
  * Provides {@link Gson} serializer for converting Java objects to Json and vice versa.
  * It is configured to serialize Exonum objects in a format, compatible with the core framework
- * and light clients (e.g., {@link HashCode} as a hex string).
+ * and light clients (e.g., {@link HashCode} as a hex string). If needed, a new serializer
+ * with adapters for service-specific types can be {@linkplain #builder() created}, with
+ * Exonum types support already included.
  */
 public final class JsonSerializer {
 
@@ -50,8 +52,8 @@ public final class JsonSerializer {
   }
 
   /**
-   * Returns preconfigured {@link Gson} instance. Helpful in cases when no additional configuration
-   * of the Json serializer is required.
+   * Returns preconfigured {@link Gson} instance. Helpful in cases when no additional
+   * {@linkplain #builder() configuration} of the Json serializer is required.
    */
   public static Gson json() {
     return INSTANCE;
