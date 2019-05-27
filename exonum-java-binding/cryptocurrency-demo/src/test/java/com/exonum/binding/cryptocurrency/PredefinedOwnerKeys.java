@@ -16,18 +16,16 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.PUBLIC_KEY_BYTES;
-
-import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.test.Bytes;
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
 
 public class PredefinedOwnerKeys {
 
-  public static final PublicKey FIRST_OWNER_KEY =
-      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(0), PUBLIC_KEY_BYTES));
+  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
-  public static final PublicKey SECOND_OWNER_KEY =
-      PublicKey.fromBytes(Bytes.createPrefixed(Bytes.bytes(1), PUBLIC_KEY_BYTES));
+  public static final KeyPair FIRST_OWNER_KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
+  public static final KeyPair SECOND_OWNER_KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
 
   private PredefinedOwnerKeys() {
     throw new AssertionError("Non-instantiable");

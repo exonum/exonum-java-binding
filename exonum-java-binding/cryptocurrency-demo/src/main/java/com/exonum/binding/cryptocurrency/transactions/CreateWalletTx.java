@@ -54,7 +54,7 @@ public final class CreateWalletTx implements Transaction {
    * Creates a create wallet transaction from the serialized transaction data.
    * @param rawTransaction a raw transaction
    */
-  public static CreateWalletTx fromRawTransaction(RawTransaction rawTransaction) {
+  static CreateWalletTx fromRawTransaction(RawTransaction rawTransaction) {
     checkTransaction(rawTransaction, ID);
 
     TxMessageProtos.CreateWalletTx body =
