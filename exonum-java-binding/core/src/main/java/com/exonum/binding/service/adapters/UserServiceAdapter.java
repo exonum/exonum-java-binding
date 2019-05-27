@@ -201,8 +201,7 @@ public class UserServiceAdapter {
     // Currently the API is mounted on *all* interfaces, see VertxServer#start
     logger.info("{} API is mounted at :{}{}", serviceName, port, mountPoint);
 
-    // TODO: is it worth it — it is not even necessarily *GET* (and you can't filter by that)?
-    //   It can also have things like request parameters ('/foo/:bar')
+    // Log the full path to one of the service endpoint
     serviceRoutes.stream()
         .map(Route::getPath)
         .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
