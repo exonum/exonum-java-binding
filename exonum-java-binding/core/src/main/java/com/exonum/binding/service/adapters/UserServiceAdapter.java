@@ -208,7 +208,7 @@ public class UserServiceAdapter {
         .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
         .findAny()
         .ifPresent(someRoute ->
-            logger.info("    E.g.: http://127.1:{}{}", port, mountPoint + someRoute)
+            logger.info("    E.g.: http://127.0.0.1:{}{}", port, mountPoint + someRoute)
         );
   }
 
