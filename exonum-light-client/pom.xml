@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -270,6 +270,20 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <version>1.18.6.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>delombok</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -291,6 +305,20 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.3</version>
+            <configuration>
+              <excludes>
+                <!--
+                Exclude lombok annotated classes which are located at `src/main/lombok`,
+                because the plugin can't be configured to look for sources there.
+                -->
+                <exclude>com/exonum/client/response/Block.class</exclude>
+                <exclude>com/exonum/client/response/Block*BlockBuilder.class</exclude>
+                <exclude>com/exonum/client/response/BlockResponse.class</exclude>
+                <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
+                <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
+              </excludes>
+            </configuration>
             <executions>
               <execution>
                 <id>prepare-jacoco-agent</id>
@@ -331,6 +359,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -352,6 +381,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-deploy-plugin</artifactId>
+            <version>2.8.2</version>
             <executions>
               <execution>
                 <id>default-deploy</id>

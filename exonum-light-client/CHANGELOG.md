@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-## 0.2.0 <!-- Release date placeholder -->
+## 0.2.0 - 2019-05-27
 
 Second release of Exonum Java Light Client which brings
 system API and blockhain explorer API endpoints support.
