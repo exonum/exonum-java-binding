@@ -105,7 +105,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     List<HashCode> stateHashes = super.getStateHashes(snapshot);
     // Log the state hashes, so that the values passed to the native part of the framework
     // are known.
-    logger.error("state hashes: {}", stateHashes);
+    logger.info("state hashes: {}", stateHashes);
     return stateHashes;
   }
 
