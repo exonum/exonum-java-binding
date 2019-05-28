@@ -20,15 +20,14 @@
 //!
 //! See: https://docs.oracle.com/en/java/javase/12/docs/specs/jni/invocation.html#jni_onload
 
-use std::os::raw::c_void;
-use std::panic::catch_unwind;
-
 use jni::{
     objects::{GlobalRef, JMethodID},
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
 use parking_lot::{Once, ONCE_INIT};
+use std::os::raw::c_void;
+use std::panic::catch_unwind;
 
 /// Invalid JNI version constant, signifying JNI_OnLoad failure.
 const INVALID_JNI_VERSION: jint = 0;

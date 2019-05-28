@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+use jni::objects::JObject;
+use jni::JNIEnv;
+
 use std::any::Any;
 use std::cell::Cell;
 use std::error::Error;
 use std::result;
 use std::thread;
-
-use jni::objects::JObject;
-use jni::JNIEnv;
 
 use utils::{get_class_name, get_exception_message, jni_cache::classes_refs};
 use {JniError, JniErrorKind, JniResult};
