@@ -29,6 +29,12 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import io.vertx.core.Vertx;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pf4j.PluginManager;
@@ -84,17 +90,49 @@ public final class ServiceRuntimeBootstrap {
   }
 
   private static void logRuntimeInfo() {
-    logger.info("Starting Java Service Runtime");
-    // Log VM info, e.g., OpenJDK 64-Bit Server VM (build 12.0.1+12)
-    String vmName = getSysProperty("java.vm.name");
-    String vmVersion = getSysProperty("java.vm.version");
-    logger.info("    VM: {} (build {})", vmName, vmVersion);
+    logExonumInfo();
+    logVmInfo();
+    logOsInfo();
+  }
 
+  private static void logExonumInfo() {
+    Properties buildProperties = readBuildProperties();
+    String version = buildProperties.getProperty("version");
+    String revision = buildProperties.getProperty("revision");
+    long timestamp = Long.parseLong(buildProperties.getProperty("timestamp"));
+    ZonedDateTime buildTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+        ZoneOffset.UTC);
+    logger.info("Starting Java Service Runtime {} (revision {}, built on {})",
+        version, revision, buildTime);
+  }
+
+  private static Properties readBuildProperties() {
+    Properties buildProperties = new Properties();
+    try {
+      ClassLoader cl = ServiceRuntimeBootstrap.class.getClassLoader();
+      InputStream in = cl.getResourceAsStream("build.properties");
+      //noinspection ConstantConditions
+      buildProperties.load(in);
+    } catch (IOException e) {
+      // Log and return the empty properties
+      logger.warn("Failed to load the build properties", e);
+    }
+    return buildProperties;
+  }
+
+  private static void logVmInfo() {
+    // Log VM info, e.g., OpenJDK 64-Bit Server VM (build 12.0.1+12)
+    String name = getSysProperty("java.vm.name");
+    String version = getSysProperty("java.vm.version");
+    logger.info("    VM: {} (build {})", name, version);
+  }
+
+  private static void logOsInfo() {
     // Log OS info, e.g. Linux 4.15.0-50-generic amd64
-    String osName = getSysProperty("os.name");
-    String osVersion = getSysProperty("os.version");
-    String osArch = getSysProperty("os.arch");
-    logger.info("    OS: {} {} {}", osName, osVersion, osArch);
+    String name = getSysProperty("os.name");
+    String version = getSysProperty("os.version");
+    String arch = getSysProperty("os.arch");
+    logger.info("    OS: {} {} {}", name, version, arch);
   }
 
   private static String getSysProperty(String key) {
