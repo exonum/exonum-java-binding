@@ -355,6 +355,16 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
+     * Sets the type of the main TestKit node - either validator or auditor. Note that
+     * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main
+     * TestKit node of this type
+     */
+    public Builder withNodeType(EmulatedNodeType nodeType) {
+      this.nodeType = nodeType;
+      return this;
+    }
+
+    /**
      * Sets number of validator nodes in the TestKit network, should be positive. Note that
      * regardless of the configured number of validators, only a single service will be
      * instantiated. Equal to one by default.
