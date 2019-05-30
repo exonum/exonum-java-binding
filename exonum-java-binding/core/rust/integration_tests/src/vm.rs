@@ -184,10 +184,10 @@ fn project_root_dir() -> PathBuf {
 
 #[cfg(debug_assertions)]
 fn target_path() -> &'static str {
-    "target/debug"
+    "target/debug/deps"
 }
 
 #[cfg(not(debug_assertions))]
 fn target_path() -> &'static str {
-    "target/release"
+    "target/release/deps"
 }
