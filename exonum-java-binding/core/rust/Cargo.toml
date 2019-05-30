@@ -21,7 +21,7 @@ exonum-testkit = "0.11"
 chrono = "0.4.6"
 failure = "0.1.1"
 toml = "0.4.6"
-jni = { version = "0.12.3", features = ["invocation"] }
+jni = { git = "https://github.com/vitvakatu/jni-rs", branch = "auto-detach-threads", version = "0.12.3", features = ["invocation"] }
 lazy_static = "1.3.0"
 log = "0.4.1"
 parking_lot = "0.6"

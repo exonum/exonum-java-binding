@@ -51,5 +51,4 @@ fn concurrent_threads() {
 #[test]
 fn nested_attach() {
     check_nested_attach(&VM, &*EXECUTOR);
-    check_detached(&VM);
 }

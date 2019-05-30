@@ -74,8 +74,7 @@ impl<'t, T: JniExecutor> JniExecutor for &'t T {
 }
 
 /// A "dumb" implementation of `JniExecutor`.
-/// It attaches the current thread to JVM and then detaches.
-/// It just works, but it leads to very poor performance.
+/// It attaches the current thread to JVM as daemon. Thread will be detached when finished.
 #[derive(Clone)]
 pub struct DumbExecutor {
     /// The main JVM interface, which allows to attach threads.
@@ -94,17 +93,8 @@ impl JniExecutor for DumbExecutor {
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
-        match self.vm.get_env() {
-            Ok(jni_env) => f(&jni_env),
-            Err(jni_err) => {
-                if let ThreadDetached = jni_err.0 {
-                    let attach_guard = self.vm.attach_current_thread()?;
-                    f(&attach_guard)
-                } else {
-                    Err(jni_err)
-                }
-            }
-        }
+        let jni_env = self.vm.attach_current_thread_as_daemon()?;
+        f(&jni_env)
     }
 }
 
