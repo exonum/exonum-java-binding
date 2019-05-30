@@ -34,6 +34,7 @@ package com.exonum.binding.common.hash;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.test.CiOnly;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Kurt Alfred Kluever
  */
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class MessageDigestHashFunctionTest {
   private static final ImmutableSet<String> INPUTS = ImmutableSet.of("", "Z", "foobar");
 

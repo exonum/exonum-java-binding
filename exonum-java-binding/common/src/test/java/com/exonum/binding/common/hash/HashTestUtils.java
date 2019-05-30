@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.test.CiOnly;
 import com.exonum.binding.test.EqualsTester;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
@@ -54,6 +55,7 @@ import org.junit.jupiter.api.Assertions;
  * @author Dimitris Andreou
  * @author Kurt Alfred Kluever
  */
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 final class HashTestUtils {
   private HashTestUtils() {
   }
