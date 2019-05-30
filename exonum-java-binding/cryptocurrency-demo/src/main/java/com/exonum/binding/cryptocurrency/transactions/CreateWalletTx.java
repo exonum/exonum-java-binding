@@ -23,15 +23,19 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionPrecondi
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.cryptocurrency.ByteStrings;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.cryptocurrency.WalletProtos;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.util.Objects;
 
 /** A transaction that creates a new named wallet with default balance. */
@@ -41,13 +45,15 @@ public final class CreateWalletTx implements Transaction {
   private static final Serializer<TxMessageProtos.CreateWalletTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.CreateWalletTx.class);
   private final long initialBalance;
+  private final String name;
 
   @VisibleForTesting
-  CreateWalletTx(long initialBalance) {
+  CreateWalletTx(long initialBalance, String name) {
     checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
         initialBalance);
-
+    checkArgument(!Strings.isNullOrEmpty(name), "name=%s", name);
     this.initialBalance = initialBalance;
+    this.name = name;
   }
 
   /**
@@ -61,7 +67,8 @@ public final class CreateWalletTx implements Transaction {
         PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
 
     long initialBalance = body.getInitialBalance();
-    return new CreateWalletTx(initialBalance);
+    String name = body.getName();
+    return new CreateWalletTx(initialBalance, name);
   }
 
   @Override
@@ -69,14 +76,21 @@ public final class CreateWalletTx implements Transaction {
     PublicKey ownerPublicKey = context.getAuthorPk();
 
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
-    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+    ProofMapIndexProxy<PublicKey, WalletProtos.Wallet> wallets = schema.wallets();
 
     if (wallets.containsKey(ownerPublicKey)) {
       throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
     }
 
-    Wallet wallet = new Wallet(initialBalance);
-
+    // Add a new wallet
+    ProofListIndexProxy<HashCode> history = schema.transactionsHistory(ownerPublicKey);
+    WalletProtos.Wallet wallet = WalletProtos.Wallet.newBuilder()
+        .setName(name)
+        .setOwnerPubKey(ByteStrings.copyFrom(ownerPublicKey))
+        .setBalance(initialBalance)
+        .setHistoryHash(ByteStrings.copyFrom(history.getRootHash()))
+        .setHistoryLen(history.size())
+        .build();
     wallets.put(ownerPublicKey, wallet);
   }
 
@@ -94,12 +108,13 @@ public final class CreateWalletTx implements Transaction {
       return false;
     }
     CreateWalletTx that = (CreateWalletTx) o;
-    return initialBalance == that.initialBalance;
+    return initialBalance == that.initialBalance
+        && Objects.equals(name, that.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(initialBalance);
+    return Objects.hash(initialBalance, name);
   }
 }
 

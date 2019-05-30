@@ -23,7 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.ListIndexProxy;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -37,6 +37,8 @@ public final class CryptocurrencySchema implements Schema {
 
   /** A namespace of cryptocurrency service collections. */
   private static final String NAMESPACE = CryptocurrencyService.NAME.replace('-', '_');
+  private static final String TRANSACTIONS_HISTORY_NAME = fullIndexName("transactions_history");
+  private static final String WALLETS_NAME = fullIndexName("wallets");
 
   private final View view;
 
@@ -52,10 +54,9 @@ public final class CryptocurrencySchema implements Schema {
   /**
    * Returns a proof map of wallets.
    */
-  public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
-    String name = fullIndexName("wallets");
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.publicKey(),
-        WalletSerializer.INSTANCE);
+  public ProofMapIndexProxy<PublicKey, WalletProtos.Wallet> wallets() {
+    return ProofMapIndexProxy.newInstance(WALLETS_NAME, view, StandardSerializers.publicKey(),
+        StandardSerializers.protobuf(WalletProtos.Wallet.class));
   }
 
   /**
@@ -65,10 +66,8 @@ public final class CryptocurrencySchema implements Schema {
    *
    * @param walletId wallet address
    */
-  public ListIndexProxy<HashCode> transactionsHistory(PublicKey walletId) {
-    String name = fullIndexName("transactions_history");
-
-    return ListIndexProxy.newInGroupUnsafe(name, walletId.toBytes(), view,
+  public ProofListIndexProxy<HashCode> transactionsHistory(PublicKey walletId) {
+    return ProofListIndexProxy.newInGroupUnsafe(TRANSACTIONS_HISTORY_NAME, walletId.toBytes(), view,
         StandardSerializers.hash());
   }
 

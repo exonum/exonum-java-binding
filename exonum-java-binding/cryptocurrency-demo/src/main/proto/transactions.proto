@@ -11,4 +11,5 @@ message TransferTx {
 
 message CreateWalletTx {
   int64 initialBalance = 1;
+  string name = 2;
 }

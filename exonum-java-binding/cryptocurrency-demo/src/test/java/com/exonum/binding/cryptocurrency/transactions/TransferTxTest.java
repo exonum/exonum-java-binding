@@ -33,10 +33,12 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.cryptocurrency.ByteStrings;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
-import com.exonum.binding.cryptocurrency.Wallet;
+import com.exonum.binding.cryptocurrency.WalletProtos.Wallet;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
@@ -110,22 +112,36 @@ class TransferTxTest {
       testKit.createBlockWithTransactions(transferTx);
 
       testKit.withSnapshot((view) -> {
-        // Check that wallets have correct balances
         CryptocurrencySchema schema = new CryptocurrencySchema(view);
-        ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-        long expectedFromValue = initialBalance - transferSum;
-        assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
-            .isEqualTo(expectedFromValue);
-        long expectedToValue = initialBalance + transferSum;
-        assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
-            .isEqualTo(expectedToValue);
 
         // Check history
         HashCode messageHash = transferTx.hash();
-        assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
+        PublicKey fromPublicKey = FROM_KEY_PAIR.getPublicKey();
+        ProofListIndexProxy<HashCode> fromHistory = schema
+            .transactionsHistory(fromPublicKey);
+        assertThat(fromHistory).containsExactly(messageHash);
+
+        ProofListIndexProxy<HashCode> toHistory = schema
+            .transactionsHistory(TO_KEY_PAIR.getPublicKey());
+        assertThat(toHistory)
             .containsExactly(messageHash);
-        assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
-            .containsExactly(messageHash);
+
+        // Check that wallets have correct balances
+        ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+        long expectedFromValue = initialBalance - transferSum;
+        Wallet expectedFrom = Wallet.newBuilder()
+            .setBalance(expectedFromValue)
+            .setName("Jack")
+            .setHistoryLen(1)
+            .setHistoryHash(ByteStrings.copyFrom(fromHistory.getRootHash()))
+            .setOwnerPubKey(ByteStrings.copyFrom(fromPublicKey))
+            .build();
+        assertThat(wallets.get(fromPublicKey))
+            .isEqualTo(expectedFrom);
+
+        long expectedToValue = initialBalance + transferSum;
+        assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
+            .isEqualTo(expectedToValue);
         return null;
       });
     }

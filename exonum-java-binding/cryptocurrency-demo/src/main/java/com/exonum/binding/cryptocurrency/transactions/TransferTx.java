@@ -28,8 +28,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.cryptocurrency.ByteStrings;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.Wallet;
+import com.exonum.binding.cryptocurrency.WalletProtos;
+import com.exonum.binding.cryptocurrency.WalletProtos.Wallet;
+import com.exonum.binding.cryptocurrency.WalletProtos.Wallet.Builder;
+import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
@@ -86,22 +90,34 @@ public final class TransferTx implements Transaction {
     checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
     CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
-    ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+    ProofMapIndexProxy<PublicKey, WalletProtos.Wallet> wallets = schema.wallets();
     checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
     checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
 
-    Wallet from = wallets.get(fromWallet);
-    Wallet to = wallets.get(toWallet);
+    WalletProtos.Wallet from = wallets.get(fromWallet);
     checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
 
-    // Update the balances
-    wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
-    wallets.put(toWallet, new Wallet(to.getBalance() + sum));
-
+    // todo: Extract things
     // Update the transaction history of each wallet
     HashCode messageHash = context.getTransactionMessageHash();
-    schema.transactionsHistory(fromWallet).add(messageHash);
-    schema.transactionsHistory(toWallet).add(messageHash);
+    ProofListIndexProxy<HashCode> fromHistory = schema.transactionsHistory(fromWallet);
+    fromHistory.add(messageHash);
+    ProofListIndexProxy<HashCode> toHistory = schema.transactionsHistory(toWallet);
+    toHistory.add(messageHash);
+
+    // Update the balances
+    wallets.put(fromWallet, copyOf(from)
+        .setBalance(from.getBalance() - sum)
+        .setHistoryLen(fromHistory.size())
+        .setHistoryHash(ByteStrings.copyFrom(fromHistory.getRootHash()))
+        .build());
+
+    WalletProtos.Wallet to = wallets.get(toWallet);
+    wallets.put(toWallet,  copyOf(to)
+        .setBalance(to.getBalance() + sum)
+        .setHistoryLen(toHistory.size())
+        .setHistoryHash(ByteStrings.copyFrom(toHistory.getRootHash()))
+        .build());
   }
 
   // todo: consider extracting in a TransactionPreconditions or
@@ -112,6 +128,11 @@ public final class TransferTx implements Transaction {
     if (!precondition) {
       throw new TransactionExecutionException(errorCode);
     }
+  }
+
+  private static Builder copyOf(WalletProtos.Wallet from) {
+    return Wallet.newBuilder()
+        .mergeFrom(from);
   }
 
   @Override

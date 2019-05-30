@@ -32,8 +32,8 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
-import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.cryptocurrency.WalletProtos.Wallet;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
@@ -57,7 +57,7 @@ class CreateWalletTxTest {
 
     CreateWalletTx tx = CreateWalletTx.fromRawTransaction(raw);
 
-    assertThat(tx).isEqualTo(new CreateWalletTx(initialBalance));
+    assertThat(tx).isEqualTo(new CreateWalletTx(initialBalance, "Jack"));
   }
 
   @Test
@@ -65,7 +65,7 @@ class CreateWalletTxTest {
     long initialBalance = -1L;
 
     Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> new CreateWalletTx(initialBalance));
+        () -> new CreateWalletTx(initialBalance, "Jack"));
 
     assertThat(t.getMessage()).isEqualTo("The initial balance (-1) must not be negative.");
   }
@@ -81,7 +81,7 @@ class CreateWalletTxTest {
       testKit.withSnapshot((view) -> {
         // Check that entries have been added
         CryptocurrencySchema schema = new CryptocurrencySchema(view);
-        MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+        ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
 
         PublicKey emulatedNodePublicKey = OWNER_KEY_PAIR.getPublicKey();
         assertThat(wallets.containsKey(emulatedNodePublicKey)).isTrue();
@@ -121,7 +121,7 @@ class CreateWalletTxTest {
 
   @Test
   void info() {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
+    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE, "Jack");
 
     String info = tx.info();
 

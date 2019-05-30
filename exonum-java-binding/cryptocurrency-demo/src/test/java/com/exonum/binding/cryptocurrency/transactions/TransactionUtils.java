@@ -21,6 +21,7 @@ import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.cryptocurrency.ByteStrings;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.protobuf.ByteString;
@@ -53,6 +54,7 @@ public class TransactionUtils {
         .transactionId(CreateWalletTx.ID)
         .payload(TxMessageProtos.CreateWalletTx.newBuilder()
             .setInitialBalance(initialBalance)
+            .setName("Jack")
             .build()
             .toByteArray())
         .build();
@@ -89,7 +91,7 @@ public class TransactionUtils {
    * Returns key byte string.
    */
   private static ByteString fromPublicKey(PublicKey k) {
-    return ByteString.copyFrom(k.toBytes());
+    return ByteStrings.copyFrom(k);
   }
 
   /**
