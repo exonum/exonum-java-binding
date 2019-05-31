@@ -26,7 +26,6 @@ import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.time.TimeSchema;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.time.ZoneOffset;
@@ -43,10 +42,6 @@ class TimeSchemaProxyIntegrationTest {
 
   private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
       .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
-
-  static {
-    LibraryLoader.load();
-  }
 
   private TestKit testKit;
 

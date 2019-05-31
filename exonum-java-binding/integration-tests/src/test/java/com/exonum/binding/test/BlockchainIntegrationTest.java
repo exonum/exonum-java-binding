@@ -45,7 +45,6 @@ import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -62,10 +61,6 @@ class BlockchainIntegrationTest {
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final short VALIDATOR_COUNT = 1;
-
-  static {
-    LibraryLoader.load();
-  }
 
   private TestKit testKit;
   private Block block;

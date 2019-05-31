@@ -23,6 +23,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.util.LibraryLoader;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,10 @@ import org.apache.logging.log4j.Logger;
  * and get a snapshot of the database state.
  */
 public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private static final Logger logger = LogManager.getLogger(NodeProxy.class);
 

@@ -41,6 +41,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -80,6 +81,10 @@ import javax.annotation.Nullable;
  *      <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
+
+  static {
+    LibraryLoader.load();
+  }
 
   /**
    * The maximum number of validators supported by TestKit when a time oracle is enabled. The time

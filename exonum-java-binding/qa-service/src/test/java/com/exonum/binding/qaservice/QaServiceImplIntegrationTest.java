@@ -45,7 +45,6 @@ import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TimeProvider;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
@@ -60,10 +59,6 @@ import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class QaServiceImplIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void createDataSchema() {

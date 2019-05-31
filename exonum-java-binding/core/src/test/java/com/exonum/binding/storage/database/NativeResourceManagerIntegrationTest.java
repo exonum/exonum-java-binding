@@ -23,7 +23,6 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,10 +31,6 @@ import org.junit.jupiter.api.Test;
  */
 @RequiresNativeLibrary
 class NativeResourceManagerIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void nativeResourceManagerShallThrowIfUnknownHandle() {
