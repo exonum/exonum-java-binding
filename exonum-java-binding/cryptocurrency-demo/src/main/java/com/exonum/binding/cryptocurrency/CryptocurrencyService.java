@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CryptocurrencyService extends Service {
-  short ID = 42;
-  String NAME = "cryptocurrency-demo";
+  short ID = 43;
+  String NAME = "java-cryptocurrency-advanced";
 
   Optional<Wallet> getWallet(PublicKey ownerKey);
 
