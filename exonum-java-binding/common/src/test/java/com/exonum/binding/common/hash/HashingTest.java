@@ -36,6 +36,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.exonum.binding.test.CiOnly;
 import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.Test;
  * @author Dimitris Andreou
  * @author Kurt Alfred Kluever
  */
+@CiOnly
 class HashingTest {
 
   private static final String ZERO_HASH_HEX =
