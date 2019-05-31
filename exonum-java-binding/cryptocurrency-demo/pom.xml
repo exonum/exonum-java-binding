@@ -8,12 +8,15 @@
     <version>0.7.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>exonum-java-binding-cryptocurrency-demo</artifactId>
+  <artifactId>java-cryptocurrency-advanced</artifactId>
   <version>0.7.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Exonum Java Binding: Cryptocurrency Java service</name>
-  <description>A simple cryptocurrency Exonum Java service.</description>
+  <name>Cryptocurrency-advanced Java service</name>
+  <description>An *incomplete* clone of cryptocurrency-advanced in Java. It has the same
+    schema and the same TransferTx implementation as its Rust counterpart. However, "create wallet",
+    "issue funds" transactions, and service public API are *not* the same as in Rust.
+  </description>
 
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
