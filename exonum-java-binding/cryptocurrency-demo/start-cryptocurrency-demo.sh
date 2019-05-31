@@ -29,12 +29,12 @@ export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 
 # Find the latest version of artifact and build if not found.
-ARTIFACT_PATH="$(find ./target -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
+ARTIFACT_PATH="$(find ./target -type f -name java-cryptocurrency-advanced-*-artifact.jar)"
 
 if [ -z "${ARTIFACT_PATH}" ];
 then
     mvn package
-    ARTIFACT_PATH="$(find ./target -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
+    ARTIFACT_PATH="$(find ./target -type f -name java-cryptocurrency-advanced-*-artifact.jar)"
 fi
 echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
 
