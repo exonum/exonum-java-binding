@@ -22,7 +22,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>3.6.1</lazysodium-java.version>
+    <lazysodium-java.version>3.6.2</lazysodium-java.version>
     <auto-value.version>1.6.5</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
   </properties>
