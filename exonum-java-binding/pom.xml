@@ -116,7 +116,7 @@
     <junit.jupiter.version>5.4.2</junit.jupiter.version>
     <powermock.version>2.0.2</powermock.version>
     <protobuf.version>3.8.0</protobuf.version>
-    <mockito-core.version>2.27.0</mockito-core.version>
+    <mockito-core.version>2.28.2</mockito-core.version>
     <guava.version>27.1-jre</guava.version>
     <vertx.version>3.7.1</vertx.version>
     <equalsverifier.version>3.1.8</equalsverifier.version>
