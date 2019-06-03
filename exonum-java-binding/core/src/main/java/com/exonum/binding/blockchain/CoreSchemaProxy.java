@@ -41,6 +41,7 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.util.LibraryLoader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -50,6 +51,10 @@ import java.nio.ByteOrder;
  * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">doc</a> for details.
  */
 final class CoreSchemaProxy {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private final NativeHandle nativeHandle;
   private final View dbView;

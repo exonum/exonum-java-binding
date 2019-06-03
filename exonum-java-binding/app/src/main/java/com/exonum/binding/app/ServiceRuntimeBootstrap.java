@@ -75,7 +75,7 @@ public final class ServiceRuntimeBootstrap {
       // Log the information about the runtime and environment
       logRuntimeInfo();
 
-      // Load the native libraries
+      // Load the native libraries early
       LibraryLoader.load();
 
       // Create the framework injector

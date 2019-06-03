@@ -38,7 +38,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("unchecked") // Don't warn of unchecked assignment of mocks
 @ExtendWith(MockitoExtension.class)
-class BlockchainTest {
+// todo: rename in ECR-3195
+class Blockchain2IntegrationTest {
 
   private static final long HEIGHT = 10L;
 

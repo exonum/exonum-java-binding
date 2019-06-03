@@ -25,16 +25,11 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class TimeSchemaProxyIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void getTimeTest() {
