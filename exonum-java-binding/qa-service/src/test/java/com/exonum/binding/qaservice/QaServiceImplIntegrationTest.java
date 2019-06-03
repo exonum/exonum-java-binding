@@ -53,10 +53,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.test.appender.ListAppender;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -69,27 +65,6 @@ class QaServiceImplIntegrationTest {
     LibraryLoader.load();
   }
 
-  private ListAppender logAppender;
-
-  @BeforeEach
-  void setUp() {
-    logAppender = getCapturingLogAppender();
-  }
-
-  private static ListAppender getCapturingLogAppender() {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    Configuration config = ctx.getConfiguration();
-    ListAppender appender = (ListAppender) config.getAppenders().get("ListAppender");
-    // Clear the appender so that it doesn't contain entries from the previous tests.
-    appender.clear();
-    return appender;
-  }
-
-  @AfterEach
-  void tearDown() {
-    logAppender.clear();
-  }
-
   @Test
   void createDataSchema() {
     try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
@@ -97,28 +72,6 @@ class QaServiceImplIntegrationTest {
       testKit.withSnapshot((view) -> {
         Schema dataSchema = service.createDataSchema(view);
         assertThat(dataSchema).isInstanceOf(QaSchema.class);
-        return null;
-      });
-    }
-  }
-
-  @Test
-  void getStateHashesLogsThem() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      testKit.withSnapshot((view) -> {
-        List<HashCode> stateHashes = service.getStateHashes(view);
-        int numMerkelizedCollections = 1;
-        assertThat(stateHashes).hasSize(numMerkelizedCollections);
-
-        List<String> logMessages = logAppender.getMessages();
-        // Logger contains two messages as #getStateHashes is called during service instantiation
-        int expectedNumMessages = 2;
-        assertThat(logMessages).hasSize(expectedNumMessages);
-
-        assertThat(logMessages.get(0))
-            .contains("ERROR")
-            .contains(stateHashes.get(0).toString());
         return null;
       });
     }

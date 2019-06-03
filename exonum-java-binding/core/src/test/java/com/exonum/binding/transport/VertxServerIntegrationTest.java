@@ -30,6 +30,7 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -76,6 +77,11 @@ class VertxServerIntegrationTest {
   }
 
   @Test
+  void getActualPort_BeforeStart() {
+    assertThat(server.getActualPort(), equalTo(OptionalInt.empty()));
+  }
+
+  @Test
   void stop_properlyStops() throws Exception {
     server.start(ANY_PORT);
     CompletableFuture<Void> f = server.stop();
@@ -108,6 +114,9 @@ class VertxServerIntegrationTest {
       // Start a server.
       int port = findFreePort();
       server.start(port);
+
+      // Check the port
+      assertThat(server.getActualPort(), equalTo(OptionalInt.of(port)));
 
       // Define a request handler.
       Router r = server.createRouter();

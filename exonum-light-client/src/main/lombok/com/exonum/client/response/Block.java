@@ -43,7 +43,7 @@ public class Block {
   int proposerId;
 
   /**
-   * Returns the height of this block which is a distance between the last block and the "genesis"
+   * The height of this block which is a distance between the last block and the "genesis"
    * block. Genesis block has 0 height. Therefore, the blockchain height is equal to
    * the number of blocks plus one.
    *

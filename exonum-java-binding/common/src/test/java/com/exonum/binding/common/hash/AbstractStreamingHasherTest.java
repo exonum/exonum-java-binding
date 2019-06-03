@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashTestUtils.RandomHasherAction;
+import com.exonum.binding.test.CiOnly;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.ByteArrayOutputStream;
@@ -54,7 +55,9 @@ import org.junit.jupiter.api.Test;
  *
  * @author Dimitris Andreou
  */
+@CiOnly  // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class AbstractStreamingHasherTest {
+
   @Test
   void testBytes() {
     Sink sink = new Sink(4); // byte order insignificant here

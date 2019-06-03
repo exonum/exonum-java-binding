@@ -96,12 +96,17 @@ public final class ServiceRuntime {
   public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
     Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
     try {
+      ServiceId serviceId;
       synchronized (lock) {
         LoadedServiceDefinition loadedServiceDefinition = serviceLoader
             .loadService(serviceArtifactLocation);
-        ServiceId serviceId = loadedServiceDefinition.getId();
-        return serviceId.toString();
+        serviceId = loadedServiceDefinition.getId();
       }
+
+      // Debug as 'loading' is an impl detail (until dynamic services)
+      logger.debug("Loaded an artifact ({}) from {}", serviceId, serviceArtifactPath);
+
+      return serviceId.toString();
     } catch (Throwable e) {
       logger.error("Failed to load an artifact from {}", serviceArtifactPath, e);
       throw e;
@@ -119,14 +124,21 @@ public final class ServiceRuntime {
   public UserServiceAdapter createService(String artifactId) {
     try {
       ServiceId serviceId = ServiceId.parseFrom(artifactId);
+
+      UserServiceAdapter service;
       synchronized (lock) {
         LoadedServiceDefinition serviceDefinition = serviceLoader.findService(serviceId)
             .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
         Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
         Module serviceModule = serviceModuleSupplier.get();
         Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
-        return serviceInjector.getInstance(UserServiceAdapter.class);
+        service = serviceInjector.getInstance(UserServiceAdapter.class);
       }
+
+      logger.info("Created {} service (id={}, artifactId={})", service.getName(), service.getId(),
+          artifactId);
+
+      return service;
     } catch (Throwable e) {
       logger.error("Failed to create a service {} instance", artifactId, e);
       throw e;

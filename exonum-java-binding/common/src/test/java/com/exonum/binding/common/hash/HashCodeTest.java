@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.test.CiOnly;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.Test;
  * @author Dimitris Andreou
  * @author Kurt Alfred Kluever
  */
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class HashCodeTest {
   // note: asInt(), asLong() are in little endian
   private static final ImmutableList<ExpectedHashCode> expectedHashCodes =

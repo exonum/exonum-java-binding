@@ -17,6 +17,7 @@
 package com.exonum.binding.transport;
 
 import io.vertx.ext.web.Router;
+import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -62,6 +63,12 @@ public interface Server {
    * @param port a port to listen on
    */
   void start(int port);
+
+  /**
+   * Returns a port this server is listening at, or {@link OptionalInt#empty()} if it does not
+   * currently accept requests.
+   */
+  OptionalInt getActualPort();
 
   /**
    * Requests the server to stop listening to incoming requests and release any resources.
