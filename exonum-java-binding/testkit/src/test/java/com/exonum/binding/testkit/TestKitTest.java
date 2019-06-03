@@ -54,14 +54,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+@TestInstance(Lifecycle.PER_CLASS)
 class TestKitTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder(EmulatedNodeType.VALIDATOR)
+  static TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
           .withService(TestServiceModule.class));
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
@@ -81,7 +85,7 @@ class TestKitTest {
 
   @Test
   void createTestKitWithBuilderForSingleService() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .build()) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -94,14 +98,14 @@ class TestKitTest {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     List<Class<? extends ServiceModule>> serviceModules = ImmutableList.of(TestServiceModule.class,
         TestServiceModule.class);
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withServices(serviceModules);
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
   @Test
   void createTestKitWithBuilderForMultipleDifferentServices() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withService(TestServiceModule2.class)
         .build()) {
@@ -114,7 +118,7 @@ class TestKitTest {
 
   @Test
   void createTestKitWithBuilderForMultipleDifferentServicesVarargs() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withServices(TestServiceModule.class, TestServiceModule2.class)
         .build()) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -127,7 +131,7 @@ class TestKitTest {
   @Test
   void createTestKitWithTimeService() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build()) {
@@ -183,7 +187,7 @@ class TestKitTest {
   @Test
   void createTestKitWithSeveralValidators() {
     short validatorCount = 2;
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withValidators(validatorCount)
         .build()) {
@@ -199,7 +203,8 @@ class TestKitTest {
   @Test
   void createTestKitWithAuditorAndAdditionalValidators() {
     short validatorCount = 2;
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.AUDITOR)
+    try (TestKit testKit = TestKit.builder()
+        .withNodeType(EmulatedNodeType.AUDITOR)
         .withService(TestServiceModule.class)
         .withValidators(validatorCount)
         .build()) {
@@ -216,7 +221,7 @@ class TestKitTest {
   void setInvalidValidatorCount() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     short invalidValidatorCount = 0;
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withService(TestServiceModule.class);
     assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
   }
@@ -224,7 +229,7 @@ class TestKitTest {
   @Test
   void requestWrongServiceClass() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .build()) {
       assertThrows(exceptionType,
@@ -247,7 +252,7 @@ class TestKitTest {
     for (int i = 0; i < TestKit.MAX_SERVICE_NUMBER + 1; i++) {
       serviceModules.add(TestServiceModule.class);
     }
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withServices(serviceModules);
     assertThrows(exceptionType, testKitBuilder::build);
   }
@@ -255,7 +260,7 @@ class TestKitTest {
   @Test
   void createTestKitWithoutServices() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR);
+    TestKit.Builder testKitBuilder = TestKit.builder();
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
@@ -494,7 +499,8 @@ class TestKitTest {
 
   @Test
   void getAuditorEmulatedNode() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.AUDITOR)
+    try (TestKit testKit = TestKit.builder()
+        .withNodeType(EmulatedNodeType.AUDITOR)
         .withService(TestServiceModule.class)
         .build()) {
       EmulatedNode node = testKit.getEmulatedNode();
@@ -507,7 +513,7 @@ class TestKitTest {
   @Test
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build()) {
@@ -549,7 +555,7 @@ class TestKitTest {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     short invalidValidatorCount = TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE + 1;
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .withValidators(invalidValidatorCount);

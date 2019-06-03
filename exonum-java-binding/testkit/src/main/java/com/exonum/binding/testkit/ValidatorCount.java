@@ -22,7 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Changes network validator count for injected TestKit.
+ * Number of validator nodes in the TestKit network, should be positive. Note that regardless of
+ * the configured number of validators, only a single service will be instantiated.
+ *
+ * @see TestKit.Builder#withValidators(short)
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

@@ -16,15 +16,22 @@
 
 package com.exonum.binding.testkit;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Disables Time Service for injected TestKit.
- */
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface WithoutTimeService {
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+class TestKitAuditorParameterizationTest {
+
+  @RegisterExtension
+  TestKitExtension testKitAuditorExtension = new TestKitExtension(
+      TestKit.builder()
+          .withNodeType(EmulatedNodeType.AUDITOR)
+          .withService(TestServiceModule.class));
+
+  @Test
+  void testTestKitValidator(@Validator TestKit testKit) {
+    // Check that main TestKit node is a validator
+    assertThat(testKit.getEmulatedNode().getValidatorId()).isNotEmpty();
+  }
 }

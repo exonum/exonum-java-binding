@@ -23,6 +23,9 @@ import java.lang.annotation.Target;
 
 /**
  * Changes main TestKit node type to auditor for injected TestKit.
+ *
+ * @see TestKit.Builder#withNodeType(EmulatedNodeType)
+ *      <a href="https://exonum.com/doc/version/0.11/glossary/#auditor">Auditor Node</a>
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
