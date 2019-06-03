@@ -3,6 +3,17 @@ syntax = "proto3";
 option java_package = "com.exonum.binding.cryptocurrency";
 option java_outer_classname = "WalletProtos";
 
+// Wallet information stored in the database.
+// A patched copy of https://github.com/exonum/exonum/blob/05b1cab64763df4e7041fbcac6ef4efcb3db2195/examples/cryptocurrency-advanced/backend/src/proto/cryptocurrency.proto#L44-L57
 message Wallet {
-    int64 balance = 1;
+    // `PublicKey` of the wallet.
+    bytes owner_pub_key = 1;
+    // Name of the wallet.
+    string name = 2;
+    // Current balance of the wallet.
+    uint64 balance = 3;
+    // Length of the transactions history.
+    uint64 history_len = 4;
+    // `Hash` of the transactions history.
+    bytes history_hash = 5;
 }

@@ -28,7 +28,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
-import com.exonum.binding.cryptocurrency.Wallet;
+import com.exonum.binding.cryptocurrency.WalletProtos.Wallet;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;

@@ -32,6 +32,7 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.ListIndex;
 import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
@@ -75,9 +76,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
     return node.withSnapshot((view) -> {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+      ProofMapIndexProxy<PublicKey, WalletProtos.Wallet> wallets = schema.wallets();
 
-      return Optional.ofNullable(wallets.get(ownerKey));
+      return Optional.ofNullable(wallets.get(ownerKey))
+          .map(wp -> new Wallet(wp.getBalance()));
     });
   }
 

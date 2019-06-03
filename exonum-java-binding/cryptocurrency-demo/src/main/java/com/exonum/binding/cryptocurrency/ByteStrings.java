@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.service.Service;
-import java.util.List;
-import java.util.Optional;
+import com.exonum.binding.common.crypto.AbstractKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.google.protobuf.ByteString;
 
-public interface CryptocurrencyService extends Service {
-  short ID = 43;
-  String NAME = "java-cryptocurrency-advanced";
+public class ByteStrings {
 
-  Optional<Wallet> getWallet(PublicKey ownerKey);
+  public static ByteString copyFrom(AbstractKey key) {
+    return ByteString.copyFrom(key.toBytes());
+  }
 
-  List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
+  public static ByteString copyFrom(HashCode hash) {
+    return ByteString.copyFrom(hash.asBytes());
+  }
 }
