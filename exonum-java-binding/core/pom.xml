@@ -195,6 +195,7 @@
         <executions>
           <!-- Each execution has its own configuration for
                we need to execute cargo during various phases (e.g., compile).
+
                Correspondences between Maven and Cargo phases:
                 | Maven   | Cargo |
                 | compile | build |
@@ -204,7 +205,8 @@
                not supported. -->
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
-                 depend on the library -->
+                 depend on the library. The library is built with resource-manager feature
+                 enabled to detect possible errors with handle management. -->
             <id>build-rust-lib-for-tests</id>
             <phase>compile</phase>
             <configuration>
@@ -223,34 +225,7 @@
             </goals>
           </execution>
 
-          <!-- Runs rust native tests without resource manager.
-
-               todo: run on a CI server only
-               Note: cannot be currently extracted in 'ci-build' profile for will produce a library
-               without rm and break ITs in Java. -->
-          <execution>
-            <id>test-rust-lib-no-resource-manager</id>
-            <phase>test</phase>
-            <configuration>
-              <arguments>
-                <argument>+${rust.compiler.version}</argument>
-                <argument>test</argument>
-                <argument>--all</argument>
-                <argument>--exclude</argument>
-                <argument>${rust.itSubCrate}</argument>
-                <!-- Exonum Java app depends on `resource-manager`, so we do not test it here -->
-                <argument>--exclude</argument>
-                <argument>${rust.appSubCrate}</argument>
-                <argument>--color</argument>
-                <argument>always</argument>
-              </arguments>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-
+          <!-- Run the unit-tests of the Rust library with resource-manager feature enabled. -->
           <execution>
             <id>test-rust-lib</id>
             <phase>test</phase>
@@ -400,8 +375,9 @@
 
   <profiles>
     <!-- A build profile for a build performed on a CI server:
-            - Fails if the code has style issues
-            - Runs FindBugs during verify phase
+           - Fails if the code has style issues
+           - Runs FindBugs during verify phase
+           - Runs unit tests of the Rust library without resource-manager feature
      -->
     <profile>
       <id>ci-build</id>
@@ -416,6 +392,37 @@
                 <phase>verify</phase>
                 <goals>
                   <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+            <executions>
+              <!-- Run the unit-tests of the Rust library without resource-manager feature. -->
+              <execution>
+                <id>test-rust-lib-no-resource-manager</id>
+                <phase>test</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>test</argument>
+                    <argument>--all</argument>
+                    <argument>--exclude</argument>
+                    <argument>${rust.itSubCrate}</argument>
+                    <!-- Exonum Java app depends on `resource-manager`, so we do not test it here -->
+                    <argument>--exclude</argument>
+                    <argument>${rust.appSubCrate}</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                  <skip>${skipTests}</skip>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
                 </goals>
               </execution>
             </executions>
