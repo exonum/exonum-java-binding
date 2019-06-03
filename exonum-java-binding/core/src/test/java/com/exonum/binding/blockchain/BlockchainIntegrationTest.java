@@ -42,7 +42,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.MapIndexProxy;
 import com.exonum.binding.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,10 +59,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RequiresNativeLibrary
 @ExtendWith(MockitoExtension.class)
 class BlockchainIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   private static final String TEST_BLOCKS = "test_blocks";
   private static final String TEST_BLOCK_HASHES = "test_block_hashes";

@@ -24,9 +24,14 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.util.LibraryLoader;
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private static final Serializer<PublicKey> PUBLIC_KEY_SERIALIZER =
       StandardSerializers.publicKey();

@@ -20,6 +20,7 @@ import static com.exonum.binding.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 
 import com.exonum.binding.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.proxy.Cleaner;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -30,6 +31,10 @@ import com.google.common.annotations.VisibleForTesting;
  * @see com.exonum.binding.service.NodeFake
  */
 public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
+
+  static {
+    LibraryLoader.load();
+  }
 
   /**
    * Creates a new empty MemoryDb.

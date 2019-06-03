@@ -21,18 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class QaSchemaIntegrationTest {
-
-  @BeforeAll
-  static void loadLibrary() {
-    LibraryLoader.load();
-  }
 
   @Test
   void getStateHashesEmptyDb() {

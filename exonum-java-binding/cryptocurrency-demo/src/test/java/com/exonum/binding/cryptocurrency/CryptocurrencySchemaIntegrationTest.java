@@ -22,16 +22,11 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class CryptocurrencySchemaIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
