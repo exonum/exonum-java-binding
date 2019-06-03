@@ -66,24 +66,18 @@
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
 
-      <plugin><!--Do not create Jar-->
+      <plugin><!--Do not create an empty Jar-->
         <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <phase/>
-          </execution>
-        </executions>
+        <configuration>
+          <skipIfEmpty>true</skipIfEmpty>
+        </configuration>
       </plugin>
 
       <plugin><!--Do not install Jar-->
         <artifactId>maven-install-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-install</id>
-            <phase/>
-          </execution>
-        </executions>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
       </plugin>
 
       <plugin>
