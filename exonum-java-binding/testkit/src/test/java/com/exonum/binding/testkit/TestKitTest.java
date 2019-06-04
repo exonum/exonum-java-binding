@@ -41,7 +41,6 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -68,10 +67,6 @@ class TestKitTest {
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void createTestKitForSingleService(TestKit testKit) {

@@ -43,7 +43,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -61,10 +60,6 @@ class TransferTxTest {
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void fromRawTransaction() {

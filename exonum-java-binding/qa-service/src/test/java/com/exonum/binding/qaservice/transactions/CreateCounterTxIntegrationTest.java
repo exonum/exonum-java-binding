@@ -40,7 +40,6 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -53,10 +52,6 @@ class CreateCounterTxIntegrationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(QaServiceModule.class));
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void converterRejectsWrongServiceId() {

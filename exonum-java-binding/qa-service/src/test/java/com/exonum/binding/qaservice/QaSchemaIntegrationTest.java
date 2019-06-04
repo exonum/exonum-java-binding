@@ -22,9 +22,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.List;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -35,11 +33,6 @@ class QaSchemaIntegrationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(QaServiceModule.class));
-
-  @BeforeAll
-  static void loadLibrary() {
-    LibraryLoader.load();
-  }
 
   @Test
   void getStateHashesEmptyDb(TestKit testKit) {

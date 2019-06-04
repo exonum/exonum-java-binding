@@ -41,7 +41,6 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
 import com.exonum.binding.transaction.TransactionExecutionException;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -57,10 +56,6 @@ class ErrorTxIntegrationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(QaServiceModule.class));
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void converterRejectsWrongServiceId() {

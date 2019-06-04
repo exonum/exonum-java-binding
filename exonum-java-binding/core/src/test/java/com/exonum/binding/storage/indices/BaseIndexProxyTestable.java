@@ -28,7 +28,6 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,10 +38,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 // Currently it's not possible due to JUnit 4 limitations (e.g., @Rules do not work).
 @RequiresNativeLibrary
 abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
-
-  static {
-    LibraryLoader.load();
-  }
 
   MemoryDb database;
 

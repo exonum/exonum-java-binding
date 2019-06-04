@@ -32,6 +32,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.function.LongSupplier;
 
@@ -58,6 +59,10 @@ import java.util.function.LongSupplier;
  */
 public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
     implements ListIndex<E> {
+
+  static {
+    LibraryLoader.load();
+  }
 
   /**
    * Creates a new ProofListIndexProxy storing protobuf messages.

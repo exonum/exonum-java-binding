@@ -22,7 +22,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.testkit.*;
 import com.exonum.binding.time.TimeSchema;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.time.ZoneOffset;
@@ -45,10 +44,6 @@ class TimeSchemaProxyIntegrationTest {
       TestKit.builder()
           .withService(TestServiceModule.class)
           .withTimeService(timeProvider));
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void getTime(TestKit testKit) {

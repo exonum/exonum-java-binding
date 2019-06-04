@@ -46,7 +46,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.testkit.ValidatorCount;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
@@ -69,10 +68,6 @@ class QaServiceImplIntegrationTest {
           .withService(QaServiceModule.class));
 
   private static final short NEW_VALIDATOR_COUNT = 8;
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void createDataSchema(TestKit testKit) {

@@ -23,7 +23,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -35,10 +34,6 @@ class CryptocurrencySchemaIntegrationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(CryptocurrencyServiceModule.class));
-
-  static {
-    LibraryLoader.load();
-  }
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();

@@ -38,7 +38,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -51,10 +50,6 @@ class ThrowingTxIntegrationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(QaServiceModule.class));
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void converterRoundtrip() {

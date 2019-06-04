@@ -56,7 +56,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceAdapterTest {
+class UserServiceAdapterIntegrationTest {
 
   @Mock
   private Service service;
