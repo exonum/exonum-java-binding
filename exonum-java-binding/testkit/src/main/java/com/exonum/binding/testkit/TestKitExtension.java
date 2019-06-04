@@ -16,7 +16,6 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableSet;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -30,41 +29,44 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 /**
- * Extension that injects TestKit into service tests. Register this extension with TestKit builder
- * and a TestKit will be injected as a parameter, instantiated from given builder.
- *
- * Allows injecting TestKit into test context:
+ * Extension that injects TestKit into service tests and destroys afterwards. Register this
+ * extension with TestKit builder and a TestKit will be injected as a parameter, instantiated from
+ * given builder. Example usage:
  *
  * <pre><code>
- * @RegisterExtension
+ * &#64;RegisterExtension
  * static TestKitExtension testKitExtension = new TestKitExtension(
  *     TestKit.builder()
  *         .withService(TestServiceModule.class));
  *
- * @BeforeEach
- * void setUp(TestKit testKit) {
- *   // Set up logic
+ * &#64;BeforeEach
+ * void setUp() {
+ *   // Set up
  * }
  *
- * @Test
+ * &#64;Test
  * void test(TestKit testKit) {
  *   // Test logic
  * }
  * </code></pre>
- *
  * instead of:
- *
  * <pre><code>
- * static {
- *   LibraryLoader.load();
+ * private TestKit testKit;
+ *
+ * &#64;BeforeEach
+ * void setUp() {
+ *   testKit = TestKit.forService(TestServiceModule.class));
+ *   // Set up
  * }
  *
- * @Test
+ * &#64;Test
  * void test() {
- *   try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
- *     // Set up logic
- *     // Test logic
- *   }
+ *   // Test logic
+ * }
+ *
+ * &#64;AfterEach
+ * void destroyTestKit() {
+ *   testKit.close();
  * }
  * </code></pre>
  *
@@ -75,17 +77,15 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  *   <li>{@link Auditor} sets main TestKit validator node type to auditor</li>
  *   <li>{@link ValidatorCount} sets number of validator nodes in the TestKit network</li>
  * </ul>
- *
  * These annotations should be applied on TestKit parameter:
- *
  * <pre><code>
- * @RegisterExtension
+ * &#64;RegisterExtension
  * static TestKitExtension testKitExtension = new TestKitExtension(
  *     TestKit.builder()
  *         .withService(TestServiceModule.class));
  *
- * @Test
- * void test(@Auditor @ValidatorCount(validatorCount = 8) TestKit testKit) {
+ * &#64;Test
+ * void test(&#64;Auditor &#64;ValidatorCount(8) TestKit testKit) {
  *   // Test logic
  * }
  * </code></pre>
@@ -102,10 +102,6 @@ public class TestKitExtension implements ParameterResolver {
   private static final String KEY = "ResourceKey";
   private static final Set<Class> testKitModificationAnnotations =
       ImmutableSet.of(Auditor.class, Validator.class, ValidatorCount.class);
-
-  static {
-    LibraryLoader.load();
-  }
 
   private final TestKit.Builder templateTestKitBuilder;
 
@@ -135,8 +131,8 @@ public class TestKitExtension implements ParameterResolver {
       // Throw an exception if TestKit was already instantiated in this context, but user tries to
       // reconfigure it
       if (annotationsUsed(parameterContext)) {
-        throw new ParameterResolutionException("TestKit was parameterized with annotations after being"
-            + " instantiated in " + extensionContext.getDisplayName());
+        throw new ParameterResolutionException("TestKit was parameterized with annotations after"
+            + " being instantiated in " + extensionContext.getDisplayName());
       }
       testKit = closeableTestKit.getTestKit();
     }
@@ -149,10 +145,15 @@ public class TestKitExtension implements ParameterResolver {
   private void checkExtensionContext(ExtensionContext extensionContext) {
     Optional<Method> testMethod = extensionContext.getTestMethod();
     testMethod.orElseThrow(() ->
-        new RuntimeException("TestKit can't be injected in @BeforeAll or @AfterAll"));
+        new RuntimeException("TestKit can't be injected in @BeforeAll or @AfterAll because it is"
+            + " a stateful, mutable object and sharing it between all tests is error-prone."
+            + " Consider injecting it in @BeforeEach instead.\n"
+            + " If you do need the same instance for all tests — just use `TestKit#builder`"
+            + " directly. Don't forget to destroy it in @AfterEach."));
   }
 
-  private TestKit buildTestKit(ParameterContext parameterContext, ExtensionContext extensionContext) {
+  private TestKit buildTestKit(ParameterContext parameterContext,
+                               ExtensionContext extensionContext) {
     TestKit.Builder testKitBuilder = createTestKitBuilder(parameterContext, extensionContext);
     return testKitBuilder.build();
   }
@@ -168,8 +169,8 @@ public class TestKitExtension implements ParameterResolver {
     Optional<Auditor> auditorAnnotation = parameterContext.findAnnotation(Auditor.class);
     Optional<Validator> validatorAnnotation = parameterContext.findAnnotation(Validator.class);
     if (auditorAnnotation.isPresent() && validatorAnnotation.isPresent()) {
-      throw new ParameterResolutionException("Both @Validator and @Auditor annotations were used in "
-          + extensionContext.getDisplayName());
+      throw new ParameterResolutionException("Both @Validator and @Auditor annotations were used"
+          + " in " + extensionContext.getDisplayName());
     }
     auditorAnnotation.ifPresent(auditor -> testKitBuilder.withNodeType(EmulatedNodeType.AUDITOR));
     validatorAnnotation.ifPresent(validator ->
@@ -178,7 +179,7 @@ public class TestKitExtension implements ParameterResolver {
     Optional<ValidatorCount> validatorCountAnnotation =
         parameterContext.findAnnotation(ValidatorCount.class);
     validatorCountAnnotation.ifPresent(validatorCount ->
-        testKitBuilder.withValidators(validatorCount.validatorCount()));
+        testKitBuilder.withValidators(validatorCount.value()));
     return testKitBuilder;
   }
 

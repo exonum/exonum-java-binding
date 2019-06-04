@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  * Changes main TestKit node type to validator for injected TestKit.
  *
  * @see TestKit.Builder#withNodeType(EmulatedNodeType)
- *      <a href="https://exonum.com/doc/version/0.11/glossary/#validator">Validator Node</a>
+ * @see <a href="https://exonum.com/doc/version/0.11/glossary/#validator">Validator Node</a>
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

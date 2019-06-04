@@ -74,4 +74,9 @@ public class FakeTimeProvider implements TimeProvider {
   public ZonedDateTime getTime() {
     return time;
   }
+
+  @Override
+  public TimeProvider copy() {
+    return new FakeTimeProvider(time);
+  }
 }

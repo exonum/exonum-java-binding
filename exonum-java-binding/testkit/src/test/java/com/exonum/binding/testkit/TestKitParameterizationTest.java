@@ -19,41 +19,48 @@ package com.exonum.binding.testkit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.storage.database.Snapshot;
+import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 class TestKitParameterizationTest {
 
+  private static final short TEMPLATE_VALIDATOR_COUNT = 1;
+  private static final EmulatedNodeType TEMPLATE_NODE_TYPE = EmulatedNodeType.VALIDATOR;
+  private static final short NEW_VALIDATOR_COUNT = 8;
+
   @RegisterExtension
   static TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
-          .withService(TestServiceModule.class));
+          .withNodeType(TEMPLATE_NODE_TYPE)
+          .withService(TestServiceModule.class)
+          .withValidators(TEMPLATE_VALIDATOR_COUNT));
 
   @Test
   void testDefaultTestKit(TestKit testKit) {
-    // Check that main TestKit node is an auditor
-    assertThat(testKit.getEmulatedNode().getValidatorId()).isNotEmpty();
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
-          .isEqualTo(1);
-      return null;
-    });
+    // Check that main TestKit node is a validator
+    assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(TEMPLATE_NODE_TYPE);
+    testKit.withSnapshot(verifyNumValidators(TEMPLATE_VALIDATOR_COUNT));
   }
 
   @Test
   void testTestKitAuditor(@Auditor TestKit testKit) {
     // Check that main TestKit node is an auditor
-    assertThat(testKit.getEmulatedNode().getValidatorId()).isEmpty();
+    assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.AUDITOR);
   }
 
   @Test
-  void testTestKitValidatorCount(@ValidatorCount(validatorCount = 8) TestKit testKit) {
-    testKit.withSnapshot((view) -> {
+  void testTestKitValidatorCount(@ValidatorCount(NEW_VALIDATOR_COUNT) TestKit testKit) {
+    testKit.withSnapshot(verifyNumValidators(NEW_VALIDATOR_COUNT));
+  }
+
+  private static Function<Snapshot, Void> verifyNumValidators(int expected) {
+    return (view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       assertThat(blockchain.getActualConfiguration().validatorKeys().size())
-          .isEqualTo(8);
+          .isEqualTo(expected);
       return null;
-    });
+    };
   }
 }

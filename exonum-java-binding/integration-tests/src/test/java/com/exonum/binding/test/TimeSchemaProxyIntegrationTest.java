@@ -20,11 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.testkit.EmulatedNode;
-import com.exonum.binding.testkit.EmulatedNodeType;
-import com.exonum.binding.testkit.FakeTimeProvider;
-import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.testkit.TimeProvider;
+import com.exonum.binding.testkit.*;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableMap;
@@ -34,57 +30,47 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 @RequiresNativeLibrary
 class TimeSchemaProxyIntegrationTest {
 
   private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
       .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+  private TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(TestServiceModule.class)
+          .withTimeService(timeProvider));
 
   static {
     LibraryLoader.load();
   }
 
-  private TestKit testKit;
-
-  @BeforeEach
-  void createTestKit() {
-    TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
-    testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
-        .withService(TestServiceModule.class)
-        .withTimeService(timeProvider)
-        .build();
-  }
-
-  @AfterEach
-  void destroyTestkit() {
-    testKit.close();
-  }
-
   @Test
-  void getTime() {
-    setUpConsolidatedTime();
-    testKitTest((timeSchema) -> {
+  void getTime(TestKit testKit) {
+    setUpConsolidatedTime(testKit);
+    testKitTest(testKit, (timeSchema) -> {
       Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
       assertThat(consolidatedTime).hasValue(EXPECTED_TIME);
     });
   }
 
   @Test
-  void getTimeBeforeConsolidated() {
-    testKitTest((timeSchema) -> {
+  void getTimeBeforeConsolidated(TestKit testKit) {
+    testKitTest(testKit, (timeSchema) -> {
       Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
       assertThat(consolidatedTime).isEmpty();
     });
   }
 
   @Test
-  void getValidatorsTime() {
-    setUpConsolidatedTime();
-    testKitTest((timeSchema) -> {
+  void getValidatorsTime(TestKit testKit) {
+    setUpConsolidatedTime(testKit);
+    testKitTest(testKit, (timeSchema) -> {
       Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
       EmulatedNode emulatedNode = testKit.getEmulatedNode();
       PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
@@ -93,7 +79,7 @@ class TimeSchemaProxyIntegrationTest {
     });
   }
 
-  private void setUpConsolidatedTime() {
+  private void setUpConsolidatedTime(TestKit testKit) {
     // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
     // after the first block time transactions are generated and after the second one they are
     // processed
@@ -101,7 +87,7 @@ class TimeSchemaProxyIntegrationTest {
     testKit.createBlock();
   }
 
-  private void testKitTest(Consumer<TimeSchema> test) {
+  private void testKitTest(TestKit testKit, Consumer<TimeSchema> test) {
     testKit.withSnapshot((view) -> {
       TimeSchema timeSchema = TimeSchema.newInstance(view);
       test.accept(timeSchema);

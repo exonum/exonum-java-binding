@@ -123,7 +123,7 @@ class TestKitExtensionTest {
       assertThat(service.getName()).isEqualTo(TestService.SERVICE_NAME);
 
       // Check that main TestKit node is a validator
-      assertThat(testKit.getEmulatedNode().getValidatorId()).isNotEmpty();
+      assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
     }
 
     @Test
@@ -159,7 +159,7 @@ class TestKitExtensionTest {
     static TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
 
     @AfterEach
-    void afterEach(@ValidatorCount(validatorCount = 8) TestKit testKit) {
+    void afterEach(@ValidatorCount(8) TestKit testKit) {
       // Shouldn't be executed
     }
 

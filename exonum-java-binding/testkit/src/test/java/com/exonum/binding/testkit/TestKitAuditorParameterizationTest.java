@@ -32,6 +32,6 @@ class TestKitAuditorParameterizationTest {
   @Test
   void testTestKitValidator(@Validator TestKit testKit) {
     // Check that main TestKit node is a validator
-    assertThat(testKit.getEmulatedNode().getValidatorId()).isNotEmpty();
+    assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
   }
 }

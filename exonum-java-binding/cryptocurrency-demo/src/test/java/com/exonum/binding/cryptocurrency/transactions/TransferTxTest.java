@@ -40,6 +40,7 @@ import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.util.LibraryLoader;
@@ -47,10 +48,16 @@ import com.google.common.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class TransferTxTest {
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(CryptocurrencyServiceModule.class));
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
@@ -92,149 +99,139 @@ class TransferTxTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeTransfer() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create source and target wallets with the same initial balance
-      long initialBalance = 100L;
-      TransactionMessage createFromWalletTx =
-          newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
-      TransactionMessage createToWalletTx =
-          newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
-      testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
+  void executeTransfer(TestKit testKit) {
+    // Create source and target wallets with the same initial balance
+    long initialBalance = 100L;
+    TransactionMessage createFromWalletTx =
+        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+    TransactionMessage createToWalletTx =
+        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+    testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
 
-      // Create and execute the transaction
-      long seed = 1L;
-      long transferSum = 40L;
-      TransactionMessage transferTx = newTransferTransaction(
-          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
-      testKit.createBlockWithTransactions(transferTx);
+    // Create and execute the transaction
+    long seed = 1L;
+    long transferSum = 40L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+    testKit.createBlockWithTransactions(transferTx);
 
-      testKit.withSnapshot((view) -> {
-        // Check that wallets have correct balances
-        CryptocurrencySchema schema = new CryptocurrencySchema(view);
-        ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-        long expectedFromValue = initialBalance - transferSum;
-        assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
-            .isEqualTo(expectedFromValue);
-        long expectedToValue = initialBalance + transferSum;
-        assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
-            .isEqualTo(expectedToValue);
+    testKit.withSnapshot((view) -> {
+      // Check that wallets have correct balances
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+      long expectedFromValue = initialBalance - transferSum;
+      assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
+          .isEqualTo(expectedFromValue);
+      long expectedToValue = initialBalance + transferSum;
+      assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
+          .isEqualTo(expectedToValue);
 
-        // Check history
-        HashCode messageHash = transferTx.hash();
-        assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
-            .containsExactly(messageHash);
-        assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
-            .containsExactly(messageHash);
-        return null;
-      });
-    }
+      // Check history
+      HashCode messageHash = transferTx.hash();
+      assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
+          .containsExactly(messageHash);
+      assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
+          .containsExactly(messageHash);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeTransfer_NoSuchFromWallet() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create a receiver’s wallet with the given initial balance
-      long initialBalance = 50L;
-      TransactionMessage createToWalletTx =
-          newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
-      testKit.createBlockWithTransactions(createToWalletTx);
+  void executeTransfer_NoSuchFromWallet(TestKit testKit) {
+    // Create a receiver’s wallet with the given initial balance
+    long initialBalance = 50L;
+    TransactionMessage createToWalletTx =
+        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+    testKit.createBlockWithTransactions(createToWalletTx);
 
-      long seed = 1L;
-      long transferSum = 50L;
-      TransactionMessage transferTx = newTransferTransaction(
-          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
-      testKit.createBlockWithTransactions(transferTx);
+    long seed = 1L;
+    long transferSum = 50L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+    testKit.createBlockWithTransactions(transferTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(UNKNOWN_SENDER.errorCode, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(UNKNOWN_SENDER.errorCode, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeTransfer_NoSuchToWallet() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create a receiver’s wallet with the given initial balance
-      long initialBalance = 50L;
-      TransactionMessage createFromWalletTx =
-          newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
-      testKit.createBlockWithTransactions(createFromWalletTx);
+  void executeTransfer_NoSuchToWallet(TestKit testKit) {
+    // Create a receiver’s wallet with the given initial balance
+    long initialBalance = 50L;
+    TransactionMessage createFromWalletTx =
+        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+    testKit.createBlockWithTransactions(createFromWalletTx);
 
-      long seed = 1L;
-      long transferSum = 50L;
-      TransactionMessage transferTx = newTransferTransaction(
-          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
-      testKit.createBlockWithTransactions(transferTx);
+    long seed = 1L;
+    long transferSum = 50L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+    testKit.createBlockWithTransactions(transferTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(UNKNOWN_RECEIVER.errorCode, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(UNKNOWN_RECEIVER.errorCode, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeTransfer_RejectsSameSenderAndReceiver() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      long seed = 1L;
-      long transferSum = 50L;
-      TransactionMessage transferTx = newTransferTransaction(
-          seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum);
-      testKit.createBlockWithTransactions(transferTx);
+  void executeTransfer_RejectsSameSenderAndReceiver(TestKit testKit) {
+    long seed = 1L;
+    long transferSum = 50L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum);
+    testKit.createBlockWithTransactions(transferTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(SAME_SENDER_AND_RECEIVER.errorCode, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(SAME_SENDER_AND_RECEIVER.errorCode, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeTransfer_InsufficientFunds() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      // Create source and target wallets with the same initial balance
-      long initialBalance = 50L;
-      TransactionMessage createFromWalletTx =
-          newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
-      TransactionMessage createToWalletTx =
-          newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
-      testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
+  void executeTransfer_InsufficientFunds(TestKit testKit) {
+    // Create source and target wallets with the same initial balance
+    long initialBalance = 50L;
+    TransactionMessage createFromWalletTx =
+        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+    TransactionMessage createToWalletTx =
+        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+    testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
 
-      // Create and execute the transaction that attempts to transfer an amount exceeding the
-      // balance
-      long seed = 1L;
-      long transferSum = initialBalance + 50L;
-      TransactionMessage transferTx = newTransferTransaction(
-          seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
-      testKit.createBlockWithTransactions(transferTx);
+    // Create and execute the transaction that attempts to transfer an amount exceeding the
+    // balance
+    long seed = 1L;
+    long transferSum = initialBalance + 50L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+    testKit.createBlockWithTransactions(transferTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(INSUFFICIENT_FUNDS.errorCode, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(INSUFFICIENT_FUNDS.errorCode, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test

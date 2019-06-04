@@ -17,7 +17,6 @@
 package com.exonum.binding.testkit;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -77,7 +76,7 @@ import javax.annotation.Nullable;
  * created.
  *
  * @see <a href="https://exonum.com/doc/version/0.11/get-started/test-service/">TestKit documentation</a>
- *      <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
@@ -353,11 +352,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * Returns a copy of this TestKit builder.
      */
     public Builder copy() {
+      TimeProvider timeProviderCopy = timeProvider == null ? null : timeProvider.copy();
       return new Builder()
           .withNodeType(nodeType)
           .withServices(services)
           .withValidators(validatorCount)
-          .withTimeService(timeProvider);
+          .withTimeService(timeProviderCopy);
     }
 
     /**

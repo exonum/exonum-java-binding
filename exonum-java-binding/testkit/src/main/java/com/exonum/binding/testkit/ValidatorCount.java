@@ -34,5 +34,5 @@ public @interface ValidatorCount {
   /**
    * Validator count of TestKit network.
    */
-  short validatorCount();
+  short value();
 }
