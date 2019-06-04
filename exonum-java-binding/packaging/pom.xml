@@ -51,12 +51,9 @@
 
       <plugin><!--Do not install Jar-->
         <artifactId>maven-install-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-install</id>
-            <phase/>
-          </execution>
-        </executions>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
       </plugin>
 
       <plugin>
