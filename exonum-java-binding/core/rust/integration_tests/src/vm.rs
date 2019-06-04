@@ -182,6 +182,9 @@ fn project_root_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
+/// The relative path to a directory that contains runtime dependencies of the integration tests
+/// executed with `cargo test`. Also, the both native and Java parts of integration tests depend on
+/// the same `java_bindings` library, thus this path is also passed to the JVM via `-Djava.library.path`.
 #[cfg(debug_assertions)]
 fn target_path() -> &'static str {
     "target/debug/deps"
