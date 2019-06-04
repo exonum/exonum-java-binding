@@ -20,7 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.testkit.*;
+import com.exonum.binding.testkit.EmulatedNode;
+import com.exonum.binding.testkit.FakeTimeProvider;
+import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
