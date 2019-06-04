@@ -27,6 +27,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,6 +55,10 @@ import java.util.function.LongSupplier;
  * @see View
  */
 public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private final CheckingSerializerDecorator<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;

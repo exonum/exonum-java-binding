@@ -43,6 +43,7 @@ import javax.annotation.Nullable;
 public final class NativeFacade {
 
   static {
+    // Load the native library early when this class is used in native integration tests.
     LibraryLoader.load();
   }
 

@@ -37,7 +37,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -45,10 +44,6 @@ import org.junit.jupiter.api.Test;
 class CreateWalletTxTest {
 
   private static final KeyPair OWNER_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void fromRawTransaction() {

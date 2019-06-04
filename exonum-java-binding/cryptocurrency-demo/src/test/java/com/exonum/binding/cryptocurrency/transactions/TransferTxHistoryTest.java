@@ -32,7 +32,6 @@ import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.util.LibraryLoader;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -40,10 +39,6 @@ class TransferTxHistoryTest {
 
   private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   @RequiresNativeLibrary

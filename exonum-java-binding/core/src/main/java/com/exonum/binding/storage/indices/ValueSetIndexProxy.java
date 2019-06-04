@@ -30,6 +30,7 @@ import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageLite;
@@ -64,6 +65,10 @@ import javax.annotation.Nullable;
  */
 public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     implements Iterable<ValueSetIndexProxy.Entry<E>> {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private final CheckingSerializerDecorator<E> serializer;
 

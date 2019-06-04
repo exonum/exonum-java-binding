@@ -30,15 +30,10 @@ import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class TestServiceIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   @RequiresNativeLibrary

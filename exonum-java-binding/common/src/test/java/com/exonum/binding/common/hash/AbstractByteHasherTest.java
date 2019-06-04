@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.test.CiOnly;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Colin Decker
  */
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class AbstractByteHasherTest {
 
   @Test

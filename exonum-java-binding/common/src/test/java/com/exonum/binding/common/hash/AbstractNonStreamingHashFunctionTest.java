@@ -34,6 +34,7 @@ package com.exonum.binding.common.hash;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.exonum.binding.common.hash.HashTestUtils.RandomHasherAction;
+import com.exonum.binding.test.CiOnly;
 import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for AbstractNonStreamingHashFunction.
  */
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class AbstractNonStreamingHashFunctionTest {
   /**
    * Constructs two trivial HashFunctions (output := input), one streaming and one non-streaming,

@@ -23,7 +23,7 @@
     ]
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "big-integer": "^1.6.32",
     "bootstrap": "^4.3.1",
     "exonum-client": "^0.16.4",
