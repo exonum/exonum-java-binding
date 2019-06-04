@@ -13,7 +13,6 @@ crate-type = ["dylib"]
 # Enables native handles checking. Useful for debugging.
 resource-manager = []
 invocation = ["jni/invocation"]
-default = ["resource-manager", "invocation"]
 
 [dependencies]
 exonum = "0.11"

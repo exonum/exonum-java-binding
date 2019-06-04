@@ -21,9 +21,9 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <!-- TODO: stable does not work well until ECR-1839 is resolved. -->
     <rust.compiler.version>stable</rust.compiler.version>
-    <rust.compiler.features>resource-manager</rust.compiler.features>
+    <!-- This should be in sync with features that `integration_tests` crate require from `java_bindings` -->
+    <rust.compiler.features>resource-manager invocation</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <rust.appSubCrate>exonum-java</rust.appSubCrate>
     <!--A directory containing libjava_bindings native library-->
