@@ -109,7 +109,7 @@ class TestKitExtensionTest {
   static class TestKitInstantiationTestCase {
 
     @RegisterExtension
-    static TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
+    TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
 
     static TestKit instantiatedTestKit;
 
@@ -140,7 +140,7 @@ class TestKitExtensionTest {
   static class BeforeEachInstantiationTestCase {
 
     @RegisterExtension
-    static TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
+    TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
 
     @BeforeEach
     void beforeEach(TestKit testKit) {
@@ -156,7 +156,7 @@ class TestKitExtensionTest {
   static class AfterEachInstantiationTestCase {
 
     @RegisterExtension
-    static TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
+    TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
 
     @AfterEach
     void afterEach(@ValidatorCount(8) TestKit testKit) {
@@ -173,7 +173,7 @@ class TestKitExtensionTest {
   static class BeforeAllInstantiationTestCase {
 
     @RegisterExtension
-    static TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
+    TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
 
     @BeforeAll
     void beforeAll(TestKit testKit) {
@@ -190,7 +190,7 @@ class TestKitExtensionTest {
   static class AfterAllInstantiationTestCase {
 
     @RegisterExtension
-    static TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
+    TestKitExtension testKitExtension = new TestKitExtension(defaultBuilder);
 
     @AfterAll
     void afterAll(TestKit testKit) {

@@ -59,7 +59,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class TestKitTest {
 
   @RegisterExtension
-  static TestKitExtension testKitExtension = new TestKitExtension(
+  TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(TestServiceModule.class));
 

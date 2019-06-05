@@ -63,7 +63,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class QaServiceImplIntegrationTest {
 
   @RegisterExtension
-  static TestKitExtension testKitExtension = new TestKitExtension(
+  TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withService(QaServiceModule.class));
 

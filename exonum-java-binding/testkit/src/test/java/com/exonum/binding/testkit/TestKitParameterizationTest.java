@@ -31,7 +31,7 @@ class TestKitParameterizationTest {
   private static final short NEW_VALIDATOR_COUNT = 8;
 
   @RegisterExtension
-  static TestKitExtension testKitExtension = new TestKitExtension(
+  TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(TEMPLATE_NODE_TYPE)
           .withService(TestServiceModule.class)

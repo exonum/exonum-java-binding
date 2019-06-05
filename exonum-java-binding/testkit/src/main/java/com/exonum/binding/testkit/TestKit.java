@@ -72,8 +72,8 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized - service instances are
- * {@linkplain UserServiceAdapter#initialize(long)} initialized} and genesis block is committed.
- * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are
+ * {@linkplain UserServiceAdapter#initialize(long) initialized} and genesis block is committed.
+ * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long) public API handlers} are
  * created.
  *
  * @see <a href="https://exonum.com/doc/version/0.11/get-started/test-service/">TestKit documentation</a>
@@ -357,12 +357,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * Returns a copy of this TestKit builder.
      */
     public Builder copy() {
-      TimeProvider timeProviderCopy = timeProvider == null ? null : timeProvider.copy();
       return new Builder()
           .withNodeType(nodeType)
           .withServices(services)
           .withValidators(validatorCount)
-          .withTimeService(timeProviderCopy);
+          .withTimeService(timeProvider);
     }
 
     /**

@@ -27,9 +27,4 @@ public interface TimeProvider {
    * Returns the current time of this time provider in UTC time zone.
    */
   ZonedDateTime getTime();
-
-  /**
-   * Returns a copy of this time provider.
-   */
-  TimeProvider copy();
 }

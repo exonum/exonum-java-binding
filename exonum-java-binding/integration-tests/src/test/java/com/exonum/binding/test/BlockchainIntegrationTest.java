@@ -43,7 +43,6 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -52,9 +51,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 class BlockchainIntegrationTest {
 
@@ -62,39 +61,45 @@ class BlockchainIntegrationTest {
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final short VALIDATOR_COUNT = 1;
 
-  @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withService(TestServiceModule.class)
-          .withValidators(VALIDATOR_COUNT));
-
+  private TestKit testKit;
   private Block block;
   private TransactionMessage expectedBlockTransaction;
 
   @BeforeEach
-  void setUp(TestKit testKit) {
+  void setUp() {
+    testKit = TestKit.builder()
+        .withService(TestServiceModule.class)
+        .withValidators(VALIDATOR_COUNT)
+        .build();
     String payload = "Test";
     TransactionMessage transactionMessage = constructTestTransactionMessage(payload);
     expectedBlockTransaction = transactionMessage;
     block = testKit.createBlockWithTransactions(transactionMessage);
   }
 
-  @Test
-  void containsBlock(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> assertThat(blockchain.containsBlock(block)).isTrue());
+  @AfterEach
+  void destroyTestKit() {
+    testKit.close();
   }
 
   @Test
-  void getHeight(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void containsBlock() {
+    testKitTest((blockchain) -> {
+      assertThat(blockchain.containsBlock(block)).isTrue();
+    });
+  }
+
+  @Test
+  void getHeight() {
+    testKitTest((blockchain) -> {
       long expectedHeight = 1;
       assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
     });
   }
 
   @Test
-  void getBlockHashes(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockHashes() {
+    testKitTest((blockchain) -> {
       HashCode expectedHash = block.getBlockHash();
       ListIndex<HashCode> blockHashes = blockchain.getBlockHashes();
       // Contains both genesis and committed blocks
@@ -104,16 +109,16 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void containsBlockNoSuchBlock(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void containsBlockNoSuchBlock() {
+    testKitTest((blockchain) -> {
       Block unknownBlock = aBlock(Long.MAX_VALUE).build();
       assertThat(blockchain.containsBlock(unknownBlock)).isFalse();
     });
   }
 
   @Test
-  void containsBlockSameHashDistinctFields(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void containsBlockSameHashDistinctFields() {
+    testKitTest((blockchain) -> {
       // Check against a block that has the same hash, but different fields
       Block unknownBlock = aBlock(10L)
           .blockHash(block.getBlockHash())
@@ -123,8 +128,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsByHeight(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockTransactionsByHeight() {
+    testKitTest((blockchain) -> {
       long blockHeight = block.getHeight();
       List<HashCode> expectedBlockTransactionHashes =
           ImmutableList.of(expectedBlockTransaction.hash());
@@ -134,8 +139,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsByInvalidHeight(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockTransactionsByInvalidHeight() {
+    testKitTest((blockchain) -> {
       long invalidBlockHeight = block.getHeight() + 1;
       Exception e = assertThrows(IllegalArgumentException.class,
           () -> blockchain.getBlockTransactions(invalidBlockHeight));
@@ -148,8 +153,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsByHash(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockTransactionsByHash() {
+    testKitTest((blockchain) -> {
       HashCode blockHash = block.getBlockHash();
       List<HashCode> expectedBlockTransactionHashes =
           ImmutableList.of(expectedBlockTransaction.hash());
@@ -159,8 +164,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsByInvalidHash(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockTransactionsByInvalidHash() {
+    testKitTest((blockchain) -> {
       HashCode invalidBlockHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
       Exception e = assertThrows(IllegalArgumentException.class,
           () -> blockchain.getBlockTransactions(invalidBlockHash));
@@ -170,8 +175,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsByBlock(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockTransactionsByBlock() {
+    testKitTest((blockchain) -> {
       List<HashCode> expectedBlockTransactionHashes =
           ImmutableList.of(expectedBlockTransaction.hash());
       assertThat(blockchain.getBlockTransactions(block))
@@ -180,8 +185,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockTransactionsByInvalidBlock(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockTransactionsByInvalidBlock() {
+    testKitTest((blockchain) -> {
       Block unknownBlock = aBlock(Long.MAX_VALUE).build();
 
       Exception e = assertThrows(IllegalArgumentException.class,
@@ -193,8 +198,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxMessages(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxMessages() {
+    testKitTest((blockchain) -> {
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
       Map<HashCode, TransactionMessage> txMessagesMap = toMap(txMessages);
       // Should include one executed and one in-pool (submitted in afterCommit) transaction
@@ -205,8 +210,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxResults(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxResults() {
+    testKitTest((blockchain) -> {
       ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
       Map<HashCode, TransactionResult> txResultsMap = toMap(txResults);
       Map<HashCode, TransactionResult> expected =
@@ -216,8 +221,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxResult(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxResult() {
+    testKitTest((blockchain) -> {
       Optional<TransactionResult> txResult =
           blockchain.getTxResult(expectedBlockTransaction.hash());
       assertThat(txResult).hasValue(TransactionResult.successful());
@@ -225,8 +230,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxResultOfUnknownTx(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxResultOfUnknownTx() {
+    testKitTest((blockchain) -> {
       HashCode unknownHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
       Optional<TransactionResult> txResult = blockchain.getTxResult(unknownHash);
       assertThat(txResult).isEmpty();
@@ -234,8 +239,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxLocations(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxLocations() {
+    testKitTest((blockchain) -> {
       MapIndex<HashCode, TransactionLocation> txLocations = blockchain.getTxLocations();
       Map<HashCode, TransactionLocation> txLocationsMap = toMap(txLocations);
       TransactionLocation expectedTransactionLocation =
@@ -247,8 +252,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxLocation(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxLocation() {
+    testKitTest((blockchain) -> {
       Optional<TransactionLocation> txLocation =
           blockchain.getTxLocation(expectedBlockTransaction.hash());
       TransactionLocation expectedTransactionLocation =
@@ -258,8 +263,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTxLocationOfUnknownTx(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getTxLocationOfUnknownTx() {
+    testKitTest((blockchain) -> {
       HashCode unknownHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
       Optional<TransactionLocation> txLocation = blockchain.getTxLocation(unknownHash);
       assertThat(txLocation).isEmpty();
@@ -267,8 +272,8 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlocks(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlocks() {
+    testKitTest((blockchain) -> {
       MapIndex<HashCode, Block> blocks = blockchain.getBlocks();
       Map<HashCode, Block> blocksMap = toMap(blocks);
       // Contains both genesis and committed blocks
@@ -278,16 +283,16 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockByHeight(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockByHeight() {
+    testKitTest((blockchain) -> {
       Block actualBlock = blockchain.getBlock(block.getHeight());
       assertThat(actualBlock).isEqualTo(block);
     });
   }
 
   @Test
-  void getBlockByInvalidHeight(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockByInvalidHeight() {
+    testKitTest((blockchain) -> {
       long invalidBlockHeight = block.getHeight() + 1;
       Exception e = assertThrows(IndexOutOfBoundsException.class,
           () -> blockchain.getBlock(invalidBlockHeight));
@@ -298,24 +303,24 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getBlockById(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getBlockById() {
+    testKitTest((blockchain) -> {
       Optional<Block> actualBlock = blockchain.findBlock(block.getBlockHash());
       assertThat(actualBlock).hasValue(block);
     });
   }
 
   @Test
-  void getLastBlock(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getLastBlock() {
+    testKitTest((blockchain) -> {
       Block lastBlock = blockchain.getLastBlock();
       assertThat(lastBlock).isEqualTo(block);
     });
   }
 
   @Test
-  void getActualConfiguration(TestKit testKit) {
-    testKitTest(testKit, (blockchain) -> {
+  void getActualConfiguration() {
+    testKitTest((blockchain) -> {
       StoredConfiguration configuration = blockchain.getActualConfiguration();
       List<ValidatorKey> validatorKeys = configuration.validatorKeys();
       // Check the number of validator keys
@@ -337,13 +342,13 @@ class BlockchainIntegrationTest {
   }
 
   @Test
-  void getTransactionPool(TestKit testKit) throws Exception {
+  void getTransactionPool() throws Exception {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
     RawTransaction rawTransaction = RawTransaction.fromMessage(message);
     service.getNode().submitTransaction(rawTransaction);
 
-    testKitTest(testKit, (blockchain) -> {
+    testKitTest((blockchain) -> {
       KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
       assertThat(transactionPool.contains(message.hash()))
           .describedAs("pool=%s", transactionPool)
@@ -351,7 +356,7 @@ class BlockchainIntegrationTest {
     });
   }
 
-  private void testKitTest(TestKit testKit, Consumer<Blockchain> test) {
+  private void testKitTest(Consumer<Blockchain> test) {
     testKit.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       test.accept(blockchain);
