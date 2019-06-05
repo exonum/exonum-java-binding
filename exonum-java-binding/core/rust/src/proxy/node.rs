@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use std::{panic, ptr};
-
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
@@ -24,15 +22,17 @@ use exonum::{
     storage::Snapshot,
 };
 use failure;
-use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
-use JniResult;
+use jni::JNIEnv;
 
-use handle::{cast_handle, drop_handle, Handle, to_handle};
+use std::{panic, ptr};
+
+use handle::{cast_handle, drop_handle, to_handle, Handle};
 use proxy::MainExecutor;
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
+use JniResult;
 
 const TX_SUBMISSION_EXCEPTION: &str = "com/exonum/binding/service/InvalidTransactionException";
 
