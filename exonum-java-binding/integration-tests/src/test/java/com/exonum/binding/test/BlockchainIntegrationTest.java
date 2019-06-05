@@ -61,7 +61,8 @@ class BlockchainIntegrationTest {
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final short VALIDATOR_COUNT = 1;
-  private static final HashCode ZERO_HASH_CODE = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+  private static final HashCode ZERO_HASH_CODE = HashCode.fromBytes(
+      new byte[DEFAULT_HASH_SIZE_BYTES]);
 
   private TestKit testKit;
   private Block block;
