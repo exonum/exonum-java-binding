@@ -117,7 +117,6 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
     service_id: jshort,
     transaction_id: jshort,
 ) -> jbyteArray {
-    use std::ptr;
     use utils::convert_hash;
     let res = panic::catch_unwind(|| {
         let node = cast_handle::<NodeContext>(node_handle);
