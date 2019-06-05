@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use std::{panic, ptr};
+
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
@@ -22,19 +24,17 @@ use exonum::{
     storage::Snapshot,
 };
 use failure;
+use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
-use jni::JNIEnv;
+use JniResult;
 
-use std::{panic, ptr};
-
-use handle::{cast_handle, drop_handle, to_handle, Handle};
+use handle::{cast_handle, drop_handle, Handle, to_handle};
 use proxy::MainExecutor;
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
-use JniResult;
 
-const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/service/InternalServerError";
+const TX_SUBMISSION_EXCEPTION: &str = "com/exonum/binding/service/InvalidTransactionException";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
@@ -130,7 +130,12 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
                 match node.submit(raw_transaction) {
                     Ok(tx_hash) => convert_hash(&env, &tx_hash),
                     Err(err) => {
-                        let error_class = INTERNAL_SERVER_ERROR;
+                        // node#submit can fail for two reasons: unknown transaction id and
+                        // an error in ApiSender#send. The former is the service implementation
+                        // error and is appropriate to communicate with the exception below;
+                        // the second is an internal, unrecoverable error that has nothing
+                        // to do with the service: ECR-3190
+                        let error_class = TX_SUBMISSION_EXCEPTION;
                         let error_description = err.to_string();
                         env.throw_new(error_class, error_description)?;
                         Ok(ptr::null_mut())

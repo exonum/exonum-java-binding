@@ -56,7 +56,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public HashCode submitTransaction(RawTransaction rawTransaction) throws InternalServerError {
+  public HashCode submitTransaction(RawTransaction rawTransaction) {
     byte[] payload = rawTransaction.getPayload();
     short serviceId = rawTransaction.getServiceId();
     short transactionId = rawTransaction.getTransactionId();
@@ -74,7 +74,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param transactionId an identifier of the transaction
    */
   private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, short serviceId,
-      short transactionId) throws InternalServerError;
+      short transactionId);
 
   /**
    * {@inheritDoc}
