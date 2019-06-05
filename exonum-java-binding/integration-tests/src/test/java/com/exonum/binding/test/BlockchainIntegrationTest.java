@@ -61,6 +61,8 @@ class BlockchainIntegrationTest {
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final short VALIDATOR_COUNT = 1;
+  private static final HashCode ZERO_HASH_CODE = HashCode.fromBytes(
+      new byte[DEFAULT_HASH_SIZE_BYTES]);
 
   private TestKit testKit;
   private Block block;
@@ -292,6 +294,16 @@ class BlockchainIntegrationTest {
   }
 
   @Test
+  void getBlockByHeightGenesis() {
+    testKitTest((blockchain) -> {
+      long genesisBlockHeight = 0;
+      Block genesisBlock = blockchain.getBlock(0);
+      assertThat(genesisBlock.getHeight()).isEqualTo(genesisBlockHeight);
+      assertThat(genesisBlock.getPreviousBlockHash()).isEqualTo(ZERO_HASH_CODE);
+    });
+  }
+
+  @Test
   void getBlockByInvalidHeight() {
     testKitTest((blockchain) -> {
       long invalidBlockHeight = block.getHeight() + 1;
@@ -308,6 +320,15 @@ class BlockchainIntegrationTest {
     testKitTest((blockchain) -> {
       Optional<Block> actualBlock = blockchain.findBlock(block.getBlockHash());
       assertThat(actualBlock).hasValue(block);
+    });
+  }
+
+  @Test
+  void getUnknownBlockById() {
+    testKitTest((blockchain) -> {
+      HashCode blockHash = HashCode.fromString("ab");
+      Optional<Block> block = blockchain.findBlock(blockHash);
+      assertThat(block).isEmpty();
     });
   }
 
@@ -337,8 +358,7 @@ class BlockchainIntegrationTest {
       assertThat(serviceKeys).isEqualTo(expectedKeys);
 
       // Check the previous config is empty
-      HashCode zeroHashCode = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
-      assertThat(configuration.previousCfgHash()).isEqualTo(zeroHashCode);
+      assertThat(configuration.previousCfgHash()).isEqualTo(ZERO_HASH_CODE);
     });
   }
 
