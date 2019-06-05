@@ -312,6 +312,15 @@ class BlockchainIntegrationTest {
   }
 
   @Test
+  void getUnknownBlockById() {
+    testKitTest((blockchain) -> {
+      HashCode blockHash = HashCode.fromString("ab");
+      Optional<Block> block = blockchain.findBlock(blockHash);
+      assertThat(block).isEmpty();
+    });
+  }
+
+  @Test
   void getLastBlock() {
     testKitTest((blockchain) -> {
       Block lastBlock = blockchain.getLastBlock();
