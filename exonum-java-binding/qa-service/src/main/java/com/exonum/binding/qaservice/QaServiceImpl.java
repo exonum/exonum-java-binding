@@ -30,7 +30,6 @@ import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.BlockCommittedEvent;
-import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.service.Schema;
 import com.exonum.binding.service.TransactionConverter;
@@ -224,11 +223,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions") // Node is not null.
   private HashCode submitTransaction(RawTransaction rawTransaction) {
     checkBlockchainInitialized();
-    try {
-      return node.submitTransaction(rawTransaction);
-    } catch (InternalServerError e) {
-      throw new RuntimeException("Propagated transaction submission exception", e);
-    }
+    return node.submitTransaction(rawTransaction);
   }
 
   private void checkBlockchainInitialized() {
