@@ -34,9 +34,9 @@ import com.exonum.binding.service.Schema;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.EmulatedNode;
-import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.testkit.TimeProvider;
 import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
@@ -48,145 +48,135 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 @RequiresNativeLibrary
 class QaServiceImplIntegrationTest {
 
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(QaServiceModule.class));
+
+  private static final short NEW_VALIDATOR_COUNT = 8;
+
   @Test
-  void createDataSchema() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      testKit.withSnapshot((view) -> {
-        Schema dataSchema = service.createDataSchema(view);
-        assertThat(dataSchema).isInstanceOf(QaSchema.class);
-        return null;
-      });
-    }
+  void createDataSchema(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    testKit.withSnapshot((view) -> {
+      Schema dataSchema = service.createDataSchema(view);
+      assertThat(dataSchema).isInstanceOf(QaSchema.class);
+      return null;
+    });
   }
 
   @Test
-  void initialize() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      testKit.withSnapshot((view) -> {
-        // TODO: https://jira.bf.local/browse/ECR-2683 is needed for service configuration to be
-        //  checked
+  void initialize(TestKit testKit) {
+    testKit.withSnapshot((view) -> {
+      // TODO: https://jira.bf.local/browse/ECR-2683 is needed for service configuration to be
+      //  checked
 
-        // Check that both the default and afterCommit counters were created.
-        QaSchema schema = new QaSchema(view);
-        MapIndex<HashCode, Long> counters = schema.counters();
-        MapIndex<HashCode, String> counterNames = schema.counterNames();
+      // Check that both the default and afterCommit counters were created.
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-        HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
-        HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+      HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
+      HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
-        assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
-        assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
-        assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
-        assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
-        return null;
-      });
-    }
+      assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
+      assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
+      assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
+      assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
+      return null;
+    });
   }
 
   @Test
-  void submitCreateCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      String counterName = "bids";
-      service.submitCreateCounter(counterName);
-      TransactionMessage expectedTransaction = createCreateCounterTransaction(counterName, testKit);
-      List<TransactionMessage> inPoolTransactions = testKit.getTransactionPool();
-      assertThat(inPoolTransactions).containsExactly(expectedTransaction);
-    }
+  void submitCreateCounter(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    String counterName = "bids";
+    service.submitCreateCounter(counterName);
+    TransactionMessage expectedTransaction = createCreateCounterTransaction(counterName, testKit);
+    List<TransactionMessage> inPoolTransactions = testKit.getTransactionPool();
+    assertThat(inPoolTransactions).containsExactly(expectedTransaction);
   }
 
   @Test
-  void submitIncrementCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+  void submitIncrementCounter(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
 
-      String counterName = "bids";
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
-      long seed = 1L;
-      service.submitIncrementCounter(seed, counterId);
-      TransactionMessage expectedTransaction =
-          createIncrementCounterTransaction(seed, counterId, testKit);
-      List<TransactionMessage> inPoolTransactions = testKit.getTransactionPool();
-      assertThat(inPoolTransactions).containsExactly(expectedTransaction);
-    }
+    String counterName = "bids";
+    HashCode counterId = sha256().hashString(counterName, UTF_8);
+    long seed = 1L;
+    service.submitIncrementCounter(seed, counterId);
+    TransactionMessage expectedTransaction =
+        createIncrementCounterTransaction(seed, counterId, testKit);
+    List<TransactionMessage> inPoolTransactions = testKit.getTransactionPool();
+    assertThat(inPoolTransactions).containsExactly(expectedTransaction);
   }
 
   @Test
-  void submitValidThrowingTx() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      long seed = 1L;
-      service.submitValidThrowingTx(seed);
-      TransactionMessage expectedTransaction = createThrowingTransaction(seed, testKit);
-      List<TransactionMessage> inPoolTransactions = testKit.getTransactionPool();
-      assertThat(inPoolTransactions).containsExactly(expectedTransaction);
-    }
+  void submitValidThrowingTx(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    long seed = 1L;
+    service.submitValidThrowingTx(seed);
+    TransactionMessage expectedTransaction = createThrowingTransaction(seed, testKit);
+    List<TransactionMessage> inPoolTransactions = testKit.getTransactionPool();
+    assertThat(inPoolTransactions).containsExactly(expectedTransaction);
   }
 
   @Test
-  void submitUnknownTx() {
+  void submitUnknownTx(TestKit testKit) {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      service.submitUnknownTx();
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    service.submitUnknownTx();
 
-      Exception e = assertThrows(exceptionType, testKit::createBlock);
+    Exception e = assertThrows(exceptionType, testKit::createBlock);
 
-      String expectedTxId = Integer.toString(UnknownTx.ID);
-      assertThat(e.getMessage())
-          .contains("failed to convert transaction", expectedTxId);
-    }
+    String expectedTxId = Integer.toString(UnknownTx.ID);
+    assertThat(e.getMessage())
+        .contains("failed to convert transaction", expectedTxId);
   }
 
   @Test
-  void getValue() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      String counterName = "bids";
-      TransactionMessage createCounterTransaction = createCreateCounterTransaction(counterName);
-      testKit.createBlockWithTransactions(createCounterTransaction);
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
-      Optional<Counter> counterValue = service.getValue(counterId);
-      Counter expectedCounter = new Counter(counterName, 0L);
-      assertThat(counterValue).hasValue(expectedCounter);
-    }
+  void getValue(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    String counterName = "bids";
+    TransactionMessage createCounterTransaction = createCreateCounterTransaction(counterName);
+    testKit.createBlockWithTransactions(createCounterTransaction);
+    HashCode counterId = sha256().hashString(counterName, UTF_8);
+    Optional<Counter> counterValue = service.getValue(counterId);
+    Counter expectedCounter = new Counter(counterName, 0L);
+    assertThat(counterValue).hasValue(expectedCounter);
   }
 
   @Test
-  void getValueNoSuchCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      HashCode counterId = sha256().hashString("Unknown counter", UTF_8);
-      // Check there is no such counter
-      assertThat(service.getValue(counterId)).isEmpty();
-    }
+  void getValueNoSuchCounter(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    HashCode counterId = sha256().hashString("Unknown counter", UTF_8);
+    // Check there is no such counter
+    assertThat(service.getValue(counterId)).isEmpty();
   }
 
   @Test
-  void afterCommit() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      // After the first block the afterCommit transaction is submitted
-      testKit.createBlock();
+  void afterCommit(TestKit testKit) {
+    // After the first block the afterCommit transaction is submitted
+    testKit.createBlock();
 
-      // After the second block the afterCommit transaction is executed
-      testKit.createBlock();
+    // After the second block the afterCommit transaction is executed
+    testKit.createBlock();
 
-      testKit.withSnapshot((view) -> {
-        QaSchema schema = new QaSchema(view);
-        MapIndex<HashCode, Long> counters = schema.counters();
-        MapIndex<HashCode, String> counterNames = schema.counterNames();
-        HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+    testKit.withSnapshot((view) -> {
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
-        assertThat(counters.get(counterId)).isEqualTo(1L);
-        assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
-        return null;
-      });
-    }
+      assertThat(counters.get(counterId)).isEqualTo(1L);
+      assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
+      return null;
+    });
   }
 
   @Nested
@@ -199,7 +189,7 @@ class QaServiceImplIntegrationTest {
     @BeforeEach
     void setUpConsolidatedTime() {
       TimeProvider timeProvider = FakeTimeProvider.create(expectedTime);
-      testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+      testKit = TestKit.builder()
           .withService(QaServiceModule.class)
           .withTimeService(timeProvider)
           .build();

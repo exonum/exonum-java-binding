@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.testkit.EmulatedNode;
-import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TimeProvider;
@@ -48,7 +47,7 @@ class TimeSchemaProxyIntegrationTest {
   @BeforeEach
   void createTestKit() {
     TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
-    testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build();

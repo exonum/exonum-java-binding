@@ -41,7 +41,6 @@ import com.exonum.binding.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.testkit.EmulatedNode;
-import com.exonum.binding.testkit.EmulatedNodeType;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.common.collect.ImmutableList;
@@ -70,7 +69,7 @@ class BlockchainIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withValidators(VALIDATOR_COUNT)
         .build();
