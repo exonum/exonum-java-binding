@@ -35,7 +35,7 @@
     <!--Main Exonum Java app executable-->
     <file>
       <source>${packaging.basedir}/exonum-java</source>
-      <destName>exonum-java-app</destName>
+      <outputDirectory>bin</outputDirectory>
     </file>
     <!--Exonum Java app wrapper script that starts the app executable-->
     <file>

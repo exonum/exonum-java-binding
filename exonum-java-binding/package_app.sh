@@ -32,7 +32,7 @@ function build-exonum-java() {
 # java_binding library for current platform.
 function build-exonum-java-for-platform() {
     # This will point to the directory with native libraries in case code was executed by "exonum-java"
-    local path_lib_from_exe="$1/lib/native"
+    local path_lib_from_exe="$1/../lib/native"
     # This will point to the directory with native libraries in case code was loaded by java
     local path_lib_from_lib=$1
     local full_lib_name=$2

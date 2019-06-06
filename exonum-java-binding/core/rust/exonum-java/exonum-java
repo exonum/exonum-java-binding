@@ -12,4 +12,4 @@ LIBJVM_PATH="$(find -L ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 
 # Delegate execution to the app executable
-exonum-java-app "$@"
+${EXONUM_HOME}/bin/exonum-java "$@"
