@@ -36,6 +36,7 @@ import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.TransactionContext;
@@ -45,10 +46,16 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class ErrorTxIntegrationTest {
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(QaServiceModule.class));
 
   @Test
   void converterRejectsWrongServiceId() {
@@ -96,40 +103,36 @@ class ErrorTxIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeNoDescription() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      byte errorCode = 1;
-      TransactionMessage errorTx = createErrorTransaction(0L, errorCode, null);
-      testKit.createBlockWithTransactions(errorTx);
+  void executeNoDescription(TestKit testKit) {
+    byte errorCode = 1;
+    TransactionMessage errorTx = createErrorTransaction(0L, errorCode, null);
+    testKit.createBlockWithTransactions(errorTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-        TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+      TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeWithDescription() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      byte errorCode = 1;
-      String errorDescription = "Test";
-      TransactionMessage errorTx = createErrorTransaction(0L, errorCode, errorDescription);
-      testKit.createBlockWithTransactions(errorTx);
+  void executeWithDescription(TestKit testKit) {
+    byte errorCode = 1;
+    String errorDescription = "Test";
+    TransactionMessage errorTx = createErrorTransaction(0L, errorCode, errorDescription);
+    testKit.createBlockWithTransactions(errorTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(errorCode, errorDescription);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(errorCode, errorDescription);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test

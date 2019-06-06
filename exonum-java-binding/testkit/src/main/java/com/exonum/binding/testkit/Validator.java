@@ -16,13 +16,18 @@
 
 package com.exonum.binding.testkit;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * Type of the TestKit emulated node.
+ * Changes main TestKit node type to validator for injected TestKit.
  *
- * @see <a href="https://exonum.com/doc/version/0.11/glossary/#auditor">Auditor Node</a>
+ * @see TestKit.Builder#withNodeType(EmulatedNodeType)
  * @see <a href="https://exonum.com/doc/version/0.11/glossary/#validator">Validator Node</a>
  */
-public enum EmulatedNodeType {
-  VALIDATOR,
-  AUDITOR
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Validator {
 }
