@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Try to detect the Java home from installed executable. We don't rely on JAVA_HOME that is already set because it may
+# not work in some cases (like `skdman`).
+JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')"
+
+# Find the directory containing libjvm.
+LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+
+export LD_LIBRARY_PATH="${LIBJVM_PATH}"
+
+# Delegate execution to the app executable
+exonum-java-app "$@"
