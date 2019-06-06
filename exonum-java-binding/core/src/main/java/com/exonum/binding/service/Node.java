@@ -45,7 +45,8 @@ public interface Node {
    *
    * @param rawTransaction transaction parameters to include in transaction message
    * @return hash of the transaction message created by the framework
-   * @throws InvalidTransactionException if the transaction belongs to an unknown service
+   * @throws TransactionSubmissionException if the transaction belongs to an unknown service,
+   *     or cannot be submitted
    * @throws NullPointerException if the transaction is null
    * @see Blockchain#getTxMessages()
    */

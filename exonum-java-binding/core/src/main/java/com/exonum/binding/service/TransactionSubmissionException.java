@@ -17,11 +17,12 @@
 package com.exonum.binding.service;
 
 /**
- * Indicates that the submitted transaction is not valid (e.g., belongs to an unknown service).
+ * Indicates a transaction could not be submitted. For example, the submitted transaction
+ * is not valid — belongs to an unknown service.
  */
-public final class InvalidTransactionException extends IllegalArgumentException {
+public final class TransactionSubmissionException extends RuntimeException {
 
-  public InvalidTransactionException(String message) {
+  public TransactionSubmissionException(String message) {
     super(message);
   }
 }
