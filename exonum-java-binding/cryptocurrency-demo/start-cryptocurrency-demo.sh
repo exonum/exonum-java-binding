@@ -17,17 +17,6 @@ header "DETECTING ENVIRONMENT"
 EXONUM_JAVA_APP="exonum-java"
 command -v ${EXONUM_JAVA_APP} >/dev/null 2>&1 || { echo >&2 "Please install the Exonum Java App and make sure that 'exonum-java' binary is available via PATH. Aborting."; exit 1; }
 
-# Check whether JAVA_HOME is set or detect it from the currently available java binary otherwise.
-if [ -z "${JAVA_HOME+x}" ];
-then
-    export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')"
-fi
-echo "JAVA_HOME=${JAVA_HOME}"
-
-# Find the directory containing libjvm (the relative path has changed in Java 9).
-export LD_LIBRARY_PATH="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
-echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
-
 # Find the latest version of artifact and build if not found.
 ARTIFACT_PATH="$(find ./target -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
 

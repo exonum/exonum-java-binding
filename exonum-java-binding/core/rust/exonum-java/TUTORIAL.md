@@ -19,20 +19,6 @@ in the [user guide](https://exonum.com/doc/version/0.11/get-started/java-binding
 
 ### Step 1. Configure Environment
 
-#### `LD_LIBRARY_PATH`
-
-`LD_LIBRARY_PATH` is required to locate native libraries used by Java Binding.
-You need to provide path to JVM library (e.g. `libjvm.so` on Linux).
-
-You can use the following script for this purpose:
-
-```bash
-JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')}"
-LIBJVM_PATH="$(find ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
-
-export LD_LIBRARY_PATH="${LIBJVM_PATH}"
-```
-
 #### Services definition
 Services must be defined in the [services.toml](https://exonum.com/doc/version/0.11/get-started/java-binding/#built-in-services) 
 file in order to be available in the network. The configuration file consists of two sections:
