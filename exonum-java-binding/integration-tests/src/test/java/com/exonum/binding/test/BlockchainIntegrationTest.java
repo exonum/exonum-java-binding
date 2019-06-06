@@ -410,7 +410,7 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    void getTransactionPool() throws Exception {
+    void getTransactionPool() {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
       TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
       RawTransaction rawTransaction = RawTransaction.fromMessage(message);
