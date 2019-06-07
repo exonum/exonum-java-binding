@@ -22,7 +22,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.BlockCommittedEvent;
-import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
@@ -79,11 +78,7 @@ final class TestService extends AbstractService {
   public void afterCommit(BlockCommittedEvent event) {
     long height = event.getHeight();
     RawTransaction rawTransaction = constructAfterCommitTransaction(height);
-    try {
-      node.submitTransaction(rawTransaction);
-    } catch (InternalServerError e) {
-      throw new RuntimeException(e);
-    }
+    node.submitTransaction(rawTransaction);
   }
 
   static RawTransaction constructAfterCommitTransaction(long height) {

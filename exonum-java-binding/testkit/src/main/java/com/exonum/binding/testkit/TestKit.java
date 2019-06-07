@@ -17,7 +17,6 @@
 package com.exonum.binding.testkit;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -73,12 +72,12 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized - service instances are
- * {@linkplain UserServiceAdapter#initialize(long)} initialized} and genesis block is committed.
- * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long)} public API handlers} are
+ * {@linkplain UserServiceAdapter#initialize(long) initialized} and genesis block is committed.
+ * Then the {@linkplain UserServiceAdapter#mountPublicApiHandler(long) public API handlers} are
  * created.
  *
  * @see <a href="https://exonum.com/doc/version/0.11/get-started/test-service/">TestKit documentation</a>
- *      <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.11/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
@@ -334,15 +333,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   private native void nativeFreeTestKit(long nativeHandle);
 
   /**
-   * Creates a new builder for the TestKit.
-   *
-   * @param nodeType type of the main TestKit node - either validator or auditor. Note that
-   * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main TestKit
-   *     node of this type
+   * Creates a new builder for the TestKit. Note that this builder creates a single validator
+   * network by default.
    */
-  public static Builder builder(EmulatedNodeType nodeType) {
-    checkNotNull(nodeType);
-    return new Builder(nodeType);
+  public static Builder builder() {
+    return new Builder();
   }
 
   /**
@@ -350,13 +345,33 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    */
   public static final class Builder {
 
-    private EmulatedNodeType nodeType;
+    private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
     private final List<Class<? extends ServiceModule>> services = new ArrayList<>();
     private TimeProvider timeProvider;
 
-    private Builder(EmulatedNodeType nodeType) {
+    private Builder() {
+    }
+
+    /**
+     * Returns a copy of this TestKit builder.
+     */
+    public Builder copy() {
+      return new Builder()
+          .withNodeType(nodeType)
+          .withServices(services)
+          .withValidators(validatorCount)
+          .withTimeService(timeProvider);
+    }
+
+    /**
+     * Sets the type of the main TestKit node - either validator or auditor. Note that
+     * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main
+     * TestKit node of this type
+     */
+    public Builder withNodeType(EmulatedNodeType nodeType) {
       this.nodeType = nodeType;
+      return this;
     }
 
     /**

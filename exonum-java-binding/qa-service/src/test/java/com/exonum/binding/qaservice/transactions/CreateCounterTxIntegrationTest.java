@@ -38,13 +38,20 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 class CreateCounterTxIntegrationTest {
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(QaServiceModule.class));
 
   @Test
   void converterRejectsWrongServiceId() {
@@ -86,45 +93,41 @@ class CreateCounterTxIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeNewCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-      String counterName = "counter";
-      service.submitCreateCounter(counterName);
-      testKit.createBlock();
+  void executeNewCounter(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    String counterName = "counter";
+    service.submitCreateCounter(counterName);
+    testKit.createBlock();
 
-      testKit.withSnapshot((view) -> {
-        QaSchema schema = new QaSchema(view);
-        MapIndex<HashCode, Long> counters = schema.counters();
-        MapIndex<HashCode, String> counterNames = schema.counterNames();
-        HashCode counterId = sha256().hashString(counterName, UTF_8);
+    testKit.withSnapshot((view) -> {
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      HashCode counterId = sha256().hashString(counterName, UTF_8);
 
-        assertThat(counters.get(counterId)).isEqualTo(0L);
-        assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-        return null;
-      });
-    }
+      assertThat(counters.get(counterId)).isEqualTo(0L);
+      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeAlreadyExistingCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      String counterName = "counter";
-      TransactionMessage transactionMessage = createCreateCounterTransaction(counterName);
-      TransactionMessage transactionMessage2 = createCreateCounterTransaction(counterName);
-      testKit.createBlockWithTransactions(transactionMessage);
-      testKit.createBlockWithTransactions(transactionMessage2);
+  void executeAlreadyExistingCounter(TestKit testKit) {
+    String counterName = "counter";
+    TransactionMessage transactionMessage = createCreateCounterTransaction(counterName);
+    TransactionMessage transactionMessage2 = createCreateCounterTransaction(counterName);
+    testKit.createBlockWithTransactions(transactionMessage);
+    testKit.createBlockWithTransactions(transactionMessage2);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(COUNTER_ALREADY_EXISTS.code, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(COUNTER_ALREADY_EXISTS.code, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test
