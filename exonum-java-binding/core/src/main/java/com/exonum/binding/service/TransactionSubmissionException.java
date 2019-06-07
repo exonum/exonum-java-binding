@@ -16,9 +16,12 @@
 
 package com.exonum.binding.service;
 
+import com.exonum.binding.transaction.RawTransaction;
+
 /**
- * Indicates a transaction could not be submitted. For example, the submitted transaction
- * is not valid — belongs to an unknown service.
+ * Indicates that a transaction could not be
+ * {@linkplain Node#submitTransaction(RawTransaction) submitted}.
+ * For example, the submitted transaction is not valid — belongs to an unknown service.
  */
 public final class TransactionSubmissionException extends RuntimeException {
 
