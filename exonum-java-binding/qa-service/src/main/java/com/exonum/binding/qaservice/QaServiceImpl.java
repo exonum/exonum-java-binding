@@ -20,6 +20,8 @@ import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.google.common.base.Preconditions.checkState;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.exonum.binding.blockchain.Blockchain;
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -193,6 +195,17 @@ public final class QaServiceImpl extends AbstractService implements QaService {
       String name = counterNames.get(counterId);
       Long value = counters.get(counterId);
       return Optional.of(new Counter(name, value));
+    });
+  }
+
+  @Override
+  public StoredConfiguration getActualConfiguration() {
+    checkBlockchainInitialized();
+
+    return node.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+
+      return blockchain.getActualConfiguration();
     });
   }
 

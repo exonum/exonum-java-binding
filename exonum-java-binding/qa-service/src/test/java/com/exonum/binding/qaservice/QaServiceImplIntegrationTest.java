@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
@@ -23,9 +24,12 @@ import static com.exonum.binding.qaservice.TransactionUtils.createCreateCounterT
 import static com.exonum.binding.qaservice.TransactionUtils.createIncrementCounterTransaction;
 import static com.exonum.binding.qaservice.TransactionUtils.createThrowingTransaction;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
+import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -38,6 +42,7 @@ import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.testkit.TimeProvider;
+import com.exonum.binding.testkit.ValidatorCount;
 import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -177,6 +182,28 @@ class QaServiceImplIntegrationTest {
       assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
       return null;
     });
+  }
+
+  @Test
+  void getActualConfiguration(@ValidatorCount(NEW_VALIDATOR_COUNT) TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+    StoredConfiguration configuration = service.getActualConfiguration();
+
+    HashCode expectedPreviousCfgHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+    assertThat(configuration.previousCfgHash()).isEqualTo(expectedPreviousCfgHash);
+
+    EmulatedNode emulatedNode = testKit.getEmulatedNode();
+    List<ValidatorKey> validatorKeys = configuration.validatorKeys();
+
+    assertThat(validatorKeys).hasSize(NEW_VALIDATOR_COUNT);
+
+    PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
+    List<PublicKey> serviceKeys = configuration.validatorKeys().stream()
+        .map(ValidatorKey::serviceKey)
+        .collect(toList());
+
+    assertThat(serviceKeys).hasSize(NEW_VALIDATOR_COUNT);
+    assertThat(serviceKeys).contains(emulatedNodeServiceKey);
   }
 
   @Nested

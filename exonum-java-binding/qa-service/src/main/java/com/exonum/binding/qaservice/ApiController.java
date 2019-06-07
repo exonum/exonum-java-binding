@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
@@ -32,6 +32,7 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.common.annotations.VisibleForTesting;
@@ -75,7 +76,7 @@ final class ApiController {
             .put(SUBMIT_VALID_THROWING_TX_PATH, this::submitValidThrowingTx)
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
-            .put(GET_COUNTER_PATH, this::getCounter)
+            .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .put(TIME_PATH, this::getTime)
             .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
             .build();
@@ -131,6 +132,11 @@ final class ApiController {
     Optional<Counter> counter = service.getValue(counterId);
 
     respondWithJson(rc, counter);
+  }
+
+  private void getActualConfiguration(RoutingContext rc) {
+    StoredConfiguration configuration = service.getActualConfiguration();
+    respondWithJson(rc, configuration);
   }
 
   private void getTime(RoutingContext rc) {
@@ -245,7 +251,8 @@ final class ApiController {
     static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
     static final String COUNTER_ID_PARAM = "counterId";
     static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
-
+    @VisibleForTesting
+    static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
     @VisibleForTesting
     static final String TIME_PATH = "/time";
     @VisibleForTesting

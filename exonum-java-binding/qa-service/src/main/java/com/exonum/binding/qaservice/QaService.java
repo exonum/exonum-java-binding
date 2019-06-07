@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.service.Service;
@@ -44,8 +45,7 @@ public interface QaService extends Service {
 
   Optional<Counter> getValue(HashCode counterId);
 
-  // todo: Is configuration still needed?
-  // StoredConfiguration getActualConfiguration();
+  StoredConfiguration getActualConfiguration();
 
   // todo: Is time still needed?
   Optional<ZonedDateTime> getTime();
