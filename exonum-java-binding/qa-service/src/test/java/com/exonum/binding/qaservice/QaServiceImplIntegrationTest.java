@@ -28,9 +28,6 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
@@ -46,7 +43,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.testkit.ValidatorCount;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -169,33 +165,6 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
-  void getHeight(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    testKit.createBlock();
-    Height expectedHeight = new Height(1L);
-    assertThat(service.getHeight()).isEqualTo(expectedHeight);
-  }
-
-  @Test
-  void getBlockHashes(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    Block block = testKit.createBlock();
-    List<HashCode> hashes = service.getBlockHashes();
-    // Should contain genesis and created block hashes
-    assertThat(hashes).hasSize(2);
-    assertThat(hashes.get(1)).isEqualTo(block.getBlockHash());
-  }
-
-  @Test
-  void getBlockTransactionsByHeight(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    List<HashCode> transactionHashes = service.getBlockTransactions(1L);
-    assertThat(transactionHashes).isEqualTo(ImmutableList.of(createCounterTransaction.hash()));
-  }
-
-  @Test
   void afterCommit(TestKit testKit) {
     // After the first block the afterCommit transaction is submitted
     testKit.createBlock();
@@ -235,104 +204,6 @@ class QaServiceImplIntegrationTest {
 
     assertThat(serviceKeys).hasSize(NEW_VALIDATOR_COUNT);
     assertThat(serviceKeys).contains(emulatedNodeServiceKey);
-  }
-
-  @Test
-  void getBlockTransactionsByBlockId(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    List<HashCode> blockTransactions = service.getBlockTransactions(1L);
-    assertThat(blockTransactions).hasSize(1);
-    assertThat(blockTransactions.get(0)).isEqualTo(createCounterTransaction.hash());
-  }
-
-  @Test
-  void getTxMessages(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    Map<HashCode, TransactionMessage> txMessages = service.getTxMessages();
-    // Contains two transactions - one submitted above and the second committed in afterCommit
-    assertThat(txMessages).hasSize(2);
-    assertThat(txMessages.get(createCounterTransaction.hash()))
-        .isEqualTo(createCounterTransaction);
-  }
-
-  @Test
-  void getTxResults(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    Map<HashCode, TransactionResult> txResults = service.getTxResults();
-    assertThat(txResults)
-        .isEqualTo(ImmutableMap.of(createCounterTransaction.hash(),
-            TransactionResult.successful()));
-  }
-
-  @Test
-  void getTxResult(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    Optional<TransactionResult> txResult = service.getTxResult(createCounterTransaction.hash());
-    assertThat(txResult).hasValue(TransactionResult.successful());
-  }
-
-  @Test
-  void getTxLocations(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
-    TransactionLocation expectedTransactionLocation = TransactionLocation.valueOf(1L, 0L);
-    assertThat(txLocations)
-        .isEqualTo(ImmutableMap.of(createCounterTransaction.hash(),
-            expectedTransactionLocation));
-  }
-
-  @Test
-  void getTxLocation(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    TransactionMessage createCounterTransaction = createCreateCounterTransaction("counterName");
-    testKit.createBlockWithTransactions(createCounterTransaction);
-    Optional<TransactionLocation> txLocation =
-        service.getTxLocation(createCounterTransaction.hash());
-    TransactionLocation expectedTransactionLocation = TransactionLocation.valueOf(1L, 0L);
-    assertThat(txLocation).hasValue(expectedTransactionLocation);
-  }
-
-  @Test
-  void getBlocks(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    Block block = testKit.createBlock();
-    Map<HashCode, Block> blocks = service.getBlocks();
-    assertThat(blocks).hasSize(2);
-    assertThat(blocks.get(block.getBlockHash())).isEqualTo(block);
-  }
-
-  @Test
-  void getBlockByHeight(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    Block block = testKit.createBlock();
-    Block actualBlock = service.getBlockByHeight(block.getHeight());
-    assertThat(actualBlock).isEqualTo(block);
-  }
-
-  @Test
-  void getBlockById(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    Block block = testKit.createBlock();
-    Optional<Block> actualBlock = service.getBlockById(block.getBlockHash());
-    assertThat(actualBlock).hasValue(block);
-  }
-
-  @Test
-  void getLastBlock(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    Block block = testKit.createBlock();
-    Block lastBlock = service.getLastBlock();
-    assertThat(lastBlock).isEqualTo(block);
   }
 
   @Nested
