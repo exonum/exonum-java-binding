@@ -21,9 +21,11 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <!-- TODO: stable does not work well until ECR-1839 is resolved. -->
-    <rust.compiler.version>1.32.0</rust.compiler.version>
-    <rust.compiler.features>resource-manager</rust.compiler.features>
+    <rust.compiler.version>stable</rust.compiler.version>
+    <!-- Features for integration testing. At least "resource-manager" is required by Java integration tests. Ideally,
+     keeping them in sync with the ones that `integration_tests` crate require from the `java_bindings` crate allows
+     the native integration tests to avoid recompilation of the `java_binding` library. -->
+    <rust.compiler.features>resource-manager invocation</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <rust.appSubCrate>exonum-java</rust.appSubCrate>
     <!--A directory containing libjava_bindings native library-->
@@ -195,6 +197,7 @@
         <executions>
           <!-- Each execution has its own configuration for
                we need to execute cargo during various phases (e.g., compile).
+
                Correspondences between Maven and Cargo phases:
                 | Maven   | Cargo |
                 | compile | build |
@@ -204,7 +207,8 @@
                not supported. -->
           <execution>
             <!-- We build a rust lib during 'compile' phase as Java integration tests
-                 depend on the library -->
+                 depend on the library. The library is built with resource-manager feature
+                 enabled to detect possible errors with handle management. -->
             <id>build-rust-lib-for-tests</id>
             <phase>compile</phase>
             <configuration>
@@ -223,34 +227,7 @@
             </goals>
           </execution>
 
-          <!-- Runs rust native tests without resource manager.
-
-               todo: run on a CI server only
-               Note: cannot be currently extracted in 'ci-build' profile for will produce a library
-               without rm and break ITs in Java. -->
-          <execution>
-            <id>test-rust-lib-no-resource-manager</id>
-            <phase>test</phase>
-            <configuration>
-              <arguments>
-                <argument>+${rust.compiler.version}</argument>
-                <argument>test</argument>
-                <argument>--all</argument>
-                <argument>--exclude</argument>
-                <argument>${rust.itSubCrate}</argument>
-                <!-- Exonum Java app depends on `resource-manager`, so we do not test it here -->
-                <argument>--exclude</argument>
-                <argument>${rust.appSubCrate}</argument>
-                <argument>--color</argument>
-                <argument>always</argument>
-              </arguments>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-
+          <!-- Run the unit-tests of the Rust library with resource-manager feature enabled. -->
           <execution>
             <id>test-rust-lib</id>
             <phase>test</phase>
@@ -400,8 +377,9 @@
 
   <profiles>
     <!-- A build profile for a build performed on a CI server:
-            - Fails if the code has style issues
-            - Runs FindBugs during verify phase
+           - Fails if the code has style issues
+           - Runs FindBugs during verify phase
+           - Runs unit tests of the Rust library without resource-manager feature
      -->
     <profile>
       <id>ci-build</id>
@@ -416,6 +394,37 @@
                 <phase>verify</phase>
                 <goals>
                   <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+            <executions>
+              <!-- Run the unit-tests of the Rust library without resource-manager feature. -->
+              <execution>
+                <id>test-rust-lib-no-resource-manager</id>
+                <phase>test</phase>
+                <configuration>
+                  <arguments>
+                    <argument>+${rust.compiler.version}</argument>
+                    <argument>test</argument>
+                    <argument>--all</argument>
+                    <argument>--exclude</argument>
+                    <argument>${rust.itSubCrate}</argument>
+                    <!-- Exonum Java app depends on `resource-manager`, so we do not test it here -->
+                    <argument>--exclude</argument>
+                    <argument>${rust.appSubCrate}</argument>
+                    <argument>--color</argument>
+                    <argument>always</argument>
+                  </arguments>
+                  <skip>${skipTests}</skip>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
                 </goals>
               </execution>
             </executions>

@@ -19,7 +19,6 @@ package com.exonum.binding.storage.indices;
 import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -27,10 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 
 @RequiresNativeLibrary
 abstract class BaseIndexGroupTestable {
-
-  static {
-    LibraryLoader.load();
-  }
 
   /**
    * A default cleaner for a test case.

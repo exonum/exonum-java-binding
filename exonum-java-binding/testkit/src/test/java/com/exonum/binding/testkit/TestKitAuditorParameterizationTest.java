@@ -16,13 +16,22 @@
 
 package com.exonum.binding.testkit;
 
-/**
- * Type of the TestKit emulated node.
- *
- * @see <a href="https://exonum.com/doc/version/0.11/glossary/#auditor">Auditor Node</a>
- * @see <a href="https://exonum.com/doc/version/0.11/glossary/#validator">Validator Node</a>
- */
-public enum EmulatedNodeType {
-  VALIDATOR,
-  AUDITOR
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+class TestKitAuditorParameterizationTest {
+
+  @RegisterExtension
+  TestKitExtension testKitAuditorExtension = new TestKitExtension(
+      TestKit.builder()
+          .withNodeType(EmulatedNodeType.AUDITOR)
+          .withService(TestServiceModule.class));
+
+  @Test
+  void testTestKitValidator(@Validator TestKit testKit) {
+    // Check that main TestKit node is a validator
+    assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
+  }
 }

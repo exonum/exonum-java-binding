@@ -22,44 +22,42 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.util.LibraryLoader;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 @RequiresNativeLibrary
 class CryptocurrencySchemaIntegrationTest {
 
-  static {
-    LibraryLoader.load();
-  }
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(CryptocurrencyServiceModule.class));
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
 
   @Test
-  void getStateHashes() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      testKit.withSnapshot((view) -> {
-        CryptocurrencySchema schema = new CryptocurrencySchema(view);
+  void getStateHashes(TestKit testKit) {
+    testKit.withSnapshot((view) -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
-        HashCode walletsMerkleRoot = schema.wallets().getRootHash();
-        ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
+      HashCode walletsMerkleRoot = schema.wallets().getRootHash();
+      ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
 
-        assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
-        return null;
-      });
-    }
+      assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
+      return null;
+    });
   }
 
   @Test
-  void walletHistoryNoRecords() {
-    try (TestKit testKit = TestKit.forService(CryptocurrencyServiceModule.class)) {
-      testKit.withSnapshot((view) -> {
-        CryptocurrencySchema schema = new CryptocurrencySchema(view);
+  void walletHistoryNoRecords(TestKit testKit) {
+    testKit.withSnapshot((view) -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
-        assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
-        return null;
-      });
-    }
+      assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
+      return null;
+    });
   }
 }

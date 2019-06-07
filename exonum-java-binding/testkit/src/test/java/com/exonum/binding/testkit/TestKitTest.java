@@ -41,7 +41,6 @@ import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -55,17 +54,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 class TestKitTest {
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(TestServiceModule.class));
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void createTestKitForSingleService() {
@@ -78,7 +79,7 @@ class TestKitTest {
 
   @Test
   void createTestKitWithBuilderForSingleService() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .build()) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -91,14 +92,14 @@ class TestKitTest {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     List<Class<? extends ServiceModule>> serviceModules = ImmutableList.of(TestServiceModule.class,
         TestServiceModule.class);
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withServices(serviceModules);
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
   @Test
   void createTestKitWithBuilderForMultipleDifferentServices() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withService(TestServiceModule2.class)
         .build()) {
@@ -111,7 +112,7 @@ class TestKitTest {
 
   @Test
   void createTestKitWithBuilderForMultipleDifferentServicesVarargs() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withServices(TestServiceModule.class, TestServiceModule2.class)
         .build()) {
       TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -124,7 +125,7 @@ class TestKitTest {
   @Test
   void createTestKitWithTimeService() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build()) {
@@ -180,7 +181,7 @@ class TestKitTest {
   @Test
   void createTestKitWithSeveralValidators() {
     short validatorCount = 2;
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withValidators(validatorCount)
         .build()) {
@@ -196,7 +197,8 @@ class TestKitTest {
   @Test
   void createTestKitWithAuditorAndAdditionalValidators() {
     short validatorCount = 2;
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.AUDITOR)
+    try (TestKit testKit = TestKit.builder()
+        .withNodeType(EmulatedNodeType.AUDITOR)
         .withService(TestServiceModule.class)
         .withValidators(validatorCount)
         .build()) {
@@ -213,7 +215,7 @@ class TestKitTest {
   void setInvalidValidatorCount() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     short invalidValidatorCount = 0;
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withService(TestServiceModule.class);
     assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
   }
@@ -221,7 +223,7 @@ class TestKitTest {
   @Test
   void requestWrongServiceClass() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .build()) {
       assertThrows(exceptionType,
@@ -244,7 +246,7 @@ class TestKitTest {
     for (int i = 0; i < TestKit.MAX_SERVICE_NUMBER + 1; i++) {
       serviceModules.add(TestServiceModule.class);
     }
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withServices(serviceModules);
     assertThrows(exceptionType, testKitBuilder::build);
   }
@@ -252,166 +254,148 @@ class TestKitTest {
   @Test
   void createTestKitWithoutServices() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR);
+    TestKit.Builder testKitBuilder = TestKit.builder();
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
   @Test
-  void createEmptyBlock() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      Block block = testKit.createBlock();
-      assertThat(block.getNumTransactions()).isEqualTo(0);
+  void createEmptyBlock(TestKit testKit) {
+    Block block = testKit.createBlock();
+    assertThat(block.getNumTransactions()).isEqualTo(0);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        assertThat(blockchain.getHeight()).isEqualTo(1);
-        assertThat(block).isEqualTo(blockchain.getBlock(1));
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      assertThat(blockchain.getHeight()).isEqualTo(1);
+      assertThat(block).isEqualTo(blockchain.getBlock(1));
+      return null;
+    });
   }
 
   @Test
-  void afterCommitSubmitsTransaction() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      // Create a block so that afterCommit transaction is submitted
-      Block block = testKit.createBlock();
-      List<TransactionMessage> inPoolTransactions = testKit
-          .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
-      assertThat(inPoolTransactions).hasSize(1);
-      TransactionMessage inPoolTransaction = inPoolTransactions.get(0);
-      RawTransaction afterCommitTransaction = constructAfterCommitTransaction(block.getHeight());
+  void afterCommitSubmitsTransaction(TestKit testKit) {
+    // Create a block so that afterCommit transaction is submitted
+    Block block = testKit.createBlock();
+    List<TransactionMessage> inPoolTransactions = testKit
+        .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+    assertThat(inPoolTransactions).hasSize(1);
+    TransactionMessage inPoolTransaction = inPoolTransactions.get(0);
+    RawTransaction afterCommitTransaction = constructAfterCommitTransaction(block.getHeight());
 
-      assertThat(inPoolTransaction.getServiceId())
-          .isEqualTo(afterCommitTransaction.getServiceId());
-      assertThat(inPoolTransaction.getTransactionId())
-          .isEqualTo(afterCommitTransaction.getTransactionId());
-      assertThat(inPoolTransaction.getPayload()).isEqualTo(afterCommitTransaction.getPayload());
+    assertThat(inPoolTransaction.getServiceId())
+        .isEqualTo(afterCommitTransaction.getServiceId());
+    assertThat(inPoolTransaction.getTransactionId())
+        .isEqualTo(afterCommitTransaction.getTransactionId());
+    assertThat(inPoolTransaction.getPayload()).isEqualTo(afterCommitTransaction.getPayload());
 
-      Block nextBlock = testKit.createBlock();
-      assertThat(nextBlock.getNumTransactions()).isEqualTo(1);
-      assertThat(nextBlock.getHeight()).isEqualTo(2);
-    }
+    Block nextBlock = testKit.createBlock();
+    assertThat(nextBlock.getNumTransactions()).isEqualTo(1);
+    assertThat(nextBlock.getHeight()).isEqualTo(2);
   }
 
   @Test
-  void createBlockWithTransactionIgnoresInPoolTransactions() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      // Create a block so that afterCommit transaction is submitted
-      testKit.createBlock();
+  void createBlockWithTransactionIgnoresInPoolTransactions(TestKit testKit) {
+    // Create a block so that afterCommit transaction is submitted
+    testKit.createBlock();
 
-      Block block = testKit.createBlockWithTransactions();
-      assertThat(block.getNumTransactions()).isEqualTo(0);
+    Block block = testKit.createBlockWithTransactions();
+    assertThat(block.getNumTransactions()).isEqualTo(0);
 
-      // Two blocks were created, so two afterCommit transactions should be submitted into pool
-      List<TransactionMessage> inPoolTransactions = testKit
-          .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
-      assertThat(inPoolTransactions).hasSize(2);
-    }
+    // Two blocks were created, so two afterCommit transactions should be submitted into pool
+    List<TransactionMessage> inPoolTransactions = testKit
+        .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+    assertThat(inPoolTransactions).hasSize(2);
   }
 
   @Test
-  void createBlockWithSingleTransaction() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TransactionMessage message = constructTestTransactionMessage("Test message");
-      Block block = testKit.createBlockWithTransactions(message);
-      assertThat(block.getNumTransactions()).isEqualTo(1);
+  void createBlockWithSingleTransaction(TestKit testKit) {
+    TransactionMessage message = constructTestTransactionMessage("Test message");
+    Block block = testKit.createBlockWithTransactions(message);
+    assertThat(block.getNumTransactions()).isEqualTo(1);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        assertThat(blockchain.getHeight()).isEqualTo(1);
-        assertThat(block).isEqualTo(blockchain.getBlock(1));
-        Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
-        assertThat(transactionResults).hasSize(1);
-        TransactionResult transactionResult = transactionResults.get(message.hash());
-        assertThat(transactionResult).isEqualTo(TransactionResult.successful());
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      assertThat(blockchain.getHeight()).isEqualTo(1);
+      assertThat(block).isEqualTo(blockchain.getBlock(1));
+      Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
+      assertThat(transactionResults).hasSize(1);
+      TransactionResult transactionResult = transactionResults.get(message.hash());
+      assertThat(transactionResult).isEqualTo(TransactionResult.successful());
+      return null;
+    });
   }
 
   @Test
-  void createBlockWithTransactions() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TransactionMessage message = constructTestTransactionMessage("Test message");
-      TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
+  void createBlockWithTransactions(TestKit testKit) {
+    TransactionMessage message = constructTestTransactionMessage("Test message");
+    TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
-      Block block = testKit.createBlockWithTransactions(ImmutableList.of(message, message2));
-      assertThat(block.getNumTransactions()).isEqualTo(2);
+    Block block = testKit.createBlockWithTransactions(ImmutableList.of(message, message2));
+    assertThat(block.getNumTransactions()).isEqualTo(2);
 
-      testKit.withSnapshot((view) -> {
-        checkTransactionsCommittedSuccessfully(view, block, message, message2);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      checkTransactionsCommittedSuccessfully(view, block, message, message2);
+      return null;
+    });
   }
 
   @Test
-  void nodeSubmittedTransactionsArePlacedInPool() throws Exception {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) throws Exception {
+    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-      service.getNode().submitTransaction(rawTransaction);
+    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
+    service.getNode().submitTransaction(rawTransaction);
 
-      List<TransactionMessage> transactionsInPool =
-          testKit.findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
-      assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
-    }
+    List<TransactionMessage> transactionsInPool =
+        testKit.findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+    assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
   }
 
   @Test
-  void getTransactionPool() throws Exception {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+  void getTransactionPool(TestKit testKit) throws Exception {
+    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-      RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
+    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
+    TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+    RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
 
-      service.getNode().submitTransaction(rawTransaction);
-      service.getNode().submitTransaction(rawTransaction2);
+    service.getNode().submitTransaction(rawTransaction);
+    service.getNode().submitTransaction(rawTransaction2);
 
-      List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
-      assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
-    }
+    List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
+    assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
   }
 
   @Test
-  void findTransactionsInPool() throws Exception {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
+  void findTransactionsInPool(TestKit testKit) throws Exception {
+    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-      TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-      RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
-      service.getNode().submitTransaction(rawTransaction);
-      service.getNode().submitTransaction(rawTransaction2);
+    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
+    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
+    TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
+    RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
+    service.getNode().submitTransaction(rawTransaction);
+    service.getNode().submitTransaction(rawTransaction2);
 
-      List<TransactionMessage> transactionsInPool =
-          testKit.findTransactionsInPool(
-              tx -> Arrays.equals(tx.getPayload(), message.getPayload()));
-      assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
-    }
+    List<TransactionMessage> transactionsInPool =
+        testKit.findTransactionsInPool(
+            tx -> Arrays.equals(tx.getPayload(), message.getPayload()));
+    assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
   }
 
   @Test
-  void createBlockWithTransactionsVarargs() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      TransactionMessage message = constructTestTransactionMessage("Test message");
-      TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
+  void createBlockWithTransactionsVarargs(TestKit testKit) {
+    TransactionMessage message = constructTestTransactionMessage("Test message");
+    TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
-      Block block = testKit.createBlockWithTransactions(message, message2);
-      assertThat(block.getNumTransactions()).isEqualTo(2);
+    Block block = testKit.createBlockWithTransactions(message, message2);
+    assertThat(block.getNumTransactions()).isEqualTo(2);
 
-      testKit.withSnapshot((view) -> {
-        checkTransactionsCommittedSuccessfully(view, block, message, message2);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      checkTransactionsCommittedSuccessfully(view, block, message, message2);
+      return null;
+    });
   }
 
   private TransactionMessage constructTestTransactionMessage(String payload) {
@@ -447,51 +431,46 @@ class TestKitTest {
   }
 
   @Test
-  void createBlockWithTransactionWithWrongServiceId() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      short wrongServiceId = (short) (TestService.SERVICE_ID + 1);
-      TransactionMessage message = TransactionMessage.builder()
-          .serviceId(wrongServiceId)
-          .transactionId(TestTransaction.ID)
-          .payload("Test message".getBytes(BODY_CHARSET))
-          .sign(KEY_PAIR, CRYPTO_FUNCTION);
-      IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
-          () -> testKit.createBlockWithTransactions(message));
-      assertThat(thrownException.getMessage())
-          .contains("Unknown service id", Integer.toString(wrongServiceId), message.toString());
-    }
+  void createBlockWithTransactionWithWrongServiceId(TestKit testKit) {
+    short wrongServiceId = (short) (TestService.SERVICE_ID + 1);
+    TransactionMessage message = TransactionMessage.builder()
+        .serviceId(wrongServiceId)
+        .transactionId(TestTransaction.ID)
+        .payload("Test message".getBytes(BODY_CHARSET))
+        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+        () -> testKit.createBlockWithTransactions(message));
+    assertThat(thrownException.getMessage())
+        .contains("Unknown service id", Integer.toString(wrongServiceId), message.toString());
   }
 
   @Test
-  void createBlockWithTransactionWithWrongTransactionId() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      short wrongTransactionId = (short) (TestTransaction.ID + 1);
-      TransactionMessage message = TransactionMessage.builder()
-          .serviceId(TestService.SERVICE_ID)
-          .transactionId(wrongTransactionId)
-          .payload("Test message".getBytes(BODY_CHARSET))
-          .sign(KEY_PAIR, CRYPTO_FUNCTION);
-      IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
-          () -> testKit.createBlockWithTransactions(message));
-      assertThat(thrownException.getMessage())
-          .contains("failed to convert transaction", TestService.SERVICE_NAME,
-              Integer.toString(TestService.SERVICE_ID), message.toString());
-    }
+  void createBlockWithTransactionWithWrongTransactionId(TestKit testKit) {
+    short wrongTransactionId = (short) (TestTransaction.ID + 1);
+    TransactionMessage message = TransactionMessage.builder()
+        .serviceId(TestService.SERVICE_ID)
+        .transactionId(wrongTransactionId)
+        .payload("Test message".getBytes(BODY_CHARSET))
+        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+        () -> testKit.createBlockWithTransactions(message));
+    assertThat(thrownException.getMessage())
+        .contains("failed to convert transaction", TestService.SERVICE_NAME,
+            Integer.toString(TestService.SERVICE_ID), message.toString());
   }
 
   @Test
-  void getValidatorEmulatedNode() {
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      EmulatedNode node = testKit.getEmulatedNode();
-      assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
-      assertThat(node.getValidatorId()).isNotEmpty();
-      assertThat(node.getServiceKeyPair()).isNotNull();
-    }
+  void getValidatorEmulatedNode(TestKit testKit) {
+    EmulatedNode node = testKit.getEmulatedNode();
+    assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
+    assertThat(node.getValidatorId()).isNotEmpty();
+    assertThat(node.getServiceKeyPair()).isNotNull();
   }
 
   @Test
   void getAuditorEmulatedNode() {
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.AUDITOR)
+    try (TestKit testKit = TestKit.builder()
+        .withNodeType(EmulatedNodeType.AUDITOR)
         .withService(TestServiceModule.class)
         .build()) {
       EmulatedNode node = testKit.getEmulatedNode();
@@ -504,7 +483,7 @@ class TestKitTest {
   @Test
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    try (TestKit testKit = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    try (TestKit testKit = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .build()) {
@@ -546,7 +525,7 @@ class TestKitTest {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     short invalidValidatorCount = TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE + 1;
-    TestKit.Builder testKitBuilder = TestKit.builder(EmulatedNodeType.VALIDATOR)
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withService(TestServiceModule.class)
         .withTimeService(timeProvider)
         .withValidators(invalidValidatorCount);

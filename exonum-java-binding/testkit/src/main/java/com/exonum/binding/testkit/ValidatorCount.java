@@ -16,13 +16,23 @@
 
 package com.exonum.binding.testkit;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * Type of the TestKit emulated node.
+ * Number of validator nodes in the TestKit network, should be positive. Note that regardless of
+ * the configured number of validators, only a single service will be instantiated.
  *
- * @see <a href="https://exonum.com/doc/version/0.11/glossary/#auditor">Auditor Node</a>
- * @see <a href="https://exonum.com/doc/version/0.11/glossary/#validator">Validator Node</a>
+ * @see TestKit.Builder#withValidators(short)
  */
-public enum EmulatedNodeType {
-  VALIDATOR,
-  AUDITOR
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ValidatorCount {
+
+  /**
+   * Validator count of TestKit network.
+   */
+  short value();
 }

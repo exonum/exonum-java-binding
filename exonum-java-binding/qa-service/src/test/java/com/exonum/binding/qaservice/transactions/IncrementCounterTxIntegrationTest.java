@@ -39,18 +39,20 @@ import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 class IncrementCounterTxIntegrationTest {
 
-  static {
-    LibraryLoader.load();
-  }
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(QaServiceModule.class));
 
   @Test
   void converterRejectsWrongServiceId() {
@@ -86,51 +88,47 @@ class IncrementCounterTxIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  void executeIncrementsCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
+  void executeIncrementsCounter(TestKit testKit) {
+    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
 
-      // Add a new counter with the given name and initial value
-      String counterName = "counter";
-      service.submitCreateCounter(counterName);
-      testKit.createBlock();
+    // Add a new counter with the given name and initial value
+    String counterName = "counter";
+    service.submitCreateCounter(counterName);
+    testKit.createBlock();
 
-      // Submit and execute the transaction
-      long seed = 0L;
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
-      service.submitIncrementCounter(seed, counterId);
-      testKit.createBlock();
+    // Submit and execute the transaction
+    long seed = 0L;
+    HashCode counterId = sha256().hashString(counterName, UTF_8);
+    service.submitIncrementCounter(seed, counterId);
+    testKit.createBlock();
 
-      testKit.withSnapshot((view) -> {
-        // Check the counter has an incremented value
-        QaSchema schema = new QaSchema(view);
-        MapIndex<HashCode, Long> counters = schema.counters();
-        long expectedValue = 1;
+    testKit.withSnapshot((view) -> {
+      // Check the counter has an incremented value
+      QaSchema schema = new QaSchema(view);
+      MapIndex<HashCode, Long> counters = schema.counters();
+      long expectedValue = 1;
 
-        assertThat(counters.get(counterId)).isEqualTo(expectedValue);
-        return null;
-      });
-    }
+      assertThat(counters.get(counterId)).isEqualTo(expectedValue);
+      return null;
+    });
   }
 
   @Test
   @RequiresNativeLibrary
-  void executeNoSuchCounter() {
-    try (TestKit testKit = TestKit.forService(QaServiceModule.class)) {
-      String counterName = "unknown-counter";
-      HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
-      TransactionMessage incrementCounterTx = createIncrementCounterTransaction(0L, counterId);
-      testKit.createBlockWithTransactions(incrementCounterTx);
+  void executeNoSuchCounter(TestKit testKit) {
+    String counterName = "unknown-counter";
+    HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
+    TransactionMessage incrementCounterTx = createIncrementCounterTransaction(0L, counterId);
+    testKit.createBlockWithTransactions(incrementCounterTx);
 
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(incrementCounterTx.hash());
-        TransactionResult expectedTransactionResult =
-            TransactionResult.error(UNKNOWN_COUNTER.code, null);
-        assertThat(txResult).hasValue(expectedTransactionResult);
-        return null;
-      });
-    }
+    testKit.withSnapshot((view) -> {
+      Blockchain blockchain = Blockchain.newInstance(view);
+      Optional<TransactionResult> txResult = blockchain.getTxResult(incrementCounterTx.hash());
+      TransactionResult expectedTransactionResult =
+          TransactionResult.error(UNKNOWN_COUNTER.code, null);
+      assertThat(txResult).hasValue(expectedTransactionResult);
+      return null;
+    });
   }
 
   @Test

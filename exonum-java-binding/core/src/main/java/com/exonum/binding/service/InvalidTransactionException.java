@@ -17,11 +17,11 @@
 package com.exonum.binding.service;
 
 /**
- * Indicates that an internal error occurred during transaction processing.
+ * Indicates that the submitted transaction is not valid (e.g., belongs to an unknown service).
  */
-public final class InternalServerError extends Exception {
+public final class InvalidTransactionException extends IllegalArgumentException {
 
-  public InternalServerError(String message) {
+  public InvalidTransactionException(String message) {
     super(message);
   }
 }

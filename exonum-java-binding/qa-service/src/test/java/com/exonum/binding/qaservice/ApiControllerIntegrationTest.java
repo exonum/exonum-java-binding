@@ -74,7 +74,6 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
 import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
-import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -103,6 +102,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -204,26 +204,6 @@ class ApiControllerIntegrationTest {
           assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
           context.completeNow();
         })));
-  }
-
-  @Test
-  void submitCreateCounter_InternalServerError(VertxTestContext context) {
-    String counterName = "counter 1";
-    MultiMap params = multiMap("name", counterName);
-
-    String errorMessage = "internal error";
-    Throwable error = wrapInUnchecked(new InternalServerError(errorMessage));
-    when(qaService.submitCreateCounter(counterName))
-        .thenThrow(error);
-
-    post(SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(response -> {
-          context.verify(() -> {
-            assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR);
-            assertThat(response.bodyAsString()).contains(errorMessage);
-            context.completeNow();
-          });
-        }));
   }
 
   @Test
@@ -341,6 +321,26 @@ class ApiControllerIntegrationTest {
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
               () -> assertThat(response.bodyAsString())
                   .startsWith("Failed to convert parameter (counterId):"));
+          context.completeNow();
+        })));
+  }
+
+  @Test
+  @DisplayName("failureHandler converts unexpected exceptions to HTTP_INTERNAL_ERROR")
+  void failureHandlerUnexpectedException(VertxTestContext context) {
+    HashCode id = HASH_1;
+    String message = "Boom";
+    // This test is not specific to any service method — what matters is the exception type:
+    // RuntimeException.
+    when(qaService.getValue(id))
+        .thenThrow(new RuntimeException(message));
+    String getCounterUri = getCounterUri(id);
+
+    get(getCounterUri)
+        .send(context.succeeding(response -> context.verify(() -> {
+          assertAll(
+              () -> assertThat(response.statusCode()).isEqualTo(HTTP_INTERNAL_ERROR),
+              () -> assertThat(response.bodyAsString()).contains(message));
           context.completeNow();
         })));
   }
@@ -878,10 +878,6 @@ class ApiControllerIntegrationTest {
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 must be supported", e);
     }
-  }
-
-  private Throwable wrapInUnchecked(Throwable checkedException) {
-    return new RuntimeException(checkedException);
   }
 
   private Handler<AsyncResult<HttpResponse<Buffer>>> checkCreatedTransaction(

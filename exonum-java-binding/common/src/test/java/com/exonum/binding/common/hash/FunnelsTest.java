@@ -38,6 +38,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.exonum.binding.test.CiOnly;
 import com.exonum.binding.test.EqualsTester;
 import com.google.common.base.Charsets;
 import com.google.common.testing.SerializableTester;
@@ -53,6 +54,7 @@ import org.mockito.InOrder;
  *
  * @author Dimitris Andreou
  */
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class FunnelsTest {
   @Test
   void testForBytes() {

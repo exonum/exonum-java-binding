@@ -22,7 +22,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.service.AbstractService;
 import com.exonum.binding.service.BlockCommittedEvent;
-import com.exonum.binding.service.InternalServerError;
 import com.exonum.binding.service.Node;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
@@ -32,14 +31,14 @@ import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-final class TestService extends AbstractService {
+public final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
   static final String INITIAL_CONFIGURATION = "{ \"version\": \"0.2.0\" }";
 
-  static final short SERVICE_ID = 46;
+  public static final short SERVICE_ID = 46;
   static final String SERVICE_NAME = "Test service";
 
   private Node node;
@@ -58,7 +57,7 @@ final class TestService extends AbstractService {
     return SERVICE_NAME;
   }
 
-  Node getNode() {
+  public Node getNode() {
     return node;
   }
 
@@ -79,11 +78,7 @@ final class TestService extends AbstractService {
   public void afterCommit(BlockCommittedEvent event) {
     long height = event.getHeight();
     RawTransaction rawTransaction = constructAfterCommitTransaction(height);
-    try {
-      node.submitTransaction(rawTransaction);
-    } catch (InternalServerError e) {
-      throw new RuntimeException(e);
-    }
+    node.submitTransaction(rawTransaction);
   }
 
   static RawTransaction constructAfterCommitTransaction(long height) {
