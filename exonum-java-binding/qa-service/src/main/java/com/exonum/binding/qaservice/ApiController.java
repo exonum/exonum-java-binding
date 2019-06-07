@@ -19,6 +19,7 @@ package com.exonum.binding.qaservice;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
@@ -76,6 +77,7 @@ final class ApiController {
             .put(SUBMIT_VALID_THROWING_TX_PATH, this::submitValidThrowingTx)
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
+            .put(GET_COUNTER_PATH, this::getCounter)
             .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .put(TIME_PATH, this::getTime)
             .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
