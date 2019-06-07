@@ -37,7 +37,7 @@ use java_bindings::{
     jni::{objects::JObject, JavaVM},
     serde_json::{self, Value},
     utils::{any_to_string, convert_to_string, unwrap_jni},
-    JniExecutor, MainExecutor,
+    Executor,
 };
 
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -47,7 +47,7 @@ use exonum_testkit::TestKitBuilder;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
+    pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
 const EXCEPTION_CLASS: &str = "java/lang/RuntimeException";
@@ -272,7 +272,7 @@ fn after_commit_auditor() {
 }
 
 // Helper methods. Gets the JSON representation of interaction with mock.
-fn get_mock_interaction_result(exec: &MainExecutor, obj: JObject) -> String {
+fn get_mock_interaction_result(exec: &Executor, obj: JObject) -> String {
     unwrap_jni(exec.with_attached(|env| {
         env.call_method(obj, "getInteractions", "()Ljava/lang/String;", &[])?
             .l()

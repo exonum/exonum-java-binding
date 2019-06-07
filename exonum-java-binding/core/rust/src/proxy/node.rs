@@ -29,7 +29,7 @@ use jni::JNIEnv;
 use std::{panic, ptr};
 
 use handle::{cast_handle, drop_handle, to_handle, Handle};
-use proxy::MainExecutor;
+use proxy::Executor;
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
@@ -40,7 +40,7 @@ const INTERNAL_SERVER_ERROR: &str = "com/exonum/binding/service/InternalServerEr
 /// and get a snapshot of the database state.
 #[derive(Clone)]
 pub struct NodeContext {
-    executor: MainExecutor,
+    executor: Executor,
     blockchain: Blockchain,
     public_key: PublicKey,
     transaction_sender: ApiSender,
@@ -49,7 +49,7 @@ pub struct NodeContext {
 impl NodeContext {
     /// Creates a node context for a service.
     pub fn new(
-        executor: MainExecutor,
+        executor: Executor,
         blockchain: Blockchain,
         public_key: PublicKey,
         transaction_sender: ApiSender,
@@ -63,7 +63,7 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn executor(&self) -> &MainExecutor {
+    pub fn executor(&self) -> &Executor {
         &self.executor
     }
 

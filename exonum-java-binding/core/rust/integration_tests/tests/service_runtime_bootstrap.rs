@@ -19,7 +19,7 @@ extern crate java_bindings;
 
 use integration_tests::vm::{fakes_classpath, log4j_path};
 use java_bindings::{
-    Config, InternalConfig, JavaServiceRuntime, JniExecutor, JvmConfig, RuntimeConfig,
+    Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig,
 };
 
 #[test]

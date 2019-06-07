@@ -15,18 +15,18 @@
 use java_bindings::jni::objects::{GlobalRef, JValue};
 use java_bindings::jni::sys::jint;
 use java_bindings::jni::JNIEnv;
-use java_bindings::{JniExecutor, JniResult};
+use java_bindings::{JniResult, Executor};
 
 /// A test example of a native-to-JNI proxy
 #[derive(Clone)]
-pub struct AtomicIntegerProxy<E: JniExecutor> {
-    exec: E,
+pub struct AtomicIntegerProxy {
+    exec: Executor,
     obj: GlobalRef,
 }
 
-impl<E: JniExecutor> AtomicIntegerProxy<E> {
+impl AtomicIntegerProxy {
     /// Creates a new instance of `AtomicIntegerProxy`
-    pub fn new(exec: E, init_value: jint) -> JniResult<Self> {
+    pub fn new(exec: Executor, init_value: jint) -> JniResult<Self> {
         let obj = exec.with_attached(|env: &JNIEnv| {
             env.new_global_ref(env.new_object(
                 "java/util/concurrent/atomic/AtomicInteger",

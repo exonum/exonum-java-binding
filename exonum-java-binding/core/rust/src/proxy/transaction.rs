@@ -33,14 +33,14 @@ use utils::{
     },
     unwrap_jni,
 };
-use {JniErrorKind, JniExecutor, JniResult, MainExecutor};
+use {JniErrorKind, JniResult, Executor};
 
 const RETVAL_TYPE_STRING: &str = "java/lang/String";
 
 /// A proxy for `Transaction`s.
 #[derive(Clone)]
 pub struct TransactionProxy {
-    exec: MainExecutor,
+    exec: Executor,
     transaction: GlobalRef,
 }
 
@@ -52,7 +52,7 @@ impl fmt::Debug for TransactionProxy {
 
 impl TransactionProxy {
     /// Creates a `TransactionProxy` of the given Java transaction.
-    pub fn from_global_ref(exec: MainExecutor, transaction: GlobalRef) -> Self {
+    pub fn from_global_ref(exec: Executor, transaction: GlobalRef) -> Self {
         TransactionProxy { exec, transaction }
     }
 }

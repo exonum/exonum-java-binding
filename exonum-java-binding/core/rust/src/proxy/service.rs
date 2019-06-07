@@ -34,12 +34,12 @@ use utils::{
     check_error_on_exception, convert_to_hash, convert_to_string, jni_cache::service_adapter,
     panic_on_exception, unwrap_jni,
 };
-use {JniExecutor, MainExecutor, TransactionProxy};
+use {Executor, TransactionProxy};
 
 /// A proxy for `Service`s.
 #[derive(Clone)]
 pub struct ServiceProxy {
-    exec: MainExecutor,
+    exec: Executor,
     service: GlobalRef,
     id: u16,
     name: String,
@@ -53,7 +53,7 @@ impl fmt::Debug for ServiceProxy {
 
 impl ServiceProxy {
     /// Creates a `ServiceProxy` of the given Java service.
-    pub fn from_global_ref(exec: MainExecutor, service: GlobalRef) -> Self {
+    pub fn from_global_ref(exec: Executor, service: GlobalRef) -> Self {
         let (id, name) = unwrap_jni(exec.with_attached(|env| {
             let id =
                 panic_on_exception(env, env.call_method(service.as_obj(), "getId", "()S", &[]));
