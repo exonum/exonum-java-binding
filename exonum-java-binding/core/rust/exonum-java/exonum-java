@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-# Check that EXONUM_HOME is set
-if [ -z "${EXONUM_HOME+x}" ];
-then
-  echo "Please make sure the EXONUM_HOME environment variable points to the installed Exonum Java application. Exiting..."
-  exit 1
-fi
-
 # Try to detect the Java home directory from installed executable in case JAVA_HOME is not set.
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version \
   2>&1 > /dev/null |\
@@ -18,5 +11,8 @@ LIBJVM_PATH="$(find -L ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 
 export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 
-# Delegate execution to the app executable
+# Detect the directory of the installed app.
+EXONUM_HOME="$(dirname $0)"
+
+# Delegate execution to the app executable.
 ${EXONUM_HOME}/bin/exonum-java "$@"
