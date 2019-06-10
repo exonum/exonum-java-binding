@@ -96,7 +96,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request encoding
     String json = recordedRequest.getBody().readUtf8();
     SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
-    TransactionMessage actualTxMessage = actualRequest.getBody();
+    TransactionMessage actualTxMessage = actualRequest.getTxBody();
 
     assertThat(actualTxMessage, is(txMessage));
   }

@@ -17,18 +17,21 @@
 
 package com.exonum.client;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
@@ -44,18 +47,22 @@ import lombok.Value;
  */
 final class ExplorerApiHelper {
 
+  private static final Gson JSON = JsonSerializer.builder()
+      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+      .create();
+
   static String createSubmitTxBody(TransactionMessage message) {
     SubmitTxRequest request = new SubmitTxRequest(message);
-    return json().toJson(request);
+    return JSON.toJson(request);
   }
 
   static HashCode parseSubmitTxResponse(String json) {
-    SubmitTxResponse response = json().fromJson(json, SubmitTxResponse.class);
-    return response.getHash();
+    SubmitTxResponse response = JSON.fromJson(json, SubmitTxResponse.class);
+    return response.getTxHash();
   }
 
   static TransactionResponse parseGetTxResponse(String json) {
-    GetTxResponse response = json().fromJson(json, GetTxResponse.class);
+    GetTxResponse response = JSON.fromJson(json, GetTxResponse.class);
     TransactionResult executionResult = getTransactionResult(response.getStatus());
 
     return new TransactionResponse(
@@ -67,15 +74,15 @@ final class ExplorerApiHelper {
   }
 
   static BlockResponse parseGetBlockResponse(String json) {
-    GetBlockResponse response = json().fromJson(json, GetBlockResponse.class);
+    GetBlockResponse response = JSON.fromJson(json, GetBlockResponse.class);
     ZonedDateTime time = response.getTime();
     Block block = toTimeBlock(response.getBlock(), time);
 
-    return new BlockResponse(block, response.getTransactions());
+    return new BlockResponse(block, response.getTxs());
   }
 
   static BlocksResponse parseGetBlocksResponse(String json) {
-    GetBlocksResponse response = json().fromJson(json, GetBlocksResponse.class);
+    GetBlocksResponse response = JSON.fromJson(json, GetBlocksResponse.class);
     List<GetBlockResponseBlock> blocks = response.getBlocks();
     int blocksSize = blocks.size();
     List<ZonedDateTime> times = response.getTimes();
@@ -106,14 +113,13 @@ final class ExplorerApiHelper {
   }
 
   private static Block toTimeBlock(GetBlockResponseBlock block, @Nullable ZonedDateTime time) {
-
     return Block.builder()
         .proposerId(block.getProposerId())
         .numTransactions(block.getTxCount())
         .height(block.getHeight())
-        .previousBlockHash(block.getPreviousBlockHash())
+        .previousBlockHash(block.getPrevHash())
         .stateHash(block.getStateHash())
-        .txRootHash(block.getTxRootHash())
+        .txRootHash(block.getTxHash())
         .commitTime(time)
         .build();
   }
@@ -139,8 +145,7 @@ final class ExplorerApiHelper {
    */
   @Value
   static class SubmitTxRequest {
-    @SerializedName("tx_body")
-    TransactionMessage body;
+    TransactionMessage txBody;
   }
 
   /**
@@ -148,8 +153,7 @@ final class ExplorerApiHelper {
    */
   @Value
   private static class SubmitTxResponse {
-    @SerializedName("tx_hash")
-    HashCode hash;
+    HashCode txHash;
   }
 
   /**
@@ -162,7 +166,6 @@ final class ExplorerApiHelper {
     @NonNull
     GetTxResponseContent content;
     TransactionLocation location;
-    @SerializedName("location_proof")
     JsonObject locationProof; //TODO: in scope of LC P3
     GetTxResponseExecutionResult status;
   }
@@ -206,23 +209,18 @@ final class ExplorerApiHelper {
   private static class GetBlockResponse {
     GetBlockResponseBlock block;
     JsonElement precommits; //TODO: in scope of LC P3
-    @SerializedName("txs")
-    List<HashCode> transactions;
+    List<HashCode> txs;
     ZonedDateTime time;
   }
 
   @Value
-  private static class GetBlockResponseBlock {
-    @SerializedName("proposer_id")
+  @VisibleForTesting
+  static class GetBlockResponseBlock {
     int proposerId;
     long height;
-    @SerializedName("tx_count")
     int txCount;
-    @SerializedName("prev_hash")
-    HashCode previousBlockHash;
-    @SerializedName("tx_hash")
-    HashCode txRootHash;
-    @SerializedName("state_hash")
+    HashCode prevHash;
+    HashCode txHash;
     HashCode stateHash;
   }
 

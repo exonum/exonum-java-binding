@@ -19,6 +19,7 @@ package com.exonum.client.response;
 import java.util.List;
 import lombok.Value;
 
+// todo: remove
 @Value
 public class BlocksResponse {
   /**

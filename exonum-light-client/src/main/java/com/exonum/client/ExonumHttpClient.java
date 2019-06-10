@@ -30,6 +30,7 @@ import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
 import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.min;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -42,9 +43,12 @@ import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -144,9 +148,39 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public BlocksRange getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
-//    doGetBlocks(Math.toIntExact(fromHeight - toHeight + 1), blockFilter, fromHeight,
-//        timeOption);
-    return null;
+    checkArgument(0 <= fromHeight, "First block height (%s) must be non-negative", fromHeight);
+    checkArgument(fromHeight <= toHeight,
+        "First block height (%s) should be less than or equal to the last block height (%s)",
+        fromHeight, toHeight);
+
+    // 'estimate' as when skipping empty it might be way smaller
+    int estimateSize = Math.toIntExact(toHeight - fromHeight + 1);
+    List<Block> blocks = new ArrayList<>(estimateSize);
+    for (long rangeLast = toHeight; rangeLast >= fromHeight; ) {
+      int remainingBlocks = Math.toIntExact(rangeLast - fromHeight + 1);
+      int numBlocks = min(MAX_BLOCKS_PER_REQUEST, remainingBlocks);
+      BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, rangeLast, timeOption);
+
+      blocks.addAll(blocksResponse.getBlocks());
+
+      rangeLast = blocksResponse.getBlocksRangeStart() - 1;
+    }
+
+    // Turn the blocks in ascending order
+    blocks = Lists.reverse(blocks);
+
+    // Filter the possible blocks that are out of range
+    // No Stream#dropWhile in Java 8 :(
+    int firstInRange = 0;
+    while (firstInRange < blocks.size()) {
+      Block b = blocks.get(firstInRange);
+      if (b.getHeight() >= fromHeight) {
+        break;
+      }
+      firstInRange++;
+    }
+    blocks = blocks.subList(firstInRange, blocks.size());
+    return new BlocksRange(fromHeight, toHeight, blocks);
   }
 
   @Override

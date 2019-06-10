@@ -16,7 +16,6 @@
 
 package com.exonum.client;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.client.Blocks.BLOCK_1;
 import static com.exonum.client.Blocks.BLOCK_1_JSON;
 import static com.exonum.client.Blocks.BLOCK_1_TIME;
@@ -52,6 +51,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.json.JsonSerializer;
+import com.exonum.client.ExplorerApiHelper.GetBlockResponseBlock;
 import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
@@ -60,6 +61,8 @@ import com.exonum.client.response.BlocksRange;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +81,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @Execution(ExecutionMode.SAME_THREAD)
 class ExonumHttpClientBlocksIntegrationTest {
+
+  private static final Gson JSON = JsonSerializer.builder()
+      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+      .create();
+
   private static MockWebServer server;
   private static ExonumClient exonumClient;
 
@@ -181,7 +189,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + start + ",\n"
         + "        'end': " + toHeight + 1 + "\n"
         + "    },\n"
-        + "    'blocks': [ " + json().toJson(block) + "],\n"
+        + "    'blocks': [ " + JSON.toJson(toResponseBlock(block)) + "],\n"
         + "    'times': null\n"
         + "}\n";
     enqueueResponse(mockResponse);
@@ -253,7 +261,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + startP1 + ",\n"
         + "        'end': " + endP1 + "\n"
         + "    },\n"
-        + "    'blocks': [ " + json().toJson(firstPageBlock) + "],\n"
+        + "    'blocks': [ " + JSON.toJson(toResponseBlock(firstPageBlock)) + "],\n"
         + "    'times': null\n"
         + "}\n";
     enqueueResponse(firstResponse);
@@ -266,7 +274,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + fromHeight + ",\n"
         + "        'end': " + startP1 + "\n"
         + "    },\n"
-        + "    'blocks': [ " + json().toJson(secondPageBlock) + "],\n"
+        + "    'blocks': [ " + JSON.toJson(toResponseBlock(secondPageBlock)) + "],\n"
         + "    'times': null\n"
         + "}\n";
     enqueueResponse(secondResponse);
@@ -287,7 +295,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         timeOption);
 
     RecordedRequest secondRequest = server.takeRequest();
-    assertBlockRequestParams(secondRequest, 100, blockFilter, (startP1 - 1),
+    assertBlockRequestParams(secondRequest, 101, blockFilter, (startP1 - 1),
         timeOption);
   }
 
@@ -363,7 +371,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksRange response = exonumClient.getLastBlocks(blocksCount, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(6L, 288L,
+    BlocksRange expected = new BlocksRange(6L, 287L,
         ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response, equalTo(expected));
 
@@ -427,7 +435,10 @@ class ExonumHttpClientBlocksIntegrationTest {
     long end = last.getHeight() + 1;
     checkArgument(start < end);
 
-    String blocksResponse = json().toJson(Lists.reverse(blocks));
+    List<GetBlockResponseBlock> responseBlocks = blocks.stream()
+        .map(b -> toResponseBlock(b))
+        .collect(toList());
+    String blocksResponse = JSON.toJson(Lists.reverse(responseBlocks));
     return "{\n"
         + "    'range': {\n"
         + "        'start': " + start + ",\n"
@@ -436,6 +447,16 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "    'blocks': " + blocksResponse + ",\n"
         + "    'times': null\n"
         + "}\n";
+  }
+
+  private static GetBlockResponseBlock toResponseBlock(Block b) {
+    return new GetBlockResponseBlock(
+        b.getProposerId(),
+        b.getHeight(),
+        b.getNumTransactions(),
+        b.getPreviousBlockHash(),
+        b.getTxRootHash(),
+        b.getStateHash());
   }
 
   @Test
