@@ -38,6 +38,7 @@ import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
@@ -141,19 +142,21 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public BlocksResponse getBlocks(int count, BlockFilteringOption blockFilter, long heightMax,
+  public BlocksRange getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
-    checkArgument(0 < count,
-        "Requested number of blocks should be positive number but was %s", count);
-    return doGetBlocks(count, blockFilter, heightMax, timeOption);
+//    doGetBlocks(Math.toIntExact(fromHeight - toHeight + 1), blockFilter, fromHeight,
+//        timeOption);
+    return null;
   }
 
   @Override
-  public BlocksResponse getLastBlocks(int count, BlockFilteringOption blockFilter,
+  public BlocksRange getLastBlocks(int count, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
     checkArgument(0 < count,
         "Requested number of blocks should be positive number but was %s", count);
-    return doGetBlocks(count, blockFilter, null, timeOption);
+    BlocksResponse blocksResponse = doGetBlocks(count, blockFilter, null, timeOption);
+    return new BlocksRange(blocksResponse.getBlocksRangeStart(),
+        blocksResponse.getBlocksRangeEnd() - 1, blocksResponse.getBlocks());
   }
 
   @Override

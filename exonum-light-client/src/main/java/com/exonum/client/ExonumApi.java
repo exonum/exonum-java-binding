@@ -16,11 +16,11 @@
 
 package com.exonum.client;
 
-public final class ExonumApi {
+final class ExonumApi {
   /**
    * The maximum allowed blocks count per the request.
    */
-  public static final int MAX_BLOCKS_PER_REQUEST = 1000;
+  static final int MAX_BLOCKS_PER_REQUEST = 1000;
 
   private ExonumApi() {
   }
