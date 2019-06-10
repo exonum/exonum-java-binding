@@ -145,7 +145,7 @@ fn get_node_config(context: &Context) -> NodeConfig<PathBuf> {
 fn get_path_to_default_log_config() -> String {
     let log_fallback_path = {
         let mut path = executable_directory();
-        path.push("../log4j-fallback.xml");
+        path.push("log4j-fallback.xml");
         path
     };
     log_fallback_path.to_string_lossy().into_owned()
