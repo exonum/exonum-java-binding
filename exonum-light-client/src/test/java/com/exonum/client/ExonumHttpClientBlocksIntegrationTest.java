@@ -42,10 +42,10 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -171,6 +171,7 @@ class ExonumHttpClientBlocksIntegrationTest {
   }
 
   @Test
+  // todo: it does not test actual *filtering*!
   void getBlocksSinglePageSkippingEmptyFiltersOutOfRangeBlocks() throws InterruptedException {
     // 'start' is less than requested 'from' because the requests to core specify the number
     // of blocks to return, not the 'from', hence the Exonum response might include some blocks
@@ -184,14 +185,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     Block block = aBlock()
         .height(1050)
         .build();
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + start + ",\n"
-        + "        'end': " + toHeight + 1 + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + JSON.toJson(toResponseBlock(block)) + "],\n"
-        + "    'times': null\n"
-        + "}\n";
+    String mockResponse = createGetBlocksResponse(start, toHeight + 1, ImmutableList.of(block));
     enqueueResponse(mockResponse);
 
     // Call
@@ -256,27 +250,15 @@ class ExonumHttpClientBlocksIntegrationTest {
         .build();
     long startP1 = toHeight - MAX_BLOCKS_PER_REQUEST + 1;
     long endP1 = toHeight + 1;
-    String firstResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + startP1 + ",\n"
-        + "        'end': " + endP1 + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + JSON.toJson(toResponseBlock(firstPageBlock)) + "],\n"
-        + "    'times': null\n"
-        + "}\n";
+    String firstResponse = createGetBlocksResponse(startP1, endP1,
+        ImmutableList.of(firstPageBlock));
     enqueueResponse(firstResponse);
 
     Block secondPageBlock = aBlock()
         .height(102)
         .build();
-    String secondResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + fromHeight + ",\n"
-        + "        'end': " + startP1 + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + JSON.toJson(toResponseBlock(secondPageBlock)) + "],\n"
-        + "    'times': null\n"
-        + "}\n";
+    String secondResponse = createGetBlocksResponse(fromHeight, startP1,
+        ImmutableList.of(secondPageBlock));
     enqueueResponse(secondResponse);
 
     // Call
@@ -299,10 +281,10 @@ class ExonumHttpClientBlocksIntegrationTest {
         timeOption);
   }
 
-  @ParameterizedTest
+  @ParameterizedTest(name = "[{index}] 2nd page range: [{0}, 1999]")
   @ValueSource(longs = {1000, 1998, 1999})
-  void getBlocksMultiplePagesWithEmptyTwoPages(long fromHeight) throws Exception {
-    // Use two pages: [<from>, 1999], [2000, 2999]
+  void getBlocksMultiplePagesWithEmpty(long fromHeight) throws Exception {
+    // Request a range [<from <= 1999>, 2999] spanning two pages: [<from>, 1999], [2000, 2999]
     long toHeight = 2999;
     long startP1 = toHeight - MAX_BLOCKS_PER_REQUEST + 1;
     long toP2 = startP1 - 1;
@@ -331,6 +313,52 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest secondRequest = server.takeRequest();
     int numBlocksP2 = Math.toIntExact(toP2 - fromHeight + 1);
     assertBlockRequestParams(secondRequest, numBlocksP2, blockFilter, toP2, timeOption);
+  }
+
+  @ParameterizedTest(name = "[{index}] {0} empty blocks on 2nd page")
+  @ValueSource(ints = {1, 2, 999, 1000})
+  void getBlocksMultiplePagesNoEmptyFiltersRedundantBlocks(int numEmptyOnSecondPage) throws Exception {
+    // Request the range [1000, 2999] spanning two full pages: [1000, 1999], [2000, 2999]
+    long fromHeight = 1000;
+    long toHeight = 2999;
+
+    // First range is always full
+    long startP1 = toHeight - MAX_BLOCKS_PER_REQUEST + 1;
+    long toP2 = startP1 - 1;
+    List<Block> page1Blocks = createBlocks(startP1, toHeight);
+    // Second range contains some empty blocks:
+    // In-range must be included in the response
+    List<Block> page2InRangeBlocks = createBlocks(fromHeight, toP2 - numEmptyOnSecondPage);
+    // Out-of-range must be discarded
+    List<Block> page2OutOfRangeBlocks = createBlocks(fromHeight - numEmptyOnSecondPage,
+        fromHeight - 1);
+    List<Block> page2Blocks = concatLists(page2OutOfRangeBlocks, page2InRangeBlocks);
+    // Self-check
+    assertThat(page2Blocks, hasSize(MAX_BLOCKS_PER_REQUEST));
+    assertThat(page2OutOfRangeBlocks, hasSize(numEmptyOnSecondPage));
+
+    String firstResponse = createGetBlocksResponseWithEmpty(page1Blocks);
+    enqueueResponse(firstResponse);
+
+    String secondResponse = createGetBlocksResponseWithEmpty(page2Blocks);
+    enqueueResponse(secondResponse);
+
+    // Call
+    BlockFilteringOption blockFilter = SKIP_EMPTY;
+    BlockTimeOption timeOption = NO_COMMIT_TIME;
+    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+
+    List<Block> expectedBlocks = concatLists(page2InRangeBlocks, page1Blocks);
+    BlocksRange expected = new BlocksRange(fromHeight, toHeight, expectedBlocks);
+    assertThat(response, equalTo(expected));
+
+    // Check the requests made
+    RecordedRequest firstRequest = server.takeRequest();
+    assertBlockRequestParams(firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight,
+        timeOption);
+
+    RecordedRequest secondRequest = server.takeRequest();
+    assertBlockRequestParams(secondRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toP2, timeOption);
   }
 
   @ParameterizedTest
@@ -405,11 +433,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksRange response = exonumClient.getLastBlocks(numBlocks, blockFilter, timeOption);
 
     List<Block> expectedBlocks = concatLists(blocksP1, blocksP2);
-    assertAll(
-        () -> assertThat(response.getBlocks(), equalTo(expectedBlocks)),
-        () -> assertThat(response.getFromHeight(), equalTo(startP2)),
-        () -> assertThat(response.getToHeight(), equalTo(blockchainHeight))
-    );
+    BlocksRange expected = new BlocksRange(startP2, blockchainHeight, expectedBlocks);
+    assertThat(response, equalTo(expected));
 
     // Verify requests:
     // The first request shall naturally request the maximum number of blocks it is allowed to
@@ -435,6 +460,10 @@ class ExonumHttpClientBlocksIntegrationTest {
     long end = last.getHeight() + 1;
     checkArgument(start < end);
 
+    return createGetBlocksResponse(start, end, blocks);
+  }
+
+  private static String createGetBlocksResponse(long start, long end, List<Block> blocks) {
     List<GetBlockResponseBlock> responseBlocks = blocks.stream()
         .map(b -> toResponseBlock(b))
         .collect(toList());
