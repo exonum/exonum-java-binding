@@ -299,10 +299,10 @@ class ExonumHttpClientBlocksIntegrationTest {
         timeOption);
   }
 
-  @Test
-  void getBlocksMultiplePagesWithEmptyTwoFullPages() throws Exception {
-    // Use two full (even) pages: [1000, 1999], [2000, 2999]
-    long fromHeight = 1000;
+  @ParameterizedTest
+  @ValueSource(longs = {1000, 1998, 1999})
+  void getBlocksMultiplePagesWithEmptyTwoPages(long fromHeight) throws Exception {
+    // Use two pages: [<from>, 1999], [2000, 2999]
     long toHeight = 2999;
     long startP1 = toHeight - MAX_BLOCKS_PER_REQUEST + 1;
     long toP2 = startP1 - 1;
@@ -329,8 +329,8 @@ class ExonumHttpClientBlocksIntegrationTest {
         timeOption);
 
     RecordedRequest secondRequest = server.takeRequest();
-    assertBlockRequestParams(secondRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toP2,
-        timeOption);
+    int numBlocksP2 = Math.toIntExact(toP2 - fromHeight + 1);
+    assertBlockRequestParams(secondRequest, numBlocksP2, blockFilter, toP2, timeOption);
   }
 
   @ParameterizedTest
