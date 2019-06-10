@@ -153,9 +153,9 @@ class ExonumHttpClient implements ExonumClient {
         "First block height (%s) should be less than or equal to the last block height (%s)",
         fromHeight, toHeight);
 
-    // 'estimate' as when skipping empty it might be way smaller
-    int estimateSize = Math.toIntExact(toHeight - fromHeight + 1);
-    List<Block> blocks = new ArrayList<>(estimateSize);
+    // 'maximum' as when skipping empty the actual might be way smaller
+    int maxSize = Math.toIntExact(toHeight - fromHeight + 1);
+    List<Block> blocks = new ArrayList<>(maxSize);
     for (long rangeLast = toHeight; rangeLast >= fromHeight; ) {
       int remainingBlocks = Math.toIntExact(rangeLast - fromHeight + 1);
       int numBlocks = min(MAX_BLOCKS_PER_REQUEST, remainingBlocks);
