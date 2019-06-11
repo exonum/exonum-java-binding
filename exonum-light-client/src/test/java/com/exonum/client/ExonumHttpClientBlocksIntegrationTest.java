@@ -167,7 +167,6 @@ class ExonumHttpClientBlocksIntegrationTest {
   }
 
   @Test
-  // todo: it does not test actual *filtering*!
   void getBlocksSinglePageSkippingEmptyFiltersOutOfRangeBlocks() throws InterruptedException {
     // 'start' is less than requested 'from' because the requests to core specify the number
     // of blocks to return, not the 'from', hence the Exonum response might include some blocks
@@ -178,10 +177,14 @@ class ExonumHttpClientBlocksIntegrationTest {
     // A single block in the range
     // NB: The response below is not 100% accurate, as Exonum would return the 'count' blocks
     // (or the total number of empty blocks in the blockchain at or below the 'fromHeight')
-    Block block = aBlock()
+    List<Block> inRangeBlocks = ImmutableList.of(aBlock()
         .height(1050)
-        .build();
-    String mockResponse = createGetBlocksResponse(start, toHeight + 1, ImmutableList.of(block));
+        .build());
+    List<Block> outOfRangeBlocks = ImmutableList.of(aBlock()
+        .height(850)
+        .build());
+    List<Block> responseBlocks = concatLists(inRangeBlocks, outOfRangeBlocks);
+    String mockResponse = createGetBlocksResponse(start, toHeight + 1, responseBlocks);
     enqueueResponse(mockResponse);
 
     // Call
@@ -190,7 +193,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight, ImmutableList.of(block));
+    BlocksRange expected = new BlocksRange(fromHeight, toHeight, inRangeBlocks);
     assertThat(response, equalTo(expected));
 
     // Assert request params
