@@ -50,12 +50,16 @@ import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class) // Probably not thread-safe. This is *the* broken test —
+// other are made per-thread just in case
+@Execution(ExecutionMode.SAME_THREAD)
 class UserServiceAdapterIntegrationTest {
 
   @Mock

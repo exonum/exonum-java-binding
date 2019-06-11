@@ -25,8 +25,11 @@ import com.exonum.binding.testkit.TestKitExtension;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @RequiresNativeLibrary
+@Execution(ExecutionMode.SAME_THREAD)
 class QaSchemaIntegrationTest {
 
   @RegisterExtension

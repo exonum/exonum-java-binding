@@ -54,8 +54,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @RequiresNativeLibrary
+@Execution(ExecutionMode.SAME_THREAD) // todo: report a bug
 class QaServiceImplIntegrationTest {
 
   @RegisterExtension
