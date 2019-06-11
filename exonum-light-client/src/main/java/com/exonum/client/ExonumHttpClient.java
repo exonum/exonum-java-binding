@@ -169,7 +169,7 @@ class ExonumHttpClient implements ExonumClient {
       rangeLast = blocksResponse.getBlocksRangeStart() - 1;
     }
 
-    return postProcessBlocks(fromHeight, toHeight, blocks);
+    return postProcessResponseBlocks(fromHeight, toHeight, blocks);
   }
 
   @Override
@@ -196,10 +196,17 @@ class ExonumHttpClient implements ExonumClient {
 
     long fromHeight = max(blockchainHeight - count + 1, GENESIS_BLOCK_HEIGHT);
     long toHeight = blockchainHeight;
-    return postProcessBlocks(fromHeight, toHeight, blocks);
+    return postProcessResponseBlocks(fromHeight, toHeight, blocks);
   }
 
-  private static BlocksRange postProcessBlocks(long fromHeight, long toHeight, List<Block> blocks) {
+  /**
+   * Post-processes the blocks, coming from
+   * {@link #doGetBlocks(int, BlockFilteringOption, Long, BlockTimeOption)}:
+   * 1. Turns them in ascending order by height.
+   * 2. Keeps only blocks that fall in range [fromHeight; toHeight].
+   */
+  private static BlocksRange postProcessResponseBlocks(long fromHeight, long toHeight,
+      List<Block> blocks) {
     // Turn the blocks in ascending order
     blocks = Lists.reverse(blocks);
 
@@ -209,7 +216,7 @@ class ExonumHttpClient implements ExonumClient {
         .orElse(blocks.size());
     blocks = blocks.subList(firstInRange, blocks.size());
 
-    // Do not bother trimming — BlocksRange will copy the list
+    // Do not bother trimming — BlocksRange copies the list
     return new BlocksRange(fromHeight, toHeight, blocks);
   }
 

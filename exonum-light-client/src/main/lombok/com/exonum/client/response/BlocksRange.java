@@ -56,19 +56,26 @@ public class BlocksRange {
   public BlocksRange(long fromHeight, long toHeight, List<Block> blocks) {
     checkArgument(0 <= fromHeight, "fromHeight (%s) is negative");
     checkArgument(fromHeight <= toHeight, "fromHeight (%s) > toHeight (%s)", fromHeight, toHeight);
-    if (!blocks.isEmpty()) {
-      // Check the first block
-      Block first = blocks.get(0);
-      checkArgument(fromHeight <= first.getHeight(), "First block (%s) appears before fromHeight (%s)",
-          first, fromHeight);
-
-      // Check the last block
-      Block last = blocks.get(blocks.size() - 1);
-      checkArgument(last.getHeight() <= toHeight, "Last block (%s) appears after toHeight (%s)",
-          last, toHeight);
-    }
     this.fromHeight = fromHeight;
     this.toHeight = toHeight;
-    this.blocks = ImmutableList.copyOf(blocks);
+    this.blocks = checkBlocks(fromHeight, toHeight, blocks);
+  }
+
+  private static List<Block> checkBlocks(long fromHeight, long toHeight, List<Block> blocks) {
+    if (blocks.isEmpty()) {
+      return blocks;
+    }
+    // Check the first block
+    Block first = blocks.get(0);
+    checkArgument(fromHeight <= first.getHeight(),
+        "First block (%s) appears before fromHeight (%s)", first, fromHeight);
+
+    // Check the last block
+    Block last = blocks.get(blocks.size() - 1);
+    checkArgument(last.getHeight() <= toHeight,
+        "Last block (%s) appears after toHeight (%s)", last, toHeight);
+
+    // Copy (possibly) the list
+    return ImmutableList.copyOf(blocks);
   }
 }
