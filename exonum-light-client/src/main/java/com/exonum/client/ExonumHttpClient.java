@@ -31,6 +31,7 @@ import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
 import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
@@ -66,6 +67,7 @@ import okhttp3.Response;
  */
 class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
+  private static final int GENESIS_BLOCK_HEIGHT = 0;
 
   private final OkHttpClient httpClient;
   private final URL exonumHost;
@@ -159,7 +161,7 @@ class ExonumHttpClient implements ExonumClient {
     List<Block> blocks = new ArrayList<>(maxSize);
     for (long rangeLast = toHeight; rangeLast >= fromHeight; ) {
       int remainingBlocks = Math.toIntExact(rangeLast - fromHeight + 1);
-      int numBlocks = min(MAX_BLOCKS_PER_REQUEST, remainingBlocks);
+      int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
       BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, rangeLast, timeOption);
 
       blocks.addAll(blocksResponse.getBlocks());
@@ -167,16 +169,7 @@ class ExonumHttpClient implements ExonumClient {
       rangeLast = blocksResponse.getBlocksRangeStart() - 1;
     }
 
-    // Turn the blocks in ascending order
-    blocks = Lists.reverse(blocks);
-
-    // Filter the possible blocks that are out of range
-    // No Stream#dropWhile in Java 8 :(
-    int firstInRange = indexOf(blocks, b -> b.getHeight() >= fromHeight)
-        .orElse(blocks.size());
-    blocks = blocks.subList(firstInRange, blocks.size());
-
-    return new BlocksRange(fromHeight, toHeight, blocks);
+    return postProcessBlocks(fromHeight, toHeight, blocks);
   }
 
   @Override
@@ -184,9 +177,40 @@ class ExonumHttpClient implements ExonumClient {
       BlockTimeOption timeOption) {
     checkArgument(0 < count,
         "Requested number of blocks should be positive number but was %s", count);
-    BlocksResponse blocksResponse = doGetBlocks(count, blockFilter, null, timeOption);
-    return new BlocksRange(blocksResponse.getBlocksRangeStart(),
-        blocksResponse.getBlocksRangeEnd() - 1, blocksResponse.getBlocks());
+
+    List<Block> blocks = new ArrayList<>(count);
+    // The first request does not specify the maximum height to get the top blocks
+    long blockchainHeight = Long.MIN_VALUE;
+    Long nextHeight = null;
+    int remainingBlocks = count;
+    while (remainingBlocks > 0 && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+      int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
+      BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, nextHeight, timeOption);
+
+      blocks.addAll(blocksResponse.getBlocks());
+
+      nextHeight = blocksResponse.getBlocksRangeStart() - 1;
+      blockchainHeight = max(blockchainHeight, blocksResponse.getBlocksRangeEnd() - 1);
+      remainingBlocks = Math.toIntExact(count - (blockchainHeight - nextHeight));
+    }
+
+    long fromHeight = max(blockchainHeight - count + 1, GENESIS_BLOCK_HEIGHT);
+    long toHeight = blockchainHeight;
+    return postProcessBlocks(fromHeight, toHeight, blocks);
+  }
+
+  private static BlocksRange postProcessBlocks(long fromHeight, long toHeight, List<Block> blocks) {
+    // Turn the blocks in ascending order
+    blocks = Lists.reverse(blocks);
+
+    // Filter the possible blocks that are out of the requested range
+    // No Stream#dropWhile in Java 8 :(
+    int firstInRange = indexOf(blocks, b -> b.getHeight() >= fromHeight)
+        .orElse(blocks.size());
+    blocks = blocks.subList(firstInRange, blocks.size());
+
+    // Do not bother trimming — BlocksRange will copy the list
+    return new BlocksRange(fromHeight, toHeight, blocks);
   }
 
   @Override

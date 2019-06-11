@@ -87,8 +87,8 @@ class ExonumHttpClientBlocksIntegrationTest {
       .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
       .create();
 
-  private static MockWebServer server;
-  private static ExonumClient exonumClient;
+  private MockWebServer server;
+  private ExonumClient exonumClient;
 
   @BeforeEach
   void start() throws IOException {
@@ -383,10 +383,15 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @Test
   void getLastBlocksSkippingEmptySinglePage() throws InterruptedException {
+    int numBlocks = 95;
+    long blockchainHeight = 99;
+
+    long end = blockchainHeight + 1;
+    long start = end - numBlocks;
     String mockResponse = "{\n"
         + "    'range': {\n"
-        + "        'start': 6,\n"
-        + "        'end': 288\n"
+        + "        'start': " + start + ",\n"
+        + "        'end': " + end + "\n"
         + "    },\n"
         + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
         + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
@@ -394,13 +399,12 @@ class ExonumHttpClientBlocksIntegrationTest {
     enqueueResponse(mockResponse);
 
     // Call
-    int blocksCount = MAX_BLOCKS_PER_REQUEST;
     BlockFilteringOption blockFilter = SKIP_EMPTY;
     BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
-    BlocksRange response = exonumClient.getLastBlocks(blocksCount, blockFilter, timeOption);
+    BlocksRange response = exonumClient.getLastBlocks(numBlocks, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(6L, 287L,
+    BlocksRange expected = new BlocksRange(start, blockchainHeight,
         ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response, equalTo(expected));
 
@@ -408,7 +412,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
-    assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, null, timeOption);
+    assertBlockRequestParams(recordedRequest, numBlocks, blockFilter, null, timeOption);
   }
 
   @Test
@@ -443,7 +447,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, null, timeOption);
   }
 
-  @ParameterizedTest
+  @ParameterizedTest(name = "[{index}] {0} blocks on the 2nd page")
   @ValueSource(ints = {1, MAX_BLOCKS_PER_REQUEST - 1, MAX_BLOCKS_PER_REQUEST})
   void getLastBlocksMultiplePagesWithEmpty(int secondPageSize) throws Exception {
     int numBlocks = MAX_BLOCKS_PER_REQUEST + secondPageSize;
@@ -465,7 +469,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlockTimeOption timeOption = NO_COMMIT_TIME;
     BlocksRange response = exonumClient.getLastBlocks(numBlocks, blockFilter, timeOption);
 
-    List<Block> expectedBlocks = concatLists(blocksP1, blocksP2);
+    List<Block> expectedBlocks = concatLists(blocksP2, blocksP1);
     BlocksRange expected = new BlocksRange(startP2, blockchainHeight, expectedBlocks);
     assertThat(response, equalTo(expected));
 
@@ -645,7 +649,7 @@ class ExonumHttpClientBlocksIntegrationTest {
   }
 
   /** Enqueues a JSON response with the given body. */
-  private static void enqueueResponse(String jsonResponse) {
+  private void enqueueResponse(String jsonResponse) {
     server.enqueue(new MockResponse()
         .setHeader("Content-Type", "application/json")
         .setBody(jsonResponse));
