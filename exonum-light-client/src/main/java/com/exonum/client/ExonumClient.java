@@ -38,7 +38,8 @@ import okhttp3.OkHttpClient;
  * Provides a convenient way for interaction with Exonum framework APIs.
  * All the methods of the interface work in a blocking way
  * i.e. invoke underlying request immediately, and block until the response can be processed
- * or an error occurs.
+ * or an error occurs. In case the thread is interrupted, the blocked methods will complete
+ * exceptionally.
  *
  * <p><i>Implementations of that interface are required to be thread-safe</i>.
  **/
