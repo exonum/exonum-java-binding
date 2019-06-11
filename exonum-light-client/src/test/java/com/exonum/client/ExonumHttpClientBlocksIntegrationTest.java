@@ -55,18 +55,18 @@ import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ExonumHttpClientBlocksIntegrationTest {
-  private static MockWebServer server;
-  private static ExonumClient exonumClient;
+  private MockWebServer server;
+  private ExonumClient exonumClient;
 
-  @BeforeAll
-  static void start() throws IOException {
+  @BeforeEach
+  void start() throws IOException {
     server = new MockWebServer();
     server.start();
 
@@ -75,8 +75,8 @@ class ExonumHttpClientBlocksIntegrationTest {
         .build();
   }
 
-  @AfterAll
-  static void shutdown() throws IOException {
+  @AfterEach
+  void shutdown() throws IOException {
     server.shutdown();
   }
 
