@@ -19,8 +19,9 @@ use std::sync::Arc;
 
 use JniResult;
 
-/// The capacity of local frames, allocated for attached threads
-const LOCAL_FRAME_CAPACITY: i32 = 32;
+/// The capacity of local frames, allocated for attached threads by default. Same as the default
+/// value Hotspot uses when calling native Java methods.
+const DEFAULT_LOCAL_FRAME_CAPACITY: i32 = 32;
 
 /// Jni thread attachment manager. Attaches threads as daemons, hence they do not block
 /// JVM exit. Finished threads detach automatically.
@@ -38,7 +39,9 @@ impl Executor {
     }
 
     /// Executes a provided closure, making sure that the current thread
-    /// is attached to the JVM. Additionally ensures that local object references freed after call.
+    /// is attached to the JVM. Additionally ensures that local object references are freed after
+    /// call.
+    ///
     /// Allocates a local frame with the specified capacity.
     pub fn with_attached_capacity<F, R>(&self, capacity: i32, f: F) -> JniResult<R>
         where
@@ -57,12 +60,14 @@ impl Executor {
     }
 
     /// Executes a provided closure, making sure that the current thread
-    /// is attached to the JVM. Additionally ensures that local object references freed after call.
+    /// is attached to the JVM. Additionally ensures that local object references are freed after
+    /// call.
+    ///
     /// Allocates a local frame with the default capacity.
     pub fn with_attached<F, R>(&self, f: F) -> JniResult<R>
         where
             F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
-        self.with_attached_capacity(LOCAL_FRAME_CAPACITY, f)
+        self.with_attached_capacity(DEFAULT_LOCAL_FRAME_CAPACITY, f)
     }
 }
