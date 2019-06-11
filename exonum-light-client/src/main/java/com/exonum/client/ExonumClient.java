@@ -114,8 +114,9 @@ public interface ExonumClient {
    * @param fromHeight the height of the first block to include. Must be non-negative
    * @param toHeight the height of the last block to include. Must be greater than
    *        or equal to {@code fromHeight} and less than or equal to the blockchain height.
-   *        If the {@code heightMax} is greater than actual blockchain height then
-   *        the actual height will be used
+   *        If the {@code toHeight} is greater than actual blockchain height then
+   *        the actual height will be used — such error-prone behaviour will be fixed
+   *        in Exonum 0.12, see ECR-3188)
    * @param blockFilter controls whether to skip blocks with no transactions
    * @param timeOption controls whether to include the block commit time.
    *        See {@linkplain Block#getCommitTime()}.
