@@ -38,8 +38,10 @@ import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
 import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
 import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Comparators.isInStrictOrder;
 import static com.google.common.collect.ImmutableList.of;
 import static java.lang.Math.min;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -183,7 +185,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     List<Block> outOfRangeBlocks = ImmutableList.of(aBlock()
         .height(850)
         .build());
-    List<Block> responseBlocks = concatLists(inRangeBlocks, outOfRangeBlocks);
+    List<Block> responseBlocks = concatLists(outOfRangeBlocks, inRangeBlocks);
     String mockResponse = createGetBlocksResponse(start, toHeight + 1, responseBlocks);
     enqueueResponse(mockResponse);
 
@@ -514,7 +516,11 @@ class ExonumHttpClientBlocksIntegrationTest {
     return createGetBlocksResponse(start, end, blocks);
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private static String createGetBlocksResponse(long start, long end, List<Block> blocks) {
+    // Self-check the blocks to be in ascending order by height
+    assertTrue(isInStrictOrder(blocks, comparing(Block::getHeight)));
+
     List<GetBlockResponseBlock> responseBlocks = blocks.stream()
         .map(b -> toResponseBlock(b))
         .collect(toList());
