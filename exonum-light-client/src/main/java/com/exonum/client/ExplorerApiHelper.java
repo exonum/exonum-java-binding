@@ -47,7 +47,8 @@ import lombok.Value;
  */
 final class ExplorerApiHelper {
 
-  private static final Gson JSON = JsonSerializer.builder()
+  @VisibleForTesting
+  static final Gson JSON = JsonSerializer.builder()
       .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
       .create();
 

@@ -32,6 +32,7 @@ import static com.exonum.client.Blocks.aBlock;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
+import static com.exonum.client.ExplorerApiHelper.JSON;
 import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
 import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
 import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
@@ -51,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.client.ExplorerApiHelper.GetBlockResponseBlock;
 import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
@@ -61,8 +61,6 @@ import com.exonum.client.response.BlocksRange;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -82,10 +80,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @Execution(ExecutionMode.SAME_THREAD)
 class ExonumHttpClientBlocksIntegrationTest {
-
-  private static final Gson JSON = JsonSerializer.builder()
-      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-      .create();
 
   private MockWebServer server;
   private ExonumClient exonumClient;
