@@ -450,18 +450,25 @@ class ExonumHttpClientBlocksIntegrationTest {
         timeOption);
   }
 
-  @ParameterizedTest(name = "[{index}] {0} blocks on the 2nd page")
-  @ValueSource(ints = {1, MAX_BLOCKS_PER_REQUEST - 1, MAX_BLOCKS_PER_REQUEST})
-  void getLastBlocksMultiplePagesWithEmpty(int secondPageSize) throws Exception {
+  @ParameterizedTest(name = "[{index}] {0} height, {1} blocks on the 2nd page. {2}")
+  @CsvSource({
+      "5000, 1, '1001 blocks requested'",
+      "5000, 999, '1999 blocks requested'",
+      "5000, 1000, '2K blocks requested'",
+      "1999, 1000, '2K blocks requested = 2K in the blockchain'",
+      "1998, 1000, '2K blocks requested > 1999 in the blockchain'",
+  })
+  void getLastBlocksMultiplePagesWithEmpty(int blockchainHeight, int secondPageSize,
+      @SuppressWarnings("unused") String description)
+      throws Exception {
     int numBlocks = MAX_BLOCKS_PER_REQUEST + secondPageSize;
-    long blockchainHeight = 5000;
     long startP1 = blockchainHeight - MAX_BLOCKS_PER_REQUEST + 1;
 
     List<Block> blocksP1 = createBlocks(startP1, blockchainHeight);
     String responseP1 = createGetBlocksResponseWithEmpty(blocksP1);
     enqueueResponse(responseP1);
 
-    long startP2 = blockchainHeight - numBlocks + 1;
+    long startP2 = Math.max(0, blockchainHeight - numBlocks + 1);
     long toP2 = startP1 - 1;
     List<Block> blocksP2 = createBlocks(startP2, toP2);
     String responseP2 = createGetBlocksResponseWithEmpty(blocksP2);
