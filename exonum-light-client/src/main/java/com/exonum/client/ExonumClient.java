@@ -131,11 +131,13 @@ public interface ExonumClient {
 
   /**
    * Returns the given number of the most recent blockchain blocks in ascending order
-   * by their height.
+   * by their height. More precisely, returns blocks in the range
+   * {@code [max(0, blockchainHeight - count + 1), blockchainHeight]}.
    *
    * @param count Number of blocks to return. If the number of blocks in the blockchain is less
    *        than {@code count}, this method will return all blocks
-   * @param blockFilter controls whether to skip blocks with no transactions
+   * @param blockFilter controls whether to skip blocks with no transactions. If filtering
+   *        is applied, the actual number of blocks may be smaller than {@code count}
    * @param timeOption controls whether to include the block commit time.
    *        See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the

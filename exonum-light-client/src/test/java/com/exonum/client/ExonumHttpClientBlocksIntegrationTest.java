@@ -72,6 +72,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -410,6 +411,38 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, null, timeOption);
   }
 
+  @Test
+  @DisplayName("getLastBlocks request more blocks than has been committed")
+  void getLastBlocksSkippingEmptySinglePageMoreThanCommitted() throws InterruptedException {
+    String mockResponse = "{\n"
+        + "    'range': {\n"
+        + "        'start': 0,\n"
+        + "        'end': 288\n"
+        + "    },\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
+        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "}\n";
+    enqueueResponse(mockResponse);
+
+    // Call
+    // Request more than the blockchain height
+    int blocksCount = 500;
+    BlockFilteringOption blockFilter = SKIP_EMPTY;
+    BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
+    BlocksRange response = exonumClient.getLastBlocks(blocksCount, blockFilter, timeOption);
+
+    // Assert response
+    BlocksRange expected = new BlocksRange(0L, 287L,
+        ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
+    assertThat(response, equalTo(expected));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest.getPath(), startsWith(BLOCKS));
+    assertBlockRequestParams(recordedRequest, blocksCount, blockFilter, null, timeOption);
+  }
+
   @ParameterizedTest
   @ValueSource(ints = {1, MAX_BLOCKS_PER_REQUEST - 1, MAX_BLOCKS_PER_REQUEST})
   void getLastBlocksMultiplePagesWithEmpty(int secondPageSize) throws Exception {
@@ -441,7 +474,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest request1 = server.takeRequest();
     assertBlockRequestParams(request1, MAX_BLOCKS_PER_REQUEST, blockFilter, null, timeOption);
 
-    // The second request shall get the one remaining
+    // The second request shall request the remaining blocks
     RecordedRequest request2 = server.takeRequest();
     assertBlockRequestParams(request2, secondPageSize, blockFilter, toP2, timeOption);
   }
