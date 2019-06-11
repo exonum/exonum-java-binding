@@ -19,6 +19,7 @@ package com.exonum.client.response;
 import static com.exonum.client.Blocks.aBlock;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -28,6 +29,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class BlocksRangeTest {
+
+  @ParameterizedTest
+  @CsvSource({
+      "0, 0,",
+      "0, 1",
+      "0, 2",
+      "1, 1",
+  })
+  void acceptableRanges(long from, long to) {
+    List<Block> blocks = ImmutableList.of();
+    BlocksRange range = new BlocksRange(from, to, blocks);
+    assertThat(range.getFromHeight(), equalTo(from));
+    assertThat(range.getToHeight(), equalTo(to));
+  }
 
   @ParameterizedTest
   @CsvSource({
