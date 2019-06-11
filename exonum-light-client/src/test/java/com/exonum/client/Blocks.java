@@ -102,6 +102,7 @@ public final class Blocks {
       .stateHash(HashCode.fromString("00cc"))
       .build();
 
+  /** Creates a block builder with some pre-configured values and empty commit time. */
   public static Block.BlockBuilder aBlock() {
     return Block.builder()
         .proposerId(1)

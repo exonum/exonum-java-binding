@@ -36,7 +36,8 @@ class BlocksRangeTest {
       "-2, -1, 'negative from & to'",
       "1, 0, 'from > to",
   })
-  void constructorRejectsInvalidHeights(long from, long to, @SuppressWarnings("unused") String description) {
+  void constructorRejectsInvalidHeights(long from, long to,
+      @SuppressWarnings("unused") String description) {
     List<Block> blocks = ImmutableList.of();
     assertThrows(IllegalArgumentException.class, () -> new BlocksRange(from, to, blocks));
   }

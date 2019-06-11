@@ -312,7 +312,8 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @ParameterizedTest(name = "[{index}] {0} empty blocks on 2nd page")
   @ValueSource(ints = {1, 2, 999, 1000})
-  void getBlocksMultiplePagesNoEmptyFiltersRedundantBlocks(int numEmptyOnSecondPage) throws Exception {
+  void getBlocksMultiplePagesNoEmptyFiltersRedundantBlocks(int numEmptyOnSecondPage)
+      throws Exception {
     // Request the range [1000, 2999] spanning two full pages: [1000, 1999], [2000, 2999]
     long fromHeight = 1000;
     long toHeight = 2999;
