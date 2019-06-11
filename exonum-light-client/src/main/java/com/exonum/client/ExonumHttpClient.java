@@ -18,6 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
+import static com.exonum.client.ExonumIterables.indexOf;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
@@ -171,15 +172,10 @@ class ExonumHttpClient implements ExonumClient {
 
     // Filter the possible blocks that are out of range
     // No Stream#dropWhile in Java 8 :(
-    int firstInRange = 0;
-    while (firstInRange < blocks.size()) {
-      Block b = blocks.get(firstInRange);
-      if (b.getHeight() >= fromHeight) {
-        break;
-      }
-      firstInRange++;
-    }
+    int firstInRange = indexOf(blocks, b -> b.getHeight() >= fromHeight)
+        .orElse(blocks.size());
     blocks = blocks.subList(firstInRange, blocks.size());
+
     return new BlocksRange(fromHeight, toHeight, blocks);
   }
 
