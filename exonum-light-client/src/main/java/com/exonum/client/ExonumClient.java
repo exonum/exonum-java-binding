@@ -41,7 +41,7 @@ import okhttp3.OkHttpClient;
  * or an error occurs. In case the thread is interrupted, the blocked methods will complete
  * exceptionally.
  *
- * <p><i>Implementations of that interface are required to be thread-safe</i>.
+ * <p><em>Implementations of this interface are required to be thread-safe</em>.
  **/
 public interface ExonumClient {
 
