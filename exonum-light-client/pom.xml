@@ -314,6 +314,7 @@
                 <exclude>com/exonum/client/response/Block.class</exclude>
                 <exclude>com/exonum/client/response/Block*BlockBuilder.class</exclude>
                 <exclude>com/exonum/client/response/BlockResponse.class</exclude>
+                <exclude>com/exonum/client/response/BlocksRange.class</exclude>
                 <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
                 <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
                 <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
