@@ -48,7 +48,7 @@ public class BlocksRange {
   // todo: I wonder what is better: doing these structures that must document possible «gaps»,
   //   or fully separate normal and excl. empty requests?
   /**
-   * Blockchain blocks in ascending order by height. It is not necessarily continuous if some
+   * Blockchain blocks in ascending order by height. The list is not necessarily continuous if some
    * blocks are filtered out. May be empty if no blocks are found.
    */
   List<Block> blocks;

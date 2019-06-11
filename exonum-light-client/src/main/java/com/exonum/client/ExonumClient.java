@@ -115,7 +115,6 @@ public interface ExonumClient {
    *        or equal to {@code fromHeight} and less than or equal to the blockchain height.
    *        If the {@code heightMax} is greater than actual blockchain height then
    *        the actual height will be used
-   *        TODO: WHEN THE FIX FOR THAT ARRIVES?
    * @param blockFilter controls whether to skip blocks with no transactions
    * @param timeOption controls whether to include the block commit time.
    *        See {@linkplain Block#getCommitTime()}.
