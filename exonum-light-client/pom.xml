@@ -229,6 +229,18 @@
           <argLine>
             ${jacoco.args}
           </argLine>
+          <!-- Set up JUnit 5 configuration parameters.
+          See also: https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven-config-params -->
+          <properties>
+            <configurationParameters>
+              # Enable parallel execution, with concurrent mode by default
+              junit.jupiter.execution.parallel.enabled = true
+              junit.jupiter.execution.parallel.mode.default = concurrent
+
+              # Use 1.5 times the number of CPUs
+              junit.jupiter.execution.parallel.config.dynamic.factor = 1.5
+            </configurationParameters>
+          </properties>
         </configuration>
       </plugin>
 
