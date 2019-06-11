@@ -35,11 +35,11 @@
     <!--Main Exonum Java app executable-->
     <file>
       <source>${packaging.basedir}/exonum-java</source>
-      <outputDirectory>bin</outputDirectory>
     </file>
     <!--Exonum Java app wrapper script that starts the app executable-->
     <file>
       <source>${packaging.script}</source>
+      <outputDirectory>bin</outputDirectory>
     </file>
     <!--libjava_bindings.[so|dylib]-->
     <file>
