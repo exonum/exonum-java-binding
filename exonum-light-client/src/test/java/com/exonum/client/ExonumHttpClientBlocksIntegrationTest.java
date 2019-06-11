@@ -455,6 +455,7 @@ class ExonumHttpClientBlocksIntegrationTest {
       "5000, 1, '1001 blocks requested'",
       "5000, 999, '1999 blocks requested'",
       "5000, 1000, '2K blocks requested'",
+      "1000, 1, '1001 blocks requested = 1001 in the blockchain'",
       "1999, 1000, '2K blocks requested = 2K in the blockchain'",
       "1998, 1000, '2K blocks requested > 1999 in the blockchain'",
   })

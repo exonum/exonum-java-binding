@@ -183,7 +183,8 @@ class ExonumHttpClient implements ExonumClient {
     long blockchainHeight = Long.MIN_VALUE;
     Long nextHeight = null;
     int remainingBlocks = count;
-    while (remainingBlocks > 0 && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+    while (remainingBlocks > 0
+        && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
       int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
       BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, nextHeight, timeOption);
 
