@@ -53,6 +53,14 @@ public class BlocksRange {
    */
   List<Block> blocks;
 
+  /**
+   * Creates a new range of blocks.
+   *
+   * @param fromHeight the height of the first requested block
+   * @param toHeight the height of the last requested block
+   * @param blocks the list blocks in the given range. It is allowed to <em>not</em> contain
+   *     all blocks in the range
+   */
   public BlocksRange(long fromHeight, long toHeight, List<Block> blocks) {
     checkArgument(0 <= fromHeight, "fromHeight (%s) is negative");
     checkArgument(fromHeight <= toHeight, "fromHeight (%s) > toHeight (%s)", fromHeight, toHeight);
