@@ -17,23 +17,9 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCKS_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_HASHES_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_HEIGHT_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_LAST_BLOCK_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_LOCATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_MESSAGES_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULTS_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCKCHAIN_TRANSACTION_RESULT_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_HEIGHT_PARAM;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.BLOCK_ID_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.MESSAGE_HASH_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
@@ -47,18 +33,12 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.TransactionMessage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.io.BaseEncoding;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
@@ -67,7 +47,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -77,8 +56,6 @@ import org.apache.logging.log4j.Logger;
 final class ApiController {
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
-
-  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   private final QaService service;
 
@@ -101,17 +78,6 @@ final class ApiController {
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
-            .put(BLOCKCHAIN_HEIGHT_PATH, this::getHeight)
-            .put(BLOCKCHAIN_BLOCK_HASHES_PATH, this::getBlockHashes)
-            .put(BLOCKCHAIN_BLOCKS_PATH, this::getBlocks)
-            .put(BLOCKCHAIN_BLOCK_PATH, this::getBlock)
-            .put(BLOCKCHAIN_LAST_BLOCK_PATH, this::getLastBlock)
-            .put(BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH, this::getBlockTransactions)
-            .put(BLOCKCHAIN_TRANSACTION_MESSAGES_PATH, this::getTransactionMessages)
-            .put(BLOCKCHAIN_TRANSACTION_RESULTS_PATH, this::getTransactionResults)
-            .put(BLOCKCHAIN_TRANSACTION_RESULT_PATH, this::getTransactionResult)
-            .put(BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH, this::getTransactionLocations)
-            .put(BLOCKCHAIN_TRANSACTION_LOCATION_PATH, this::getTransactionLocation)
             .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
             .put(TIME_PATH, this::getTime)
             .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
@@ -168,117 +134,6 @@ final class ApiController {
     Optional<Counter> counter = service.getValue(counterId);
 
     respondWithJson(rc, counter);
-  }
-
-  private void getHeight(RoutingContext rc) {
-    try {
-      Height height = service.getHeight();
-      respondWithJson(rc, height);
-    } catch (RuntimeException ex) {
-      rc.response()
-          .setStatusCode(HTTP_BAD_REQUEST)
-          .end();
-    }
-  }
-
-  private void getBlockHashes(RoutingContext rc) {
-    List<HashCode> hashes = service.getBlockHashes();
-    respondWithJson(rc, hashes);
-  }
-
-  private void getBlocks(RoutingContext rc) {
-    Map<HashCode, Block> blocks = service.getBlocks();
-    respondWithJson(rc, blocks);
-  }
-
-  private void getBlock(RoutingContext rc) {
-    MultiMap queryParams = rc.queryParams();
-    if (queryParams.contains(BLOCK_HEIGHT_PARAM)) {
-      long blockHeight = Long.parseLong(queryParams.get(BLOCK_HEIGHT_PARAM));
-      getBlockByHeight(rc, blockHeight);
-    } else if (queryParams.contains(BLOCK_ID_PARAM)) {
-      HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
-      getBlockById(rc, blockId);
-    } else {
-      throw new IllegalArgumentException("Get block request was invalid. Expected format is "
-          + BLOCKCHAIN_BLOCK_PATH + "?blockId={blockId} or "
-          + BLOCKCHAIN_BLOCK_PATH + "?blockHeight={blockHeight}");
-    }
-  }
-
-  private void getBlockByHeight(RoutingContext rc, long blockHeight) {
-    Block block = service.getBlockByHeight(blockHeight);
-    respondWithJson(rc, block);
-  }
-
-  private void getBlockById(RoutingContext rc, HashCode blockId) {
-    Optional<Block> block = service.getBlockById(blockId);
-    respondWithJson(rc, block);
-  }
-
-  private void getLastBlock(RoutingContext rc) {
-    Block block = service.getLastBlock();
-    respondWithJson(rc, block);
-  }
-
-  private void getBlockTransactions(RoutingContext rc) {
-    MultiMap queryParams = rc.queryParams();
-    if (queryParams.contains(BLOCK_HEIGHT_PARAM)) {
-      long blockHeight = Long.parseLong(queryParams.get(BLOCK_HEIGHT_PARAM));
-      getBlockTransactionsByHeight(rc, blockHeight);
-    } else if (queryParams.contains(BLOCK_ID_PARAM)) {
-      HashCode blockId = HashCode.fromString(queryParams.get(BLOCK_ID_PARAM));
-      getBlockTransactionsByBlockId(rc, blockId);
-    } else {
-      throw new IllegalArgumentException(
-          "Get block transactions request was invalid. Expected format is "
-              + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockId={blockId} or "
-              + BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH + "?blockHeight={blockHeight}");
-    }
-  }
-
-  private void getBlockTransactionsByHeight(RoutingContext rc, long blockHeight) {
-    List<HashCode> hashes = service.getBlockTransactions(blockHeight);
-    respondWithJson(rc, hashes);
-  }
-
-  private void getBlockTransactionsByBlockId(RoutingContext rc, HashCode blockId) {
-    List<HashCode> hashes = service.getBlockTransactions(blockId);
-    respondWithJson(rc, hashes);
-  }
-
-  private void getTransactionMessages(RoutingContext rc) {
-    Map<HashCode, TransactionMessage> transactionMessages = service.getTxMessages();
-    Map<HashCode, String> transactionMessagesEncoded =
-        hexEncodeTransactionMessages(transactionMessages);
-
-    respondWithJson(rc, transactionMessagesEncoded);
-  }
-
-  private void getTransactionResults(RoutingContext rc) {
-    Map<HashCode, TransactionResult> txResults = service.getTxResults();
-    respondWithJson(rc, txResults);
-  }
-
-  private void getTransactionResult(RoutingContext rc) {
-    HashCode messageHash = getRequiredParameter(rc.request().params(), MESSAGE_HASH_PARAM,
-        HashCode::fromString);
-
-    Optional<TransactionResult> txResult = service.getTxResult(messageHash);
-    respondWithJson(rc, txResult);
-  }
-
-  private void getTransactionLocations(RoutingContext rc) {
-    Map<HashCode, TransactionLocation> txLocations = service.getTxLocations();
-    respondWithJson(rc, txLocations);
-  }
-
-  private void getTransactionLocation(RoutingContext rc) {
-    HashCode messageHash = getRequiredParameter(rc.request().params(), MESSAGE_HASH_PARAM,
-        HashCode::fromString);
-
-    Optional<TransactionLocation> txLocation = service.getTxLocation(messageHash);
-    respondWithJson(rc, txLocation);
   }
 
   private void getActualConfiguration(RoutingContext rc) {
@@ -385,16 +240,6 @@ final class ApiController {
         .end();
   }
 
-  @VisibleForTesting
-  static Map<HashCode, String> hexEncodeTransactionMessages(
-      Map<HashCode, TransactionMessage> txMessages) {
-    return Maps.transformValues(txMessages, ApiController::hexEncodeTransactionMessage);
-  }
-
-  private static String hexEncodeTransactionMessage(TransactionMessage transactionMessage) {
-    return HEX_ENCODING.encode(transactionMessage.toBytes());
-  }
-
   static class QaPaths {
     @VisibleForTesting
     static final String SUBMIT_CREATE_COUNTER_TX_PATH = "/submit-create-counter";
@@ -406,43 +251,10 @@ final class ApiController {
     static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
     @VisibleForTesting
     static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
-    @VisibleForTesting
-    static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
     static final String COUNTER_ID_PARAM = "counterId";
     static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
-
-    private static final String BLOCKCHAIN_ROOT = "/blockchain";
     @VisibleForTesting
-    static final String BLOCKCHAIN_HEIGHT_PATH = BLOCKCHAIN_ROOT + "/height";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_HASHES_PATH = BLOCKCHAIN_ROOT + "/blocks";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCKS_PATH = BLOCKCHAIN_ROOT + "/hashesToBlocks";
-    @VisibleForTesting
-    static final String BLOCK_HEIGHT_PARAM = "blockHeight";
-    @VisibleForTesting
-    static final String BLOCK_ID_PARAM = "blockId";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_LAST_BLOCK_PATH = BLOCKCHAIN_ROOT + "/block/last";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_BLOCK_TRANSACTIONS_PATH = BLOCKCHAIN_ROOT + "/block"
-        + "/transactions";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_TRANSACTION_MESSAGES_PATH = BLOCKCHAIN_ROOT + "/txMessages";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_TRANSACTION_RESULTS_PATH = BLOCKCHAIN_ROOT + "/txResults";
-    @VisibleForTesting
-    static final String MESSAGE_HASH_PARAM = "messageHash";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_TRANSACTION_RESULT_PATH = BLOCKCHAIN_ROOT + "/txResult/:"
-        + MESSAGE_HASH_PARAM;
-    @VisibleForTesting
-    static final String BLOCKCHAIN_TRANSACTION_LOCATIONS_PATH = BLOCKCHAIN_ROOT + "/txLocations";
-    @VisibleForTesting
-    static final String BLOCKCHAIN_TRANSACTION_LOCATION_PATH = BLOCKCHAIN_ROOT + "/txLocation/:"
-        + MESSAGE_HASH_PARAM;
+    static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
     @VisibleForTesting
     static final String TIME_PATH = "/time";
     @VisibleForTesting

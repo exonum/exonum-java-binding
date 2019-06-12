@@ -16,12 +16,16 @@
 
 package com.exonum.binding.service;
 
-/**
- * Indicates that the submitted transaction is not valid (e.g., belongs to an unknown service).
- */
-public final class InvalidTransactionException extends IllegalArgumentException {
+import com.exonum.binding.transaction.RawTransaction;
 
-  public InvalidTransactionException(String message) {
+/**
+ * Indicates that a transaction could not be
+ * {@linkplain Node#submitTransaction(RawTransaction) submitted}.
+ * For example, the submitted transaction is not valid — belongs to an unknown service.
+ */
+public final class TransactionSubmissionException extends RuntimeException {
+
+  public TransactionSubmissionException(String message) {
     super(message);
   }
 }

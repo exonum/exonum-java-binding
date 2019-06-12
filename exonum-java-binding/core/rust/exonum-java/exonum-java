@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Try to detect the Java home directory from installed executable in case JAVA_HOME is not set.
+JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version \
+  2>&1 > /dev/null |\
+  grep 'java.home' |\
+  awk '{print $3}')}"
+
+# Find the directory containing libjvm.
+LIBJVM_PATH="$(find -L ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+
+export LD_LIBRARY_PATH="${LIBJVM_PATH}"
+
+# Detect the root directory of the installed app.
+EXONUM_HOME="$(dirname $0)/.."
+
+# Delegate execution to the app executable.
+${EXONUM_HOME}/exonum-java "$@"
