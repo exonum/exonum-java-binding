@@ -16,27 +16,27 @@ use super::mock::NATIVE_FACADE_CLASS;
 use java_bindings::{
     jni::objects::{JObject, JValue},
     utils::{panic_on_exception, unwrap_jni},
-    JniExecutor, MainExecutor,
+    Executor,
 };
 use tempfile::{self, TempPath};
 
 /// Creates valid service artifact.
-pub fn create_service_artifact_valid(executor: &MainExecutor) -> TempPath {
+pub fn create_service_artifact_valid(executor: &Executor) -> TempPath {
     create_service_artifact(executor, "createValidServiceArtifact")
 }
 
 /// Creates service artifact that fails loading.
-pub fn create_service_artifact_non_loadable(executor: &MainExecutor) -> TempPath {
+pub fn create_service_artifact_non_loadable(executor: &Executor) -> TempPath {
     create_service_artifact(executor, "createUnloadableServiceArtifact")
 }
 
 /// Creates service artifact that provides service that is not possible to instantiate.
-pub fn create_service_artifact_non_instantiable_service(executor: &MainExecutor) -> TempPath {
+pub fn create_service_artifact_non_instantiable_service(executor: &Executor) -> TempPath {
     create_service_artifact(executor, "createServiceArtifactWithNonInstantiableService")
 }
 
 // Does the actual communication with the Java part.
-fn create_service_artifact(executor: &MainExecutor, method_name: &str) -> TempPath {
+fn create_service_artifact(executor: &Executor, method_name: &str) -> TempPath {
     unwrap_jni(executor.with_attached(|env| {
         let artifact_path = tempfile::Builder::new()
             .prefix("artifact")

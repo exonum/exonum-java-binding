@@ -19,7 +19,7 @@ use java_bindings::jni::objects::{GlobalRef, JObject, JValue};
 use java_bindings::jni::strings::JNIString;
 use java_bindings::jni::sys::jsize;
 use java_bindings::utils::unwrap_jni;
-use java_bindings::{JniExecutor, MainExecutor, ServiceProxy};
+use java_bindings::{Executor, ServiceProxy};
 
 use super::transaction::TRANSACTION_ADAPTER_CLASS;
 use super::NATIVE_FACADE_CLASS;
@@ -32,12 +32,12 @@ pub const SERVICE_DEFAULT_ID: u16 = 42;
 pub const SERVICE_DEFAULT_NAME: &str = "service 42";
 
 pub struct ServiceMockBuilder {
-    exec: MainExecutor,
+    exec: Executor,
     builder: GlobalRef,
 }
 
 impl ServiceMockBuilder {
-    pub fn new(exec: MainExecutor) -> Self {
+    pub fn new(exec: Executor) -> Self {
         let builder = unwrap_jni(exec.with_attached(|env| {
             let value = env.call_static_method(
                 NATIVE_FACADE_CLASS,
