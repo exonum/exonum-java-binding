@@ -45,12 +45,12 @@ public interface Node {
    *
    * @param rawTransaction transaction parameters to include in transaction message
    * @return hash of the transaction message created by the framework
-   * @throws InternalServerError if this node failed to process the transaction
+   * @throws TransactionSubmissionException if the transaction belongs to an unknown service,
+   *     or cannot be submitted
    * @throws NullPointerException if the transaction is null
    * @see Blockchain#getTxMessages()
    */
-  HashCode submitTransaction(RawTransaction rawTransaction)
-      throws InternalServerError;
+  HashCode submitTransaction(RawTransaction rawTransaction);
 
   /**
    * Performs a given function with a snapshot of the current database state.

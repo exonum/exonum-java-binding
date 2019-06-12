@@ -41,10 +41,24 @@ public interface Transaction {
   void execute(TransactionContext context) throws TransactionExecutionException;
 
   /**
-   * Returns some information about this transaction in JSON format.
+   * Returns the information about this transaction in JSON format.
+   * For example, it is included in the blockchain explorer response to
+   * a <a href="https://exonum.com/doc/version/0.11/advanced/node-management/#transaction">
+   *   transaction</a> request as 'content.debug'.
+   *
+   * <p>By default, no information is provided. If needed, it can be easily implemented
+   * with {@linkplain com.exonum.binding.common.serialization.json.JsonSerializer Gson}:
+   *
+   * <pre><code>
+   *   &#64;Override
+   *   public String info() {
+   *     return JsonSerializer.json().toJson(this);
+   *   }
+   * </code></pre>
    */
   default String info() {
-    return "";
+    // Empty object by default
+    return "{}";
   }
 
 }

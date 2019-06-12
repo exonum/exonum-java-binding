@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.service;
+package com.exonum.binding.testkit;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Indicates that an internal error occurred during transaction processing.
+ * Changes main TestKit node type to auditor for injected TestKit.
+ *
+ * @see TestKit.Builder#withNodeType(EmulatedNodeType)
+ * @see <a href="https://exonum.com/doc/version/0.11/glossary/#auditor">Auditor Node</a>
  */
-public final class InternalServerError extends Exception {
-
-  public InternalServerError(String message) {
-    super(message);
-  }
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Auditor {
 }

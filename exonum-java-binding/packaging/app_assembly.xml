@@ -36,6 +36,11 @@
     <file>
       <source>${packaging.basedir}/exonum-java</source>
     </file>
+    <!--Exonum Java app wrapper script that starts the app executable-->
+    <file>
+      <source>${packaging.script}</source>
+      <outputDirectory>bin</outputDirectory>
+    </file>
     <!--libjava_bindings.[so|dylib]-->
     <file>
       <source>${rust.libraryPath}</source>

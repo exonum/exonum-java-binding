@@ -83,6 +83,13 @@
     </dependency>
 
     <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-testkit</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
@@ -177,6 +184,9 @@
           </descriptorRefs>
           <finalName>${project.artifactId}-${project.version}-artifact</finalName>
           <appendAssemblyId>false</appendAssemblyId>
+          <!-- Do not use the produced artifact jar file as a main jar
+               i.e. do not install it in the local repo -->
+          <attach>false</attach>
           <archive>
             <manifestEntries>
               <Plugin-Id>${project.groupId}:${project.artifactId}:${project.version}</Plugin-Id>

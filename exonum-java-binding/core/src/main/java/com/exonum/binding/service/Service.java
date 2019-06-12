@@ -103,8 +103,8 @@ public interface Service {
    *
    * <p>Please note that the path prefix shown above is stripped from the request path
    * when it is forwarded to the given router. For example, if your service name is «timestamping»,
-   * and you have an endpoint «/timestamp», use this name when defining the handler and it will be
-   * available by path «/api/services/timestamping/timestamp»:
+   * and you have an endpoint «/timestamp», use «/timestamp» as the endpoint name when defining
+   * the handler and it will be available by path «/api/services/timestamping/timestamp»:
    *
    * <pre><code>
    * router.get("/timestamp").handler((rc) -> {

@@ -21,13 +21,13 @@ use jni::{
     objects::{GlobalRef, JObject},
     JNIEnv,
 };
-use proxy::{JniExecutor, MainExecutor};
+use proxy::Executor;
 use utils::unwrap_jni;
 
 /// Wrapper around Java interface TimeProvider.
 pub struct JavaTimeProvider {
     provider: GlobalRef,
-    exec: MainExecutor,
+    exec: Executor,
 }
 
 impl std::fmt::Debug for JavaTimeProvider {
@@ -37,7 +37,7 @@ impl std::fmt::Debug for JavaTimeProvider {
 }
 
 impl JavaTimeProvider {
-    pub fn new(exec: MainExecutor, java_provider: JObject) -> Self {
+    pub fn new(exec: Executor, java_provider: JObject) -> Self {
         let provider =
             unwrap_jni(exec.with_attached(|env: &JNIEnv| env.new_global_ref(java_provider)));
         Self { provider, exec }

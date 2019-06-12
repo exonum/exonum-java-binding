@@ -56,7 +56,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceAdapterTest {
+class UserServiceAdapterIntegrationTest {
 
   @Mock
   private Service service;
@@ -210,6 +210,9 @@ class UserServiceAdapterTest {
 
   @Test
   void mountPublicApiHandler_FailsOnSubsequentCalls() {
+    Router router = mock(RouterImpl.class);
+    when(server.createRouter())
+        .thenReturn(router);
     serviceAdapter.mountPublicApiHandler(0x0A);
 
     assertThrows(IllegalStateException.class, () -> serviceAdapter.mountPublicApiHandler(0x0B));

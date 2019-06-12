@@ -182,12 +182,18 @@ fn project_root_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
+/// The relative path to a directory that contains runtime dependencies of the integration tests
+/// executed with `cargo test`. These dependencies include `java_bindings` library, which
+/// is also required and loaded by Java code.
+///
+/// This path is included in `java.library.path` JVM property, so that `java_bindings` library
+/// can be discovered and loaded by Java.
 #[cfg(debug_assertions)]
 fn target_path() -> &'static str {
-    "target/debug"
+    "target/debug/deps"
 }
 
 #[cfg(not(debug_assertions))]
 fn target_path() -> &'static str {
-    "target/release"
+    "target/release/deps"
 }
