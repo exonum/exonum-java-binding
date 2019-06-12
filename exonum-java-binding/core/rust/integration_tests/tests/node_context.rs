@@ -37,12 +37,12 @@ use java_bindings::{
         storage::{MemoryDB, Snapshot},
     },
     jni::JavaVM,
-    MainExecutor, NodeContext,
+    Executor, NodeContext,
 };
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
+    pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
 const TEST_TRANSACTION_ID: u16 = 0;

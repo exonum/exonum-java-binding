@@ -17,7 +17,7 @@
 use example_proxy::AtomicIntegerProxy;
 use java_bindings::{
     jni::{sys::jint, JavaVM},
-    JniErrorKind, JniExecutor,
+    Executor, JniErrorKind,
 };
 
 use std::{
@@ -25,12 +25,9 @@ use std::{
     thread::spawn,
 };
 
-/// Checks if detached native thread attaches and detaches as it should when calls to
-/// `with_attached` appears to be nested. After the nested function call ends, thread should stay
-/// attached, and after the outer one ends, normally thread should be detached
-/// (an exception is `HackyExecutor`).
-/// But this function doesn't check last condition, leaving this check to the user.
-pub fn check_nested_attach<E: JniExecutor>(vm: &JavaVM, executor: E) {
+/// Checks if nested `with_attached` calls does not detach the thread before the outer-most
+/// call is finished.
+pub fn check_nested_attach(vm: &JavaVM, executor: Executor) {
     check_detached(vm);
     executor
         .with_attached(|_| {
@@ -63,7 +60,7 @@ pub fn is_attached(vm: &JavaVM) -> bool {
         .expect("An unexpected JNI error occurred")
 }
 
-pub fn test_single_thread<E: JniExecutor>(executor: E) {
+pub fn test_single_thread(executor: Executor) {
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     assert_eq!(1, atomic.increment_and_get().unwrap());
@@ -71,7 +68,7 @@ pub fn test_single_thread<E: JniExecutor>(executor: E) {
     assert_eq!(3, atomic.get().unwrap());
 }
 
-pub fn test_serialized_threads<E: JniExecutor + 'static>(executor: E) {
+pub fn test_serialized_threads(executor: Executor) {
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
     let jh = spawn(move || {
@@ -83,7 +80,7 @@ pub fn test_serialized_threads<E: JniExecutor + 'static>(executor: E) {
     assert_eq!(3, atomic.get().unwrap());
 }
 
-pub fn test_concurrent_threads<E: JniExecutor + 'static>(executor: E, thread_num: usize) {
+pub fn test_concurrent_threads(executor: Executor, thread_num: usize) {
     const ITERS_PER_THREAD: usize = 10_000;
 
     let mut atomic = AtomicIntegerProxy::new(executor.clone(), 0).unwrap();

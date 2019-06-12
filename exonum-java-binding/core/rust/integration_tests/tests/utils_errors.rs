@@ -26,7 +26,7 @@ use java_bindings::{
         check_error_on_exception, get_and_clear_java_exception, get_class_name,
         get_exception_message, panic_on_exception,
     },
-    JniErrorKind, JniExecutor, JniResult, MainExecutor,
+    Executor, JniErrorKind, JniResult,
 };
 use std::sync::Arc;
 
@@ -39,7 +39,7 @@ const CUSTOM_EXCEPTION_MESSAGE: &str = "Test exception message";
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
+    pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
 #[test]
