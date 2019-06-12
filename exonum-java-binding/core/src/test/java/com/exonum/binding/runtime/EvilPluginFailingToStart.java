@@ -17,7 +17,7 @@
 package com.exonum.binding.runtime;
 
 import org.pf4j.Plugin;
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 
 public class EvilPluginFailingToStart extends Plugin {
@@ -27,7 +27,7 @@ public class EvilPluginFailingToStart extends Plugin {
   }
 
   @Override
-  public void start() throws PluginException {
-    throw new PluginException("I am an evil plugin so I won't start");
+  public void start() {
+    throw new PluginRuntimeException("I am an evil plugin so I won't start");
   }
 }

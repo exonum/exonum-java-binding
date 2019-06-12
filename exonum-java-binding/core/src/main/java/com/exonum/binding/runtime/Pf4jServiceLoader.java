@@ -31,14 +31,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.pf4j.Extension;
-import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
 /**
- * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in
- * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
- * an extension.
+ * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in a certain
+ * format ('groupId:artifactId:version'); have a single {@link ServiceModule} as an extension.
  *
  * @see <a href="https://pf4j.org/doc/getting-started.html">PF4J docs</a>
  */
@@ -63,7 +61,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
   /**
    * Loads a service as PF4J artifact.
    *
-   * <p>Verification steps involve metadata validation, starting the plugin and checking it provides
+   * <p>Verification steps involve metadata validation, starting the plugin and checking it
+   * provides
    * a single ServiceModule as an extension.
    */
   @Override
@@ -92,7 +91,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   private String loadPlugin(Path artifactLocation) throws ServiceLoadingException {
     try {
       return pluginManager.loadPlugin(artifactLocation);
-    } catch (PluginException e) {
+    } catch (Exception e) {
       throw new ServiceLoadingException("Failed to load the service from " + artifactLocation, e);
     }
   }
@@ -108,7 +107,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
       PluginState pluginState = pluginManager.startPlugin(pluginId);
       checkState(pluginState == PluginState.STARTED,
           "Failed to start the plugin %s, its state=%s", pluginId, pluginState);
-    } catch (PluginException e) {
+    } catch (Exception e) {
       throw new ServiceLoadingException("Failed to start the plugin " + pluginId, e);
     }
   }
@@ -173,12 +172,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   }
 
   private void unloadPlugin(String pluginId) {
-    try {
-      pluginManager.unloadPlugin(pluginId);
-    } catch (PluginException e) {
-      String message = String.format("Unload of plugin %s failed", pluginId);
-      throw new IllegalStateException(message, e);
-    }
+    pluginManager.unloadPlugin(pluginId);
   }
 
   @Override
@@ -196,8 +190,6 @@ final class Pf4jServiceLoader implements ServiceLoader {
       // The docs don't say why it may fail to stop the plugin.
       // Follow: https://github.com/pf4j/pf4j/issues/291
       checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
-    } catch (PluginException e) {
-      throw new IllegalStateException("Unable to unload the plugin " + pluginId, e);
     } finally {
       loadedServices.remove(serviceId);
     }

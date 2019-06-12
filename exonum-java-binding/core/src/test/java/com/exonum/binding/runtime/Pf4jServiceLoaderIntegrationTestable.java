@@ -50,7 +50,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pf4j.Plugin;
-import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
 
 abstract class Pf4jServiceLoaderIntegrationTestable {
@@ -128,9 +127,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @Test
   void cannotLoadIfNoArtifact() {
     // Try to load the service
-    Exception e = assertThrows(IllegalArgumentException.class,
+    Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("does not exist");
+    assertThat(e).hasMessageContaining("Failed to load");
     assertThat(e).hasMessageContaining(artifactLocation.toString());
   }
 
@@ -274,7 +273,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         .addExtensionClass(serviceModule);
   }
 
-  private void verifyUnloaded(String pluginId) throws PluginException {
+  private void verifyUnloaded(String pluginId) {
     verify(pluginManager).unloadPlugin(pluginId);
 
     ServiceId serviceId = ServiceId.parseFrom(pluginId);
