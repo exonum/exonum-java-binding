@@ -33,7 +33,7 @@ use utils::{
     },
     unwrap_jni,
 };
-use {JniErrorKind, JniResult, Executor};
+use {Executor, JniErrorKind, JniResult};
 
 const RETVAL_TYPE_STRING: &str = "java/lang/String";
 

@@ -33,9 +33,7 @@ pub struct Executor {
 impl Executor {
     /// Creates new Executor with specified JVM.
     pub fn new(vm: Arc<JavaVM>) -> Self {
-        Self {
-            vm,
-        }
+        Self { vm }
     }
 
     /// Executes a provided closure, making sure that the current thread
@@ -44,8 +42,8 @@ impl Executor {
     ///
     /// Allocates a local frame with the specified capacity.
     pub fn with_attached_capacity<F, R>(&self, capacity: i32, f: F) -> JniResult<R>
-        where
-            F: FnOnce(&JNIEnv) -> JniResult<R>,
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         assert!(capacity > 0, "capacity should be a positive integer");
 
@@ -65,8 +63,8 @@ impl Executor {
     ///
     /// Allocates a local frame with the default capacity.
     pub fn with_attached<F, R>(&self, f: F) -> JniResult<R>
-        where
-            F: FnOnce(&JNIEnv) -> JniResult<R>,
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         self.with_attached_capacity(DEFAULT_LOCAL_FRAME_CAPACITY, f)
     }

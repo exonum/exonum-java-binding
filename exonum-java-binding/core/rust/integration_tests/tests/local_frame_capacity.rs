@@ -22,7 +22,7 @@ extern crate rand;
 
 use integration_tests::vm::create_vm_for_leak_tests;
 use java_bindings::jni::JavaVM;
-use java_bindings::{Executor};
+use java_bindings::Executor;
 
 use std::sync::Arc;
 

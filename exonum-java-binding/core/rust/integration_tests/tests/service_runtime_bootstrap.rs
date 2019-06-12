@@ -18,9 +18,7 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use integration_tests::vm::{fakes_classpath, log4j_path};
-use java_bindings::{
-    Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig,
-};
+use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents

@@ -18,8 +18,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::executor::{
-    test_concurrent_threads, test_serialized_threads,
-    test_single_thread,
+    test_concurrent_threads, test_serialized_threads, test_single_thread,
 };
 use integration_tests::vm::create_vm_for_tests;
 use java_bindings::jni::JavaVM;

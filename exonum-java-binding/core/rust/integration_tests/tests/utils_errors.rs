@@ -26,7 +26,7 @@ use java_bindings::{
         check_error_on_exception, get_and_clear_java_exception, get_class_name,
         get_exception_message, panic_on_exception,
     },
-    JniErrorKind, JniResult, Executor,
+    Executor, JniErrorKind, JniResult,
 };
 use std::sync::Arc;
 

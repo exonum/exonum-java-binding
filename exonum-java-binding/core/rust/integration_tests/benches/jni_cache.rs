@@ -27,7 +27,7 @@ use java_bindings::{
         JNIEnv, JavaVM,
     },
     utils::{convert_to_string, get_class_name, jni_cache},
-    JniResult, Executor,
+    Executor, JniResult,
 };
 
 use std::sync::Arc;

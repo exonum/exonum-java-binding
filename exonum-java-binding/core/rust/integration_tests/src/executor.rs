@@ -15,7 +15,10 @@
  */
 
 use example_proxy::AtomicIntegerProxy;
-use java_bindings::{jni::{sys::jint, JavaVM}, JniErrorKind, Executor};
+use java_bindings::{
+    jni::{sys::jint, JavaVM},
+    Executor, JniErrorKind,
+};
 
 use std::{
     sync::{Arc, Barrier},

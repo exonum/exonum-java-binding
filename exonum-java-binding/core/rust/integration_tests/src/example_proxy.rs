@@ -15,7 +15,7 @@
 use java_bindings::jni::objects::{GlobalRef, JValue};
 use java_bindings::jni::sys::jint;
 use java_bindings::jni::JNIEnv;
-use java_bindings::{JniResult, Executor};
+use java_bindings::{Executor, JniResult};
 
 /// A test example of a native-to-JNI proxy
 #[derive(Clone)]
