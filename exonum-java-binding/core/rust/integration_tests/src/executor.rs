@@ -22,6 +22,44 @@ use std::{
     thread::spawn,
 };
 
+/// Checks if detached native thread attaches and detaches as it should when calls to
+/// `with_attached` appears to be nested. After the nested function call ends, thread should stay
+/// attached, and after the outer one ends, normally thread should be detached
+/// (an exception is `HackyExecutor`).
+/// But this function doesn't check last condition, leaving this check to the user.
+pub fn check_nested_attach(vm: &JavaVM, executor: Executor) {
+    check_detached(vm);
+    executor
+        .with_attached(|_| {
+            check_attached(vm);
+            executor.with_attached(|_| {
+                check_attached(vm);
+                Ok(())
+            })?;
+            check_attached(vm);
+            Ok(())
+        })
+        .unwrap();
+}
+
+pub fn check_attached(vm: &JavaVM) {
+    assert!(is_attached(vm));
+}
+
+pub fn check_detached(vm: &JavaVM) {
+    assert!(!is_attached(vm));
+}
+
+pub fn is_attached(vm: &JavaVM) -> bool {
+    vm.get_env()
+        .map(|_| true)
+        .or_else(|jni_err| match jni_err.0 {
+            JniErrorKind::ThreadDetached => Ok(false),
+            _ => Err(jni_err),
+        })
+        .expect("An unexpected JNI error occurred")
+}
+
 pub fn test_single_thread(executor: Executor) {
     let mut atomic = AtomicIntegerProxy::new(executor, 0).unwrap();
     assert_eq!(0, atomic.get().unwrap());
