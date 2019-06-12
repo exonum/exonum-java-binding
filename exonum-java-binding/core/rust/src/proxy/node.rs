@@ -34,7 +34,7 @@ use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
 
-const TX_SUBMISSION_EXCEPTION: &str = "com/exonum/binding/service/InvalidTransactionException";
+const TX_SUBMISSION_EXCEPTION: &str = "com/exonum/binding/service/TransactionSubmissionException";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
@@ -132,9 +132,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
                     Err(err) => {
                         // node#submit can fail for two reasons: unknown transaction id and
                         // an error in ApiSender#send. The former is the service implementation
-                        // error and is appropriate to communicate with the exception below;
-                        // the second is an internal, unrecoverable error that has nothing
-                        // to do with the service: ECR-3190
+                        // error; the latter is an internal, unrecoverable error.
                         let error_class = TX_SUBMISSION_EXCEPTION;
                         let error_description = err.to_string();
                         env.throw_new(error_class, error_description)?;

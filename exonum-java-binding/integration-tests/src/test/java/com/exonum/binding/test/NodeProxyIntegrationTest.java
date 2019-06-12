@@ -19,8 +19,8 @@ package com.exonum.binding.test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.service.InvalidTransactionException;
 import com.exonum.binding.service.Node;
+import com.exonum.binding.service.TransactionSubmissionException;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.transaction.RawTransaction;
 import org.junit.jupiter.api.Test;
@@ -40,9 +40,11 @@ class NodeProxyIntegrationTest {
           .transactionId((short) 1)
           .build();
 
-      Exception e = assertThrows(InvalidTransactionException.class,
+      Exception e = assertThrows(TransactionSubmissionException.class,
           () -> node.submitTransaction(unknownTx));
-      assertThat(e).hasMessageContaining(String.valueOf(unknownServiceId));
+      assertThat(e)
+          .hasMessageContaining(Short.toString(unknownServiceId))
+          .hasMessageContaining("not found");
     }
   }
 }
