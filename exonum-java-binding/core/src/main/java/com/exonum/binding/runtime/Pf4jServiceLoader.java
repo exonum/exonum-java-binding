@@ -108,6 +108,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
       checkState(pluginState == PluginState.STARTED,
           "Failed to start the plugin %s, its state=%s", pluginId, pluginState);
     } catch (Exception e) {
+      // Catch any exception, as it may originate either from PluginManager code or
+      // from Plugin#start (= service code).
       throw new ServiceLoadingException("Failed to start the plugin " + pluginId, e);
     }
   }
