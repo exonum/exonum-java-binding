@@ -18,7 +18,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 
 use integration_tests::executor::{
-    check_nested_attach, test_concurrent_threads, test_serialized_threads,
+    test_concurrent_threads, test_serialized_threads,
     test_single_thread,
 };
 use integration_tests::vm::create_vm_for_tests;
@@ -46,9 +46,4 @@ fn serialized_threads() {
 fn concurrent_threads() {
     const THREAD_NUM: usize = 8;
     test_concurrent_threads(EXECUTOR.clone(), THREAD_NUM)
-}
-
-#[test]
-fn nested_attach() {
-    check_nested_attach(&VM, EXECUTOR.clone());
 }

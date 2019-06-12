@@ -22,11 +22,8 @@ use std::{
     thread::spawn,
 };
 
-/// Checks if detached native thread attaches and detaches as it should when calls to
-/// `with_attached` appears to be nested. After the nested function call ends, thread should stay
-/// attached, and after the outer one ends, normally thread should be detached
-/// (an exception is `HackyExecutor`).
-/// But this function doesn't check last condition, leaving this check to the user.
+/// Checks if nested `with_attached` calls does not detach the thread before the outer-most
+/// call is finished.
 pub fn check_nested_attach(vm: &JavaVM, executor: Executor) {
     check_detached(vm);
     executor
