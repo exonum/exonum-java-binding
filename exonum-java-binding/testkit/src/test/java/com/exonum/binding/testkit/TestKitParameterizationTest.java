@@ -23,10 +23,7 @@ import com.exonum.binding.storage.database.Snapshot;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
-@Execution(ExecutionMode.SAME_THREAD)
 class TestKitParameterizationTest {
 
   private static final short TEMPLATE_VALIDATOR_COUNT = 1;

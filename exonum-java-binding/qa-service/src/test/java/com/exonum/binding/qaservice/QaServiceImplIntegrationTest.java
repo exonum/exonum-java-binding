@@ -58,7 +58,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @RequiresNativeLibrary
-@Execution(ExecutionMode.SAME_THREAD) // todo: report a bug
+// todo: Remove once https://github.com/junit-team/junit5/issues/1925 is resolved
+@Execution(ExecutionMode.SAME_THREAD)
 class QaServiceImplIntegrationTest {
 
   @RegisterExtension
