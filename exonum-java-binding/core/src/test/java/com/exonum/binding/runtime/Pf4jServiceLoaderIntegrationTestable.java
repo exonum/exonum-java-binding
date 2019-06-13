@@ -117,7 +117,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("Failed to load the plugin from");
+    assertThat(e).hasMessageContaining("Failed to load the service from");
 
     // Check the definition is inaccessible
     ServiceId serviceId = ServiceId.parseFrom(PLUGIN_ID);
@@ -127,9 +127,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @Test
   void cannotLoadIfNoArtifact() {
     // Try to load the service
-    Exception e = assertThrows(IllegalArgumentException.class,
+    Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("does not exist");
+    assertThat(e).hasMessageContaining("Failed to load");
     assertThat(e).hasMessageContaining(artifactLocation.toString());
   }
 
@@ -230,7 +230,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   }
 
   @Test
-  void canLoadUnloadService() throws ServiceLoadingException, IOException {
+  void canLoadUnloadService() throws Exception {
     String pluginId = PLUGIN_ID;
 
     anArtifact()

@@ -57,7 +57,7 @@ class JarPluginManagerSmokeIntegrationTest {
     assertThat(pluginState).isEqualTo(PluginState.STARTED);
 
     // Check the extensions
-    List<Class<ServiceModule>> extensionClasses = pluginManager
+    List<Class<? extends ServiceModule>> extensionClasses = pluginManager
         .getExtensionClasses(ServiceModule.class, pluginId);
     assertThat(extensionClasses).hasSize(1);
     Class<?> extensionType = extensionClasses.get(0);
