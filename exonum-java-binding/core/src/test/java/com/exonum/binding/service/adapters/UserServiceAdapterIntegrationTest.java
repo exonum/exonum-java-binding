@@ -57,8 +57,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class) // Probably not thread-safe. This is *the* broken test —
-// other are made per-thread just in case
+// todo: This extension is currently not exactly thread-safe. This test is always broken with
+//  parallel execution. Remove once https://github.com/mockito/mockito/issues/1630 is resolved.
+@ExtendWith(MockitoExtension.class)
 @Execution(ExecutionMode.SAME_THREAD)
 class UserServiceAdapterIntegrationTest {
 
