@@ -99,7 +99,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 public class TestKitExtension implements ParameterResolver {
 
   private static final Namespace NAMESPACE = Namespace.create(TestKitExtension.class);
-  private static final String KEY = "ResourceKey";
+  private static final String TESTKIT_KEY = "Testkit";
   private static final Set<Class> testKitModificationAnnotations =
       ImmutableSet.of(Auditor.class, Validator.class, ValidatorCount.class);
 
@@ -111,8 +111,7 @@ public class TestKitExtension implements ParameterResolver {
 
   @Override
   public boolean supportsParameter(ParameterContext parameterContext,
-                                   ExtensionContext extensionContext)
-      throws ParameterResolutionException {
+                                   ExtensionContext extensionContext) {
     return parameterContext.getParameter().getType() == TestKit.class;
   }
 
@@ -122,11 +121,11 @@ public class TestKitExtension implements ParameterResolver {
       throws ParameterResolutionException {
     checkExtensionContext(extensionContext);
     CloseableTestKit closeableTestKit =
-        getStore(extensionContext).get(KEY, CloseableTestKit.class);
+        getStore(extensionContext).get(TESTKIT_KEY, CloseableTestKit.class);
     TestKit testKit;
     if (closeableTestKit == null) {
       testKit = buildTestKit(parameterContext, extensionContext);
-      getStore(extensionContext).put(KEY, new CloseableTestKit(testKit));
+      getStore(extensionContext).put(TESTKIT_KEY, new CloseableTestKit(testKit));
     } else {
       // Throw an exception if TestKit was already instantiated in this context, but user tries to
       // reconfigure it
