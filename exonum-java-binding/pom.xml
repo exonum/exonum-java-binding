@@ -133,17 +133,6 @@
     <!-- Default build mode is `debug`, can also be `release`. Usually controlled
          by the packaging script (package_app.sh), but can also be set from the CLI -->
     <build.mode>debug</build.mode>
-    <runJavaTestsInParallel>true</runJavaTestsInParallel>
-    <surefire.junitPlatformProperties>
-      # Enable parallel execution, with concurrent mode by default
-      junit.jupiter.execution.parallel.enabled = ${runJavaTestsInParallel}
-      junit.jupiter.execution.parallel.mode.default = concurrent
-
-      # Use 1.5 times the number of CPUs
-      junit.jupiter.execution.parallel.config.dynamic.factor = 1.5
-    </surefire.junitPlatformProperties>
-    <!-- Use for failsafe the same properties as for surefire -->
-    <failsafe.junitPlatformProperties>${surefire.junitPlatformProperties}</failsafe.junitPlatformProperties>
   </properties>
 
   <dependencyManagement>
@@ -370,13 +359,6 @@
             <excludedGroups>
               ${excludeTags}
             </excludedGroups>
-            <!-- Set up JUnit 5 configuration parameters.
-                 See also: https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven-config-params -->
-            <properties>
-              <configurationParameters>
-               ${surefire.junitPlatformProperties}
-              </configurationParameters>
-            </properties>
           </configuration>
         </plugin>
 
@@ -388,13 +370,6 @@
             <excludedGroups>
               ${excludeTags}
             </excludedGroups>
-            <!-- Set up JUnit 5 configuration parameters.
-                 See also: https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven-config-params -->
-            <properties>
-              <configurationParameters>
-               ${failsafe.junitPlatformProperties}
-              </configurationParameters>
-            </properties>
           </configuration>
         </plugin>
 
