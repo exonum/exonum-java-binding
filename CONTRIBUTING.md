@@ -57,6 +57,37 @@ By default, the Exonum Java app is built in debug mode, which affects performanc
 and is not desired for production usage. To enable release mode, you need
 to pass `--release` flag to the `package_app.sh` script.
 
+#### (Optional) Maven Configuration
+Each _independent_ module and the root aggregator project contain `.mvn` directory 
+with Maven configuration files. 
+
+- `jvm.config` contains extra JVM options that has [proved][build-benches] to speed up the build.
+- `maven.config` contains default Maven command line flags (not included, ignored by Git). 
+  `maven-template.config` is a template file with some configuration options that
+  can be copied in a local `maven.config`. Some options that can be considered:
+  - `--threads 1C` — will activate parallel builds. Independent modules will be built concurrently,
+    with the given number of threads (here — 1 times the number of available cores).
+  - `-Djunit.jupiter.execution.parallel.enabled=true` + 
+    `-Djunit.jupiter.execution.parallel.mode.default=concurrent` — enable [parallel JUnit 5 test
+    execution](https://junit.org/junit5/docs/current/user-guide/#writing-tests-parallel-execution).
+  - `-Djacoco.skip` — if you never browse the local reports when 
+    [running all tests](#running-tests).
+
+
+<details>
+<summary>Why `.mvn` is present in each independent module?</summary>
+
+Remember that configuration files in `.mvn` are used when Maven is launched from 
+its parent directory; or when you build a _child_ project in multi-module build, the
+parent’s `.mvn` is used. For example, if you build `core`, `../.mvn` will be picked up because
+`core` is a child of `ejb-parent`; but if you build `ejb-parent`, `../.mvn` will not have any
+effect because `ejb-parent` is _not_ a child of `exonum-java-parent`.
+</details>
+
+See [Maven configuration documentation](https://maven.apache.org/configure.html) for details. 
+
+[build-benches]: https://jira.bf.local/browse/ECR-534?focusedCommentId=48501&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-48501
+
 ## EJB Modules
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:
