@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.service.ServiceModule;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ import org.pf4j.PluginState;
 class JarPluginManagerSmokeIntegrationTest {
 
   @Test
-  void loadsUnloadsJarPlugins(@TempDir Path tmp) throws Exception {
+  void loadsUnloadsJarPlugins(@TempDir Path tmp) throws IOException {
     Path pluginPath = tmp.resolve("test-plugin.jar");
 
     String pluginId = "test-plugin";

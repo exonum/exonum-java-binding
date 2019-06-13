@@ -35,8 +35,9 @@ import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
 /**
- * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in a certain
- * format ('groupId:artifactId:version'); have a single {@link ServiceModule} as an extension.
+ * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in
+ * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
+ * an extension.
  *
  * @see <a href="https://pf4j.org/doc/getting-started.html">PF4J docs</a>
  */
@@ -61,8 +62,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   /**
    * Loads a service as PF4J artifact.
    *
-   * <p>Verification steps involve metadata validation, starting the plugin and checking it
-   * provides
+   * <p>Verification steps involve metadata validation, starting the plugin and checking it provides
    * a single ServiceModule as an extension.
    */
   @Override

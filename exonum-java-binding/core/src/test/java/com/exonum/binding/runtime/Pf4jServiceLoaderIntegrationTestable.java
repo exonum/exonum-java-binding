@@ -135,7 +135,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
 
   @Test
-  void cannotLoadIfPluginFailedToStart() throws Exception {
+  void cannotLoadIfPluginFailedToStart() throws IOException {
     String pluginId = PLUGIN_ID;
     Class<? extends Plugin> evilPlugin = EvilPluginFailingToStart.class;
     anArtifact()
@@ -162,7 +162,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
       "foo-service",
       "com.acme:foo-service:1.0:extra-coordinate",
   })
-  void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) throws Exception {
+  void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) throws IOException {
     anArtifact()
         .setPluginId(invalidPluginId)
         .writeTo(artifactLocation);
@@ -181,7 +181,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @MethodSource("invalidServiceModuleExtensions")
   void cannotLoadIfInvalidServiceModuleExtensions(
       List<Class<? extends ServiceModule>> extensionClasses, String expectedErrorPattern)
-      throws Exception {
+      throws IOException {
     String pluginId = PLUGIN_ID;
 
     anArtifact()
@@ -210,7 +210,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   }
 
   @Test
-  void cannotLoadIfArtifactIncludesCopiesOfAppClasses() throws Exception {
+  void cannotLoadIfArtifactIncludesCopiesOfAppClasses() throws IOException {
     String pluginId = PLUGIN_ID;
 
     anArtifact()
