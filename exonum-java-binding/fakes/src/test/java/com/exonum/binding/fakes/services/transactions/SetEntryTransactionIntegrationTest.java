@@ -37,17 +37,10 @@ import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.indices.EntryIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.util.LibraryLoader;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class SetEntryTransactionIntegrationTest {
-
-  @BeforeAll
-  static void loadLibrary() {
-    LibraryLoader.load();
-  }
 
   @Test
   void executePutsTheValueIntoEntry() throws CloseFailuresException {

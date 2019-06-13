@@ -23,6 +23,7 @@ import com.exonum.binding.proxy.Cleaner;
 import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.util.LibraryLoader;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,10 @@ import org.apache.logging.log4j.Logger;
  * and get a snapshot of the database state.
  */
 public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private static final Logger logger = LogManager.getLogger(NodeProxy.class);
 
@@ -51,7 +56,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @throws IllegalStateException if the node proxy is closed
    */
   @Override
-  public HashCode submitTransaction(RawTransaction rawTransaction) throws InternalServerError {
+  public HashCode submitTransaction(RawTransaction rawTransaction) {
     byte[] payload = rawTransaction.getPayload();
     short serviceId = rawTransaction.getServiceId();
     short transactionId = rawTransaction.getTransactionId();
@@ -69,7 +74,7 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param transactionId an identifier of the transaction
    */
   private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, short serviceId,
-      short transactionId) throws InternalServerError;
+      short transactionId);
 
   /**
    * {@inheritDoc}

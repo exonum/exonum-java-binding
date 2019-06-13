@@ -125,7 +125,7 @@ class ExonumHttpClient implements ExonumClient {
   public long getBlockchainHeight() {
     BlocksResponse response = doGetBlocks(0, INCLUDE_EMPTY, null, NO_COMMIT_TIME);
 
-    return response.getBlocksRangeEnd();
+    return response.getBlocksRangeEnd() - 1; // Because '$.range.end' is exclusive
   }
 
   @Override
@@ -181,7 +181,7 @@ class ExonumHttpClient implements ExonumClient {
         "Requested number of blocks was %s but maximum allowed is %s",
         count, MAX_BLOCKS_PER_REQUEST);
     checkArgument(heightMax == null || 0 <= heightMax,
-        "Blockhain height can't be negative but was %s", heightMax);
+        "Blockchain height can't be negative but was %s", heightMax);
 
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;

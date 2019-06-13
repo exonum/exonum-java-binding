@@ -28,7 +28,6 @@ import com.exonum.binding.proxy.CloseFailuresException;
 import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -36,10 +35,6 @@ import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class CoreSchemaProxyIntegrationTest {
-
-  static {
-    LibraryLoader.load();
-  }
 
   @Test
   void getHeightBeforeGenesisBlockTest() {

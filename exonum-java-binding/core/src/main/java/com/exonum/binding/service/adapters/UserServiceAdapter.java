@@ -32,8 +32,10 @@ import com.exonum.binding.transaction.RawTransaction;
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transport.Server;
 import com.google.inject.Inject;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
@@ -170,14 +172,43 @@ public class UserServiceAdapter {
     try {
       checkState(node == null, "There is a node already (%s): are you calling this method twice?",
           node);
+
+      // Create the API handlers of this service
       node = new NodeProxy(nodeNativeHandle);
       Router router = server.createRouter();
       service.createPublicApiHandlers(node, router);
+
+      // Mount the service handlers
       server.mountSubRouter(serviceApiPath(), router);
+
+      // Log the endpoints
+      logApiMountEvent(router);
     } catch (Exception e) {
       logger.error("Unexpected exception occurs at mountPublicApiHandler", e);
       throw e;
     }
+  }
+
+  private void logApiMountEvent(Router router) {
+    List<Route> serviceRoutes = router.getRoutes();
+    if (serviceRoutes.isEmpty()) {
+      return; // nothing to do here
+    }
+
+    String serviceName = getName();
+    int port = server.getActualPort().orElse(0);
+    String mountPoint = serviceApiPath();
+    // Currently the API is mounted on *all* interfaces, see VertxServer#start
+    logger.info("{} API is mounted at :{}{}", serviceName, port, mountPoint);
+
+    // Log the full path to one of the service endpoint
+    serviceRoutes.stream()
+        .map(Route::getPath)
+        .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
+        .findAny()
+        .ifPresent(someRoute ->
+            logger.info("    E.g.: http://127.0.0.1:{}{}", port, mountPoint + someRoute)
+        );
   }
 
   /**

@@ -17,84 +17,80 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.exonum.binding.cryptocurrency.transactions.ContextUtils.newContextBuilder;
-import static com.exonum.binding.cryptocurrency.transactions.CreateTransferTransactionUtils.createWallet;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
+import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.storage.database.Database;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.util.LibraryLoader;
-import org.hamcrest.Matcher;
+import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 @RequiresNativeLibrary
 class TransferTxHistoryTest {
 
-  static {
-    LibraryLoader.load();
-  }
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(CryptocurrencyServiceModule.class));
 
-  private static final PublicKey ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY;
-  private static final PublicKey ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY;
+  private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
+  private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
   @Test
   @RequiresNativeLibrary
-  void transfersHistoryBetweenTwoAccountsTest() throws Exception {
-    try (Database db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
+  void transfersHistoryBetweenTwoAccountsTest(TestKit testKit) {
+    // Create source and target wallets with the same initial balance
+    long initialBalance = 100L;
+    TransactionMessage createFromWalletTx1 =
+        newCreateWalletTransaction(initialBalance, ACCOUNT_1);
+    TransactionMessage createFromWalletTx2 =
+        newCreateWalletTransaction(initialBalance, ACCOUNT_2);
+    testKit.createBlockWithTransactions(createFromWalletTx1, createFromWalletTx2);
 
-      // Create wallets with the given initial balances
-      long initialBalance = 100L;
-      createWallet(view, ACCOUNT_1, initialBalance);
-      createWallet(view, ACCOUNT_2, initialBalance);
+    // Create and execute 1st transaction
+    long seed1 = 1L;
+    long transferSum1 = 40L;
+    TransactionMessage transferTx1 = newTransferTransaction(
+        seed1, ACCOUNT_1, ACCOUNT_2.getPublicKey(), transferSum1);
+    testKit.createBlockWithTransactions(transferTx1);
 
-      // Create and execute 1st transaction
-      long seed1 = 1L;
-      long transferSum1 = 40L;
-      HashCode txMessageHash1 = HashCode.fromString("a0a0a0a0");
-      TransferTx tx1 = new TransferTx(seed1, ACCOUNT_2, transferSum1);
-      TransactionContext context1 = newContextBuilder(view)
-          .txMessageHash(txMessageHash1)
-          .authorPk(ACCOUNT_1)
-          .build();
-      tx1.execute(context1);
+    // Create and execute 2nd transaction
+    long seed2 = 2L;
+    long transferSum2 = 10L;
+    TransactionMessage transferTx2 = newTransferTransaction(
+        seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2);
+    testKit.createBlockWithTransactions(transferTx2);
 
-      // Create and execute 2nd transaction
-      long seed2 = 2L;
-      long transferSum2 = 10L;
-      HashCode txMessageHash2 = HashCode.fromString("b1b1b1b1");
-      TransferTx tx2 = new TransferTx(seed2, ACCOUNT_1, transferSum2);
-      TransactionContext context2 = newContextBuilder(view)
-          .txMessageHash(txMessageHash2)
-          .authorPk(ACCOUNT_2)
-          .build();
-      tx2.execute(context2);
-
+    testKit.withSnapshot((view) -> {
       // Check that wallets have correct balances
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
       ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
       long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
-      assertThat(wallets.get(ACCOUNT_1).getBalance(), equalTo(expectedBalance1));
+      assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())
+          .isEqualTo(expectedBalance1);
       long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
-      assertThat(wallets.get(ACCOUNT_2).getBalance(), equalTo(expectedBalance2));
+      assertThat(wallets.get(ACCOUNT_2.getPublicKey()).getBalance())
+          .isEqualTo(expectedBalance2);
 
       // Check history
-      Matcher<Iterable<?>> containsExpectedEntries = contains(txMessageHash1, txMessageHash2);
-      assertThat(schema.transactionsHistory(ACCOUNT_1), containsExpectedEntries);
-      assertThat(schema.transactionsHistory(ACCOUNT_2), containsExpectedEntries);
-    }
+      HashCode messageHash1 = transferTx1.hash();
+      HashCode messageHash2 = transferTx2.hash();
+      assertThat(schema.transactionsHistory(ACCOUNT_1.getPublicKey()))
+          .containsExactly(messageHash1, messageHash2);
+      assertThat(schema.transactionsHistory(ACCOUNT_2.getPublicKey()))
+          .containsExactly(messageHash1, messageHash2);
+      return null;
+    });
   }
 }

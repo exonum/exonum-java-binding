@@ -16,52 +16,48 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyIterable;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.util.LibraryLoader;
+import com.exonum.binding.testkit.TestKit;
+import com.exonum.binding.testkit.TestKitExtension;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 @RequiresNativeLibrary
 class CryptocurrencySchemaIntegrationTest {
 
-  static {
-    LibraryLoader.load();
-  }
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withService(CryptocurrencyServiceModule.class));
 
-  private static final PublicKey WALLET_OWNER_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY;
+  private static final PublicKey WALLET_OWNER_KEY =
+      PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
 
   @Test
-  void getStateHashes() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
+  void getStateHashes(TestKit testKit) {
+    testKit.withSnapshot((view) -> {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
       HashCode walletsMerkleRoot = schema.wallets().getRootHash();
       ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
 
-      assertThat(schema.getStateHashes(), equalTo(expectedHashes));
-    }
+      assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
+      return null;
+    });
   }
 
   @Test
-  void walletHistoryNoRecords() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
+  void walletHistoryNoRecords(TestKit testKit) {
+    testKit.withSnapshot((view) -> {
       CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
-      assertThat(schema.transactionsHistory(WALLET_OWNER_KEY), emptyIterable());
-    }
+      assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
+      return null;
+    });
   }
 }

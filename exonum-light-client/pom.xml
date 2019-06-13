@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -61,19 +61,19 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.5.0</ejb.version>
+    <ejb.version>0.6.0</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
-    <okhttp.version>3.14.1</okhttp.version>
-    <lombok.version>1.18.6</lombok.version>
+    <okhttp.version>3.14.2</okhttp.version>
+    <lombok.version>1.18.8</lombok.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.4.2</junit.jupiter.version>
     <mockito.version>2.27.0</mockito.version>
     <hamcrest.version>2.1</hamcrest.version>
-    <equalsverifier.version>3.1.8</equalsverifier.version>
+    <equalsverifier.version>3.1.9</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
@@ -159,7 +159,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.8.1</version>
         <configuration>
           <showWarnings>true</showWarnings>
           <source>${java.compiler.source}</source>
@@ -171,7 +171,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <configuration>
           <configLocation>${project.basedir}/../checkstyle.xml</configLocation>
           <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
@@ -224,7 +224,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.1</version>
+        <version>2.22.2</version>
         <configuration>
           <argLine>
             ${jacoco.args}
@@ -260,12 +260,26 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>attach-sources</id>
             <goals>
               <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <version>1.18.6.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>delombok</goal>
             </goals>
           </execution>
         </executions>
@@ -290,7 +304,21 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.3</version>
+            <version>0.8.4</version>
+            <configuration>
+              <excludes>
+                <!--
+                Exclude lombok annotated classes which are located at `src/main/lombok`,
+                because the plugin can't be configured to look for sources there.
+                -->
+                <exclude>com/exonum/client/response/Block.class</exclude>
+                <exclude>com/exonum/client/response/Block*BlockBuilder.class</exclude>
+                <exclude>com/exonum/client/response/BlockResponse.class</exclude>
+                <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
+                <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
+              </excludes>
+            </configuration>
             <executions>
               <execution>
                 <id>prepare-jacoco-agent</id>
@@ -331,6 +359,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -352,6 +381,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-deploy-plugin</artifactId>
+            <version>2.8.2</version>
             <executions>
               <execution>
                 <id>default-deploy</id>

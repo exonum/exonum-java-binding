@@ -21,11 +21,11 @@ use jni::{
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use proxy::{JniExecutor, ServiceProxy};
+use proxy::ServiceProxy;
 use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
-use MainExecutor;
+use Executor;
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
@@ -37,7 +37,7 @@ const CREATE_SERVICE_SIGNATURE: &str =
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct JavaServiceRuntime {
-    executor: MainExecutor,
+    executor: Executor,
     service_runtime: GlobalRef,
 }
 
@@ -55,7 +55,7 @@ impl JavaServiceRuntime {
     ///
     /// Also, this function is public for being used from integration tests.
     pub fn create_with_jvm(java_vm: Arc<JavaVM>, port: i32) -> Self {
-        let executor = MainExecutor::new(java_vm.clone());
+        let executor = Executor::new(java_vm.clone());
         let service_runtime = Self::create_service_runtime_java(port, executor.clone());
         JavaServiceRuntime {
             executor,
@@ -64,7 +64,7 @@ impl JavaServiceRuntime {
     }
 
     /// Creates service runtime that is responsible for services management.
-    fn create_service_runtime_java(port: i32, executor: MainExecutor) -> GlobalRef {
+    fn create_service_runtime_java(port: i32, executor: Executor) -> GlobalRef {
         unwrap_jni(executor.with_attached(|env| {
             let serviceRuntime = env
                 .call_static_method(
@@ -191,10 +191,13 @@ impl JavaServiceRuntime {
         // Append extra user arguments
         args_builder = Self::add_user_arguments(args_builder, args_append);
 
+        // Log JVM arguments
+        Self::log_jvm_arguments(&args_builder);
+
         args_builder.build()
     }
 
-    /// Adds extra user arguments (optional) to JVM configuration
+    /// Adds extra user arguments (optional) to JVM configuration.
     fn add_user_arguments<I>(mut args_builder: InitArgsBuilder, user_args: I) -> InitArgsBuilder
     where
         I: IntoIterator<Item = String>,
@@ -206,7 +209,7 @@ impl JavaServiceRuntime {
         args_builder
     }
 
-    /// Adds required EJB-related arguments to JVM configuration
+    /// Adds required EJB-related arguments to JVM configuration.
     fn add_required_arguments(
         mut args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
@@ -232,7 +235,7 @@ impl JavaServiceRuntime {
             ))
     }
 
-    /// Adds optional user arguments to JVM configuration
+    /// Adds optional user arguments to JVM configuration.
     fn add_optional_arguments(
         mut args_builder: InitArgsBuilder,
         jvm_config: &JvmConfig,
@@ -246,8 +249,18 @@ impl JavaServiceRuntime {
         args_builder
     }
 
+    /// Logs JVM arguments collected by a particular builder.
+    fn log_jvm_arguments(args_builder: &InitArgsBuilder) {
+        let mut jvm_args_line = String::new();
+        for option in args_builder.options().iter() {
+            jvm_args_line.push(' ');
+            jvm_args_line.push_str(option);
+        }
+        info!("JVM arguments:{}", jvm_args_line);
+    }
+
     /// Returns a reference to the runtime's executor.
-    pub fn get_executor(&self) -> &MainExecutor {
+    pub fn get_executor(&self) -> &Executor {
         &self.executor
     }
 }

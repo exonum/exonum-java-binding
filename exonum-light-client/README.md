@@ -16,8 +16,7 @@ By using the client you are able to perform the following operations:
 - Receive blockchain blocks information 
 - Receive node system information 
 - Receive node status information  
-<!-- TODO: replace by javadoc link when it will be available --> 
-_*Please refer to [the code][exonum-client] for details._  
+_*Please refer to [the documentation][exonum-client] for details._  
 Also, see [examples](#examples). 
 
 ## Compatibility
@@ -25,6 +24,7 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
+| 0.2.0        | 0.11.0 | 0.6.0       |
 | 0.1.0        | 0.10.* | 0.4         |
 
 ## System Dependencies
@@ -37,15 +37,18 @@ If you are using Maven, add this to your _pom.xml_ file
 <dependency>
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 If you are using Gradle, add this to your dependencies
 ```Groovy
-compile 'com.exonum.client:exonum-light-client:0.1.0'
+compile 'com.exonum.client:exonum-light-client:0.2.0'
 ```
 
 ## Examples
+This section contains most frequently used operations with the blockchain.
+Please navigate to [Exonum client][exonum-client] API documentation 
+to see all supported operations.
 
 ### Exonum Client Initialization
 The following example shows how to create the instance of exonum client
@@ -105,8 +108,6 @@ for the full example of how to create a transaction message and
 send it to Exonum node.
 
 ### Transaction Info
-<!-- TODO: remove after release --> 
-_*Not available for Light Client v0.1_  
 The following method provides a possibility to get information 
 on a transaction by its hash - status of the transaction, 
 details of the message containing the transaction and, 
@@ -132,9 +133,9 @@ which is required for the client.
 Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 
 [exonum]: https://github.com/exonum/exonum
-[ejb-common]: https://exonum.com/doc/api/java-binding-common/0.4/
-[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/message/TransactionMessage.Builder.html
+[ejb-common]: https://exonum.com/doc/api/java-binding-common/0.6.0/
+[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding-common/0.6.0/com/exonum/binding/common/message/TransactionMessage.Builder.html
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
-[standard-serializers]: https://exonum.com/doc/api/java-binding-common/0.4/com/exonum/binding/common/serialization/StandardSerializers.html
+[standard-serializers]: https://exonum.com/doc/api/java-binding-common/0.6.0/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
-[exonum-client]: ./src/main/java/com/exonum/client/ExonumClient.java
+[exonum-client]: https://exonum.com/doc/api/java-light-client/0.2.0/com/exonum/client/ExonumClient.html

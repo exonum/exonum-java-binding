@@ -308,10 +308,11 @@ class ExonumHttpClientBlocksIntegrationTest {
   void getBlockchainHeight() throws InterruptedException {
     // Mock response
     long height = 1600;
+    long heightExclusive = height + 1;
     String json = "{\n"
         + "  'range': {\n"
         + "    'start': 0,\n"
-        + "    'end': " + height + "\n"
+        + "    'end': " + heightExclusive + "\n"
         + "  },\n"
         + "  'blocks': [],\n"
         + "  'times': null\n"

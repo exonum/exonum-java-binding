@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.exonum.binding</groupId>
+    <artifactId>exonum-java-binding-parent</artifactId>
+    <version>0.7.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>exonum-java-binding-integration-tests</artifactId>
+  <version>0.7.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Exonum Java Binding: Integration Tests</name>
+  <description>
+    A module providing integration tests for Core and Time Oracle modules that require
+    a node running a service. Such tests cannot be written using plain MemoryDb, hence use
+    the TestKit.
+    This module is not supposed to have sources and produce a jar file; it's created for
+    integration tests execution during the project build.
+  </description>
+
+  <properties>
+    <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
+    <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-time-oracle</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-testkit</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-testing</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+
+      <plugin><!--Do not create an empty Jar-->
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <skipIfEmpty>true</skipIfEmpty>
+        </configuration>
+      </plugin>
+
+      <plugin><!--Do not install Jar-->
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${jacoco.args}
+            -Djava.library.path=${ejb-core.nativeLibPath}
+            ${java.vm.assertionFlag}
+          </argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>${project.parent.basedir}/../checkstyle.xml</configLocation>
+          <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
+        </configuration>
+      </plugin>
+
+      <!-- Skip the deployment of internal module as it is inherited from parent pom -->
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

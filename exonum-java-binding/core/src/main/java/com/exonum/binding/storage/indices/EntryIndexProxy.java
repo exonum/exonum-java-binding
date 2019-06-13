@@ -27,6 +27,7 @@ import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.Snapshot;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -51,6 +52,10 @@ import java.util.Optional;
  * @see View
  */
 public final class EntryIndexProxy<T> extends AbstractIndexProxy {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private final CheckingSerializerDecorator<T> serializer;
 

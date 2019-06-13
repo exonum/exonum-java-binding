@@ -23,8 +23,8 @@ pub extern "system" fn Java_com_exonum_binding_util_LibraryLoader_nativeGetLibra
     env.new_string(get_lib_version()).unwrap().into_inner()
 }
 
-// Returns the exact value of the `version` field from the library's Cargo.toml configuration file.
-fn get_lib_version() -> &'static str {
+/// Returns the exact value of the `version` field from the library's Cargo.toml configuration file.
+pub fn get_lib_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 

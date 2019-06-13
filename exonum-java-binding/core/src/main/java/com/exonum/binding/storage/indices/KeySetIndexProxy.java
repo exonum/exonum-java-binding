@@ -27,6 +27,7 @@ import com.exonum.binding.proxy.NativeHandle;
 import com.exonum.binding.proxy.ProxyDestructor;
 import com.exonum.binding.storage.database.Fork;
 import com.exonum.binding.storage.database.View;
+import com.exonum.binding.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.function.LongSupplier;
@@ -57,6 +58,10 @@ import java.util.function.LongSupplier;
  * @see View
  */
 public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Iterable<E> {
+
+  static {
+    LibraryLoader.load();
+  }
 
   private final CheckingSerializerDecorator<E> serializer;
 

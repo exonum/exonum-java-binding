@@ -12,25 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.exonum.client.response;
+package com.exonum.binding.testkit;
 
-import lombok.Value;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Value
-public class HealthCheckInfo {
+/**
+ * Number of validator nodes in the TestKit network, should be positive. Note that regardless of
+ * the configured number of validators, only a single service will be instantiated.
+ *
+ * @see TestKit.Builder#withValidators(short)
+ */
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ValidatorCount {
+
   /**
-   * Shows information about whether it is possible to achieve the consensus between
-   * validators in the current state.
+   * Validator count of TestKit network.
    */
-  ConsensusStatus consensusStatus;
-
-  /**
-   * The number of peers that the node is connected to;
-   * {@code = 0} if the node is not connected to the network,
-   * or it's the single node network.
-   */
-  int connectionsNumber;
+  short value();
 }

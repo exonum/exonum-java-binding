@@ -27,7 +27,7 @@ use java_bindings::{
         JNIEnv, JavaVM,
     },
     utils::{convert_to_string, get_class_name, jni_cache},
-    JniExecutor, JniResult, MainExecutor,
+    Executor, JniResult,
 };
 
 use std::sync::Arc;
@@ -38,7 +38,7 @@ const TX_EXEC_EXCEPTION_CLASS: &str =
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
+    pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
 // Returns a class name of an obj as a `String`. It's a simulation of old non cached implementation.
