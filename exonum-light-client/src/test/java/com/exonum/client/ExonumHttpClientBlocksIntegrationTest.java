@@ -40,6 +40,7 @@ import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Comparators.isInStrictOrder;
 import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.lang.Math.min;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -668,7 +669,7 @@ class ExonumHttpClientBlocksIntegrationTest {
   /** Enqueues a JSON response with the given body. */
   private void enqueueResponse(String jsonResponse) {
     server.enqueue(new MockResponse()
-        .setHeader("Content-Type", "application/json")
+        .setHeader(CONTENT_TYPE, "application/json")
         .setBody(jsonResponse));
   }
 
