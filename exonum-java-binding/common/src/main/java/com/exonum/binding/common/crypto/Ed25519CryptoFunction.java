@@ -25,7 +25,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
-import com.sun.jna.NativeLong;
 
 /**
  * A ED25519 public-key signature system crypto function.
@@ -65,8 +64,7 @@ public enum Ed25519CryptoFunction implements CryptoFunction {
   public byte[] signMessage(byte[] message, PrivateKey privateKey) {
     checkArgument(hasLength(privateKey.toBytesNoCopy(), PRIVATE_KEY_BYTES));
     byte[] signature = new byte[SIGNATURE_BYTES];
-    NativeLong messageLength = new NativeLong(message.length);
-    boolean signed = lazySodium.cryptoSignDetached(signature, null, message, messageLength,
+    boolean signed = lazySodium.cryptoSignDetached(signature, message, message.length,
         privateKey.toBytesNoCopy());
 
     if (!signed) {
