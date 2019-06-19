@@ -58,9 +58,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 // todo: This extension is currently not exactly thread-safe. This test is always broken with
-//  parallel execution. Remove once https://github.com/mockito/mockito/issues/1630 is resolved.
+//  parallel execution. Remove everywhere once https://github.com/mockito/mockito/issues/1630
+//  is resolved.
 @ExtendWith(MockitoExtension.class)
-@Execution(ExecutionMode.SAME_THREAD)
+@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 class UserServiceAdapterIntegrationTest {
 
   @Mock
