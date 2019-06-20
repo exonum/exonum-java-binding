@@ -16,12 +16,12 @@
 
 package ${groupId};
 
-import com.exonum.binding.service.AbstractService;
-import com.exonum.binding.service.Node;
-import com.exonum.binding.service.Schema;
-import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.core.service.AbstractService;
+import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.View;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 

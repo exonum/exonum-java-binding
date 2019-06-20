@@ -21,7 +21,6 @@ import static com.exonum.binding.common.blockchain.TransactionResult.SUCCESSFUL_
 import static com.exonum.binding.common.blockchain.TransactionResult.UNEXPECTED_ERROR_STATUS_CODE;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
-import com.exonum.binding.blockchain.serialization.CoreProtos;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.serialization.Serializer;
 

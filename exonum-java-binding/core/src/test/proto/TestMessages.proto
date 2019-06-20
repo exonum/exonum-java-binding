@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.exonum.binding.storage.indices";
+option java_package = "com.exonum.binding.core.storage.indices";
 option java_outer_classname = "TestProtoMessages";
 
 message Id {

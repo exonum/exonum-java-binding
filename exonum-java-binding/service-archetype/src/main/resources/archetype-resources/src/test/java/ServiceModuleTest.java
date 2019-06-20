@@ -19,8 +19,8 @@ package ${groupId};
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.exonum.binding.service.Service;
-import com.exonum.binding.service.TransactionConverter;
+import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;

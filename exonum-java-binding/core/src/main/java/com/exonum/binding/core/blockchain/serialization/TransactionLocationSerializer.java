@@ -18,10 +18,9 @@ package com.exonum.binding.core.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 
-import com.exonum.binding.blockchain.serialization.CoreProtos;
-import com.exonum.binding.blockchain.serialization.CoreProtos.TxLocation;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.core.blockchain.serialization.CoreProtos.TxLocation;
 
 public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;
@@ -31,7 +30,7 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
 
   @Override
   public byte[] toBytes(TransactionLocation value) {
-    TxLocation txLocation =
+    CoreProtos.TxLocation txLocation =
         CoreProtos.TxLocation.newBuilder()
             .setBlockHeight(value.getHeight())
             .setPositionInBlock(value.getIndexInBlock())
