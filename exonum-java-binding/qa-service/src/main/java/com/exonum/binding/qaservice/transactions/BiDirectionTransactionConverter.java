@@ -16,8 +16,8 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
 
 /**
  * A converter between executable transaction and Exonum binary raw transaction data.

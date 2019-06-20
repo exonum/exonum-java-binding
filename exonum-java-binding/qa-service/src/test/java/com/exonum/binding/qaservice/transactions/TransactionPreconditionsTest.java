@@ -20,9 +20,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.test.Bytes;
-import com.exonum.binding.transaction.RawTransaction;
 import org.junit.jupiter.api.Test;
 
 class TransactionPreconditionsTest {

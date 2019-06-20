@@ -21,8 +21,8 @@ import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
-import com.exonum.binding.transaction.RawTransaction;
 import com.google.protobuf.ByteString;
 
 /**

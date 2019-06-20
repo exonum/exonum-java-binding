@@ -17,7 +17,7 @@
 package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.service.Service;
+import com.exonum.binding.core.service.Service;
 import java.util.List;
 import java.util.Optional;
 

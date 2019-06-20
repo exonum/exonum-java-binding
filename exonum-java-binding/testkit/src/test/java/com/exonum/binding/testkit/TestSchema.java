@@ -18,9 +18,9 @@ package com.exonum.binding.testkit;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.util.Collections;
 import java.util.List;
 

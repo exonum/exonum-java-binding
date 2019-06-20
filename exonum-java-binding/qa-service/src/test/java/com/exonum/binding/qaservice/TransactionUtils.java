@@ -25,15 +25,15 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.ThrowingTx;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
 
 /**
  * Helper class to create transaction messages from raw transactions.
