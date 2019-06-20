@@ -45,7 +45,13 @@ then
 else
     cd "${TRAVIS_BUILD_DIR}"
 
+    # Set CI Maven arguments. They enable parallel execution of Java tests; and parallel builds.
+    echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=true \
+          -Djunit.jupiter.execution.parallel.mode.default=concurrent" > \
+      .mvn/maven.config
+
     ./run_all_tests.sh;
+
     # Linux builds currently skip some tests, so only OSX builds should update code coverage report.
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       # Upload the coverage report to coveralls
