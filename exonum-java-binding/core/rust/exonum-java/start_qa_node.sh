@@ -32,8 +32,7 @@ echo "PROJ_ROOT=${EJB_ROOT}"
 
 source "${EJB_ROOT}/tests_profile"
 
-export LD_LIBRARY_PATH="${JAVA_LIB_DIR}"
-echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+java_library_path="${EJB_ROOT}/core/rust/target/debug"
 
 # Find the artifact
 ARTIFACT_PATH="$(find ${EJB_ROOT} -type f -name exonum-java-binding-qa-service-*-artifact.jar)"
@@ -104,7 +103,8 @@ do
      --consensus-key-pass pass \
      --service-key-pass pass \
      --public-api-address 0.0.0.0:${port} \
-     --private-api-address 0.0.0.0:${private_port} &
+     --private-api-address 0.0.0.0:${private_port} \
+     --ejb-java-library-path ${java_library_path} &
 
     echo "new node with ports: $port (public) and $private_port (private)"
 done

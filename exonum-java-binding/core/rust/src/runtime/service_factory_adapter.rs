@@ -17,10 +17,7 @@ use exonum::{
     helpers::fabric::{Command, CommandExtension, Context, ServiceFactory},
 };
 use runtime::{
-    cmd::Run,
-    config::{Config, InternalConfig},
-    java_service_runtime::JavaServiceRuntime,
-    paths::{absolute_library_path, system_classpath},
+    cmd::Run, config::Config, java_service_runtime::JavaServiceRuntime, paths::system_classpath,
 };
 use std::sync::{Once, ONCE_INIT};
 
@@ -53,12 +50,7 @@ impl JavaServiceFactoryAdapter {
     fn get_or_create_java_service_runtime(config: Config) -> JavaServiceRuntime {
         // Initialize runtime if it wasn't created before.
         JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-            let internal_config = InternalConfig {
-                system_class_path: system_classpath(),
-                system_lib_path: Some(absolute_library_path()),
-            };
-
-            let runtime = JavaServiceRuntime::new(config, internal_config);
+            let runtime = JavaServiceRuntime::new(config, system_classpath());
             unsafe {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             }
@@ -95,7 +87,7 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
     }
 }
 
-// Returns the real command extension for the first call and `None` for any other call.
+// Returns `true` for the very first call, `false` otherwise.
 fn is_first_instance_created() -> bool {
     let mut is_first = false;
     FIRST_INSTANCE_CREATED.call_once(|| is_first = true);

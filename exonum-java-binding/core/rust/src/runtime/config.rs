@@ -55,15 +55,6 @@ pub struct RuntimeConfig {
     /// A port of the HTTP server for Java services.
     /// Must be distinct from the ports used by Exonum.
     pub port: i32,
-}
-
-/// Internal EJB configuration.
-///
-/// Not visible by user, used internally while initializing runtime.
-#[doc(hidden)] // For testing purposes only.
-pub struct InternalConfig {
-    /// EJB system classpath.
-    pub system_class_path: String,
     /// EJB library path.
     pub system_lib_path: Option<String>,
 }
