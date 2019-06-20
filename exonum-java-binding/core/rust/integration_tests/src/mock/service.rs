@@ -24,7 +24,8 @@ use java_bindings::{Executor, ServiceProxy};
 use super::transaction::TRANSACTION_ADAPTER_CLASS;
 use super::NATIVE_FACADE_CLASS;
 
-pub const SERVICE_ADAPTER_CLASS: &str = "com/exonum/binding/core/service/adapters/UserServiceAdapter";
+pub const SERVICE_ADAPTER_CLASS: &str =
+    "com/exonum/binding/core/service/adapters/UserServiceAdapter";
 pub const SERVICE_MOCK_BUILDER_CLASS: &str =
     "com/exonum/binding/fakes/mocks/UserServiceAdapterMockBuilder";
 

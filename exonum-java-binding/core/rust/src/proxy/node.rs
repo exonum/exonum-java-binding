@@ -34,7 +34,8 @@ use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
 
-const TX_SUBMISSION_EXCEPTION: &str = "com/exonum/binding/core/service/TransactionSubmissionException";
+const TX_SUBMISSION_EXCEPTION: &str =
+    "com/exonum/binding/core/service/TransactionSubmissionException";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
