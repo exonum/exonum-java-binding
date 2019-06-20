@@ -117,7 +117,7 @@
     <powermock.version>2.0.2</powermock.version>
     <protobuf.version>3.8.0</protobuf.version>
     <mockito-core.version>2.28.2</mockito-core.version>
-    <guava.version>27.1-jre</guava.version>
+    <guava.version>28.0-jre</guava.version>
     <vertx.version>3.7.1</vertx.version>
     <equalsverifier.version>3.1.9</equalsverifier.version>
     <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
@@ -129,7 +129,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
-    <pf4j.version>2.6.0</pf4j.version>
+    <pf4j.version>3.0.1</pf4j.version>
     <!-- Default build mode is `debug`, can also be `release`. Usually controlled
          by the packaging script (package_app.sh), but can also be set from the CLI -->
     <build.mode>debug</build.mode>

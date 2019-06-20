@@ -28,6 +28,8 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_TH
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.LOCATION;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
@@ -176,8 +178,8 @@ final class ApiController {
   private void replyTxSubmitted(RoutingContext rc, HashCode transactionHash) {
     rc.response()
         .setStatusCode(HTTP_CREATED)
-        .putHeader("Content-Type", "text/plain")
-        .putHeader("Location", transactionLocationPath(transactionHash))
+        .putHeader(CONTENT_TYPE, "text/plain")
+        .putHeader(LOCATION, transactionLocationPath(transactionHash))
         .end(String.valueOf(transactionHash));
   }
 
@@ -199,7 +201,7 @@ final class ApiController {
         response.setStatusCode(HTTP_INTERNAL_ERROR);
       }
       String description = Strings.nullToEmpty(requestFailure.getMessage());
-      response.putHeader("Content-Type", "text/plain")
+      response.putHeader(CONTENT_TYPE, "text/plain")
           .end(description);
     } else {
       int failureStatusCode = rc.statusCode();
@@ -230,7 +232,7 @@ final class ApiController {
 
   private void respondWithJson(RoutingContext rc, Object responseBody) {
     rc.response()
-        .putHeader("Content-Type", "application/json")
+        .putHeader(CONTENT_TYPE, "application/json")
         .end(json().toJson(responseBody));
   }
 

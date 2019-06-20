@@ -26,6 +26,7 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_TH
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.net.HttpHeaders.LOCATION;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
@@ -424,7 +425,7 @@ class ApiControllerIntegrationTest {
           assertAll(
               () -> assertThat(response.bodyAsString()).isEqualTo(expectedTxHash.toString()),
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_CREATED),
-              () -> assertThat(response.getHeader("Location"))
+              () -> assertThat(response.getHeader(LOCATION))
                   .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash)
           );
           context.completeNow();

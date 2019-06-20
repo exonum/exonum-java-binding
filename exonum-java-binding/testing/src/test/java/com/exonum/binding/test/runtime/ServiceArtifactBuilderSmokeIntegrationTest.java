@@ -69,7 +69,7 @@ class ServiceArtifactBuilderSmokeIntegrationTest {
     assertThat(pluginState).isEqualTo(PluginState.STARTED);
 
     // Check the extensions
-    List<Class<TestServiceExtension>> extensionClasses = pluginManager
+    List<Class<? extends TestServiceExtension>> extensionClasses = pluginManager
         .getExtensionClasses(TestServiceExtension.class, pluginId);
     assertThat(extensionClasses).hasSize(1);
     Class<?> extensionType = extensionClasses.get(0);

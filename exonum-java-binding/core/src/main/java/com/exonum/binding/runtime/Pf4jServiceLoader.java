@@ -80,24 +80,20 @@ final class Pf4jServiceLoader implements ServiceLoader {
       // Load the service definition
       return loadDefinition(pluginId);
     } catch (IllegalArgumentException e) {
-      pluginManager.unloadPlugin(pluginId);
+      unloadPlugin(pluginId);
       throw new ServiceLoadingException(String.format("Failed to load plugin %s:", pluginId), e);
     } catch (Exception e) {
-      pluginManager.unloadPlugin(pluginId);
+      unloadPlugin(pluginId);
       throw e;
     }
   }
 
   private String loadPlugin(Path artifactLocation) throws ServiceLoadingException {
-    // todo: prevent loading of duplicates at this point. The plugin manager might load duplicate
-    //  plugins if they have different paths. This problem is resolved
-    //  in https://github.com/pf4j/pf4j/pull/287 , update PF4J when the fix is released.
-    String pluginId = pluginManager.loadPlugin(artifactLocation);
-    if (pluginId == null) {
-      throw new ServiceLoadingException("Failed to load the plugin from "
-          + artifactLocation);
+    try {
+      return pluginManager.loadPlugin(artifactLocation);
+    } catch (Exception e) {
+      throw new ServiceLoadingException("Failed to load the service from " + artifactLocation, e);
     }
-    return pluginId;
   }
 
   private void verifyPostLoad(String pluginId) {
@@ -107,10 +103,14 @@ final class Pf4jServiceLoader implements ServiceLoader {
   }
 
   private void startPlugin(String pluginId) throws ServiceLoadingException {
-    PluginState pluginState = pluginManager.startPlugin(pluginId);
-    if (pluginState != PluginState.STARTED) {
-      throw new ServiceLoadingException(
-          String.format("Failed to start the plugin %s, its state=%s", pluginId, pluginState));
+    try {
+      PluginState pluginState = pluginManager.startPlugin(pluginId);
+      checkState(pluginState == PluginState.STARTED,
+          "Failed to start the plugin %s, its state=%s", pluginId, pluginState);
+    } catch (Exception e) {
+      // Catch any exception, as it may originate either from PluginManager code or
+      // from Plugin#start (= service code).
+      throw new ServiceLoadingException("Failed to start the plugin " + pluginId, e);
     }
   }
 
@@ -138,11 +138,11 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   private Supplier<ServiceModule> findServiceModuleSupplier(String pluginId)
       throws ServiceLoadingException {
-    List<Class<ServiceModule>> extensionClasses = pluginManager
+    List<Class<? extends ServiceModule>> extensionClasses = pluginManager
         .getExtensionClasses(ServiceModule.class, pluginId);
     checkServiceModules(pluginId, extensionClasses);
 
-    Class<ServiceModule> serviceModuleClass = extensionClasses.get(0);
+    Class<? extends ServiceModule> serviceModuleClass = extensionClasses.get(0);
     try {
       return new ReflectiveModuleSupplier(serviceModuleClass);
     } catch (NoSuchMethodException | IllegalAccessException e) {
@@ -152,7 +152,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
     }
   }
 
-  private void checkServiceModules(String pluginId, List<Class<ServiceModule>> extensions)
+  private void checkServiceModules(String pluginId, List<Class<? extends ServiceModule>> extensions)
       throws ServiceLoadingException {
     int numServiceModules = extensions.size();
     if (numServiceModules == 1) {
@@ -161,7 +161,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
     String message;
     if (numServiceModules == 0) {
       message = String.format("A plugin (%s) must provide exactly one service module as "
-          + "an extension, but no modules found.%nCheck that your %s implementation "
+              + "an extension, but no modules found.%nCheck that your %s implementation "
               + "is annotated with @%s",
           pluginId, ServiceModule.class.getSimpleName(), Extension.class.getSimpleName());
     } else {
@@ -171,6 +171,10 @@ final class Pf4jServiceLoader implements ServiceLoader {
           pluginId, numServiceModules, extensions);
     }
     throw new ServiceLoadingException(message);
+  }
+
+  private void unloadPlugin(String pluginId) {
+    pluginManager.unloadPlugin(pluginId);
   }
 
   @Override
@@ -183,12 +187,14 @@ final class Pf4jServiceLoader implements ServiceLoader {
     checkArgument(loadedServices.containsKey(serviceId), "No such serviceId: %s", serviceId);
 
     String pluginId = serviceId.toString();
-    boolean stopped = pluginManager.unloadPlugin(pluginId);
-    // The docs don't say why it may fail to stop the plugin.
-    // Follow: https://github.com/pf4j/pf4j/issues/291
-    checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
-
-    loadedServices.remove(serviceId);
+    try {
+      boolean stopped = pluginManager.unloadPlugin(pluginId);
+      // The docs don't say why it may fail to stop the plugin.
+      // Follow: https://github.com/pf4j/pf4j/issues/291
+      checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
+    } finally {
+      loadedServices.remove(serviceId);
+    }
   }
 
   @Override
