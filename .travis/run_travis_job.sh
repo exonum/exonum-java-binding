@@ -52,9 +52,8 @@ else
 
     ./run_all_tests.sh;
 
-    # Linux builds currently skip some tests, so only OSX builds should update code coverage report.
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      # Upload the coverage report to coveralls
+    # Upload the coverage report to Coveralls from a single job only
+    if [[ "$TRAVIS_JOB_NAME" == "Linux JDK 8 CHECK_RUST=false" ]]; then
       mvn org.eluder.coveralls:coveralls-maven-plugin:report
     fi
 fi
