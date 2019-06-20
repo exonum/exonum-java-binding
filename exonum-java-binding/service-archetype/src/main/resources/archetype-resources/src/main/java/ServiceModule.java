@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package ${package};
 
 import com.exonum.binding.service.AbstractServiceModule;
 import com.exonum.binding.service.Service;
