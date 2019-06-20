@@ -163,7 +163,7 @@ class VertxServerIntegrationTest {
    */
   private void blockingStop() throws InterruptedException, ExecutionException, TimeoutException {
     Future<Void> f = server.stop();
-    int stopTimeout = 2;
+    int stopTimeout = 3;
     f.get(stopTimeout, TimeUnit.SECONDS);
   }
 
