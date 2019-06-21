@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package ${package};
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
