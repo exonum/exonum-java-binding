@@ -28,10 +28,12 @@
     <rust.compiler.features>resource-manager invocation</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <rust.appSubCrate>exonum-java</rust.appSubCrate>
+    <!-- The build directory of Rust workspace  -->
+    <rust.build.directory>${project.basedir}/rust/target</rust.build.directory>
     <!--A directory containing libjava_bindings native library-->
-    <build.nativeLibPath>${project.basedir}/rust/target/${build.mode}</build.nativeLibPath>
+    <build.nativeLibPath>${rust.build.directory}/${build.mode}</build.nativeLibPath>
     <!--A directory containing native dynamic libraries used by the App-->
-    <packaging.native>${project.basedir}/rust/target/${build.mode}/lib/native</packaging.native>
+    <packaging.native>${rust.build.directory}/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.5</auto-value.version>
     <!-- Skip building Rust library for tests -->
     <doNotBuildRustLib>false</doNotBuildRustLib>
@@ -480,6 +482,31 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- A profile that will make maven-clean-plugin also clean Rust target
+         if cleanRust property is set. -->
+    <profile>
+      <id>clean-rust-target</id>
+      <activation>
+        <property>
+          <name>cleanRust</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${rust.build.directory}</directory>
+                </fileset>
+              </filesets>
+            </configuration>
           </plugin>
         </plugins>
       </build>
