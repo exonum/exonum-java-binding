@@ -35,7 +35,7 @@ fn bootstrap() {
         // Pass log4j path to avoid error messages of mis-configuration
         log_config_path: log4j_path(),
         port: 6300,
-        system_lib_path: None,
+        override_system_lib_path: None,
     };
 
     let config = Config {

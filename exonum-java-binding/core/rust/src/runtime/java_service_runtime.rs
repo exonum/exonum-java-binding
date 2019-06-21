@@ -223,8 +223,8 @@ impl JavaServiceRuntime {
         system_class_path: String,
     ) -> InitArgsBuilder {
         // If path is not provided use the standard library path for packaged app.
-        let system_lib_path = if runtime_config.system_lib_path.is_some() {
-            runtime_config.system_lib_path.clone().unwrap()
+        let system_lib_path = if runtime_config.override_system_lib_path.is_some() {
+            runtime_config.override_system_lib_path.clone().unwrap()
         } else {
             absolute_library_path()
         };

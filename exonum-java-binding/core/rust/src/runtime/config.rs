@@ -56,7 +56,7 @@ pub struct RuntimeConfig {
     /// Must be distinct from the ports used by Exonum.
     pub port: i32,
     /// EJB library path.
-    pub system_lib_path: Option<String>,
+    pub override_system_lib_path: Option<String>,
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.

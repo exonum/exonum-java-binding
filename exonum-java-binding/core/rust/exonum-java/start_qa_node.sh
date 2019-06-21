@@ -104,7 +104,7 @@ do
      --service-key-pass pass \
      --public-api-address 0.0.0.0:${port} \
      --private-api-address 0.0.0.0:${private_port} \
-     --ejb-java-library-path ${java_library_path} &
+     --ejb-override-java-library-path ${java_library_path} &
 
     echo "new node with ports: $port (public) and $private_port (private)"
 done
