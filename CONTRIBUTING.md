@@ -57,7 +57,7 @@ By default, the Exonum Java app is built in debug mode, which affects performanc
 and is not desired for production usage. To enable release mode, you need
 to pass `--release` flag to the `package_app.sh` script.
 
-#### Useful commands
+#### Useful Commands
 
 ##### Clean Rust Targets using Maven
 
