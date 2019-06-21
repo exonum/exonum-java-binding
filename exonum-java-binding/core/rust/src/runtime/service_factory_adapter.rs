@@ -17,9 +17,13 @@ use exonum::{
     helpers::fabric::{Command, CommandExtension, Context, ServiceFactory},
 };
 use runtime::{
-    cmd::Run, config::Config, java_service_runtime::JavaServiceRuntime, paths::system_classpath,
+    cmd::Run,
+    config::Config,
+    java_service_runtime::JavaServiceRuntime,
+    paths::{absolute_library_path, system_classpath},
 };
 use std::sync::{Once, ONCE_INIT};
+use InternalConfig;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
 static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
@@ -50,7 +54,23 @@ impl JavaServiceFactoryAdapter {
     fn get_or_create_java_service_runtime(config: Config) -> JavaServiceRuntime {
         // Initialize runtime if it wasn't created before.
         JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-            let runtime = JavaServiceRuntime::new(config, system_classpath());
+            // If path is not provided use the standard library path for packaged app.
+            let system_lib_path = if config.runtime_config.override_system_lib_path.is_some() {
+                config
+                    .runtime_config
+                    .override_system_lib_path
+                    .clone()
+                    .unwrap()
+            } else {
+                absolute_library_path()
+            };
+
+            let internal_config = InternalConfig {
+                system_class_path: system_classpath(),
+                system_lib_path,
+            };
+
+            let runtime = JavaServiceRuntime::new(config, internal_config);
             unsafe {
                 JAVA_SERVICE_RUNTIME = Some(runtime);
             }

@@ -22,10 +22,7 @@ use jni::{
 };
 
 use proxy::ServiceProxy;
-use runtime::{
-    config::{self, Config, JvmConfig, RuntimeConfig},
-    paths::absolute_library_path,
-};
+use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
 use Executor;
@@ -48,12 +45,9 @@ impl JavaServiceRuntime {
     /// Creates new runtime from provided config.
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
-    pub fn new(config: Config, system_class_path: String) -> Self {
-        let java_vm = Self::create_java_vm(
-            &config.jvm_config,
-            &config.runtime_config,
-            system_class_path,
-        );
+    pub fn new(config: Config, internal_config: InternalConfig) -> Self {
+        let java_vm =
+            Self::create_java_vm(&config.jvm_config, &config.runtime_config, internal_config);
         Self::create_with_jvm(Arc::new(java_vm), config.runtime_config.port)
     }
 
@@ -148,9 +142,9 @@ impl JavaServiceRuntime {
     fn create_java_vm(
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
-        system_class_path: String,
+        internal_config: InternalConfig,
     ) -> JavaVM {
-        let args = Self::build_jvm_arguments(jvm_config, runtime_config, system_class_path)
+        let args = Self::build_jvm_arguments(jvm_config, runtime_config, internal_config)
             .expect("Unable to build arguments for JVM");
 
         jni::JavaVM::new(args)
@@ -178,7 +172,7 @@ impl JavaServiceRuntime {
     fn build_jvm_arguments(
         jvm_config: &JvmConfig,
         runtime_config: &RuntimeConfig,
-        system_class_path: String,
+        internal_config: InternalConfig,
     ) -> JniResult<InitArgs> {
         let mut args_builder = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8);
 
@@ -189,8 +183,7 @@ impl JavaServiceRuntime {
         args_builder = Self::add_user_arguments(args_builder, args_prepend);
 
         // Add required arguments
-        args_builder =
-            Self::add_required_arguments(args_builder, runtime_config, system_class_path);
+        args_builder = Self::add_required_arguments(args_builder, runtime_config, internal_config);
 
         // Add optional arguments
         args_builder = Self::add_optional_arguments(args_builder, jvm_config);
@@ -220,18 +213,17 @@ impl JavaServiceRuntime {
     fn add_required_arguments(
         args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
-        system_class_path: String,
+        internal_config: InternalConfig,
     ) -> InitArgsBuilder {
-        // If path is not provided use the standard library path for packaged app.
-        let system_lib_path = if runtime_config.override_system_lib_path.is_some() {
-            runtime_config.override_system_lib_path.clone().unwrap()
-        } else {
-            absolute_library_path()
-        };
-
         args_builder
-            .option(&format!("-Djava.library.path={}", system_lib_path))
-            .option(&format!("-Djava.class.path={}", system_class_path))
+            .option(&format!(
+                "-Djava.library.path={}",
+                internal_config.system_lib_path
+            ))
+            .option(&format!(
+                "-Djava.class.path={}",
+                internal_config.system_class_path
+            ))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
                 runtime_config.log_config_path

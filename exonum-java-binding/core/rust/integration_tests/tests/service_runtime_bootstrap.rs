@@ -17,8 +17,8 @@
 extern crate integration_tests;
 extern crate java_bindings;
 
-use integration_tests::vm::{fakes_classpath, log4j_path};
-use java_bindings::{Config, JavaServiceRuntime, JvmConfig, RuntimeConfig};
+use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
+use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
 
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
@@ -43,7 +43,12 @@ fn bootstrap() {
         runtime_config,
     };
 
-    let runtime = JavaServiceRuntime::new(config, fakes_classpath());
+    let internal_config = InternalConfig {
+        system_class_path: fakes_classpath(),
+        system_lib_path: java_library_path(),
+    };
+
+    let runtime = JavaServiceRuntime::new(config, internal_config);
 
     let result = runtime
         .get_executor()

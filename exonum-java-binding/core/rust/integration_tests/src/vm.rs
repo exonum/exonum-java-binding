@@ -140,10 +140,11 @@ pub fn log4j_path() -> String {
 }
 
 fn libpath_option() -> String {
-    format!("-Djava.library.path={}", libpath())
+    format!("-Djava.library.path={}", java_library_path())
 }
 
-fn libpath() -> String {
+/// Returns path to the java_bindings library for native integration tests.
+pub fn java_library_path() -> String {
     let library_path = rust_project_root_dir()
         .join(target_path())
         .canonicalize()
