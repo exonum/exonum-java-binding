@@ -42,7 +42,8 @@ pub fn panic_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> T {
     })
 }
 
-/// Handles and describes non-fatal Java exceptions.
+/// Handles and describes non-fatal Java exceptions. The main purpose is to distinguish Java errors
+/// from exceptions.
 ///
 /// Java exceptions are converted into `Error`s with their descriptions, Java errors and JNI errors
 /// are treated as unrecoverable and result in a panic.
