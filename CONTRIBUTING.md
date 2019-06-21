@@ -57,6 +57,12 @@ By default, the Exonum Java app is built in debug mode, which affects performanc
 and is not desired for production usage. To enable release mode, you need
 to pass `--release` flag to the `package_app.sh` script.
 
+#### Useful commands
+
+##### Clean Rust Targets using Maven
+
+Run `mvn clean -DcleanRust`.
+
 ## EJB Modules
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:
