@@ -88,6 +88,12 @@ See [Maven configuration documentation](https://maven.apache.org/configure.html)
 
 [build-benches]: https://jira.bf.local/browse/ECR-534?focusedCommentId=48501&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-48501
 
+#### Useful Commands
+
+##### Clean Rust Targets using Maven
+
+Run `mvn clean -DcleanRust`.
+
 ## EJB Modules
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:
