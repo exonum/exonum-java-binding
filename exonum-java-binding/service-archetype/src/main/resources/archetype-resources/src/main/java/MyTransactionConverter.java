@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package ${package};
 
 import com.exonum.binding.transaction.Transaction;
 import com.exonum.binding.transaction.RawTransaction;
