@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
 request. It is modified to return an empty object by default (no info in `content.debug` field
 of the response to `transaction`). (#904)
+- Allow to override root package in the template project generated with 
+the exonum-java-binding-service-archetype. It remains equal to 'groupId' property
+by default, but can be overridden with 'package' property.
 
 [tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
 

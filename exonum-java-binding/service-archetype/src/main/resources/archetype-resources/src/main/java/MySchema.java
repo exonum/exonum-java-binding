@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package ${package};
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Schema;
