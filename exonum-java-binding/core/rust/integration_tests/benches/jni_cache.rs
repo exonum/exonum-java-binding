@@ -34,7 +34,7 @@ use std::sync::Arc;
 use test::{black_box, Bencher};
 
 const TX_EXEC_EXCEPTION_CLASS: &str =
-    "com/exonum/binding/transaction/TransactionExecutionException";
+    "com/exonum/binding/core/transaction/TransactionExecutionException";
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();

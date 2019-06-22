@@ -78,27 +78,27 @@ unsafe fn cache_methods(env: &JNIEnv) {
     );
     TRANSACTION_ADAPTER_EXECUTE = get_method_id(
         &env,
-        "com/exonum/binding/service/adapters/UserTransactionAdapter",
+        "com/exonum/binding/core/service/adapters/UserTransactionAdapter",
         "execute",
         "(J[B[B)V",
     );
     TRANSACTION_ADAPTER_INFO = get_method_id(
         &env,
-        "com/exonum/binding/service/adapters/UserTransactionAdapter",
+        "com/exonum/binding/core/service/adapters/UserTransactionAdapter",
         "info",
         "()Ljava/lang/String;",
     );
     SERVICE_ADAPTER_STATE_HASHES = get_method_id(
         &env,
-        "com/exonum/binding/service/adapters/UserServiceAdapter",
+        "com/exonum/binding/core/service/adapters/UserServiceAdapter",
         "getStateHashes",
         "(J)[[B",
     );
     SERVICE_ADAPTER_CONVERT_TRANSACTION = get_method_id(
         &env,
-        "com/exonum/binding/service/adapters/UserServiceAdapter",
+        "com/exonum/binding/core/service/adapters/UserServiceAdapter",
         "convertTransaction",
-        "(S[B)Lcom/exonum/binding/service/adapters/UserTransactionAdapter;",
+        "(S[B)Lcom/exonum/binding/core/service/adapters/UserTransactionAdapter;",
     );
     JAVA_LANG_ERROR = env
         .new_global_ref(env.find_class("java/lang/Error").unwrap().into())
@@ -108,7 +108,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         .ok();
     TRANSACTION_EXECUTION_EXCEPTION = env
         .new_global_ref(
-            env.find_class("com/exonum/binding/transaction/TransactionExecutionException")
+            env.find_class("com/exonum/binding/core/transaction/TransactionExecutionException")
                 .unwrap()
                 .into(),
         )

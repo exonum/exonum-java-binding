@@ -40,7 +40,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.blockchain.serialization.BlockAdapterFactory;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
@@ -49,6 +48,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
 import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
+import com.exonum.binding.core.blockchain.serialization.BlockAdapterFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

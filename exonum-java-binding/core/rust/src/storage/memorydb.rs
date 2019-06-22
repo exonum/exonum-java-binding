@@ -24,7 +24,7 @@ use utils;
 
 /// Returns pointer to created `MemoryDB` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
 ) -> Handle {
@@ -34,7 +34,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
 
 /// Destroys underlying `MemoryDB` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeFree(
     env: JNIEnv,
     _: JClass,
     db_handle: Handle,
@@ -44,7 +44,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeF
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeCreateSnapshot(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeCreateSnapshot(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -58,7 +58,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeCreateFork(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeCreateFork(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -72,7 +72,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeC
 
 /// Merges the given fork into the database.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_database_MemoryDb_nativeMerge(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeMerge(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,

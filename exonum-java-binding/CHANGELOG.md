@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   format instead of the whole message in binary form.
 - `Node#submitTransaction` to throw _unchecked_ `TransactionSubmissionException` instead
   of checked `InternalServerError`.
+- Moved all packages inside `com.exonum.binding` to `com.exonum.binding.core` package.
+  That was required to give each module a unique root package to prevent 'split-packages'
+  problem. The migration guide has a regexp to update the service automatically.
   
 ### Fixed
 - The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
@@ -37,7 +40,7 @@ of the response to `transaction`). (#904)
 the exonum-java-binding-service-archetype. It remains equal to 'groupId' property
 by default, but can be overridden with 'package' property.
 
-[tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/transaction/Transaction.html#info()
+[tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
 
 ## [0.6.0] - 2019-05-08
 

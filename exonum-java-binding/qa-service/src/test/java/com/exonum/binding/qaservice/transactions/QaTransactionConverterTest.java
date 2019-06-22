@@ -23,9 +23,9 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
 import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

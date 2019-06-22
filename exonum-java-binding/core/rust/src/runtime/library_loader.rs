@@ -16,7 +16,7 @@ use jni::{objects::JClass, sys::jstring, JNIEnv};
 
 /// Returns the current version of the library.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_util_LibraryLoader_nativeGetLibraryVersion(
+pub extern "system" fn Java_com_exonum_binding_core_util_LibraryLoader_nativeGetLibraryVersion(
     env: JNIEnv,
     _: JClass,
 ) -> jstring {

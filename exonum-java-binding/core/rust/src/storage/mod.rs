@@ -25,7 +25,7 @@ mod proof_map_index;
 mod value_set_index;
 
 pub use self::core_schema::*;
-pub use self::db::Java_com_exonum_binding_storage_database_Views_nativeFree;
+pub use self::db::Java_com_exonum_binding_core_storage_database_Views_nativeFree;
 pub(crate) use self::db::View;
 pub use self::entry::*;
 pub use self::key_set_index::*;
