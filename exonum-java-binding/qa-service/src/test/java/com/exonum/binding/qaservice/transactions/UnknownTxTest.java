@@ -19,7 +19,7 @@ package com.exonum.binding.qaservice.transactions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionContext;
 import org.junit.jupiter.api.Test;
 
 class UnknownTxTest {

@@ -33,7 +33,7 @@ enum IndexType {
 
 /// Returns pointer to the created `Entry` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     name: JString,
@@ -55,7 +55,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 
 /// Destroys the underlying `Entry` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     entry_handle: Handle,
@@ -65,7 +65,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 
 /// Returns the value or null pointer if it is absent.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,
@@ -85,7 +85,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 
 /// Returns `true` if the entry contains the value.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeIsPresent(
+pub extern "C" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeIsPresent(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,
@@ -101,7 +101,7 @@ pub extern "C" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_native
 
 /// Returns the hash of the value or default hash if value is absent.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeGetHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeGetHash(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,
@@ -120,7 +120,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 
 /// Inserts value to the entry.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeSet(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,
@@ -141,7 +141,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_n
 
 /// Removes a value from the entry.
 #[no_mangle]
-pub extern "C" fn Java_com_exonum_binding_storage_indices_EntryIndexProxy_nativeRemove(
+pub extern "C" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,

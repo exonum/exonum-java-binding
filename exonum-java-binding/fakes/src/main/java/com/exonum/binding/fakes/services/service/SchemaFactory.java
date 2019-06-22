@@ -16,7 +16,7 @@
 
 package com.exonum.binding.fakes.services.service;
 
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.core.storage.database.View;
 
 /**
  * A factory of service schemas. Might be promoted to an ejb-core interface in future versions.

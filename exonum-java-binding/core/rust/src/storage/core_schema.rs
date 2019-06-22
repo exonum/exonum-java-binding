@@ -36,7 +36,7 @@ enum SchemaType {
 
 /// Returns pointer to created CoreSchemaProxy object
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     view_handle: Handle,
@@ -53,7 +53,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
 
 /// Destroys the underlying `Schema` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     schema_handle: Handle,
@@ -64,7 +64,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
 /// Returns the height of the latest committed block. Throws `java.lang.RuntimeException` if the
 /// "genesis block" has not been created yet.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeGetHeight(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_nativeGetHeight(
     env: JNIEnv,
     _: JClass,
     schema_handle: Handle,
@@ -82,7 +82,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
 /// Returns the latest committed block. Throws `java.lang.RuntimeException` if the "genesis block"
 /// has not been created yet.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeGetLastBlock(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_nativeGetLastBlock(
     env: JNIEnv,
     _: JClass,
     schema_handle: Handle,
@@ -100,7 +100,7 @@ pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_native
 /// Returns the configuration for the latest height of the blockchain. Throws
 /// `java.lang.RuntimeException` if the "genesis block" has not been created yet.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_blockchain_CoreSchemaProxy_nativeGetActualConfiguration(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_nativeGetActualConfiguration(
     env: JNIEnv,
     _: JClass,
     schema_handle: Handle,

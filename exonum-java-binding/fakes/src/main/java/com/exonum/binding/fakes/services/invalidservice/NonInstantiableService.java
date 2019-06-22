@@ -16,10 +16,10 @@
 
 package com.exonum.binding.fakes.services.invalidservice;
 
-import com.exonum.binding.service.AbstractService;
-import com.exonum.binding.service.Node;
-import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.core.service.AbstractService;
+import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.database.View;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
 

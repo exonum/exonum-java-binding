@@ -34,7 +34,7 @@ enum IndexType {
 
 /// Returns pointer to created `KeySetIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     name: JString,
@@ -56,7 +56,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Returns a pointer to the created `KeySetIndex` object in an index family (= group).
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeCreateInGroup(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeCreateInGroup(
     env: JNIEnv,
     _: JClass,
     group_name: JString,
@@ -81,7 +81,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Destroys underlying `KeySetIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     set_handle: Handle,
@@ -91,7 +91,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Returns `true` if the set contains the specified value.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeContains(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeContains(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -109,7 +109,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Returns pointer to the iterator over set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeCreateIterator(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeCreateIterator(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -127,7 +127,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Returns pointer to the iterator over set starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeCreateIteratorFrom(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeCreateIteratorFrom(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -147,7 +147,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Inserts value in the set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeAdd(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeAdd(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -168,7 +168,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Removes value from the set.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeRemove(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -189,7 +189,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Clears the set, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     set_handle: Handle,
@@ -208,7 +208,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Return next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeIteratorNext(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeIteratorNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -225,7 +225,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_
 
 /// Destroys underlying `KeySetIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_KeySetIndexProxy_nativeIteratorFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeIteratorFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,

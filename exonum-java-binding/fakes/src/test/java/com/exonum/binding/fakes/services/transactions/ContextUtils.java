@@ -19,8 +19,8 @@ package com.exonum.binding.fakes.services.transactions;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.TransactionContext;
 
 /**
  * Helper class to provide preconfigured context with default values.
