@@ -22,9 +22,9 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERRO
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkServiceId;
 
-import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
+import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.Function;

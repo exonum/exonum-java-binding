@@ -18,10 +18,10 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.cryptocurrency.CryptocurrencyService;
-import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.Function;
 

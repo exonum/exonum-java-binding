@@ -17,8 +17,8 @@
 package com.exonum.binding.testkit;
 
 import com.exonum.binding.common.crypto.KeyPair;
-import com.exonum.binding.service.Node;
-import com.exonum.binding.transaction.RawTransaction;
+import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.OptionalInt;
 
 /**

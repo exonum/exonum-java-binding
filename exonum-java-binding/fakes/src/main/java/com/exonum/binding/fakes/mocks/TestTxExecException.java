@@ -16,8 +16,7 @@
 
 package com.exonum.binding.fakes.mocks;
 
-import com.exonum.binding.transaction.TransactionExecutionException;
-
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import javax.annotation.Nullable;
 
 /**

@@ -16,8 +16,8 @@
 
 package com.exonum.binding.fakes.services.invalidservice;
 
-import com.exonum.binding.service.AbstractServiceModule;
-import com.exonum.binding.service.Service;
+import com.exonum.binding.core.service.AbstractServiceModule;
+import com.exonum.binding.core.service.Service;
 import com.google.inject.Singleton;
 
 public class NonInstantiableServiceModule extends AbstractServiceModule {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package ${package};
 
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.service.TransactionConverter;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.service.TransactionConverter;
 
 /**
  * {@code MyTransactionConverter} converts raw transactions of {@link MyService}

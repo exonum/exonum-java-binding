@@ -16,10 +16,10 @@
 
 package com.exonum.binding.qaservice;
 
+import com.exonum.binding.core.service.AbstractServiceModule;
+import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.qaservice.transactions.QaTransactionConverter;
-import com.exonum.binding.service.AbstractServiceModule;
-import com.exonum.binding.service.Service;
-import com.exonum.binding.service.TransactionConverter;
 import com.google.inject.Singleton;
 import org.pf4j.Extension;
 

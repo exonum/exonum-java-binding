@@ -20,12 +20,12 @@ import static com.exonum.binding.common.serialization.StandardSerializers.protob
 import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.TransactionContext;
 import java.util.Objects;
 
 public final class ThrowingTx implements Transaction {
