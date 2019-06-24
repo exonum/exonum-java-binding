@@ -46,7 +46,7 @@ pub fn panic_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> T {
 ///
 /// Java exceptions are converted into `Error`s with their descriptions, Java errors and JNI errors
 /// are treated as unrecoverable and result in a panic.
-/// 
+///
 /// *This method shall be used only if it is needed to determine if a Java Exception
 /// is an instance of `java.lang.Error` or `java.lang.Exception`.*
 ///
