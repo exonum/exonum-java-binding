@@ -59,6 +59,28 @@
       </plugin>
 
       <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <executions>
+          <execution>
+            <!-- Clean the directory into which Java dependencies are copied. -->
+            <id>clean-lib-java-target</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <configuration>
+              <excludeDefaultDirectories>true</excludeDefaultDirectories>
+              <filesets>
+                <fileset>
+                  <directory>${packaging.java}</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
           <includeScope>runtime</includeScope>
