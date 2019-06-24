@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-option java_package = "com.exonum.binding.blockchain.serialization";
+option java_package = "com.exonum.binding.core.blockchain.serialization";
 option java_outer_classname = "CoreProtos";
 
 message Block {

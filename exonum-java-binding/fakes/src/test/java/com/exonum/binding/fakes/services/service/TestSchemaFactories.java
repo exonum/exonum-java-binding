@@ -16,7 +16,7 @@
 
 package com.exonum.binding.fakes.services.service;
 
-import com.exonum.binding.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Fork;
 
 final class TestSchemaFactories {
 

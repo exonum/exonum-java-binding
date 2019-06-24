@@ -17,11 +17,11 @@
 package com.exonum.binding.app;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.runtime.FrameworkModule;
-import com.exonum.binding.runtime.ServiceRuntime;
-import com.exonum.binding.service.Service;
+import com.exonum.binding.core.runtime.FrameworkModule;
+import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.binding.time.TimeSchema;
-import com.exonum.binding.util.LibraryLoader;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.inject.Guice;

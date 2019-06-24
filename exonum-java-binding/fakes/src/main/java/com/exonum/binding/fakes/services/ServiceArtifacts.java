@@ -34,7 +34,7 @@ public final class ServiceArtifacts {
 
   /**
    * Writes a valid service artifact to the specified location. A valid service artifact
-   * can be loaded by the {@link com.exonum.binding.runtime.ServiceRuntime} and
+   * can be loaded by the {@link com.exonum.binding.core.runtime.ServiceRuntime} and
    * the service can be instantiated.
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
@@ -52,7 +52,7 @@ public final class ServiceArtifacts {
   /**
    * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
    * during an attempt
-   * to {@linkplain com.exonum.binding.runtime.ServiceRuntime#loadArtifact(String) load} it.
+   * to {@linkplain com.exonum.binding.core.runtime.ServiceRuntime#loadArtifact(String) load} it.
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
@@ -66,7 +66,7 @@ public final class ServiceArtifacts {
 
   /**
    * Writes a service artifact that can be loaded, but with a service that cannot be
-   * {@linkplain com.exonum.binding.runtime.ServiceRuntime#createService(String) instantiated}.
+   * {@linkplain com.exonum.binding.core.runtime.ServiceRuntime#createService(String) instantiated}.
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */

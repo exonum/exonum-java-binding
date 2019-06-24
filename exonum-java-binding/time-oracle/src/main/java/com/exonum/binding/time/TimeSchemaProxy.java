@@ -21,10 +21,10 @@ import static com.google.common.base.Preconditions.checkState;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.util.LibraryLoader;
+import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.util.LibraryLoader;
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {

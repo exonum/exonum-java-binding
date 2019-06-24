@@ -18,8 +18,8 @@ package com.exonum.binding.testkit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.blockchain.Blockchain;
-import com.exonum.binding.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;

@@ -23,10 +23,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
