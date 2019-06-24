@@ -45,8 +45,8 @@ then
 else
     cd "${TRAVIS_BUILD_DIR}"
 
-    # Set CI Maven arguments. They enable parallel execution of Java tests; and parallel builds.
-    echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=true \
+    # Set CI Maven arguments. They enable parallel execution of Java tests.
+    echo "--threads 1 -Djunit.jupiter.execution.parallel.enabled=true \
           -Djunit.jupiter.execution.parallel.mode.default=concurrent" > \
       .mvn/maven.config
 
