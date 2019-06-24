@@ -19,6 +19,7 @@ package com.exonum.binding.core.blockchain;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
@@ -100,7 +101,7 @@ public abstract class Block {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.core.blockchain.serialization.BlockAdapterFactory
+   * @see CoreTypeAdapterFactory
    */
   public static TypeAdapter<Block> typeAdapter(Gson gson) {
     return new AutoValue_Block.GsonTypeAdapter(gson);
