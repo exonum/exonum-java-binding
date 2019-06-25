@@ -23,6 +23,10 @@ public enum BlockFilteringOption {
   /**
    * Skip empty blocks (containing no transactions).
    * Only non-empty blocks will be returned in a response.
+   *
+   * <p>Requesting the <em>server</em> to skip empty blocks when the client does not need them
+   * allows to save bandwidth and complete the request faster if a large number of blocks
+   * is requested.
    */
   SKIP_EMPTY,
   /**
