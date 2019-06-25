@@ -151,12 +151,11 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Call
     BlockFilteringOption blockFilter = SKIP_EMPTY;
     BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
-    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+    List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight,
-        of(BLOCK_1, BLOCK_2, BLOCK_3));
-    assertThat(response, equalTo(expected));
+    List<Block> expected = of(BLOCK_1, BLOCK_2, BLOCK_3);
+    assertThat(blocks, equalTo(expected));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -190,11 +189,10 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Call
     BlockFilteringOption blockFilter = SKIP_EMPTY;
     BlockTimeOption timeOption = NO_COMMIT_TIME;
-    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+    List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight, inRangeBlocks);
-    assertThat(response, equalTo(expected));
+    assertThat(blocks, equalTo(inRangeBlocks));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -221,12 +219,11 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Call
     BlockFilteringOption blockFilter = SKIP_EMPTY;
     BlockTimeOption timeOption = NO_COMMIT_TIME;
-    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+    List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight,
-        of(BLOCK_1_WITHOUT_TIME, BLOCK_2_WITHOUT_TIME, BLOCK_3_WITHOUT_TIME));
-    assertThat(response, equalTo(expected));
+    List<Block> expected = of(BLOCK_1_WITHOUT_TIME, BLOCK_2_WITHOUT_TIME, BLOCK_3_WITHOUT_TIME);
+    assertThat(blocks, equalTo(expected));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -263,12 +260,11 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Call
     BlockFilteringOption blockFilter = SKIP_EMPTY;
     BlockTimeOption timeOption = NO_COMMIT_TIME;
-    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+    List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     // Check response
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight,
-        ImmutableList.of(secondPageBlock, firstPageBlock));
-    assertThat(response, equalTo(expected));
+    List<Block> expected = of(secondPageBlock, firstPageBlock);
+    assertThat(blocks, equalTo(expected));
 
     // Check the requests made
     RecordedRequest firstRequest = server.takeRequest();
@@ -298,11 +294,10 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Call
     BlockFilteringOption blockFilter = INCLUDE_EMPTY;
     BlockTimeOption timeOption = NO_COMMIT_TIME;
-    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+    List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     List<Block> expectedBlocks = concatLists(page2Blocks, page1Blocks);
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight, expectedBlocks);
-    assertThat(response, equalTo(expected));
+    assertThat(blocks, equalTo(expectedBlocks));
 
     // Check the requests made
     RecordedRequest firstRequest = server.takeRequest();
@@ -346,11 +341,10 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Call
     BlockFilteringOption blockFilter = SKIP_EMPTY;
     BlockTimeOption timeOption = NO_COMMIT_TIME;
-    BlocksRange response = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
+    List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     List<Block> expectedBlocks = concatLists(page2InRangeBlocks, page1Blocks);
-    BlocksRange expected = new BlocksRange(fromHeight, toHeight, expectedBlocks);
-    assertThat(response, equalTo(expected));
+    assertThat(blocks, equalTo(expectedBlocks));
 
     // Check the requests made
     RecordedRequest firstRequest = server.takeRequest();

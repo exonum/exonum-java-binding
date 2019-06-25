@@ -30,6 +30,7 @@ import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import okhttp3.OkHttpClient;
 
@@ -108,7 +109,7 @@ public interface ExonumClient {
   BlockResponse getBlockByHeight(long height);
 
   /**
-   * Returns blockchain blocks information for the requested range. The blocks are returned
+   * Returns blockchain blocks in the requested <em>closed</em> range. The blocks are returned
    * in ascending order by their height.
    *
    * @param fromHeight the height of the first block to include. Must be non-negative
@@ -122,12 +123,12 @@ public interface ExonumClient {
    *        See {@linkplain Block#getCommitTime()}.
    *        The time value corresponds to the average time of submission of precommits by the
    *        validators for every returned block
-   * @return blocks information response
+   * @return blocks in the requested range
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
-   * @throws IllegalArgumentException if fromHeight or toHeight are not valid
+   * @throws IllegalArgumentException if {@code fromHeight} or {@code toHeight} are not valid
    */
-  BlocksRange getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
+  List<Block> getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption);
 
   /**

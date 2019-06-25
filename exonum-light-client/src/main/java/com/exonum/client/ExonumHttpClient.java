@@ -149,7 +149,7 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public BlocksRange getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
+  public List<Block> getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
     checkArgument(0 <= fromHeight, "First block height (%s) must be non-negative", fromHeight);
     checkArgument(fromHeight <= toHeight,
@@ -169,7 +169,8 @@ class ExonumHttpClient implements ExonumClient {
       rangeLast = blocksResponse.getBlocksRangeStart() - 1;
     }
 
-    return postProcessResponseBlocks(fromHeight, toHeight, blocks);
+    return postProcessResponseBlocks(fromHeight, toHeight, blocks)
+        .getBlocks();
   }
 
   @Override
