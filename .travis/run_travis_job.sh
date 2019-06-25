@@ -13,8 +13,6 @@ set -x
 # Run rust code checks if CHECK_RUST is true, or java tests if it's not
 if [ "$CHECK_RUST" = true ] 
 then
-    # Install cargo-audit if it's not already.
-    cargo audit --version || cargo install cargo-audit --force
     # Install clippy and rustfmt.
     rustup component add clippy
     rustup component add rustfmt
@@ -24,22 +22,12 @@ then
     echo 'Performing checks over the rust code'
     EJB_RUST_BUILD_DIR="${TRAVIS_BUILD_DIR}/exonum-java-binding/core/rust/"
     cd "${EJB_RUST_BUILD_DIR}"
+
     # Check the formatting.
     cargo fmt -- --check
 
     # Run clippy static analysis.
     cargo clippy --all --tests --all-features -- -D warnings
-
-    # Run audit of vulnerable dependencies.
-    #
-    # Don’t fail the build, as the vulnerable crate might not even have a fix yet,
-    # and, as it has, it will updated promptly by Dependabot.
-    cargo audit || true
-
-    # Check silently for updates of Maven dependencies.
-    # TODO Disabled until ECR-2252 is fixed.
-    #cd "${TRAVIS_BUILD_DIR}"
-    #mvn versions:display-property-updates versions:display-dependency-updates | grep '\->' --context=3 || true
 
     echo 'Rust checks are completed.'
 else
