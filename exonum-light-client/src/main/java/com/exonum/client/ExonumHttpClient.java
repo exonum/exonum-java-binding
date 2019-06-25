@@ -45,6 +45,7 @@ import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
@@ -177,7 +178,7 @@ class ExonumHttpClient implements ExonumClient {
   public BlocksRange getLastBlocks(int count, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
     checkArgument(0 < count,
-        "Requested number of blocks should be positive number but was %s", count);
+        "Requested number of blocks should be positive but was %s", count);
 
     List<Block> blocks = new ArrayList<>(count);
     // The first request does not specify the maximum height to get the top blocks
@@ -220,6 +221,29 @@ class ExonumHttpClient implements ExonumClient {
 
     // Do not bother trimming — BlocksRange copies the list
     return new BlocksRange(fromHeight, toHeight, blocks);
+  }
+
+  @Override
+  public List<Block> findNonEmptyBlocks(int numBlocks, BlockTimeOption timeOption) {
+    checkArgument(0 < numBlocks,
+        "Requested number of blocks should be positive but was %s", numBlocks);
+
+    List<Block> blocks = new ArrayList<>(numBlocks);
+    Long nextHeight = null;
+    int remainingBlocks = numBlocks;
+    while (remainingBlocks > 0
+        && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+      int numRequested = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
+      BlocksResponse blocksResponse = doGetBlocks(numRequested, SKIP_EMPTY, nextHeight, timeOption);
+
+      blocks.addAll(blocksResponse.getBlocks());
+
+      nextHeight = blocksResponse.getBlocksRangeStart() - 1;
+      remainingBlocks -= blocksResponse.getBlocks().size();
+    }
+
+    List<Block> ascBlocks = Lists.reverse(blocks);
+    return ImmutableList.copyOf(ascBlocks);
   }
 
   @Override

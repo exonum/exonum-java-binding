@@ -286,10 +286,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     List<Block> page1Blocks = createBlocks(startP1, toHeight);
     List<Block> page2Blocks = createBlocks(fromHeight, toP2);
     String firstResponse = createGetBlocksResponseWithEmpty(page1Blocks);
-    enqueueResponse(firstResponse);
-
     String secondResponse = createGetBlocksResponseWithEmpty(page2Blocks);
-    enqueueResponse(secondResponse);
+    enqueueResponses(firstResponse, secondResponse);
 
     // Call
     BlockFilteringOption blockFilter = INCLUDE_EMPTY;
@@ -333,10 +331,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertThat(page2OutOfRangeBlocks, hasSize(numEmptyOnSecondPage));
 
     String firstResponse = createGetBlocksResponseWithEmpty(page1Blocks);
-    enqueueResponse(firstResponse);
-
     String secondResponse = createGetBlocksResponseWithEmpty(page2Blocks);
-    enqueueResponse(secondResponse);
+    enqueueResponses(firstResponse, secondResponse);
 
     // Call
     BlockFilteringOption blockFilter = SKIP_EMPTY;
@@ -491,9 +487,114 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertBlockRequestParams(request2, secondPageSize, blockFilter, toP2, timeOption);
   }
 
+  @Test
+  void findNonEmptyBlocksSinglePage() throws InterruptedException {
+    int numBlocks = 3;
+    long blockchainHeight = 99;
+
+    long end = blockchainHeight + 1;
+    long start = BLOCK_1.getHeight();
+    String mockResponse = "{\n"
+        + "    'range': {\n"
+        + "        'start': " + start + ",\n"
+        + "        'end': " + end + "\n"
+        + "    },\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
+        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "}\n";
+    enqueueResponse(mockResponse);
+
+    // Call
+    BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
+    List<Block> blocks = exonumClient.findNonEmptyBlocks(numBlocks, timeOption);
+
+    // Check the response
+    List<Block> expected = of(BLOCK_1, BLOCK_2, BLOCK_3);
+    assertThat(blocks, equalTo(expected));
+
+    // Verify the request
+    RecordedRequest request = server.takeRequest();
+    assertBlockRequestParams(request, numBlocks, SKIP_EMPTY, null, timeOption);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {
+      10,
+      1010
+  })
+  void findNonEmptyBlocksSinglePageMoreThanInBlockchain(int numBlocks) throws InterruptedException {
+    int numNonEmptyBlocks = 3;
+    long blockchainHeight = 99;
+
+    long end = blockchainHeight + 1;
+    long start = 0;
+    String mockResponse = "{\n"
+        + "    'range': {\n"
+        + "        'start': " + start + ",\n"
+        + "        'end': " + end + "\n"
+        + "    },\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
+        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "}\n";
+    enqueueResponse(mockResponse);
+
+    // Call
+    BlockTimeOption timeOption = INCLUDE_COMMIT_TIME;
+    List<Block> blocks = exonumClient.findNonEmptyBlocks(numBlocks, timeOption);
+
+    // Check the response
+    assertThat(blocks, hasSize(numNonEmptyBlocks));
+    List<Block> expected = of(BLOCK_1, BLOCK_2, BLOCK_3);
+    assertThat(blocks, equalTo(expected));
+
+    // Verify the request
+    RecordedRequest request = server.takeRequest();
+    int requestedBlocks = min(numBlocks, MAX_BLOCKS_PER_REQUEST);
+    assertBlockRequestParams(request, requestedBlocks, SKIP_EMPTY, null, timeOption);
+  }
+
+  @ParameterizedTest(name = "[{index}] {0} height, {1} blocks on the 2nd page. {2}")
+  @CsvSource({
+      "5000, 10, '1100 blocks requested'",
+      "5000, 1000, '2000 blocks requested'",
+      "1000, 1, '1001 blocks requested = 1001 in blockchain'",
+  })
+  void findNonEmptyBlocksMultiplePages(long blockchainHeight, int secondPageSize,
+      @SuppressWarnings("unused") String description)
+      throws InterruptedException {
+
+    long toP1 = blockchainHeight;
+    long fromP1 = toP1 - MAX_BLOCKS_PER_REQUEST + 1;
+    List<Block> blocksP1 = createBlocks(fromP1, toP1);
+
+    long toP2 = fromP1 - 1;
+    long fromP2 = toP2 - secondPageSize + 1;
+    List<Block> blocksP2 = createBlocks(fromP2, toP2);
+
+    String response1 = createGetBlocksResponseWithEmpty(blocksP1);
+    String response2 = createGetBlocksResponseWithEmpty(blocksP2);
+    enqueueResponses(response1, response2);
+
+    // Call
+    int numBlocks = MAX_BLOCKS_PER_REQUEST + secondPageSize;
+    BlockTimeOption timeOption = NO_COMMIT_TIME;
+    List<Block> blocks = exonumClient.findNonEmptyBlocks(numBlocks, timeOption);
+
+    // Check the response
+    List<Block> expected = concatLists(blocksP2, blocksP1);
+    assertThat(blocks, equalTo(expected));
+
+    // Verify the requests
+    RecordedRequest r1 = server.takeRequest();
+    assertBlockRequestParams(r1, MAX_BLOCKS_PER_REQUEST, SKIP_EMPTY, null, timeOption);
+
+    RecordedRequest r2 = server.takeRequest();
+    assertBlockRequestParams(r2, secondPageSize, SKIP_EMPTY, toP2, timeOption);
+  }
+
   /**
-   * Returns a response to 'get_blocks' request **with** empty blocks (i.e., 'start' and 'end'
-   * can be inferred from the passed blocks).
+   * Returns a response to 'get_blocks' request **possibly with** empty blocks (i.e., 'start'
+   * and 'end' will be inferred from the passed blocks).
    *
    * @param blocks a list of blocks in ascending order
    */
@@ -660,6 +761,13 @@ class ExonumHttpClientBlocksIntegrationTest {
         is(String.valueOf(withTime)));
   }
 
+  /** Enqueues JSON responses with the given body, in the order they are passed. */
+  private void enqueueResponses(String... jsonResponses) {
+    for (String r : jsonResponses) {
+      enqueueResponse(r);
+    }
+  }
+
   /** Enqueues a JSON response with the given body. */
   private void enqueueResponse(String jsonResponse) {
     server.enqueue(new MockResponse()
@@ -667,6 +775,9 @@ class ExonumHttpClientBlocksIntegrationTest {
         .setBody(jsonResponse));
   }
 
+  /**
+   * Creates a list of blocks in the closed range [from; to].
+   */
   private static List<Block> createBlocks(long from, long to) {
     return LongStream.rangeClosed(from, to)
         .mapToObj(h -> aBlock()

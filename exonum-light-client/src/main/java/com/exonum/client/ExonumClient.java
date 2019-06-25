@@ -145,9 +145,28 @@ public interface ExonumClient {
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    * @throws IllegalArgumentException if numBlocks is non-positive
+   * @see #findNonEmptyBlocks(int, BlockTimeOption)
    */
   BlocksRange getLastBlocks(int numBlocks, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption);
+
+  /**
+   * Returns up to the given number of the most recent non-empty blocks in ascending order
+   * by their height. The search range is not limited, i.e., spans the whole blockchain.
+   *
+   * @param numBlocks the maximum number of blocks to return. Must be positive. If the number
+   *     of non-empty blocks in the blockchain is less than {@code numBlocks}, all such blocks
+   *     will be returned
+   * @param timeOption controls whether to include
+   *        the {@linkplain Block#getCommitTime() block commit time}
+   * @return a list of the most recent non-empty blocks
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   * @throws IllegalArgumentException if numBlocks is non-positive
+   * @see #getLastBlocks(int, BlockFilteringOption, BlockTimeOption)
+   * @see BlockFilteringOption#SKIP_EMPTY
+   */
+  List<Block> findNonEmptyBlocks(int numBlocks, BlockTimeOption timeOption);
 
   /**
    * Returns the last block in the blockchain.

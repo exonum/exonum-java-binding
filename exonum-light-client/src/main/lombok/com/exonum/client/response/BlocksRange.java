@@ -24,7 +24,8 @@ import lombok.Value;
 
 /**
  * A <em>closed</em> range of blocks. It is allowed to contain «gaps» if blocks containing no
- * transactions are filtered out.
+ * transactions are filtered out. The actual range boundaries are accessible with
+ * {@link #getFromHeight()} and {@link #getToHeight()}.
  */
 @Value
 public class BlocksRange {
