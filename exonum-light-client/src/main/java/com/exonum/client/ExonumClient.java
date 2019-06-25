@@ -119,10 +119,8 @@ public interface ExonumClient {
    *        the actual height will be used — such error-prone behaviour will be fixed
    *        in Exonum 0.12, see ECR-3188)
    * @param blockFilter controls whether to skip blocks with no transactions
-   * @param timeOption controls whether to include the block commit time.
-   *        See {@linkplain Block#getCommitTime()}.
-   *        The time value corresponds to the average time of submission of precommits by the
-   *        validators for every returned block
+   * @param timeOption controls whether to include
+   *        the {@linkplain Block#getCommitTime() block commit time}
    * @return blocks in the requested range
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
@@ -141,10 +139,8 @@ public interface ExonumClient {
    * @param blockFilter controls whether to skip blocks with no transactions. If filtering
    *        is applied, the actual number of blocks may be smaller than {@code numBlocks};
    *        but the range of blocks will not be extended
-   * @param timeOption controls whether to include the block commit time.
-   *        See {@linkplain Block#getCommitTime()}.
-   *        The time value corresponds to the average time of submission of precommits by the
-   *        validators for every returned block
+   * @param timeOption controls whether to include
+   *        the {@linkplain Block#getCommitTime() block commit time}
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
