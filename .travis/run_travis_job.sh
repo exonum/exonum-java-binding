@@ -45,15 +45,22 @@ then
 else
     cd "${TRAVIS_BUILD_DIR}"
 
-    # Set CI Maven arguments. They enable parallel builds.
-    echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=false \
+    # Set CI Maven arguments. They enable parallel builds, and parallel tests (Linux only).
+    # TODO: Remove this when macos builds use newer JDK that does not hang up when
+    #   parallel tests are enabled.
+    PARALLEL_TESTS_ENABLED="true"
+    if [[ ${TRAVIS_OS_NAME} == "osx" ]]; then
+      PARALLEL_TESTS_ENABLED="false"
+    fi
+    echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=${PARALLEL_TESTS_ENABLED} \
           -Djunit.jupiter.execution.parallel.mode.default=concurrent" > \
       .mvn/maven.config
 
-    ./run_all_tests.sh;
+    # Run all tests
+    ./run_all_tests.sh
 
     # Upload the coverage report to Coveralls from a single job only
-    if [[ "$TRAVIS_JOB_NAME" == "Linux JDK 8 CHECK_RUST=false" ]]; then
+    if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
       mvn org.eluder.coveralls:coveralls-maven-plugin:report
     fi
 fi
