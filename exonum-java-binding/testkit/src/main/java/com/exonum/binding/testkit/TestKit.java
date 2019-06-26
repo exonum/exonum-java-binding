@@ -302,8 +302,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    */
   public <ResultT> ResultT applySnapshot(Function<Snapshot, ResultT> snapshotFunction) {
     try (Cleaner cleaner = new Cleaner("TestKit#applySnapshot")) {
-      long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
-      Snapshot snapshot = Snapshot.newInstance(snapshotHandle, cleaner);
+      Snapshot snapshot = createSnapshot(cleaner);
       return snapshotFunction.apply(snapshot);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
@@ -319,8 +318,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    */
   public void withSnapshot(Consumer<Snapshot> snapshotFunction) {
     try (Cleaner cleaner = new Cleaner("TestKit#withSnapshot")) {
-      long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
-      Snapshot snapshot = Snapshot.newInstance(snapshotHandle, cleaner);
+      Snapshot snapshot = createSnapshot(cleaner);
       snapshotFunction.accept(snapshot);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
@@ -336,10 +334,14 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    */
   public Snapshot getSnapshot() {
     Cleaner cleaner = new Cleaner("TestKit#getSnapshot");
-    long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
-    Snapshot snapshot = Snapshot.newInstance(snapshotHandle, cleaner);
+    Snapshot snapshot = createSnapshot(cleaner);
     snapshotCleaners.add(cleaner);
     return snapshot;
+  }
+
+  private Snapshot createSnapshot(Cleaner cleaner) {
+    long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
+    return Snapshot.newInstance(snapshotHandle, cleaner);
   }
 
   /**
