@@ -42,7 +42,7 @@ public abstract class ValidatorKey {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.CommonTypeAdapterFactory
    */
   public static TypeAdapter<ValidatorKey> typeAdapter(Gson gson) {
     return new AutoValue_ValidatorKey.GsonTypeAdapter(gson);

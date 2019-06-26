@@ -47,7 +47,7 @@ public final class JsonSerializer {
         .registerTypeHierarchyAdapter(HashCode.class, new HashCodeJsonSerializer())
         .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
         .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeJsonSerializer())
-        .registerTypeAdapterFactory(StoredConfigurationAdapterFactory.create())
+        .registerTypeAdapterFactory(CommonTypeAdapterFactory.create())
         .setLongSerializationPolicy(LongSerializationPolicy.STRING);
   }
 

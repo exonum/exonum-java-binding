@@ -91,8 +91,7 @@
 
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
-      <artifactId>auto-value-gson-annotations</artifactId>
-      <!-- TODO: verify <scope>provided</scope>-->
+      <artifactId>auto-value-gson-runtime</artifactId>
     </dependency>
 
     <dependency>

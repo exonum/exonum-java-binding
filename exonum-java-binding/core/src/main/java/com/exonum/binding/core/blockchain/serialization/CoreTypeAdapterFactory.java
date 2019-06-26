@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.serialization.json;
+package com.exonum.binding.core.blockchain.serialization;
 
 import com.google.gson.TypeAdapterFactory;
 import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
 
 /**
- * Class used to automatically create Gson type adapters for AutoValue classes.
- * Note that you need to provide static factory method in your AutoValue class.
+ * Class used to automatically create Gson type adapters for all AutoValue classes
+ * located in this module.
+ *
+ * <p>Note that you need to provide an accessible static factory method in your AutoValue class.
  *
  * <pre><code>
- *   public static TypeAdapter&lt;TransactionLocation&gt; typeAdapter(Gson gson) {
- *     return new AutoValue_TransactionLocation.GsonTypeAdapter(gson);
+ *   public static TypeAdapter&lt;TransactionResult&gt; typeAdapter(Gson gson) {
+ *     return new AutoValue_TransactionResult.GsonTypeAdapter(gson);
  *   }
  * </code></pre>
+ *
+ * @see <a href="https://github.com/rharter/auto-value-gson/#factory">
+ *   Using TypeAdapterFactory</a>
  */
 @GsonTypeAdapterFactory
-public abstract class TransactionLocationAdapterFactory implements TypeAdapterFactory {
+public abstract class CoreTypeAdapterFactory implements TypeAdapterFactory {
 
   public static TypeAdapterFactory create() {
-    return new AutoValueGson_TransactionLocationAdapterFactory();
+    return new AutoValueGson_CoreTypeAdapterFactory();
   }
 }
