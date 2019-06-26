@@ -25,6 +25,7 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
@@ -72,25 +73,24 @@ class TransferTxHistoryTest {
         seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2);
     testKit.createBlockWithTransactions(transferTx2);
 
-    testKit.withSnapshot((view) -> {
-      // Check that wallets have correct balances
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-      long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
-      assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())
-          .isEqualTo(expectedBalance1);
-      long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
-      assertThat(wallets.get(ACCOUNT_2.getPublicKey()).getBalance())
-          .isEqualTo(expectedBalance2);
+    Snapshot view = testKit.getSnapshot();
 
-      // Check history
-      HashCode messageHash1 = transferTx1.hash();
-      HashCode messageHash2 = transferTx2.hash();
-      assertThat(schema.transactionsHistory(ACCOUNT_1.getPublicKey()))
-          .containsExactly(messageHash1, messageHash2);
-      assertThat(schema.transactionsHistory(ACCOUNT_2.getPublicKey()))
-          .containsExactly(messageHash1, messageHash2);
-      return null;
-    });
+    // Check that wallets have correct balances
+    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+    long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
+    assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())
+        .isEqualTo(expectedBalance1);
+    long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
+    assertThat(wallets.get(ACCOUNT_2.getPublicKey()).getBalance())
+        .isEqualTo(expectedBalance2);
+
+    // Check history
+    HashCode messageHash1 = transferTx1.hash();
+    HashCode messageHash2 = transferTx2.hash();
+    assertThat(schema.transactionsHistory(ACCOUNT_1.getPublicKey()))
+        .containsExactly(messageHash1, messageHash2);
+    assertThat(schema.transactionsHistory(ACCOUNT_2.getPublicKey()))
+        .containsExactly(messageHash1, messageHash2);
   }
 }
