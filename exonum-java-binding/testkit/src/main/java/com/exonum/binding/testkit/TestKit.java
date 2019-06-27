@@ -343,9 +343,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * <p>All created snapshots are deleted when this TestKit is {@linkplain #close() closed}.
    * It is forbidden to access the snapshots once the TestKit is closed.
    *
-   * <p>If you need to create a large number of snapshots, it is recommended to use
-   * {@link #withSnapshot(Consumer)} or {@link #applySnapshot(Function)}, which destroy the
-   * snapshots once the passed closure completes.
+   * <p>If you need to create a large number (e.g. more than a hundred) of snapshots, it is
+   * recommended to use {@link #withSnapshot(Consumer)} or {@link #applySnapshot(Function)}, which
+   * destroy the snapshots once the passed closure completes.
    */
   public Snapshot getSnapshot() {
     return createSnapshot(snapshotCleaner);
