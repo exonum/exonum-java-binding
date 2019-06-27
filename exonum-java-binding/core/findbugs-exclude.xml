@@ -12,6 +12,9 @@
     <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
   </Match>
 
+  <!-- Exclude the auto-generated files.
+       Remove the rules below once https://github.com/spotbugs/spotbugs/issues/694 is resolved. -->
+
   <!-- It is good, hashCode is specified in the parent, which is *the* way
        to configure it in AutoValue -->
   <Match>
@@ -19,7 +22,11 @@
     <Bug pattern="HE_EQUALS_NO_HASHCODE"/>
   </Match>
 
-  <!-- Exclude the auto-generated files -->
+  <Match>
+    <Class name="~.*AutoValue_Block.GsonTypeAdapter"/>
+    <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
+  </Match>
+
   <Match>
     <Source name="~.*CoreProtos\.java"/>
   </Match>

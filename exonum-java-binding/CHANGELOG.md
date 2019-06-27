@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Moved all packages inside `com.exonum.binding` to `com.exonum.binding.core` package.
   That was required to give each module a unique root package to prevent 'split-packages'
   problem. The migration guide has a regexp to update the service automatically.
+- Replaced redundant `TypeAdapterFactory` in 'common' module with a single 
+  `CommonTypeAdapterFactory`. `BlockTypeAdapterFactory` is renamed to `CoreTypeAdapterFactory`.
+  `JsonSerializer#json` and `JsonSerializer#builder` register `CommonTypeAdapterFactory` 
+  by default. `CoreTypeAdapterFactory` must be registered explicitly if needed. (#971)
+
   
 ### Fixed
 - The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
@@ -39,6 +44,8 @@ of the response to `transaction`). (#904)
 - Allow to override root package in the template project generated with 
 the exonum-java-binding-service-archetype. It remains equal to 'groupId' property
 by default, but can be overridden with 'package' property.
+- Application packaging issue that might have resulted in several versions of Java artifacts
+on the application classpath. (#968)
 
 [tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
 

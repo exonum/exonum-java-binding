@@ -18,6 +18,7 @@ package com.exonum.binding.common.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.common.serialization.json.CommonTypeAdapterFactory;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -119,7 +120,7 @@ public abstract class TransactionResult {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory
+   * @see CommonTypeAdapterFactory
    */
   public static TypeAdapter<TransactionResult> typeAdapter(Gson gson) {
     return new AutoValue_TransactionResult.GsonTypeAdapter(gson);
