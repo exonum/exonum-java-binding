@@ -46,9 +46,7 @@ import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
-import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
-import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
-import com.exonum.binding.core.blockchain.serialization.BlockAdapterFactory;
+import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -94,9 +92,7 @@ class ApiControllerIntegrationTest {
   private static final HashCode HASH_1 = HashCode.fromInt(0x00);
 
   private static final Gson JSON_SERIALIZER = JsonSerializer.builder()
-      .registerTypeAdapterFactory(BlockAdapterFactory.create())
-      .registerTypeAdapterFactory(TransactionLocationAdapterFactory.create())
-      .registerTypeAdapterFactory(TransactionResultAdapterFactory.create())
+      .registerTypeAdapterFactory(CoreTypeAdapterFactory.create())
       .create();
 
   @Mock
