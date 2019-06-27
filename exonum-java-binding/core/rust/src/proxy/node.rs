@@ -29,18 +29,19 @@ use jni::JNIEnv;
 use std::{panic, ptr};
 
 use handle::{cast_handle, drop_handle, to_handle, Handle};
-use proxy::MainExecutor;
+use proxy::Executor;
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
 
-const TX_SUBMISSION_EXCEPTION: &str = "com/exonum/binding/service/TransactionSubmissionException";
+const TX_SUBMISSION_EXCEPTION: &str =
+    "com/exonum/binding/core/service/TransactionSubmissionException";
 
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
 #[derive(Clone)]
 pub struct NodeContext {
-    executor: MainExecutor,
+    executor: Executor,
     blockchain: Blockchain,
     public_key: PublicKey,
     transaction_sender: ApiSender,
@@ -49,7 +50,7 @@ pub struct NodeContext {
 impl NodeContext {
     /// Creates a node context for a service.
     pub fn new(
-        executor: MainExecutor,
+        executor: Executor,
         blockchain: Blockchain,
         public_key: PublicKey,
         transaction_sender: ApiSender,
@@ -63,7 +64,7 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn executor(&self) -> &MainExecutor {
+    pub fn executor(&self) -> &Executor {
         &self.executor
     }
 
@@ -109,7 +110,7 @@ impl NodeContext {
 /// - `payload` - an array containing the transaction payload
 /// - `service_id` - an identifier of the service
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
+pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -155,7 +156,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeSubmit(
 ///
 /// Returns a `Snapshot` of the database state
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSnapshot(
+pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCreateSnapshot(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -171,7 +172,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeCreateSna
 
 /// Returns the public key of this node.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeGetPublicKey(
+pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeGetPublicKey(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -189,7 +190,7 @@ pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeGetPublic
 
 /// Destroys node context.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_service_NodeProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,

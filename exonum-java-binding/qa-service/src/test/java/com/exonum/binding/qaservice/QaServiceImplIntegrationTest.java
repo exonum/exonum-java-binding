@@ -33,9 +33,9 @@ import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
-import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
@@ -54,8 +54,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @RequiresNativeLibrary
+// todo: Remove once https://github.com/junit-team/junit5/issues/1925 is released (in 5.5)
+@Execution(ExecutionMode.SAME_THREAD)
 class QaServiceImplIntegrationTest {
 
   @RegisterExtension

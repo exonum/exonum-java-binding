@@ -25,14 +25,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
-import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.transaction.TransactionExecutionException;
 import java.util.Objects;
 
 /**

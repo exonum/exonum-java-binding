@@ -35,7 +35,7 @@ use JniResult;
 type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/storage/indices/MapEntryInternal";
+const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
 const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
 const MAP_ENTRY: &str = "com/exonum/binding/common/collect/MapEntry";
 const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
@@ -52,7 +52,7 @@ type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     name: JString,
@@ -74,7 +74,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns a pointer to the created `ProofMapIndex` instance in an index family (= group).
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateInGroup(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreateInGroup(
     env: JNIEnv,
     _: JClass,
     group_name: JString,
@@ -99,7 +99,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Destroys the underlying `ProofMapIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
@@ -109,7 +109,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the root hash of the proof map or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -126,7 +126,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns value identified by the `key`. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -148,7 +148,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns `true` if the map contains a value for the specified key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeContainsKey(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeContainsKey(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -166,7 +166,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns Java-proof object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetProof(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -186,7 +186,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns Java-proof object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeGetMultiProof(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetMultiProof(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -334,7 +334,7 @@ fn create_java_unchecked_map_proof<'a>(
 
 /// Returns the pointer to the iterator over a map keys and values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateEntriesIter(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreateEntriesIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -352,7 +352,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the pointer to the iterator over map keys.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateKeysIter(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreateKeysIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -370,7 +370,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the pointer to the iterator over map values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateValuesIter(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreateValuesIter(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -388,7 +388,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the pointer to the iterator over a map keys and values starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeCreateIterFrom(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreateIterFrom(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -408,7 +408,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the pointer to the iterator over map keys starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeKeysFrom(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeKeysFrom(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
@@ -428,7 +428,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the pointer to the iterator over map values starting at the given key.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeValuesFrom(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeValuesFrom(
     env: JNIEnv,
     _: JClass,
     map_handle: Handle,
@@ -448,7 +448,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Sets `value` identified by the `key` into the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativePut(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativePut(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -471,7 +471,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Removes value identified by the `key` from the index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeRemove(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeRemove(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -492,7 +492,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Removes all entries of the map.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
@@ -511,7 +511,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeEntriesIterNext(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeEntriesIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -538,7 +538,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Destroys the underlying `ProofMapIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeEntriesIterFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeEntriesIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -548,7 +548,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Returns the next value from the keys-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeKeysIterNext(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeKeysIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -565,7 +565,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Destroys the underlying `ProofMapIndex` keys-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeKeysIterFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -575,7 +575,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeValuesIterNext(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeValuesIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -592,7 +592,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProx
 
 /// Destroys the underlying `ProofMapIndex` values-iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofMapIndexProxy_nativeValuesIterFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,

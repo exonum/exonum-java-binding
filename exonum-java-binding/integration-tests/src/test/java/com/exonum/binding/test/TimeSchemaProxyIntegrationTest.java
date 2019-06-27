@@ -19,7 +19,7 @@ package com.exonum.binding.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;

@@ -26,6 +26,8 @@
     <packaging.native>${packaging.basedir}/lib/native</packaging.native>
     <!--A directory containing Java dependencies of the App used when running from target directory-->
     <packaging.java>${packaging.basedir}/lib/java</packaging.java>
+    <!--A full path to the shell script that starts the App executable-->
+    <packaging.script>${project.parent.basedir}/core/rust/exonum-java/exonum-java</packaging.script>
   </properties>
 
   <dependencies>
@@ -54,6 +56,28 @@
         <configuration>
           <skip>true</skip>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <executions>
+          <execution>
+            <!-- Clean the directory into which Java dependencies are copied. -->
+            <id>clean-lib-java-target</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <configuration>
+              <excludeDefaultDirectories>true</excludeDefaultDirectories>
+              <filesets>
+                <fileset>
+                  <directory>${packaging.java}</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>

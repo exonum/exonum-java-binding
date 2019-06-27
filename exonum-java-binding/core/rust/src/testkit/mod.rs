@@ -32,7 +32,7 @@ use jni::{
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
     JNIEnv,
 };
-use proxy::{MainExecutor, ServiceProxy};
+use proxy::{Executor, ServiceProxy};
 use std::{panic, sync::Arc};
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default};
@@ -64,7 +64,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         };
         builder = builder.with_validators(validator_count as _);
         let builder = {
-            let executor = MainExecutor::new(Arc::new(env.get_java_vm()?));
+            let executor = Executor::new(Arc::new(env.get_java_vm()?));
             let num_services = env.get_array_length(services)?;
             for i in 0..num_services {
                 let service = env.get_object_array_element(services, i)?;

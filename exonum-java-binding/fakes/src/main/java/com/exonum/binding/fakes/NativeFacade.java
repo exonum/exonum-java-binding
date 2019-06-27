@@ -18,18 +18,20 @@ package com.exonum.binding.fakes;
 
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.service.adapters.UserServiceAdapter;
+import com.exonum.binding.core.service.adapters.UserTransactionAdapter;
+import com.exonum.binding.core.service.adapters.ViewFactory;
+import com.exonum.binding.core.service.adapters.ViewProxyFactory;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transport.Server;
+import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.binding.fakes.mocks.ThrowingTransactions;
 import com.exonum.binding.fakes.mocks.UserServiceAdapterMockBuilder;
 import com.exonum.binding.fakes.services.ServiceArtifacts;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.exonum.binding.fakes.services.transactions.SetEntryTransaction;
-import com.exonum.binding.service.adapters.UserServiceAdapter;
-import com.exonum.binding.service.adapters.UserTransactionAdapter;
-import com.exonum.binding.service.adapters.ViewFactory;
-import com.exonum.binding.service.adapters.ViewProxyFactory;
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transport.Server;
-import com.exonum.binding.util.LibraryLoader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import javax.annotation.Nullable;
@@ -75,7 +77,7 @@ public final class NativeFacade {
 
   /**
    * Creates a UserTransactionAdapter that contains a transaction that throws
-   * {@link com.exonum.binding.transaction.TransactionExecutionException} in its execute method.
+   * {@link TransactionExecutionException} in its execute method.
    *
    * @param isSubclass whether method should produce a subclass of TransactionExecutionException
    * @param errorCode an error code that will be included in the exception
@@ -127,7 +129,7 @@ public final class NativeFacade {
 
   /**
    * Writes a valid service artifact to the specified location. A valid service artifact
-   * can be loaded by the {@link com.exonum.binding.runtime.ServiceRuntime} and
+   * can be loaded by the {@link ServiceRuntime} and
    * the service can be instantiated.
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
@@ -139,7 +141,7 @@ public final class NativeFacade {
   /**
    * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
    * during an attempt
-   * to {@linkplain com.exonum.binding.runtime.ServiceRuntime#loadArtifact(String) load} it.
+   * to {@linkplain ServiceRuntime#loadArtifact(String) load} it.
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
@@ -149,7 +151,7 @@ public final class NativeFacade {
 
   /**
    * Writes a service artifact that can be loaded, but with a service that cannot be
-   * {@linkplain com.exonum.binding.runtime.ServiceRuntime#createService(String) instantiated}.
+   * {@linkplain ServiceRuntime#createService(String) instantiated}.
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */

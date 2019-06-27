@@ -27,10 +27,10 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import org.junit.jupiter.api.Test;
 
 class PutValueTransactionTest {

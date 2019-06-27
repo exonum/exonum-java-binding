@@ -21,23 +21,23 @@ use jni::{
     InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use proxy::{JniExecutor, ServiceProxy};
+use proxy::ServiceProxy;
 use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
-use MainExecutor;
+use Executor;
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
-const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/runtime/ServiceRuntime;";
+const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/core/runtime/ServiceRuntime;";
 const LOAD_ARTIFACT_SIGNATURE: &str = "(Ljava/lang/String;)Ljava/lang/String;";
 const CREATE_SERVICE_SIGNATURE: &str =
-    "(Ljava/lang/String;)Lcom/exonum/binding/service/adapters/UserServiceAdapter;";
+    "(Ljava/lang/String;)Lcom/exonum/binding/core/service/adapters/UserServiceAdapter;";
 
 /// Controls JVM and java service.
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct JavaServiceRuntime {
-    executor: MainExecutor,
+    executor: Executor,
     service_runtime: GlobalRef,
 }
 
@@ -55,7 +55,7 @@ impl JavaServiceRuntime {
     ///
     /// Also, this function is public for being used from integration tests.
     pub fn create_with_jvm(java_vm: Arc<JavaVM>, port: i32) -> Self {
-        let executor = MainExecutor::new(java_vm.clone());
+        let executor = Executor::new(java_vm.clone());
         let service_runtime = Self::create_service_runtime_java(port, executor.clone());
         JavaServiceRuntime {
             executor,
@@ -64,7 +64,7 @@ impl JavaServiceRuntime {
     }
 
     /// Creates service runtime that is responsible for services management.
-    fn create_service_runtime_java(port: i32, executor: MainExecutor) -> GlobalRef {
+    fn create_service_runtime_java(port: i32, executor: Executor) -> GlobalRef {
         unwrap_jni(executor.with_attached(|env| {
             let serviceRuntime = env
                 .call_static_method(
@@ -260,7 +260,7 @@ impl JavaServiceRuntime {
     }
 
     /// Returns a reference to the runtime's executor.
-    pub fn get_executor(&self) -> &MainExecutor {
+    pub fn get_executor(&self) -> &Executor {
         &self.executor
     }
 }

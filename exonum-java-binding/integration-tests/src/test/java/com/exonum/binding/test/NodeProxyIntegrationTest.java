@@ -19,10 +19,10 @@ package com.exonum.binding.test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.service.Node;
-import com.exonum.binding.service.TransactionSubmissionException;
+import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.TransactionSubmissionException;
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.binding.transaction.RawTransaction;
 import org.junit.jupiter.api.Test;
 
 class NodeProxyIntegrationTest {

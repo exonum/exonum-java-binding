@@ -26,6 +26,7 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_TH
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.net.HttpHeaders.LOCATION;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
@@ -39,15 +40,13 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.blockchain.serialization.BlockAdapterFactory;
 import com.exonum.binding.common.configuration.ConsensusConfiguration;
 import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
-import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
-import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
+import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -75,6 +74,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -83,6 +84,7 @@ import org.mockito.quality.Strictness;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
+@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 @SuppressWarnings("WeakerAccess")
 class ApiControllerIntegrationTest {
 
@@ -93,9 +95,7 @@ class ApiControllerIntegrationTest {
   private static final HashCode HASH_1 = HashCode.fromInt(0x00);
 
   private static final Gson JSON_SERIALIZER = JsonSerializer.builder()
-      .registerTypeAdapterFactory(BlockAdapterFactory.create())
-      .registerTypeAdapterFactory(TransactionLocationAdapterFactory.create())
-      .registerTypeAdapterFactory(TransactionResultAdapterFactory.create())
+      .registerTypeAdapterFactory(CoreTypeAdapterFactory.create())
       .create();
 
   @Mock
@@ -424,7 +424,7 @@ class ApiControllerIntegrationTest {
           assertAll(
               () -> assertThat(response.bodyAsString()).isEqualTo(expectedTxHash.toString()),
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_CREATED),
-              () -> assertThat(response.getHeader("Location"))
+              () -> assertThat(response.getHeader(LOCATION))
                   .isEqualTo("/api/explorer/v1/transactions/" + expectedTxHash)
           );
           context.completeNow();

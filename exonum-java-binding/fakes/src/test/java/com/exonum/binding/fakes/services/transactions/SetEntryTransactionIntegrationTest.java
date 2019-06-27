@@ -29,14 +29,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
-import com.exonum.binding.storage.database.Snapshot;
-import com.exonum.binding.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import com.exonum.binding.transaction.TransactionContext;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary

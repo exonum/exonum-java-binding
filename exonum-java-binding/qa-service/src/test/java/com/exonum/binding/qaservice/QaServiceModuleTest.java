@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.service.Service;
+import com.exonum.binding.core.service.Service;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;

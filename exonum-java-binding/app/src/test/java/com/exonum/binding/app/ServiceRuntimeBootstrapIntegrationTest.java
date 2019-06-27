@@ -18,8 +18,8 @@ package com.exonum.binding.app;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.exonum.binding.runtime.ServiceRuntime;
-import com.exonum.binding.storage.database.MemoryDb;
+import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.storage.database.MemoryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.Test;
 

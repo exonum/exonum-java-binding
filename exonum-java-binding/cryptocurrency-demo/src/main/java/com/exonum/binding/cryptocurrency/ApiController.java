@@ -18,6 +18,7 @@ package com.exonum.binding.cryptocurrency;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -73,7 +74,7 @@ final class ApiController {
 
     if (wallet.isPresent()) {
       rc.response()
-          .putHeader("Content-Type", "application/json")
+          .putHeader(CONTENT_TYPE, "application/json")
           .end(json().toJson(wallet.get()));
     } else {
       rc.response()
@@ -88,7 +89,7 @@ final class ApiController {
     List<HistoryEntity> walletHistory = service.getWalletHistory(walletId);
 
     rc.response()
-        .putHeader("Content-Type", "application/json")
+        .putHeader(CONTENT_TYPE, "application/json")
         .end(json().toJson(walletHistory));
   }
 

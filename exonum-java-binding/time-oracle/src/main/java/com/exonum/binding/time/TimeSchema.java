@@ -17,9 +17,9 @@
 package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.EntryIndexProxy;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
 
 /**

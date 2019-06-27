@@ -53,35 +53,50 @@ function build-exonum-java-linux() {
 
 EJB_RUST_DIR="${PWD}/core/rust"
 
-# Run tests by default. To skip, use `--skip-tests` flag
-SKIP_TESTS=false
 # Debug mode by default. To switch to release, use `--release` flag
 BUILD_MODE=debug
+# Run tests by default. To skip, use `--skip-tests` flag
+SKIP_TESTS=false
+# Clean Cargo target by default. To skip, use `--skip-cargo-clean` flag
+SKIP_CARGO_CLEAN=false
 # This var is used by maven to run `cargo` with no extra flags in case of debug builds and with `--release` flag for
 #   release builds
 BUILD_CARGO_FLAG=""
 
 while (( "$#" )); do
   case "$1" in
-    --skip-tests)
-      SKIP_TESTS=true
-      shift 1
-      ;;
     --release)
       BUILD_MODE=release
       BUILD_CARGO_FLAG="--release"
       shift 1
       ;;
+    --skip-tests)
+      SKIP_TESTS=true
+      shift 1
+      ;;
+    --skip-cargo-clean)
+      SKIP_CARGO_CLEAN=true
+      shift 1
+      ;;
     *) # anything else
-      echo "Usage: package_app.sh [--skip-tests] [--release]" >&2
+      echo "Usage: package_app.sh [--release] [--skip-tests] [--skip-cargo-clean]" >&2
       exit 1
       ;;
   esac
 done
 
-if [ $SKIP_TESTS != true ]; then
+# Run all tests
+if [[ ${SKIP_TESTS} != true ]]; then
   ./run_all_tests.sh
 fi
+
+# Clean the Rust target. As subsequent build uses different RUSTFLAGS from run_all_tests.sh,
+# which requires full recompilation of all artifacts *and* overwrites them,
+# they are of no use.
+if [[ ${SKIP_CARGO_CLEAN} != true ]]; then
+  cargo clean --manifest-path="${EJB_RUST_DIR}/Cargo.toml"
+fi
+
 source ./tests_profile
 
 # Prepare directories

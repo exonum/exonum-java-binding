@@ -36,7 +36,7 @@ enum IndexType {
 
 /// Returns pointer to the created `ProofListIndex` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
     name: JString,
@@ -58,7 +58,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns a pointer to the created `ProofListIndex` instance in an index family (= group).
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeCreateInGroup(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeCreateInGroup(
     env: JNIEnv,
     _: JClass,
     group_name: JString,
@@ -83,7 +83,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Destroys the underlying `ProofListIndex` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     list_handle: Handle,
@@ -93,7 +93,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns the value by index. Null pointer is returned if value is not found.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGet(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGet(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -114,7 +114,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns the last value or null pointer if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetLast(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetLast(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -134,7 +134,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns `true` if the list is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIsEmpty(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeIsEmpty(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -150,7 +150,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns length of the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeSize(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeSize(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -166,7 +166,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns the height of the proof list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeHeight(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeHeight(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -184,7 +184,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns the root hash of the proof list or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetRootHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRootHash(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -201,7 +201,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns Java representation of the proof that an element exists at the specified index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetProof(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -219,7 +219,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns Java representation of the proof that some elements exists in the specified range.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -238,7 +238,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns pointer to the iterator over list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeCreateIter(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeCreateIter(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -256,7 +256,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns pointer to the iterator over list starting at given index.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIterFrom(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeIterFrom(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -275,7 +275,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Adds value to the list.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeAdd(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeAdd(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -296,7 +296,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Sets value into specified index. Panics if `i` is out of bounds.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeSet(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -318,7 +318,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Clears the list, removing all values.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeClear(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeClear(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
@@ -337,7 +337,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Returns next value from the iterator. Returns null pointer when iteration is finished.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIterNext(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeIterNext(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,
@@ -354,7 +354,7 @@ pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexPro
 
 /// Destroys the underlying `ProofListIndex` iterator object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_storage_indices_ProofListIndexProxy_nativeIterFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeIterFree(
     env: JNIEnv,
     _: JObject,
     iter_handle: Handle,

@@ -36,7 +36,7 @@ use java_bindings::{
         storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
     jni::JavaVM,
-    serde_json, MainExecutor,
+    serde_json, Executor,
 };
 
 use std::sync::Arc;
@@ -46,7 +46,7 @@ const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
-    pub static ref EXECUTOR: MainExecutor = MainExecutor::new(VM.clone());
+    pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
 #[test]

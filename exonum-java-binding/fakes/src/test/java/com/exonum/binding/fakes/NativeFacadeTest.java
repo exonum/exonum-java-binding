@@ -20,9 +20,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.core.service.adapters.UserServiceAdapter;
+import com.exonum.binding.core.service.adapters.UserTransactionAdapter;
 import com.exonum.binding.fakes.services.service.TestService;
-import com.exonum.binding.service.adapters.UserServiceAdapter;
-import com.exonum.binding.service.adapters.UserTransactionAdapter;
 import org.junit.jupiter.api.Test;
 
 class NativeFacadeTest {

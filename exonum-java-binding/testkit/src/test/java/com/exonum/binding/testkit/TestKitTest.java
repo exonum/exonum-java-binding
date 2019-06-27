@@ -21,8 +21,6 @@ import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.blockchain.Block;
-import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
@@ -30,17 +28,19 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.service.AbstractServiceModule;
-import com.exonum.binding.service.Node;
-import com.exonum.binding.service.Service;
-import com.exonum.binding.service.ServiceModule;
-import com.exonum.binding.service.TransactionConverter;
-import com.exonum.binding.storage.database.View;
-import com.exonum.binding.storage.indices.MapIndex;
-import com.exonum.binding.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.blockchain.Block;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.service.AbstractServiceModule;
+import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.service.ServiceModule;
+import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.time.TimeSchema;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -339,7 +339,7 @@ class TestKitTest {
   }
 
   @Test
-  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) throws Exception {
+  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
@@ -352,7 +352,7 @@ class TestKitTest {
   }
 
   @Test
-  void getTransactionPool(TestKit testKit) throws Exception {
+  void getTransactionPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
@@ -368,7 +368,7 @@ class TestKitTest {
   }
 
   @Test
-  void findTransactionsInPool(TestKit testKit) throws Exception {
+  void findTransactionsInPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
