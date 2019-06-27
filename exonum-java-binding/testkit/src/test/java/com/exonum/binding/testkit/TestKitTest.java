@@ -524,17 +524,17 @@ class TestKitTest {
 
   @Test
   void getSnapshot(TestKit testKit) {
+    Class<IllegalStateException> exceptionType = IllegalStateException.class;
     Snapshot view1 = testKit.getSnapshot();
     Snapshot view2 = testKit.getSnapshot();
-    assertThat(testKit.snapshotCleaners).hasSize(2);
+    Cleaner snapshotCleaner = testKit.snapshotCleaner;
+    assertThat(snapshotCleaner.getNumRegisteredActions()).isEqualTo(2);
 
     testKit.close();
-    Cleaner cleaner1 = view1.getCleaner();
-    Cleaner cleaner2 = view2.getCleaner();
 
-    // Verify that snapshot cleaners were closed
-    assertThat(cleaner1.isClosed()).isTrue();
-    assertThat(cleaner2.isClosed()).isTrue();
+    // Verify that snapshot proxies were closed
+    assertThrows(exceptionType, view1::getViewNativeHandle);
+    assertThrows(exceptionType, view2::getViewNativeHandle);
   }
 
   private void checkValidatorsTimes(
