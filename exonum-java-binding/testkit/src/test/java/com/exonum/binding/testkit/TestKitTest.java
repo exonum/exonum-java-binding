@@ -339,7 +339,7 @@ class TestKitTest {
   }
 
   @Test
-  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) throws Exception {
+  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
@@ -352,7 +352,7 @@ class TestKitTest {
   }
 
   @Test
-  void getTransactionPool(TestKit testKit) throws Exception {
+  void getTransactionPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
@@ -368,7 +368,7 @@ class TestKitTest {
   }
 
   @Test
-  void findTransactionsInPool(TestKit testKit) throws Exception {
+  void findTransactionsInPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
 
     TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
