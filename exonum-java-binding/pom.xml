@@ -113,7 +113,7 @@
     <log4j.version>2.11.2</log4j.version>
     <hamcrest.version>2.1</hamcrest.version>
     <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.4.2</junit.jupiter.version>
+    <junit.jupiter.version>5.5.0</junit.jupiter.version>
     <powermock.version>2.0.2</powermock.version>
     <protobuf.version>3.8.0</protobuf.version>
     <mockito-core.version>2.28.2</mockito-core.version>
