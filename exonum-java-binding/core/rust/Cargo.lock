@@ -1257,7 +1257,7 @@ dependencies = [
 [[package]]
 name = "jni"
 version = "0.12.3"
-source = "git+https://github.com/vitvakatu/jni-rs?branch=auto-detach-threads#a88d87d363ee81f393eca5c25f29ab32b024ef17"
+source = "git+https://github.com/vitvakatu/jni-rs?branch=auto-detach-threads#204dbe3bf28c4259fbcabb48dfa9649c436c1094"
 dependencies = [
  "cesu8 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "combine 3.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
