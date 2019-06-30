@@ -743,7 +743,7 @@ dependencies = [
 
 [[package]]
 name = "exonum-btc-anchoring"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bitcoin 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -839,7 +839,7 @@ name = "exonum-java"
 version = "0.7.0-SNAPSHOT"
 dependencies = [
  "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-btc-anchoring 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-btc-anchoring 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-configuration 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-time 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.7.0-SNAPSHOT",
@@ -3152,7 +3152,7 @@ dependencies = [
 "checksum error-chain 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)" = "07e791d3be96241c77c43846b665ef1384606da2cd2a48730abe606a12906e02"
 "checksum error-chain 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6930e04918388a9a2e41d518c25cf679ccafe26733fb4127dbf21993f2575d46"
 "checksum exonum 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7562320336562265f861798e4eae7251cf20a3efb2ed264f260f0e064acc131f"
-"checksum exonum-btc-anchoring 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "52c9cd33455760ec555bae48f2c4d8a26abcc75952c0d618e61708f3c8e2431d"
+"checksum exonum-btc-anchoring 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8148369702114bae70800682d13da6cc26ea54e879efdfb2dcd774d69fdddc1d"
 "checksum exonum-build 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b697a346cc67b824b5a226aee4ac6bc54031faafa72ac8a5bca6eeec16f62ba4"
 "checksum exonum-configuration 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "68a02c7a1806f6d4483a0b3dccdf2a695d31adee4ef55f8b64e76c24d16ca410"
 "checksum exonum-crypto 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6f32f4e16d26b80b856f9592b3e526c7461f1dd5501eaeec8c1d0e1411eeb6eb"
