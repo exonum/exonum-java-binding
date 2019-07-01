@@ -298,10 +298,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * <p>This method destroys the snapshot once the passed closure completes, compared to
    * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
    *
-   * <p>Consider using {@link #applySnapshot(Function)} when returning the result of given function
-   * is needed.
-   *
    * @param snapshotFunction a function to execute
+   * @see #applySnapshot(Function)
    */
   public void withSnapshot(Consumer<Snapshot> snapshotFunction) {
     applySnapshot(s -> {
