@@ -23,34 +23,16 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.exonum.binding.testutils.LoggingTestUtils;
 import com.google.common.testing.NullPointerTester;
-import java.util.List;
-import org.apache.logging.log4j.test.appender.ListAppender;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 class CleanerTest {
 
-  private ListAppender logAppender;
-
-  private Cleaner context;
-
-  @BeforeEach
-  void setUp() {
-    logAppender = LoggingTestUtils.getCapturingLogAppender();
-
-    context = new Cleaner();
-  }
-
-  @AfterEach
-  void tearDown() {
-    logAppender.clear();
-  }
+  private Cleaner context = new Cleaner();
 
   @Test
+  @SuppressWarnings("UnstableApiUsage") // OK in an internal test
   void testRejectsNull() {
     //TODO Consider rewriting this test to get rid of JUnit4 dependency through Guava Testing.
     NullPointerTester tester = new NullPointerTester();
@@ -98,25 +80,6 @@ class CleanerTest {
     context.close();
 
     verify(action).clean();
-  }
-
-  @Test
-  void closeOneActionLogsFailures() {
-    CleanAction action = mock(CleanAction.class);
-    doThrow(RuntimeException.class).when(action).clean();
-
-    context.add(action);
-
-    CloseFailuresException expected = assertThrows(CloseFailuresException.class,
-        () -> context.close());
-    List<String> logEvents = logAppender.getMessages();
-
-    assertThat(logEvents).hasSize(1);
-
-    assertThat(logEvents.get(0))
-        .contains("ERROR")
-        .contains("Exception occurred when this context (" + context
-            + ") attempted to perform a clean operation (" + action);
   }
 
   @Test
