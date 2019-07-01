@@ -37,6 +37,7 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -134,9 +135,7 @@ class BlockchainIntegrationTest {
 
     @Test
     void containsBlock() {
-      testKitTest((blockchain) -> {
-        assertThat(blockchain.containsBlock(block)).isTrue();
-      });
+      testKitTest((blockchain) -> assertThat(blockchain.containsBlock(block)).isTrue());
     }
 
     @Test
@@ -426,12 +425,9 @@ class BlockchainIntegrationTest {
   }
 
   private void testKitTest(Consumer<Blockchain> test) {
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      test.accept(blockchain);
-
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    test.accept(blockchain);
   }
 
   private static void assertGenesisBlock(Block actualBlock) {

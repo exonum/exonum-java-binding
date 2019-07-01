@@ -30,11 +30,13 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.ServiceModule;
 import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -144,20 +146,19 @@ class TestKitTest {
     EmulatedNode emulatedTestKitNode = testKit.getEmulatedNode();
     assertThat(serviceNode.getPublicKey())
         .isEqualTo(emulatedTestKitNode.getServiceKeyPair().getPublicKey());
-    testKit.withSnapshot((view) -> {
-      // Check that initialization changed database state
-      TestSchema testSchema = service.createDataSchema(view);
-      ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
-      Map<HashCode, String> testMap = toMap(testProofMap);
-      Map<HashCode, String> expected = ImmutableMap.of(
-          TestService.INITIAL_ENTRY_KEY, TestService.INITIAL_ENTRY_VALUE);
-      assertThat(testMap).isEqualTo(expected);
 
-      // Check that genesis block was committed
-      Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
-      return null;
-    });
+    // Check that initialization changed database state
+    Snapshot view = testKit.getSnapshot();
+    TestSchema testSchema = service.createDataSchema(view);
+    ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
+    Map<HashCode, String> testMap = toMap(testProofMap);
+    Map<HashCode, String> expected = ImmutableMap.of(
+        TestService.INITIAL_ENTRY_KEY, TestService.INITIAL_ENTRY_VALUE);
+    assertThat(testMap).isEqualTo(expected);
+
+    // Check that genesis block was committed
+    Blockchain blockchain = Blockchain.newInstance(view);
+    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
   private void checkTestService2Initialization(TestKit testKit, TestService2 service) {
@@ -170,12 +171,11 @@ class TestKitTest {
     EmulatedNode emulatedTestKitNode = testKit.getEmulatedNode();
     assertThat(serviceNode.getPublicKey())
         .isEqualTo(emulatedTestKitNode.getServiceKeyPair().getPublicKey());
-    testKit.withSnapshot((view) -> {
-      // Check that genesis block was committed
-      Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
-      return null;
-    });
+
+    // Check that genesis block was committed
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
   @Test
@@ -185,12 +185,10 @@ class TestKitTest {
         .withService(TestServiceModule.class)
         .withValidators(validatorCount)
         .build()) {
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        assertThat(blockchain.getActualConfiguration().validatorKeys().size())
-            .isEqualTo(validatorCount);
-        return null;
-      });
+      Snapshot view = testKit.getSnapshot();
+      Blockchain blockchain = Blockchain.newInstance(view);
+      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+          .isEqualTo(validatorCount);
     }
   }
 
@@ -202,12 +200,10 @@ class TestKitTest {
         .withService(TestServiceModule.class)
         .withValidators(validatorCount)
         .build()) {
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
-        assertThat(blockchain.getActualConfiguration().validatorKeys().size())
-            .isEqualTo(validatorCount);
-        return null;
-      });
+      Snapshot view = testKit.getSnapshot();
+      Blockchain blockchain = Blockchain.newInstance(view);
+      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+          .isEqualTo(validatorCount);
     }
   }
 
@@ -263,12 +259,10 @@ class TestKitTest {
     Block block = testKit.createBlock();
     assertThat(block.getNumTransactions()).isEqualTo(0);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getHeight()).isEqualTo(1);
-      assertThat(block).isEqualTo(blockchain.getBlock(1));
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    assertThat(blockchain.getHeight()).isEqualTo(1);
+    assertThat(block).isEqualTo(blockchain.getBlock(1));
   }
 
   @Test
@@ -312,16 +306,14 @@ class TestKitTest {
     Block block = testKit.createBlockWithTransactions(message);
     assertThat(block.getNumTransactions()).isEqualTo(1);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getHeight()).isEqualTo(1);
-      assertThat(block).isEqualTo(blockchain.getBlock(1));
-      Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
-      assertThat(transactionResults).hasSize(1);
-      TransactionResult transactionResult = transactionResults.get(message.hash());
-      assertThat(transactionResult).isEqualTo(TransactionResult.successful());
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    assertThat(blockchain.getHeight()).isEqualTo(1);
+    assertThat(block).isEqualTo(blockchain.getBlock(1));
+    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
+    assertThat(transactionResults).hasSize(1);
+    TransactionResult transactionResult = transactionResults.get(message.hash());
+    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
   }
 
   @Test
@@ -332,10 +324,8 @@ class TestKitTest {
     Block block = testKit.createBlockWithTransactions(ImmutableList.of(message, message2));
     assertThat(block.getNumTransactions()).isEqualTo(2);
 
-    testKit.withSnapshot((view) -> {
-      checkTransactionsCommittedSuccessfully(view, block, message, message2);
-      return null;
-    });
+    testKit.withSnapshot((view) -> checkTransactionsCommittedSuccessfully(
+        view, block, message, message2));
   }
 
   @Test
@@ -392,10 +382,8 @@ class TestKitTest {
     Block block = testKit.createBlockWithTransactions(message, message2);
     assertThat(block.getNumTransactions()).isEqualTo(2);
 
-    testKit.withSnapshot((view) -> {
-      checkTransactionsCommittedSuccessfully(view, block, message, message2);
-      return null;
-    });
+    testKit.withSnapshot((view) -> checkTransactionsCommittedSuccessfully(
+        view, block, message, message2));
   }
 
   private TransactionMessage constructTestTransactionMessage(String payload) {
@@ -500,7 +488,6 @@ class TestKitTest {
         // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
         // public key and time provider's time
         checkValidatorsTimes(timeSchema, testKit, TIME);
-        return null;
       });
 
       // Update time in time provider
@@ -515,7 +502,6 @@ class TestKitTest {
         TimeSchema timeSchema = TimeSchema.newInstance(view);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(newTime);
-        return null;
       });
     }
   }
@@ -534,6 +520,21 @@ class TestKitTest {
         + " to %s when TimeService is enabled.",
         invalidValidatorCount, TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
     assertThat(thrownException).hasMessageContaining(expectedMessage);
+  }
+
+  @Test
+  void getSnapshot(TestKit testKit) {
+    Class<IllegalStateException> exceptionType = IllegalStateException.class;
+    Snapshot view1 = testKit.getSnapshot();
+    Snapshot view2 = testKit.getSnapshot();
+    Cleaner snapshotCleaner = testKit.snapshotCleaner;
+    assertThat(snapshotCleaner.getNumRegisteredActions()).isEqualTo(2);
+
+    testKit.close();
+
+    // Verify that snapshot proxies were closed
+    assertThrows(exceptionType, view1::getViewNativeHandle);
+    assertThrows(exceptionType, view2::getViewNativeHandle);
   }
 
   private void checkValidatorsTimes(
