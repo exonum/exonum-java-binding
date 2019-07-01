@@ -296,7 +296,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * accessible with it in {@linkplain Blockchain#getTxMessages() blockchain}.
    *
    * <p>This method destroys the snapshot once the passed closure completes, compared to
-   * {@link #getSnapshot()}, which disposes created snapshots only when closing the TestKit.
+   * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
    *
    * <p>Consider using {@link #applySnapshot(Function)} when returning the result of given function
    * is needed.
@@ -317,7 +317,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * {@linkplain Blockchain#getTxMessages() blockchain}.
    *
    * <p>This method destroys the snapshot once the passed closure completes, compared to
-   * {@link #getSnapshot()}, which disposes created snapshots only when closing the TestKit.
+   * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
    *
    * <p>Consider using {@link #withSnapshot(Consumer)} when returning the result of given function
    * is not needed.
@@ -331,7 +331,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       Snapshot snapshot = createSnapshot(cleaner);
       return snapshotFunction.apply(snapshot);
     } catch (CloseFailuresException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -366,15 +366,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   @Override
   protected void disposeInternal() {
-    closeSnapshotCleaners();
-    nativeFreeTestKit(nativeHandle.get());
-  }
-
-  private void closeSnapshotCleaners() {
     try {
       snapshotCleaner.close();
     } catch (CloseFailuresException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
+    } finally {
+      nativeFreeTestKit(nativeHandle.get());
     }
   }
 
