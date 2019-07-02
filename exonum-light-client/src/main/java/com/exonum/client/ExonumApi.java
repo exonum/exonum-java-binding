@@ -16,11 +16,23 @@
 
 package com.exonum.client;
 
+import com.exonum.binding.common.serialization.json.JsonSerializer;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+
 final class ExonumApi {
+  /**
+   * The Gson instance configured to (de)serialize Exonum responses.
+   */
+  static final Gson JSON = JsonSerializer.builder()
+      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+      .create();
+
   /**
    * The maximum allowed blocks count per the request.
    */
   static final int MAX_BLOCKS_PER_REQUEST = 1000;
+
 
   private ExonumApi() {
   }

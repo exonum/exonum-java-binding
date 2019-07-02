@@ -17,21 +17,19 @@
 
 package com.exonum.client;
 
+import static com.exonum.client.ExonumApi.JSON;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
@@ -46,11 +44,6 @@ import lombok.Value;
  * Utility class for Exonum Explorer API.
  */
 final class ExplorerApiHelper {
-
-  @VisibleForTesting
-  static final Gson JSON = JsonSerializer.builder()
-      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-      .create();
 
   static String createSubmitTxBody(TransactionMessage message) {
     SubmitTxRequest request = new SubmitTxRequest(message);

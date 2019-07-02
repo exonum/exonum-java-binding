@@ -17,7 +17,7 @@
 
 package com.exonum.client;
 
-import static com.exonum.client.ExplorerApiHelper.JSON;
+import static com.exonum.client.ExonumApi.JSON;
 
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
