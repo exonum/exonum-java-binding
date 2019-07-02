@@ -18,9 +18,9 @@ package com.exonum.binding.qaservice.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.qaservice.PromoteToCore;
 import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.transaction.RawTransaction;
 
 @PromoteToCore("You have to check these preconditions all the time!")
 final class TransactionPreconditions {

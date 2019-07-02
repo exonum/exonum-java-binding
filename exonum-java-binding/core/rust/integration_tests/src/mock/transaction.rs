@@ -22,7 +22,7 @@ use java_bindings::{Executor, TransactionProxy};
 use super::NATIVE_FACADE_CLASS;
 
 pub const TRANSACTION_ADAPTER_CLASS: &str =
-    "com/exonum/binding/service/adapters/UserTransactionAdapter";
+    "com/exonum/binding/core/service/adapters/UserTransactionAdapter";
 
 pub const TEST_ENTRY_NAME: &str = "test_entry";
 pub const TX_HASH_ENTRY_NAME: &str = "tx_hash";

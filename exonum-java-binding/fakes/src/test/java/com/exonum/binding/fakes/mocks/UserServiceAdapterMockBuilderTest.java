@@ -22,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.service.adapters.UserServiceAdapter;
+import com.exonum.binding.core.service.adapters.UserServiceAdapter;
 import org.junit.jupiter.api.Test;
 
 class UserServiceAdapterMockBuilderTest {

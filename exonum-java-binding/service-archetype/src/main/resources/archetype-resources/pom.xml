@@ -15,7 +15,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
-    <junit.jupiter.version>5.4.2</junit.jupiter.version>
+    <junit.jupiter.version>5.5.0</junit.jupiter.version>
     <hamcrest.version>2.1</hamcrest.version>
     <mockito.version>2.28.2</mockito.version>
     <exonum.version>0.7.0-SNAPSHOT</exonum.version>
@@ -117,9 +117,7 @@
         <version>2.22.2</version>
         <configuration>
           <argLine>
-            <!-- TODO: Replace with a path to the libjava_bindings.so to enable
-                 integration tests that require a native library. -->
-            -Djava.library.path=${project.basedir}/core/rust/target/debug
+            -Djava.library.path=${env.EXONUM_HOME}/lib/native
           </argLine>
         </configuration>
       </plugin>

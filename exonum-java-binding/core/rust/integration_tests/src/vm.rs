@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
-use java_bindings::utils::jni_cache;
-
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::Arc;
+
+use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
+use java_bindings::utils::jni_cache;
 
 /// Kibibyte
 pub const KIB: usize = 1024;
@@ -70,7 +70,12 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         jvm_args_builder = jvm_args_builder.option(&log4j_path_option());
     }
     if debug {
-        jvm_args_builder = jvm_args_builder.option("-Xcheck:jni");
+        jvm_args_builder = jvm_args_builder
+            // Perform additional checks of correctness of JNI operations
+            .option("-Xcheck:jni")
+            // Use test-specific JVM options improving performance (see ECR-534)
+            .option("-XX:TieredStopAtLevel=1")
+            .option("-XX:+UseParallelGC");
     }
 
     let jvm_args = jvm_args_builder

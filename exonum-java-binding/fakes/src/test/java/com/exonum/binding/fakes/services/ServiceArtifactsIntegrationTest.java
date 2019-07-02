@@ -21,10 +21,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.app.ServiceRuntimeBootstrap;
+import com.exonum.binding.core.runtime.ServiceLoadingException;
+import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.service.adapters.UserServiceAdapter;
 import com.exonum.binding.fakes.services.service.TestService;
-import com.exonum.binding.runtime.ServiceLoadingException;
-import com.exonum.binding.runtime.ServiceRuntime;
-import com.exonum.binding.service.adapters.UserServiceAdapter;
 import com.exonum.binding.test.CiOnly;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.io.IOException;

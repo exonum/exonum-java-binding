@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package ${groupId};
+package ${package};
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.service.Schema;
-import com.exonum.binding.storage.database.View;
+import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.database.View;
 import java.util.Collections;
 import java.util.List;
 

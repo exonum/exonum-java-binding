@@ -119,7 +119,7 @@ impl Service for ServiceProxy {
                 self.service.as_obj(),
                 service_adapter::convert_transaction_id(),
                 JavaType::Object(
-                    "com/exonum/binding/service/adapters/UserTransactionAdapter".into(),
+                    "com/exonum/binding/core/service/adapters/UserTransactionAdapter".into(),
                 ),
                 &[JValue::from(tx_id), JValue::from(payload)],
             );

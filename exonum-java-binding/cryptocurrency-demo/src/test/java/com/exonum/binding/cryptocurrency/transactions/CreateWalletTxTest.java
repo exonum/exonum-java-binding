@@ -24,20 +24,21 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.ne
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.binding.transaction.RawTransaction;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -79,17 +80,15 @@ class CreateWalletTxTest {
         newCreateWalletTransaction(DEFAULT_INITIAL_BALANCE, OWNER_KEY_PAIR);
     testKit.createBlockWithTransactions(transactionMessage);
 
-    testKit.withSnapshot((view) -> {
-      // Check that entries have been added
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+    // Check that entries have been added
+    Snapshot view = testKit.getSnapshot();
+    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-      PublicKey emulatedNodePublicKey = OWNER_KEY_PAIR.getPublicKey();
-      assertThat(wallets.containsKey(emulatedNodePublicKey)).isTrue();
-      assertThat(wallets.get(emulatedNodePublicKey).getBalance())
-          .isEqualTo(DEFAULT_INITIAL_BALANCE);
-      return null;
-    });
+    PublicKey emulatedNodePublicKey = OWNER_KEY_PAIR.getPublicKey();
+    assertThat(wallets.containsKey(emulatedNodePublicKey)).isTrue();
+    assertThat(wallets.get(emulatedNodePublicKey).getBalance())
+        .isEqualTo(DEFAULT_INITIAL_BALANCE);
   }
 
   @Test
@@ -107,14 +106,12 @@ class CreateWalletTxTest {
     testKit.createBlockWithTransactions(transactionMessage2);
 
     // Check that the second tx has failed
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
-      TransactionResult expectedTransactionResult =
-          TransactionResult.error(WALLET_ALREADY_EXISTS.errorCode, null);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
+    TransactionResult expectedTransactionResult =
+        TransactionResult.error(WALLET_ALREADY_EXISTS.errorCode, null);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test

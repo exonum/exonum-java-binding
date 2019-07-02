@@ -20,17 +20,20 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 class ThrowingTransactionsTest {
 
   @Mock

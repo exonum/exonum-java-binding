@@ -23,24 +23,25 @@ import static com.exonum.binding.qaservice.TransactionUtils.toTransactionMessage
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceModule;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.transaction.TransactionExecutionException;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -108,13 +109,11 @@ class ErrorTxIntegrationTest {
     TransactionMessage errorTx = createErrorTransaction(0L, errorCode, null);
     testKit.createBlockWithTransactions(errorTx);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-      TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+    TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test
@@ -125,14 +124,12 @@ class ErrorTxIntegrationTest {
     TransactionMessage errorTx = createErrorTransaction(0L, errorCode, errorDescription);
     testKit.createBlockWithTransactions(errorTx);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-      TransactionResult expectedTransactionResult =
-          TransactionResult.error(errorCode, errorDescription);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+    TransactionResult expectedTransactionResult =
+        TransactionResult.error(errorCode, errorDescription);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test

@@ -20,9 +20,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.transaction.Transaction;
-import com.exonum.binding.transaction.TransactionContext;
-import com.exonum.binding.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import java.lang.reflect.Constructor;
 import javax.annotation.Nullable;
 import org.mockito.invocation.InvocationOnMock;

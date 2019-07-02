@@ -23,21 +23,22 @@ import static com.exonum.binding.qaservice.TransactionUtils.newContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.proxy.Cleaner;
-import com.exonum.binding.proxy.CloseFailuresException;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceModule;
-import com.exonum.binding.storage.database.Fork;
-import com.exonum.binding.storage.database.MemoryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.binding.transaction.RawTransaction;
-import com.exonum.binding.transaction.TransactionContext;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -83,17 +84,15 @@ class ThrowingTxIntegrationTest {
     TransactionMessage throwingTx = createThrowingTransaction(0L);
     testKit.createBlockWithTransactions(throwingTx);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(throwingTx.hash());
-      assertThat(txResult).isNotEmpty();
-      TransactionResult transactionResult = txResult.get();
-      assertThat(transactionResult.getType()).isEqualTo(TransactionResult.Type.UNEXPECTED_ERROR);
-      assertThat(transactionResult.getErrorCode()).isEmpty();
-      assertThat(transactionResult.getErrorDescription())
-          .contains("#execute of this transaction always throws");
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(throwingTx.hash());
+    assertThat(txResult).isNotEmpty();
+    TransactionResult transactionResult = txResult.get();
+    assertThat(transactionResult.getType()).isEqualTo(TransactionResult.Type.UNEXPECTED_ERROR);
+    assertThat(transactionResult.getErrorCode()).isEmpty();
+    assertThat(transactionResult.getErrorDescription())
+        .contains("#execute of this transaction always throws");
   }
 
   @Test

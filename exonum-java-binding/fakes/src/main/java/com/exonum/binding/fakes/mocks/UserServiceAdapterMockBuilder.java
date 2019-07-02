@@ -26,8 +26,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.service.adapters.UserServiceAdapter;
-import com.exonum.binding.service.adapters.UserTransactionAdapter;
+import com.exonum.binding.core.service.adapters.UserServiceAdapter;
+import com.exonum.binding.core.service.adapters.UserTransactionAdapter;
 
 /**
  * A {@link UserServiceAdapter} mock builder.

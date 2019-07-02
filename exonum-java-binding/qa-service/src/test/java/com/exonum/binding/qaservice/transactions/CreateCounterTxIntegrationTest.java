@@ -26,20 +26,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.blockchain.Blockchain;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceImpl;
 import com.exonum.binding.qaservice.QaServiceModule;
-import com.exonum.binding.storage.indices.MapIndex;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.binding.transaction.RawTransaction;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -99,16 +100,14 @@ class CreateCounterTxIntegrationTest {
     service.submitCreateCounter(counterName);
     testKit.createBlock();
 
-    testKit.withSnapshot((view) -> {
-      QaSchema schema = new QaSchema(view);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
+    Snapshot view = testKit.getSnapshot();
+    QaSchema schema = new QaSchema(view);
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> counterNames = schema.counterNames();
+    HashCode counterId = sha256().hashString(counterName, UTF_8);
 
-      assertThat(counters.get(counterId)).isEqualTo(0L);
-      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
-      return null;
-    });
+    assertThat(counters.get(counterId)).isEqualTo(0L);
+    assertThat(counterNames.get(counterId)).isEqualTo(counterName);
   }
 
   @Test
@@ -120,14 +119,12 @@ class CreateCounterTxIntegrationTest {
     testKit.createBlockWithTransactions(transactionMessage);
     testKit.createBlockWithTransactions(transactionMessage2);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
-      TransactionResult expectedTransactionResult =
-          TransactionResult.error(COUNTER_ALREADY_EXISTS.code, null);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
+    TransactionResult expectedTransactionResult =
+        TransactionResult.error(COUNTER_ALREADY_EXISTS.code, null);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test
