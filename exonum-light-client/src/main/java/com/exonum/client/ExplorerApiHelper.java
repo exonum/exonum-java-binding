@@ -122,15 +122,18 @@ final class ExplorerApiHelper {
       GetTxResponseExecutionResult executionStatus) {
     if (executionStatus == null) {
       return null;
-    } else if (executionStatus.getType() == GetTxResponseExecutionStatus.SUCCESS) {
-      return TransactionResult.successful();
-    } else if (executionStatus.getType() == GetTxResponseExecutionStatus.ERROR) {
-      return TransactionResult.error(executionStatus.getCode(), executionStatus.getDescription());
-    } else if (executionStatus.getType() == GetTxResponseExecutionStatus.PANIC) {
-      return TransactionResult.unexpectedError(executionStatus.getDescription());
-    } else {
-      throw new IllegalArgumentException("Unexpected transaction execution status: "
-          + executionStatus.getType());
+    }
+    switch (executionStatus.getType()) {
+      case SUCCESS:
+        return TransactionResult.successful();
+      case ERROR:
+        return TransactionResult.error(executionStatus.getCode(),
+            executionStatus.getDescription());
+      case PANIC:
+        return TransactionResult.unexpectedError(executionStatus.getDescription());
+      default:
+        throw new IllegalStateException("Unexpected transaction execution status: "
+            + executionStatus.getType());
     }
   }
 
