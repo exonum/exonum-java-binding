@@ -49,7 +49,7 @@ class ServiceModuleTest {
   }
 
   @Test
-  void testKitTest() {
+  void testServiceInstantiation() {
     try (TestKit testKit = TestKit.forService(ServiceModule.class)) {
       MyService service = testKit.getService(MyService.ID, MyService.class);
 
