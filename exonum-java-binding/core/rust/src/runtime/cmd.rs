@@ -31,6 +31,7 @@ use std::path::PathBuf;
 // Parameters for `run` command
 const EJB_LOG_CONFIG_PATH: &str = "EJB_LOG_CONFIG_PATH";
 const EJB_PORT: &str = "EJB_PORT";
+const EJB_OVERRIDE_LIBRARY_PATH: &str = "EJB_OVERRIDE_LIBRARY_PATH";
 const JVM_DEBUG_SOCKET: &str = "JVM_DEBUG_SOCKET";
 const JVM_ARGS_PREPEND: &str = "JVM_ARGS_PREPEND";
 const JVM_ARGS_APPEND: &str = "JVM_ARGS_APPEND";
@@ -60,6 +61,15 @@ impl CommandExtension for Run {
                 "Path to log4j configuration file.",
                 None,
                 "ejb-log-config-path",
+                false,
+            ),
+            Argument::new_named(
+                EJB_OVERRIDE_LIBRARY_PATH,
+                false,
+                "Overrides the standard path to native libraries, enabling running the non-packaged \
+                exonum-java application. Mostly for internal usage.",
+                None,
+                "ejb-override-java-library-path",
                 false,
             ),
             Argument::new_named(
@@ -97,6 +107,7 @@ impl CommandExtension for Run {
             .arg(EJB_LOG_CONFIG_PATH)
             .unwrap_or_else(|_| get_path_to_default_log_config());
         let port = context.arg(EJB_PORT)?;
+        let override_system_lib_path = context.arg(EJB_OVERRIDE_LIBRARY_PATH).ok();
         let args_prepend: Vec<String> = context.arg_multiple(JVM_ARGS_PREPEND).unwrap_or_default();
         let args_append: Vec<String> = context.arg_multiple(JVM_ARGS_APPEND).unwrap_or_default();
         let jvm_debug_socket = context.arg(JVM_DEBUG_SOCKET).ok();
@@ -110,6 +121,7 @@ impl CommandExtension for Run {
         let runtime_config = RuntimeConfig {
             log_config_path,
             port,
+            override_system_lib_path,
         };
 
         let config = Config {
