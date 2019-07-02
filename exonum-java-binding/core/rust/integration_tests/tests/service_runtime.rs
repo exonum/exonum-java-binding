@@ -97,7 +97,7 @@ fn load_failing_artifact() {
     let artifact_path = create_service_artifact_non_loadable(runtime.get_executor());
 
     assert_panics(
-        "Java exception: com.exonum.binding.runtime.ServiceLoadingException;",
+        "Java exception: com.exonum.binding.core.runtime.ServiceLoadingException;",
         || runtime.load_artifact(&artifact_path),
     );
 }
