@@ -62,7 +62,6 @@ pub struct RuntimeConfig {
 /// Internal EJB configuration.
 ///
 /// Not visible by user, used internally while initializing runtime.
-#[doc(hidden)] // For testing purposes only.
 pub struct InternalConfig {
     /// EJB system classpath.
     pub system_class_path: String,

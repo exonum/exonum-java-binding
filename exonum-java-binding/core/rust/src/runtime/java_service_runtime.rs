@@ -215,11 +215,15 @@ impl JavaServiceRuntime {
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
     ) -> InitArgsBuilder {
+        // Use overridden system library path if any.
+        let system_lib_path = if runtime_config.override_system_lib_path.is_some() {
+            runtime_config.override_system_lib_path.clone().unwrap()
+        } else {
+            internal_config.system_lib_path
+        };
+
         args_builder
-            .option(&format!(
-                "-Djava.library.path={}",
-                internal_config.system_lib_path
-            ))
+            .option(&format!("-Djava.library.path={}", system_lib_path))
             .option(&format!(
                 "-Djava.class.path={}",
                 internal_config.system_class_path

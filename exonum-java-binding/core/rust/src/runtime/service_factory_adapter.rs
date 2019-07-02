@@ -54,30 +54,24 @@ impl JavaServiceFactoryAdapter {
     fn get_or_create_java_service_runtime(config: Config) -> JavaServiceRuntime {
         // Initialize runtime if it wasn't created before.
         JAVA_SERVICE_RUNTIME_INIT.call_once(|| {
-            // If path is not provided use the standard library path for packaged app.
-            let system_lib_path = if config.runtime_config.override_system_lib_path.is_some() {
-                config
-                    .runtime_config
-                    .override_system_lib_path
-                    .clone()
-                    .unwrap()
-            } else {
-                absolute_library_path()
-            };
-
-            let internal_config = InternalConfig {
-                system_class_path: system_classpath(),
-                system_lib_path,
-            };
-
-            let runtime = JavaServiceRuntime::new(config, internal_config);
-            unsafe {
-                JAVA_SERVICE_RUNTIME = Some(runtime);
-            }
+            Self::create_runtime(config);
         });
 
         unsafe { JAVA_SERVICE_RUNTIME.clone() }
             .expect("Trying to return runtime, but it's uninitialized")
+    }
+
+    // Actually creates the runtime. Should be called only once.
+    fn create_runtime(config: Config) {
+        let internal_config = InternalConfig {
+            system_class_path: system_classpath(),
+            system_lib_path: absolute_library_path(),
+        };
+
+        let runtime = JavaServiceRuntime::new(config, internal_config);
+        unsafe {
+            JAVA_SERVICE_RUNTIME = Some(runtime);
+        }
     }
 }
 
