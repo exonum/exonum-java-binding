@@ -18,9 +18,12 @@ package ${package};
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
+import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.testkit.TestKit;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,19 @@ class ServiceModuleTest {
     TransactionConverter s = injector.getInstance(TransactionConverter.class);
 
     assertThat(s, instanceOf(MyTransactionConverter.class));
+  }
+
+  @Test
+  void testKitTest() {
+    try (TestKit testKit = TestKit.forService(ServiceModule.class)) {
+      MyService service = testKit.getService(MyService.ID, MyService.class);
+
+      // Check that genesis block was committed
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        assertThat(blockchain.getBlockHashes().size(), equalTo(1L));
+      });
+    }
   }
 
   private static Injector createInjector() {
