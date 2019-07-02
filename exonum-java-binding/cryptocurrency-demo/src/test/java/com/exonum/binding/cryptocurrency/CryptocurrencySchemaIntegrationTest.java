@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -40,24 +41,20 @@ class CryptocurrencySchemaIntegrationTest {
 
   @Test
   void getStateHashes(TestKit testKit) {
-    testKit.withSnapshot((view) -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    Snapshot view = testKit.getSnapshot();
+    CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
-      HashCode walletsMerkleRoot = schema.wallets().getRootHash();
-      ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
+    HashCode walletsMerkleRoot = schema.wallets().getRootHash();
+    ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
 
-      assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
-      return null;
-    });
+    assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
   }
 
   @Test
   void walletHistoryNoRecords(TestKit testKit) {
-    testKit.withSnapshot((view) -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    Snapshot view = testKit.getSnapshot();
+    CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
-      assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
-      return null;
-    });
+    assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
   }
 }

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -55,12 +55,11 @@ class TestKitParameterizationTest {
     testKit.withSnapshot(verifyNumValidators(NEW_VALIDATOR_COUNT));
   }
 
-  private static Function<Snapshot, Void> verifyNumValidators(int expected) {
+  private static Consumer<Snapshot> verifyNumValidators(int expected) {
     return (view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       assertThat(blockchain.getActualConfiguration().validatorKeys().size())
           .isEqualTo(expected);
-      return null;
     };
   }
 }
