@@ -31,6 +31,7 @@ import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.qaservice.QaSchema;
@@ -102,15 +103,13 @@ class IncrementCounterTxIntegrationTest {
     service.submitIncrementCounter(seed, counterId);
     testKit.createBlock();
 
-    testKit.withSnapshot((view) -> {
-      // Check the counter has an incremented value
-      QaSchema schema = new QaSchema(view);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      long expectedValue = 1;
+    // Check the counter has an incremented value
+    Snapshot view = testKit.getSnapshot();
+    QaSchema schema = new QaSchema(view);
+    MapIndex<HashCode, Long> counters = schema.counters();
+    long expectedValue = 1;
 
-      assertThat(counters.get(counterId)).isEqualTo(expectedValue);
-      return null;
-    });
+    assertThat(counters.get(counterId)).isEqualTo(expectedValue);
   }
 
   @Test
@@ -121,14 +120,12 @@ class IncrementCounterTxIntegrationTest {
     TransactionMessage incrementCounterTx = createIncrementCounterTransaction(0L, counterId);
     testKit.createBlockWithTransactions(incrementCounterTx);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(incrementCounterTx.hash());
-      TransactionResult expectedTransactionResult =
-          TransactionResult.error(UNKNOWN_COUNTER.code, null);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(incrementCounterTx.hash());
+    TransactionResult expectedTransactionResult =
+        TransactionResult.error(UNKNOWN_COUNTER.code, null);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test

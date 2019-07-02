@@ -34,6 +34,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -54,12 +55,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @RequiresNativeLibrary
-// todo: Remove once https://github.com/junit-team/junit5/issues/1925 is released (in 5.5)
-@Execution(ExecutionMode.SAME_THREAD)
 class QaServiceImplIntegrationTest {
 
   @RegisterExtension
@@ -72,33 +69,29 @@ class QaServiceImplIntegrationTest {
   @Test
   void createDataSchema(TestKit testKit) {
     QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    testKit.withSnapshot((view) -> {
-      Schema dataSchema = service.createDataSchema(view);
-      assertThat(dataSchema).isInstanceOf(QaSchema.class);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Schema dataSchema = service.createDataSchema(view);
+    assertThat(dataSchema).isInstanceOf(QaSchema.class);
   }
 
   @Test
   void initialize(TestKit testKit) {
-    testKit.withSnapshot((view) -> {
-      // TODO: https://jira.bf.local/browse/ECR-2683 is needed for service configuration to be
-      //  checked
+    // TODO: https://jira.bf.local/browse/ECR-2683 is needed for service configuration to be
+    //  checked
 
-      // Check that both the default and afterCommit counters were created.
-      QaSchema schema = new QaSchema(view);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
+    Snapshot view = testKit.getSnapshot();
+    // Check that both the default and afterCommit counters were created.
+    QaSchema schema = new QaSchema(view);
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> counterNames = schema.counterNames();
 
-      HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
-      HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+    HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
+    HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
-      assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
-      assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
-      assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
-      assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
-      return null;
-    });
+    assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
+    assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
+    assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
+    assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
   }
 
   @Test
@@ -176,16 +169,14 @@ class QaServiceImplIntegrationTest {
     // After the second block the afterCommit transaction is executed
     testKit.createBlock();
 
-    testKit.withSnapshot((view) -> {
-      QaSchema schema = new QaSchema(view);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-      HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+    Snapshot view = testKit.getSnapshot();
+    QaSchema schema = new QaSchema(view);
+    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<HashCode, String> counterNames = schema.counterNames();
+    HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
 
-      assertThat(counters.get(counterId)).isEqualTo(1L);
-      assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
-      return null;
-    });
+    assertThat(counters.get(counterId)).isEqualTo(1L);
+    assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
   }
 
   @Test

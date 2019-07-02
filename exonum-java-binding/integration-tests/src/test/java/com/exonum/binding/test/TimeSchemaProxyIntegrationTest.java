@@ -19,6 +19,7 @@ package com.exonum.binding.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
@@ -96,12 +97,9 @@ class TimeSchemaProxyIntegrationTest {
   }
 
   private void testKitTest(Consumer<TimeSchema> test) {
-    testKit.withSnapshot((view) -> {
-      TimeSchema timeSchema = TimeSchema.newInstance(view);
-      test.accept(timeSchema);
-
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    TimeSchema timeSchema = TimeSchema.newInstance(view);
+    test.accept(timeSchema);
   }
 
   private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {

@@ -30,6 +30,7 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -108,13 +109,11 @@ class ErrorTxIntegrationTest {
     TransactionMessage errorTx = createErrorTransaction(0L, errorCode, null);
     testKit.createBlockWithTransactions(errorTx);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-      TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+    TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test
@@ -125,14 +124,12 @@ class ErrorTxIntegrationTest {
     TransactionMessage errorTx = createErrorTransaction(0L, errorCode, errorDescription);
     testKit.createBlockWithTransactions(errorTx);
 
-    testKit.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
-      Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-      TransactionResult expectedTransactionResult =
-          TransactionResult.error(errorCode, errorDescription);
-      assertThat(txResult).hasValue(expectedTransactionResult);
-      return null;
-    });
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
+    TransactionResult expectedTransactionResult =
+        TransactionResult.error(errorCode, errorDescription);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test
