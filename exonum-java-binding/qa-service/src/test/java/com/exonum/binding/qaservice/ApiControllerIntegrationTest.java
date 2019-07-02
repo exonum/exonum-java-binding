@@ -46,9 +46,7 @@ import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
-import com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory;
-import com.exonum.binding.common.serialization.json.TransactionResultAdapterFactory;
-import com.exonum.binding.core.blockchain.serialization.BlockAdapterFactory;
+import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -76,6 +74,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -84,6 +84,7 @@ import org.mockito.quality.Strictness;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
+@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 @SuppressWarnings("WeakerAccess")
 class ApiControllerIntegrationTest {
 
@@ -94,9 +95,7 @@ class ApiControllerIntegrationTest {
   private static final HashCode HASH_1 = HashCode.fromInt(0x00);
 
   private static final Gson JSON_SERIALIZER = JsonSerializer.builder()
-      .registerTypeAdapterFactory(BlockAdapterFactory.create())
-      .registerTypeAdapterFactory(TransactionLocationAdapterFactory.create())
-      .registerTypeAdapterFactory(TransactionResultAdapterFactory.create())
+      .registerTypeAdapterFactory(CoreTypeAdapterFactory.create())
       .create();
 
   @Mock

@@ -67,7 +67,7 @@ public abstract class StoredConfiguration {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.CommonTypeAdapterFactory
    */
   public static TypeAdapter<StoredConfiguration> typeAdapter(Gson gson) {
     return new AutoValue_StoredConfiguration.GsonTypeAdapter(gson);

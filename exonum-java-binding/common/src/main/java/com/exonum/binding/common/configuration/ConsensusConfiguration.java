@@ -89,7 +89,7 @@ public abstract class ConsensusConfiguration {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.common.serialization.json.StoredConfigurationAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.CommonTypeAdapterFactory
    */
   public static TypeAdapter<ConsensusConfiguration> typeAdapter(Gson gson) {
     return new AutoValue_ConsensusConfiguration.GsonTypeAdapter(gson);

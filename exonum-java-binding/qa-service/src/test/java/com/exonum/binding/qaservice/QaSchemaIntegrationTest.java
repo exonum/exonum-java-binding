@@ -19,6 +19,7 @@ package com.exonum.binding.qaservice;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -36,16 +37,14 @@ class QaSchemaIntegrationTest {
 
   @Test
   void getStateHashesEmptyDb(TestKit testKit) {
-    testKit.withSnapshot((view) -> {
-      QaSchema schema = new QaSchema(view);
+    Snapshot view = testKit.getSnapshot();
+    QaSchema schema = new QaSchema(view);
 
-      List<HashCode> stateHashes = schema.getStateHashes();
+    List<HashCode> stateHashes = schema.getStateHashes();
 
-      assertThat(stateHashes).hasSize(1);
+    assertThat(stateHashes).hasSize(1);
 
-      HashCode countersRootHash = schema.counters().getRootHash();
-      assertThat(stateHashes.get(0)).isEqualTo(countersRootHash);
-      return null;
-    });
+    HashCode countersRootHash = schema.counters().getRootHash();
+    assertThat(stateHashes.get(0)).isEqualTo(countersRootHash);
   }
 }

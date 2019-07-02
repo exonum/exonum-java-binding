@@ -18,8 +18,13 @@ out/
 **/*.rs.bk
 .cargo/
 
-# Maven target
+# Maven and Rust target dirs
 target/
+
+# Ignore Maven command-line configuration (we currently consider it as local).
+# See `mvn --help` for a list of flags to put in that file, and also
+# https://maven.apache.org/configure.html
+**/.mvn/maven.config
 
 *.log
 

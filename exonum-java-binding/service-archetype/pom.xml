@@ -21,6 +21,21 @@
     <maven-resourcesPlugin.version>3.1.0</maven-resourcesPlugin.version>
   </properties>
 
+  <dependencies>
+    <!-- The archetype has to have a dependency on core so that it is built strictly after it.
+
+    The ITs naturally generate a project that is not a child of the parent project.
+    Therefore, they also require that the core and its dependencies are available in the (local)
+    repository, hence `mvn verify` does not work; but `mvn install` — does.
+    -->
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-core</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <pluginManagement>
       <plugins>

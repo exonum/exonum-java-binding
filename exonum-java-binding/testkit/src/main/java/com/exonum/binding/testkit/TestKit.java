@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -98,6 +99,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   private static final short TIME_SERVICE_ID = 4;
 
   private final Map<Short, Service> services = new HashMap<>();
+  @VisibleForTesting
+  final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
   private TestKit(long nativeHandle, Map<Short, UserServiceAdapter> serviceAdapters) {
     super(nativeHandle, true);
@@ -272,7 +275,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * Returns a list of in-pool transactions that match the given predicate.
    */
   public List<TransactionMessage> findTransactionsInPool(Predicate<TransactionMessage> predicate) {
-    return withSnapshot((view) -> {
+    return applySnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
       KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
@@ -292,18 +295,63 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * corresponds to the latest committed block). In-pool (not yet processed) transactions are also
    * accessible with it in {@linkplain Blockchain#getTxMessages() blockchain}.
    *
+   * <p>This method destroys the snapshot once the passed closure completes, compared to
+   * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
+   *
+   * @param snapshotFunction a function to execute
+   * @see #applySnapshot(Function)
+   */
+  public void withSnapshot(Consumer<Snapshot> snapshotFunction) {
+    applySnapshot(s -> {
+      snapshotFunction.accept(s);
+      return null;
+    });
+  }
+
+  /**
+   * Performs a given function with a snapshot of the current database state (i.e., the one that
+   * corresponds to the latest committed block) and returns a result of its execution. In-pool
+   * (not yet processed) transactions are also accessible with it in
+   * {@linkplain Blockchain#getTxMessages() blockchain}.
+   *
+   * <p>This method destroys the snapshot once the passed closure completes, compared to
+   * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
+   *
+   * <p>Consider using {@link #withSnapshot(Consumer)} when returning the result of given function
+   * is not needed.
+   *
    * @param snapshotFunction a function to execute
    * @param <ResultT> a type the function returns
    * @return the result of applying the given function to the database state
    */
-  public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
-    try (Cleaner cleaner = new Cleaner("TestKit#withSnapshot")) {
-      long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
-      Snapshot snapshot = Snapshot.newInstance(snapshotHandle, cleaner);
+  public <ResultT> ResultT applySnapshot(Function<Snapshot, ResultT> snapshotFunction) {
+    try (Cleaner cleaner = new Cleaner("TestKit#applySnapshot")) {
+      Snapshot snapshot = createSnapshot(cleaner);
       return snapshotFunction.apply(snapshot);
     } catch (CloseFailuresException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
+  }
+
+  /**
+   * Returns a snapshot of the current database state (i.e., the one that
+   * corresponds to the latest committed block). In-pool (not yet processed) transactions are also
+   * accessible with it in {@linkplain Blockchain#getTxMessages() blockchain}.
+   *
+   * <p>All created snapshots are deleted when this TestKit is {@linkplain #close() closed}.
+   * It is forbidden to access the snapshots once the TestKit is closed.
+   *
+   * <p>If you need to create a large number (e.g. more than a hundred) of snapshots, it is
+   * recommended to use {@link #withSnapshot(Consumer)} or {@link #applySnapshot(Function)}, which
+   * destroy the snapshots once the passed closure completes.
+   */
+  public Snapshot getSnapshot() {
+    return createSnapshot(snapshotCleaner);
+  }
+
+  private Snapshot createSnapshot(Cleaner cleaner) {
+    long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
+    return Snapshot.newInstance(snapshotHandle, cleaner);
   }
 
   /**
@@ -316,7 +364,13 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   @Override
   protected void disposeInternal() {
-    nativeFreeTestKit(nativeHandle.get());
+    try {
+      snapshotCleaner.close();
+    } catch (CloseFailuresException e) {
+      throw new IllegalStateException(e);
+    } finally {
+      nativeFreeTestKit(nativeHandle.get());
+    }
   }
 
   private static native long nativeCreateTestKit(UserServiceAdapter[] services, boolean auditor,
