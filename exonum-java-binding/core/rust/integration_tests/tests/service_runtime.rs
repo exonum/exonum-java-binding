@@ -70,7 +70,7 @@ fn load_nonexistent_artifact() {
     let artifact_path = "nonexistent_artifact.jar";
 
     assert_panics(
-        &format!("Unable to load artifact {}", artifact_path),
+        &format!("Failed to load the service from {}", artifact_path),
         || runtime.load_artifact(&artifact_path),
     );
 }
@@ -84,7 +84,7 @@ fn load_artifact_twice() {
     // The second loading attempt should fail.
     assert_panics(
         &format!(
-            "Unable to load artifact {}",
+            "Failed to load the service from {}",
             artifact_path.to_string_lossy()
         ),
         || runtime.load_artifact(&artifact_path),
@@ -96,9 +96,10 @@ fn load_failing_artifact() {
     let runtime = get_runtime();
     let artifact_path = create_service_artifact_non_loadable(runtime.get_executor());
 
-    assert_panics("Unable to load artifact", || {
-        runtime.load_artifact(&artifact_path)
-    });
+    assert_panics(
+        "Java exception: com.exonum.binding.core.runtime.ServiceLoadingException;",
+        || runtime.load_artifact(&artifact_path),
+    );
 }
 
 #[test]
@@ -108,7 +109,7 @@ fn non_instantiable_service() {
     let artifact_id = runtime.load_artifact(&artifact_path);
 
     assert_panics(
-        &format!("Unable to create service for artifact_id [{}]", artifact_id),
+        "com.exonum.binding.fakes.services.invalidservice.NonInstantiableService",
         || runtime.create_service(&artifact_id),
     );
 }
@@ -117,10 +118,9 @@ fn non_instantiable_service() {
 fn create_service_for_unknown_artifact() {
     let runtime = get_runtime();
 
-    assert_panics(
-        "Unable to create service for artifact_id [unknown:artifact:id]",
-        || runtime.create_service("unknown:artifact:id"),
-    );
+    assert_panics("Unknown artifactId: unknown:artifact:id", || {
+        runtime.create_service("unknown:artifact:id")
+    });
 }
 
 // Creates a new instance of JavaServiceRuntime for same JVM.
