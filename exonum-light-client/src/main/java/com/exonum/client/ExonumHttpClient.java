@@ -175,16 +175,16 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public BlocksRange getLastBlocks(int count, BlockFilteringOption blockFilter,
+  public BlocksRange getLastBlocks(int size, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
-    checkArgument(0 < count,
-        "Requested number of blocks should be positive but was %s", count);
+    checkArgument(0 < size,
+        "Requested blocks range size should be positive but was %s", size);
 
-    List<Block> blocks = new ArrayList<>(count);
+    List<Block> blocks = new ArrayList<>(size);
     // The first request does not specify the maximum height to get the top blocks
     long blockchainHeight = Long.MIN_VALUE;
     Long nextHeight = null;
-    int remainingBlocks = count;
+    int remainingBlocks = size;
     while (remainingBlocks > 0
         && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
       int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
@@ -194,10 +194,10 @@ class ExonumHttpClient implements ExonumClient {
 
       nextHeight = blocksResponse.getBlocksRangeStart() - 1;
       blockchainHeight = max(blockchainHeight, blocksResponse.getBlocksRangeEnd() - 1);
-      remainingBlocks = Math.toIntExact(count - (blockchainHeight - nextHeight));
+      remainingBlocks = Math.toIntExact(size - (blockchainHeight - nextHeight));
     }
 
-    long fromHeight = max(blockchainHeight - count + 1, GENESIS_BLOCK_HEIGHT);
+    long fromHeight = max(blockchainHeight - size + 1, GENESIS_BLOCK_HEIGHT);
     long toHeight = blockchainHeight;
     return postProcessResponseBlocks(fromHeight, toHeight, blocks);
   }

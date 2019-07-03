@@ -132,22 +132,24 @@ public interface ExonumClient {
   /**
    * Returns the given number of the most recent blockchain blocks in ascending order
    * by their height. More precisely, returns blocks in the range
-   * {@code [max(0, blockchainHeight - numBlocks + 1), blockchainHeight]}.
+   * {@code [max(0, blockchainHeight - size + 1), blockchainHeight]}.
    *
-   * @param numBlocks Number of blocks to return. If the number of blocks in the blockchain is less
-   *        than {@code numBlocks}, this method will return all blocks
+   * @param size the size of the range. If the number of blocks in the blockchain is less
+   *        than {@code size}, this method will return all blocks
    * @param blockFilter controls whether to skip blocks with no transactions. If filtering
-   *        is applied, the actual number of blocks may be smaller than {@code numBlocks};
-   *        but the range of blocks will not be extended
+   *        is applied, the actual number of blocks may be smaller than {@code size};
+   *        but the range of blocks will not be extended beyond {@code blockchainHeight - size + 1}.
+   *        If a certain <em>number</em> of non-empty blocks is needed (not a certain
+   *        <em>range</em>), use {@link #findNonEmptyBlocks(int, BlockTimeOption)}
    * @param timeOption controls whether to include
    *        the {@linkplain Block#getCommitTime() block commit time}
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
-   * @throws IllegalArgumentException if numBlocks is non-positive
+   * @throws IllegalArgumentException if size is non-positive
    * @see #findNonEmptyBlocks(int, BlockTimeOption)
    */
-  BlocksRange getLastBlocks(int numBlocks, BlockFilteringOption blockFilter,
+  BlocksRange getLastBlocks(int size, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption);
 
   /**
