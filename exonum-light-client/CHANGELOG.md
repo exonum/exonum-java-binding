@@ -15,14 +15,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+* `ExonumClient#findNonEmptyBlocks` to find a certain number of the most recent non-empty
+  blocks (from the last block and up to the genesis block). (#953)
+
 ### Changed
 - `ExonumClient#getBlocks` accepts a closed range of block heights _[from; to]_
   and returns only the blocks which heights fall into that range. The size of
   the range _(to - from + 1)_ is no longer limited. If needed, the client
-  performs multiple requests to the node. 
+  performs multiple requests to the node. (#953)
 - `ExonumClient#getLastBlocks` returns only the blocks from the closed range 
   _[max(0, blockchainHeight - count + 1), blockchainHeight]_. The size of
-  the range _(min(count, blockchainHeight + 1))_ is no longer limited.
+  the range _(min(count, blockchainHeight + 1))_ is no longer limited. (#953)
 
 ## 0.2.0 - 2019-05-27
 
