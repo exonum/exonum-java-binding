@@ -16,12 +16,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Verification of native library compatibility when it is first loaded, to detect
-  possible mismatch between an installed exonum-java application and the version
-  used in a service project. (#882)
-- `Block#isEmpty()`
-- `RawTransaction#fromMessage(TransactionMessage)`, which is mostly useful in tests,
-  where you might have a message but need it as a `RawTransaction` in some assertions.
 - A new `exonum-testkit` module that allows to emulate blockchain network and test transaction
   execution in the synchronous environment (that is, without consensus algorithm and network
   operation involved).
@@ -29,6 +23,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   node (a validator or an auditor) in an emulated Exonum blockchain network.
   For more information and examples see <TODO: link to documentation>.
   (#819, #833, #859, #913, #989)
+- Verification of native library compatibility when it is first loaded, to detect
+  possible mismatch between an installed exonum-java application and the version
+  used in a service project. (#882)
+- `Block#isEmpty()`
+- `RawTransaction#fromMessage(TransactionMessage)`, which is mostly useful in tests,
+  where you might have a message but need it as a `RawTransaction` in some assertions.
 
 ### Changed
 - `BinaryTransactionMessage#toString` to include some fields in human-readable
