@@ -39,7 +39,6 @@
         <groupId>com.exonum.binding</groupId>
         <artifactId>exonum-testkit</artifactId>
         <version>${project.version}</version>
-        <scope>test</scope>
       </dependency>
 
       <!-- Exported third-party artefacts the services depend upon. -->
