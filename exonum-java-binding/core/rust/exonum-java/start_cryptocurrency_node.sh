@@ -45,9 +45,7 @@ echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 header "PREPARE PATHS"
 
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
-
-export LD_LIBRARY_PATH="$JAVA_LIB_DIR"
-echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+JAVA_LIBRARY_PATH="${EJB_ROOT}/core/rust/target/debug"
 
 # Clear test dir
 rm -rf testnet
@@ -78,4 +76,5 @@ cargo +$RUST_COMPILER_VERSION run -- run -d testnet/db -c testnet/node.toml \
  --service-key-pass pass \
  --public-api-address 127.0.0.1:3000 \
  --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
- --ejb-port 7000
+ --ejb-port 7000 \
+ --ejb-override-java-library-path $JAVA_LIBRARY_PATH

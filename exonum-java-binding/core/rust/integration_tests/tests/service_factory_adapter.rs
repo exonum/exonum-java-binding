@@ -43,7 +43,7 @@ fn test_callbacks() {
 
     let run_command_ext = run_command_ext.unwrap();
     let arguments = run_command_ext.args();
-    assert_eq!(arguments.len(), 5);
+    assert_eq!(arguments.len(), 6);
 
     // Make sure another instance of JavaServiceFactoryAdapter does not extend the `Run` command.
     let mut one_more_adapter =

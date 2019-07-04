@@ -24,7 +24,7 @@ use jni::{
 use proxy::ServiceProxy;
 use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
-use utils::{check_error_on_exception, convert_to_string, unwrap_jni};
+use utils::{convert_to_string, panic_on_exception, unwrap_jni};
 use Executor;
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
@@ -84,7 +84,7 @@ impl JavaServiceRuntime {
     pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
         unwrap_jni(self.executor.with_attached(|env| {
             let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
-            let service = check_error_on_exception(
+            let service = panic_on_exception(
                 env,
                 env.call_method(
                     self.service_runtime.as_obj(),
@@ -93,12 +93,6 @@ impl JavaServiceRuntime {
                     &[artifact_id_obj.into()],
                 ),
             )
-            .unwrap_or_else(|err_msg| {
-                panic!(
-                    "Unable to create service for artifact_id [{}]: {}",
-                    artifact_id, err_msg
-                )
-            })
             .l()?;
             let service = env.new_global_ref(service)?;
             Ok(ServiceProxy::from_global_ref(
@@ -117,7 +111,7 @@ impl JavaServiceRuntime {
         unwrap_jni(self.executor.with_attached(|env| {
             let artifact_path = artifact_path.as_ref().to_str().unwrap();
             let artifact_path_obj: JObject = env.new_string(artifact_path)?.into();
-            let artifact_id = check_error_on_exception(
+            let artifact_id = panic_on_exception(
                 env,
                 env.call_method(
                     self.service_runtime.as_obj(),
@@ -126,9 +120,6 @@ impl JavaServiceRuntime {
                     &[artifact_path_obj.into()],
                 ),
             )
-            .unwrap_or_else(|err_msg| {
-                panic!("Unable to load artifact {}: {}", artifact_path, err_msg)
-            })
             .l()?;
             convert_to_string(env, artifact_id)
         }))
@@ -211,20 +202,19 @@ impl JavaServiceRuntime {
 
     /// Adds required EJB-related arguments to JVM configuration.
     fn add_required_arguments(
-        mut args_builder: InitArgsBuilder,
+        args_builder: InitArgsBuilder,
         runtime_config: &RuntimeConfig,
         internal_config: InternalConfig,
     ) -> InitArgsBuilder {
-        // We do not use system library path in tests, because an absolute path to the native
-        // library will be provided at compile time using RPATH.
-        if internal_config.system_lib_path.is_some() {
-            args_builder = args_builder.option(&format!(
-                "-Djava.library.path={}",
-                internal_config.system_lib_path.unwrap()
-            ));
-        }
+        // Use overridden system library path if any.
+        let system_lib_path = if runtime_config.override_system_lib_path.is_some() {
+            runtime_config.override_system_lib_path.clone().unwrap()
+        } else {
+            internal_config.system_lib_path
+        };
 
         args_builder
+            .option(&format!("-Djava.library.path={}", system_lib_path))
             .option(&format!(
                 "-Djava.class.path={}",
                 internal_config.system_class_path

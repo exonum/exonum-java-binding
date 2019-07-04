@@ -15,8 +15,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
+    <junit.jupiter.version>5.5.0</junit.jupiter.version>
     <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
-    <junit.jupiter.version>5.4.2</junit.jupiter.version>
     <hamcrest.version>2.1</hamcrest.version>
     <mockito.version>2.28.2</mockito.version>
     <exonum.version>0.7.0-SNAPSHOT</exonum.version>
