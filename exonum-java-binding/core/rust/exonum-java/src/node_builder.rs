@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
+//use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory; // FIXME: uncomment when anchoring uses merkledb
 use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
@@ -82,7 +82,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
     match name {
         CONFIGURATION_SERVICE => Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
-        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>,
+        //        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>, // FIXME: uncomment when anchoring uses merkledb
         TIME_SERVICE => Box::new(TimeServiceFactory) as Box<ServiceFactory>,
         _ => panic!("Unknown system service name \"{}\" has been found", name),
     }
@@ -141,6 +141,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // FIXME: temporary ignored until anchoring service switches to MerkleDb
     fn prepare_service_factories_all_system_plus_user_services() {
         let cfg_path = create_config(
             r#"
@@ -161,6 +162,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // FIXME: temporary ignored until anchoring service switches to MerkleDb
     fn system_service_factory_for_name_ok() {
         assert_eq!(
             "configuration",

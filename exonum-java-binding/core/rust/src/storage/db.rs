@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Fork, Snapshot};
-use jni::objects::JClass;
-use jni::JNIEnv;
+use exonum_merkledb::{Fork, Snapshot};
+use jni::{objects::JClass, JNIEnv};
 
 use handle::{self, Handle};
 
@@ -48,7 +47,7 @@ enum ViewOwned {
 
 pub(crate) enum ViewRef {
     Snapshot(&'static Snapshot),
-    Fork(&'static mut Fork),
+    Fork(&'static Fork),
 }
 
 impl View {
@@ -63,10 +62,10 @@ impl View {
     pub fn from_owned_fork(fork: Fork) -> Self {
         // Box a `Fork` value to make sure it will not be moved later
         // and will not break the `reference` field.
-        let mut fork = Box::new(fork);
+        let fork = Box::new(fork);
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
-            reference: unsafe { ViewRef::from_fork(&mut *fork) },
+            reference: unsafe { ViewRef::from_fork(&*fork) },
             _owned: Some(ViewOwned::Fork(fork)),
         }
     }
@@ -82,7 +81,7 @@ impl View {
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
-    pub fn from_ref_fork(fork: &mut Fork) -> Self {
+    pub fn from_ref_fork(fork: &Fork) -> Self {
         View {
             reference: unsafe { ViewRef::from_fork(fork) },
             _owned: None,
@@ -95,9 +94,9 @@ impl View {
 }
 
 impl ViewRef {
-    unsafe fn from_fork(fork: &mut Fork) -> Self {
+    unsafe fn from_fork(fork: &Fork) -> Self {
         // Make a provided reference `'static`.
-        ViewRef::Fork(&mut *(fork as *mut Fork))
+        ViewRef::Fork(&*(fork as *const Fork))
     }
 
     unsafe fn from_snapshot(snapshot: &Snapshot) -> Self {
@@ -118,11 +117,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 
 #[cfg(test)]
 mod tests {
-    use exonum::storage::{Database, Entry, MemoryDB};
-
-    use std::convert::AsRef;
-
     use super::*;
+    use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
 
     const TEST_VALUE: i32 = 42;
 
@@ -147,8 +143,8 @@ mod tests {
     #[test]
     fn create_view_with_ref_fork() {
         let db = setup_database();
-        let mut fork = db.fork();
-        let mut view = View::from_ref_fork(&mut fork);
+        let fork = db.fork();
+        let mut view = View::from_ref_fork(&fork);
         check_ref_fork(&mut view);
         assert!(view._owned.is_none());
     }
@@ -163,24 +159,24 @@ mod tests {
     }
 
     // Creates database with a prepared state.
-    fn setup_database() -> MemoryDB {
-        let db = MemoryDB::new();
-        let mut fork = db.fork();
-        entry(&mut fork).set(TEST_VALUE);
+    fn setup_database() -> TemporaryDB {
+        let db = TemporaryDB::new();
+        let fork = db.fork();
+        entry(&fork).set(TEST_VALUE);
         db.merge(fork.into_patch()).unwrap();
         db
     }
 
     fn entry<T>(view: T) -> Entry<T, i32>
     where
-        T: AsRef<Snapshot + 'static>,
+        T: IndexAccess,
     {
         Entry::new("test", view)
     }
 
     fn check_ref_fork(view: &mut View) {
         match *view.get() {
-            ViewRef::Fork(ref fork) => check_value(fork),
+            ViewRef::Fork(fork) => check_value(fork),
             _ => panic!("View::reference expected to be Fork"),
         }
     }
@@ -192,7 +188,7 @@ mod tests {
         }
     }
 
-    fn check_value<T: AsRef<Snapshot + 'static>>(view: T) {
+    fn check_value<T: IndexAccess>(view: T) {
         assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 

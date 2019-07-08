@@ -38,6 +38,7 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
+pub extern crate exonum_merkledb;
 extern crate exonum_testkit;
 extern crate exonum_time;
 #[cfg(test)]

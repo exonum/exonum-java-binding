@@ -12,25 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::map_index::{MapIndexIter, MapIndexKeys, MapIndexValues};
-use exonum::storage::{Fork, MapIndex, Snapshot};
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject};
-use jni::JNIEnv;
+use exonum_merkledb::{
+    map_index::{MapIndexIter, MapIndexKeys, MapIndexValues},
+    Fork, MapIndex, Snapshot,
+};
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jobject},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
-use storage::db::{Key, Value, View, ViewRef};
-use storage::PairIter;
+use storage::{
+    db::{Key, Value, View, ViewRef},
+    PairIter,
+};
 use utils;
 
 type Index<T> = MapIndex<T, Key, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 type Iter<'a> = PairIter<MapIndexIter<'a, Key, Value>>;
@@ -52,7 +57,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -76,7 +81,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
             }
-            ViewRef::Fork(ref mut fork) => {
+            ViewRef::Fork(fork) => {
                 IndexType::ForkIndex(Index::new_in_family(group_name, &map_id, fork))
             }
         }))

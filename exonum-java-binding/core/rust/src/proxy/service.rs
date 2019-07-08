@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-use exonum::api::ServiceApiBuilder;
-use exonum::blockchain::{Service, ServiceContext, Transaction};
-use exonum::crypto::Hash;
-use exonum::messages::RawTransaction;
-use exonum::storage::{Fork, Snapshot};
+use exonum::{
+    api::ServiceApiBuilder,
+    blockchain::{Service, ServiceContext, Transaction},
+    crypto::Hash,
+    messages::RawTransaction,
+};
+use exonum_merkledb::{Fork, Snapshot};
 use failure;
-use jni::objects::{GlobalRef, JObject, JValue};
-use jni::signature::JavaType;
-use jni::Executor;
-use serde_json;
-use serde_json::value::Value;
-use std::fmt;
-use std::str::FromStr;
+use jni::{
+    objects::{GlobalRef, JObject, JValue},
+    signature::JavaType,
+    Executor,
+};
+use serde_json::{self, value::Value};
+use std::{fmt, str::FromStr};
 
 use handle::to_handle;
 use proxy::node::NodeContext;
@@ -139,7 +141,7 @@ impl Service for ServiceProxy {
         }))
     }
 
-    fn initialize(&self, fork: &mut Fork) -> Value {
+    fn initialize(&self, fork: &Fork) -> Value {
         let json_config = unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let json_config = panic_on_exception(

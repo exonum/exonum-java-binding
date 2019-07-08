@@ -29,6 +29,7 @@ pub const TX_HASH_ENTRY_NAME: &str = "tx_hash";
 pub const AUTHOR_PK_ENTRY_NAME: &str = "author_pk";
 pub const ENTRY_VALUE: &str = "test_value";
 pub const INFO_JSON: &str = r#""test_info""#;
+pub const TEST_SERVICE_NAME: &str = "test_service";
 
 lazy_static! {
     pub static ref INFO_VALUE: Value = Value::String("test_info".to_string());

@@ -19,13 +19,12 @@ use exonum::{
     crypto::{Hash, PublicKey},
     messages::{Message, RawTransaction, ServiceTransaction},
     node::ApiSender,
-    storage::Snapshot,
 };
+use exonum_merkledb::Snapshot;
 use failure;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
-use jni::Executor;
-use jni::JNIEnv;
+use jni::{Executor, JNIEnv};
 
 use std::{panic, ptr};
 
