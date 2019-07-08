@@ -115,7 +115,7 @@ class ApiControllerIntegrationTest {
     Router router = Router.router(vertx);
     new ApiController(qaService).mountApi(router);
 
-    httpServer.requestHandler(router::accept)
+    httpServer.requestHandler(router)
         .listen(0, context.succeeding(result -> {
 
           // Set the actual server port.

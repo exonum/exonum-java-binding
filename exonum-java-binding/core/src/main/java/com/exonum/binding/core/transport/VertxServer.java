@@ -64,7 +64,7 @@ final class VertxServer implements Server {
     vertx = Vertx.vertx();
     rootRouter = Router.router(vertx);
     server = vertx.createHttpServer()
-        .requestHandler(rootRouter::accept);
+        .requestHandler(rootRouter);
     state = IDLE;
   }
 
