@@ -13,15 +13,18 @@
 // limitations under the License.
 
 use exonum::crypto::Hash;
-use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
-use exonum::storage::{Fork, ProofListIndex, Snapshot};
-use jni::errors::Result;
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jint, jlong, jobject};
-use jni::JNIEnv;
+use exonum_merkledb::{
+    proof_list_index::{ListProof, ProofListIndexIter},
+    Fork, ProofListIndex, Snapshot,
+};
+use jni::{
+    errors::Result,
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jint, jlong, jobject},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};

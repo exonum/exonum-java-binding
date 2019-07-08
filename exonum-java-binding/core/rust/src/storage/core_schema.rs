@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::{
-    blockchain::Schema,
-    storage::{Fork, Snapshot, StorageValue},
-};
+use exonum::blockchain::Schema;
+use exonum_merkledb::{Fork, Snapshot, StorageValue};
 use handle::{self, Handle};
 use jni::{
     objects::JClass,

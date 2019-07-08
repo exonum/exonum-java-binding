@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Database, MemoryDB};
-use jni::objects::{JClass, JObject};
-use jni::JNIEnv;
+use exonum_merkledb::{Database, MemoryDB};
+use jni::{
+    objects::{JClass, JObject},
+    JNIEnv,
+};
 
 use std::panic;
 

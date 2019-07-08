@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Entry, Fork, Snapshot};
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray};
-use jni::JNIEnv;
+use exonum_merkledb::{Entry, Fork, Snapshot};
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};

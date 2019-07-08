@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Fork, Snapshot};
-use jni::objects::JClass;
-use jni::JNIEnv;
+use exonum_merkledb::{Fork, Snapshot};
+use jni::{objects::JClass, JNIEnv};
 
 use handle::{self, Handle};
 

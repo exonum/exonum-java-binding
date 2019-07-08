@@ -12,23 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject, jsize};
-use jni::JNIEnv;
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jobject, jsize},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use exonum::crypto::Hash;
-use exonum::storage::proof_map_index::{
-    MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
-    PROOF_MAP_KEY_SIZE,
+use exonum_merkledb::{
+    proof_map_index::{
+        MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
+        PROOF_MAP_KEY_SIZE,
+    },
+    Fork, ProofMapIndex, Snapshot,
 };
-use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 
 use handle::{self, Handle};
-use storage::db::{Value, View, ViewRef};
-use storage::PairIter;
+use storage::{
+    db::{Value, View, ViewRef},
+    PairIter,
+};
 use utils;
 use JniResult;
 

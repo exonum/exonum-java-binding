@@ -15,7 +15,7 @@
  */
 
 use chrono::{DateTime, Utc};
-use exonum::storage::StorageValue;
+use exonum_merkledb::StorageValue;
 use exonum_time::time_provider::TimeProvider;
 use jni::{
     objects::{GlobalRef, JObject},

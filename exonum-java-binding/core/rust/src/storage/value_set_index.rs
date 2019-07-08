@@ -12,18 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::value_set_index::{ValueSetIndexHashes, ValueSetIndexIter};
-use exonum::storage::{Fork, Snapshot, ValueSetIndex};
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject};
-use jni::JNIEnv;
+use exonum_merkledb::{
+    value_set_index::{ValueSetIndexHashes, ValueSetIndexIter},
+    Fork, Snapshot, ValueSetIndex,
+};
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jobject},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
-use storage::db::{Value, View, ViewRef};
-use storage::PairIter;
+use storage::{
+    db::{Value, View, ViewRef},
+    PairIter,
+};
 use utils;
 
 type Index<T> = ValueSetIndex<T, Value>;
