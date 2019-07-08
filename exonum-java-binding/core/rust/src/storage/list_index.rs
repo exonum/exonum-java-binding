@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::list_index::ListIndexIter;
-use exonum::storage::{Fork, ListIndex, Snapshot};
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jlong};
-use jni::JNIEnv;
+use exonum_merkledb::{list_index::ListIndexIter, Fork, ListIndex, Snapshot};
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jlong},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
@@ -29,7 +29,7 @@ type Index<T> = ListIndex<T, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 /// Returns pointer to the created `ListIndex` object.
@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -71,7 +71,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
             }
-            ViewRef::Fork(ref mut fork) => {
+            ViewRef::Fork(fork) => {
                 IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
             }
         }))

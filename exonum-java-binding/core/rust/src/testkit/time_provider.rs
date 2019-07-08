@@ -15,7 +15,7 @@
  */
 
 use chrono::{DateTime, Utc};
-use exonum::storage::StorageValue;
+use exonum_merkledb::BinaryValue;
 use exonum_time::time_provider::TimeProvider;
 use jni::{
     objects::{GlobalRef, JObject},
@@ -51,7 +51,7 @@ impl TimeProvider for JavaTimeProvider {
                 .l()?
                 .into_inner();
             let serialized_date_time = env.convert_byte_array(serialized_date_time)?;
-            let date_time = DateTime::from_bytes(serialized_date_time.into());
+            let date_time = DateTime::from_bytes(serialized_date_time.into()).unwrap();
 
             Ok(date_time)
         }))

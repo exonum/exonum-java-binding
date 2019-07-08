@@ -29,11 +29,8 @@ use integration_tests::{
 };
 
 use java_bindings::{
-    exonum::{
-        blockchain::Service,
-        crypto::hash,
-        storage::{Database, MemoryDB},
-    },
+    exonum::{blockchain::Service, crypto::hash},
+    exonum_merkledb::{Database, TemporaryDB},
     jni::{objects::JObject, JavaVM},
     serde_json::{self, Value},
     utils::{any_to_string, convert_to_string, unwrap_jni},
@@ -91,7 +88,7 @@ fn service_name() {
 
 #[test]
 fn state_hash() {
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let snapshot = db.snapshot();
     let hashes = [hash(&[1]), hash(&[2]), hash(&[3])];
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
@@ -126,40 +123,40 @@ fn tx_from_raw_should_return_err_if_java_exception_occurred() {
 
 #[test]
 fn initialize_config() {
-    let db = MemoryDB::new();
-    let mut fork = db.fork();
+    let db = TemporaryDB::new();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config(TEST_CONFIG_JSON.to_string())
         .build();
 
-    let config = service.initialize(&mut fork);
+    let config = service.initialize(&fork);
     assert_eq!(config, *TEST_CONFIG_VALUE);
 }
 
 #[test]
 fn initialize_config_null() {
-    let db = MemoryDB::new();
-    let mut fork = db.fork();
+    let db = TemporaryDB::new();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config(None)
         .build();
 
-    let config = service.initialize(&mut fork);
+    let config = service.initialize(&fork);
     assert_eq!(config, Value::Null);
 }
 
 #[test]
 fn initialize_config_parse_error() {
-    let db = MemoryDB::new();
-    let mut fork = db.fork();
+    let db = TemporaryDB::new();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config(TEST_CONFIG_NOT_JSON.to_string())
         .build();
 
-    match catch_unwind(AssertUnwindSafe(|| service.initialize(&mut fork))) {
+    match catch_unwind(AssertUnwindSafe(|| service.initialize(&fork))) {
         Ok(_config) => panic!("This test should panic"),
         Err(ref e) => {
             let error = any_to_string(e);
@@ -172,23 +169,23 @@ fn initialize_config_parse_error() {
 #[test]
 #[should_panic(expected = "Java exception: java.lang.RuntimeException")]
 fn initialize_should_panic_if_java_exception_occurred() {
-    let db = MemoryDB::new();
-    let mut fork = db.fork();
+    let db = TemporaryDB::new();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config_throwing(EXCEPTION_CLASS)
         .build();
 
-    service.initialize(&mut fork);
+    service.initialize(&fork);
 }
 
 #[test]
 fn service_can_modify_db_on_initialize() {
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let service = create_test_service(EXECUTOR.clone());
     {
-        let mut fork = db.fork();
-        service.initialize(&mut fork);
+        let fork = db.fork();
+        service.initialize(&fork);
         db.merge(fork.into_patch())
             .expect("Failed to merge changes");
     }
