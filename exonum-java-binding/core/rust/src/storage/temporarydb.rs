@@ -81,14 +81,13 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
     view_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let _db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let _fork = match *handle::cast_handle::<View>(view_handle).get() {
+        let db = handle::cast_handle::<MemoryDB>(db_handle);
+        let fork = match *handle::cast_handle::<View>(view_handle).get() {
             ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
-            ViewRef::Fork(fork) => fork,
+            ViewRef::Fork(ref fork) => fork,
         };
-        //FIXME: Implement merging via db.merge(fork.into_patch())
-        //        db.merge(fork.patch().clone())
-        //            .expect("Unable to merge fork");
+        db.merge(fork.patch().clone())
+            .expect("Unable to merge fork");
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
