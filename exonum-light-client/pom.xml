@@ -67,7 +67,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
-    <okhttp.version>3.14.2</okhttp.version>
+    <okhttp.version>4.0.0</okhttp.version>
     <lombok.version>1.18.8</lombok.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.5.0</junit.jupiter.version>
