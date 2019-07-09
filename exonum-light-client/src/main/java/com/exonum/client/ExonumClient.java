@@ -130,12 +130,13 @@ public interface ExonumClient {
       BlockTimeOption timeOption);
 
   /**
-   * Returns the given number of the most recent blockchain blocks in ascending order
-   * by their height. More precisely, returns blocks in the range
-   * {@code [max(0, blockchainHeight - size + 1), blockchainHeight]}.
+   * Returns the range of the most recent blockchain blocks in ascending order by their height.
+   * More precisely, returns the blocks in the closed range
+   * {@code [max(0, blockchainHeight - size + 1), blockchainHeight]} of size
+   * {@code max(blockchainHeight + 1, size)}.
    *
-   * @param size the size of the range. If the number of blocks in the blockchain is less
-   *        than {@code size}, this method will return all blocks
+   * @param size the size of the range. If it exceeds the number of blocks in the blockchain,
+   *        this method will return all blocks ({@code blockchainHeight + 1})
    * @param blockFilter controls whether to skip blocks with no transactions. If filtering
    *        is applied, the actual number of blocks may be smaller than {@code size};
    *        but the range of blocks will not be extended beyond {@code blockchainHeight - size + 1}.
