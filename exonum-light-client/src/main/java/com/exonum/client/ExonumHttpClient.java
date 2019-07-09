@@ -301,7 +301,7 @@ class ExonumHttpClient implements ExonumClient {
   private static Request post(HttpUrl url, String jsonBody) {
     return new Request.Builder()
         .url(url)
-        .post(RequestBody.create(MEDIA_TYPE_JSON, jsonBody))
+        .post(RequestBody.create(jsonBody, MEDIA_TYPE_JSON))
         .build();
   }
 
