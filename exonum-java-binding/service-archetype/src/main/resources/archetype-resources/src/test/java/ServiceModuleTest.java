@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,36 +16,34 @@
 
 package ${package};
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.testkit.TestKit;
 import org.junit.jupiter.api.Test;
 
 class ServiceModuleTest {
 
+  /**
+   * This is an example service integration test with Exonum Testkit. It simply verifies
+   * that a Service can be instantiated by Testkit, and that the libraries required for Testkit
+   * operation are accessible.
+   *
+   * <p>If you get an UnsatisfiedLinkError in this test — please check that the EXONUM_HOME
+   * environment variable is set properly:
+   * https://exonum.com/doc/version/latest/get-started/java-binding/#after-install
+   */
   @Test
-  void testServiceBinding() {
-    Injector injector = createInjector();
+  void testServiceInstantiation() {
+    try (TestKit testKit = TestKit.forService(ServiceModule.class)) {
+      MyService service = testKit.getService(MyService.ID, MyService.class);
 
-    Service s = injector.getInstance(Service.class);
-
-    assertThat(s, instanceOf(MyService.class));
-  }
-
-  @Test
-  void testTransactionConverterBinding() {
-    Injector injector = createInjector();
-
-    TransactionConverter s = injector.getInstance(TransactionConverter.class);
-
-    assertThat(s, instanceOf(MyTransactionConverter.class));
-  }
-
-  private static Injector createInjector() {
-    return Guice.createInjector(new ServiceModule());
+      // Check that genesis block was committed
+      testKit.withSnapshot((view) -> {
+        Blockchain blockchain = Blockchain.newInstance(view);
+        assertThat(blockchain.getBlockHashes().size(), equalTo(1L));
+      });
+    }
   }
 }
