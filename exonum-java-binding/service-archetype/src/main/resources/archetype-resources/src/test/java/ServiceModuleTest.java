@@ -30,24 +30,15 @@ import org.junit.jupiter.api.Test;
 
 class ServiceModuleTest {
 
-  @Test
-  void testServiceBinding() {
-    Injector injector = createInjector();
-
-    Service s = injector.getInstance(Service.class);
-
-    assertThat(s, instanceOf(MyService.class));
-  }
-
-  @Test
-  void testTransactionConverterBinding() {
-    Injector injector = createInjector();
-
-    TransactionConverter s = injector.getInstance(TransactionConverter.class);
-
-    assertThat(s, instanceOf(MyTransactionConverter.class));
-  }
-
+  /**
+   * This is an example service integration test with Exonum Testkit.
+   * It simply verifies that a Service can be instantiated by Testkit,
+   * and that the libraries required for Testkit operation are accessible.
+   *
+   * <p>If you get an UnsatisfiedLinkError in this test — please check 
+   * that the EXONUM_HOME environment variable is set properly: 
+   * https://exonum.com/doc/version/latest/get-started/java-binding/#after-install
+   */
   @Test
   void testServiceInstantiation() {
     try (TestKit testKit = TestKit.forService(ServiceModule.class)) {
@@ -59,9 +50,5 @@ class ServiceModuleTest {
         assertThat(blockchain.getBlockHashes().size(), equalTo(1L));
       });
     }
-  }
-
-  private static Injector createInjector() {
-    return Guice.createInjector(new ServiceModule());
   }
 }
