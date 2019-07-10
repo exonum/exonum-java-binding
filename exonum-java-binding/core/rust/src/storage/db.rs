@@ -117,7 +117,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 
 #[cfg(test)]
 mod tests {
-    use exonum::storage::{Database, Entry, MemoryDB};
+    use exonum_merkledb::{Database, Entry, TemporaryDB};
 
     use std::convert::AsRef;
 
