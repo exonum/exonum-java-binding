@@ -18,6 +18,7 @@
 package com.exonum.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -176,6 +177,7 @@ public interface ExonumClient {
 
     private URL exonumHost;
     private OkHttpClient httpClient = DEFAULT_CLIENT;
+    private String prefix = "";
 
     /**
      * Sets Exonum host url.
@@ -211,12 +213,21 @@ public interface ExonumClient {
     }
 
     /**
+     * Optionally, sets prefix url to be applied to all requests made by the client.
+     * Can be helpful in case of using middleware routing proxy on the blockchain node side.
+     */
+    public Builder setPrefix(String prefix) {
+      this.prefix = requireNonNull(prefix);
+      return this;
+    }
+
+    /**
      * Creates Exonum client instance.
      * @throws IllegalStateException if required fields weren't set
      */
     public ExonumClient build() {
       checkRequiredFieldsSet();
-      return new ExonumHttpClient(httpClient, exonumHost);
+      return new ExonumHttpClient(httpClient, exonumHost, prefix);
     }
 
     private void checkRequiredFieldsSet() {
