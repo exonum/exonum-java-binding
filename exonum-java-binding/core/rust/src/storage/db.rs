@@ -162,8 +162,8 @@ mod tests {
     }
 
     // Creates database with a prepared state.
-    fn setup_database() -> MemoryDB {
-        let db = MemoryDB::new();
+    fn setup_database() -> TemporaryDB {
+        let db = TemporaryDB::new();
         let mut fork = db.fork();
         entry(&mut fork).set(TEST_VALUE);
         db.merge(fork.into_patch()).unwrap();
