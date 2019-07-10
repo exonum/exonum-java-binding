@@ -19,9 +19,8 @@ use exonum::storage::StorageValue;
 use exonum_time::time_provider::TimeProvider;
 use jni::{
     objects::{GlobalRef, JObject},
-    JNIEnv,
+    Executor, JNIEnv,
 };
-use proxy::Executor;
 use utils::unwrap_jni;
 
 /// Wrapper around Java interface TimeProvider.
