@@ -35,7 +35,7 @@ type Index<T> = MapIndex<T, Key, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 type Iter<'a> = PairIter<MapIndexIter<'a, Key, Value>>;
@@ -57,7 +57,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -81,7 +81,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
             }
-            ViewRef::Fork(ref mut fork) => {
+            ViewRef::Fork(fork) => {
                 IndexType::ForkIndex(Index::new_in_family(group_name, &map_id, fork))
             }
         }))

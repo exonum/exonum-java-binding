@@ -141,7 +141,7 @@ impl Service for ServiceProxy {
         }))
     }
 
-    fn initialize(&self, fork: &mut Fork) -> Value {
+    fn initialize(&self, fork: &Fork) -> Value {
         let json_config = unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let json_config = panic_on_exception(

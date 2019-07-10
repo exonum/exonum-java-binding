@@ -29,7 +29,7 @@ type Index<T> = Entry<T, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 /// Returns pointer to the created `Entry` object.
@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });

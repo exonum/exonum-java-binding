@@ -47,7 +47,7 @@ enum ViewOwned {
 
 pub(crate) enum ViewRef {
     Snapshot(&'static Snapshot),
-    Fork(&'static mut Fork),
+    Fork(&'static Fork),
 }
 
 impl View {
@@ -62,10 +62,10 @@ impl View {
     pub fn from_owned_fork(fork: Fork) -> Self {
         // Box a `Fork` value to make sure it will not be moved later
         // and will not break the `reference` field.
-        let mut fork = Box::new(fork);
+        let fork = Box::new(fork);
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
-            reference: unsafe { ViewRef::from_fork(&mut *fork) },
+            reference: unsafe { ViewRef::from_fork(&*fork) },
             _owned: Some(ViewOwned::Fork(fork)),
         }
     }
@@ -81,7 +81,7 @@ impl View {
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
-    pub fn from_ref_fork(fork: &mut Fork) -> Self {
+    pub fn from_ref_fork(fork: &Fork) -> Self {
         View {
             reference: unsafe { ViewRef::from_fork(fork) },
             _owned: None,
@@ -94,9 +94,9 @@ impl View {
 }
 
 impl ViewRef {
-    unsafe fn from_fork(fork: &mut Fork) -> Self {
+    unsafe fn from_fork(fork: &Fork) -> Self {
         // Make a provided reference `'static`.
-        ViewRef::Fork(&mut *(fork as *mut Fork))
+        ViewRef::Fork(&*(fork as *const Fork))
     }
 
     unsafe fn from_snapshot(snapshot: &Snapshot) -> Self {
