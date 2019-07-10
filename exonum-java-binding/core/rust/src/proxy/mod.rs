@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod executor;
 mod node;
 mod service;
 mod transaction;
 
-pub use self::executor::*;
 pub use self::node::*;
 pub use self::service::*;
 pub use self::transaction::*;

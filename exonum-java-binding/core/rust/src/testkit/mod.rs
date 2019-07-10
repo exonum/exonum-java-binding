@@ -30,9 +30,9 @@ use handle::{cast_handle, drop_handle, to_handle, Handle};
 use jni::{
     objects::{JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
-    JNIEnv,
+    Executor, JNIEnv,
 };
-use proxy::{Executor, ServiceProxy};
+use proxy::ServiceProxy;
 use std::{panic, sync::Arc};
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default};
