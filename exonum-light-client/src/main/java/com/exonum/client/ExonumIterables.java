@@ -16,24 +16,27 @@
 
 package com.exonum.client;
 
-import com.exonum.binding.common.serialization.json.JsonSerializer;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
+import com.google.common.collect.Iterables;
+import java.util.OptionalInt;
+import java.util.function.Predicate;
 
-final class ExonumApi {
-  /**
-   * The Gson instance configured to (de)serialize Exonum responses.
-   */
-  static final Gson JSON = JsonSerializer.builder()
-      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-      .create();
+final class ExonumIterables {
 
   /**
-   * The maximum allowed blocks count per the request.
+   * Returns an index of the first element matching the predicate or {@code OptionalInt.empty()}
+   * if no such element exists.
+   *
+   * @param list a list to search in
+   * @param p a predicate that an element must match
+   * @param <T> the type of elements
    */
-  static final int MAX_BLOCKS_PER_REQUEST = 1000;
-
-
-  private ExonumApi() {
+  static <T> OptionalInt indexOf(Iterable<T> list, Predicate<? super T> p) {
+    int i = Iterables.indexOf(list, p::test);
+    if (i == -1) {
+      return OptionalInt.empty();
+    }
+    return OptionalInt.of(i);
   }
+
+  private ExonumIterables() {}
 }

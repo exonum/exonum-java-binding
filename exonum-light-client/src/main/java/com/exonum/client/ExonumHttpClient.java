@@ -18,6 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
+import static com.exonum.client.ExonumIterables.indexOf;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
@@ -30,6 +31,8 @@ import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
 import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -38,12 +41,17 @@ import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
+import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -60,6 +68,7 @@ import okhttp3.Response;
  */
 class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
+  private static final int GENESIS_BLOCK_HEIGHT = 0;
 
   private final OkHttpClient httpClient;
   private final URL exonumHost;
@@ -141,19 +150,100 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public BlocksResponse getBlocks(int count, BlockFilteringOption blockFilter, long heightMax,
+  public List<Block> getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
-    checkArgument(0 < count,
-        "Requested number of blocks should be positive number but was %s", count);
-    return doGetBlocks(count, blockFilter, heightMax, timeOption);
+    checkArgument(0 <= fromHeight, "First block height (%s) must be non-negative", fromHeight);
+    checkArgument(fromHeight <= toHeight,
+        "First block height (%s) should be less than or equal to the last block height (%s)",
+        fromHeight, toHeight);
+
+    // 'maximum' as when skipping empty the actual might be way smaller
+    int maxSize = Math.toIntExact(toHeight - fromHeight + 1);
+    List<Block> blocks = new ArrayList<>(maxSize);
+    for (long rangeLast = toHeight; rangeLast >= fromHeight; ) {
+      int remainingBlocks = Math.toIntExact(rangeLast - fromHeight + 1);
+      int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
+      BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, rangeLast, timeOption);
+
+      blocks.addAll(blocksResponse.getBlocks());
+
+      rangeLast = blocksResponse.getBlocksRangeStart() - 1;
+    }
+
+    return postProcessResponseBlocks(fromHeight, toHeight, blocks)
+        .getBlocks();
   }
 
   @Override
-  public BlocksResponse getLastBlocks(int count, BlockFilteringOption blockFilter,
+  public BlocksRange getLastBlocks(int size, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
-    checkArgument(0 < count,
-        "Requested number of blocks should be positive number but was %s", count);
-    return doGetBlocks(count, blockFilter, null, timeOption);
+    checkArgument(0 < size,
+        "Requested blocks range size should be positive but was %s", size);
+
+    List<Block> blocks = new ArrayList<>(size);
+    // The first request does not specify the maximum height to get the top blocks
+    long blockchainHeight = Long.MIN_VALUE;
+    Long nextHeight = null;
+    int remainingBlocks = size;
+    while (remainingBlocks > 0
+        && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+      int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
+      BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, nextHeight, timeOption);
+
+      blocks.addAll(blocksResponse.getBlocks());
+
+      nextHeight = blocksResponse.getBlocksRangeStart() - 1;
+      blockchainHeight = max(blockchainHeight, blocksResponse.getBlocksRangeEnd() - 1);
+      remainingBlocks = Math.toIntExact(size - (blockchainHeight - nextHeight));
+    }
+
+    long fromHeight = max(blockchainHeight - size + 1, GENESIS_BLOCK_HEIGHT);
+    long toHeight = blockchainHeight;
+    return postProcessResponseBlocks(fromHeight, toHeight, blocks);
+  }
+
+  /**
+   * Post-processes the blocks, coming from
+   * {@link #doGetBlocks(int, BlockFilteringOption, Long, BlockTimeOption)}:
+   * 1. Turns them in ascending order by height.
+   * 2. Keeps only blocks that fall in range [fromHeight; toHeight].
+   */
+  private static BlocksRange postProcessResponseBlocks(long fromHeight, long toHeight,
+      List<Block> blocks) {
+    // Turn the blocks in ascending order
+    blocks = Lists.reverse(blocks);
+
+    // Filter the possible blocks that are out of the requested range
+    // No Stream#dropWhile in Java 8 :(
+    int firstInRange = indexOf(blocks, b -> b.getHeight() >= fromHeight)
+        .orElse(blocks.size());
+    blocks = blocks.subList(firstInRange, blocks.size());
+
+    // Do not bother trimming — BlocksRange copies the list
+    return new BlocksRange(fromHeight, toHeight, blocks);
+  }
+
+  @Override
+  public List<Block> findNonEmptyBlocks(int numBlocks, BlockTimeOption timeOption) {
+    checkArgument(0 < numBlocks,
+        "Requested number of blocks should be positive but was %s", numBlocks);
+
+    List<Block> blocks = new ArrayList<>(numBlocks);
+    Long nextHeight = null;
+    int remainingBlocks = numBlocks;
+    while (remainingBlocks > 0
+        && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+      int numRequested = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
+      BlocksResponse blocksResponse = doGetBlocks(numRequested, SKIP_EMPTY, nextHeight, timeOption);
+
+      blocks.addAll(blocksResponse.getBlocks());
+
+      nextHeight = blocksResponse.getBlocksRangeStart() - 1;
+      remainingBlocks -= blocksResponse.getBlocks().size();
+    }
+
+    List<Block> ascBlocks = Lists.reverse(blocks);
+    return ImmutableList.copyOf(ascBlocks);
   }
 
   @Override

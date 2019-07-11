@@ -80,8 +80,11 @@ public class Block {
   ZonedDateTime commitTime;
 
   /**
-   * Returns time when the block was committed to the blockchain.
-   * Can be empty if include time parameter is not specified in the request.
+   * Returns the time when the block was committed to the blockchain.
+   * The time is equal to the average time of submission of precommit messages confirming
+   * this block by the validators.
+   *
+   * <p>Can be empty if include time parameter is not specified in the request.
    */
   public Optional<ZonedDateTime> getCommitTime() {
     return Optional.ofNullable(commitTime);

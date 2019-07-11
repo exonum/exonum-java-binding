@@ -21,8 +21,15 @@ package com.exonum.client.request;
  */
 public enum BlockFilteringOption {
   /**
-   * Skip empty blocks (containing no transactions).
-   * Only non-empty blocks will be returned in a response.
+   * Skip empty blocks (containing no transactions). Only non-empty blocks will be returned
+   * in a response.
+   *
+   * <p>Requesting the <em>server</em> to skip empty blocks when the client does not need them
+   * allows to save bandwidth and complete the request faster if a large number of blocks
+   * is requested. However, some blockchains never have empty blocks, in which case this option
+   * has no effect (e.g., an active <a href="https://exonum.com/doc/version/latest/advanced/time/">
+   * time oracle service</a>
+   * will execute transactions after each block to keep time synchronized).
    */
   SKIP_EMPTY,
   /**
