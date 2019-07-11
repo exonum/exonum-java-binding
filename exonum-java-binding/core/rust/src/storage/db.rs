@@ -117,10 +117,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 
 #[cfg(test)]
 mod tests {
-    use exonum_merkledb::{Database, Entry, TemporaryDB};
-
-    use std::convert::AsRef;
-
+    use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
     use super::*;
 
     const TEST_VALUE: i32 = 42;
@@ -164,22 +161,22 @@ mod tests {
     // Creates database with a prepared state.
     fn setup_database() -> TemporaryDB {
         let db = TemporaryDB::new();
-        let mut fork = db.fork();
-        entry(&mut fork).set(TEST_VALUE);
+        let fork = db.fork();
+        entry(&fork).set(TEST_VALUE);
         db.merge(fork.into_patch()).unwrap();
         db
     }
 
     fn entry<T>(view: T) -> Entry<T, i32>
     where
-        T: AsRef<Snapshot + 'static>,
+        T: IndexAccess,
     {
         Entry::new("test", view)
     }
 
     fn check_ref_fork(view: &mut View) {
         match *view.get() {
-            ViewRef::Fork(ref fork) => check_value(fork),
+            ViewRef::Fork(fork) => check_value(fork),
             _ => panic!("View::reference expected to be Fork"),
         }
     }
@@ -191,7 +188,7 @@ mod tests {
         }
     }
 
-    fn check_value<T: AsRef<Snapshot + 'static>>(view: T) {
+    fn check_value<T: IndexAccess>(view: T) {
         assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 

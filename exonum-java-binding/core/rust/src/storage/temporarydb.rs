@@ -84,8 +84,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDB
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
         let fork = match *handle::cast_handle::<View>(view_handle).get() {
             ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
-            ViewRef::Fork(ref fork) => fork,
+            ViewRef::Fork(fork) => fork,
         };
+        //FIXME: Implement merging
         //        db.merge(fork.patch().clone())
         //            .expect("Unable to merge fork");
         Ok(())
