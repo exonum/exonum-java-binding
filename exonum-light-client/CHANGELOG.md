@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+- Prefix URL can be set for routing all Light Client requests. (#997) 
+
+### Fixed
+- Now port is optional in the Exonum host URL. (#997) 
+
 ## 0.2.0 - 2019-05-27
 
 Second release of Exonum Java Light Client which brings

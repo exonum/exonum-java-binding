@@ -18,7 +18,6 @@ package com.exonum.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import okhttp3.HttpUrl;
