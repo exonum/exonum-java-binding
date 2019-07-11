@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   operation involved).
   Main component of this module is `TestKit` which allows recreating behavior of a single full
   node (a validator or an auditor) in an emulated Exonum blockchain network.
-  For more information and examples see <TODO: link to documentation>.
+  For more information and examples see [documentation][testkit-documentation].
   (#819, #833, #859, #913, #989)
 - Verification of native library compatibility when it is first loaded, to detect
   possible mismatch between an installed exonum-java application and the version
@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `Block#isEmpty()`
 - `RawTransaction#fromMessage(TransactionMessage)`, which is mostly useful in tests,
   where you might have a message but need it as a `RawTransaction` in some assertions.
+
+[testkit-documentation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#testing
 
 ### Changed
 - `BinaryTransactionMessage#toString` to include some fields in human-readable
