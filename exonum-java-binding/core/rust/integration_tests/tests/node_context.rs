@@ -24,7 +24,7 @@ extern crate failure;
 use std::sync::Arc;
 
 use futures::{
-    sync::mpsc::{self, Receiver},
+    sync::mpsc::{self, UnboundedReceiver},
     Stream,
 };
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
@@ -34,8 +34,8 @@ use java_bindings::{
         crypto::{gen_keypair, Hash, PublicKey, SecretKey},
         messages::{RawTransaction, ServiceTransaction},
         node::{ApiSender, ExternalMessage},
-        storage::{MemoryDB, Snapshot},
     },
+    exonum_merkledb::{TemporaryDB, Snapshot},
     jni::JavaVM,
     Executor, NodeContext,
 };
@@ -90,8 +90,8 @@ fn create_raw_transaction(service_id: u16) -> RawTransaction {
     RawTransaction::new(service_id, service_transaction)
 }
 
-fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<ExternalMessage>) {
-    let api_channel = mpsc::channel(128);
+fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, UnboundedReceiver<ExternalMessage>) {
+    let api_channel = mpsc::unbounded();
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     struct EmptyService;
@@ -114,7 +114,7 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<Extern
         }
     }
 
-    let storage = MemoryDB::new();
+    let storage = TemporaryDB::new();
     let blockchain = Blockchain::new(
         storage,
         vec![Box::new(EmptyService)],
