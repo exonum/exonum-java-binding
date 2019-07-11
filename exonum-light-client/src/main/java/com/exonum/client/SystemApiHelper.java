@@ -17,11 +17,10 @@
 
 package com.exonum.client;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.client.ExonumApi.JSON;
 
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
-import com.google.gson.annotations.SerializedName;
 import lombok.Value;
 
 /**
@@ -30,7 +29,7 @@ import lombok.Value;
 final class SystemApiHelper {
 
   static HealthCheckInfo parseHealthCheckJson(String json) {
-    HealthCheckResponse response = json().fromJson(json, HealthCheckResponse.class);
+    HealthCheckResponse response = JSON.fromJson(json, HealthCheckResponse.class);
     String consensusStatus = response.getConsensusStatus().toUpperCase();
 
     return new HealthCheckInfo(
@@ -40,7 +39,7 @@ final class SystemApiHelper {
   }
 
   static int parseMemoryPoolJson(String json) {
-    MemoryPoolResponse response = json().fromJson(json, MemoryPoolResponse.class);
+    MemoryPoolResponse response = JSON.fromJson(json, MemoryPoolResponse.class);
     return response.getSize();
   }
 
@@ -57,9 +56,7 @@ final class SystemApiHelper {
    */
   @Value
   private class HealthCheckResponse {
-    @SerializedName("consensus_status")
     String consensusStatus;
-    @SerializedName("connected_peers")
     int connectedPeers;
   }
 
