@@ -18,7 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.client.ExonumApi.JSON;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
@@ -95,8 +95,8 @@ class ExonumHttpClientIntegrationTest {
 
     // Assert request encoding
     String json = recordedRequest.getBody().readUtf8();
-    SubmitTxRequest actualRequest = json().fromJson(json, SubmitTxRequest.class);
-    TransactionMessage actualTxMessage = actualRequest.getBody();
+    SubmitTxRequest actualRequest = JSON.fromJson(json, SubmitTxRequest.class);
+    TransactionMessage actualTxMessage = actualRequest.getTxBody();
 
     assertThat(actualTxMessage, is(txMessage));
   }

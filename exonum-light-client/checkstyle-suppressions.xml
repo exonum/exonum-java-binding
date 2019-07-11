@@ -23,4 +23,5 @@
 <suppressions>
     <!-- Allow `aBlock` name -->
     <suppress files="BlockTest\.java" checks="MethodName"/>
+    <suppress files="Blocks\.java" checks="MethodName"/>
 </suppressions>
