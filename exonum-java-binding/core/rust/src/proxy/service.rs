@@ -22,6 +22,7 @@ use exonum::storage::{Fork, Snapshot};
 use failure;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::JavaType;
+use jni::Executor;
 use serde_json;
 use serde_json::value::Value;
 use std::fmt;
@@ -34,7 +35,7 @@ use utils::{
     check_error_on_exception, convert_to_hash, convert_to_string, jni_cache::service_adapter,
     panic_on_exception, unwrap_jni,
 };
-use {Executor, TransactionProxy};
+use TransactionProxy;
 
 /// A proxy for `Service`s.
 #[derive(Clone)]

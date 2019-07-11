@@ -22,7 +22,8 @@
   </properties>
 
   <dependencies>
-    <!-- The archetype has to have a dependency on core so that it is built strictly after it.
+    <!-- The archetype has to have a dependency on core and TestKit so that it is built strictly
+    after those.
 
     The ITs naturally generate a project that is not a child of the parent project.
     Therefore, they also require that the core and its dependencies are available in the (local)
@@ -31,6 +32,13 @@
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-binding-core</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-testkit</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -43,6 +51,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-archetype-plugin</artifactId>
           <version>${maven-archetype.version}</version>
+          <configuration>
+            <properties>
+              <nativeLibPath>${project.parent.basedir}/core/rust/target/debug</nativeLibPath>
+            </properties>
+          </configuration>
           <executions>
           	<execution>
           		<goals>
