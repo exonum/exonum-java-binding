@@ -83,7 +83,7 @@ class ApiControllerTest {
     ApiController controller = new ApiController(service);
     controller.mountApi(router);
 
-    httpServer.requestHandler(router::accept)
+    httpServer.requestHandler(router)
         .listen(0, context.succeeding(result -> {
           // Set the actual server port.
           port = result.actualPort();

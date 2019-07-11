@@ -16,8 +16,9 @@
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <junit.jupiter.version>5.5.0</junit.jupiter.version>
+    <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
     <hamcrest.version>2.1</hamcrest.version>
-    <mockito.version>2.28.2</mockito.version>
+    <mockito.version>3.0.0</mockito.version>
     <exonum.version>0.7.0-SNAPSHOT</exonum.version>
   </properties>
 
@@ -73,6 +74,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-testkit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
       <scope>test</scope>
@@ -117,7 +124,7 @@
         <version>2.22.2</version>
         <configuration>
           <argLine>
-            -Djava.library.path=${env.EXONUM_HOME}/lib/native
+            -Djava.library.path=${nativeLibPath}
           </argLine>
         </configuration>
       </plugin>

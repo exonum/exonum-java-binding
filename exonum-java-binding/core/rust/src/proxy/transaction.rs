@@ -17,6 +17,7 @@
 use exonum::blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext};
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::{JavaType, Primitive};
+use jni::Executor;
 use jni::JNIEnv;
 use serde::{self, ser};
 
@@ -33,7 +34,7 @@ use utils::{
     },
     unwrap_jni,
 };
-use {Executor, JniErrorKind, JniResult};
+use {JniErrorKind, JniResult};
 
 const RETVAL_TYPE_STRING: &str = "java/lang/String";
 

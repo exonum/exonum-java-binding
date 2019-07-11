@@ -41,7 +41,8 @@ else
       PARALLEL_TESTS_ENABLED="false"
     fi
     echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=${PARALLEL_TESTS_ENABLED} \
-          -Djunit.jupiter.execution.parallel.mode.default=concurrent" > \
+          -Djunit.jupiter.execution.parallel.mode.default=concurrent \
+          --batch-mode" > \
       .mvn/maven.config
 
     # Run all tests

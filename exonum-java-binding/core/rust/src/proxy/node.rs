@@ -24,12 +24,12 @@ use exonum::{
 use failure;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
+use jni::Executor;
 use jni::JNIEnv;
 
 use std::{panic, ptr};
 
 use handle::{cast_handle, drop_handle, to_handle, Handle};
-use proxy::Executor;
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
