@@ -53,7 +53,7 @@ public interface Node {
   HashCode submitTransaction(RawTransaction rawTransaction);
 
   /**
-   * Performs a given function with a snapshot of the current database state.
+   * Performs the given function with a snapshot of the current database state.
    *
    * @param snapshotFunction a function to execute
    * @param <ResultT> a type the function returns
@@ -66,8 +66,6 @@ public interface Node {
    * for signing transactions in {@link #submitTransaction(RawTransaction)}.
    *
    * <p>This key is stored under "service_public_key" key in the node configuration file.
-   *
-   * @throws IllegalStateException if the node proxy is closed
    */
   PublicKey getPublicKey();
 }
