@@ -54,17 +54,17 @@ class HttpUrlHelperTest {
   private static List<Arguments> source() {
     Map<String, String> noQuery = emptyMap();
     return ImmutableList.of(
-        arguments("http://localhost/path/to/source",
+        arguments("http://localhost//path/to/source",
             "http://localhost", "", "/path/to/source", noQuery),
         arguments("http://localhost/prefix/path/to/source",
             "http://localhost", "prefix", "path/to/source", noQuery),
         arguments("http://localhost/pre%20fix/path/to/source",
             "http://localhost", "pre fix", "path/to/source", noQuery),
-        arguments("http://localhost:8080/prefix/path/to/source",
+        arguments("http://localhost:8080//prefix//path/to/source",
             "http://localhost:8080", "/prefix", "/path/to/source", noQuery),
-        arguments("http://localhost:8080/pre/fix/path/to/source",
+        arguments("http://localhost:8080//pre/fix//path/to/source",
             "http://localhost:8080", "/pre/fix", "/path/to/source", noQuery),
-        arguments("http://localhost:8080/pre/fix/path/to/source?key=value",
+        arguments("http://localhost:8080//pre/fix//path/to/source?key=value",
             "http://localhost:8080", "/pre/fix", "/path/to/source", ImmutableMap.of("key", "value"))
     );
   }

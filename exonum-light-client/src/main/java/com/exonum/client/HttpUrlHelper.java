@@ -34,7 +34,7 @@ final class HttpUrlHelper {
         .addPathSegments(relativeUrl);
     encodedQueryParameters.forEach(urlBuilder::addEncodedQueryParameter);
 
-    return normalize(urlBuilder.build());
+    return urlBuilder.build();
   }
 
   private static HttpUrl.Builder urlHostBuilder(URL host) {
@@ -46,16 +46,6 @@ final class HttpUrlHelper {
       builder.port(host.getPort());
     }
     return builder;
-  }
-
-  /**
-   * Normalized the given URL to the canonical form.
-   * Doesn't modify letters case in the URL.
-   * Also see {@link URI#normalize()}.
-   */
-  private static HttpUrl normalize(HttpUrl url) {
-    URI normalized = url.uri().normalize();
-    return HttpUrl.get(normalized);
   }
 
   private HttpUrlHelper() {
