@@ -117,8 +117,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 
 #[cfg(test)]
 mod tests {
-    use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
     use super::*;
+    use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
 
     const TEST_VALUE: i32 = 42;
 

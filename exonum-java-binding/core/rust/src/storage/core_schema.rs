@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use exonum::blockchain::Schema;
-use exonum_merkledb::{Fork, Snapshot, BinaryValue};
+use exonum_merkledb::{BinaryValue, Fork, Snapshot};
 use handle::{self, Handle};
 use jni::{
     objects::JClass,

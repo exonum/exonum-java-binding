@@ -29,10 +29,7 @@ use integration_tests::{
 };
 
 use java_bindings::{
-    exonum::{
-        blockchain::Service,
-        crypto::hash,
-    },
+    exonum::{blockchain::Service, crypto::hash},
     exonum_merkledb::{Database, TemporaryDB},
     jni::{objects::JObject, JavaVM},
     serde_json::{self, Value},

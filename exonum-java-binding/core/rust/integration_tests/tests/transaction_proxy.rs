@@ -39,8 +39,8 @@ use java_bindings::{
     serde_json, Executor,
 };
 
-use std::sync::Arc;
 use integration_tests::mock::transaction::TEST_SERVICE_NAME;
+use std::sync::Arc;
 
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const OOM_ERROR_CLASS: &str = "java/lang/OutOfMemoryError";

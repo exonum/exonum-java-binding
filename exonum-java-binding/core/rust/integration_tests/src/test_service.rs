@@ -15,20 +15,13 @@
  */
 
 use java_bindings::{
-    exonum_merkledb::{
-        proof_map_index::ProofMapIndex,
-        IndexAccess,
-    },
     exonum::crypto::Hash,
+    exonum_merkledb::{proof_map_index::ProofMapIndex, IndexAccess},
     utils::unwrap_jni,
-    Executor,
-    ServiceProxy
+    Executor, ServiceProxy,
 };
 
-use mock::{
-    service::SERVICE_ADAPTER_CLASS,
-    NATIVE_FACADE_CLASS
-};
+use mock::{service::SERVICE_ADAPTER_CLASS, NATIVE_FACADE_CLASS};
 
 pub const INITIAL_ENTRY_KEY: &str = "initial key";
 pub const INITIAL_ENTRY_VALUE: &str = "initial value";

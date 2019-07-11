@@ -82,7 +82,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
     match name {
         CONFIGURATION_SERVICE => Box::new(ConfigurationServiceFactory) as Box<ServiceFactory>,
-//        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>, // FIXME: uncomment when anchoring uses merkledb
+        //        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<ServiceFactory>, // FIXME: uncomment when anchoring uses merkledb
         TIME_SERVICE => Box::new(TimeServiceFactory) as Box<ServiceFactory>,
         _ => panic!("Unknown system service name \"{}\" has been found", name),
     }

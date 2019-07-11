@@ -119,15 +119,15 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JObject,
     map_handle: Handle,
 ) -> jbyteArray {
-//    // FIXME: uncomment when new proofs are implemented
-//    let res = panic::catch_unwind(|| {
-//        let hash = match *handle::cast_handle::<IndexType>(map_handle) {
-//            IndexType::SnapshotIndex(ref map) => map.merkle_root(),
-//            IndexType::ForkIndex(ref map) => map.merkle_root(),
-//        };
-//        utils::convert_hash(&env, &hash)
-//    });
-//    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+    //    // FIXME: uncomment when new proofs are implemented
+    //    let res = panic::catch_unwind(|| {
+    //        let hash = match *handle::cast_handle::<IndexType>(map_handle) {
+    //            IndexType::SnapshotIndex(ref map) => map.merkle_root(),
+    //            IndexType::ForkIndex(ref map) => map.merkle_root(),
+    //        };
+    //        utils::convert_hash(&env, &hash)
+    //    });
+    //    utils::unwrap_exc_or(&env, res, ptr::null_mut())
     ptr::null_mut()
 }
 

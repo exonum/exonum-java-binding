@@ -35,7 +35,7 @@ use java_bindings::{
         messages::{RawTransaction, ServiceTransaction},
         node::{ApiSender, ExternalMessage},
     },
-    exonum_merkledb::{TemporaryDB, Snapshot},
+    exonum_merkledb::{Snapshot, TemporaryDB},
     jni::JavaVM,
     Executor, NodeContext,
 };
@@ -90,7 +90,9 @@ fn create_raw_transaction(service_id: u16) -> RawTransaction {
     RawTransaction::new(service_id, service_transaction)
 }
 
-fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, UnboundedReceiver<ExternalMessage>) {
+fn create_node(
+    keypair: (PublicKey, SecretKey),
+) -> (NodeContext, UnboundedReceiver<ExternalMessage>) {
     let api_channel = mpsc::unbounded();
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
