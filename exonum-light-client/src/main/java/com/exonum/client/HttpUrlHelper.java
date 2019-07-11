@@ -16,8 +16,9 @@
 
 package com.exonum.client;
 
-import static java.util.Objects.requireNonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import okhttp3.HttpUrl;
@@ -26,18 +27,18 @@ import okhttp3.HttpUrl.Builder;
 final class HttpUrlHelper {
 
   static HttpUrl getFullUrl(URL host, String prefix, String relativeUrl,
-      Map<String, String> query) {
-    requireNonNull(query);
-    Builder builder = urlHostBuilder(host)
-        .addPathSegments(normalize(prefix))
-        .addPathSegments(normalize(relativeUrl));
-    query.forEach(builder::addEncodedQueryParameter);
+      Map<String, String> encodedQueryParameters) {
+    checkNotNull(encodedQueryParameters);
+    Builder urlBuilder = urlHostBuilder(host)
+        .addPathSegments(prefix)
+        .addPathSegments(relativeUrl);
+    encodedQueryParameters.forEach(urlBuilder::addEncodedQueryParameter);
 
-    return builder.build();
+    return normalize(urlBuilder.build());
   }
 
   private static HttpUrl.Builder urlHostBuilder(URL host) {
-    requireNonNull(host);
+    checkNotNull(host);
     HttpUrl.Builder builder = new HttpUrl.Builder()
         .scheme(host.getProtocol())
         .host(host.getHost());
@@ -48,16 +49,13 @@ final class HttpUrlHelper {
   }
 
   /**
-   * Removes heading slash from the path.
-   * Useful because underlying OkHttp applies slashes when constructing paths.
+   * Normalized the given URL to the canonical form.
+   * Doesn't modify letters case in the URL.
+   * Also see {@link URI#normalize()}.
    */
-  private static String normalize(String path) {
-    requireNonNull(path);
-    if (path.startsWith("/")) {
-      return path.substring(1);
-    } else {
-      return path;
-    }
+  private static HttpUrl normalize(HttpUrl url) {
+    URI normalized = url.uri().normalize();
+    return HttpUrl.get(normalized);
   }
 
   private HttpUrlHelper() {

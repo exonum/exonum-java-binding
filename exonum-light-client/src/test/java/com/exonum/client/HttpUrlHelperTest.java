@@ -19,7 +19,7 @@ package com.exonum.client;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.params.provider.Arguments.of;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -49,22 +49,23 @@ class HttpUrlHelperTest {
    * - port is optional
    * - prefix is optional
    * - paths can start either with or without heading slash
-   * - query params is optional.
+   * - query params are optional.
    */
   private static List<Arguments> source() {
     Map<String, String> noQuery = emptyMap();
     return ImmutableList.of(
-        of("http://localhost/path/to/source",
+        arguments("http://localhost/path/to/source",
             "http://localhost", "", "/path/to/source", noQuery),
-        of("http://localhost/prefix/path/to/source",
+        arguments("http://localhost/prefix/path/to/source",
             "http://localhost", "prefix", "path/to/source", noQuery),
-        of("http://localhost:8080/prefix/path/to/source",
+        arguments("http://localhost/pre%20fix/path/to/source",
+            "http://localhost", "pre fix", "path/to/source", noQuery),
+        arguments("http://localhost:8080/prefix/path/to/source",
             "http://localhost:8080", "/prefix", "/path/to/source", noQuery),
-        of("http://localhost:8080/pre/fix/path/to/source",
+        arguments("http://localhost:8080/pre/fix/path/to/source",
             "http://localhost:8080", "/pre/fix", "/path/to/source", noQuery),
-        of("http://localhost:8080/pre/fix/path/to/source?key=value",
+        arguments("http://localhost:8080/pre/fix/path/to/source?key=value",
             "http://localhost:8080", "/pre/fix", "/path/to/source", ImmutableMap.of("key", "value"))
     );
   }
-
 }
