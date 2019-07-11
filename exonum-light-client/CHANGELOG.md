@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Prefix URL can be set for routing all Light Client requests. (#997) 
 
-### Fixed
+### Changed
 - Now port is optional in the Exonum host URL. (#997) 
 
 ## 0.2.0 - 2019-05-27
