@@ -861,6 +861,10 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   /**
+   * Creates 257 entries for a ProofMap that, when added to it, will make the underlying
+   * Merkle-Patricia tree of the maximum height (256). Leaf nodes will be at depths
+   * ranging from 1 to 256.
+   *
    * Bits of 32-byte keys:
    * 00…0000
    * 100…000
