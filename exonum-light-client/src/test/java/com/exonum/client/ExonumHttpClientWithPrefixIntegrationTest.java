@@ -16,7 +16,8 @@
 
 package com.exonum.client;
 
-import static com.exonum.client.TestUtils.assertPath;
+import static com.exonum.client.RecordedRequestMatchers.hasPathStartingWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
@@ -59,7 +60,7 @@ class ExonumHttpClientWithPrefixIntegrationTest {
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
-    assertPath(recordedRequest, prefixUrl);
+    assertThat(recordedRequest, hasPathStartingWith(prefixUrl));
   }
 
 }

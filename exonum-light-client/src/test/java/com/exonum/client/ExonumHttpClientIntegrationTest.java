@@ -23,8 +23,8 @@ import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
-import static com.exonum.client.TestUtils.assertExactPath;
-import static com.exonum.client.TestUtils.assertPath;
+import static com.exonum.client.RecordedRequestMatchers.hasPath;
+import static com.exonum.client.RecordedRequestMatchers.hasPathStartingWith;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -92,7 +92,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("POST"));
-    assertExactPath(recordedRequest, TRANSACTIONS);
+    assertThat(recordedRequest, hasPath(TRANSACTIONS));
 
     // Assert request encoding
     String json = recordedRequest.getBody().readUtf8();
@@ -118,7 +118,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertExactPath(recordedRequest, MEMORY_POOL);
+    assertThat(recordedRequest, hasPath(MEMORY_POOL));
   }
 
   @Test
@@ -137,7 +137,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertExactPath(recordedRequest, HEALTH_CHECK);
+    assertThat(recordedRequest, hasPath(HEALTH_CHECK));
   }
 
   @Test
@@ -155,7 +155,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertExactPath(recordedRequest, USER_AGENT);
+    assertThat(recordedRequest, hasPath(USER_AGENT));
   }
 
   @Test
@@ -190,7 +190,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertPath(recordedRequest, TRANSACTIONS);
+    assertThat(recordedRequest, hasPathStartingWith(TRANSACTIONS));
     assertThat(recordedRequest.getRequestUrl().queryParameter("hash"), is(id.toString()));
   }
 
@@ -209,7 +209,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertPath(recordedRequest, TRANSACTIONS);
+    assertThat(recordedRequest, hasPathStartingWith(TRANSACTIONS));
     assertThat(recordedRequest.getRequestUrl().queryParameter("hash"), is(id.toString()));
   }
 
