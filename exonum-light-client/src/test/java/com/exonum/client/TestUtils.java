@@ -47,5 +47,4 @@ final class TestUtils {
   static void assertPath(RecordedRequest request, String url) {
     assertThat(request.getPath(), startsWith("/" + url));
   }
-
 }
