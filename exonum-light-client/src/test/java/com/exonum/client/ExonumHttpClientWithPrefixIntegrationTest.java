@@ -16,8 +16,7 @@
 
 package com.exonum.client;
 
-import static com.exonum.client.ExonumUrls.USER_AGENT;
-import static com.exonum.client.TestUtils.assertExactPath;
+import static com.exonum.client.TestUtils.assertPath;
 
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
@@ -31,7 +30,7 @@ import org.junit.jupiter.api.Test;
 class ExonumHttpClientWithPrefixIntegrationTest {
   private MockWebServer server;
   private ExonumClient exonumClient;
-  private String prefixUrl = "pre/fix/";
+  private String prefixUrl = "pre/fix";
 
   @BeforeEach
   void start() throws IOException {
@@ -60,7 +59,7 @@ class ExonumHttpClientWithPrefixIntegrationTest {
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
-    assertExactPath(recordedRequest, prefixUrl + USER_AGENT);
+    assertPath(recordedRequest, prefixUrl);
   }
 
 }
