@@ -44,16 +44,16 @@ public class EmulatedNode {
   }
 
   /**
-   * Returns a node type - either {@link EmulatedNodeType.VALIDATOR} or
-   * {@link EmulatedNodeType.AUDITOR}.
+   * Returns a node type - either {@link EmulatedNodeType#VALIDATOR} or
+   * {@link EmulatedNodeType#AUDITOR}.
    */
   public EmulatedNodeType getNodeType() {
     return validatorId.isPresent() ? EmulatedNodeType.VALIDATOR : EmulatedNodeType.AUDITOR;
   }
 
   /**
-   * Returns a validator id if this node is a validator or {@link OptionalInt.EMPTY} is this is an
-   * auditor node.
+   * Returns a validator id if this node is a validator or {@link OptionalInt#empty()} if this is
+   * an auditor node.
    */
   public OptionalInt getValidatorId() {
     return validatorId;
