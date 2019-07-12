@@ -875,8 +875,8 @@ class ProofMapIndexProxyIntegrationTest
    * 00…0010
    * 00…0001.
    *
-   * If all the keys above are added to the ProofMap, the underlying Merkle-Patricia tree
-   * will have the following structure (only key bits in leaf nodes are shown; the intermediate
+   * When all the keys above are added to the ProofMap, the underlying Merkle-Patricia tree
+   * has the following structure (only key bits in leaf nodes are shown; the intermediate
    * nodes are shown as 'o' character):
    *
    *                    o — the root node
