@@ -28,10 +28,7 @@ import static com.exonum.client.Blocks.BLOCK_3_JSON;
 import static com.exonum.client.Blocks.BLOCK_3_TIME;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
@@ -52,7 +49,7 @@ class ExplorerApiHelperTest {
     String json = "{'tx_hash':'" + expected + "'}";
 
     HashCode actual = ExplorerApiHelper.parseSubmitTxResponse(json);
-    assertThat(actual, equalTo(HashCode.fromString(expected)));
+    assertThat(actual).isEqualTo(HashCode.fromString(expected));
   }
 
   @Test
@@ -73,8 +70,9 @@ class ExplorerApiHelperTest {
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.IN_POOL));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    // todo: Prototype custom Subjects on the response
+    assertThat(transactionResponse.getStatus()).isEqualTo(TransactionStatus.IN_POOL);
+    assertThat(transactionResponse.getMessage()).isEqualTo(expectedMessage);
     assertThrows(IllegalStateException.class, transactionResponse::getExecutionResult);
     assertThrows(IllegalStateException.class, transactionResponse::getLocation);
   }
@@ -107,10 +105,10 @@ class ExplorerApiHelperTest {
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(), is(TransactionResult.successful()));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(11L, 0L)));
+    assertThat(transactionResponse.getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+    assertThat(transactionResponse.getMessage()).isEqualTo(expectedMessage);
+    assertThat(transactionResponse.getExecutionResult()).isEqualTo(TransactionResult.successful());
+    assertThat(transactionResponse.getLocation()).isEqualTo(TransactionLocation.valueOf(11L, 0L));
   }
 
   @Test
@@ -142,11 +140,11 @@ class ExplorerApiHelperTest {
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.error(errorCode, errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+    assertThat(transactionResponse.getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+    assertThat(transactionResponse.getMessage()).isEqualTo(expectedMessage);
+    assertThat(transactionResponse.getExecutionResult())
+        .isEqualTo(TransactionResult.error(errorCode, errorDescription));
+    assertThat(transactionResponse.getLocation()).isEqualTo(TransactionLocation.valueOf(1L, 0L));
   }
 
   @Test
@@ -176,11 +174,11 @@ class ExplorerApiHelperTest {
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.unexpectedError(errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+    assertThat(transactionResponse.getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+    assertThat(transactionResponse.getMessage()).isEqualTo(expectedMessage);
+    assertThat(transactionResponse.getExecutionResult())
+        .isEqualTo(TransactionResult.unexpectedError(errorDescription));
+    assertThat(transactionResponse.getLocation()).isEqualTo(TransactionLocation.valueOf(1L, 0L));
   }
 
   @Test
@@ -195,8 +193,10 @@ class ExplorerApiHelperTest {
 
     BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
 
-    assertThat(response.getBlock(), is(BLOCK_1));
-    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
+    assertThat(response.getBlock()).isEqualTo(BLOCK_1);
+    assertThat(response.getTransactionHashes())
+        .containsExactly(HashCode.fromString(tx1))
+        .inOrder();
   }
 
   @Test
@@ -213,9 +213,11 @@ class ExplorerApiHelperTest {
 
     BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);
 
-    assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
-    assertThat(response.getBlocksRangeStart(), is(6L));
-    assertThat(response.getBlocksRangeEnd(), is(288L));
+    assertThat(response.getBlocks())
+        .containsExactly(BLOCK_1, BLOCK_2, BLOCK_3)
+        .inOrder();
+    assertThat(response.getBlocksRangeStart()).isEqualTo(6L);
+    assertThat(response.getBlocksRangeEnd()).isEqualTo(288L);
   }
 
 }
