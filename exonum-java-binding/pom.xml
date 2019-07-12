@@ -421,29 +421,7 @@
           <configuration>
             <source>${java.compiler.source}</source>
             <doclint>none</doclint>
-            <!-- Allow fetching links below -->
-            <isOffline>false</isOffline>
             <detectOfflineLinks>false</detectOfflineLinks>
-            <links>
-              <!-- Published Exonum API docs. Only the modules that are dependencies of
-                   other modules are listed here.
-
-                   To generate release Javadocs, a two-step process is required:
-                     0. Bump version.
-                     1. Generate Javadocs for the given version. They won't have cross-references,
-                        because no Javadocs have been published on the website.
-                     2. Upload them to the website.
-                     3. Re-generate Javadocs. This time the Javadocs will be available
-                        on the website, and cross-references will be added.
-                     4. Upload the new ones.
-
-                   Our web-site seems to be the only one compatible with javadoc tool —
-                   the Javadocs published on javadoc.io, github.io (guava and vertx)
-                   do not work.
-              -->
-              <link>https://exonum.com/doc/api/java-binding-common/${project.version}</link>
-              <link>https://exonum.com/doc/api/java-binding-core/${project.version}</link>
-            </links>
             <additionalJOption>${maven.javadoc.joption}</additionalJOption>
           </configuration>
           <executions>
