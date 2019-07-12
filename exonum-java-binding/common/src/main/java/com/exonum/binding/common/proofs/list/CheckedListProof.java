@@ -22,7 +22,7 @@ import java.util.NavigableMap;
 /**
  * A proof that some elements exist in a proof list.
  * Example usage:
- * <pre><code>
+ * <pre>{@code
  * HashCode expectedRootHash = // get a known root hash from block proof //
  * UncheckedListProof proof = new UncheckedListProofAdapter(rootProofNode, serializer);
  * // Check the proof
@@ -32,7 +32,7 @@ import java.util.NavigableMap;
  *   // Get and use elements
  *   NavigableMap value = checkedProof.getElements();
  * }
- * </code></pre>
+ * }</pre>
  */
 public interface CheckedListProof<E> extends CheckedProof {
   /**

@@ -106,11 +106,11 @@ public interface Service {
    * and you have an endpoint «/timestamp», use «/timestamp» as the endpoint name when defining
    * the handler and it will be available by path «/api/services/timestamping/timestamp»:
    *
-   * <pre><code>
+   * <pre>{@code
    * router.get("/timestamp").handler((rc) -> {
    *   rc.response().end("2019-04-01T10:15:30+02:00[Europe/Kiev]");
    * });
-   * </code></pre>
+   * }</pre>
    *
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
