@@ -861,7 +861,11 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   /**
-   * Keys:
+   * Creates 257 entries for a ProofMap that, when added to it, will make the underlying
+   * Merkle-Patricia tree of the maximum height (256). Leaf nodes will be at depths
+   * ranging from 1 to 256.
+   *
+   * Bits of 32-byte keys:
    * 00…0000
    * 100…000
    * 0100…00
@@ -870,6 +874,24 @@ class ProofMapIndexProxyIntegrationTest
    * 00…0100
    * 00…0010
    * 00…0001.
+   *
+   * When all the keys above are added to the ProofMap, the underlying Merkle-Patricia tree
+   * has the following structure (only key bits in leaf nodes are shown; the intermediate
+   * nodes are shown as 'o' character):
+   *
+   *                    o — the root node
+   *                   / \
+   *                  o   100…000 — a leaf node
+   *                 / \
+   *                o   0100…00
+   *               / \
+   *              o   00100…0
+   *             / \
+   *            …   00010…0
+   *           /
+   *          o — an intermediate node with key prefix 00…0 of size 255 bits.
+   *         / \
+   *  00…0000  00…0001 — leaf nodes at depth 256 with a common prefix of 255 bits.
    */
   private static List<MapEntry<HashCode, String>> createEntriesForRightLeaningMpt() {
     int numKeyBits = Byte.SIZE * PROOF_MAP_KEY_SIZE;
