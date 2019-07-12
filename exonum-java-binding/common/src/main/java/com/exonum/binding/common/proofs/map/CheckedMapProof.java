@@ -26,7 +26,7 @@ import java.util.Set;
  * In case of incorrect proof all methods (except for getStatus and compareWithRootHash)
  * throw IllegalStateException.
  * Example usage:
- * <pre><code>
+ * <pre>{@code
  * ByteString key = "The key for which I want a proved value".getBytes();
  * HashCode expectedRootHash = // get a known root hash from block proof //
  * UncheckedMapProof proof = requestProofForKey(key);
@@ -37,7 +37,7 @@ import java.util.Set;
  *   // Get and use the value(s)
  *   ByteString value = checked.get(key);
  * }
- * </code></pre>
+ * }</pre>
  */
 public interface CheckedMapProof extends CheckedProof {
   /**

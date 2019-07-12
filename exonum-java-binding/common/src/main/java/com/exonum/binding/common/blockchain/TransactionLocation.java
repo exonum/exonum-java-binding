@@ -47,7 +47,7 @@ public abstract class TransactionLocation {
   /**
    * Provides a Gson type adapter for this class.
    *
-   * @see com.exonum.binding.common.serialization.json.TransactionLocationAdapterFactory
+   * @see com.exonum.binding.common.serialization.json.CommonTypeAdapterFactory
    */
   public static TypeAdapter<TransactionLocation> typeAdapter(Gson gson) {
     return new AutoValue_TransactionLocation.GsonTypeAdapter(gson);
