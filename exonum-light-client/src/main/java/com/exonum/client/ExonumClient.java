@@ -25,11 +25,12 @@ import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
-import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import okhttp3.OkHttpClient;
 
@@ -38,9 +39,10 @@ import okhttp3.OkHttpClient;
  * Provides a convenient way for interaction with Exonum framework APIs.
  * All the methods of the interface work in a blocking way
  * i.e. invoke underlying request immediately, and block until the response can be processed
- * or an error occurs.
+ * or an error occurs. In case the thread is interrupted, the blocked methods will complete
+ * exceptionally.
  *
- * <p><i>Implementations of that interface are required to be thread-safe</i>.
+ * <p><em>Implementations of this interface are required to be thread-safe</em>.
  **/
 public interface ExonumClient {
 
@@ -107,44 +109,67 @@ public interface ExonumClient {
   BlockResponse getBlockByHeight(long height);
 
   /**
-   * Returns blockchain blocks information for the requested range. The blocks are returned
-   * in reverse order, starting from the {@code heightMax}.
-   * @param count Number of blocks to return.
-   *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   * Returns blockchain blocks in the requested <em>closed</em> range. The blocks are returned
+   * in ascending order by their height.
+   *
+   * @param fromHeight the height of the first block to include. Must be non-negative
+   * @param toHeight the height of the last block to include. Must be greater than
+   *        or equal to {@code fromHeight} and less than or equal to the blockchain height.
+   *        If the {@code toHeight} is greater than actual blockchain height then
+   *        the actual height will be used (such error-prone behaviour will be fixed
+   *        in Exonum 0.12)
    * @param blockFilter controls whether to skip blocks with no transactions
-   * @param heightMax maximum height of the returned blocks.
-   *        If the {@code heightMax} is greater than actual blockchain height then
-   *        the actual height will be used
-   * @param timeOption controls whether to include the block commit time.
-   *        See {@linkplain Block#getCommitTime()}.
-   *        The time value corresponds to the average time of submission of precommits by the
-   *        validators for every returned block
-   * @return blocks information response
+   * @param timeOption controls whether to include
+   *        the {@linkplain Block#getCommitTime() block commit time}
+   * @return blocks in the requested range
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
-   * @throws IllegalArgumentException if count is out of range
-   *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   * @throws IllegalArgumentException if {@code fromHeight} or {@code toHeight} are not valid
    */
-  BlocksResponse getBlocks(int count, BlockFilteringOption blockFilter, long heightMax,
+  List<Block> getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption);
 
   /**
-   * Returns blockchain blocks information starting from the last block in the blockchain.
-   * @param count Number of blocks to return.
-   *        It should be in range [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
-   * @param blockFilter controls whether to skip blocks with no transactions
-   * @param timeOption controls whether to include the block commit time.
-   *        See {@linkplain Block#getCommitTime()}.
-   *        The time value corresponds to the average time of submission of precommits by the
-   *        validators for every returned block
+   * Returns the range of the most recent blockchain blocks in ascending order by their height.
+   * More precisely, returns the blocks in the closed range
+   * {@code [max(0, blockchainHeight - size + 1), blockchainHeight]} of size
+   * {@code max(blockchainHeight + 1, size)}.
+   *
+   * @param size the size of the range. If it exceeds the number of blocks in the blockchain,
+   *        this method will return all blocks ({@code blockchainHeight + 1})
+   * @param blockFilter controls whether to skip blocks with no transactions. If filtering
+   *        is applied, the actual number of blocks may be smaller than {@code size};
+   *        but the range of blocks will not be extended beyond {@code blockchainHeight - size + 1}.
+   *        If a certain <em>number</em> of non-empty blocks is needed (not a certain
+   *        <em>range</em>), use {@link #findNonEmptyBlocks(int, BlockTimeOption)}
+   * @param timeOption controls whether to include
+   *        the {@linkplain Block#getCommitTime() block commit time}
    * @return blocks information response
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
-   * @throws IllegalArgumentException if count is out of range
-   *        [1, {@linkplain ExonumApi#MAX_BLOCKS_PER_REQUEST}]
+   * @throws IllegalArgumentException if size is non-positive
+   * @see #findNonEmptyBlocks(int, BlockTimeOption)
    */
-  BlocksResponse getLastBlocks(int count, BlockFilteringOption blockFilter,
+  BlocksRange getLastBlocks(int size, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption);
+
+  /**
+   * Returns up to the given number of the most recent non-empty blocks in ascending order
+   * by their height. The search range is not limited, i.e., spans the whole blockchain.
+   *
+   * @param numBlocks the maximum number of blocks to return. Must be positive. If the number
+   *     of non-empty blocks in the blockchain is less than {@code numBlocks}, all such blocks
+   *     will be returned
+   * @param timeOption controls whether to include
+   *        the {@linkplain Block#getCommitTime() block commit time}
+   * @return a list of the most recent non-empty blocks
+   * @throws RuntimeException if the client is unable to complete a request
+   *        (e.g., in case of connectivity problems)
+   * @throws IllegalArgumentException if numBlocks is non-positive
+   * @see #getLastBlocks(int, BlockFilteringOption, BlockTimeOption)
+   * @see BlockFilteringOption#SKIP_EMPTY
+   */
+  List<Block> findNonEmptyBlocks(int numBlocks, BlockTimeOption timeOption);
 
   /**
    * Returns the last block in the blockchain.

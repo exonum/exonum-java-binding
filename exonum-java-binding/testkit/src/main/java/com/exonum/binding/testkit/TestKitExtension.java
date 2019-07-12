@@ -40,7 +40,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  *         .withService(TestServiceModule.class));
  *
  * &#64;BeforeEach
- * void setUp() {
+ * void setUp(TestKit testKit) {
  *   // Set up
  * }
  *
@@ -73,8 +73,8 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * <p>As different tests might need slightly different TestKit configuration, following
  * parameterization annotations are available:
  * <ul>
- *   <li>{@link Validator} sets main TestKit validator node type to validator</li>
- *   <li>{@link Auditor} sets main TestKit validator node type to auditor</li>
+ *   <li>{@link Validator} sets main TestKit node type to validator</li>
+ *   <li>{@link Auditor} sets main TestKit node type to auditor</li>
  *   <li>{@link ValidatorCount} sets number of validator nodes in the TestKit network</li>
  * </ul>
  * These annotations should be applied on TestKit parameter:

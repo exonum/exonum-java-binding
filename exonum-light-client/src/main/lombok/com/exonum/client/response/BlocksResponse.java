@@ -19,6 +19,7 @@ package com.exonum.client.response;
 import java.util.List;
 import lombok.Value;
 
+// todo: Consider removing after ECR-3187 is resolved.
 @Value
 public class BlocksResponse {
   /**

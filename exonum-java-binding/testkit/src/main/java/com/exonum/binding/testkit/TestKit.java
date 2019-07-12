@@ -291,7 +291,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Performs a given function with a snapshot of the current database state (i.e., the one that
+   * Performs the given function with a snapshot of the current database state (i.e., the one that
    * corresponds to the latest committed block). In-pool (not yet processed) transactions are also
    * accessible with it in {@linkplain Blockchain#getTxMessages() blockchain}.
    *
@@ -309,7 +309,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Performs a given function with a snapshot of the current database state (i.e., the one that
+   * Performs the given function with a snapshot of the current database state (i.e., the one that
    * corresponds to the latest committed block) and returns a result of its execution. In-pool
    * (not yet processed) transactions are also accessible with it in
    * {@linkplain Blockchain#getTxMessages() blockchain}.
