@@ -71,6 +71,7 @@
     <module>testkit</module>
     <module>app</module>
     <module>integration-tests</module>
+    <module>benchmarks</module>
   </modules>
 
   <scm>
