@@ -19,7 +19,9 @@ package com.exonum.client;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
+import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -43,5 +45,10 @@ final class RecordedRequestSubject extends Subject {
 
   void hasMethod(String method) {
     check("getMethod()").that(actual.getMethod()).isEqualTo(method);
+  }
+
+  StringSubject hasUrlQueryParameter(String name) {
+    HttpUrl requestUrl = actual.getRequestUrl();
+    return check("queryParameter(%s)", name).that(requestUrl.queryParameter(name));
   }
 }

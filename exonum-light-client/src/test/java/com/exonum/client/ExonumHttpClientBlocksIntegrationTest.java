@@ -51,7 +51,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,7 +69,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.LongStream;
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -126,8 +124,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest).hasMethod("GET");
     assertThat(recordedRequest, hasPathStartingWith(BLOCK));
-    assertThat(recordedRequest.getRequestUrl().queryParameter("height"),
-        is(String.valueOf(height)));
+    assertThat(recordedRequest).hasUrlQueryParameter("height")
+        .isEqualTo(String.valueOf(height));
   }
 
   @ParameterizedTest
@@ -749,19 +747,19 @@ class ExonumHttpClientBlocksIntegrationTest {
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
 
-    HttpUrl requestUrl = request.getRequestUrl();
-    assertThat(requestUrl.queryParameter("count"),
-        is(String.valueOf(count)));
-    assertThat(requestUrl.queryParameter("skip_empty_blocks"),
-        is(String.valueOf(skipEmpty)));
+    assertThat(request).hasUrlQueryParameter("count")
+        .isEqualTo(String.valueOf(count));
+    assertThat(request).hasUrlQueryParameter("skip_empty_blocks")
+        .isEqualTo(String.valueOf(skipEmpty));
     if (heightMax == null) {
-      assertThat(requestUrl.queryParameter("latest"), nullValue());
+      assertThat(request).hasUrlQueryParameter("latest")
+          .isNull();
     } else {
-      assertThat(requestUrl.queryParameter("latest"),
-          is(String.valueOf(heightMax)));
+      assertThat(request).hasUrlQueryParameter("latest")
+          .isEqualTo(String.valueOf(heightMax));
     }
-    assertThat(requestUrl.queryParameter("add_blocks_time"),
-        is(String.valueOf(withTime)));
+    assertThat(request).hasUrlQueryParameter("add_blocks_time")
+        .isEqualTo(String.valueOf(withTime));
   }
 
   /** Enqueues JSON responses with the given body, in the order they are passed. */
