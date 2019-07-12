@@ -21,8 +21,8 @@ package com.exonum.client;
  * Contains Exonum API URLs.
  */
 final class ExonumUrls {
-  private static final String EXPLORER_PATHS_PREFIX = "/api/explorer/v1";
-  private static final String SYS_PATHS_PREFIX = "/api/system/v1";
+  private static final String EXPLORER_PATHS_PREFIX = "api/explorer/v1";
+  private static final String SYS_PATHS_PREFIX = "api/system/v1";
   static final String TRANSACTIONS = EXPLORER_PATHS_PREFIX + "/transactions";
   static final String BLOCK = EXPLORER_PATHS_PREFIX + "/block";
   static final String BLOCKS = EXPLORER_PATHS_PREFIX + "/blocks";

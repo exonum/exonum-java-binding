@@ -19,12 +19,12 @@ package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumIterables.indexOf;
-import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
+import static com.exonum.client.HttpUrlHelper.getFullUrl;
 import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
 import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
 import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.util.Collections.emptyMap;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -46,6 +47,7 @@ import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
@@ -72,15 +74,17 @@ class ExonumHttpClient implements ExonumClient {
 
   private final OkHttpClient httpClient;
   private final URL exonumHost;
+  private final String prefix;
 
-  ExonumHttpClient(OkHttpClient httpClient, URL exonumHost) {
+  ExonumHttpClient(OkHttpClient httpClient, URL exonumHost, String prefix) {
     this.httpClient = httpClient;
     this.exonumHost = exonumHost;
+    this.prefix = prefix;
   }
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    Request request = post(toFullUrl(TRANSACTIONS),
+    Request request = post(url(TRANSACTIONS),
         ExplorerApiHelper.createSubmitTxBody(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
@@ -88,21 +92,21 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public int getUnconfirmedTransactionsCount() {
-    Request request = get(toFullUrl(MEMORY_POOL));
+    Request request = get(url(MEMORY_POOL));
 
     return blockingExecuteAndParse(request, SystemApiHelper::parseMemoryPoolJson);
   }
 
   @Override
   public HealthCheckInfo healthCheck() {
-    Request request = get(toFullUrl(HEALTH_CHECK));
+    Request request = get(url(HEALTH_CHECK));
 
     return blockingExecuteAndParse(request, SystemApiHelper::parseHealthCheckJson);
   }
 
   @Override
   public String getUserAgentInfo() {
-    Request request = get(toFullUrl(USER_AGENT));
+    Request request = get(url(USER_AGENT));
 
     return blockingExecutePlainText(request);
   }
@@ -110,11 +114,8 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public Optional<TransactionResponse> getTransaction(HashCode id) {
     HashCode hash = checkNotNull(id);
-    HttpUrl url = urlBuilder()
-        .encodedPath(TRANSACTIONS)
-        .addQueryParameter("hash", hash.toString())
-        .build();
-    Request request = get(url);
+    Map<String, String> query = ImmutableMap.of("hash", hash.toString());
+    Request request = get(url(TRANSACTIONS, query));
 
     return blockingExecute(request, response -> {
       if (response.code() == HTTP_NOT_FOUND) {
@@ -140,11 +141,8 @@ class ExonumHttpClient implements ExonumClient {
   @Override
   public BlockResponse getBlockByHeight(long height) {
     checkArgument(0 <= height, "Height can't be negative, but was %s", height);
-    HttpUrl url = urlBuilder()
-        .encodedPath(BLOCK)
-        .addQueryParameter("height", String.valueOf(height))
-        .build();
-    Request request = get(url);
+    Map<String, String> query = ImmutableMap.of("height", String.valueOf(height));
+    Request request = get(url(BLOCKS, query));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlockResponse);
   }
@@ -282,11 +280,7 @@ class ExonumHttpClient implements ExonumClient {
     if (heightMax != null) {
       query.put("latest", String.valueOf(heightMax));
     }
-
-    HttpUrl.Builder httpRequest = urlBuilder().encodedPath(BLOCKS);
-    query.forEach(httpRequest::addQueryParameter);
-
-    Request request = get(httpRequest.build());
+    Request request = get(url(BLOCKS, query));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlocksResponse);
   }
@@ -305,18 +299,12 @@ class ExonumHttpClient implements ExonumClient {
         .build();
   }
 
-  private HttpUrl toFullUrl(String relativeUrl) {
-    return urlBuilder()
-        .encodedPath(relativeUrl)
-        .build();
+  private HttpUrl url(String path, Map<String, String> query) {
+    return getFullUrl(exonumHost, prefix, path, query);
   }
 
-  private HttpUrl.Builder urlBuilder() {
-
-    return new HttpUrl.Builder()
-        .scheme(exonumHost.getProtocol())
-        .host(exonumHost.getHost())
-        .port(exonumHost.getPort());
+  private HttpUrl url(String path) {
+    return url(path, emptyMap());
   }
 
   private <T> T blockingExecute(Request request, Function<Response, T> responseHandler) {

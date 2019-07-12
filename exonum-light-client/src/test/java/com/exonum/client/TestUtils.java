@@ -17,9 +17,13 @@
 package com.exonum.client;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.google.common.io.BaseEncoding;
+import okhttp3.mockwebserver.RecordedRequest;
 
 final class TestUtils {
   private static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
@@ -36,4 +40,11 @@ final class TestUtils {
     return HEX_ENCODER.encode(message.toBytes());
   }
 
+  static void assertExactPath(RecordedRequest request, String url) {
+    assertThat(request.getPath(), is("/" + url));
+  }
+
+  static void assertPath(RecordedRequest request, String url) {
+    assertThat(request.getPath(), startsWith("/" + url));
+  }
 }
