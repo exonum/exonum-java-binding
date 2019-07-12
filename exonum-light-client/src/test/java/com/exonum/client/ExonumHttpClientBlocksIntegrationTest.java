@@ -749,17 +749,18 @@ class ExonumHttpClientBlocksIntegrationTest {
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
 
-    assertThat(request.getRequestUrl().queryParameter("count"),
+    HttpUrl requestUrl = request.getRequestUrl();
+    assertThat(requestUrl.queryParameter("count"),
         is(String.valueOf(count)));
-    assertThat(request.getRequestUrl().queryParameter("skip_empty_blocks"),
+    assertThat(requestUrl.queryParameter("skip_empty_blocks"),
         is(String.valueOf(skipEmpty)));
     if (heightMax == null) {
-      assertThat(request.getRequestUrl().queryParameter("latest"), nullValue());
+      assertThat(requestUrl.queryParameter("latest"), nullValue());
     } else {
-      assertThat(request.getRequestUrl().queryParameter("latest"),
+      assertThat(requestUrl.queryParameter("latest"),
           is(String.valueOf(heightMax)));
     }
-    assertThat(request.getRequestUrl().queryParameter("add_blocks_time"),
+    assertThat(requestUrl.queryParameter("add_blocks_time"),
         is(String.valueOf(withTime)));
   }
 
