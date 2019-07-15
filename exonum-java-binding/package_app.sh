@@ -44,6 +44,13 @@ function build-exonum-java-for-platform() {
 }
 
 function build-exonum-java-macos() {
+    # We use static linkage for RocksDB on Mac
+    export ROCKSDB_STATIC=1
+    # Check if ROCKSDB_LIB_DIR is set
+    if [ -z "${ROCKSDB_LIB_DIR:-}" ]; then
+      echo "Please set ROCKSDB_LIB_DIR"
+      exit 1
+    fi
     build-exonum-java-for-platform "@loader_path" "libjava_bindings.dylib"
 }
 
