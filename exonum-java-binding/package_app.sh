@@ -44,7 +44,8 @@ function build-exonum-java-for-platform() {
 }
 
 function build-exonum-java-macos() {
-    # We use static linkage for RocksDB on Mac
+    # We use static linkage for RocksDB on Mac because we depend on RocksDB 5.18.3
+    # which is not available via Homebrew
     export ROCKSDB_STATIC=1
     # Check if ROCKSDB_LIB_DIR is set
     if [ -z "${ROCKSDB_LIB_DIR:-}" ]; then
