@@ -246,6 +246,5 @@ fn create_transaction_context(
 ) -> TransactionContext {
     let (service_id, service_transaction) = (raw.service_id(), raw.service_transaction());
     let signed_transaction = Message::sign_transaction(service_transaction, service_id, pk, &sk);
-    // TODO: think about service name
     TransactionContext::new(fork, TEST_SERVICE_NAME, &signed_transaction)
 }
