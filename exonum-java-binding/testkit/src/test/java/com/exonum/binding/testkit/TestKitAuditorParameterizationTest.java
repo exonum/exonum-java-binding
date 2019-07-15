@@ -18,9 +18,11 @@ package com.exonum.binding.testkit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+@Disabled
 class TestKitAuditorParameterizationTest {
 
   @RegisterExtension

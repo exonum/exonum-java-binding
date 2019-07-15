@@ -43,6 +43,8 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -187,6 +189,7 @@ abstract class BaseListIndexIntegrationTestable
     });
   }
 
+  @Disabled //FIXME: disabled until ECR-3330
   @Test
   void setWithSnapshot() throws Exception {
     // Initialize the list.

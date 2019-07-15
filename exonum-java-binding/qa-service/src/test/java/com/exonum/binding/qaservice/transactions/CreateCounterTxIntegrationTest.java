@@ -44,6 +44,7 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -92,6 +93,7 @@ class CreateCounterTxIntegrationTest {
     assertThat(e.getMessage()).contains("Name must not be blank");
   }
 
+  @Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
   @Test
   @RequiresNativeLibrary
   void executeNewCounter(TestKit testKit) {
@@ -110,6 +112,7 @@ class CreateCounterTxIntegrationTest {
     assertThat(counterNames.get(counterId)).isEqualTo(counterName);
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeAlreadyExistingCounter(TestKit testKit) {
