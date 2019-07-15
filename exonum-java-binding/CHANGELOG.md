@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2019-07-TBD
+
+### Overview
+
+This release brings support of Exonum TestKit. It is based on Exonum 0.11.
+
 ### Added
 - A new `exonum-testkit` module that allows to emulate blockchain network and test transaction
   execution in the synchronous environment (that is, without consensus algorithm and network
@@ -259,7 +265,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...HEAD
+[0.7.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...ejb/v0.7.0
 [0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0
 [0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0
 [0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
