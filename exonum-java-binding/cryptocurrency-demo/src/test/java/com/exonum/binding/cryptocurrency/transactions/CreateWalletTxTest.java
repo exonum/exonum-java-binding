@@ -41,6 +41,7 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -73,6 +74,7 @@ class CreateWalletTxTest {
     assertThat(t.getMessage()).isEqualTo("The initial balance (-1) must not be negative.");
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx(TestKit testKit) {
@@ -91,6 +93,7 @@ class CreateWalletTxTest {
         .isEqualTo(DEFAULT_INITIAL_BALANCE);
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx(TestKit testKit) {

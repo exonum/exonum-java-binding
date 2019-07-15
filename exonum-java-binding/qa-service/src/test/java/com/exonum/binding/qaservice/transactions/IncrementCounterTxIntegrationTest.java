@@ -45,6 +45,7 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -87,6 +88,7 @@ class IncrementCounterTxIntegrationTest {
     assertThat(txFromRaw).isEqualTo(tx);
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeIncrementsCounter(TestKit testKit) {
@@ -112,6 +114,7 @@ class IncrementCounterTxIntegrationTest {
     assertThat(counters.get(counterId)).isEqualTo(expectedValue);
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeNoSuchCounter(TestKit testKit) {

@@ -46,6 +46,7 @@ import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -102,6 +103,7 @@ class ErrorTxIntegrationTest {
         () -> new ErrorTx(1L, (byte) 1, invalidDescription));
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeNoDescription(TestKit testKit) {
@@ -116,6 +118,7 @@ class ErrorTxIntegrationTest {
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeWithDescription(TestKit testKit) {
@@ -132,6 +135,7 @@ class ErrorTxIntegrationTest {
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
+  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeClearsQaServiceData() throws CloseFailuresException {

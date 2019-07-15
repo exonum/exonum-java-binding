@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -37,6 +38,7 @@ class TestKitExtensionTest {
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
       .withService(TestServiceModule.class);
 
+  @Disabled
   @Test
   void testKitInstantiationTestCase() {
     Events testEvents = getTestCaseEvents(TestKitInstantiationTestCase.class);
@@ -45,6 +47,7 @@ class TestKitExtensionTest {
     assertThat(testEvents.executions().succeeded().count()).isEqualTo(1);
   }
 
+  @Disabled
   @Test
   void beforeEachInstantiationTestCase() {
     Events testEvents = getAllTestCaseEvents(BeforeEachInstantiationTestCase.class);
@@ -53,6 +56,7 @@ class TestKitExtensionTest {
     checkFailedEvents(testEvents, expectedMessage);
   }
 
+  @Disabled
   @Test
   void afterEachInstantiationTestCase() {
     Events testEvents = getAllTestCaseEvents(AfterEachInstantiationTestCase.class);
@@ -61,6 +65,7 @@ class TestKitExtensionTest {
     checkFailedEvents(testEvents, expectedMessage);
   }
 
+  @Disabled
   @Test
   void beforeAllInstantiationTestCase() {
     Events testEvents = getAllTestCaseEvents(BeforeAllInstantiationTestCase.class);
@@ -69,6 +74,7 @@ class TestKitExtensionTest {
     checkFailedEvents(testEvents, expectedMessage);
   }
 
+  @Disabled
   @Test
   void afterAllInstantiationTestCase() {
     Events testEvents = getAllTestCaseEvents(AfterAllInstantiationTestCase.class);
