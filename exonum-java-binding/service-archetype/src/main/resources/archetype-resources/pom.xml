@@ -19,7 +19,7 @@
     <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
     <hamcrest.version>2.1</hamcrest.version>
     <mockito.version>3.0.0</mockito.version>
-    <exonum.version>0.7.0-SNAPSHOT</exonum.version>
+    <exonum.version>0.7.0</exonum.version>
   </properties>
 
   <dependencyManagement>

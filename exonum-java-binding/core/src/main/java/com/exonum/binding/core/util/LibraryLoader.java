@@ -50,7 +50,7 @@ public final class LibraryLoader {
    * <a href="https://wiki.bf.local/display/EJB/Java+Binding+Release+Checklist+Template">
    * each release</a>.
    */
-  private static final String JAVA_BINDING_VERSION = "0.7.0-SNAPSHOT";
+  private static final String JAVA_BINDING_VERSION = "0.7.0";
 
   private static final Logger logger = LogManager.getLogger(LibraryLoader.class);
 
