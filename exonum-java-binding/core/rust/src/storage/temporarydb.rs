@@ -81,8 +81,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
     view_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let fork = match *handle::cast_handle::<View>(view_handle).get() {
+        let _db = handle::cast_handle::<TemporaryDB>(db_handle);
+        let _fork = match *handle::cast_handle::<View>(view_handle).get() {
             ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
             ViewRef::Fork(fork) => fork,
         };

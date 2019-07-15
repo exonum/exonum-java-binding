@@ -124,39 +124,39 @@ fn tx_from_raw_should_return_err_if_java_exception_occurred() {
 #[test]
 fn initialize_config() {
     let db = TemporaryDB::new();
-    let mut fork = db.fork();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config(TEST_CONFIG_JSON.to_string())
         .build();
 
-    let config = service.initialize(&mut fork);
+    let config = service.initialize(&fork);
     assert_eq!(config, *TEST_CONFIG_VALUE);
 }
 
 #[test]
 fn initialize_config_null() {
     let db = TemporaryDB::new();
-    let mut fork = db.fork();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config(None)
         .build();
 
-    let config = service.initialize(&mut fork);
+    let config = service.initialize(&fork);
     assert_eq!(config, Value::Null);
 }
 
 #[test]
 fn initialize_config_parse_error() {
     let db = TemporaryDB::new();
-    let mut fork = db.fork();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config(TEST_CONFIG_NOT_JSON.to_string())
         .build();
 
-    match catch_unwind(AssertUnwindSafe(|| service.initialize(&mut fork))) {
+    match catch_unwind(AssertUnwindSafe(|| service.initialize(&fork))) {
         Ok(_config) => panic!("This test should panic"),
         Err(ref e) => {
             let error = any_to_string(e);
@@ -170,13 +170,13 @@ fn initialize_config_parse_error() {
 #[should_panic(expected = "Java exception: java.lang.RuntimeException")]
 fn initialize_should_panic_if_java_exception_occurred() {
     let db = TemporaryDB::new();
-    let mut fork = db.fork();
+    let fork = db.fork();
 
     let service = ServiceMockBuilder::new(EXECUTOR.clone())
         .initial_global_config_throwing(EXCEPTION_CLASS)
         .build();
 
-    service.initialize(&mut fork);
+    service.initialize(&fork);
 }
 
 #[test]
@@ -184,8 +184,8 @@ fn service_can_modify_db_on_initialize() {
     let db = TemporaryDB::new();
     let service = create_test_service(EXECUTOR.clone());
     {
-        let mut fork = db.fork();
-        service.initialize(&mut fork);
+        let fork = db.fork();
+        service.initialize(&fork);
         db.merge(fork.into_patch())
             .expect("Failed to merge changes");
     }

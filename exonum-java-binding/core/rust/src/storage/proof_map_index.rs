@@ -115,9 +115,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 /// Returns the root hash of the proof map or default hash value if it is empty.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
-    env: JNIEnv,
+    _env: JNIEnv,
     _: JObject,
-    map_handle: Handle,
+    _map_handle: Handle,
 ) -> jbyteArray {
     //    // FIXME: uncomment when new proofs are implemented
     //    let res = panic::catch_unwind(|| {

@@ -188,9 +188,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 /// Returns the root hash of the proof list or default hash value if it is empty.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRootHash(
-    env: JNIEnv,
+    _env: JNIEnv,
     _: JObject,
-    list_handle: Handle,
+    _list_handle: Handle,
 ) -> jbyteArray {
     //    // FIXME: uncomment when new proofs are implemented
     //    let res = panic::catch_unwind(|| {
@@ -225,11 +225,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 /// Returns Java representation of the proof that some elements exists in the specified range.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
-    env: JNIEnv,
+    _env: JNIEnv,
     _: JObject,
-    list_handle: Handle,
-    from: jlong,
-    to: jlong,
+    _list_handle: Handle,
+    _from: jlong,
+    _to: jlong,
 ) -> jobject {
     //    // FIXME: uncomment when new proofs are implemented
     //    let res = panic::catch_unwind(|| {

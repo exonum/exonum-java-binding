@@ -143,8 +143,8 @@ mod tests {
     #[test]
     fn create_view_with_ref_fork() {
         let db = setup_database();
-        let mut fork = db.fork();
-        let mut view = View::from_ref_fork(&mut fork);
+        let fork = db.fork();
+        let mut view = View::from_ref_fork(&fork);
         check_ref_fork(&mut view);
         assert!(view._owned.is_none());
     }
