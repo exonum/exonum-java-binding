@@ -37,11 +37,13 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class SetEntryTransactionIntegrationTest {
 
+  @Disabled //FIXME: Disabled until ECR-3330
   @Test
   void executePutsTheValueIntoEntry() throws CloseFailuresException {
     try (MemoryDb database = MemoryDb.newInstance();

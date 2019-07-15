@@ -32,6 +32,8 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.TestStorageItems;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.List;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -61,6 +63,7 @@ class MemoryDbIntegrationTest {
     }
   }
 
+  @Disabled // FIXME: Tests are disabled until ECR-3330
   @Test
   void merge_singleList() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
@@ -83,6 +86,7 @@ class MemoryDbIntegrationTest {
     }
   }
 
+  @Disabled
   @Test
   void merge_twoIndices() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
@@ -115,6 +119,7 @@ class MemoryDbIntegrationTest {
     }
   }
 
+  @Disabled
   @Test
   void merge_multipleForks() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();

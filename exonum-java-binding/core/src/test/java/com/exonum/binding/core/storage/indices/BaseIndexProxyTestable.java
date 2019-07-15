@@ -91,15 +91,15 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      " name",
-      "name ",
-      "name 1",
-      " name ",
-      "?name",
-      "name?",
-      "na?me",
-      "name#1",
-      "name-1",
+      //      " name", // FIXME: commented out until ECR-3345
+      //      "name ",
+      //      "name 1",
+      //      " name ",
+      //      "?name",
+      //      "name?",
+      //      "na?me",
+      //      "name#1",
+      //      "name-1",
   })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
     try (Cleaner cleaner = new Cleaner();
