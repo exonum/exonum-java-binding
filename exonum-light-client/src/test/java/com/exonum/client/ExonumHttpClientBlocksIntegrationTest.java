@@ -31,8 +31,7 @@ import static com.exonum.client.Blocks.BLOCK_3_WITHOUT_TIME;
 import static com.exonum.client.Blocks.aBlock;
 import static com.exonum.client.ExonumApi.JSON;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
-import static com.exonum.client.ExonumUrls.BLOCK;
-import static com.exonum.client.ExonumUrls.BLOCKS;
+import static com.exonum.client.RecordedRequestMatchers.hasPath;
 import static com.exonum.client.RecordedRequestMatchers.hasPathStartingWith;
 import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
 import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
@@ -82,6 +81,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class ExonumHttpClientBlocksIntegrationTest {
 
+  private final String expectedBlocksPath = "api/explorer/v1/blocks";
+
   private MockWebServer server;
   private ExonumClient exonumClient;
 
@@ -123,9 +124,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCK));
-    assertThat(recordedRequest.getRequestUrl().queryParameter("height"),
-        is(String.valueOf(height)));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/block?height=" + height));
   }
 
   @ParameterizedTest
@@ -160,7 +159,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     int expectedNumBlocks = Math.toIntExact(toHeight - fromHeight + 1);
     assertBlockRequestParams(recordedRequest, expectedNumBlocks, blockFilter, toHeight, timeOption);
   }
@@ -197,7 +196,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     int expectedNumBlocks = Math.toIntExact(toHeight - fromHeight + 1);
     assertBlockRequestParams(recordedRequest, expectedNumBlocks, blockFilter, toHeight, timeOption);
   }
@@ -228,7 +227,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     int expectedNumBlocks = Math.toIntExact(toHeight - fromHeight + 1);
     assertBlockRequestParams(recordedRequest, expectedNumBlocks, blockFilter, toHeight, timeOption);
   }
@@ -400,7 +399,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, numBlocks, blockFilter, null, timeOption);
   }
 
@@ -437,7 +436,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     int expectedFirstRequestSize = min(blocksCount, MAX_BLOCKS_PER_REQUEST);
     assertBlockRequestParams(recordedRequest, expectedFirstRequestSize, blockFilter, null,
         timeOption);
@@ -659,7 +658,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 1, INCLUDE_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
@@ -685,7 +684,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
@@ -710,7 +709,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
@@ -738,7 +737,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPathStartingWith(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 0, INCLUDE_EMPTY, null, NO_COMMIT_TIME);
   }
 
