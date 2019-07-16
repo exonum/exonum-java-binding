@@ -20,6 +20,7 @@ package com.exonum.client;
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.client.ExonumApi.JSON;
 import static com.exonum.client.RecordedRequestMatchers.hasPath;
+import static com.exonum.client.RecordedRequestMatchers.hasQueryParam;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -185,7 +186,8 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/explorer/v1/transactions?hash=" + id.toString()));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/transactions"));
+    assertThat(recordedRequest, hasQueryParam("hash", id));
   }
 
   @Test
@@ -203,7 +205,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/explorer/v1/transactions?hash=" + id.toString()));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/transactions"));
   }
 
 }
