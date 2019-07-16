@@ -51,7 +51,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
     // Create a set proxy for each id
     Map<String, ValueSetIndexProxy<String>> setsById = new HashMap<>();
-    for (String setId : valuesById.keys()) {
+    for (String setId : valuesById.keySet()) {
       byte[] id = bytes(setId);
       ValueSetIndexProxy<String> set = createInGroup(id, view);
 

@@ -42,7 +42,7 @@ abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
 
     // Create a list proxy for each id
     Map<String, ListIndex<String>> listsById = new HashMap<>();
-    for (String listId : elementsById.keys()) {
+    for (String listId : elementsById.keySet()) {
       byte[] id = bytes(listId);
       ListIndex<String> list = createInGroup(id, view);
 

@@ -51,7 +51,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
     // Create a set proxy for each id
     Map<String, KeySetIndexProxy<String>> setsById = new HashMap<>();
-    for (String setId : valuesById.keys()) {
+    for (String setId : valuesById.keySet()) {
       byte[] id = bytes(setId);
       KeySetIndexProxy<String> set = createInGroup(id, view);
 
