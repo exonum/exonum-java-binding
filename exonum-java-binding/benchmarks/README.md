@@ -6,7 +6,7 @@ It is configured to use [Java Microbenchmark Harness][jmh-home] (JMH).
 
 [jmh-home]: https://openjdk.java.net/projects/code-tools/jmh/
 
-*This module is included in this project for easier prototyping and experimentation.
+*This module is included in the project for easier prototyping and experimentation.
 It does* not *contain system-level benchmarks of Exonum services, which currently 
 reside in an internal project:* 
 [exonum/exonum-benchmarking](https://github.com/exonum/exonum-benchmarking)
@@ -17,7 +17,7 @@ project.
 
 ## Usage
 
-Build the `benchmarks.jar` (from exonum-java-binding directory):
+Build the `benchmarks.jar` (from [exonum-java-binding](..) directory):
 
 ```
 # Build the benchmarks and the modules it depends upon 
