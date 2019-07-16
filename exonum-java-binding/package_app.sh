@@ -52,6 +52,11 @@ function build-exonum-java-macos() {
       echo "Please set ROCKSDB_LIB_DIR"
       exit 1
     fi
+    # Check if SNAPPY_LIB_DIR is set
+    if [ -z "${SNAPPY_LIB_DIR:-}" ]; then
+      echo "Please set SNAPPY_LIB_DIR"
+      exit 1
+    fi
     build-exonum-java-for-platform "@loader_path" "libjava_bindings.dylib"
 }
 
