@@ -36,7 +36,7 @@
     <packaging.native>${rust.build.directory}/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.6.5</auto-value.version>
     <!-- Skip building Rust library for tests -->
-    <doNotBuildRustLib>false</doNotBuildRustLib>
+    <skipRustLibBuild>false</skipRustLibBuild>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
   </properties>
@@ -221,7 +221,7 @@
                 <argument>--color</argument>
                 <argument>always</argument>
               </arguments>
-              <skip>${doNotBuildRustLib}</skip>
+              <skip>${skipRustLibBuild}</skip>
             </configuration>
             <goals>
               <goal>exec</goal>
