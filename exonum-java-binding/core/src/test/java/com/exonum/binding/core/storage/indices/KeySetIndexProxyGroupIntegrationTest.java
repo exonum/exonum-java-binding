@@ -31,14 +31,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
   private static final String GROUP_NAME = "key_set_group_IT";
 
-  @Disabled //FIXME: broken
   @Test
   void setsInGroupMustBeIndependent() {
     View view = db.createFork(cleaner);
