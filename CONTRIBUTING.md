@@ -22,14 +22,13 @@ You need to install the following dependencies:
   * [Stable Rust](https://www.rust-lang.org/tools/install).
   * The [system dependencies](https://exonum.com/doc/version/0.11/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
-  __Important__: On Mac OS it is necessary to install RocksDB and Snappy
-  packages and to set environment variables `ROCKSDB_LIB_DIR` and `SNAPPY_LIB_DIR`.
-  To install these packages via Homebrew:
+  __Important__: On Mac OS it is necessary to install RocksDB
+  package and to set the environment variable `ROCKSDB_LIB_DIR`.
+  To install the package via Homebrew:
   
   ```bash
-  brew install rocksdb snappy
+  brew install rocksdb
   export ROCKSDB_LIB_DIR=/usr/local/lib
-  export SNAPPY_LIB_DIR=/usr/local/lib
   ```
   
   * For automatic packaging of the Exonum Java app you need [CMake](https://cmake.org/) installed in your system. 
