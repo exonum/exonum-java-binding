@@ -24,6 +24,14 @@ You need to install the following dependencies:
   You do _not_ need to manually fetch and compile Exonum.
   __Important__: On Mac OS it is necessary to install RocksDB and Snappy
   packages and to set environment variables `ROCKSDB_LIB_DIR` and `SNAPPY_LIB_DIR`.
+  To install these packages via Homebrew:
+  
+  ```bash
+  brew install rocksdb snappy
+  export ROCKSDB_LIB_DIR=/usr/local/lib
+  export SNAPPY_LIB_DIR=/usr/local/lib
+  ```
+  
   * For automatic packaging of the Exonum Java app you need [CMake](https://cmake.org/) installed in your system. 
   Also on Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
 
