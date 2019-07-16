@@ -206,6 +206,7 @@ class ExonumHttpClientIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest, hasPath("api/explorer/v1/transactions"));
+    assertThat(recordedRequest, hasQueryParam("hash", id));
   }
 
 }
