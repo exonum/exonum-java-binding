@@ -256,6 +256,7 @@
           <!-- Allow fetching external resources to generate links -->
           <isOffline>false</isOffline>
           <links>
+            <!-- todo: Update when upgraded to 0.7 to new link: https://exonum.com/doc/api/java-binding/${ejb.version} -->
             <link>https://exonum.com/doc/api/java-binding-common/${ejb.version}</link>
           </links>
         </configuration>
