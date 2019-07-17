@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 
 class TestServiceIntegrationTest {
 
-  @Disabled // FIXME: disabled until ECR-XYZ.
+  @Disabled // FIXME: disabled until ECR-3320.
   @Test
   @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {

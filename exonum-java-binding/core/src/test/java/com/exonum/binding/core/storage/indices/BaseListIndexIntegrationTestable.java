@@ -189,7 +189,7 @@ abstract class BaseListIndexIntegrationTestable
     });
   }
 
-  @Disabled //FIXME: disabled until ECR-XYZ1
+  @Disabled //FIXME: disabled until ECR-3330
   @Test
   void setWithSnapshot() throws Exception {
     // Initialize the list.
