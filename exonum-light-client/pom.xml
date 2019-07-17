@@ -61,7 +61,7 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.6.0</ejb.version>
+    <ejb.version>0.7.0</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

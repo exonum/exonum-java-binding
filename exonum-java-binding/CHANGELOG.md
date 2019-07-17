@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2019-07-17
+
+### Overview
+
+This release brings support of Exonum TestKit, massive performance improvements,
+and various other fixes and improvements. It is based on Exonum 0.11.
+
+*If you are upgrading an existing Java service, consult 
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.7.0/exonum-java-binding/doc/Migration_guide_0.7.md).*
+
 ### Added
 - A new `exonum-testkit` module that allows to emulate blockchain network and test transaction
   execution in the synchronous environment (that is, without consensus algorithm and network
@@ -33,6 +43,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [testkit-documentation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#testing
 
 ### Changed
+- Improved the throughput of transaction processing twofold. Java services on Exonum Java 0.7.0 
+  handle transactions about 15–20% slower than equivalent Rust ones, according to our system 
+  benchmarks. (#917, #996)
 - `BinaryTransactionMessage#toString` to include some fields in human-readable
   format instead of the whole message in binary form.
 - `Node#submitTransaction` to throw _unchecked_ `TransactionSubmissionException` instead
@@ -57,7 +70,7 @@ by default, but can be overridden with 'package' property.
 - Application packaging issue that might have resulted in several versions of Java artifacts
 on the application classpath. (#968)
 
-[tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
+[tx-info-07]: https://exonum.com/doc/api/java-binding/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
 
 ## [0.6.0] - 2019-05-08
 
@@ -260,7 +273,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...HEAD
+[0.7.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...ejb/v0.7.0
 [0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0
 [0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0
 [0.4]: https://github.com/exonum/exonum-java-binding/compare/v0.3...v0.4
