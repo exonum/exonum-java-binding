@@ -687,7 +687,6 @@ class ProofMapIndexProxyIntegrationTest
    * - ProofMap constructor preserves the index type and
    * - Map constructor checks it, preventing illegal access to ProofMap internals.
    */
-  @Disabled // FIXME: Panics on failed assertion "Index type doesn't match specified".
   @Test
   void constructorShallPreserveTypeInformation() {
     runTestWithView(database::createFork, (view, map) -> {
@@ -698,8 +697,9 @@ class ProofMapIndexProxyIntegrationTest
         MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
             StandardSerializers.hash(), StandardSerializers.string());
       });
-      assertThat(thrown.getLocalizedMessage(), containsString("Attempt to access index '" + MAP_NAME
-          + "' of type Map, while said index was initially created with type ProofMap"));
+      // TODO: Change message after https://jira.bf.local/browse/ECR-3354
+      assertThat(thrown.getLocalizedMessage(),
+              containsString("Index type doesn't match specified"));
     });
   }
 
