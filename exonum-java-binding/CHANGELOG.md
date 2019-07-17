@@ -70,7 +70,7 @@ by default, but can be overridden with 'package' property.
 - Application packaging issue that might have resulted in several versions of Java artifacts
 on the application classpath. (#968)
 
-[tx-info-07]: https://exonum.com/doc/api/java-binding-core/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
+[tx-info-07]: https://exonum.com/doc/api/java-binding/0.7.0/com/exonum/binding/core/transaction/Transaction.html#info()
 
 ## [0.6.0] - 2019-05-08
 
