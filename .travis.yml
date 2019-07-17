@@ -28,6 +28,7 @@ addons:
       - pkg-config
       - protobuf-compiler
       - libprotobuf-dev
+      - clang
 
 env:
   global:
