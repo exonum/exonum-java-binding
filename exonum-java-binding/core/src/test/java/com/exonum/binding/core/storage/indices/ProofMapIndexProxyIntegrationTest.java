@@ -697,7 +697,9 @@ class ProofMapIndexProxyIntegrationTest
         MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
             StandardSerializers.hash(), StandardSerializers.string());
       });
-      assertThat(thrown.getLocalizedMessage(), containsString("Index type doesn't match specified"));
+      // TODO: Change message after https://jira.bf.local/browse/ECR-3354
+      assertThat(thrown.getLocalizedMessage(),
+              containsString("Index type doesn't match specified"));
     });
   }
 
