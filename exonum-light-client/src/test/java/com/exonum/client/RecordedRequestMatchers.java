@@ -17,12 +17,17 @@
 package com.exonum.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
+import java.util.Set;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 class RecordedRequestMatchers {
 
@@ -38,6 +43,23 @@ class RecordedRequestMatchers {
     return createRequestPathMatcher(pathMatcher);
   }
 
+  static Matcher<RecordedRequest> hasNoQueryParam(String queryKey) {
+    Matcher<Iterable<? extends String>> keyMatcher = not(contains(queryKey));
+
+    return createRequestQueryKeysMatcher(keyMatcher);
+  }
+
+  static Matcher<RecordedRequest> hasQueryParam(String queryKey, Object queryValue) {
+
+    return hasQueryParam(queryKey, String.valueOf(queryValue));
+  }
+
+  static Matcher<RecordedRequest> hasQueryParam(String queryKey, String queryValue) {
+    Matcher<String> valueMather = equalTo(queryValue);
+
+    return createRequestQueryMatcher(queryKey, valueMather);
+  }
+
   private static void checkPathPrefix(String expectedPath) {
     checkArgument(!expectedPath.startsWith("/"), "expectedPath (%s) must not have leading slash",
         expectedPath);
@@ -50,10 +72,53 @@ class RecordedRequestMatchers {
 
       @Override
       protected String featureValueOf(RecordedRequest actual) {
-        return actual.getPath();
+        return actual.getRequestUrl().encodedPath();
       }
     };
   }
 
-  private RecordedRequestMatchers() {}
+  private static Matcher<RecordedRequest> createRequestQueryKeysMatcher(
+      Matcher<Iterable<? extends String>> keysMatcher) {
+    return new FeatureMatcher<RecordedRequest, Set<String>>(keysMatcher, "query keys",
+        "query keys") {
+
+      @Override
+      protected Set<String> featureValueOf(RecordedRequest actual) {
+        return actual.getRequestUrl().queryParameterNames();
+      }
+    };
+  }
+
+  private static Matcher<RecordedRequest> createRequestQueryMatcher(String key,
+      Matcher<? super String> valueMatcher) {
+    return new RequestQueryParamMatcher(key, valueMatcher);
+  }
+
+  private static final class RequestQueryParamMatcher extends TypeSafeMatcher<RecordedRequest> {
+    private final String key;
+    private final Matcher<? super String> valueMatcher;
+
+    RequestQueryParamMatcher(String key,
+        Matcher<? super String> valueMatcher) {
+      this.key = key;
+      this.valueMatcher = valueMatcher;
+    }
+
+    @Override
+    protected boolean matchesSafely(RecordedRequest actual) {
+      return valueMatcher.matches(actual.getRequestUrl().queryParameter(key));
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      description.appendText("query containing [")
+          .appendText(key)
+          .appendText("->")
+          .appendDescriptionOf(valueMatcher)
+          .appendText("]");
+    }
+  }
+
+  private RecordedRequestMatchers() {
+  }
 }

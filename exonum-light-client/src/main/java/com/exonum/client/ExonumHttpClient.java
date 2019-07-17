@@ -19,6 +19,7 @@ package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumIterables.indexOf;
+import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.MEMORY_POOL;
@@ -142,7 +143,7 @@ class ExonumHttpClient implements ExonumClient {
   public BlockResponse getBlockByHeight(long height) {
     checkArgument(0 <= height, "Height can't be negative, but was %s", height);
     Map<String, String> query = ImmutableMap.of("height", String.valueOf(height));
-    Request request = get(url(BLOCKS, query));
+    Request request = get(url(BLOCK, query));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlockResponse);
   }

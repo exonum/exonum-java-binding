@@ -31,9 +31,9 @@ import static com.exonum.client.Blocks.BLOCK_3_WITHOUT_TIME;
 import static com.exonum.client.Blocks.aBlock;
 import static com.exonum.client.ExonumApi.JSON;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
-import static com.exonum.client.ExonumUrls.BLOCK;
-import static com.exonum.client.ExonumUrls.BLOCKS;
-import static com.exonum.client.RecordedRequestMatchers.hasPathStartingWith;
+import static com.exonum.client.RecordedRequestMatchers.hasNoQueryParam;
+import static com.exonum.client.RecordedRequestMatchers.hasPath;
+import static com.exonum.client.RecordedRequestMatchers.hasQueryParam;
 import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
 import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
 import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
@@ -46,11 +46,11 @@ import static java.lang.Math.min;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -72,6 +72,7 @@ import java.util.stream.LongStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,6 +82,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ExonumHttpClientBlocksIntegrationTest {
+
+  private final String expectedBlocksPath = "api/explorer/v1/blocks";
 
   private MockWebServer server;
   private ExonumClient exonumClient;
@@ -123,9 +126,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCK));
-    assertThat(recordedRequest.getRequestUrl().queryParameter("height"),
-        is(String.valueOf(height)));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/block"));
+    assertThat(recordedRequest, hasQueryParam("height", height));
   }
 
   @ParameterizedTest
@@ -160,7 +162,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     int expectedNumBlocks = Math.toIntExact(toHeight - fromHeight + 1);
     assertBlockRequestParams(recordedRequest, expectedNumBlocks, blockFilter, toHeight, timeOption);
   }
@@ -197,7 +199,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     int expectedNumBlocks = Math.toIntExact(toHeight - fromHeight + 1);
     assertBlockRequestParams(recordedRequest, expectedNumBlocks, blockFilter, toHeight, timeOption);
   }
@@ -228,7 +230,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     int expectedNumBlocks = Math.toIntExact(toHeight - fromHeight + 1);
     assertBlockRequestParams(recordedRequest, expectedNumBlocks, blockFilter, toHeight, timeOption);
   }
@@ -400,7 +402,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, numBlocks, blockFilter, null, timeOption);
   }
 
@@ -437,7 +439,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     int expectedFirstRequestSize = min(blocksCount, MAX_BLOCKS_PER_REQUEST);
     assertBlockRequestParams(recordedRequest, expectedFirstRequestSize, blockFilter, null,
         timeOption);
@@ -659,7 +661,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 1, INCLUDE_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
@@ -685,7 +687,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
@@ -710,7 +712,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
   }
 
@@ -738,7 +740,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPathStartingWith(BLOCKS));
+    assertThat(recordedRequest, hasPath(expectedBlocksPath));
     assertBlockRequestParams(recordedRequest, 0, INCLUDE_EMPTY, null, NO_COMMIT_TIME);
   }
 
@@ -747,18 +749,15 @@ class ExonumHttpClientBlocksIntegrationTest {
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
 
-    assertThat(request.getRequestUrl().queryParameter("count"),
-        is(String.valueOf(count)));
-    assertThat(request.getRequestUrl().queryParameter("skip_empty_blocks"),
-        is(String.valueOf(skipEmpty)));
-    if (heightMax == null) {
-      assertThat(request.getRequestUrl().queryParameter("latest"), nullValue());
-    } else {
-      assertThat(request.getRequestUrl().queryParameter("latest"),
-          is(String.valueOf(heightMax)));
-    }
-    assertThat(request.getRequestUrl().queryParameter("add_blocks_time"),
-        is(String.valueOf(withTime)));
+    Matcher<RecordedRequest> heightMatcher =
+        heightMax == null ? hasNoQueryParam("latest") : hasQueryParam("latest", heightMax);
+
+    assertThat(request, allOf(
+        hasQueryParam("count", count),
+        hasQueryParam("skip_empty_blocks", skipEmpty),
+        hasQueryParam("add_blocks_time", withTime),
+        heightMatcher
+    ));
   }
 
   /** Enqueues JSON responses with the given body, in the order they are passed. */

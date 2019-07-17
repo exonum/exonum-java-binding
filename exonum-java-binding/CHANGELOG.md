@@ -44,7 +44,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `CommonTypeAdapterFactory`. `BlockTypeAdapterFactory` is renamed to `CoreTypeAdapterFactory`.
   `JsonSerializer#json` and `JsonSerializer#builder` register `CommonTypeAdapterFactory` 
   by default. `CoreTypeAdapterFactory` must be registered explicitly if needed. (#971)
-
+- Exonum Java App now uses static linkage for RocksDB on Mac OS. Installed RocksDB
+  is no more necessary to run the App. (#1011)
   
 ### Fixed
 - The default [`Transaction#info`][tx-info-07] implementation causing an error on `transaction`
