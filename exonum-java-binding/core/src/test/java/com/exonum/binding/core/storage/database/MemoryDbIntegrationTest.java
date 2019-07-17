@@ -54,8 +54,6 @@ class MemoryDbIntegrationTest {
     }
   }
 
-  // FIXME: Disabled until ECR-3333
-  @Disabled
   @Test
   void getForkShallCreateNonNullFork() throws Exception {
     try (MemoryDb database = MemoryDb.newInstance();
