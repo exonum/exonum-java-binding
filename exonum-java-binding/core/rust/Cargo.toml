@@ -19,7 +19,7 @@ exonum = "0.11"
 exonum-time = "0.11"
 exonum-testkit = "0.11"
 # FIXME: Until merkedb is published to the `crates.io` the `exonum` repo should be cloned as `exonum` at the same level as EJB root.
-exonum-merkledb = { path = "../../../exonum/components/merkledb" }
+exonum-merkledb = { path = "../../../../exonum/components/merkledb" }
 chrono = "0.4.7"
 failure = "0.1.1"
 toml = "0.5"
@@ -41,7 +41,7 @@ rpath = true
 rpath = true
 
 [patch.crates-io]
-exonum = { path = "../../../exonum/exonum" }
-exonum-testkit = { path = "../../../exonum/testkit" }
-exonum-time = { path = "../../../exonum/services/time" }
-exonum-configuration = { path = "../../../exonum/services/configuration" }
+exonum = { path = "../../../../exonum/exonum" }
+exonum-testkit = { path = "../../../../exonum/testkit" }
+exonum-time = { path = "../../../../exonum/services/time" }
+exonum-configuration = { path = "../../../../exonum/services/configuration" }
