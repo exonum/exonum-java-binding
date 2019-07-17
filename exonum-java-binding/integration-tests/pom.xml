@@ -106,6 +106,14 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+      <!-- Skip the signing as there is no artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
