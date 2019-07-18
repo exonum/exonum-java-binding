@@ -5,9 +5,9 @@ Java client for [Exonum blockchain][exonum].
 Exonum light client is Java library for working with Exonum blockchain
 from the client side and can be easily integrated to an existing 
 Java application.  
-Also, Exonum light client provides access to [common utils][ejb-common]
-toolkit which contains some helpful functions for _hashing_,
-_cryptography_, _serialization_ etc. 
+Also, Exonum light client provides access to [common utils][ejb-documentation]
+(`com.exonum.binding.common.*` packages) toolkit which contains some helpful
+functions for _hashing_, _cryptography_, _serialization_, etc.
 
 ## Capabilities
 By using the client you are able to perform the following operations:
@@ -133,9 +133,9 @@ which is required for the client.
 Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 
 [exonum]: https://github.com/exonum/exonum
-[ejb-common]: https://exonum.com/doc/api/java-binding-common/0.6.0/
-[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding-common/0.6.0/com/exonum/binding/common/message/TransactionMessage.Builder.html
+[ejb-documentation]: https://exonum.com/doc/api/java-binding/0.7.0/index.html
+[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding/0.7.0/com/exonum/binding/common/message/TransactionMessage.Builder.html
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
-[standard-serializers]: https://exonum.com/doc/api/java-binding-common/0.6.0/com/exonum/binding/common/serialization/StandardSerializers.html
+[standard-serializers]: https://exonum.com/doc/api/java-binding/0.7.0/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
 [exonum-client]: https://exonum.com/doc/api/java-light-client/0.2.0/com/exonum/client/ExonumClient.html

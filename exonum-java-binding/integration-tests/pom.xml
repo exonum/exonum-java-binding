@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>exonum-java-binding-integration-tests</artifactId>
-  <version>0.7.0-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Integration Tests</name>
@@ -102,6 +102,14 @@
       <!-- Skip the deployment of internal module as it is inherited from parent pom -->
       <plugin>
         <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <!-- Skip the signing as there is no artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
         <configuration>
           <skip>true</skip>
         </configuration>
