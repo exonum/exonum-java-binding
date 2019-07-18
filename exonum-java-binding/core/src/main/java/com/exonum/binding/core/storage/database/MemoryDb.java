@@ -80,6 +80,12 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
    *
    * <p>TODO(@bogdanov): If the fork cannot be applied to the database …
    *
+   * <p>Once this method completes, any indexes created with the fork and the fork itself
+   * are closed and cannot be used. Any subsequent operations on these objects will result
+   * in {@link IllegalStateException}.
+   *
+   * <p>TBD: If the fork cannot be applied to the database …
+   *
    * @param fork a fork to get changes from
    */
   public void merge(Fork fork) {
