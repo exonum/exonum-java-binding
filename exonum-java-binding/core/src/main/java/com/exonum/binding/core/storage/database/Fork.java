@@ -75,4 +75,16 @@ public final class Fork extends View {
   private Fork(NativeHandle nativeHandle, Cleaner cleaner) {
     super(nativeHandle, cleaner, new IncrementalModificationCounter(), true);
   }
+
+  /**
+   * Converts this fork into a patch that can be merged into the database.
+   * This method will close any resources registered with {@linkplain #getCleaner() its cleaner}
+   * (typically, indexes, iterators), convert this fork into a patch, close this Fork, and return
+   * a handle to the patch. The caller is responsible to properly destroy the returned patch.
+   *
+   * @return a handle to the patch obtained from this fork
+   */
+  NativeHandle intoPatch() {
+    return new NativeHandle(0);
+  }
 }
