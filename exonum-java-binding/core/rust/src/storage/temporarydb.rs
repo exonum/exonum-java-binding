@@ -21,7 +21,7 @@ use jni::{
 use std::panic;
 
 use handle::{self, Handle};
-use storage::db::{View, ViewRef};
+use storage::db::View;
 use utils;
 
 /// Returns pointer to created `TemporaryDB` object.
@@ -73,6 +73,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
 }
 
 /// Merges the given fork into the database.
+/// Invalidates provided `view_handle` by replacing it with new Fork. `view_handle` must be
+/// freed immediately by Java side.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeMerge(
     env: JNIEnv,
@@ -81,14 +83,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
     view_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let _db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let _fork = match *handle::cast_handle::<View>(view_handle).get() {
-            ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
-            ViewRef::Fork(fork) => fork,
-        };
-        //FIXME: Implement merging via db.merge(fork.into_patch())
-        //        db.merge(fork.patch().clone())
-        //            .expect("Unable to merge fork");
+        let db = handle::cast_handle::<TemporaryDB>(db_handle);
+        let view_ref = handle::cast_handle::<View>(view_handle);
+        let view = std::mem::replace(view_ref, View::from_owned_fork(db.fork()));
+        let fork = view.into_fork();
+        db.merge(fork.into_patch())
+            .expect("Unable to merge fork");
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)

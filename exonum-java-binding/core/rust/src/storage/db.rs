@@ -91,6 +91,18 @@ impl View {
     pub fn get(&mut self) -> &mut ViewRef {
         &mut self.reference
     }
+
+    /// Unwraps the stored Fork from the View, panics if it's not possible.
+    pub fn into_fork(self) -> Box<Fork> {
+        if let Some(view_owned) = self._owned {
+            match view_owned {
+                ViewOwned::Snapshot(_) => panic!("`into_fork` called on Snapshot"),
+                ViewOwned::Fork(fork) => fork,
+            }
+        } else {
+            panic!("`into_fork` called on non-owning View");
+        }
+    }
 }
 
 impl ViewRef {
