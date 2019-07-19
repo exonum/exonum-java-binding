@@ -18,21 +18,25 @@ package com.exonum.binding.core.storage.database;
 
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Iterator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class ForkIntegrationTest {
 
   @Test
+  @Disabled("Depends on ECR-3330")
   void mergeInvalidatesForkAndDependencies() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
@@ -56,6 +60,33 @@ class ForkIntegrationTest {
           () -> assertThrows(IllegalStateException.class, list2::size),
           () -> assertThrows(IllegalStateException.class, it::next)
       );
+    }
+  }
+
+  @Test
+  @Disabled("Depends on ECR-3330")
+  void mergeAbortedIfCollectionsFailedToClose() throws Exception {
+    try (MemoryDb db = MemoryDb.newInstance();
+        Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+      // Create a 'normal' collection
+      ListIndex<String> list1 = newList("list_1", fork);
+      // Register a clean action with the *fork* that completes exceptionally
+      Cleaner forkCleaner = fork.getCleaner();
+      forkCleaner.add(() -> {
+        throw new IllegalStateException("Evil clean action");
+      });
+
+      // Attempt to merge the fork (involves converting into patch, which must be aborted)
+      Exception e = assertThrows(IllegalStateException.class, () -> db.merge(fork));
+
+      assertThat(e)
+          .hasMessageContaining("intoPatch aborted")
+          .hasCauseInstanceOf(CloseFailuresException.class);
+
+      // Check that the 'normal' collection and the fork are no longer accessible
+      assertThrows(IllegalStateException.class, list1::size);
+      assertThrows(IllegalStateException.class, fork::getViewNativeHandle);
     }
   }
 

@@ -20,6 +20,7 @@ import static com.exonum.binding.core.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 
 import com.exonum.binding.core.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -70,7 +71,8 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
   }
 
   /**
-   * Applies the changes from the given fork to the database state.
+   * Applies the changes from the given fork to the database state. MemoryDb can only
+   * merge forks that {@linkplain #createFork(Cleaner) it created itself}.
    *
    * <p>Once this method completes, any indexes created with the fork and the fork itself
    * are closed and cannot be used. Any subsequent operations on these objects will result
@@ -81,7 +83,8 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
    * @param fork a fork to get changes from
    */
   public void merge(Fork fork) {
-    nativeMerge(getNativeHandle(), fork.getViewNativeHandle());
+    NativeHandle patchHandle = fork.intoPatch();
+    nativeMerge(getNativeHandle(), patchHandle.get());
   }
 
   @Override

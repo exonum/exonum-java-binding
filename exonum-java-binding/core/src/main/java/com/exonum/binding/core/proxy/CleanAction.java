@@ -33,7 +33,7 @@ public interface CleanAction<ResourceDescriptionT> {
   /**
    * A clean operation to perform. It is recommended that this operation is idempotent.
    */
-  void clean();
+  void clean() throws Exception;
 
   /**
    * Returns the description of the type of resource this action corresponds to.
