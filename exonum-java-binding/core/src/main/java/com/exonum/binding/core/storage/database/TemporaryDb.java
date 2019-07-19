@@ -29,6 +29,9 @@ import com.google.common.annotations.VisibleForTesting;
  * and read-write forks. The changes made to database forks can be
  * {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
  *
+ * Note that corresponding database is deleted when TemporaryDb is
+ * {@linkplain TemporaryDb#close() disposed}.
+ *
  * @see com.exonum.binding.core.service.NodeFake
  */
 public final class TemporaryDb extends AbstractCloseableNativeProxy implements Database {
