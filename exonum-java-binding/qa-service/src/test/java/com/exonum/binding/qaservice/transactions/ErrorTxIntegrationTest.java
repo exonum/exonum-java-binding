@@ -29,7 +29,7 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
@@ -139,7 +139,7 @@ class ErrorTxIntegrationTest {
   @Test
   @RequiresNativeLibrary
   void executeClearsQaServiceData() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
 

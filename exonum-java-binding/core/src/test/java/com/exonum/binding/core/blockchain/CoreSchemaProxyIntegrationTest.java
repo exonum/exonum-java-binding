@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.google.common.collect.ImmutableSet;
@@ -95,7 +95,7 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
-    try (MemoryDb db = MemoryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
+    try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
       assertion.accept(CoreSchemaProxy.newInstance(view));
     } catch (CloseFailuresException e) {

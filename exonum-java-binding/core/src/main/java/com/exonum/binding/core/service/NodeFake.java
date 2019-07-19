@@ -24,7 +24,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
@@ -36,7 +36,7 @@ import org.apache.logging.log4j.Logger;
  * Use it in tests of your handlers that need some data in the database:
  *
  * <pre><code>
- * try (MemoryDb db = MemoryDb.newInstance();
+ * try (TemporaryDb db = TemporaryDb.newInstance();
  *      Cleaner cleaner = new Cleaner()) {
  *
  *   // Setup database to include some test data
@@ -59,7 +59,7 @@ public final class NodeFake implements Node {
 
   private static final Logger logger = LogManager.getLogger(NodeFake.class);
 
-  private final MemoryDb database;
+  private final TemporaryDb database;
 
   private final PublicKey publicKey;
 
@@ -68,7 +68,7 @@ public final class NodeFake implements Node {
    *
    * @param database a database to provide snapshots of
    */
-  public NodeFake(MemoryDb database) {
+  public NodeFake(TemporaryDb database) {
     this(database, PublicKey.fromBytes(new byte[PUBLIC_KEY_BYTES]));
   }
 
@@ -78,7 +78,7 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    * @param publicKey a public key of the node
    */
-  public NodeFake(MemoryDb database, PublicKey publicKey) {
+  public NodeFake(TemporaryDb database, PublicKey publicKey) {
     this.database = checkNotNull(database);
     this.publicKey = publicKey;
   }
@@ -114,7 +114,7 @@ public final class NodeFake implements Node {
   /**
    * Returns the underlying database.
    */
-  public MemoryDb getDatabase() {
+  public TemporaryDb getDatabase() {
     return database;
   }
 }

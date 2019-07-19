@@ -24,26 +24,27 @@ import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * An in-memory database for testing purposes. It can create both read-only snapshots
+ * A wrapper over the `RocksDB` backend which stores data in the temporary
+ * directory for testing purposes. It can create both read-only snapshots
  * and read-write forks. The changes made to database forks can be
- * {@linkplain MemoryDb#merge(Fork) applied} to the database state.
+ * {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
  *
  * @see com.exonum.binding.core.service.NodeFake
  */
-public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
+public final class TemporaryDb extends AbstractCloseableNativeProxy implements Database {
 
   static {
     LibraryLoader.load();
   }
 
   /**
-   * Creates a new empty MemoryDb.
+   * Creates a new empty TemporaryDb.
    */
-  public static MemoryDb newInstance() {
+  public static TemporaryDb newInstance() {
     long nativeHandle = INVALID_NATIVE_HANDLE;
     try {
       nativeHandle = nativeCreate();
-      return new MemoryDb(nativeHandle);
+      return new TemporaryDb(nativeHandle);
     } catch (Throwable t) {
       if (nativeHandle != INVALID_NATIVE_HANDLE) {
         nativeFree(nativeHandle);
@@ -53,7 +54,7 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
   }
 
   @VisibleForTesting  // Used in native resource manager tests, must not be exported.
-  MemoryDb(long nativeHandle) {
+  TemporaryDb(long nativeHandle) {
     super(nativeHandle, true);
   }
 
