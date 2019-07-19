@@ -40,6 +40,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -700,6 +701,15 @@ class ProofMapIndexProxyIntegrationTest
       // TODO: Change message after https://jira.bf.local/browse/ECR-3354
       assertThat(thrown.getLocalizedMessage(),
               containsString("Index type doesn't match specified"));
+    });
+  }
+
+  @Test
+  void getMapSize() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(PK1, V1);
+
+      assertEquals(map.size(), 1);
     });
   }
 

@@ -253,6 +253,20 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   private native void nativeEntriesIterFree(long iterNativeHandle);
 
   @Override
+  public long size() {
+    return nativeSize(getNativeHandle());
+  }
+
+  private native long nativeSize(long nativeHandle);
+
+  @Override
+  public boolean isEmpty() {
+    return nativeIsEmpty(getNativeHandle());
+  }
+
+  private native boolean nativeIsEmpty(long nativeHandle);
+
+  @Override
   public void clear() {
     notifyModified();
     nativeClear(getNativeHandle());
