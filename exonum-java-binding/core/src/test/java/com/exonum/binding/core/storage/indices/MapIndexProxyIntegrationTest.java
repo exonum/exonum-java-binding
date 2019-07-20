@@ -55,6 +55,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class MapIndexProxyIntegrationTest
@@ -455,7 +456,9 @@ class MapIndexProxyIntegrationTest
     });
   }
 
+  // TODO: disabled until ECR-3317 completion (here and below)
   @Test
+  @Disabled
   void getMapSize() {
     runTestWithView(database::createFork, (map) -> {
       map.put(K1, V1);
@@ -465,11 +468,13 @@ class MapIndexProxyIntegrationTest
   }
 
   @Test
+  @Disabled
   void isEmptyShouldReturnTrueForEmptyMap() {
     runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
   }
 
   @Test
+  @Disabled
   void isEmptyShouldReturnFalseForNonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
       map.put(K1, V1);

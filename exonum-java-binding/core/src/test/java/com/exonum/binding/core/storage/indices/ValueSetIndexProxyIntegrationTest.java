@@ -39,6 +39,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ValueSetIndexProxyIntegrationTest
@@ -239,7 +240,9 @@ class ValueSetIndexProxyIntegrationTest
     });
   }
 
+  // TODO: disabled until ECR-3317 completion (here and below)
   @Test
+  @Disabled
   void getSetSize() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
@@ -249,11 +252,13 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
+  @Disabled
   void isEmptyShouldReturnTrueForEmptySet() {
     runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
   }
 
   @Test
+  @Disabled
   void isEmptyShouldReturnFalseForNonEmptySet() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
