@@ -102,8 +102,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       //      "name-1",
   })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
-    try (Cleaner cleaner = new Cleaner();
-        Database database = TemporaryDb.newInstance()) {
+    try (Cleaner cleaner = new Cleaner()) {
       Snapshot view = database.createSnapshot(cleaner);
 
       assertThrows(Exception.class, () -> create(name, view));

@@ -24,13 +24,12 @@ import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * A wrapper over the `RocksDB` backend which stores data in the temporary
- * directory for testing purposes. It can create both read-only snapshots
- * and read-write forks. The changes made to database forks can be
- * {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
+ * A database which stores its data in the temporary directory for testing purposes.
+ * It can create both read-only snapshots and read-write forks. The changes made to
+ * database forks can be {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
  *
- * Note that corresponding database is deleted when TemporaryDb is
- * {@linkplain TemporaryDb#close() disposed}.
+ * <p>The corresponding database is deleted when TemporaryDb is
+ * {@linkplain TemporaryDb#close() closed}.
  *
  * @see com.exonum.binding.core.service.NodeFake
  */
