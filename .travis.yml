@@ -64,7 +64,7 @@ cache:
 
 before_cache:
   # Remove the project artifacts — no need to cache them.
-  - rm -rf ${HOME}/.m2/repository/com/exonum/binding/
+  - rm -rf ${HOME}/.m2/repository/com/exonum/binding/ ${HOME}/.m2/repository/com/exonum/client/
 
 
 before_install:
