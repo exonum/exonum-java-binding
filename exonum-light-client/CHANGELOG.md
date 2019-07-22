@@ -21,6 +21,10 @@ The third release of Exonum Java Light Client which improves
 a convenience in working with blocks and allows
 specifying a custom path prefix to Exonum API.
 
+### Versions Support
+- Exonum version, 0.11.0
+- Exonum Java Binding version, 0.6.0-0.7.0
+
 ### Added
 - `ExonumClient#findNonEmptyBlocks` to find a certain number of the most recent non-empty
   blocks (from the last block and up to the genesis block). (#953)
