@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## 0.3.0 - 2019-07-22
 
 The third release of Exonum Java Light Client which improves
-a convenience in working with blocks and brings support of
-the prefix in URLs.
+a convenience in working with blocks and allows
+specifying a custom path prefix to Exonum API.
 
 ### Added
 - `ExonumClient#findNonEmptyBlocks` to find a certain number of the most recent non-empty
