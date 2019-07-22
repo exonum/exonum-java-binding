@@ -18,6 +18,8 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
+import static com.exonum.binding.common.proofs.map.UncheckedFlatMapProof.MAP_BRANCH_NODE_PREFIX;
+import static com.exonum.binding.common.proofs.map.UncheckedFlatMapProof.MAP_NODE_PREFIX;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -110,9 +112,15 @@ class UncheckedFlatMapProofTest {
     MapEntry<ByteString, ByteString> mapEntry = createMapEntry(key, value);
 
     HashCode valueHash = HASH_FUNCTION.hashByteString(value);
-    HashCode expectedRootHash = HASH_FUNCTION.newHasher()
+    HashCode singleEntryHash = HASH_FUNCTION.newHasher()
+        .putByte(MAP_BRANCH_NODE_PREFIX)
         .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
         .putObject(valueHash, hashCodeFunnel())
+        .hash();
+
+    HashCode expectedRootHash = HASH_FUNCTION.newHasher()
+        .putByte(MAP_NODE_PREFIX)
+        .putObject(singleEntryHash, hashCodeFunnel())
         .hash();
 
     UncheckedMapProof uncheckedFlatMapProof =
@@ -149,8 +157,14 @@ class UncheckedFlatMapProofTest {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(emptyList(), emptyList(), emptyList());
 
+    HashCode expectedRootHash = HASH_FUNCTION.newHasher()
+        .putByte(MAP_NODE_PREFIX)
+        .putBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES])
+        .hash();
+
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
+    assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
   }
 
   @Test

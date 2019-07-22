@@ -26,6 +26,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.proofs.map.DbKey.Type;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import java.util.ArrayDeque;
@@ -50,6 +51,11 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   private final List<MapEntry<ByteString, ByteString>> entries;
 
   private final List<ByteString> missingKeys;
+
+  @VisibleForTesting
+  static final byte MAP_NODE_PREFIX = 0x03;
+  @VisibleForTesting
+  static final byte MAP_BRANCH_NODE_PREFIX = 0x04;
 
   UncheckedFlatMapProof(
       List<MapProofEntry> proof,
@@ -202,8 +208,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     while (contour.size() > 1) {
       lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
     }
-    return CheckedFlatMapProof.correct(
-        contour.peek().getHash(), toSet(entries), toSet(missingKeys));
+    HashCode merkleRoot = getMapProofRootHash(contour.peek().getHash());
+    return CheckedFlatMapProof.correct(merkleRoot, toSet(entries), toSet(missingKeys));
   }
 
   /**
@@ -250,22 +256,35 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getEmptyProofListHash() {
-    return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
+    return HASH_FUNCTION.newHasher()
+        .putByte(MAP_NODE_PREFIX)
+        .putBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES])
+        .hash();
   }
 
   private static HashCode getSingleEntryRootHash(MapProofEntry entry) {
-    return getSingleEntryRootHash(entry.getDbKey(), entry.getHash());
+    HashCode entryRootHash = getSingleEntryRootHash(entry.getDbKey(), entry.getHash());
+    return getMapProofRootHash(entryRootHash);
   }
 
   private static HashCode getSingleEntryRootHash(MapEntry<ByteString, ByteString> entry) {
     DbKey dbKey = DbKey.newLeafKey(entry.getKey());
     HashCode valueHash = HASH_FUNCTION.hashByteString(entry.getValue());
-    return getSingleEntryRootHash(dbKey, valueHash);
+    HashCode entryRootHash = getSingleEntryRootHash(dbKey, valueHash);
+    return getMapProofRootHash(entryRootHash);
+  }
+
+  private static HashCode getMapProofRootHash(HashCode merkleRoot) {
+    return HASH_FUNCTION.newHasher()
+        .putByte(MAP_NODE_PREFIX)
+        .putObject(merkleRoot, hashCodeFunnel())
+        .hash();
   }
 
   private static HashCode getSingleEntryRootHash(DbKey key, HashCode valueHash) {
     assert key.getNodeType() == Type.LEAF;
     return HASH_FUNCTION.newHasher()
+        .putByte(MAP_BRANCH_NODE_PREFIX)
         .putObject(key, dbKeyFunnel())
         .putObject(valueHash, hashCodeFunnel())
         .hash();
@@ -278,6 +297,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
     return HASH_FUNCTION
         .newHasher()
+        .putByte(MAP_BRANCH_NODE_PREFIX)
         .putObject(leftChild.getHash(), hashCodeFunnel())
         .putObject(rightChild.getHash(), hashCodeFunnel())
         .putObject(leftChild.getDbKey(), dbKeyFunnel())
