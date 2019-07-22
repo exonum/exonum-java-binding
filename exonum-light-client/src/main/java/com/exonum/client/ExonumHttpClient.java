@@ -32,6 +32,7 @@ import static com.exonum.client.request.BlockTimeOption.INCLUDE_COMMIT_TIME;
 import static com.exonum.client.request.BlockTimeOption.NO_COMMIT_TIME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -166,7 +167,10 @@ class ExonumHttpClient implements ExonumClient {
 
       blocks.addAll(blocksResponse.getBlocks());
 
-      rangeLast = blocksResponse.getBlocksRangeStart() - 1;
+      long blocksRangeStart = blocksResponse.getBlocksRangeStart();
+      checkState(blocksRangeStart <= rangeLast,
+          "Avoid forever loop which should never happen: %s; %s", blocksRangeStart, rangeLast);
+      rangeLast = blocksRangeStart - 1;
     }
 
     return postProcessResponseBlocks(fromHeight, toHeight, blocks)
