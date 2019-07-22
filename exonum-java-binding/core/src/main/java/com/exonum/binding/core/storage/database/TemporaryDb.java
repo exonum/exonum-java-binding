@@ -24,7 +24,7 @@ import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * A database which stores its data in the temporary directory for testing purposes.
+ * A MerkleDB which stores its data in the temporary directory for testing purposes.
  * It can create both read-only snapshots and read-write forks. The changes made to
  * database forks can be {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
  *
