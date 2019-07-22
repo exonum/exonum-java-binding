@@ -19,8 +19,6 @@ package com.exonum.binding.core.proxy;
 /**
  * A cancellable clean action can be cancelled. That is useful, for instance, when
  * a Java native proxy transfers ownership over the native peer back to the native code.
- *
- * @param <ResourceDescriptionT> the type of the resource
  */
 public interface CancellableCleanAction<ResourceDescriptionT>
     extends CleanAction<ResourceDescriptionT> {

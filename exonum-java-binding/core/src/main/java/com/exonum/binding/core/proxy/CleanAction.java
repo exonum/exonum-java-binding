@@ -25,7 +25,7 @@ import java.util.Optional;
  * The type of resource may be optionally specified.
  *
  * @param <ResourceDescriptionT> type of resource this action cleans (usually, an instance
- *                               of {@link java.lang.Class}, {@link String}, {@link Enum}),
+ *                               of {@link java.lang.Class}, {@link String}, {@link Enum})
  */
 @FunctionalInterface
 public interface CleanAction<ResourceDescriptionT> {
