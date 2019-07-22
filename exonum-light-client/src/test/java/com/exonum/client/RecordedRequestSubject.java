@@ -24,7 +24,14 @@ import com.google.common.truth.Subject;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+/*
+The difference between AssertJ and Truth in terms of extension:
+ - AssertJ requires two type parameters to allow chaining
+ - Requires to format the messages (but maybe the docs are outdated? — the implementation
+ I checked does that manually, so it is safe to assume it is true).
 
+OTOH, AssertJ provides assertion generator!
+ */
 final class RecordedRequestSubject extends Subject {
 
   @NullableDecl
