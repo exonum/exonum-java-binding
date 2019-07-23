@@ -265,7 +265,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getSingleEntryProofMapHash(MapProofEntry proofEntry) {
-    HashCode entryRootHash = getSingleEntryProofMapHash(proofEntry.getDbKey(),
+    HashCode entryRootHash = getSingleEntryRootProofMapHash(proofEntry.getDbKey(),
         proofEntry.getHash());
     return getProofMapHash(entryRootHash);
   }
@@ -273,7 +273,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   private static HashCode getSingleEntryProofMapHash(MapEntry<ByteString, ByteString> mapEntry) {
     DbKey dbKey = DbKey.newLeafKey(mapEntry.getKey());
     HashCode valueHash = getLeafEntryHash(mapEntry.getValue());
-    HashCode entryRootHash = getSingleEntryProofMapHash(dbKey, valueHash);
+    HashCode entryRootHash = getSingleEntryRootProofMapHash(dbKey, valueHash);
     return getProofMapHash(entryRootHash);
   }
 
@@ -284,7 +284,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .hash();
   }
 
-  private static HashCode getSingleEntryProofMapHash(DbKey key, HashCode valueHash) {
+  private static HashCode getSingleEntryRootProofMapHash(DbKey key, HashCode valueHash) {
     assert key.getNodeType() == Type.LEAF;
     return HASH_FUNCTION.newHasher()
         .putByte(MAP_BRANCH_NODE_PREFIX)
