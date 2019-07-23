@@ -96,12 +96,14 @@ public final class Fork extends View {
    * Converts this fork into a patch that can be merged into the database.
    * This method will close any resources registered with {@linkplain #getCleaner() its cleaner}
    * (typically, indexes, iterators), convert this fork into a patch, invalidate this fork,
-   * and return a handle to the patch. The caller is responsible to properly destroy
+   * and return a handle to the patch. The caller is responsible for properly destroying
    * the returned patch.
    *
    * <p>Subsequent operations with the fork are prohibited.
    *
    * @return a handle to the patch obtained from this fork
+   * @see <a href="https://exonum.com/doc/version/0.12/architecture/merkledb/#patches">
+   *   MerkleDB Patches</a>
    */
   NativeHandle intoPatch() {
     checkState(nativeCanConvertIntoPatch(getNativeHandle()),
