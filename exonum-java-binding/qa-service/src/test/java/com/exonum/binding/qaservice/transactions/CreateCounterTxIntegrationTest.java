@@ -93,7 +93,7 @@ class CreateCounterTxIntegrationTest {
     assertThat(e.getMessage()).contains("Name must not be blank");
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
   @Test
   @RequiresNativeLibrary
   void executeNewCounter(TestKit testKit) {

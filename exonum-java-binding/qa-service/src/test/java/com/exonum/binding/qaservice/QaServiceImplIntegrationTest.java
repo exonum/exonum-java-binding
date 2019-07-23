@@ -57,7 +57,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-@Disabled
+@Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
 @RequiresNativeLibrary
 class QaServiceImplIntegrationTest {
 

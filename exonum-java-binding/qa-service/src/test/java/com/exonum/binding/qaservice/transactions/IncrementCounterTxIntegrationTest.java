@@ -88,7 +88,7 @@ class IncrementCounterTxIntegrationTest {
     assertThat(txFromRaw).isEqualTo(tx);
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
   @Test
   @RequiresNativeLibrary
   void executeIncrementsCounter(TestKit testKit) {
