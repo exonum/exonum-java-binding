@@ -62,7 +62,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     return index.get(0L);
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until proofs code fixed ECR-3319
   @Test
   void getRootHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {

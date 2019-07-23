@@ -91,7 +91,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      //      " name", // FIXME: doesn't fail on such items
+      //      " name", // FIXME: commented out until ECR-3345
       //      "name ",
       //      "name 1",
       //      " name ",

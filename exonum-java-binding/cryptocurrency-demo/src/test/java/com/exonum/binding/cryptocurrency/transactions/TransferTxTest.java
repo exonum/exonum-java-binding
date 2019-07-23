@@ -94,7 +94,7 @@ class TransferTxTest {
         .contains(Long.toString(transferAmount));
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   @RequiresNativeLibrary
   void executeTransfer(TestKit testKit) {

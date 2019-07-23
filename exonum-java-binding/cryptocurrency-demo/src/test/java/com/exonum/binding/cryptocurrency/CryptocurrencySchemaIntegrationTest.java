@@ -40,7 +40,7 @@ class CryptocurrencySchemaIntegrationTest {
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   void getStateHashes(TestKit testKit) {
     Snapshot view = testKit.getSnapshot();

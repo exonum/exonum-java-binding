@@ -209,7 +209,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   void getRootHash_EmptyMap() {
     runTestWithView(database::createSnapshot,

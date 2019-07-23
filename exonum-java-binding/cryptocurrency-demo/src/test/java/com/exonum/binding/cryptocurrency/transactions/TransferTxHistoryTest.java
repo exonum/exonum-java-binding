@@ -49,7 +49,7 @@ class TransferTxHistoryTest {
   private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   @RequiresNativeLibrary
   void transfersHistoryBetweenTwoAccountsTest(TestKit testKit) {

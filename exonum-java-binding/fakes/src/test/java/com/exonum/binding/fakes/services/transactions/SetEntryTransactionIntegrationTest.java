@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 @RequiresNativeLibrary
 class SetEntryTransactionIntegrationTest {
 
-  @Disabled // FIXME: disabled until ECR-XYZ.
+  @Disabled //FIXME: Disabled until ECR-3330
   @Test
   void executePutsTheValueIntoEntry() throws CloseFailuresException {
     try (MemoryDb database = MemoryDb.newInstance();

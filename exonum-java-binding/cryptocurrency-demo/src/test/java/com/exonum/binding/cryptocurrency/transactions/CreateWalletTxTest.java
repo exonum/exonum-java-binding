@@ -74,7 +74,7 @@ class CreateWalletTxTest {
     assertThat(t.getMessage()).isEqualTo("The initial balance (-1) must not be negative.");
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   @RequiresNativeLibrary
   void executeCreateWalletTx(TestKit testKit) {

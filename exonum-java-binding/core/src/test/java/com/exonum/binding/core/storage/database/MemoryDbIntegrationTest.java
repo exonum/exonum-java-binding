@@ -63,7 +63,7 @@ class MemoryDbIntegrationTest {
     }
   }
 
-  @Disabled
+  @Disabled // FIXME: Tests are disabled until ECR-3330
   @Test
   void merge_singleList() throws Exception {
     try (MemoryDb db = MemoryDb.newInstance();
