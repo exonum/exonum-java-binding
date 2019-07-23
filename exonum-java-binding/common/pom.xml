@@ -168,7 +168,34 @@
             ${jacoco.args}
             ${java.vm.assertionFlag}
           </argLine>
+          <excludedGroups>${excludeTags}, forked</excludedGroups>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${jacoco.it.args}
+            ${java.vm.assertionFlag}
+          </argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <groups>forked</groups>
+          <!-- Run each test class in its own VM -->
+          <reuseForks>false</reuseForks>
+        </configuration>
+        <executions>
+          <execution>
+            <id>run-forked-its</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
