@@ -103,7 +103,7 @@ class ErrorTxIntegrationTest {
         () -> new ErrorTx(1L, (byte) 1, invalidDescription));
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
   @Test
   @RequiresNativeLibrary
   void executeNoDescription(TestKit testKit) {
