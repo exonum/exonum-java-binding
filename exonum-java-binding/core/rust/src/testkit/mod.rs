@@ -157,7 +157,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
             let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner();
             let serialized_tx = env.convert_byte_array(serialized_tx)?;
             let transaction: Signed<RawTransaction> =
-                BinaryValue::from_bytes(serialized_tx.into()).unwrap(); // TODO: rewrite
+                BinaryValue::from_bytes(serialized_tx.into()).unwrap();
             raw_transactions.push(transaction);
         }
         let block = testkit
