@@ -227,7 +227,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     proofContour.addAll(proof);
     entries
         .stream()
-        .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getLeafEntryHash(e)))
+        .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getLeafEntryHash(e.getValue())))
         .forEach(proofContour::add);
 
     proofContour.sort(Comparator.comparing(MapProofEntry::getDbKey));
@@ -264,13 +264,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getSingleEntryProofMapHash(MapProofEntry entry) {
-    HashCode entryRootHash = getSingleEntryProofMapHash(entry.getDbKey(), entry.getHash());
+    HashCode valueHash = getLeafEntryHash(entry.getHash());
+    HashCode entryRootHash = getSingleEntryProofMapHash(entry.getDbKey(), valueHash);
     return getProofMapHash(entryRootHash);
   }
 
   private static HashCode getSingleEntryProofMapHash(MapEntry<ByteString, ByteString> entry) {
     DbKey dbKey = DbKey.newLeafKey(entry.getKey());
-    HashCode valueHash = getLeafEntryHash(entry);
+    HashCode valueHash = getLeafEntryHash(entry.getValue());
     HashCode entryRootHash = getSingleEntryProofMapHash(dbKey, valueHash);
     return getProofMapHash(entryRootHash);
   }
@@ -291,10 +292,17 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .hash();
   }
 
-  private static HashCode getLeafEntryHash(MapEntry<ByteString, ByteString> entry) {
+  private static HashCode getLeafEntryHash(HashCode entryValueHash) {
     return HASH_FUNCTION.newHasher()
         .putByte(BLOB_PREFIX)
-        .putBytes(entry.getValue().toByteArray())
+        .putObject(entryValueHash, hashCodeFunnel())
+        .hash();
+  }
+
+  private static HashCode getLeafEntryHash(ByteString entryValue) {
+    return HASH_FUNCTION.newHasher()
+        .putByte(BLOB_PREFIX)
+        .putBytes(entryValue.toByteArray())
         .hash();
   }
 
