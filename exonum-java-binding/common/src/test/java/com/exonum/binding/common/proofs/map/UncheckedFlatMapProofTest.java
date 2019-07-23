@@ -18,6 +18,7 @@ package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
+import static com.exonum.binding.common.proofs.map.UncheckedFlatMapProof.BLOB_PREFIX;
 import static com.exonum.binding.common.proofs.map.UncheckedFlatMapProof.MAP_BRANCH_NODE_PREFIX;
 import static com.exonum.binding.common.proofs.map.UncheckedFlatMapProof.MAP_NODE_PREFIX;
 import static java.util.Collections.emptyList;
@@ -111,7 +112,11 @@ class UncheckedFlatMapProofTest {
     ByteString value = FIRST_VALUE;
     MapEntry<ByteString, ByteString> mapEntry = createMapEntry(key, value);
 
-    HashCode valueHash = HASH_FUNCTION.hashByteString(value);
+    HashCode valueHash = HASH_FUNCTION.newHasher()
+        .putByte(BLOB_PREFIX)
+        .putBytes(value.toByteArray())
+        .hash();
+
     HashCode singleEntryHash = HASH_FUNCTION.newHasher()
         .putByte(MAP_BRANCH_NODE_PREFIX)
         .putObject(DbKey.newLeafKey(key), dbKeyFunnel())

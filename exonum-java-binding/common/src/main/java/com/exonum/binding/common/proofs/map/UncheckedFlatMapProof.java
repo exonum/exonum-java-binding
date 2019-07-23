@@ -52,7 +52,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private final List<ByteString> missingKeys;
 
-  private static final byte BLOB_PREFIX = 0x00;
+  @VisibleForTesting
+  static final byte BLOB_PREFIX = 0x00;
   @VisibleForTesting
   static final byte MAP_NODE_PREFIX = 0x03;
   @VisibleForTesting
