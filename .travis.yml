@@ -52,7 +52,7 @@ matrix:
       os: linux
       jdk: openjdk8
       env: CHECK_RUST=false
-#     FIXME: OSX support is temporary disabled
+#     FIXME: OSX support is temporary disabled ECR-3382
 #    - name: "OSX JDK 8 CHECK_RUST=false"
 #      os: osx
 #      # Specify the image containing JDK 8
@@ -91,6 +91,6 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 
 script:
-  - git clone https://github.com/exonum/exonum.git "$TRAVIS_BUILD_DIR/../exonum"
+  - git clone https://github.com/exonum/exonum.git "$TRAVIS_BUILD_DIR/../exonum" # FIXME: Temporary step until merkledb is released.
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
